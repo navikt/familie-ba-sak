@@ -57,13 +57,25 @@ class PersongrunnlagService(
         return restPerson
     }
 
-    fun hentSøker(behandlingId: Long): Person? {
+    fun hentSøker(behandlingId: Long): Person {
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.søker
     }
 
     fun hentBarna(behandling: Behandling): List<Person> {
         return hentBarna(behandling.id)
     }
+
+    fun hentSøkerOgBarnPåBehandlingThrows(behandlingId: Long): List<PersonEnkel> =
+        hentSøkerOgBarnPåBehandling(behandlingId)
+            ?: error("Finner ikke søker/barn på behandling=$behandlingId")
+
+    fun hentSøkerOgBarnPåBehandling(behandlingId: Long): List<PersonEnkel>? =
+        personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandlingId)
+            .takeIf { it.isNotEmpty() }
+
+    fun hentSøkerOgBarnPåFagsak(fagsakId: Long): Set<PersonEnkel>? =
+        personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilFagsak(fagsakId)
+            .takeIf { it.isNotEmpty() }
 
     fun hentBarna(behandlingId: Long): List<Person> = personopplysningGrunnlagRepository
         .findByBehandlingAndAktiv(behandlingId)!!.barna
@@ -316,7 +328,7 @@ class PersongrunnlagService(
     }
 
     fun hentSøkersMålform(behandlingId: Long) =
-        hentSøker(behandlingId)?.målform ?: Målform.NB
+        hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform
 
     companion object {
         private val logger = LoggerFactory.getLogger(PersongrunnlagService::class.java)

@@ -14,7 +14,7 @@ object Behandlingutils {
     fun hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger: List<Behandling>): Behandling? {
         return iverksatteBehandlinger
             .filter { it.steg == StegType.BEHANDLING_AVSLUTTET }
-            .maxByOrNull { it.opprettetTidspunkt }
+            .maxByOrNull { it.aktivertTidspunkt }
     }
 
     fun hentForrigeBehandlingSomErVedtatt(
@@ -22,8 +22,8 @@ object Behandlingutils {
         behandlingFørFølgende: Behandling,
     ): Behandling? {
         return behandlinger
-            .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
-            .maxByOrNull { it.opprettetTidspunkt }
+            .filter { it.aktivertTidspunkt.isBefore(behandlingFørFølgende.aktivertTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
+            .maxByOrNull { it.aktivertTidspunkt }
     }
 
     fun hentForrigeIverksatteBehandling(
@@ -33,7 +33,7 @@ object Behandlingutils {
         return hentIverksatteBehandlinger(
             iverksatteBehandlinger,
             behandlingFørFølgende,
-        ).maxByOrNull { it.opprettetTidspunkt }
+        ).maxByOrNull { it.aktivertTidspunkt }
     }
 
     fun hentIverksatteBehandlinger(
@@ -41,7 +41,7 @@ object Behandlingutils {
         behandlingFørFølgende: Behandling,
     ): List<Behandling> {
         return iverksatteBehandlinger
-            .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET }
+            .filter { it.aktivertTidspunkt.isBefore(behandlingFørFølgende.aktivertTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET }
     }
 
     fun harBehandlingsårsakAlleredeKjørt(
@@ -50,7 +50,7 @@ object Behandlingutils {
         måned: YearMonth,
     ): Boolean {
         return behandlinger.any {
-            it.opprettetTidspunkt.toLocalDate().toYearMonth() == måned && it.opprettetÅrsak == behandlingÅrsak
+            it.aktivertTidspunkt.toLocalDate().toYearMonth() == måned && it.opprettetÅrsak == behandlingÅrsak
         }
     }
 

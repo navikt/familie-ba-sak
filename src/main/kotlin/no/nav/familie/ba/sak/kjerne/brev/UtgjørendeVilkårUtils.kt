@@ -6,9 +6,12 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
@@ -28,13 +31,16 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
  *        Brukes for opphør som har egen logikk dersom det er første periode.
  * @return List med personene det trigges endring på
  */
+
 fun hentPersonerForAlleUtgjørendeVilkår(
     minimertePersonResultater: List<MinimertRestPersonResultat>,
     vedtaksperiode: Periode,
     oppdatertBegrunnelseType: VedtakBegrunnelseType,
     aktuellePersonerForVedtaksperiode: List<MinimertRestPerson>,
     triggesAv: TriggesAv,
+    begrunnelse: IVedtakBegrunnelse,
     erFørsteVedtaksperiodePåFagsak: Boolean,
+    featureToggleService: FeatureToggleService,
 ): Set<MinimertRestPerson> {
     return triggesAv.vilkår.fold(setOf()) { acc, vilkår ->
         acc + hentPersonerMedUtgjørendeVilkår(
@@ -44,7 +50,9 @@ fun hentPersonerForAlleUtgjørendeVilkår(
             vilkårGjeldendeForBegrunnelse = vilkår,
             aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
             triggesAv = triggesAv,
+            begrunnelse = begrunnelse,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+            featureToggleService = featureToggleService,
         )
     }
 }
@@ -56,7 +64,9 @@ private fun hentPersonerMedUtgjørendeVilkår(
     vilkårGjeldendeForBegrunnelse: Vilkår,
     aktuellePersonerForVedtaksperiode: List<MinimertRestPerson>,
     triggesAv: TriggesAv,
+    begrunnelse: IVedtakBegrunnelse,
     erFørsteVedtaksperiodePåFagsak: Boolean,
+    featureToggleService: FeatureToggleService,
 ): List<MinimertRestPerson> {
     val aktuellePersonidenter = aktuellePersonerForVedtaksperiode.map { it.personIdent }
 
@@ -76,6 +86,8 @@ private fun hentPersonerMedUtgjørendeVilkår(
                             triggesAv = triggesAv,
                             vedtaksperiode = vedtaksperiode,
                             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                            featureToggleService = featureToggleService,
+                            begrunnelse = begrunnelse,
                         )
                     }
 
@@ -100,8 +112,10 @@ private fun erVilkårResultatUtgjørende(
     nesteMinimerteVilkårResultat: MinimertVilkårResultat?,
     begrunnelseType: VedtakBegrunnelseType,
     triggesAv: TriggesAv,
+    begrunnelse: IVedtakBegrunnelse,
     vedtaksperiode: Periode,
     erFørsteVedtaksperiodePåFagsak: Boolean,
+    featureToggleService: FeatureToggleService,
 ): Boolean {
     if (minimertVilkårResultat.periodeFom == null && !begrunnelseType.erAvslag()) {
         return false
@@ -144,7 +158,12 @@ private fun erVilkårResultatUtgjørende(
         }
 
         VedtakBegrunnelseType.AVSLAG, VedtakBegrunnelseType.INSTITUSJON_AVSLAG ->
-            vilkårResultatPasserForAvslagsperiode(minimertVilkårResultat, vedtaksperiode)
+            vilkårResultatPasserForAvslagsperiode(
+                minimertVilkårResultat = minimertVilkårResultat,
+                vedtaksperiode = vedtaksperiode,
+                begrunnelse = begrunnelse,
+                featureToggleService = featureToggleService,
+            )
 
         else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
     }
@@ -216,6 +235,8 @@ private fun erInnvilgetVilkårResultatUtgjørende(
 private fun vilkårResultatPasserForAvslagsperiode(
     minimertVilkårResultat: MinimertVilkårResultat,
     vedtaksperiode: Periode,
+    begrunnelse: IVedtakBegrunnelse,
+    featureToggleService: FeatureToggleService,
 ): Boolean {
     val erAvslagUtenFomDato = minimertVilkårResultat.periodeFom == null
 
@@ -223,11 +244,16 @@ private fun vilkårResultatPasserForAvslagsperiode(
         if (erAvslagUtenFomDato) {
             TIDENES_MORGEN.toYearMonth()
         } else {
-            minimertVilkårResultat.periodeFom!!.toYearMonth()
+            if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
+                minimertVilkårResultat.periodeFom!!.toYearMonth().plusMonths(1)
+            } else {
+                minimertVilkårResultat.periodeFom!!.toYearMonth()
+            }
         }
 
     return fomVilkår == vedtaksperiode.fom.toYearMonth() &&
-        minimertVilkårResultat.resultat == Resultat.IKKE_OPPFYLT
+        minimertVilkårResultat.resultat == Resultat.IKKE_OPPFYLT &&
+        minimertVilkårResultat.standardbegrunnelser.contains(begrunnelse)
 }
 
 fun erFørstePeriodeOgVilkårIkkeOppfylt(

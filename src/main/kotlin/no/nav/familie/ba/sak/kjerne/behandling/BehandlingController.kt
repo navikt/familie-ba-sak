@@ -148,6 +148,7 @@ data class NyBehandling(
     val barnasIdenter: List<String> = emptyList(),
     val nyMigreringsdato: LocalDate? = null,
     val søknadMottattDato: LocalDate? = null,
+    val søknadsinfo: Søknadsinfo? = null,
     val fagsakId: Long,
 ) {
 
@@ -185,4 +186,10 @@ data class NyBehandlingHendelse(
 data class RestEndreBehandlingstema(
     val behandlingUnderkategori: BehandlingUnderkategori,
     val behandlingKategori: BehandlingKategori,
+)
+
+data class Søknadsinfo(
+    val journalpostId: String,
+    val brevkode: String,
+    val erDigital: Boolean,
 )

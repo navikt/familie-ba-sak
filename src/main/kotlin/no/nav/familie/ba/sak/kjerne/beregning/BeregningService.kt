@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -77,9 +78,10 @@ class BeregningService(
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
-        val avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak = behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(
-            fagsakId = fagsakId,
-        ).filter { !it.erHenlagt() }
+        val avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak =
+            behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(
+                fagsakId = fagsakId,
+            ).filter { !it.erHenlagt() }
 
         return avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak.mapNotNull {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
@@ -117,7 +119,8 @@ class BeregningService(
                 if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) {
                     godkjenteBehandlingerSomIkkeErIverksattEnda
                 } else {
-                    val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
+                    val sisteVedtatteBehandling =
+                        behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
                     sisteVedtatteBehandling
                 }
             }
@@ -125,10 +128,9 @@ class BeregningService(
             hentTilkjentYtelseForBehandling(behandlingId = it.id)
         }.filter {
             personopplysningGrunnlagRepository
-                .findByBehandlingAndAktiv(behandlingId = it.behandling.id)
-                ?.barna?.map { barn -> barn.aktør }
-                ?.contains(barnAktør)
-                ?: false
+                .finnSøkerOgBarnAktørerTilAktiv(behandlingId = it.behandling.id)
+                .barn().map { barn -> barn.aktør }
+                .contains(barnAktør)
         }.map { it }
     }
 
@@ -203,12 +205,12 @@ class BeregningService(
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
                 fagsakType = behandling.fagsak.type,
             ) { søkerAktør ->
-                småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønadFraEf(
+                småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
                     søkerAktør = søkerAktør,
-                    behandlingId = behandling.id,
+                    behandling = behandling,
                 )
 
-                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling.id)
+                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling)
             }
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)

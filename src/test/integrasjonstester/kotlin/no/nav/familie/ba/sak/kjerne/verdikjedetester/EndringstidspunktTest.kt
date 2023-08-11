@@ -49,6 +49,7 @@ class EndringstidspunktTest(
     @Test
     fun `Skal filtrere bort alle vedtaksperioder før endringstidspunktet`() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY) } returns false
+        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
 
         val barnFødselsdato = LocalDate.now().minusYears(2)
         val scenario = mockServerKlient().lagScenario(
@@ -94,7 +95,7 @@ class EndringstidspunktTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
-
+            featureToggleService = featureToggleService,
         )
 
         val sisteDagUtenDeltBostedOppfylt = barnFødselsdato.plusYears(1).sisteDagIMåned()
@@ -150,7 +151,7 @@ class EndringstidspunktTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
-
+            featureToggleService = featureToggleService,
         )
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)

@@ -29,25 +29,26 @@ class VilkårsvurderingSteg(
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
             val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
             validerIngenVilkårSattEtterSøkersDød(
-                personopplysningGrunnlag = personopplysningGrunnlag,
+                søkerOgBarn = søkerOgBarn,
                 vilkårsvurdering = vilkårsvurdering,
             )
         }
 
         vilkårService.hentVilkårsvurdering(behandling.id)?.apply {
             validerIkkeBlandetRegelverk(
-                personopplysningGrunnlag = personopplysningGrunnlag,
+                søkerOgBarn = søkerOgBarn,
                 vilkårsvurdering = this,
             )
 
             valider18ÅrsVilkårEksistererFraFødselsdato(
-                personopplysningGrunnlag = personopplysningGrunnlag,
+                søkerOgBarn = søkerOgBarn,
                 vilkårsvurdering = this,
+                behandling = behandling,
             )
         }
     }

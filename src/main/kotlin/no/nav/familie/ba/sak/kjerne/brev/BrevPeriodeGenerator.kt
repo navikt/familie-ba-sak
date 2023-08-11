@@ -4,13 +4,17 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedKompetanser
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.hentKompetanserForEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
@@ -20,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
@@ -42,9 +45,10 @@ class BrevPeriodeGenerator(
     private val minimerteKompetanserForPeriode: List<MinimertKompetanse>,
     private val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>,
     private val dødeBarnForrigePeriode: List<String>,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
-    fun genererBrevPeriode(): BrevPeriode? {
+    fun genererBrevPeriode(skalBrukeNyVedtaksperiodeLøsning: Boolean): BrevPeriode? {
         val begrunnelseGrunnlagMedPersoner = hentBegrunnelsegrunnlagMedPersoner()
         val eøsBegrunnelserMedKompetanser = hentEøsBegrunnelserMedKompetanser()
 
@@ -52,6 +56,7 @@ class BrevPeriodeGenerator(
             byggBegrunnelserOgFritekster(
                 begrunnelserGrunnlagMedPersoner = begrunnelseGrunnlagMedPersoner,
                 eøsBegrunnelserMedKompetanser = eøsBegrunnelserMedKompetanser,
+                skalBrukeNyVedtaksperiodeLøsning,
             )
 
         if (begrunnelserOgFritekster.isEmpty()) return null
@@ -82,9 +87,15 @@ class BrevPeriodeGenerator(
                 val minimertePersonResultater =
                     restBehandlingsgrunnlagForBrev.minimertePersonResultater.filter { personResultat ->
                         personResultat.minimerteVilkårResultater.any {
-                            it.erEksplisittAvslagPåSøknad == true && it.periodeFom == minimertVedtaksperiode.fom && it.standardbegrunnelser.contains(
-                                begrunnelse,
-                            )
+                            if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
+                                it.erEksplisittAvslagPåSøknad == true && it.periodeFom?.førsteDagINesteMåned() == minimertVedtaksperiode.fom && it.standardbegrunnelser.contains(
+                                    begrunnelse,
+                                )
+                            } else {
+                                it.erEksplisittAvslagPåSøknad == true && it.periodeFom == minimertVedtaksperiode.fom && it.standardbegrunnelser.contains(
+                                    begrunnelse,
+                                )
+                            }
                         }
                     }
 
@@ -178,6 +189,7 @@ class BrevPeriodeGenerator(
     fun byggBegrunnelserOgFritekster(
         begrunnelserGrunnlagMedPersoner: List<BrevBegrunnelseGrunnlagMedPersoner>,
         eøsBegrunnelserMedKompetanser: List<EØSBegrunnelseMedKompetanser>,
+        skalBrukeNyVedtaksperiodeLøsning: Boolean,
     ): List<Begrunnelse> {
         val brevBegrunnelser = begrunnelserGrunnlagMedPersoner
             .map {
@@ -188,6 +200,7 @@ class BrevPeriodeGenerator(
                     uregistrerteBarn = uregistrerteBarn,
                     minimerteUtbetalingsperiodeDetaljer = minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer,
                     minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
+                    skalBrukeNyVedtaksperiodeLøsning,
                 )
             }
 
@@ -311,8 +324,7 @@ class BrevPeriodeGenerator(
         begrunnelser: List<IVedtakBegrunnelse>,
     ): String? {
         val erAutobrev = begrunnelser.any {
-            it == Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK ||
-                it == Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK
+            this.minimertVedtaksperiode.begrunnelser.any { it.triggesAv.valgbarhet == Valgbarhet.AUTOMATISK }
         }
         return if (erAutobrev && fom != null) {
             val fra = if (målform == Målform.NB) "Fra" else "Frå"

@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.EfSakRestClientMock
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
@@ -52,6 +53,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.util.sisteSmåbarnstilleggSatsTilTester
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
 import no.nav.familie.ba.sak.util.tilleggOrdinærSatsTilTester
@@ -59,7 +61,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -94,6 +95,7 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val persongrunnlagService: PersongrunnlagService,
     @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val featureToggleService: FeatureToggleService,
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato = LocalDate.now().minusYears(2)
@@ -357,10 +359,10 @@ class BehandleSmåbarnstilleggTest(
         )
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = aktivBehandling.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt",
+                manuellOppgaveType = ManuellOppgaveType.SMÅBARNSTILLEGG,
             )
         }
 
@@ -468,10 +470,9 @@ class BehandleSmåbarnstilleggTest(
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
-        val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                behandlingId = aktivBehandling.id,
-            )
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
+            behandlingId = aktivBehandling.id,
+        ).sortedBy { it.stønadFom }
 
         val småbarnstilleggAndeler = andelerTilkjentYtelse.filter { it.erSmåbarnstillegg() }
 
@@ -584,6 +585,7 @@ class BehandleSmåbarnstilleggTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
+            featureToggleService = featureToggleService,
         )
     }
 }

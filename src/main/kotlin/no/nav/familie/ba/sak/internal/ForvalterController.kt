@@ -5,6 +5,9 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
@@ -17,6 +20,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -25,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
+import kotlin.concurrent.thread
 
 @RestController
 @RequestMapping("/api/forvalter")
@@ -35,7 +41,8 @@ class ForvalterController(
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
     private val oppgaveService: OppgaveService,
-
+    private val behandlingRepository: BehandlingRepository,
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -58,6 +65,93 @@ class ForvalterController(
             )
         }
         return ResponseEntity.ok("Ferdigstill oppgaver kjørt. Antall som ikke ble ferdigstilt: $antallFeil")
+    }
+
+    data class KopiertFagsakInfo(
+        val fagsakId: Long,
+        val feil: String = "",
+        val trengerNyBehandling: Boolean = true,
+    )
+
+    data class KopierteEUAFagsakerRespons(
+        val feilet: List<Long>,
+        val kopierte: List<Long>,
+        val fagsakerSomIkkeTrengerNyBehandling: List<Long>,
+        val kopierteFagsakerInfo: List<KopiertFagsakInfo>,
+    )
+
+    @PostMapping(
+        path = ["/kopier-eua-satsendring/{skalKopiere}"],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun kopierEndretUtbetalingAndelerFraForrigeBehandling(
+        @RequestBody fagsakListe: List<Long>,
+        @PathVariable skalKopiere: Boolean = false,
+    ): ResponseEntity<KopierteEUAFagsakerRespons> {
+        val kopierteFagsakerInfo = mutableListOf<KopiertFagsakInfo>()
+        fagsakListe.parallelStream().forEach { fagsakId ->
+            try {
+                val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
+                val sorterteVedtatteBehandlinger = behandlinger
+                    .filter { it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
+                    .sortedByDescending { it.aktivertTidspunkt }
+
+                val sisteVedtatteBehandling = sorterteVedtatteBehandlinger[0]
+                val nestSisteVedtatteBehandling = sorterteVedtatteBehandlinger[1]
+
+                if (!sisteVedtatteBehandling.erSatsendring() && sisteVedtatteBehandling.opprettetTidspunkt > LocalDate.of(
+                        2023,
+                        6,
+                        19,
+                    ).atStartOfDay()
+                ) {
+                    throw Exception("Det er gjennomført en ny behandling etter satsendring som har tatt med seg feilen videre. Fagsak $fagsakId, Behandling $sisteVedtatteBehandling.")
+                }
+
+                val sisteEndreteUtbetalingsAndeler =
+                    endretUtbetalingAndelRepository.findByBehandlingId(sisteVedtatteBehandling.id)
+
+                val nestSisteEndreteUtbetalingsAndeler =
+                    endretUtbetalingAndelRepository.findByBehandlingId(nestSisteVedtatteBehandling.id)
+
+                if (sisteEndreteUtbetalingsAndeler.isNotEmpty() || nestSisteEndreteUtbetalingsAndeler.isEmpty()) {
+                    logger.info("Siste behandling har allerede EUA eller nest siste har ingen EUA og vi trenger ikke å kopiere. Fagsak $fagsakId")
+                    kopierteFagsakerInfo.add(KopiertFagsakInfo(fagsakId = fagsakId, trengerNyBehandling = false))
+                } else {
+                    logger.info("Kopierer EndretUtbetalingAndel fra behandling $nestSisteVedtatteBehandling til $sisteVedtatteBehandling.")
+
+                    if (skalKopiere) {
+                        forvalterService.kopierEndretUtbetalingFraForrigeBehandling(
+                            sisteVedtatteBehandling = sisteVedtatteBehandling,
+                            nestSisteVedtatteBehandling = nestSisteVedtatteBehandling,
+                        )
+                    }
+                    kopierteFagsakerInfo.add(KopiertFagsakInfo(fagsakId = fagsakId))
+                }
+            } catch (exception: Exception) {
+                logger.warn(exception.message)
+                logger.warn("Feil ved kopiering av EndretUtbetalingAndel fra nest siste behandling. Fagsak $fagsakId.")
+                kopierteFagsakerInfo.add(
+                    KopiertFagsakInfo(
+                        fagsakId = fagsakId,
+                        exception.message
+                            ?: "Feil ved kopiering av EndretUtbetalingAndel fra nest siste behandling. Fagsak $fagsakId.",
+                    ),
+                )
+            }
+        }
+
+        return ResponseEntity.ok(
+            KopierteEUAFagsakerRespons(
+                feilet = kopierteFagsakerInfo.filter { it.feil.isNotEmpty() }.map { it.fagsakId },
+                kopierte = kopierteFagsakerInfo.filter { it.feil.isEmpty() && it.trengerNyBehandling }
+                    .map { it.fagsakId },
+                fagsakerSomIkkeTrengerNyBehandling = kopierteFagsakerInfo.filter { !it.trengerNyBehandling }
+                    .map { it.fagsakId },
+                kopierteFagsakerInfo = kopierteFagsakerInfo,
+            ),
+        )
     }
 
     @PostMapping(
@@ -174,6 +268,28 @@ class ForvalterController(
         }
 
         return ResponseEntity.ok("OK")
+    }
+
+    @PostMapping("/kjor-satsendring-uten-validering")
+    @Transactional
+    fun kjørSatsendringFor(@RequestBody fagsakListe: List<Long>) {
+        fagsakListe.parallelStream().forEach { fagsakId ->
+            try {
+                logger.info("Kjører satsendring uten validering for $fagsakId")
+                forvalterService.kjørForenkletSatsendringFor(fagsakId)
+            } catch (e: Exception) {
+                logger.warn("Klarte ikke kjøre satsendring for fagsakId=$fagsakId", e)
+            }
+        }
+    }
+
+    @PostMapping("/identifiser-utbetalinger-over-100-prosent")
+    fun identifiserUtbetalingerOver100Prosent(): ResponseEntity<Pair<String, String>> {
+        val callId = UUID.randomUUID().toString()
+        thread {
+            forvalterService.identifiserUtbetalingerOver100Prosent(callId)
+        }
+        return ResponseEntity.ok(Pair("callId", callId))
     }
 }
 

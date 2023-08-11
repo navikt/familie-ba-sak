@@ -54,6 +54,7 @@ class RevurderingDødsfallTest(
     @Test
     fun `Dødsfall bruker skal kjøre gjennom`() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY) } returns false
+        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
@@ -124,7 +125,7 @@ class RevurderingDødsfallTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
-
+            featureToggleService = featureToggleService,
         )
 
         val restFagsakEtterBehandlingAvsluttet =
@@ -197,7 +198,7 @@ class RevurderingDødsfallTest(
                 persongrunnlagService = persongrunnlagService,
                 andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
                 brevmalService = brevmalService,
-
+                featureToggleService = featureToggleService,
             )
         }
     }

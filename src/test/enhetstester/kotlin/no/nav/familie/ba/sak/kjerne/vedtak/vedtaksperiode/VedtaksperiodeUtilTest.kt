@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentEØSBegrunnelser
+import no.nav.familie.ba.sak.config.testSanityKlient
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -12,15 +12,15 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class VedtaksperiodeUtilTest {
+
+    private val sanityEØSBegrunnelser = testSanityKlient.hentEØSBegrunnelserMap()
 
     @Test
     fun `Skal ikke endre på utbetalingsperioder hvis det ikke finnes reduksjonsperioder`() {
@@ -354,15 +354,5 @@ class VedtaksperiodeUtilTest {
                 gyldigeEØSBegrunnelserForPeriode.contains(it)
             },
         )
-    }
-
-    companion object {
-        lateinit var sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>
-
-        @BeforeAll
-        @JvmStatic
-        internal fun beforeAll() {
-            sanityEØSBegrunnelser = hentEØSBegrunnelser()
-        }
     }
 }

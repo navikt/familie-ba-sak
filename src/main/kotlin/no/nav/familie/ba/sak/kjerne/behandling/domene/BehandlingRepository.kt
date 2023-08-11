@@ -1,13 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
 import jakarta.persistence.LockModeType
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import java.time.LocalDateTime
-import java.time.YearMonth
 
 interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
@@ -20,6 +17,9 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query(value = "SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND f.arkivert = false")
     fun finnBehandlinger(fagsakId: Long): List<Behandling>
 
+    @Query(value = "SELECT b FROM Behandling b WHERE b.fagsak.id = :fagsakId AND status = :status")
+    fun finnBehandlinger(fagsakId: Long, status: BehandlingStatus): List<Behandling>
+
     @Query(value = "SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id in :fagsakIder AND f.arkivert = false")
     fun finnBehandlinger(fagsakIder: Set<Long>): List<Behandling>
 
@@ -31,22 +31,20 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query(
         value = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
-                        SELECT f.id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
+                        SELECT DISTINCT ON (b.fk_fagsak_id) b.id
                         FROM behandling b
                                  INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
                                  INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
                         WHERE f.status = 'LØPENDE'
                           AND ty.utbetalingsoppdrag IS NOT NULL
                           AND f.arkivert = false
-                        GROUP BY fagsakid)
+                        ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC)
                         
                         select sum(aty.kalkulert_utbetalingsbelop) 
                         from andel_tilkjent_ytelse aty
                         where aty.stonad_fom <= :måned
                           AND aty.stonad_tom >= :måned
-                        AND aty.fk_behandling_id in (SELECT b.id FROM sisteiverksattebehandlingfraløpendefagsak silp 
-                                                     INNER JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid
-                                                     WHERE b.opprettet_tid = silp.opprettet_tid)""",
+                        AND aty.fk_behandling_id in (SELECT silp.id FROM sisteiverksattebehandlingfraløpendefagsak silp)""",
         nativeQuery = true,
     )
     fun hentTotalUtbetalingForMåned(måned: LocalDateTime): Long
@@ -56,49 +54,17 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
      * Finner deretter første behandling en periode oppstod i, som er det som skal avstemmes
      */
     @Query(
-        value = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
-                            SELECT f.id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
-                            FROM behandling b
-                                   INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                                   INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                            WHERE f.status = 'LØPENDE'
-                              AND ty.utbetalingsoppdrag IS NOT NULL
-                              AND f.arkivert = false
-                            GROUP BY fagsakid)
-                        
-                        SELECT b.id FROM sisteiverksattebehandlingfraløpendefagsak silp 
-                        INNER JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid
-                        WHERE silp.opprettet_tid = b.opprettet_tid""",
+        value = """SELECT DISTINCT ON (b.fk_fagsak_id) b.id
+                    FROM behandling b
+                           INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                           INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+                    WHERE f.status = 'LØPENDE'
+                      AND ty.utbetalingsoppdrag IS NOT NULL
+                      AND f.arkivert = false
+                    ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC""",
         nativeQuery = true,
     )
     fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Long>
-
-    @Query(
-        value = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
-                            SELECT f.id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
-                            FROM behandling b
-                                   INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                                   INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                            WHERE f.status = 'LØPENDE'
-                              AND ty.utbetalingsoppdrag IS NOT NULL
-                              AND f.arkivert = false
-                            GROUP BY fagsakid)
-                        
-                        SELECT b.id FROM sisteiverksattebehandlingfraløpendefagsak silp JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid WHERE b.opprettet_tid = silp.opprettet_tid""",
-        countQuery = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
-                            SELECT f.id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
-                            FROM behandling b
-                                   INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                                   INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                            WHERE f.status = 'LØPENDE'
-                              AND ty.utbetalingsoppdrag IS NOT NULL
-                              AND f.arkivert = false
-                            GROUP BY fagsakid)
-                        
-                        SELECT count(b.id) FROM sisteiverksattebehandlingfraløpendefagsak silp JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid WHERE b.opprettet_tid = silp.opprettet_tid""",
-        nativeQuery = true,
-    )
-    fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(page: Pageable): Page<Long>
 
     @Query(
         """select b from Behandling b
@@ -108,17 +74,15 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnIverksatteBehandlinger(fagsakId: Long): List<Behandling>
 
     @Query(
-        """WITH sisteiverksattebehandlingfraløpendefagsak AS (
-                    SELECT f.id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
-                    FROM behandling b
-                             INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                             INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                    WHERE f.id = :fagsakId
-                      AND ty.utbetalingsoppdrag IS NOT NULL
-                      AND f.arkivert = false
-                    GROUP BY fagsakid)
-                
-                SELECT b.* FROM sisteiverksattebehandlingfraløpendefagsak silp JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid WHERE b.opprettet_tid = silp.opprettet_tid""",
+        """SELECT DISTINCT ON(b.fk_fagsak_id) b.*
+            FROM behandling b
+                     INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                     INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+            WHERE f.id = :fagsakId
+              AND ty.utbetalingsoppdrag IS NOT NULL
+              AND f.arkivert = false
+              AND b.status = 'AVSLUTTET'
+            ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC""",
         nativeQuery = true,
     )
     fun finnSisteIverksatteBehandling(fagsakId: Long): Behandling?
@@ -156,13 +120,6 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Lock(LockModeType.NONE)
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE b.status <> 'AVSLUTTET' AND b.underkategori = 'UTVIDET' AND f.arkivert = false")
     fun finnÅpneUtvidetBarnetrygdBehandlinger(): List<Behandling>
-
-    @Query("SELECT DISTINCT aty.behandlingId FROM AndelTilkjentYtelse aty WHERE aty.behandlingId in :iverksatteLøpende AND aty.sats = :gammelSats AND aty.kalkulertUtbetalingsbeløp > 0 AND aty.stønadTom >= :månedÅrForEndring")
-    fun finnBehandlingerForSatsendring(
-        iverksatteLøpende: List<Long>,
-        gammelSats: Int,
-        månedÅrForEndring: YearMonth,
-    ): List<Long>
 
     @Query("SELECT new kotlin.Pair(b.opprettetÅrsak, count(*)) from Behandling b group by b.opprettetÅrsak")
     fun finnAntallBehandlingerPerÅrsak(): List<Pair<BehandlingÅrsak, Long>>

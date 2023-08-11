@@ -47,9 +47,9 @@ private fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.minsteEllerNull() =
     this.reduceOrNull { acc, neste -> minsteAv(acc, neste) }
 
 internal fun <T : Tidsenhet> størsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> =
-    if (t1.erUendeligLengeTil() && t2.erEndelig() && t1.somEndelig() <= t2) {
+    if (t1.erUendeligLengeTil() && t2.erEndelig() && t1.endeligMindreEllerLik(t2)) {
         t2.neste().somUendeligLengeTil()
-    } else if (t2.erUendeligLengeTil() && t1.erEndelig() && t2.somEndelig() <= t1) {
+    } else if (t2.erUendeligLengeTil() && t1.erEndelig() && t2.endeligMindreEllerLik(t1)) {
         t1.neste().somUendeligLengeTil()
     } else if (t1.erUendeligLengeTil() || t2.erUendeligLengeTil()) {
         maxOf(t1.somEndelig(), t2.somEndelig()).somUendeligLengeTil()
@@ -58,9 +58,9 @@ internal fun <T : Tidsenhet> størsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tid
     }
 
 internal fun <T : Tidsenhet> minsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> =
-    if (t1.erUendeligLengeSiden() && t2.erEndelig() && t1.somEndelig() >= t2) {
+    if (t1.erUendeligLengeSiden() && t2.erEndelig() && t2.endeligMindreEllerLik(t1)) {
         t2.forrige().somUendeligLengeSiden()
-    } else if (t2.erUendeligLengeSiden() && t1.erEndelig() && t2.somEndelig() >= t1) {
+    } else if (t2.erUendeligLengeSiden() && t1.erEndelig() && t1.endeligMindreEllerLik(t2)) {
         t1.forrige().somUendeligLengeSiden()
     } else if (t1.erUendeligLengeSiden() || t2.erUendeligLengeSiden()) {
         minOf(t1.somEndelig(), t2.somEndelig()).somUendeligLengeSiden()

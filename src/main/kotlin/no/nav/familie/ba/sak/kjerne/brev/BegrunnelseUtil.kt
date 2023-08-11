@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
@@ -13,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.somOverlapper
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtterEndretUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
@@ -22,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun hentPersonidenterGjeldendeForBegrunnelse(
     triggesAv: TriggesAv,
+    begrunnelse: IVedtakBegrunnelse,
     periode: NullablePeriode,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
     vedtaksperiodetype: Vedtaksperiodetype,
@@ -31,6 +34,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     identerMedReduksjonPåPeriode: List<String> = emptyList(),
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
     dødeBarnForrigePeriode: List<String>,
+    featureToggleService: FeatureToggleService,
 ): Set<String> {
     val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType.erFortsattInnvilget()
     val erEndretUtbetalingBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
@@ -51,8 +55,10 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             vedtakBegrunnelseType,
             identerMedUtbetalingPåPeriode,
         ),
+        begrunnelse = begrunnelse,
         triggesAv = triggesAv,
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+        featureToggleService = featureToggleService,
     ).map { person -> person.personIdent }
 
     return when {
@@ -147,6 +153,7 @@ private fun hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
                 FagsakType.NORMAL,
                 FagsakType.INSTITUSJON,
                 -> it.type == PersonType.SØKER
+
                 FagsakType.BARN_ENSLIG_MINDREÅRIG -> it.type == PersonType.BARN
             }
         }?.personIdent

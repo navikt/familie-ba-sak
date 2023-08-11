@@ -49,8 +49,7 @@ class BehandlingHentOgPersisterService(
      * Henter siste iverksatte behandling på fagsak
      */
     fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
-        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
-        return Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
+        return behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
     }
 
     /**
@@ -93,11 +92,11 @@ class BehandlingHentOgPersisterService(
 
     private fun List<Behandling>.hentSisteSomErVedtatt() =
         filter { !it.erHenlagt() && it.status == BehandlingStatus.AVSLUTTET }
-            .maxByOrNull { it.opprettetTidspunkt }
+            .maxByOrNull { it.aktivertTidspunkt }
 
     private fun List<Behandling>.hentSisteSomErSentTilØkonomi() =
         filter { !it.erHenlagt() && (it.status == BehandlingStatus.AVSLUTTET || it.status == BehandlingStatus.IVERKSETTER_VEDTAK) }
-            .maxByOrNull { it.opprettetTidspunkt }
+            .maxByOrNull { it.aktivertTidspunkt }
 
     /**
      * Henter siste behandling som er vedtatt FØR en gitt behandling

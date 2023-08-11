@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
@@ -36,12 +35,14 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaService
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.sorter
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
@@ -63,7 +64,6 @@ class UtvidetBehandlingService(
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
     private val settPåVentService: SettPåVentService,
     private val kompetanseRepository: KompetanseRepository,
-    private val endringstidspunktService: EndringstidspunktService,
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
@@ -94,7 +94,11 @@ class UtvidetBehandlingService(
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
-        val endringstidspunkt = endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId)
+        val endringstidspunkt = if (behandling.steg != StegType.BESLUTTE_VEDTAK) {
+            TIDENES_MORGEN
+        } else {
+            vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId = behandling.id)
+        }
 
         val kompetanser: Collection<Kompetanse> = kompetanseRepository.finnFraBehandlingId(behandlingId)
 
@@ -132,7 +136,7 @@ class UtvidetBehandlingService(
             fødselshendelsefiltreringResultater = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
                 behandlingId = behandling.id,
             ).map { it.tilRestFødselshendelsefiltreringResultat() },
-            utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
+            utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling, personopplysningGrunnlag),
             personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),
             endretUtbetalingAndeler = endreteUtbetalingerMedAndeler
@@ -141,8 +145,13 @@ class UtvidetBehandlingService(
             endringstidspunkt = utledEndringstidpunkt(endringstidspunkt, behandling),
             vedtak = vedtak?.tilRestVedtak(
                 vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
-                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
-                        .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }.sortedBy { it.fom }
+                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(
+                        vedtak = vedtak,
+                        personopplysningGrunnlag = personopplysningGrunnlag
+                            ?: error("Mangler persongrunnlag på behandling=$behandlingId"),
+                    )
+                        .sorter()
+                        .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }
                 } else {
                     emptyList()
                 },

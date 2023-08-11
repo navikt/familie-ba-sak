@@ -7,29 +7,28 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilPersonEnkel
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
+import java.time.LocalDate
 
 class UtbetalingssikkerhetTest {
 
     @Test
     fun `Skal kaste feil når en periode har flere andeler enn det som er tillatt`() {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(
-            behandlingId = 1,
-            personer = mutableSetOf(person),
-        )
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
@@ -62,7 +61,7 @@ class UtbetalingssikkerhetTest {
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                 tilkjentYtelse,
-                personopplysningGrunnlag,
+                listOf(person.tilPersonEnkel()),
             )
         }
 
@@ -72,10 +71,6 @@ class UtbetalingssikkerhetTest {
     @Test
     fun `Skal ikke kaste feil når en periode har like mange andeler som er tillatt`() {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(
-            behandlingId = 1,
-            personer = mutableSetOf(person),
-        )
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
@@ -101,7 +96,7 @@ class UtbetalingssikkerhetTest {
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                 tilkjentYtelse,
-                personopplysningGrunnlag,
+                listOf(person.tilPersonEnkel()),
             )
         }
     }
@@ -109,10 +104,6 @@ class UtbetalingssikkerhetTest {
     @Test
     fun `Skal kaste feil når en periode har større totalbeløp enn det som er tillatt`() {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(
-            behandlingId = 1,
-            personer = mutableSetOf(person),
-        )
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
@@ -138,7 +129,7 @@ class UtbetalingssikkerhetTest {
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                 tilkjentYtelse,
-                personopplysningGrunnlag,
+                listOf(person.tilPersonEnkel()),
             )
         }
 
@@ -148,10 +139,6 @@ class UtbetalingssikkerhetTest {
     @Test
     fun `Skal ikke kaste feil når en periode har gyldig totalbeløp`() {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(
-            behandlingId = 1,
-            personer = mutableSetOf(person),
-        )
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
@@ -177,24 +164,33 @@ class UtbetalingssikkerhetTest {
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                 tilkjentYtelse,
-                personopplysningGrunnlag,
+                listOf(person.tilPersonEnkel()),
             )
         }
     }
 
     @Test
     fun `Skal kaste feil når barn får har over 100 prosent gradering for ytelsetype`() {
-        val barn = tilfeldigPerson()
+        val barn1 = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(2).minusMonths(1))
+        val barn2 = tilfeldigPerson()
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
-                    barn.fødselsdato.nesteMåned(),
-                    barn.fødselsdato.plusYears(18).forrigeMåned(),
+                    barn1.fødselsdato.nesteMåned(),
+                    barn1.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
-                    person = barn,
+                    person = barn1,
+                    prosent = BigDecimal(100),
+                ),
+                lagAndelTilkjentYtelse(
+                    barn2.fødselsdato.nesteMåned(),
+                    barn2.fødselsdato.plusYears(18).forrigeMåned(),
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    1054,
+                    person = barn2,
                     prosent = BigDecimal(100),
                 ),
             ),
@@ -203,7 +199,7 @@ class UtbetalingssikkerhetTest {
         val far = tilfeldigPerson(personType = PersonType.SØKER)
         val personopplysningGrunnlag2 = PersonopplysningGrunnlag(
             behandlingId = 1,
-            personer = mutableSetOf(far, barn),
+            personer = mutableSetOf(far, barn1, barn2),
         )
 
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
@@ -211,19 +207,34 @@ class UtbetalingssikkerhetTest {
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
-                    barn.fødselsdato.nesteMåned(),
-                    barn.fødselsdato.plusYears(18).forrigeMåned(),
+                    barn1.fødselsdato.nesteMåned(),
+                    barn1.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
-                    person = barn,
+                    person = barn1,
                     prosent = BigDecimal(100),
                 ),
                 lagAndelTilkjentYtelse(
-                    barn.fødselsdato.nesteMåned(),
-                    barn.fødselsdato.plusYears(18).forrigeMåned(),
+                    barn1.fødselsdato.nesteMåned(),
+                    barn1.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.SMÅBARNSTILLEGG,
                     660,
-                    person = barn,
+                    person = barn1,
+                ),
+                lagAndelTilkjentYtelse(
+                    barn2.fødselsdato.nesteMåned(),
+                    barn2.fødselsdato.plusYears(18).forrigeMåned(),
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    1054,
+                    person = barn2,
+                    prosent = BigDecimal(100),
+                ),
+                lagAndelTilkjentYtelse(
+                    barn2.fødselsdato.nesteMåned(),
+                    barn2.fødselsdato.plusYears(18).forrigeMåned(),
+                    YtelseType.SMÅBARNSTILLEGG,
+                    660,
+                    person = barn2,
                 ),
             ),
         )
@@ -231,17 +242,24 @@ class UtbetalingssikkerhetTest {
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
-                barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
-                personopplysningGrunnlag = personopplysningGrunnlag2,
+                barnMedAndreRelevanteTilkjentYtelser = listOf(
+                    Pair(barn1.tilPersonEnkel(), listOf(tilkjentYtelse)),
+                    Pair(barn2.tilPersonEnkel(), listOf(tilkjentYtelse)),
+                ),
+                søkerOgBarn = personopplysningGrunnlag2.tilPersonEnkelSøkerOgBarn(),
             )
         }
 
         assertTrue(
             feil.frontendFeilmelding?.contains(
                 "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${
-                    listOf(
-                        barn.fødselsdato,
-                    ).tilBrevTekst()
+                    barn1.fødselsdato.tilKortString()
+                } i perioden ${barn1.fødselsdato.nesteMåned()} til ${
+                    barn1.fødselsdato.plusYears(18).forrigeMåned()
+                } og ${
+                    barn2.fødselsdato.tilKortString()
+                } i perioden ${barn2.fødselsdato.nesteMåned()} til ${
+                    barn2.fødselsdato.plusYears(18).forrigeMåned()
                 }",
             )!!,
         )
@@ -295,8 +313,8 @@ class UtbetalingssikkerhetTest {
 
         TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
-            barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
-            personopplysningGrunnlag = personopplysningGrunnlag2,
+            barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn.tilPersonEnkel(), listOf(tilkjentYtelse))),
+            søkerOgBarn = personopplysningGrunnlag2.tilPersonEnkelSøkerOgBarn(),
         )
     }
 
@@ -341,8 +359,8 @@ class UtbetalingssikkerhetTest {
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
-                barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
-                personopplysningGrunnlag = personopplysningGrunnlag2,
+                barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn.tilPersonEnkel(), listOf(tilkjentYtelse))),
+                søkerOgBarn = personopplysningGrunnlag2.tilPersonEnkelSøkerOgBarn(),
             )
         }
     }
@@ -353,10 +371,25 @@ class UtbetalingssikkerhetTest {
         val småbarnstillegg = SatsService.finnSisteSatsFor(SatsType.SMA).beløp
         val tilleggOrdinærBarnetrygd = SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp
 
-        assertEquals(utvidetBarnetrygd + småbarnstillegg, TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL))
-        assertEquals(tilleggOrdinærBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL))
-        assertEquals(tilleggOrdinærBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.INSTITUSJON))
-        assertEquals(tilleggOrdinærBarnetrygd + utvidetBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG))
+        assertEquals(
+            utvidetBarnetrygd + småbarnstillegg,
+            TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL),
+        )
+        assertEquals(
+            tilleggOrdinærBarnetrygd,
+            TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL),
+        )
+        assertEquals(
+            tilleggOrdinærBarnetrygd,
+            TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.INSTITUSJON),
+        )
+        assertEquals(
+            tilleggOrdinærBarnetrygd + utvidetBarnetrygd,
+            TilkjentYtelseValidering.maksBeløp(
+                personType = PersonType.BARN,
+                fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,
+            ),
+        )
         assertThrows<Feil> { TilkjentYtelseValidering.maksBeløp(personType = PersonType.ANNENPART, FagsakType.NORMAL) }
     }
 

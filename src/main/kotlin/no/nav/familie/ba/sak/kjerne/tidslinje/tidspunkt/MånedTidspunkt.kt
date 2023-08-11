@@ -45,7 +45,16 @@ data class MånedTidspunkt internal constructor(
     override fun equals(other: Any?): Boolean {
         return when (other) {
             is MånedTidspunkt -> compareTo(other) == 0
-            else -> super.equals(other)
+            is Tidspunkt<*> -> this.uendelighet != Uendelighet.INGEN && this.uendelighet == other.uendelighet
+            else -> false
+        }
+    }
+
+    override fun hashCode(): Int {
+        return if (uendelighet == Uendelighet.INGEN) {
+            måned.hashCode()
+        } else {
+            uendelighet.hashCode()
         }
     }
 
@@ -58,11 +67,11 @@ data class MånedTidspunkt internal constructor(
 
         internal fun YearMonth.tilTidspunkt() = MånedTidspunkt(this, Uendelighet.INGEN)
 
-        internal fun YearMonth?.tilTidspunktEllerTidligereEnn(tidspunkt: YearMonth?) =
-            tilTidspunktEllerUendelig(tidspunkt ?: YearMonth.now(), Uendelighet.FORTID)
+        internal fun YearMonth?.tilTidspunktEllerUendeligTidlig(defaultUendelighetMåned: YearMonth? = null) =
+            this.tilTidspunktEllerUendelig(defaultUendelighetMåned, Uendelighet.FORTID)
 
-        internal fun YearMonth?.tilTidspunktEllerSenereEnn(tidspunkt: YearMonth?) =
-            tilTidspunktEllerUendelig(tidspunkt ?: YearMonth.now(), Uendelighet.FREMTID)
+        internal fun YearMonth?.tilTidspunktEllerUendeligSent(defaultUendelighetMåned: YearMonth? = null) =
+            this.tilTidspunktEllerUendelig(defaultUendelighetMåned, Uendelighet.FREMTID)
 
         private fun YearMonth?.tilTidspunktEllerUendelig(default: YearMonth?, uendelighet: Uendelighet) =
             this?.let { MånedTidspunkt(it, Uendelighet.INGEN) } ?: MånedTidspunkt(

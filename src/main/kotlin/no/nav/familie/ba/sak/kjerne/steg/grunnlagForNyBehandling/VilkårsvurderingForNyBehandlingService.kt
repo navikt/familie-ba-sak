@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -27,6 +29,7 @@ class VilkårsvurderingForNyBehandlingService(
     private val behandlingstemaService: BehandlingstemaService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun opprettVilkårsvurderingUtenomHovedflyt(
@@ -46,6 +49,7 @@ class VilkårsvurderingForNyBehandlingService(
                 // Lagre ned migreringsdato
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
+
             BehandlingÅrsak.HELMANUELL_MIGRERING -> {
                 genererVilkårsvurderingForHelmanuellMigrering(
                     behandling = behandling,
@@ -55,6 +59,15 @@ class VilkårsvurderingForNyBehandlingService(
                 // Lagre ned migreringsdato
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
+
+            BehandlingÅrsak.SATSENDRING -> {
+                genererVilkårsvurderingForSatsendring(
+                    forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt
+                        ?: throw Feil("Kan ikke opprette behandling med årsak 'Satsendring' hvis det ikke finnes en tidligere behandling"),
+                    inneværendeBehandling = behandling,
+                )
+            }
+
             !in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
                 initierVilkårsvurderingForBehandling(
                     behandling = behandling,
@@ -62,6 +75,7 @@ class VilkårsvurderingForNyBehandlingService(
                     forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
                 )
             }
+
             else -> logger.info(
                 "Perioder i vilkårsvurdering generer ikke automatisk for " +
                     behandling.opprettetÅrsak.visningsnavn,
@@ -107,6 +121,36 @@ class VilkårsvurderingForNyBehandlingService(
             )
         }
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+    }
+
+    private fun genererVilkårsvurderingForSatsendring(
+        forrigeBehandlingSomErVedtatt: Behandling,
+        inneværendeBehandling: Behandling,
+    ): Vilkårsvurdering {
+        return if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_KOPIER_GRUNNLAG_FRA_FORRIGE_BEHANDLING)) {
+            val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(inneværendeBehandling.id)
+
+            val forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
+
+            val nyVilkårsvurdering =
+                forrigeBehandlingVilkårsvurdering.tilKopiForNyBehandling(
+                    nyBehandling = inneværendeBehandling,
+                    personopplysningGrunnlag,
+                )
+
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+                behandling = inneværendeBehandling,
+                forrigeBehandling = forrigeBehandlingSomErVedtatt,
+            )
+
+            return vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
+        } else {
+            initierVilkårsvurderingForBehandling(
+                behandling = inneværendeBehandling,
+                bekreftEndringerViaFrontend = true,
+                forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
+            )
+        }
     }
 
     fun initierVilkårsvurderingForBehandling(

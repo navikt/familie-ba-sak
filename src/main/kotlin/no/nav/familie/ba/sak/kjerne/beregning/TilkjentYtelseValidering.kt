@@ -2,7 +2,10 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -10,13 +13,24 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -29,10 +43,10 @@ fun hentGyldigEtterbetalingFom(kravDato: LocalDateTime) =
 
 fun hentSøkersAndeler(
     andeler: List<AndelTilkjentYtelse>,
-    søker: Person,
+    søker: PersonEnkel,
 ) = andeler.filter { it.aktør == søker.aktør }
 
-fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) = barna.map { barn ->
+fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<PersonEnkel>) = barna.map { barn ->
     barn to andeler.filter { it.aktør == barn.aktør }
 }
 
@@ -42,23 +56,47 @@ fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) =
  */
 object TilkjentYtelseValidering {
 
-    fun finnAktørIderMedUgyldigEtterbetalingsperiode(
-        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    internal fun validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
+        andelerFraForrigeBehandling: List<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    ) {
+        val andelerGruppert = andelerTilkjentYtelse.tilTidslinjerPerPersonOgType()
+        val forrigeAndelerGruppert = andelerFraForrigeBehandling.tilTidslinjerPerPersonOgType()
+
+        andelerGruppert.outerJoin(forrigeAndelerGruppert) { nåværendeAndel, forrigeAndel ->
+            when {
+                forrigeAndel == null && nåværendeAndel != null ->
+                    throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
+
+                forrigeAndel != null && nåværendeAndel == null ->
+                    throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
+
+                forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
+                    throw Feil("Satsendring kan ikke endre på prosenten til en andel")
+
+                forrigeAndel != null && forrigeAndel.type != nåværendeAndel?.type ->
+                    throw Feil("Satsendring kan ikke endre YtelseType til en andel")
+
+                else -> false
+            }
+        }.values.map { it.perioder() } // Må kalle på .perioder() for at feilene over skal bli kastet
+    }
+
+    fun finnAktørIderMedUgyldigEtterbetalingsperiode(
+        forrigeAndelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
+        andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
         kravDato: LocalDateTime,
-    ): List<String> {
+    ): List<Aktør> {
         val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato)
 
-        val aktørIder =
-            hentAktørIderForDenneOgForrigeBehandling(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
+        val aktører = unikeAntører(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
 
         val personerMedUgyldigEtterbetaling =
-            aktørIder.mapNotNull { aktørId ->
-                val andelerTilkjentYtelseForPerson = andelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
-                val forrigeAndelerTilkjentYtelseForPerson =
-                    forrigeAndelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
+            aktører.mapNotNull { aktør ->
+                val andelerTilkjentYtelseForPerson = andelerTilkjentYtelse.filter { it.aktør == aktør }
+                val forrigeAndelerTilkjentYtelseForPerson = forrigeAndelerTilkjentYtelse.filter { it.aktør == aktør }
 
-                aktørId.takeIf {
+                aktør.takeIf {
                     erUgyldigEtterbetalingPåPerson(
                         forrigeAndelerTilkjentYtelseForPerson,
                         andelerTilkjentYtelseForPerson,
@@ -70,12 +108,12 @@ object TilkjentYtelseValidering {
         return personerMedUgyldigEtterbetaling
     }
 
-    fun hentAktørIderForDenneOgForrigeBehandling(
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?,
-    ): Set<String> {
-        val aktørIderFraAndeler = andelerTilkjentYtelse.map { it.aktør.aktørId }
-        val aktøerIderFraForrigeAndeler = forrigeAndelerTilkjentYtelse?.map { it.aktør.aktørId } ?: emptyList()
+    private fun unikeAntører(
+        andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
+        forrigeAndelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
+    ): Set<Aktør> {
+        val aktørIderFraAndeler = andelerTilkjentYtelse.map { it.aktør }
+        val aktøerIderFraForrigeAndeler = forrigeAndelerTilkjentYtelse.map { it.aktør }
         return (aktørIderFraAndeler + aktøerIderFraForrigeAndeler).toSet()
     }
 
@@ -101,10 +139,10 @@ object TilkjentYtelseValidering {
 
     fun validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
         tilkjentYtelse: TilkjentYtelse,
-        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        søkerOgBarn: List<PersonEnkel>,
     ) {
-        val søker = personopplysningGrunnlag.søker
-        val barna = personopplysningGrunnlag.barna
+        val søker = søkerOgBarn.søker()
+        val barna = søkerOgBarn.barn()
 
         val tidslinjeMedAndeler = tilkjentYtelse.tilTidslinjeMedAndeler()
 
@@ -116,22 +154,22 @@ object TilkjentYtelseValidering {
 
             validerAtBeløpForPartStemmerMedSatser(person = søker, andeler = søkersAndeler, fagsakType = fagsakType)
 
-            barnasAndeler.forEach { (person, andeler) ->
-                validerAtBeløpForPartStemmerMedSatser(person = person, andeler = andeler, fagsakType = fagsakType)
+            barnasAndeler.forEach { (barn, andeler) ->
+                validerAtBeløpForPartStemmerMedSatser(person = barn, andeler = andeler, fagsakType = fagsakType)
             }
         }
     }
 
     fun validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
         behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
-        barnMedAndreRelevanteTilkjentYtelser: List<Pair<Person, List<TilkjentYtelse>>>,
-        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        barnMedAndreRelevanteTilkjentYtelser: List<Pair<PersonEnkel, List<TilkjentYtelse>>>,
+        søkerOgBarn: List<PersonEnkel>,
     ) {
-        val barna = personopplysningGrunnlag.barna.sortedBy { it.fødselsdato }
+        val barna = søkerOgBarn.barn().sortedBy { it.fødselsdato }
 
         val barnasAndeler = hentBarnasAndeler(behandlendeBehandlingTilkjentYtelse.andelerTilkjentYtelse.toList(), barna)
 
-        val barnMedUtbetalingsikkerhetFeil = mutableListOf<Person>()
+        val barnMedUtbetalingsikkerhetFeil = mutableMapOf<PersonEnkel, List<MånedPeriode>>()
         barnasAndeler.forEach { (barn, andeler) ->
             val barnsAndelerFraAndreBehandlinger =
                 barnMedAndreRelevanteTilkjentYtelser.filter { it.first.aktør == barn.aktør }
@@ -139,25 +177,28 @@ object TilkjentYtelseValidering {
                     .flatMap { it.andelerTilkjentYtelse }
                     .filter { it.aktør == barn.aktør }
 
-            if (erOverlappAvAndeler(
-                    andeler = andeler,
-                    barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
-                )
-            ) {
-                barnMedUtbetalingsikkerhetFeil.add(barn)
+            val perioderMedOverlapp = finnPeriodeMedOverlappAvAndeler(
+                andeler = andeler,
+                barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
+            )
+            if (perioderMedOverlapp.isNotEmpty()) {
+                barnMedUtbetalingsikkerhetFeil.put(barn, perioderMedOverlapp)
             }
         }
         if (barnMedUtbetalingsikkerhetFeil.isNotEmpty()) {
             throw UtbetalingsikkerhetFeil(
                 melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${
-                    barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()
+                    barnMedUtbetalingsikkerhetFeil.tilFeilmeldingTekst()
                 }",
                 frontendFeilmelding = "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${
-                    barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()
+                    barnMedUtbetalingsikkerhetFeil.tilFeilmeldingTekst()
                 }. Reduksjonsvedtak til annen person må være sendt til godkjenning før du kan gå videre.",
             )
         }
     }
+
+    fun MutableMap<PersonEnkel, List<MånedPeriode>>.tilFeilmeldingTekst() =
+        Utils.slåSammen(this.map { "${it.key.fødselsdato.tilKortString()} i perioden ${it.value.joinToString(", ") { "${it.fom} til ${it.tom}" }}" })
 
     fun maksBeløp(personType: PersonType, fagsakType: FagsakType): Int {
         val satser = SatsService.hentAllesatser()
@@ -180,21 +221,44 @@ object TilkjentYtelseValidering {
         }
     }
 
-    private fun erOverlappAvAndeler(
+    fun finnPeriodeMedOverlappAvAndeler(
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
-    ): Boolean {
-        return andeler.any { andelTilkjentYtelse ->
-            barnsAndelerFraAndreBehandlinger.any {
-                andelTilkjentYtelse.overlapperMed(it) &&
-                    andelTilkjentYtelse.prosent + it.prosent > BigDecimal(100)
-            }
+    ): List<MånedPeriode> {
+        val kombinertOverlappTidslinje = YtelseType.values().map { ytelseType ->
+            finnPeriodeMedOverlappAvAndelerForYtelseType(
+                andeler = andeler.filter { it.type == ytelseType },
+                barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger.filter { it.type == ytelseType },
+            )
+        }.kombiner { it.minstEnYtelseHarOverlapp() }
+
+        return kombinertOverlappTidslinje.perioder().filter { it.innhold == true }
+            .map { MånedPeriode(it.fraOgMed.tilYearMonth(), it.tilOgMed.tilYearMonth()) }
+    }
+
+    internal fun Iterable<Boolean>.minstEnYtelseHarOverlapp(): Boolean {
+        return any { it }
+    }
+
+    fun finnPeriodeMedOverlappAvAndelerForYtelseType(
+        andeler: List<AndelTilkjentYtelse>,
+        barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
+    ): Tidslinje<Boolean, Måned> {
+        val andelerTidslinje = andeler.map {
+            Periode(fraOgMed = it.periode.fom.tilTidspunkt(), tilOgMed = it.periode.tom.tilTidspunkt(), innhold = it)
+        }.tilTidslinje()
+        val tidligereAndelerTidslinje = barnsAndelerFraAndreBehandlinger.map {
+            Periode(fraOgMed = it.periode.fom.tilTidspunkt(), tilOgMed = it.periode.tom.tilTidspunkt(), innhold = it)
+        }.tilTidslinje()
+
+        return andelerTidslinje.kombinerUtenNullMed(tidligereAndelerTidslinje) { andel, tidligereAndel ->
+            andel.overlapperMed(tidligereAndel) && andel.prosent + tidligereAndel.prosent > BigDecimal(100)
         }
     }
 }
 
 private fun validerAtBeløpForPartStemmerMedSatser(
-    person: Person,
+    person: PersonEnkel,
     andeler: List<AndelTilkjentYtelse>,
     fagsakType: FagsakType,
 ) {

@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -12,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 data class BegrunnelseMedTriggere(
     val standardbegrunnelse: IVedtakBegrunnelse,
     val triggesAv: TriggesAv,
+    val featureToggleService: FeatureToggleService,
 ) {
     fun tilBrevBegrunnelseGrunnlagMedPersoner(
         periode: NullablePeriode,
@@ -32,6 +35,7 @@ data class BegrunnelseMedTriggere(
             )
         } else {
             val personidenterGjeldendeForBegrunnelse: Set<String> = hentPersonidenterGjeldendeForBegrunnelse(
+                begrunnelse = this.standardbegrunnelse,
                 triggesAv = this.triggesAv,
                 vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
                 periode = periode,
@@ -42,6 +46,7 @@ data class BegrunnelseMedTriggere(
                 identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent,
                 minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
                 dødeBarnForrigePeriode = dødeBarnForrigePeriode,
+                featureToggleService = featureToggleService,
             )
 
             if (
@@ -71,12 +76,14 @@ data class BegrunnelseMedTriggere(
 }
 
 fun Vedtaksbegrunnelse.tilBegrunnelseMedTriggere(
-    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
+    featureToggleService: FeatureToggleService,
 ): BegrunnelseMedTriggere {
-    val sanityBegrunnelse = sanityBegrunnelser.firstOrNull { it.apiNavn == this.standardbegrunnelse.sanityApiNavn } ?: throw Feil("Finner ikke sanityBegrunnelse med apiNavn=${this.standardbegrunnelse.sanityApiNavn}")
+    val sanityBegrunnelse = sanityBegrunnelser[this.standardbegrunnelse]
+        ?: throw Feil("Finner ikke sanityBegrunnelse med apiNavn=${this.standardbegrunnelse.sanityApiNavn}")
     return BegrunnelseMedTriggere(
         standardbegrunnelse = this.standardbegrunnelse,
-        triggesAv = sanityBegrunnelse
-            .tilTriggesAv(),
+        triggesAv = sanityBegrunnelse.triggesAv,
+        featureToggleService = featureToggleService,
     )
 }
