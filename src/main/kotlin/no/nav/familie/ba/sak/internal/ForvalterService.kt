@@ -189,7 +189,7 @@ class ForvalterService(
     }
 
     fun sammenlignOffsetGammelMedOffsetNy(): Set<Long> {
-        var slice = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 100))
+        var slice = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 1000))
         val list = mutableListOf<Long>()
         while (slice.pageable.isPaged) {
             list.addAll(sammenlignOffsetGammelMedOffsetNy(slice.get().toList()))
@@ -205,7 +205,7 @@ class ForvalterService(
                 sammenlignOffsetGammelMedOffsetNy(fagsakId)
             }.onFailure { e ->
                 accumulator.add(fagsakId)
-                logger.info("Feil ved sammenlign offset", e)
+                secureLogger.info("Ikke lik offset med ny og gammel metode for fagsak=$fagsakId melding=${e.message}")
             }
             accumulator
         }
@@ -217,7 +217,7 @@ class ForvalterService(
         val gammel = beregningService.hentSisteOffsetPerIdent(fagsakId, AndelTilkjentYtelseForSimuleringFactory())
 
         check(ny == gammel) {
-            "Ny andel ikke lik gammel $ny $gammel"
+            "Ny andel ikke lik gammel ny=$ny gammel=$gammel"
         }
     }
 }
