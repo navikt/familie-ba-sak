@@ -187,9 +187,11 @@ object TilkjentYtelseValidering {
             }
         }
         if (barnMedUtbetalingsikkerhetFeil.isNotEmpty()) {
-            LoggerFactory.getLogger("secureLogger").info("${barnMedAndreRelevanteTilkjentYtelser
-                .filter { barnMedUtbetalingsikkerhetFeil.contains(it.first) }
-                .map { "Andeler for barn ${it.first.fødselsdato}: ${it.second.map { tilkjentYtelse -> "[Fagsak ${tilkjentYtelse.behandling.fagsak}: ${tilkjentYtelse.andelerTilkjentYtelse}], " }}" }}")
+            LoggerFactory.getLogger("secureLogger").info(
+                "${barnMedAndreRelevanteTilkjentYtelser
+                    .filter { barnMedUtbetalingsikkerhetFeil.contains(it.first) }
+                    .map { "Andeler for barn ${it.first.fødselsdato}: ${it.second.map { tilkjentYtelse -> "[Fagsak ${tilkjentYtelse.behandling.fagsak}: ${tilkjentYtelse.andelerTilkjentYtelse}], " }}" }}",
+            )
 
             throw UtbetalingsikkerhetFeil(
                 melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${
