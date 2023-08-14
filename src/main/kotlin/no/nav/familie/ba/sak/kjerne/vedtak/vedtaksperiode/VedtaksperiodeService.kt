@@ -406,7 +406,7 @@ class VedtaksperiodeService(
 
         lagreNedOverstyrtEndringstidspunkt(
             behandlingId = vedtak.behandling.id,
-            overstyrtEndringstidspunkt = restGenererVedtaksperioder.overstyrtEndringstidspunkt
+            overstyrtEndringstidspunkt = restGenererVedtaksperioder.overstyrtEndringstidspunkt,
         )
         oppdaterVedtakMedVedtaksperioder(vedtak)
     }
