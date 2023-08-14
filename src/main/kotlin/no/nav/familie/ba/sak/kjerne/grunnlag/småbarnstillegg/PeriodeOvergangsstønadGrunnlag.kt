@@ -27,13 +27,13 @@ import java.time.LocalDate
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "PeriodeOvergangsstønadGrunnlag")
 @Table(name = "GR_PERIODE_OVERGANGSSTONAD")
-class PeriodeOvergangsstønadGrunnlag(
+data class PeriodeOvergangsstønadGrunnlag(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gr_periode_overgangsstonad_seq_generator")
     @SequenceGenerator(
         name = "gr_periode_overgangsstonad_seq_generator",
         sequenceName = "gr_periode_overgangsstonad_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -52,12 +52,22 @@ class PeriodeOvergangsstønadGrunnlag(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "datakilde", nullable = false)
-    val datakilde: Datakilde
+    val datakilde: Datakilde,
 ) : BaseEntitet() {
+
+    override fun toString(): String {
+        return "PeriodeOvergangsstønadGrunnlag(" +
+            "id=$id, " +
+            "behandlingId=$behandlingId, " +
+            "aktør=$aktør, " +
+            "fom=$fom, " +
+            "tom=$tom, " +
+            "datakilde=$datakilde)"
+    }
     fun tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsstønad(
         personIdent = this.aktør.aktivFødselsnummer(),
         fomDato = this.fom,
-        tomDato = this.tom
+        tomDato = this.tom,
     )
 }
 
@@ -67,5 +77,5 @@ fun EksternPeriode.tilPeriodeOvergangsstønadGrunnlag(behandlingId: Long, aktør
         aktør = aktør,
         fom = this.fomDato,
         tom = this.tomDato,
-        datakilde = this.datakilde
+        datakilde = this.datakilde,
     )

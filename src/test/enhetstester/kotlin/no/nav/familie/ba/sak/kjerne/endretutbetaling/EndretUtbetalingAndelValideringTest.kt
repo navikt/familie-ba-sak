@@ -66,7 +66,7 @@ class EndretUtbetalingAndelValideringTest {
             begrunnelse = "begrunnelse",
             prosent = BigDecimal(100),
             søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now()
+            avtaletidspunktDeltBosted = LocalDate.now(),
         )
 
         val feil = assertThrows<FunksjonellFeil> {
@@ -75,18 +75,18 @@ class EndretUtbetalingAndelValideringTest {
                 listOf(
                     endretUtbetalingAndel.copy(
                         fom = YearMonth.of(2018, 4),
-                        tom = YearMonth.of(2019, 2)
+                        tom = YearMonth.of(2019, 2),
                     ),
                     endretUtbetalingAndel.copy(
                         fom = YearMonth.of(2020, 4),
-                        tom = YearMonth.of(2021, 2)
-                    )
-                )
+                        tom = YearMonth.of(2021, 2),
+                    ),
+                ),
             )
         }
         assertEquals(
             "Perioden som blir forsøkt lagt til overlapper med eksisterende periode på person.",
-            feil.melding
+            feil.melding,
         )
 
         // Resterende kall skal validere ok.
@@ -95,17 +95,17 @@ class EndretUtbetalingAndelValideringTest {
             listOf(
                 endretUtbetalingAndel.copy(
                     fom = endretUtbetalingAndel.tom!!.plusMonths(1),
-                    tom = endretUtbetalingAndel.tom!!.plusMonths(10)
-                )
-            )
+                    tom = endretUtbetalingAndel.tom!!.plusMonths(10),
+                ),
+            ),
         )
         validerIngenOverlappendeEndring(
             endretUtbetalingAndel,
-            listOf(endretUtbetalingAndel.copy(person = barn2))
+            listOf(endretUtbetalingAndel.copy(person = barn2)),
         )
         validerIngenOverlappendeEndring(
             endretUtbetalingAndel,
-            listOf(endretUtbetalingAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT))
+            listOf(endretUtbetalingAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT)),
         )
     }
 
@@ -118,18 +118,18 @@ class EndretUtbetalingAndelValideringTest {
             lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2020, 2),
                 tom = YearMonth.of(2020, 4),
-                person = barn1
+                person = barn1,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2020, 7),
                 tom = YearMonth.of(2020, 10),
-                person = barn1
+                person = barn1,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2018, 10),
                 tom = YearMonth.of(2021, 10),
-                person = barn2
-            )
+                person = barn2,
+            ),
         )
 
         val endretUtbetalingAndel = EndretUtbetalingAndel(
@@ -141,7 +141,7 @@ class EndretUtbetalingAndelValideringTest {
             begrunnelse = "begrunnelse",
             prosent = BigDecimal(100),
             søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now()
+            avtaletidspunktDeltBosted = LocalDate.now(),
         )
 
         var feil = assertThrows<FunksjonellFeil> {
@@ -149,13 +149,13 @@ class EndretUtbetalingAndelValideringTest {
         }
         assertEquals(
             "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
-            feil.melding
+            feil.melding,
         )
 
         val endretUtbetalingAndelerSomIkkeValiderer = listOf(
             endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 11)),
             endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 4)),
-            endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 11))
+            endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 11)),
         )
 
         endretUtbetalingAndelerSomIkkeValiderer.forEach {
@@ -164,14 +164,14 @@ class EndretUtbetalingAndelValideringTest {
             }
             assertEquals(
                 "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
-                feil.melding
+                feil.melding,
             )
         }
 
         val endretUtbetalingAndelerSomValiderer = listOf(
             endretUtbetalingAndel,
             endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 10)),
-            endretUtbetalingAndel.copy(fom = YearMonth.of(2018, 10), tom = YearMonth.of(2021, 10), person = barn2)
+            endretUtbetalingAndel.copy(fom = YearMonth.of(2018, 10), tom = YearMonth.of(2021, 10), person = barn2),
         )
 
         endretUtbetalingAndelerSomValiderer.forEach { validerPeriodeInnenforTilkjentytelse(it, andelTilkjentYtelser) }
@@ -188,7 +188,7 @@ class EndretUtbetalingAndelValideringTest {
             begrunnelse = "begrunnelse",
             prosent = BigDecimal(100),
             søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now()
+            avtaletidspunktDeltBosted = LocalDate.now(),
         )
         assertThrows<FunksjonellFeil> {
             validerDeltBosted(
@@ -196,9 +196,9 @@ class EndretUtbetalingAndelValideringTest {
                 deltBostedPerioder = listOf(
                     MånedPeriode(
                         fom = YearMonth.of(2020, 2),
-                        tom = YearMonth.of(2020, 4)
-                    )
-                )
+                        tom = YearMonth.of(2020, 4),
+                    ),
+                ),
             )
         }
 
@@ -208,9 +208,9 @@ class EndretUtbetalingAndelValideringTest {
                 deltBostedPerioder = listOf(
                     MånedPeriode(
                         fom = YearMonth.of(2020, 7),
-                        tom = YearMonth.of(2020, 10)
-                    )
-                )
+                        tom = YearMonth.of(2020, 10),
+                    ),
+                ),
             )
         }
     }
@@ -226,12 +226,12 @@ class EndretUtbetalingAndelValideringTest {
             begrunnelse = "begrunnelse",
             prosent = BigDecimal(100),
             søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now()
+            avtaletidspunktDeltBosted = LocalDate.now(),
         )
         assertThrows<FunksjonellFeil> {
             validerDeltBosted(
                 endretUtbetalingAndel = endretUtbetalingAndel,
-                deltBostedPerioder = emptyList()
+                deltBostedPerioder = emptyList(),
             )
         }
     }
@@ -247,7 +247,7 @@ class EndretUtbetalingAndelValideringTest {
             begrunnelse = "begrunnelse",
             prosent = BigDecimal(100),
             søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now()
+            avtaletidspunktDeltBosted = LocalDate.now(),
         )
         assertDoesNotThrow {
             validerDeltBosted(
@@ -255,9 +255,9 @@ class EndretUtbetalingAndelValideringTest {
                 deltBostedPerioder = listOf(
                     MånedPeriode(
                         fom = YearMonth.of(2020, 2),
-                        tom = YearMonth.of(2020, 6)
-                    )
-                )
+                        tom = YearMonth.of(2020, 6),
+                    ),
+                ),
             )
         }
         assertDoesNotThrow {
@@ -266,9 +266,9 @@ class EndretUtbetalingAndelValideringTest {
                 deltBostedPerioder = listOf(
                     MånedPeriode(
                         fom = YearMonth.of(2020, 1),
-                        tom = YearMonth.of(2020, 7)
-                    )
-                )
+                        tom = YearMonth.of(2020, 7),
+                    ),
+                ),
             )
         }
     }
@@ -283,13 +283,13 @@ class EndretUtbetalingAndelValideringTest {
             validerAtAlleOpprettedeEndringerErUtfylt(
                 listOf(
                     endretUtbetalingAndel1,
-                    endretUtbetalingAndel2.copy(fom = null)
-                )
+                    endretUtbetalingAndel2.copy(fom = null),
+                ),
             )
         }
         assertEquals(
             "Det er opprettet instanser av EndretUtbetalingandel som ikke er fylt ut før navigering til neste steg.",
-            feil.melding
+            feil.melding,
         )
     }
 
@@ -301,7 +301,7 @@ class EndretUtbetalingAndelValideringTest {
         }
         assertEquals(
             "Det er opprettet instanser av EndretUtbetalingandel som ikke er tilknyttet noen andeler. De må enten lagres eller slettes av SB.",
-            feil.melding
+            feil.melding,
         )
 
         val andelTilkjentYtelse: AndelTilkjentYtelse = mockk()
@@ -309,9 +309,9 @@ class EndretUtbetalingAndelValideringTest {
             listOf(
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                     person = tilfeldigPerson(),
-                    andelTilkjentYtelser = mutableListOf(andelTilkjentYtelse)
-                )
-            )
+                    andelTilkjentYtelser = mutableListOf(andelTilkjentYtelse),
+                ),
+            ),
         )
     }
 
@@ -328,7 +328,7 @@ class EndretUtbetalingAndelValideringTest {
         val personResultatForPerson =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = barn.aktør
+                aktør = barn.aktør,
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
@@ -344,7 +344,7 @@ class EndretUtbetalingAndelValideringTest {
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
                             behandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                         ),
                         VilkårResultat(
                             personResultat = personResultatForPerson,
@@ -354,9 +354,9 @@ class EndretUtbetalingAndelValideringTest {
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
                             behandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
-                        )
-                    )
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                        ),
+                    ),
                 )
             } else {
                 VilkårResultat(
@@ -367,7 +367,7 @@ class EndretUtbetalingAndelValideringTest {
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
                     behandlingId = vilkårsvurdering.behandling.id,
-                    utdypendeVilkårsvurderinger = emptyList()
+                    utdypendeVilkårsvurderinger = emptyList(),
                 )
             }
         }
@@ -383,8 +383,8 @@ class EndretUtbetalingAndelValideringTest {
                 periodeFom = fom.minusMonths(3),
                 periodeTom = tom.plusMonths(4),
                 erDeltBosted = true,
-                vilkårType = Vilkår.BOR_MED_SØKER
-            )
+                vilkårType = Vilkår.BOR_MED_SØKER,
+            ),
         )
 
         val deltBostedPerioder = finnDeltBostedPerioder(person = barn, vilkårsvurdering = vilkårsvurdering)
@@ -406,7 +406,7 @@ class EndretUtbetalingAndelValideringTest {
         val personResultatForPerson =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = barn.aktør
+                aktør = barn.aktør,
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
@@ -422,7 +422,7 @@ class EndretUtbetalingAndelValideringTest {
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
                             behandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                         ),
                         VilkårResultat(
                             personResultat = personResultatForPerson,
@@ -432,9 +432,9 @@ class EndretUtbetalingAndelValideringTest {
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
                             behandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
-                        )
-                    )
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                        ),
+                    ),
                 )
             } else {
                 VilkårResultat(
@@ -445,7 +445,7 @@ class EndretUtbetalingAndelValideringTest {
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
                     behandlingId = vilkårsvurdering.behandling.id,
-                    utdypendeVilkårsvurderinger = emptyList()
+                    utdypendeVilkårsvurderinger = emptyList(),
                 )
             }
         }
@@ -462,8 +462,8 @@ class EndretUtbetalingAndelValideringTest {
                 periodeTom = tom2.plusMonths(4),
                 erDeltBosted = true,
                 vilkårType = Vilkår.BOR_MED_SØKER,
-                lagFullstendigVilkårResultat = true
-            )
+                lagFullstendigVilkårResultat = true,
+            ),
         )
 
         val deltBostedPerioder = finnDeltBostedPerioder(person = barn, vilkårsvurdering = vilkårsvurdering)
@@ -491,7 +491,7 @@ class EndretUtbetalingAndelValideringTest {
         val personResultatForPerson =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = barn.aktør
+                aktør = barn.aktør,
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
@@ -507,7 +507,7 @@ class EndretUtbetalingAndelValideringTest {
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
                             behandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                         ),
                         VilkårResultat(
                             personResultat = personResultatForPerson,
@@ -517,9 +517,9 @@ class EndretUtbetalingAndelValideringTest {
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
                             behandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
-                        )
-                    )
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                        ),
+                    ),
                 )
             } else {
                 VilkårResultat(
@@ -530,7 +530,7 @@ class EndretUtbetalingAndelValideringTest {
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
                     behandlingId = vilkårsvurdering.behandling.id,
-                    utdypendeVilkårsvurderinger = emptyList()
+                    utdypendeVilkårsvurderinger = emptyList(),
                 )
             }
         }
@@ -547,8 +547,8 @@ class EndretUtbetalingAndelValideringTest {
                 periodeTom = fomBarn1,
                 erDeltBosted = true,
                 vilkårType = Vilkår.BOR_MED_SØKER,
-                lagFullstendigVilkårResultat = true
-            )
+                lagFullstendigVilkårResultat = true,
+            ),
         )
 
         val deltBostedPerioder = finnDeltBostedPerioder(person = søker, vilkårsvurdering = vilkårsvurdering)
@@ -570,7 +570,7 @@ class EndretUtbetalingAndelValideringTest {
         val personResultatForPerson =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = barn.aktør
+                aktør = barn.aktør,
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
@@ -586,7 +586,7 @@ class EndretUtbetalingAndelValideringTest {
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
                             behandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                         ),
                         VilkårResultat(
                             personResultat = personResultatForPerson,
@@ -596,9 +596,9 @@ class EndretUtbetalingAndelValideringTest {
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
                             behandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
-                        )
-                    )
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                        ),
+                    ),
                 )
             } else {
                 VilkårResultat(
@@ -609,7 +609,7 @@ class EndretUtbetalingAndelValideringTest {
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
                     behandlingId = vilkårsvurdering.behandling.id,
-                    utdypendeVilkårsvurderinger = emptyList()
+                    utdypendeVilkårsvurderinger = emptyList(),
                 )
             }
         }
@@ -626,8 +626,8 @@ class EndretUtbetalingAndelValideringTest {
                 periodeTom = tomBarn1,
                 erDeltBosted = true,
                 vilkårType = Vilkår.BOR_MED_SØKER,
-                lagFullstendigVilkårResultat = true
-            )
+                lagFullstendigVilkårResultat = true,
+            ),
         )
 
         val deltBostedPerioder = finnDeltBostedPerioder(person = søker, vilkårsvurdering = vilkårsvurdering)
@@ -650,15 +650,15 @@ class EndretUtbetalingAndelValideringTest {
                 person = barn1,
                 periodeFom = LocalDate.now().minusMonths(7),
                 periodeTom = LocalDate.now(),
-                resultat = Resultat.OPPFYLT
+                resultat = Resultat.OPPFYLT,
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 person = barn2,
                 periodeFom = LocalDate.now().minusMonths(4),
                 periodeTom = LocalDate.now(),
-                resultat = Resultat.OPPFYLT
-            )
+                resultat = Resultat.OPPFYLT,
+            ),
         )
 
         val deltBostedPerioder = finnDeltBostedPerioder(person = barn1, vilkårsvurdering = vilkårsvurdering)
@@ -669,11 +669,11 @@ class EndretUtbetalingAndelValideringTest {
     @Test
     fun `skal ikke feile dersom de er en utvidet endring og delt bosted endring med samme periode og prosent`() {
         validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-            listOf(endretUtbetalingAndelUtvidetNullutbetaling, endretUtbetalingAndelDeltBostedNullutbetaling)
+            listOf(endretUtbetalingAndelUtvidetNullutbetaling, endretUtbetalingAndelDeltBostedNullutbetaling),
         )
         Assertions.assertDoesNotThrow {
             validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-                listOf(endretUtbetalingAndelUtvidetNullutbetaling, endretUtbetalingAndelDeltBostedNullutbetaling)
+                listOf(endretUtbetalingAndelUtvidetNullutbetaling, endretUtbetalingAndelDeltBostedNullutbetaling),
             )
         }
     }
@@ -682,7 +682,7 @@ class EndretUtbetalingAndelValideringTest {
     fun `skal kaste feil dersom det er en endring på utvidet ytelse uten en endring på delt bosted i samme periode`() {
         Assertions.assertThrows(FunksjonellFeil::class.java) {
             validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-                listOf(endretUtbetalingAndelUtvidetNullutbetaling)
+                listOf(endretUtbetalingAndelUtvidetNullutbetaling),
             )
         }
     }
@@ -692,7 +692,7 @@ class EndretUtbetalingAndelValideringTest {
         ytelsestype: YtelseType,
         prosent: BigDecimal,
         fomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
-        tomUtvidet: YearMonth = inneværendeMåned().minusMonths(1)
+        tomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
     ): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
         return lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
             id = Random.nextLong(),
@@ -705,9 +705,9 @@ class EndretUtbetalingAndelValideringTest {
                 lagAndelTilkjentYtelse(
                     fom = fomUtvidet,
                     tom = tomUtvidet,
-                    ytelseType = ytelsestype
-                )
-            )
+                    ytelseType = ytelsestype,
+                ),
+            ),
         )
     }
 
@@ -717,7 +717,7 @@ class EndretUtbetalingAndelValideringTest {
             validerTomDato(
                 tomDato = YearMonth.now().plusMonths(3),
                 årsak = Årsak.ALLEREDE_UTBETALT,
-                gyldigTomEtterDagensDato = YearMonth.now().plusMonths(3)
+                gyldigTomEtterDagensDato = YearMonth.now().plusMonths(3),
             )
         }
     }
@@ -734,7 +734,7 @@ class EndretUtbetalingAndelValideringTest {
             validerTomDato(
                 tomDato = YearMonth.now().plusMonths(6),
                 gyldigTomEtterDagensDato = YearMonth.now().plusMonths(9),
-                årsak = Årsak.ENDRE_MOTTAKER
+                årsak = Årsak.ENDRE_MOTTAKER,
             )
         }
     }
@@ -744,7 +744,7 @@ class EndretUtbetalingAndelValideringTest {
         assertThrows<FunksjonellFeil> {
             validerUtbetalingMotÅrsak(
                 årsak = Årsak.ALLEREDE_UTBETALT,
-                skalUtbetales = true
+                skalUtbetales = true,
             )
         }
         assertThrows<FunksjonellFeil> { validerUtbetalingMotÅrsak(årsak = Årsak.ENDRE_MOTTAKER, skalUtbetales = true) }

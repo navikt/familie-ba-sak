@@ -9,8 +9,10 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -33,6 +35,9 @@ internal class BrevmottakerServiceTest {
     private lateinit var personopplysningerService: PersonopplysningerService
 
     @MockK
+    private lateinit var validerBrevmottakerService: ValiderBrevmottakerService
+
+    @MockK
     private lateinit var loggService: LoggService
 
     @InjectMockKs
@@ -49,11 +54,11 @@ internal class BrevmottakerServiceTest {
         val mottakerInfo = brevmottakerService.lagMottakereFraBrevMottakere(brevmottakere, søkersident, søkersnavn)
         assertTrue { mottakerInfo.size == 2 }
 
-        assertEquals("John Doe", mottakerInfo.first().navn)
-        assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
+        assertEquals(søkersnavn, mottakerInfo.first().navn)
+        assertTrue { mottakerInfo.first().manuellAdresseInfo == null }
 
-        assertEquals(søkersnavn, mottakerInfo.last().navn)
-        assertTrue { mottakerInfo.last().manuellAdresseInfo == null }
+        assertEquals("John Doe", mottakerInfo.last().navn)
+        assertTrue { mottakerInfo.last().manuellAdresseInfo != null }
     }
 
     @Test
@@ -63,20 +68,20 @@ internal class BrevmottakerServiceTest {
             lagBrevMottaker(
                 mottakerType = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
                 poststed = "Munchen",
-                landkode = "DE"
-            )
+                landkode = "DE",
+            ),
         )
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
         val mottakerInfo = brevmottakerService.lagMottakereFraBrevMottakere(brevmottakere, søkersident, søkersnavn)
         assertTrue { mottakerInfo.size == 2 }
 
-        assertEquals("John Doe", mottakerInfo.first().navn)
+        assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
+        assertTrue { mottakerInfo.first().manuellAdresseInfo!!.landkode == "DE" }
 
-        assertEquals(søkersnavn, mottakerInfo.last().navn)
+        assertEquals("John Doe", mottakerInfo.last().navn)
         assertTrue { mottakerInfo.last().manuellAdresseInfo != null }
-        assertTrue { mottakerInfo.last().manuellAdresseInfo!!.landkode == "DE" }
     }
 
     @Test
@@ -86,20 +91,20 @@ internal class BrevmottakerServiceTest {
             lagBrevMottaker(
                 mottakerType = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
                 poststed = "Munchen",
-                landkode = "DE"
-            )
+                landkode = "DE",
+            ),
         )
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
         val mottakerInfo = brevmottakerService.lagMottakereFraBrevMottakere(brevmottakere, søkersident, søkersnavn)
         assertTrue { mottakerInfo.size == 2 }
 
-        assertEquals("John Doe", mottakerInfo.first().navn)
+        assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
+        assertTrue { mottakerInfo.first().manuellAdresseInfo!!.landkode == "DE" }
 
-        assertEquals(søkersnavn, mottakerInfo.last().navn)
+        assertEquals("John Doe", mottakerInfo.last().navn)
         assertTrue { mottakerInfo.last().manuellAdresseInfo != null }
-        assertTrue { mottakerInfo.last().manuellAdresseInfo!!.landkode == "DE" }
     }
 
     @Test
@@ -108,8 +113,8 @@ internal class BrevmottakerServiceTest {
             lagBrevMottaker(
                 mottakerType = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
                 poststed = "Munchen",
-                landkode = "DE"
-            )
+                landkode = "DE",
+            ),
         )
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
@@ -127,8 +132,8 @@ internal class BrevmottakerServiceTest {
             lagBrevMottaker(
                 mottakerType = MottakerType.DØDSBO,
                 poststed = "Munchen",
-                landkode = "DE"
-            )
+                landkode = "DE",
+            ),
         )
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
@@ -141,9 +146,33 @@ internal class BrevmottakerServiceTest {
     }
 
     @Test
+    fun `lagMottakereFraBrevMottakere skal kaste feil når brevmottakere inneholder ugyldig kombinasjon`() {
+        val brevmottakere = listOf(
+            lagBrevMottaker(
+                mottakerType = MottakerType.VERGE,
+                poststed = "Munchen",
+                landkode = "DE",
+            ),
+            lagBrevMottaker(
+                mottakerType = MottakerType.FULLMEKTIG,
+                poststed = "Munchen",
+                landkode = "DE",
+            ),
+        )
+        every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
+
+        assertThrows<FunksjonellFeil> {
+            brevmottakerService.lagMottakereFraBrevMottakere(brevmottakere, søkersident, søkersnavn)
+        }.also {
+            assertTrue(it.frontendFeilmelding!!.contains("kan ikke kombineres"))
+        }
+    }
+
+    @Test
     fun `leggTilBrevmottaker skal lagre logg på at brevmottaker legges til`() {
         val restBrevmottaker = mockk<RestBrevmottaker>(relaxed = true)
 
+        every { validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(any(), any()) } just runs
         every { loggService.opprettBrevmottakerLogg(any(), false) } just runs
         every { brevmottakerRepository.save(any()) } returns mockk()
 
@@ -188,6 +217,6 @@ internal class BrevmottakerServiceTest {
             adresselinje2 = "adresse 2",
             postnummer = "000",
             poststed = poststed,
-            landkode = landkode
+            landkode = landkode,
         )
 }

@@ -16,7 +16,8 @@ import java.util.concurrent.TimeUnit
 @Component
 class SatsendringStatistikk(
     private val fagsakRepository: FagsakRepository,
-    private val satskjøringRepository: SatskjøringRepository
+    private val satskjøringRepository: SatskjøringRepository,
+    private val startSatsendring: StartSatsendring,
 ) {
 
     val satsendringGauge =
@@ -25,48 +26,49 @@ class SatsendringStatistikk(
     @Scheduled(
         fixedDelay = 60,
         timeUnit = TimeUnit.MINUTES,
-        initialDelay = 5
+        initialDelay = 5,
     )
     fun antallSatsendringerKjørt() {
         try {
             MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
             logger.info("Kjører statistikk satsendring")
-            val antallKjørt = satskjøringRepository.countByFerdigTidspunktIsNotNull()
-            val antallTriggetTotalt = satskjøringRepository.count()
+            val satsTidspunkt = startSatsendring.hentAktivSatsendringstidspunkt()
+            val antallKjørt = satskjøringRepository.countByFerdigTidspunktIsNotNullAndSatsTidspunkt(satsTidspunkt)
+            val antallTriggetTotalt = satskjøringRepository.countBySatsTidspunkt(satsTidspunkt)
             val antallLøpendeFagsakerTotalt = fagsakRepository.finnAntallFagsakerLøpende()
 
             val rows = listOf(
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "totalt"
+                        "totalt",
                     ),
-                    antallTriggetTotalt
+                    antallTriggetTotalt,
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "antallkjort"
+                        "antallkjort",
                     ),
-                    antallKjørt
+                    antallKjørt,
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "antallfagsaker"
+                        "antallfagsaker",
                     ),
-                    antallLøpendeFagsakerTotalt
+                    antallLøpendeFagsakerTotalt,
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "antallgjenstaaende"
+                        "antallgjenstaaende",
                     ),
-                    antallLøpendeFagsakerTotalt - antallKjørt
-                )
+                    antallLøpendeFagsakerTotalt - antallKjørt,
+                ),
             )
 
-            satsendringGauge.register(rows)
+            satsendringGauge.register(rows, true)
         } finally {
             MDC.clear()
         }

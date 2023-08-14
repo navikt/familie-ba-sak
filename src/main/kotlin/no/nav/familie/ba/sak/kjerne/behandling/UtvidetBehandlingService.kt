@@ -32,11 +32,14 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaService
+import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.sorter
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
@@ -63,7 +66,8 @@ class UtvidetBehandlingService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val korrigertVedtakService: KorrigertVedtakService,
     private val feilutbetaltValutaService: FeilutbetaltValutaService,
-    private val brevmottakerService: BrevmottakerService
+    private val brevmottakerService: BrevmottakerService,
+    private val refusjonEøsService: RefusjonEøsService,
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
@@ -97,6 +101,8 @@ class UtvidetBehandlingService(
 
         val feilutbetaltValuta = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId)
 
+        val refusjonEøs = refusjonEøsService.hentRefusjonEøsPerioder(behandlingId)
+
         val brevmottakere = brevmottakerService.hentRestBrevmottakere(behandlingId)
 
         return RestUtvidetBehandling(
@@ -118,9 +124,9 @@ class UtvidetBehandlingService(
                 ?: emptyList(),
             personResultater = personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
             fødselshendelsefiltreringResultater = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
-                behandlingId = behandling.id
+                behandlingId = behandling.id,
             ).map { it.tilRestFødselshendelsefiltreringResultat() },
-            utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
+            utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling, personopplysningGrunnlag),
             personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),
             endretUtbetalingAndeler = endreteUtbetalingerMedAndeler
@@ -128,12 +134,17 @@ class UtvidetBehandlingService(
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
             vedtak = vedtak?.tilRestVedtak(
                 vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
-                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
-                        .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }.sortedBy { it.fom }
+                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(
+                        vedtak = vedtak,
+                        personopplysningGrunnlag = personopplysningGrunnlag
+                            ?: error("Mangler persongrunnlag på behandling=$behandlingId"),
+                    )
+                        .sorter()
+                        .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }
                 } else {
                     emptyList()
                 },
-                skalMinimeres = behandling.status != BehandlingStatus.UTREDES
+                skalMinimeres = behandling.status != BehandlingStatus.UTREDES,
             ),
             kompetanser = kompetanser.map { it.tilRestKompetanse() }.sortedByDescending { it.fom },
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
@@ -148,7 +159,8 @@ class UtvidetBehandlingService(
             korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
                 ?.tilRestKorrigertVedtak(),
             feilutbetaltValuta = feilutbetaltValuta,
-            brevmottakere = brevmottakere
+            brevmottakere = brevmottakere,
+            refusjonEøs = refusjonEøs,
         )
     }
 }

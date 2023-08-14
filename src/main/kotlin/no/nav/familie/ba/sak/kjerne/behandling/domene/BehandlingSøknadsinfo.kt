@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.GeneratedValue
@@ -22,14 +23,23 @@ data class BehandlingSøknadsinfo(
     @SequenceGenerator(
         name = "behandling_søknadsinfo_seq_generator",
         sequenceName = "behandling_soknadsinfo_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
+
+    @Column(name = "journalpost_id")
+    val journalpostId: String? = null,
+
+    @Column(name = "brevkode")
+    val brevkode: String? = null,
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandling: Behandling,
 
-    val mottattDato: LocalDateTime
+    val mottattDato: LocalDateTime,
+
+    @Column(name = "er_digital")
+    val erDigital: Boolean? = null,
 
 ) : BaseEntitet()

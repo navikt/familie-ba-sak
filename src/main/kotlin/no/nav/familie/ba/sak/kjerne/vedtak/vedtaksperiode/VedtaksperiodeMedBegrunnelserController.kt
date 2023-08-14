@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -9,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
 import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -34,11 +34,11 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class VedtaksperiodeMedBegrunnelserController(
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val vedtakService: VedtakService,
     private val tilgangService: TilgangService,
     private val brevKlient: BrevKlient,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val brevPeriodeService: BrevPeriodeService
+    private val brevPeriodeService: BrevPeriodeService,
+    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
 ) {
 
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
@@ -46,11 +46,13 @@ class VedtaksperiodeMedBegrunnelserController(
         @PathVariable
         vedtaksperiodeId: Long,
         @RequestBody
-        restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser
+        restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        val behandlingId = vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = OPPDATERE_BEGRUNNELSER_HANDLING
+            handling = OPPDATERE_BEGRUNNELSER_HANDLING,
         )
 
         val standardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull {
@@ -63,7 +65,7 @@ class VedtaksperiodeMedBegrunnelserController(
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId,
             standardbegrunnelserFraFrontend = nasjonalebegrunnelser,
-            eøsStandardbegrunnelserFraFrontend = eøsStandardbegrunnelser
+            eøsStandardbegrunnelserFraFrontend = eøsStandardbegrunnelser,
         )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
@@ -74,16 +76,18 @@ class VedtaksperiodeMedBegrunnelserController(
         @PathVariable
         vedtaksperiodeId: Long,
         @RequestBody
-        restPutVedtaksperiodeMedFritekster: RestPutVedtaksperiodeMedFritekster
+        restPutVedtaksperiodeMedFritekster: RestPutVedtaksperiodeMedFritekster,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        val behandlingId = vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = OPPDATERE_BEGRUNNELSER_HANDLING
+            handling = OPPDATERE_BEGRUNNELSER_HANDLING,
         )
 
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedFritekster(
             vedtaksperiodeId,
-            restPutVedtaksperiodeMedFritekster
+            restPutVedtaksperiodeMedFritekster,
         )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
@@ -91,22 +95,31 @@ class VedtaksperiodeMedBegrunnelserController(
 
     @PutMapping("/endringstidspunkt")
     fun genererVedtaksperioderTilOgMedFørsteEndringstidspunkt(
-        @RequestBody restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
+        @RequestBody restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        vedtaksperiodeService.genererVedtaksperiodeForOverstyrtEndringstidspunkt(restGenererVedtaksperioder)
+        val behandlingId = restGenererVedtaksperioder.behandlingId
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Oppdaterer vedtaksperiode med endringstidspunkt",
+        )
+
+        vedtaksperiodeService.oppdaterEndringstidspunktOgGenererVedtaksperioderPåNytt(restGenererVedtaksperioder)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = restGenererVedtaksperioder.behandlingId)
-            )
+                    .lagRestUtvidetBehandling(behandlingId = behandlingId),
+            ),
         )
     }
 
     @GetMapping("/brevbegrunnelser/{vedtaksperiodeId}")
     fun genererBrevBegrunnelserForPeriode(@PathVariable vedtaksperiodeId: Long): ResponseEntity<Ressurs<Set<String>>> {
+        val behandlingId = vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "hente genererte begrunnelser"
+            handling = "hente genererte begrunnelser",
         )
 
         val begrunnelser = brevPeriodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId).map {

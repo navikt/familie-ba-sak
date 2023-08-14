@@ -1,9 +1,10 @@
 package no.nav.familie.ba.sak.sikkerhet
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.RolleConfig
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -17,9 +18,9 @@ class TilgangService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
     private val rolleConfig: RolleConfig,
-    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
+    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val cacheManager: CacheManager,
-    private val auditLogger: AuditLogger
+    private val auditLogger: AuditLogger,
 ) {
 
     /**
@@ -35,7 +36,7 @@ class TilgangService(
             throw RolleTilgangskontrollFeil(
                 melding = "${SikkerhetContext.hentSaksbehandlerNavn()} med rolle $høyesteRolletilgang " +
                     "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
-                frontendFeilmelding = "Du har ikke tilgang til å $handling."
+                frontendFeilmelding = "Du har ikke tilgang til å $handling.",
             )
         }
     }
@@ -47,30 +48,31 @@ class TilgangService(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                     "har ikke tilgang.",
                 frontendFeilmelding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                    "har ikke tilgang til $personIdenter"
+                    "har ikke tilgang til $personIdenter",
             )
         }
     }
 
+    /**
+     * sjekkTilgangTilPersoner er cachet i [familieIntegrasjonerTilgangskontrollService]
+     */
     private fun harTilgangTilPersoner(personIdenter: List<String>): Boolean {
-        return harSaksbehandlerTilgang("validerTilgangTilPersoner", personIdenter) {
-            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(personIdenter).harTilgang
-        }
+        return familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(personIdenter)
+            .all { it.value.harTilgang }
     }
 
     fun validerTilgangTilBehandling(behandlingId: Long, event: AuditLoggerEvent) {
         val harTilgang = harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
-            val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-            val personIdenter =
-                persongrunnlagService.hentAktiv(behandlingId = behandlingId)?.søkerOgBarn?.map { it.aktør.aktivFødselsnummer() }
-                    ?: listOf(behandling.fagsak.aktør.aktivFødselsnummer())
+            val personIdenter = persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
+                ?.map { it.aktør.aktivFødselsnummer() }
+                ?: listOf(behandlingHentOgPersisterService.hent(behandlingId).fagsak.aktør.aktivFødselsnummer())
             personIdenter.forEach {
                 auditLogger.log(
                     Sporingsdata(
                         event = event,
                         personIdent = it,
-                        custom1 = CustomKeyValue("behandling", behandlingId.toString())
-                    )
+                        custom1 = CustomKeyValue("behandling", behandlingId.toString()),
+                    ),
                 )
             }
             harTilgangTilPersoner(personIdenter)
@@ -78,7 +80,7 @@ class TilgangService(
         if (!harTilgang) {
             throw RolleTilgangskontrollFeil(
                 "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                    "har ikke tilgang til behandling=$behandlingId"
+                    "har ikke tilgang til behandling=$behandlingId",
             )
         }
     }
@@ -89,24 +91,22 @@ class TilgangService(
             Sporingsdata(
                 event = event,
                 personIdent = it.fødselsnummer,
-                custom1 = CustomKeyValue("fagsak", fagsakId.toString())
+                custom1 = CustomKeyValue("fagsak", fagsakId.toString()),
             )
         }
-        val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
-        val personIdenterIFagsak = behandlinger.flatMap { behandling ->
-            val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
-            when {
-                personopplysningGrunnlag != null -> personopplysningGrunnlag.søkerOgBarn.map { person -> person.aktør.aktivFødselsnummer() }
-                else -> emptyList()
-            }
-        }.distinct().ifEmpty { listOf(aktør.aktivFødselsnummer()) }
+        val personIdenterIFagsak = (
+            persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId)
+                ?.map { it.aktør.aktivFødselsnummer() }
+                ?: emptyList()
+            )
+            .ifEmpty { listOf(aktør.aktivFødselsnummer()) }
         val harTilgang = harTilgangTilPersoner(personIdenterIFagsak)
         if (!harTilgang) {
             throw RolleTilgangskontrollFeil(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                     "har ikke tilgang til fagsak=$fagsakId.",
                 frontendFeilmelding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                    "har ikke tilgang til fagsak=$fagsakId."
+                    "har ikke tilgang til fagsak=$fagsakId.",
             )
         }
     }
@@ -122,10 +122,14 @@ class TilgangService(
         fagsakId: Long,
         event: AuditLoggerEvent,
         minimumBehandlerRolle: BehandlerRolle,
-        handling: String
+        handling: String,
     ) {
         verifiserHarTilgangTilHandling(minimumBehandlerRolle, handling)
         validerTilgangTilFagsak(fagsakId, event)
+    }
+
+    fun validerKanRedigereBehandling(behandlingId: Long) {
+        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
     }
 
     /**

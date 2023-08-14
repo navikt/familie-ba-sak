@@ -1,14 +1,14 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
-import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -31,7 +31,10 @@ internal class PersonopplysningerServiceTest(
     private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
 
     @Autowired
-    private val mockPersonidentService: PersonidentService
+    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+
+    @Autowired
+    private val mockPersonidentService: PersonidentService,
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -45,21 +48,16 @@ internal class PersonopplysningerServiceTest(
                 SystemOnlyPdlRestClient(
                     URI.create(wireMockServer.baseUrl() + "/api"),
                     restTemplate,
-                    mockPersonidentService
+                    mockPersonidentService,
                 ),
-                mockFamilieIntegrasjonerTilgangskontrollClient
+                familieIntegrasjonerTilgangskontrollService,
             )
         lagMockForPersoner()
     }
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
-        every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
-        } returns Tilgang(true, null)
-        every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
-        } returns Tilgang(false, null)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(mapOf(ID_BARN_1 to true, ID_BARN_2 to false))
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(ID_MOR))
 
@@ -73,17 +71,12 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal returnere riktig personinfo for død person`() {
-        every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
-        } returns Tilgang(true, null)
-        every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
-        } returns Tilgang(false, null)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(mapOf(ID_BARN_1 to true, ID_BARN_2 to false))
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
             tilAktør(
-                ID_DØD_MOR
-            )
+                ID_DØD_MOR,
+            ),
         )
 
         assertThat(personInfo.dødsfall?.erDød).isTrue
@@ -93,14 +86,12 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal filtrere bort relasjoner med opphørte folkreregisteridenter eller uten fødselsdato`() {
-        every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
-        } returns Tilgang(true, null)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
             tilAktør(
-                ID_MOR_3BARN_1OPPHØRT_1UTENFØDSELSDATO
-            )
+                ID_MOR_3BARN_1OPPHØRT_1UTENFØDSELSDATO,
+            ),
         )
 
         assertEquals(1, personInfo.forelderBarnRelasjon.size)
@@ -155,8 +146,8 @@ internal class PersonopplysningerServiceTest(
         assertThrows<HttpClientErrorException.NotFound> {
             personopplysningerService.hentAdressebeskyttelseSomSystembruker(
                 tilAktør(
-                    ID_MOR
-                )
+                    ID_MOR,
+                ),
             )
         }
     }
@@ -176,7 +167,7 @@ internal class PersonopplysningerServiceTest(
         return readfile(requestFilnavn)
             .replace(
                 "GRAPHQL-PLACEHOLDER",
-                readfile(queryFilnavn).graphqlCompatible()
+                readfile(queryFilnavn).graphqlCompatible(),
             )
     }
 
@@ -195,8 +186,8 @@ internal class PersonopplysningerServiceTest(
                 .willReturn(
                     WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withBody(mockResponse)
-                )
+                        .withBody(mockResponse),
+                ),
         )
     }
 
@@ -204,91 +195,91 @@ internal class PersonopplysningerServiceTest(
         lagMockForPdl(
             "hentperson-med-relasjoner-og-registerinformasjon.graphql",
             "PdlIntegrasjon/gyldigRequestForMor3Barn1Opphørt1UtenFødselsdato.json",
-            readfile("PdlIntegrasjon/personinfoResponseForMor3Barn1Opphørt1UtenFødselsdato.json")
+            readfile("PdlIntegrasjon/personinfoResponseForMor3Barn1Opphørt1UtenFødselsdato.json"),
         )
 
         lagMockForPdl(
             "hentperson-med-relasjoner-og-registerinformasjon.graphql",
             "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
-            readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json")
+            readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"),
         )
 
         lagMockForPdl(
             "hentperson-enkel.graphql",
             "PdlIntegrasjon/gyldigRequestForBarn.json",
-            readfile("PdlIntegrasjon/personinfoResponseForBarn.json")
+            readfile("PdlIntegrasjon/personinfoResponseForBarn.json"),
         )
 
         lagMockForPdl(
             "hentperson-enkel.graphql",
             "PdlIntegrasjon/gyldigRequestForBarnUtenFødselsdato.json",
-            readfile("PdlIntegrasjon/personinfoResponseForBarnUtenFødselsdato.json")
+            readfile("PdlIntegrasjon/personinfoResponseForBarnUtenFødselsdato.json"),
         )
 
         lagMockForPdl(
             "hentperson-enkel.graphql",
             "PdlIntegrasjon/gyldigRequestForBarnMedOpphørtStatus.json",
-            readfile("PdlIntegrasjon/personinfoResponseForBarnMedOpphørtStatus.json")
+            readfile("PdlIntegrasjon/personinfoResponseForBarnMedOpphørtStatus.json"),
         )
 
         lagMockForPdl(
             "hentperson-enkel.graphql",
             "PdlIntegrasjon/gyldigRequestForBarn2.json",
-            readfile("PdlIntegrasjon/personinfoResponseForBarnMedAdressebeskyttelse.json")
+            readfile("PdlIntegrasjon/personinfoResponseForBarnMedAdressebeskyttelse.json"),
         )
 
         lagMockForPdl(
             "hentperson-med-relasjoner-og-registerinformasjon.graphql",
             "PdlIntegrasjon/gyldigRequestForDødMor.json",
-            readfile("PdlIntegrasjon/personinfoResponseForDødMor.json")
+            readfile("PdlIntegrasjon/personinfoResponseForDødMor.json"),
         )
 
         lagMockForPdl(
             "statsborgerskap-uten-historikk.graphql",
             "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
-            readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json")
+            readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"),
         )
 
         lagMockForPdl(
             "opphold-uten-historikk.graphql",
             "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
-            readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json")
+            readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"),
         )
 
         lagMockForPdl(
             "bostedsadresse-utenlandsk.graphql",
             "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
-            readfile("PdlIntegrasjon/utenlandskAdresseResponse.json")
+            readfile("PdlIntegrasjon/utenlandskAdresseResponse.json"),
         )
 
         lagMockForPdl(
             "bostedsadresse-utenlandsk.graphql",
             "PdlIntegrasjon/gyldigRequestForBarn.json",
-            readfile("PdlIntegrasjon/personinfoResponseForBarn.json")
+            readfile("PdlIntegrasjon/personinfoResponseForBarn.json"),
         )
 
         lagMockForPdl(
             "bostedsadresse-utenlandsk.graphql",
             "PdlIntegrasjon/gyldigRequestForMorMedTomBostedsadresse.json",
-            readfile("PdlIntegrasjon/tomBostedsadresseResponse.json")
+            readfile("PdlIntegrasjon/tomBostedsadresseResponse.json"),
         )
 
         lagMockForPdl(
             "hent-adressebeskyttelse.graphql",
             "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse.json",
-            readfile("pdlAdressebeskyttelseResponse.json")
+            readfile("pdlAdressebeskyttelseResponse.json"),
         )
 
         lagMockForPdl(
             "hent-adressebeskyttelse.graphql",
             "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse2.json",
-            readfile("pdlAdressebeskyttelseResponse.json")
+            readfile("pdlAdressebeskyttelseResponse.json"),
         )
 
         lagMockForPdl(
             "hent-adressebeskyttelse.graphql",
             "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse3.json",
-            readfile("PdlIntegrasjon/pdlAdressebeskyttelseMedTomListeResponse.json")
+            readfile("PdlIntegrasjon/pdlAdressebeskyttelseMedTomListeResponse.json"),
         )
     }
 }

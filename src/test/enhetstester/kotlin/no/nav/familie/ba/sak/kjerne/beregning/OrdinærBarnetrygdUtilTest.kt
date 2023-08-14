@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -33,12 +32,11 @@ class OrdinærBarnetrygdUtilTest {
     @Test
     fun `Skal lage riktig tidslinje med rett til prosent for person med start og stopp av delt bosted`() {
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(9))
-        val søker = lagPerson(type = PersonType.SØKER)
         val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = barn.aktør
+            aktør = barn.aktør,
         )
 
         val generellVilkårFom = LocalDate.now().minusYears(3)
@@ -58,7 +56,7 @@ class OrdinærBarnetrygdUtilTest {
                     periodeFom = if (it.gjelderAlltidFraBarnetsFødselsdato()) barn.fødselsdato else generellVilkårFom,
                     periodeTom = null,
                     resultat = Resultat.OPPFYLT,
-                    vilkårType = it
+                    vilkårType = it,
                 )
             }
         }.toSet()
@@ -69,7 +67,7 @@ class OrdinærBarnetrygdUtilTest {
                 periodeFom = generellVilkårFom,
                 periodeTom = borMedSøkerVilkårFom.minusMonths(1).sisteDagIMåned(),
                 resultat = Resultat.OPPFYLT,
-                vilkårType = Vilkår.BOR_MED_SØKER
+                vilkårType = Vilkår.BOR_MED_SØKER,
             ),
             lagVilkårResultat(
                 personResultat = personResultat,
@@ -77,27 +75,27 @@ class OrdinærBarnetrygdUtilTest {
                 periodeTom = borMedSøkerVilkårTom.sisteDagIMåned(),
                 resultat = Resultat.OPPFYLT,
                 vilkårType = Vilkår.BOR_MED_SØKER,
-                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
             ),
             lagVilkårResultat(
                 personResultat = personResultat,
                 periodeFom = borMedSøkerVilkårTom.plusMonths(1).førsteDagIInneværendeMåned(),
                 periodeTom = null,
                 resultat = Resultat.OPPFYLT,
-                vilkårType = Vilkår.BOR_MED_SØKER
-            )
+                vilkårType = Vilkår.BOR_MED_SØKER,
+            ),
         )
 
         personResultat.setSortedVilkårResultater(vilkårResulater + borMedSøkerVilkår)
 
         val tidslinje = personResultat.tilTidslinjeMedRettTilProsentForPerson(
-            personType = barn.type,
-            fagsakType = FagsakType.NORMAL
+            person = barn,
+            fagsakType = FagsakType.NORMAL,
         )
 
         val perioder = tidslinje.perioder().toList()
 
-        Assertions.assertEquals(3, perioder.size)
+        assertEquals(3, perioder.size)
 
         val periode1 = perioder[0]
         val periode2 = perioder[1]
@@ -107,19 +105,19 @@ class OrdinærBarnetrygdUtilTest {
             forventetFom = startPåYtelse,
             forventetTom = rettTilDeltFom.minusMonths(1),
             forventetProsent = BigDecimal(100),
-            faktisk = periode1
+            faktisk = periode1,
         )
         assertProsentPeriode(
             forventetFom = rettTilDeltFom,
             forventetTom = rettTilDeltTom,
             forventetProsent = BigDecimal(50),
-            faktisk = periode2
+            faktisk = periode2,
         )
         assertProsentPeriode(
             forventetFom = rettTilDeltTom.plusMonths(1),
             forventetTom = månedFørFylte18År,
             forventetProsent = BigDecimal(100),
-            faktisk = periode3
+            faktisk = periode3,
         )
     }
 
@@ -128,7 +126,7 @@ class OrdinærBarnetrygdUtilTest {
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat = PersonResultat(
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
-            aktør = barn.aktør
+            aktør = barn.aktør,
         )
         val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).map {
             lagVilkårResultat(
@@ -137,13 +135,13 @@ class OrdinærBarnetrygdUtilTest {
                 periodeTom = null,
                 resultat = Resultat.OPPFYLT,
                 utdypendeVilkårsvurderinger = if (it == Vilkår.BOR_MED_SØKER) listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) else emptyList(),
-                personResultat = personResultat
+                personResultat = personResultat,
             )
         }
 
         val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
 
-        Assertions.assertEquals(BigDecimal(50), prosent)
+        assertEquals(BigDecimal(50), prosent)
     }
 
     @Test
@@ -151,7 +149,7 @@ class OrdinærBarnetrygdUtilTest {
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat = PersonResultat(
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
-            aktør = barn.aktør
+            aktør = barn.aktør,
         )
         val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).map {
             lagVilkårResultat(
@@ -160,13 +158,13 @@ class OrdinærBarnetrygdUtilTest {
                 periodeTom = null,
                 resultat = Resultat.OPPFYLT,
                 utdypendeVilkårsvurderinger = emptyList(),
-                personResultat = personResultat
+                personResultat = personResultat,
             )
         }
 
         val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
 
-        Assertions.assertEquals(BigDecimal(100), prosent)
+        assertEquals(BigDecimal(100), prosent)
     }
 
     @Test
@@ -174,7 +172,7 @@ class OrdinærBarnetrygdUtilTest {
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat = PersonResultat(
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
-            aktør = barn.aktør
+            aktør = barn.aktør,
         )
         val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).mapNotNull {
             if (it == Vilkår.LOVLIG_OPPHOLD) {
@@ -186,7 +184,7 @@ class OrdinærBarnetrygdUtilTest {
                     periodeTom = null,
                     resultat = Resultat.OPPFYLT,
                     utdypendeVilkårsvurderinger = if (it == Vilkår.BOR_MED_SØKER) listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) else emptyList(),
-                    personResultat = personResultat
+                    personResultat = personResultat,
                 )
             }
         }
@@ -201,7 +199,7 @@ class OrdinærBarnetrygdUtilTest {
         val søker = lagPerson(type = PersonType.SØKER)
         val personResultat = PersonResultat(
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
-            aktør = søker.aktør
+            aktør = søker.aktør,
         )
         val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).mapNotNull {
             if (it == Vilkår.LOVLIG_OPPHOLD) {
@@ -213,7 +211,7 @@ class OrdinærBarnetrygdUtilTest {
                     periodeTom = null,
                     resultat = Resultat.OPPFYLT,
                     utdypendeVilkårsvurderinger = emptyList(),
-                    personResultat = personResultat
+                    personResultat = personResultat,
                 )
             }
         }
@@ -227,10 +225,10 @@ class OrdinærBarnetrygdUtilTest {
         forventetFom: YearMonth,
         forventetTom: YearMonth,
         forventetProsent: BigDecimal,
-        faktisk: Periode<BigDecimal, Måned>
+        faktisk: Periode<BigDecimal, Måned>,
     ) {
-        Assertions.assertEquals(forventetFom, faktisk.fraOgMed.tilYearMonth())
-        Assertions.assertEquals(forventetTom, faktisk.tilOgMed.tilYearMonth())
-        Assertions.assertEquals(forventetProsent, faktisk.innhold)
+        assertEquals(forventetFom, faktisk.fraOgMed.tilYearMonth())
+        assertEquals(forventetTom, faktisk.tilOgMed.tilYearMonth())
+        assertEquals(forventetProsent, faktisk.innhold)
     }
 }

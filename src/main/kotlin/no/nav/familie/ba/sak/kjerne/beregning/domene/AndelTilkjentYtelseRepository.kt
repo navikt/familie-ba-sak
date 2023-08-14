@@ -25,7 +25,7 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId IN :behandlingIder AND aty.stønadTom >= :avstemmingstidspunkt")
     fun finnLøpendeAndelerTilkjentYtelseForBehandlinger(
         behandlingIder: List<Long>,
-        avstemmingstidspunkt: YearMonth
+        avstemmingstidspunkt: YearMonth,
     ): List<AndelTilkjentYtelse>
 
     @Query(
@@ -57,12 +57,31 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
               AND aty.stonad_fom <= :tom
               AND aty.stonad_tom >= :fom
         """,
-        nativeQuery = true
+        nativeQuery = true,
     )
     @Timed
     fun finnPerioderMedUtvidetBarnetrygdForPersoner(
         personIdenter: List<String>,
         fom: LocalDateTime,
-        tom: LocalDateTime
+        tom: LocalDateTime,
     ): List<AndelTilkjentYtelsePeriode>
+
+    @Query(
+        """
+        WITH andeler AS (
+            SELECT
+             aty.id,
+             row_number() OVER (PARTITION BY aty.type, aty.fk_aktoer_id ORDER BY aty.periode_offset DESC) rn
+             FROM andel_tilkjent_ytelse aty
+              JOIN tilkjent_ytelse ty ON ty.id = aty.tilkjent_ytelse_id
+              JOIN Behandling b ON b.id = aty.fk_behandling_id
+             WHERE b.fk_fagsak_id = :fagsakId
+               AND ty.utbetalingsoppdrag IS NOT NULL
+               AND aty.periode_offset IS NOT NULL
+               AND b.status = 'AVSLUTTET')
+        SELECT aty.* FROM andel_tilkjent_ytelse aty WHERE id IN (SELECT id FROM andeler WHERE rn = 1)
+    """,
+        nativeQuery = true,
+    )
+    fun hentSisteAndelPerIdent(fagsakId: Long): List<AndelTilkjentYtelse>
 }

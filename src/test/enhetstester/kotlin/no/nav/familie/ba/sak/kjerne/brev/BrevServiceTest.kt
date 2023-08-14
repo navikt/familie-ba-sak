@@ -26,7 +26,9 @@ class BrevServiceTest {
         organisasjonService = mockk(),
         korrigertVedtakService = mockk(),
         saksbehandlerContext = saksbehandlerContext,
-        brevmalService = brevmalService
+        brevmalService = brevmalService,
+        refusjonEøsRepository = mockk(),
+        featureToggleService = mockk(),
     )
 
     @BeforeEach
@@ -40,7 +42,7 @@ class BrevServiceTest {
 
         val (saksbehandler, beslutter) = brevService.hentSaksbehandlerOgBeslutter(
             behandling = behandling,
-            totrinnskontroll = null
+            totrinnskontroll = null,
         )
 
         Assertions.assertEquals("saksbehandlerNavn", saksbehandler)
@@ -57,8 +59,8 @@ class BrevServiceTest {
             totrinnskontroll = Totrinnskontroll(
                 behandling = behandling,
                 saksbehandler = "Mock Saksbehandler",
-                saksbehandlerId = "mock.saksbehandler@nav.no"
-            )
+                saksbehandlerId = "mock.saksbehandler@nav.no",
+            ),
         )
 
         Assertions.assertEquals("Mock Saksbehandler", saksbehandler)
@@ -75,8 +77,8 @@ class BrevServiceTest {
             totrinnskontroll = Totrinnskontroll(
                 behandling = behandling,
                 saksbehandler = "System",
-                saksbehandlerId = "systembruker"
-            )
+                saksbehandlerId = "systembruker",
+            ),
         )
 
         Assertions.assertEquals("System", saksbehandler)
@@ -95,8 +97,8 @@ class BrevServiceTest {
                 saksbehandler = "Mock Saksbehandler",
                 saksbehandlerId = "mock.saksbehandler@nav.no",
                 beslutter = "Mock Beslutter",
-                beslutterId = "mock.beslutter@nav.no"
-            )
+                beslutterId = "mock.beslutter@nav.no",
+            ),
         )
 
         Assertions.assertEquals("Mock Saksbehandler", saksbehandler)

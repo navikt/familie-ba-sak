@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.neste
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.beskjærPå18År
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjerForHvertOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilTidslinjeForSplitt
@@ -52,19 +53,19 @@ class VilkårsvurderingForskyvningUtilsTest {
                     periodeTom = deltBostedTom,
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     resultat = Resultat.OPPFYLT,
-                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                 ),
                 lagVilkårResultat(
                     periodeFom = deltBostedTom.plusMonths(1).førsteDagIInneværendeMåned(),
                     periodeTom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    resultat = Resultat.OPPFYLT
-                )
+                    resultat = Resultat.OPPFYLT,
+                ),
             ),
-            maksTom = barnets18årsdag
+            maksTom = barnets18årsdag,
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
 
         Assertions.assertEquals(5, tidslinjer.size)
 
@@ -103,20 +104,20 @@ class VilkårsvurderingForskyvningUtilsTest {
                     periodeFom = fom,
                     periodeTom = deltBostedTom,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    resultat = Resultat.OPPFYLT
+                    resultat = Resultat.OPPFYLT,
                 ),
                 lagVilkårResultat(
                     periodeFom = deltBostedTom.plusMonths(1).førsteDagIInneværendeMåned(),
                     periodeTom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     resultat = Resultat.OPPFYLT,
-                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
-                )
+                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                ),
             ),
-            maksTom = barnets18årsdag
+            maksTom = barnets18årsdag,
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
 
         Assertions.assertEquals(5, tidslinjer.size)
 
@@ -155,19 +156,19 @@ class VilkårsvurderingForskyvningUtilsTest {
                     periodeFom = fom,
                     periodeTom = b2bTom,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    resultat = Resultat.OPPFYLT
+                    resultat = Resultat.OPPFYLT,
                 ),
                 lagVilkårResultat(
                     periodeFom = b2bTom.plusMonths(1).førsteDagIInneværendeMåned(),
                     periodeTom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    resultat = Resultat.OPPFYLT
-                )
+                    resultat = Resultat.OPPFYLT,
+                ),
             ),
-            maksTom = barnets18årsdag
+            maksTom = barnets18årsdag,
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
 
         Assertions.assertEquals(5, tidslinjer.size)
 
@@ -201,11 +202,12 @@ class VilkårsvurderingForskyvningUtilsTest {
                 periodeFom = barn.fødselsdato,
                 periodeTom = barn.fødselsdato.plusYears(18).minusDays(1),
                 vilkårType = Vilkår.UNDER_18_ÅR,
-                resultat = Resultat.OPPFYLT
-            )
+                resultat = Resultat.OPPFYLT,
+            ),
         )
 
-        val forskjøvetTidslinje = under18VilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = Vilkår.UNDER_18_ÅR)
+        val forskjøvetTidslinje =
+            under18VilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = Vilkår.UNDER_18_ÅR, barn.fødselsdato)
 
         val forskjøvedePerioder = forskjøvetTidslinje.perioder()
 
@@ -214,7 +216,10 @@ class VilkårsvurderingForskyvningUtilsTest {
         val forskjøvetPeriode = forskjøvedePerioder.single()
 
         Assertions.assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), forskjøvetPeriode.fraOgMed.tilYearMonth())
-        Assertions.assertEquals(barn.fødselsdato.plusYears(18).minusMonths(1).toYearMonth(), forskjøvetPeriode.tilOgMed.tilYearMonth())
+        Assertions.assertEquals(
+            barn.fødselsdato.plusYears(18).minusMonths(1).toYearMonth(),
+            forskjøvetPeriode.tilOgMed.tilYearMonth(),
+        )
     }
 
     @Test
@@ -228,11 +233,12 @@ class VilkårsvurderingForskyvningUtilsTest {
                 periodeFom = barn.fødselsdato,
                 periodeTom = tomDato,
                 vilkårType = Vilkår.UNDER_18_ÅR,
-                resultat = Resultat.OPPFYLT
-            )
+                resultat = Resultat.OPPFYLT,
+            ),
         )
 
-        val forskjøvetTidslinje = under18VilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = Vilkår.UNDER_18_ÅR)
+        val forskjøvetTidslinje =
+            under18VilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = Vilkår.UNDER_18_ÅR, barn.fødselsdato)
 
         val forskjøvedePerioder = forskjøvetTidslinje.perioder()
 
@@ -245,6 +251,23 @@ class VilkårsvurderingForskyvningUtilsTest {
     }
 
     @Test
+    fun `Skal gi tom liste og ikke kaste feil dersom vi ikke sender med noen vilkårresultater`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
+
+        val forskjøvedeOppfylteVilkårTomListe = emptyList<VilkårResultat>().tilForskjøvetTidslinjeForOppfyltVilkår(
+            vilkår = Vilkår.UNDER_18_ÅR,
+            fødselsdato = barn.fødselsdato,
+        ).perioder()
+        Assertions.assertEquals(forskjøvedeOppfylteVilkårTomListe.size, 0)
+
+        val forskjøvedeVilkårTomListe = emptyList<VilkårResultat>().tilForskjøvetTidslinje(
+            vilkår = Vilkår.UNDER_18_ÅR,
+            fødselsdato = barn.fødselsdato,
+        ).perioder()
+        Assertions.assertEquals(forskjøvedeVilkårTomListe.size, 0)
+    }
+
+    @Test
     fun `Skal kutte UNDER_18 tidslinjen måneden før 18-årsdag`() {
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
@@ -253,8 +276,8 @@ class VilkårsvurderingForskyvningUtilsTest {
                 periodeFom = barn.fødselsdato,
                 periodeTom = barn.fødselsdato.plusYears(18).minusDays(1),
                 vilkårType = Vilkår.UNDER_18_ÅR,
-                resultat = Resultat.OPPFYLT
-            )
+                resultat = Resultat.OPPFYLT,
+            ),
         )
 
         val under18årVilkårTidslinje: Tidslinje<VilkårResultat, Måned> = tidslinje {
@@ -262,7 +285,7 @@ class VilkårsvurderingForskyvningUtilsTest {
                 Periode(
                     fraOgMed = it.periodeFom!!.tilMånedTidspunkt().neste(),
                     tilOgMed = it.periodeTom!!.tilMånedTidspunkt(),
-                    innhold = it
+                    innhold = it,
                 )
             }
         }
@@ -272,11 +295,11 @@ class VilkårsvurderingForskyvningUtilsTest {
         Assertions.assertEquals(1, under18PerioderFørBeskjæring.size)
         Assertions.assertEquals(
             barn.fødselsdato.plusMonths(1).toYearMonth(),
-            under18PerioderFørBeskjæring.first().fraOgMed.tilYearMonth()
+            under18PerioderFørBeskjæring.first().fraOgMed.tilYearMonth(),
         )
         Assertions.assertEquals(
             YearMonth.of(2022, Month.NOVEMBER),
-            under18PerioderFørBeskjæring.first().tilOgMed.tilYearMonth()
+            under18PerioderFørBeskjæring.first().tilOgMed.tilYearMonth(),
         )
 
         val tidslinjeBeskåret = under18årVilkårTidslinje.beskjærPå18År(barn.fødselsdato)
@@ -286,11 +309,11 @@ class VilkårsvurderingForskyvningUtilsTest {
         Assertions.assertEquals(1, under18PerioderEtterBeskjæring.size)
         Assertions.assertEquals(
             barn.fødselsdato.plusMonths(1).toYearMonth(),
-            under18PerioderEtterBeskjæring.first().fraOgMed.tilYearMonth()
+            under18PerioderEtterBeskjæring.first().fraOgMed.tilYearMonth(),
         )
         Assertions.assertEquals(
             barn.fødselsdato.plusYears(18).minusMonths(1).toYearMonth(),
-            under18PerioderEtterBeskjæring.first().tilOgMed.tilYearMonth()
+            under18PerioderEtterBeskjæring.first().tilOgMed.tilYearMonth(),
         )
     }
 
@@ -309,12 +332,12 @@ class VilkårsvurderingForskyvningUtilsTest {
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerAktør = søker.aktør,
             behandling = lagBehandling(),
-            resultat = Resultat.OPPFYLT
+            resultat = Resultat.OPPFYLT,
         )
 
         val personResultatSøker = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = søker.aktør
+            aktør = søker.aktør,
         )
 
         personResultatSøker.setSortedVilkårResultater(
@@ -322,13 +345,13 @@ class VilkårsvurderingForskyvningUtilsTest {
                 personResultat = personResultatSøker,
                 fom = februar2020.førsteDagIInneværendeMåned(),
                 tom = null,
-                generiskeVilkår = listOf(Vilkår.LOVLIG_OPPHOLD, Vilkår.BOSATT_I_RIKET)
-            )
+                generiskeVilkår = listOf(Vilkår.LOVLIG_OPPHOLD, Vilkår.BOSATT_I_RIKET),
+            ),
         )
 
         val personResultatBarn1 = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = barn1.aktør
+            aktør = barn1.aktør,
         )
 
         personResultatBarn1.setSortedVilkårResultater(
@@ -342,21 +365,21 @@ class VilkårsvurderingForskyvningUtilsTest {
                         periodeTom = desember2021.sisteDagIInneværendeMåned(),
                         vilkårType = Vilkår.BOR_MED_SØKER,
                         resultat = Resultat.OPPFYLT,
-                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                     ),
                     lagVilkårResultat(
                         periodeFom = desember2021.plusMonths(1).førsteDagIInneværendeMåned(),
                         periodeTom = null,
                         vilkårType = Vilkår.BOR_MED_SØKER,
-                        resultat = Resultat.OPPFYLT
-                    )
-                )
-            )
+                        resultat = Resultat.OPPFYLT,
+                    ),
+                ),
+            ),
         )
 
         val personResultatBarn2 = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = barn2.aktør
+            aktør = barn2.aktør,
         )
 
         personResultatBarn2.setSortedVilkårResultater(
@@ -368,30 +391,30 @@ class VilkårsvurderingForskyvningUtilsTest {
                     Vilkår.BOSATT_I_RIKET,
                     Vilkår.BOR_MED_SØKER,
                     Vilkår.UNDER_18_ÅR,
-                    Vilkår.GIFT_PARTNERSKAP
+                    Vilkår.GIFT_PARTNERSKAP,
                 ),
                 spesielleVilkår = setOf(
                     lagVilkårResultat(
                         periodeFom = mars2021.førsteDagIInneværendeMåned(),
                         periodeTom = mai2022.sisteDagIInneværendeMåned(),
                         vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                        resultat = Resultat.OPPFYLT
+                        resultat = Resultat.OPPFYLT,
                     ),
                     lagVilkårResultat(
                         periodeFom = mai2022.plusMonths(1).førsteDagIInneværendeMåned(),
                         periodeTom = null,
                         vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                        resultat = Resultat.OPPFYLT
-                    )
-                )
-            )
+                        resultat = Resultat.OPPFYLT,
+                    ),
+                ),
+            ),
         )
 
         val personResultater = setOf(personResultatSøker, personResultatBarn1, personResultatBarn2)
 
         val tidslinje = personResultater.tilTidslinjeForSplitt(
             personerIPersongrunnlag = listOf(søker, barn1, barn2),
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
 
         val perioder = tidslinje.perioder()
@@ -414,7 +437,7 @@ class VilkårsvurderingForskyvningUtilsTest {
     private fun assertPeriode(
         periode: Periode<List<VilkårResultat>, Måned>,
         forventetFom: YearMonth,
-        forventetTom: YearMonth
+        forventetTom: YearMonth,
     ) {
         Assertions.assertEquals(forventetFom, periode.fraOgMed.tilYearMonth())
         Assertions.assertEquals(forventetTom, periode.tilOgMed.tilYearMonth())
@@ -428,10 +451,10 @@ class VilkårsvurderingForskyvningUtilsTest {
             Vilkår.BOSATT_I_RIKET,
             Vilkår.LOVLIG_OPPHOLD,
             Vilkår.UNDER_18_ÅR,
-            Vilkår.GIFT_PARTNERSKAP
+            Vilkår.GIFT_PARTNERSKAP,
         ),
         maksTom: LocalDate? = null,
-        personResultat: PersonResultat? = null
+        personResultat: PersonResultat? = null,
     ): Set<VilkårResultat> {
         return spesielleVilkår + generiskeVilkår.map {
             lagVilkårResultat(
@@ -439,7 +462,7 @@ class VilkårsvurderingForskyvningUtilsTest {
                 periodeTom = if (it == Vilkår.UNDER_18_ÅR) maksTom else tom,
                 vilkårType = it,
                 resultat = Resultat.OPPFYLT,
-                personResultat = personResultat
+                personResultat = personResultat,
             )
         }
     }

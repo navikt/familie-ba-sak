@@ -20,7 +20,7 @@ data class Sporingsdata(
     val personIdent: String,
     val custom1: CustomKeyValue? = null,
     val custom2: CustomKeyValue? = null,
-    val custom3: CustomKeyValue? = null
+    val custom3: CustomKeyValue? = null,
 )
 
 data class CustomKeyValue(val key: String, val value: String)
@@ -51,7 +51,7 @@ class AuditLogger(@Value("\${NAIS_APP_NAME}") private val applicationName: Strin
     private fun createAuditLogString(data: Sporingsdata, request: HttpServletRequest): String {
         val timestamp = System.currentTimeMillis()
         val name = "Saksbehandling"
-        return "CEF:0|$applicationName|auditLog|1.0|audit:${data.event.type}|$name|INFO|end=$timestamp " +
+        return "CEF:0|Familie|$applicationName|1.0|audit:${data.event.type}|$name|INFO|end=$timestamp " +
             "suid=${SikkerhetContext.hentSaksbehandler()} " +
             "duid=${data.personIdent} " +
             "sproc=${getCallId()} " +
@@ -64,7 +64,7 @@ class AuditLogger(@Value("\${NAIS_APP_NAME}") private val applicationName: Strin
         return listOfNotNull(
             data.custom1?.let { "cs3Label=${it.key} cs3=${it.value}" },
             data.custom2?.let { "cs5Label=${it.key} cs5=${it.value}" },
-            data.custom3?.let { "cs6Label=${it.key} cs6=${it.value}" }
+            data.custom3?.let { "cs6Label=${it.key} cs6=${it.value}" },
         )
             .joinToString(" ")
     }

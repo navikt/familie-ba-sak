@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelseDeserializer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.ResultatBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.time.LocalDate
@@ -15,7 +16,7 @@ import java.time.LocalDateTime
 data class RestPersonResultat(
     val personIdent: String,
     val vilkårResultater: List<RestVilkårResultat>,
-    val andreVurderinger: List<RestAnnenVurdering> = emptyList()
+    val andreVurderinger: List<RestAnnenVurdering> = emptyList(),
 )
 
 data class RestVilkårResultat(
@@ -34,7 +35,8 @@ data class RestVilkårResultat(
     @JsonDeserialize(using = IVedtakBegrunnelseDeserializer::class)
     val avslagBegrunnelser: List<IVedtakBegrunnelse>? = emptyList(),
     val vurderesEtter: Regelverk? = null,
-    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
+    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
+    val resultatBegrunnelse: ResultatBegrunnelse? = null,
 ) {
 
     fun erAvslagUtenPeriode() =
@@ -49,6 +51,7 @@ fun PersonResultat.tilRestPersonResultat() =
         vilkårResultater = this.vilkårResultater.map { vilkårResultat ->
             RestVilkårResultat(
                 resultat = vilkårResultat.resultat,
+                resultatBegrunnelse = vilkårResultat.resultatBegrunnelse,
                 erAutomatiskVurdert = vilkårResultat.erAutomatiskVurdert,
                 erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
                 id = vilkårResultat.id,
@@ -62,10 +65,10 @@ fun PersonResultat.tilRestPersonResultat() =
                 erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0,
                 avslagBegrunnelser = vilkårResultat.standardbegrunnelser,
                 vurderesEtter = vilkårResultat.vurderesEtter,
-                utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger
+                utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger,
             )
         },
         andreVurderinger = this.andreVurderinger.map { annenVurdering ->
             annenVurdering.tilRestAnnenVurdering()
-        }
+        },
     )

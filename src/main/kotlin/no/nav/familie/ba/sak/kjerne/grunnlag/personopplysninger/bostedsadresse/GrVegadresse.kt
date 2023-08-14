@@ -36,9 +36,21 @@ data class GrVegadresse(
     val tilleggsnavn: String?,
 
     @Column(name = "postnummer")
-    val postnummer: String?
+    val postnummer: String?,
 
 ) : GrBostedsadresse() {
+
+    override fun tilKopiForNyPerson(): GrBostedsadresse =
+        GrVegadresse(
+            matrikkelId,
+            husnummer,
+            husbokstav,
+            bruksenhetsnummer,
+            adressenavn,
+            kommunenummer,
+            tilleggsnavn,
+            postnummer,
+        )
 
     override fun toSecureString(): String {
         return """VegadresseDao(husnummer=$husnummer,husbokstav=$husbokstav,matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,
@@ -51,8 +63,8 @@ data class GrVegadresse(
     }
 
     override fun tilFrontendString() = """${
-    adressenavn.nullableTilString()
-        .storForbokstav()
+        adressenavn.nullableTilString()
+            .storForbokstav()
     } ${husnummer.nullableTilString()}${husbokstav.nullableTilString()}${postnummer.let { ", $it" }}""".trimMargin()
 
     override fun equals(other: Any?): Boolean {
@@ -89,7 +101,7 @@ data class GrVegadresse(
                 adressenavn = vegadresse.adressenavn,
                 kommunenummer = vegadresse.kommunenummer,
                 tilleggsnavn = vegadresse.tilleggsnavn,
-                postnummer = vegadresse.postnummer
+                postnummer = vegadresse.postnummer,
             )
     }
 }

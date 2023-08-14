@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -48,6 +49,7 @@ class LagreMigreringsdatoTest {
     val taskRepository = mockk<TaskRepositoryWrapper>()
     val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
     val vilkårsvurderingService = mockk<VilkårsvurderingService>()
+    val simuleringService = mockk<SimuleringService>()
 
     private val behandlingService = BehandlingService(
         behandlingHentOgPersisterService,
@@ -58,12 +60,13 @@ class LagreMigreringsdatoTest {
         saksstatistikkEventPublisher,
         fagsakRepository,
         vedtakRepository,
+        andelTilkjentYtelseRepository,
         loggService,
         arbeidsfordelingService,
         infotrygdService,
         vedtaksperiodeService,
         taskRepository,
-        vilkårsvurderingService
+        vilkårsvurderingService,
     )
 
     @Test
@@ -76,7 +79,7 @@ class LagreMigreringsdatoTest {
         assertDoesNotThrow {
             behandlingService.lagreNedMigreringsdato(
                 migreringsdato = LocalDate.now(),
-                behandling = lagBehandling()
+                behandling = lagBehandling(),
             )
         }
     }
@@ -92,13 +95,13 @@ class LagreMigreringsdatoTest {
                 migreringsdato = LocalDate.now(),
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                )
+                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                ),
             )
         }
         assertEquals(
             "Migreringsdatoen du har lagt inn er lik eller senere enn eksisterende migreringsdato. Du må velge en tidligere migreringsdato for å fortsette.",
-            feil.melding
+            feil.melding,
         )
     }
 
@@ -113,8 +116,8 @@ class LagreMigreringsdatoTest {
                 migreringsdato = LocalDate.now().minusMonths(1),
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                )
+                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                ),
             )
         }
     }
@@ -136,13 +139,13 @@ class LagreMigreringsdatoTest {
                 migreringsdato = LocalDate.now(),
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                )
+                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                ),
             )
         }
         assertEquals(
             "Migreringsdatoen du har lagt inn er lik eller senere enn eksisterende migreringsdato. Du må velge en tidligere migreringsdato for å fortsette.",
-            feil.melding
+            feil.melding,
         )
     }
 
@@ -163,8 +166,8 @@ class LagreMigreringsdatoTest {
                 migreringsdato = LocalDate.now(),
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                )
+                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                ),
             )
         }
     }

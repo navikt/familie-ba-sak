@@ -11,7 +11,7 @@ class IntegrasjonException(
     msg: String,
     throwable: Throwable? = null,
     uri: URI? = null,
-    ident: String? = null
+    ident: String? = null,
 ) : RuntimeException(msg, throwable) {
 
     init {

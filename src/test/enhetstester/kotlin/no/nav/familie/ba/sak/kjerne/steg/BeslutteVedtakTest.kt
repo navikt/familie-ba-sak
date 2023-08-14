@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -52,6 +53,7 @@ class BeslutteVedtakTest {
     private lateinit var featureToggleService: FeatureToggleService
     private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
     private lateinit var simuleringService: SimuleringService
+    private lateinit var automatiskBeslutningService: AutomatiskBeslutningService
 
     private val saksbehandlerContext = mockk<SaksbehandlerContext>()
 
@@ -69,6 +71,7 @@ class BeslutteVedtakTest {
         featureToggleService = mockk()
         tilkjentYtelseValideringService = mockk()
         simuleringService = mockk()
+        automatiskBeslutningService = mockk()
 
         val loggService = mockk<LoggService>()
 
@@ -79,12 +82,12 @@ class BeslutteVedtakTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns Totrinnskontroll(
             behandling = lagBehandling(),
             saksbehandler = "Mock Saksbehandler",
-            saksbehandlerId = "Mock.Saksbehandler"
+            saksbehandlerId = "Mock.Saksbehandler",
         )
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
@@ -104,7 +107,7 @@ class BeslutteVedtakTest {
             featureToggleService,
             tilkjentYtelseValideringService,
             saksbehandlerContext,
-            simuleringService
+            automatiskBeslutningService,
         )
     }
 
@@ -120,6 +123,7 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -144,9 +148,11 @@ class BeslutteVedtakTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -157,7 +163,7 @@ class BeslutteVedtakTest {
                 Oppgavetype.BehandleUnderkjentVedtak,
                 any(),
                 any(),
-                any()
+                any(),
             )
         }
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, nesteSteg)
@@ -179,9 +185,11 @@ class BeslutteVedtakTest {
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -191,7 +199,7 @@ class BeslutteVedtakTest {
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
                 personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
                 behandlingId = behandling.id,
-                vedtakId = vedtak.id
+                vedtakId = vedtak.id,
             )
         }
         Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, nesteSteg)
@@ -210,8 +218,10 @@ class BeslutteVedtakTest {
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task(
             OpprettOppgaveTask.TASK_STEP_TYPE,
-            ""
+            "",
         )
+
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
         verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true, emptyList()) }
@@ -230,7 +240,7 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(
             type = FerdigstillOppgaver.TASK_STEP_TYPE,
-            payload = ""
+            payload = "",
         )
 
         assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
@@ -249,7 +259,7 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(
             type = FerdigstillOppgaver.TASK_STEP_TYPE,
-            payload = ""
+            payload = "",
         )
 
         assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }

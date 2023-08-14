@@ -72,9 +72,9 @@ fun parseValgfriBoolean(domenebegrep: Domenenøkkel, rad: Map<String, String?>):
         return null
     }
 
-    return when (verdi) {
-        "Ja" -> true
-        "Nei" -> false
+    return when (verdi.uppercase()) {
+        "JA" -> true
+        "NEI" -> false
         else -> null
     }
 }
@@ -166,6 +166,10 @@ fun parseList(domenebegrep: Domenenøkkel, rad: Map<String, String>): List<Long>
     return verdi(domenebegrep.nøkkel, rad).split(",").map { it.trim().toLong() }
 }
 
+fun parseStringList(domenebegrep: Domenenøkkel, rad: Map<String, String>): List<String> {
+    return verdi(domenebegrep.nøkkel, rad).split(",").map { it.trim() }
+}
+
 fun parseBigDecimal(domenebegrep: Domenenøkkel, rad: Map<String, String>): BigDecimal {
     val verdi = verdi(domenebegrep.nøkkel, rad)
     return verdi.toBigDecimal()
@@ -194,7 +198,7 @@ fun parseValgfriIntRange(domenebegrep: Domenenøkkel, rad: Map<String, String>):
 
     return Pair(
         Integer.parseInt(verdi.split("-").first()),
-        Integer.parseInt(verdi.split("-").last())
+        Integer.parseInt(verdi.split("-").last()),
     )
 }
 

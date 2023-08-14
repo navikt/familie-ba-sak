@@ -1,12 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.eøs.felles
 
+import no.nav.familie.ba.sak.common.feilHvis
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.oppdaterSkjemaerRekursivt
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.somInversOppdateringEllersNull
 
 class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
     val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<S>,
-    val endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<S>>
+    val endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<S>>,
 ) {
 
     fun hentMedBehandlingId(behandlingId: BehandlingId): Collection<S> {
@@ -26,13 +27,15 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         lagreDifferanseOgVarsleAbonnenter(
             behandlingId,
             gjeldendeSkjemaer,
-            oppdaterteKompetanser.medBehandlingId(behandlingId)
+            oppdaterteKompetanser.medBehandlingId(behandlingId),
         )
     }
 
-    fun slettSkjema(skjemaId: Long) {
+    fun slettSkjema(behandlingId: BehandlingId, skjemaId: Long) {
         val skjemaTilSletting = periodeOgBarnSkjemaRepository.getById(skjemaId)
-        val behandlingId = BehandlingId(skjemaTilSletting.behandlingId)
+        feilHvis(skjemaTilSletting.behandlingId != behandlingId.id) {
+            "Prøver å slette et skjema som ikke er koblet til behandlingen man sender inn"
+        }
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
         val blanktSkjema = skjemaTilSletting.utenInnhold()
 
@@ -55,7 +58,7 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
     fun lagreDifferanseOgVarsleAbonnenter(
         behandlingId: BehandlingId,
         gjeldende: Collection<S>,
-        oppdaterte: Collection<S>
+        oppdaterte: Collection<S>,
     ) {
         val skalSlettes = gjeldende - oppdaterte
         val skalLagres = oppdaterte - gjeldende

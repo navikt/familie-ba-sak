@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIEndretUtbetalingAndelUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIVilkårsvurderingUtil
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
@@ -22,7 +23,7 @@ import java.time.YearMonth
 
 internal enum class Endringsresultat {
     ENDRING,
-    INGEN_ENDRING
+    INGEN_ENDRING,
 }
 object BehandlingsresultatEndringUtils {
 
@@ -35,28 +36,32 @@ object BehandlingsresultatEndringUtils {
         nåværendePersonResultat: Set<PersonResultat>,
         forrigePersonResultat: Set<PersonResultat>,
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
-        forrigeEndretAndeler: List<EndretUtbetalingAndel>
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>,
+        personerIBehandling: Set<Person>,
+        personerIForrigeBehandling: Set<Person>,
     ): Endringsresultat {
         val erEndringIBeløp = erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
             nåværendeEndretAndeler = nåværendeEndretAndeler,
-            personerFremstiltKravFor = personerFremstiltKravFor
+            personerFremstiltKravFor = personerFremstiltKravFor,
         )
 
         val erEndringIKompetanse = erEndringIKompetanse(
             nåværendeKompetanser = nåværendeKompetanser,
-            forrigeKompetanser = forrigeKompetanser
+            forrigeKompetanser = forrigeKompetanser,
         )
 
         val erEndringIVilkårsvurdering = erEndringIVilkårsvurdering(
             nåværendePersonResultat = nåværendePersonResultat,
-            forrigePersonResultat = forrigePersonResultat
+            forrigePersonResultat = forrigePersonResultat,
+            personerIBehandling = personerIBehandling,
+            personerIForrigeBehandling = personerIForrigeBehandling,
         )
 
         val erEndringIEndretUtbetalingAndeler = erEndringIEndretUtbetalingAndeler(
             nåværendeEndretAndeler = nåværendeEndretAndeler,
-            forrigeEndretAndeler = forrigeEndretAndeler
+            forrigeEndretAndeler = forrigeEndretAndeler,
         )
 
         val erMinstEnEndring = erEndringIBeløp || erEndringIKompetanse || erEndringIVilkårsvurdering || erEndringIEndretUtbetalingAndeler
@@ -69,12 +74,12 @@ object BehandlingsresultatEndringUtils {
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
-        personerFremstiltKravFor: List<Aktør>
+        personerFremstiltKravFor: List<Aktør>,
     ): Boolean {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
         val opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
             forrigeAndeler = forrigeAndeler,
-            nåværendeEndretAndeler = nåværendeEndretAndeler
+            nåværendeEndretAndeler = nåværendeEndretAndeler,
         ) ?: return false // Returnerer false hvis verken forrige eller nåværende behandling har andeler
 
         val erEndringIBeløpForMinstEnPerson = allePersonerMedAndeler.any { aktør ->
@@ -85,7 +90,7 @@ object BehandlingsresultatEndringUtils {
                     nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
                     forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
                     opphørstidspunkt = opphørstidspunkt,
-                    erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør)
+                    erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør),
                 )
             }
         }
@@ -98,7 +103,7 @@ object BehandlingsresultatEndringUtils {
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
         opphørstidspunkt: YearMonth,
-        erFremstiltKravForPerson: Boolean
+        erFremstiltKravForPerson: Boolean,
     ): Boolean {
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
@@ -130,11 +135,11 @@ object BehandlingsresultatEndringUtils {
 
     internal fun erEndringIKompetanse(
         nåværendeKompetanser: List<Kompetanse>,
-        forrigeKompetanser: List<Kompetanse>
+        forrigeKompetanser: List<Kompetanse>,
     ): Boolean {
         val endringIKompetanseTidslinje = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
             nåværendeKompetanser = nåværendeKompetanser,
-            forrigeKompetanser = forrigeKompetanser
+            forrigeKompetanser = forrigeKompetanser,
         )
 
         return endringIKompetanseTidslinje.perioder().any { it.innhold == true }
@@ -142,22 +147,26 @@ object BehandlingsresultatEndringUtils {
 
     internal fun erEndringIVilkårsvurdering(
         nåværendePersonResultat: Set<PersonResultat>,
-        forrigePersonResultat: Set<PersonResultat>
+        forrigePersonResultat: Set<PersonResultat>,
+        personerIBehandling: Set<Person>,
+        personerIForrigeBehandling: Set<Person>,
     ): Boolean {
         val endringIVilkårsvurderingTidslinje = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultater = nåværendePersonResultat,
-            forrigePersonResultater = forrigePersonResultat
+            forrigePersonResultater = forrigePersonResultat,
+            personerIBehandling = personerIBehandling,
+            personerIForrigeBehandling = personerIForrigeBehandling,
         )
         return endringIVilkårsvurderingTidslinje.perioder().any { it.innhold == true }
     }
 
     internal fun erEndringIEndretUtbetalingAndeler(
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
-        forrigeEndretAndeler: List<EndretUtbetalingAndel>
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>,
     ): Boolean {
         val endringIEndretUtbetalingAndelTidslinje = EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUtbetalingAndelTidslinje(
             nåværendeEndretAndeler = nåværendeEndretAndeler,
-            forrigeEndretAndeler = forrigeEndretAndeler
+            forrigeEndretAndeler = forrigeEndretAndeler,
         )
 
         return endringIEndretUtbetalingAndelTidslinje.perioder().any { it.innhold == true }

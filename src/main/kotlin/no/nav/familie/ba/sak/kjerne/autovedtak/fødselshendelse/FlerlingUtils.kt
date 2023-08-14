@@ -9,7 +9,7 @@ fun finnBarnSomSkalBehandlesForMor(
     nyBehandlingHendelse: NyBehandlingHendelse,
     barnaTilMor: List<ForelderBarnRelasjon>,
     barnaSomHarBlittBehandlet: List<String>,
-    secureLogger: Logger? = null
+    secureLogger: Logger? = null,
 ): Pair<List<String>, List<String>> {
     val barnaPåHendelse =
         barnaTilMor.filter { nyBehandlingHendelse.barnasIdenter.contains(it.aktør.aktivFødselsnummer()) }
@@ -33,7 +33,7 @@ fun finnBarnSomSkalBehandlesForMor(
             "Alle barna til mor: ${barnaTilMor.map { it.toSecureString() }}\n" +
             "Barn på hendelse: ${barnaPåHendelse.map { it.aktør.aktivFødselsnummer() }}\n" +
             "Barn med tilstøtende fødselsdato som også behandles: ${andreBarnFødtInnenEnDag.map { it.aktør.aktivFødselsnummer() }}\n" +
-            "Barn som faktisk skal behandles for mor: ${barnSomSkalBehandlesForMor.map { it }}"
+            "Barn som faktisk skal behandles for mor: ${barnSomSkalBehandlesForMor.map { it }}",
     )
 
     return Pair(barnSomSkalBehandlesForMor, alleBarnSomKanBehandles)
@@ -41,7 +41,7 @@ fun finnBarnSomSkalBehandlesForMor(
 
 fun barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
     barnaPåHendelse: List<Aktør>,
-    barnaPåÅpenBehandling: List<Aktør>
+    barnaPåÅpenBehandling: List<Aktør>,
 ): Boolean {
     return barnaPåHendelse.all { barnaPåÅpenBehandling.contains(it) }
 }

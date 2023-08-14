@@ -1,12 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.dataGenerator.behandling.kjørStegprosessForBehandling
-import no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
+import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -39,27 +42,31 @@ class EndringstidspunktTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val featureToggleService: FeatureToggleService,
 ) : AbstractVerdikjedetest() {
 
     @Test
     fun `Skal filtrere bort alle vedtaksperioder før endringstidspunktet`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY) } returns false
+        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
+
         val barnFødselsdato = LocalDate.now().minusYears(2)
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
                     fødselsdato = "1982-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = barnFødselsdato.toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
-                    )
-                )
-            )
+                        etternavn = "Barnesen",
+                    ),
+                ),
+            ),
         )
 
         val overstyrendeVilkårResultaterFGB =
@@ -76,7 +83,7 @@ class EndringstidspunktTest(
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(
                 scenario,
-                overstyrendeVilkårResultaterFGB
+                overstyrendeVilkårResultaterFGB,
             ),
 
             behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -87,8 +94,8 @@ class EndringstidspunktTest(
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            brevmalService = brevmalService
-
+            brevmalService = brevmalService,
+            featureToggleService = featureToggleService,
         )
 
         val sisteDagUtenDeltBostedOppfylt = barnFødselsdato.plusYears(1).sisteDagIMåned()
@@ -102,22 +109,22 @@ class EndringstidspunktTest(
                         vilkårType = Vilkår.BOSATT_I_RIKET,
                         periodeFom = barnFødselsdato,
                         periodeTom = førsteDagMedDeltBostedOppfylt,
-                        personResultat = mockk(relaxed = true)
+                        personResultat = mockk(relaxed = true),
                     ),
                     lagVilkårResultat(
                         vilkårType = Vilkår.BOSATT_I_RIKET,
                         periodeFom = førsteDagMedDeltBostedOppfylt,
                         periodeTom = sisteDagMedDeltBosdet,
                         personResultat = mockk(relaxed = true),
-                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                     ),
                     lagVilkårResultat(
                         vilkårType = Vilkår.BOSATT_I_RIKET,
                         periodeFom = førsteDagMedDeltBostedOppfylt,
                         periodeTom = sisteDagMedDeltBosdet.førsteDagINesteMåned(),
                         personResultat = mockk(relaxed = true),
-                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
-                    )
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                    ),
                 )
             }.toMutableMap()
 
@@ -132,7 +139,7 @@ class EndringstidspunktTest(
             behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(
                 scenario,
-                overstyrendeVilkårResultaterRevurdering
+                overstyrendeVilkårResultaterRevurdering,
             ),
 
             behandlingstype = BehandlingType.REVURDERING,
@@ -143,8 +150,8 @@ class EndringstidspunktTest(
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            brevmalService = brevmalService
-
+            brevmalService = brevmalService,
+            featureToggleService = featureToggleService,
         )
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)
@@ -155,8 +162,8 @@ class EndringstidspunktTest(
 
         assertTrue(
             førsteFomDatoIVedtaksperiodene.isEqual(
-                førsteDagMedDeltBostedOppfylt.førsteDagINesteMåned()
-            )
+                førsteDagMedDeltBostedOppfylt.førsteDagINesteMåned(),
+            ),
         )
     }
 }

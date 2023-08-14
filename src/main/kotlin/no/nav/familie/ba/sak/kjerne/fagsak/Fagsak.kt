@@ -29,7 +29,7 @@ data class Fagsak(
     @JoinColumn(
         name = "fk_aktoer_id",
         nullable = false,
-        updatable = false
+        updatable = false,
     )
     val aktør: Aktør,
 
@@ -37,7 +37,7 @@ data class Fagsak(
     @JoinColumn(
         name = "fk_institusjon_id",
         nullable = true,
-        updatable = true
+        updatable = true,
     )
     var institusjon: Institusjon? = null,
 
@@ -50,7 +50,7 @@ data class Fagsak(
     val type: FagsakType = FagsakType.NORMAL,
 
     @Column(name = "arkivert", nullable = false)
-    var arkivert: Boolean = false
+    var arkivert: Boolean = false,
 ) : BaseEntitet() {
 
     override fun hashCode(): Int {
@@ -76,11 +76,14 @@ data class Fagsak(
 enum class FagsakStatus {
     OPPRETTET,
     LØPENDE, // Har minst én behandling gjeldende for fremtidig utbetaling
-    AVSLUTTET
+    AVSLUTTET,
 }
 
 enum class FagsakType {
     NORMAL,
     BARN_ENSLIG_MINDREÅRIG,
-    INSTITUSJON
+    INSTITUSJON,
+    ;
+
+    fun erBarnSøker() = this == BARN_ENSLIG_MINDREÅRIG || this == INSTITUSJON
 }

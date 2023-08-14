@@ -4,11 +4,9 @@ import io.micrometer.core.instrument.Metrics
 import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -16,16 +14,16 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
-import no.nav.familie.ba.sak.kjerne.simulering.domene.ØknomiSimuleringMottakerRepository
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
+import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottakerRepository
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import org.springframework.stereotype.Service
@@ -36,14 +34,13 @@ import java.time.LocalDate
 class SimuleringService(
     private val økonomiKlient: ØkonomiKlient,
     private val økonomiService: ØkonomiService,
-    private val utbetalingsoppdragService: UtbetalingsoppdragService,
     private val beregningService: BeregningService,
-    private val øknomiSimuleringMottakerRepository: ØknomiSimuleringMottakerRepository,
+    private val økonomiSimuleringMottakerRepository: ØkonomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
     private val vedtakRepository: VedtakRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val persongrunnlagService: PersongrunnlagService
+    private val persongrunnlagService: PersongrunnlagService,
 ) {
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
@@ -62,20 +59,9 @@ class SimuleringService(
             vedtak = vedtak,
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
-            erSimulering = true
+            erSimulering = true,
         )
 
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
-            val tilkjentYtelse = utbetalingsoppdragService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                vedtak = vedtak,
-                saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-                andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
-                erSimulering = true
-            )
-            val gammelUtbetalingsoppdragIString = objectMapper.writeValueAsString(utbetalingsoppdrag)
-            secureLogger.info("Generert utbetalingsoppdrag på gamle måte=$gammelUtbetalingsoppdragIString")
-            secureLogger.info("Generert utbetalingsoppdrag på ny måte=${tilkjentYtelse.utbetalingsoppdrag}")
-        }
         // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
         if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
 
@@ -86,18 +72,18 @@ class SimuleringService(
     @Transactional
     fun lagreSimuleringPåBehandling(
         simuleringMottakere: List<SimuleringMottaker>,
-        beahndling: Behandling
+        beahndling: Behandling,
     ): List<ØkonomiSimuleringMottaker> {
         val vedtakSimuleringMottakere = simuleringMottakere.map { it.tilBehandlingSimuleringMottaker(beahndling) }
-        return øknomiSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
+        return økonomiSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
     }
 
     @Transactional
     fun slettSimuleringPåBehandling(behandlingId: Long) =
-        øknomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
+        økonomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
 
     fun hentSimuleringPåBehandling(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
-        return øknomiSimuleringMottakerRepository.findByBehandlingId(behandlingId)
+        return økonomiSimuleringMottakerRepository.findByBehandlingId(behandlingId)
     }
 
     fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
@@ -109,7 +95,7 @@ class SimuleringService(
         val simulering = hentSimuleringPåBehandling(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = simulering,
-            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
         )
 
         return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
@@ -133,7 +119,7 @@ class SimuleringService(
             ?: throw Feil("Fant ikke aktivt vedtak på behandling${behandling.id}")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "opprette simulering"
+            handling = "opprette simulering",
         )
 
         val simulering: List<SimuleringMottaker> =
@@ -156,21 +142,21 @@ class SimuleringService(
     fun hentEtterbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
         return vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = økonomiSimuleringMottakere,
-            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
         ).etterbetaling
     }
 
     fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
         return vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere,
-            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
         ).feilutbetaling
     }
 
     fun harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling: Behandling): Boolean {
         if (!behandling.erManuellMigrering()) throw Feil("Avvik innenfor beløpsgrenser skal bare sjekkes for manuelle migreringsbehandlinger")
 
-        val antallBarn = persongrunnlagService.hentBarna(behandling.id).size
+        val antallBarn = persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id)?.barn()?.size ?: 0
 
         return sjekkOmBehandlingHarEtterbetalingInnenforBeløpsgrenser(behandling, antallBarn) &&
             sjekkOmBehandlingHarFeilutbetalingInnenforBeløpsgrenser(behandling, antallBarn)
@@ -186,7 +172,7 @@ class SimuleringService(
 
     private fun sjekkOmBehandlingHarEtterbetalingInnenforBeløpsgrenser(
         behandling: Behandling,
-        antallBarn: Int
+        antallBarn: Int,
     ): Boolean {
         val finnesEtterBetaling = hentTotalEtterbetalingFørMars2023(behandling.id) != BigDecimal.ZERO
         if (!finnesEtterBetaling) return true
@@ -205,7 +191,7 @@ class SimuleringService(
 
     private fun sjekkOmBehandlingHarFeilutbetalingInnenforBeløpsgrenser(
         behandling: Behandling,
-        antallBarn: Int
+        antallBarn: Int,
     ): Boolean {
         val finnesFeilutbetaling = hentFeilutbetaling(behandling.id) != BigDecimal.ZERO
         if (!finnesFeilutbetaling) return true
@@ -227,7 +213,7 @@ class SimuleringService(
 
         return vedtakSimuleringMottakereTilSimuleringPerioder(
             økonomiSimuleringMottakere = hentSimuleringPåBehandling(behandlingId),
-            erManuelPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            erManuelPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
         ).filter {
             it.fom.isSameOrBefore(februar2023)
         }

@@ -32,13 +32,13 @@ internal class ValutakursServiceTest {
 
     val valutakursService = ValutakursService(
         valutakursRepository,
-        emptyList()
+        emptyList(),
     )
 
     val tilpassValutakurserTilUtenlandskePeriodebeløpService = TilpassValutakurserTilUtenlandskePeriodebeløpService(
         valutakursRepository,
         utenlandskPeriodebeløpRepository,
-        emptyList()
+        emptyList(),
     )
 
     @BeforeEach
@@ -87,12 +87,12 @@ internal class ValutakursServiceTest {
                     barnAktører = setOf(tilfeldigPerson().aktør),
                     valutakursdato = LocalDate.now(),
                     valutakode = "EUR",
-                    kurs = BigDecimal.TEN
-                )
-            ).medBehandlingId(behandlingId)
+                    kurs = BigDecimal.TEN,
+                ),
+            ).medBehandlingId(behandlingId),
         ).single()
 
-        valutakursService.slettValutakurs(lagretValutakurs.id)
+        valutakursService.slettValutakurs(behandlingId, lagretValutakurs.id)
 
         val faktiskValutakurs = valutakursService.hentValutakurser(behandlingId).single()
 

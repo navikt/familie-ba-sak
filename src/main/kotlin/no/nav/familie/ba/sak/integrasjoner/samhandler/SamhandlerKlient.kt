@@ -16,7 +16,7 @@ import java.net.URI
 class SamhandlerKlient(
     @Value("\${FAMILIE_OPPDRAG_API_URL}")
     private val familieOppdragUri: String,
-    @Qualifier("jwtBearer") restOperations: RestOperations
+    @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "samhandler") {
 
     @Cacheable("hent-samhandler", cacheManager = "dailyCache")
@@ -26,20 +26,7 @@ class SamhandlerKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Henter samhandler fra TSS"
-        ) {
-            getForEntity(uri = uri)
-        }
-    }
-
-    @Cacheable("hent-samhandler-tss", cacheManager = "dailyCache")
-    fun hentSamhandlerVedTssEksternId(tssEksternId: String): SamhandlerInfo {
-        val uri = URI.create("$familieOppdragUri/tss/tssnr/$tssEksternId")
-
-        return kallEksternTjenesteRessurs(
-            tjeneste = "familie-oppdrag",
-            uri = uri,
-            formål = "Henter samhandler fra TSS med tss"
+            formål = "Henter samhandler fra TSS",
         ) {
             getForEntity(uri = uri)
         }
@@ -51,7 +38,7 @@ class SamhandlerKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Søk samhandler fra TSS"
+            formål = "Søk samhandler fra TSS",
         ) {
             postForEntity(uri = uri, SøkSamhandlerInfoRequest(navn, side, postnummer, område))
         }

@@ -21,20 +21,20 @@ class TilbakestillBehandlingService(
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val vedtakRepository: VedtakRepository,
     private val tilbakekrevingService: TilbakekrevingService,
-    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
+    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 ) {
 
     @Transactional
     fun initierOgSettBehandlingTilVilkårsvurdering(
         behandling: Behandling,
-        bekreftEndringerViaFrontend: Boolean = true
+        bekreftEndringerViaFrontend: Boolean = true,
     ) {
         vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = bekreftEndringerViaFrontend,
             forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
-                behandling
-            )
+                behandling,
+            ),
         )
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
@@ -44,7 +44,7 @@ class TilbakestillBehandlingService(
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandling.id,
-            steg = StegType.VILKÅRSVURDERING
+            steg = StegType.VILKÅRSVURDERING,
         )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
 
@@ -53,19 +53,18 @@ class TilbakestillBehandlingService(
 
     @Transactional
     fun tilbakestillBehandlingTilVilkårsvurdering(behandling: Behandling) {
-        if (behandling.status.erLåstMenIkkeAvsluttet() || behandling.status == BehandlingStatus.AVSLUTTET) throw Feil("Prøver å tilbakestille $behandling, men den er avsluttet eller låst for endringer")
+        if (behandling.status != BehandlingStatus.UTREDES && behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
+            throw Feil("Prøver å tilbakestille $behandling, men den er avsluttet eller låst for endringer")
+        }
 
         beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
-        vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
-            vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId = behandling.id
-            )
-        )
+        val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
+        vedtak?.let { vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak = vedtak) }
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandling.id,
-            steg = StegType.VILKÅRSVURDERING
+            steg = StegType.VILKÅRSVURDERING,
         )
     }
 
@@ -73,8 +72,8 @@ class TilbakestillBehandlingService(
     fun tilbakestillDataTilVilkårsvurderingssteg(behandling: Behandling) {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
             vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId = behandling.id
-            )
+                behandlingId = behandling.id,
+            ),
         )
     }
 
@@ -85,13 +84,13 @@ class TilbakestillBehandlingService(
     fun resettStegVedEndringPåVilkår(behandlingId: Long): Behandling {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
             vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId
-            )
+                behandlingId,
+            ),
         )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
         return behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandlingId,
-            steg = StegType.VILKÅRSVURDERING
+            steg = StegType.VILKÅRSVURDERING,
         )
     }
 }

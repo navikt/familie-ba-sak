@@ -39,26 +39,22 @@ class FagsakController(
     private val fagsakService: FagsakService,
     private val personidentService: PersonidentService,
     private val tilgangService: TilgangService,
-    private val tilbakekrevingService: TilbakekrevingService
+    private val tilbakekrevingService: TilbakekrevingService,
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentEllerOpprettFagsak(@RequestBody fagsakRequest: FagsakRequest): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
-        if (fagsakRequest.personIdent != null) {
-            tilgangService.validerTilgangTilPersoner(
-                personIdenter = listOf(
-                    fagsakRequest.personIdent
-                ),
-                event = AuditLoggerEvent.CREATE
-            )
-        }
+        tilgangService.validerTilgangTilPersoner(
+            personIdenter = listOf(fagsakRequest.personIdent),
+            event = AuditLoggerEvent.CREATE,
+        )
         tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
         return Result.runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }
             .fold(
                 onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(it) },
-                onFailure = { throw it }
+                onFailure = { throw it },
             )
     }
 
@@ -84,7 +80,7 @@ class FagsakController(
     fun hentMinimalFagsakForPerson(@RequestBody request: RestHentFagsakForPerson): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(request.personIdent),
-            event = AuditLoggerEvent.ACCESS
+            event = AuditLoggerEvent.ACCESS,
         )
 
         return Result.runCatching {
@@ -92,18 +88,18 @@ class FagsakController(
             fagsakService.hentMinimalFagsakForPerson(aktør, request.fagsakType)
         }.fold(
             onSuccess = { return ResponseEntity.ok().body(it) },
-            onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
+            onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) },
         )
     }
 
     @PostMapping(path = ["/hent-fagsaker-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMinimalFagsakerForPerson(
         @RequestBody
-        request: RestHentFagsakerForPerson
+        request: RestHentFagsakerForPerson,
     ): ResponseEntity<Ressurs<List<RestMinimalFagsak>>> {
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(request.personIdent),
-            event = AuditLoggerEvent.ACCESS
+            event = AuditLoggerEvent.ACCESS,
         )
 
         return Result.runCatching {
@@ -111,7 +107,7 @@ class FagsakController(
             fagsakService.hentMinimalFagsakerForPerson(aktør = aktør, fagsakTyper = request.fagsakTyper)
         }.fold(
             onSuccess = { return ResponseEntity.ok().body(it) },
-            onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
+            onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) },
         )
     }
 
@@ -127,14 +123,17 @@ class FagsakController(
     fun søkFagsakerHvorPersonErSøkerEllerMottarOrdinærBarnetrygd(@RequestBody request: RestSøkFagsakRequest): ResponseEntity<Ressurs<List<RestFagsakIdOgTilknyttetAktørId>>> {
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(request.personIdent),
-            event = AuditLoggerEvent.ACCESS
+            event = AuditLoggerEvent.ACCESS,
         )
 
         val aktør = personidentService.hentAktør(request.personIdent)
 
-        val fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør)
+        val fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær =
+            fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør)
 
-        val fagsakIdOgTilknyttetAktørId = fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær.map { RestFagsakIdOgTilknyttetAktørId(aktørId = it.aktør.aktørId, fagsakId = it.id) }
+        val fagsakIdOgTilknyttetAktørId = fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær.map {
+            RestFagsakIdOgTilknyttetAktørId(aktørId = it.aktør.aktørId, fagsakId = it.id)
+        }
 
         return ResponseEntity.ok().body(Ressurs.success(fagsakIdOgTilknyttetAktørId))
     }
@@ -143,14 +142,20 @@ class FagsakController(
     fun søkFagsakerHvorPersonMottarLøpendeYtelse(@RequestBody request: RestSøkFagsakRequest): ResponseEntity<Ressurs<List<RestFagsakIdOgTilknyttetAktørId>>> {
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(request.personIdent),
-            event = AuditLoggerEvent.ACCESS
+            event = AuditLoggerEvent.ACCESS,
         )
 
         val aktør = personidentService.hentAktør(request.personIdent)
 
-        val fagsakerHvorAktørMottarLøpendeUtvidetEllerOrdinær = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD))
+        val fagsakerHvorAktørMottarLøpendeUtvidetEllerOrdinær =
+            fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(
+                aktør = aktør,
+                ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD),
+            )
 
-        val fagsakIdOgTilknyttetAktørId = fagsakerHvorAktørMottarLøpendeUtvidetEllerOrdinær.map { RestFagsakIdOgTilknyttetAktørId(aktørId = it.aktør.aktørId, fagsakId = it.id) }
+        val fagsakIdOgTilknyttetAktørId = fagsakerHvorAktørMottarLøpendeUtvidetEllerOrdinær.map {
+            RestFagsakIdOgTilknyttetAktørId(aktørId = it.aktør.aktørId, fagsakId = it.id)
+        }
 
         return ResponseEntity.ok().body(Ressurs.success(fagsakIdOgTilknyttetAktørId))
     }
@@ -158,7 +163,7 @@ class FagsakController(
     data class RestSøkFagsakRequest(val personIdent: String)
     data class RestFagsakIdOgTilknyttetAktørId(
         val aktørId: String,
-        val fagsakId: Long
+        val fagsakId: Long,
     )
 
     @PostMapping(path = ["/sok/fagsakdeltagere"])
@@ -179,17 +184,17 @@ class FagsakController(
                         .body(
                             Ressurs.failure(
                                 error = it,
-                                errorMessage = "Henting av fagsakdeltagere feilet: ${it.message}"
-                            )
+                                errorMessage = "Henting av fagsakdeltagere feilet: ${it.message}",
+                            ),
                         )
-                }
+                },
             )
     }
 
     @GetMapping(path = ["/{fagsakId}/har-apen-tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun harÅpenTilbakekreving(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<Boolean>> {
         return ResponseEntity.ok(
-            Ressurs.success(tilbakekrevingService.søkerHarÅpenTilbakekreving(fagsakId))
+            Ressurs.success(tilbakekrevingService.søkerHarÅpenTilbakekreving(fagsakId)),
         )
     }
 
@@ -197,7 +202,7 @@ class FagsakController(
     fun opprettTilbakekrevingsbehandling(@PathVariable fagsakId: Long): Ressurs<String> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "opprette tilbakekrevingbehandling"
+            handling = "opprette tilbakekrevingbehandling",
         )
 
         return tilbakekrevingService.opprettTilbakekrevingsbehandlingManuelt(fagsakId)
@@ -211,21 +216,21 @@ class FagsakController(
 }
 
 data class FagsakRequest(
-    val personIdent: String?,
-    val aktørId: String? = null,
+    val personIdent: String,
     val fagsakType: FagsakType? = FagsakType.NORMAL,
-    val institusjon: InstitusjonInfo? = null
+    val institusjon: InstitusjonInfo? = null,
 )
 
 data class RestBeslutningPåVedtak(
     val beslutning: Beslutning,
     val begrunnelse: String? = null,
-    val kontrollerteSider: List<String> = emptyList()
+    val kontrollerteSider: List<String> = emptyList(),
 )
 
 enum class Beslutning {
     GODKJENT,
-    UNDERKJENT;
+    UNDERKJENT,
+    ;
 
     fun erGodkjent() = this == GODKJENT
 }

@@ -1,12 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
-import java.time.LocalDate
 
 data class VedtakEndring(
     override val mal: Brevmal,
-    override val data: EndringVedtakData
+    override val data: EndringVedtakData,
 ) : Vedtaksbrev {
 
     constructor(
@@ -17,8 +15,9 @@ data class VedtakEndring(
         erKlage: Boolean,
         etterbetalingInstitusjon: EtterbetalingInstitusjon? = null,
         informasjonOmAarligKontroll: Boolean,
-        feilutbetaltValuta: FeilutbetaltValuta? = null
-
+        feilutbetaltValuta: FeilutbetaltValuta? = null,
+        refusjonEosAvklart: RefusjonEøsAvklart? = null,
+        refusjonEosUavklart: RefusjonEøsUavklart? = null,
     ) :
         this(
             mal = mal,
@@ -27,7 +26,7 @@ data class VedtakEndring(
                     signaturVedtak = SignaturVedtak(
                         enhet = vedtakFellesfelter.enhet,
                         saksbehandler = vedtakFellesfelter.saksbehandler,
-                        beslutter = vedtakFellesfelter.beslutter
+                        beslutter = vedtakFellesfelter.beslutter,
                     ),
                     etterbetaling = etterbetaling,
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
@@ -37,25 +36,25 @@ data class VedtakEndring(
                     etterbetalingInstitusjon = etterbetalingInstitusjon,
                     korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
                     informasjonOmAarligKontroll = informasjonOmAarligKontroll,
-                    forMyeUtbetaltBarnetrygd = feilutbetaltValuta != null
+                    forMyeUtbetaltBarnetrygd = feilutbetaltValuta,
+                    refusjonEosAvklart = refusjonEosAvklart,
+                    refusjonEosUavklart = refusjonEosUavklart,
                 ),
-                flettefelter = object : FlettefelterForDokument {
-                    val perioderMedForMyeUtbetalt: Flettefelt = feilutbetaltValuta?.perioderMedForMyeUtbetalt
-                    override val navn = flettefelt(vedtakFellesfelter.søkerNavn)
-                    override val fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer)
-                    override val brevOpprettetDato = flettefelt(LocalDate.now().tilDagMånedÅr())
-                    override val organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer)
-                    override val gjelder = flettefelt(vedtakFellesfelter.gjelder)
-                },
-                perioder = vedtakFellesfelter.perioder
-            )
+                flettefelter = FlettefelterForDokumentImpl(
+                    gjelder = flettefelt(vedtakFellesfelter.gjelder),
+                    navn = flettefelt(vedtakFellesfelter.søkerNavn),
+                    fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer),
+                    organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
+                ),
+                perioder = vedtakFellesfelter.perioder,
+            ),
         )
 }
 
 data class EndringVedtakData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokument,
-    override val perioder: List<BrevPeriode>
+    override val perioder: List<BrevPeriode>,
 ) : VedtaksbrevData {
 
     data class Delmaler(
@@ -68,6 +67,8 @@ data class EndringVedtakData(
         val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
         val korrigertVedtak: KorrigertVedtakData?,
         val informasjonOmAarligKontroll: Boolean,
-        val forMyeUtbetaltBarnetrygd: Boolean
+        val forMyeUtbetaltBarnetrygd: FeilutbetaltValuta?,
+        val refusjonEosAvklart: RefusjonEøsAvklart?,
+        val refusjonEosUavklart: RefusjonEøsUavklart?,
     )
 }

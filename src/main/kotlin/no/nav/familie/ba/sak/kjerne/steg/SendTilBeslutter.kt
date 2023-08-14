@@ -5,13 +5,14 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -34,13 +35,15 @@ class SendTilBeslutter(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val simuleringService: SimuleringService
+    private val automatiskBeslutningService: AutomatiskBeslutningService,
+    private val validerBrevmottakerService: ValiderBrevmottakerService,
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(
         behandling: Behandling,
-        stegService: StegService?
+        stegService: StegService?,
     ) {
+        validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = behandling.id)
         vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
             ?.validerAtAlleAnndreVurderingerErVurdert()
 
@@ -56,26 +59,22 @@ class SendTilBeslutter(
             val utvidetVedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak)
             utvidetVedtaksperioder.validerPerioderInneholderBegrunnelser(
                 behandlingId = behandling.id,
-                fagsakId = behandling.fagsak.id
+                fagsakId = behandling.fagsak.id,
             )
         }
     }
 
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: String
+        data: String,
     ): StegType {
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling)
 
-        // oppretter ikke GodkjenneVedtak task for manuell migrering som har avvik innenfor beløpsgrenser eller manuelle posteringer
-        if (!behandling.erManuellMigrering() || simuleringService.harMigreringsbehandlingManuellePosteringer(
-                behandling
-            ) || !simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
-        ) {
+        if (!automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)) {
             val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.GodkjenneVedtak,
-                fristForFerdigstillelse = LocalDate.now()
+                fristForFerdigstillelse = LocalDate.now(),
             )
             loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = false)
             taskRepository.save(godkjenneVedtakTask)
@@ -94,7 +93,7 @@ class SendTilBeslutter(
         listOf(
             Oppgavetype.BehandleSak,
             Oppgavetype.BehandleUnderkjentVedtak,
-            Oppgavetype.VurderLivshendelse
+            Oppgavetype.VurderLivshendelse,
         ).forEach { oppgavetype ->
             oppgaveService.hentOppgaverSomIkkeErFerdigstilt(oppgavetype, behandling).also {
                 if (it.isNotEmpty()) {
@@ -147,7 +146,7 @@ fun Vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert() {
         ?.let {
             throw FunksjonellFeil(
                 melding = "Forsøker å ferdigstille uten å ha fylt ut påkrevde vurderinger",
-                frontendFeilmelding = "Andre vurderinger må tas stilling til før behandling kan sendes til beslutter."
+                frontendFeilmelding = "Andre vurderinger må tas stilling til før behandling kan sendes til beslutter.",
             )
         }
 }

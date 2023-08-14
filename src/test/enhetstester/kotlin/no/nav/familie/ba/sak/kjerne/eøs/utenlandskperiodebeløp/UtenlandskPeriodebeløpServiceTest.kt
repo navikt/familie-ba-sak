@@ -29,13 +29,13 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     val utenlandskPeriodebeløpService = UtenlandskPeriodebeløpService(
         utenlandskPeriodebeløpRepository,
-        emptyList()
+        emptyList(),
     )
 
     val tilpassUtenlandskePeriodebeløpTilKompetanserService = TilpassUtenlandskePeriodebeløpTilKompetanserService(
         utenlandskPeriodebeløpRepository,
         emptyList(),
-        kompetanseRepository
+        kompetanseRepository,
     )
 
     @BeforeEach
@@ -85,7 +85,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
             .medBeløp("44444444", "EUR", "SE", barn1)
             .lagreTil(utenlandskPeriodebeløpRepository).single()
 
-        utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(lagretUtenlandskPeriodebeløp.id)
+        utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(behandlingId, lagretUtenlandskPeriodebeløp.id)
 
         val faktiskUtenlandskPeriodebeløp =
             utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId).single()

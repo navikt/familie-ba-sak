@@ -19,7 +19,7 @@ class TilgangControllerTest(
     private val mockPersonopplysningerService: PersonopplysningerService,
 
     @Autowired
-    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
+    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -30,7 +30,7 @@ class TilgangControllerTest(
         } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(fnr))
-        } returns Tilgang(harTilgang = true)
+        } answers { firstArg<List<String>>().map { Tilgang(it, true) } }
 
         val response = tilgangController.hentTilgangOgDiskresjonskode(TilgangRequestDTO(fnr))
         val tilgangDTO = response.body?.data ?: error("Fikk ikke forventet respons")

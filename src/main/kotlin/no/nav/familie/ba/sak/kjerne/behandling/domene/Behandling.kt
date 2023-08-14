@@ -85,7 +85,10 @@ data class Behandling(
     var overstyrtEndringstidspunkt: LocalDate? = null,
 
     @OneToOne(mappedBy = "behandling", optional = true)
-    val verge: Verge? = null
+    val verge: Verge? = null,
+
+    @Column(name = "aktivert_tid", nullable = false)
+    var aktivertTidspunkt: LocalDateTime = LocalDateTime.now(),
 ) : BaseEntitet() {
 
     val steg: StegType
@@ -113,10 +116,6 @@ data class Behandling(
             "steg=$steg)"
     }
 
-    fun låstForEndringerTidspunkt(): LocalDateTime? = this.behandlingStegTilstand
-        .filter { it.behandlingSteg.rekkefølge >= StegType.BESLUTTE_VEDTAK.rekkefølge }
-        .minOfOrNull { it.opprettetTidspunkt }
-
     // Skal kun brukes på gamle behandlinger
     fun erTekniskOpphør(): Boolean {
         return if (type == BehandlingType.TEKNISK_OPPHØR ||
@@ -129,7 +128,7 @@ data class Behandling(
             } else {
                 throw Feil(
                     "Behandling er teknisk opphør, men årsak $opprettetÅrsak " +
-                        "og type $type samsvarer ikke."
+                        "og type $type samsvarer ikke.",
                 )
             }
         } else {
@@ -141,7 +140,7 @@ data class Behandling(
         if (type == BehandlingType.TEKNISK_OPPHØR) {
             throw FunksjonellFeil(
                 melding = "Kan ikke lage teknisk opphør behandling.",
-                frontendFeilmelding = "Kan ikke lage teknisk opphør behandling, bruk heller teknisk endring."
+                frontendFeilmelding = "Kan ikke lage teknisk opphør behandling, bruk heller teknisk endring.",
             )
         }
 
@@ -178,8 +177,6 @@ data class Behandling(
 
     fun erVedtatt() = status == BehandlingStatus.AVSLUTTET && !erHenlagt()
 
-    fun erSøknad() = opprettetÅrsak == BehandlingÅrsak.SØKNAD
-
     fun leggTilBehandlingStegTilstand(nesteSteg: StegType): Behandling {
         if (nesteSteg != StegType.HENLEGG_BEHANDLING) {
             fjernAlleSenereSteg(nesteSteg)
@@ -196,6 +193,8 @@ data class Behandling(
     }
 
     fun leggTilHenleggStegOmDetIkkeFinnesFraFør(): Behandling {
+        behandlingStegTilstand.filter { it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING }
+            .forEach { behandlingStegTilstand.remove(it) }
         leggTilStegOmDetIkkeFinnesFraFør(StegType.HENLEGG_BEHANDLING)
         return this
     }
@@ -205,8 +204,8 @@ data class Behandling(
             skalBehandlesAutomatisk && erOmregning() &&
                 resultat in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT) -> true
 
-            skalBehandlesAutomatisk && erMigrering() && resultat == Behandlingsresultat.INNVILGET -> true
-            skalBehandlesAutomatisk && erFødselshendelse() && resultat == Behandlingsresultat.INNVILGET -> true
+            skalBehandlesAutomatisk && erMigrering() && !erManuellMigreringForEndreMigreringsdato() && resultat == Behandlingsresultat.INNVILGET -> true
+            skalBehandlesAutomatisk && erFødselshendelse() -> true
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
             else -> false
         }
@@ -222,8 +221,8 @@ data class Behandling(
                         BehandlingStegStatus.UTFØRT
                     } else {
                         BehandlingStegStatus.IKKE_UTFØRT
-                    }
-                )
+                    },
+                ),
             )
         }
     }
@@ -247,8 +246,8 @@ data class Behandling(
         behandlingStegTilstand.add(
             BehandlingStegTilstand(
                 behandling = this,
-                behandlingSteg = FØRSTE_STEG
-            )
+                behandlingSteg = FØRSTE_STEG,
+            ),
         )
         return this
     }
@@ -275,7 +274,7 @@ data class Behandling(
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
     fun erTekniskEndringMedOpphør() =
-        erTekniskEndring() && resultat in listOf(Behandlingsresultat.OPPHØRT, Behandlingsresultat.ENDRET_OG_OPPHØRT)
+        erTekniskEndring() && resultat.erOpphør()
 
     fun erTekniskBehandling() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR || erTekniskEndring()
 
@@ -350,7 +349,8 @@ enum class Behandlingsresultat(val displayName: String) {
     HENLAGT_AUTOMATISK_FØDSELSHENDELSE(displayName = "Henlagt avslått i automatisk vilkårsvurdering"),
     HENLAGT_TEKNISK_VEDLIKEHOLD(displayName = "Henlagt teknisk vedlikehold"),
 
-    IKKE_VURDERT(displayName = "Ikke vurdert");
+    IKKE_VURDERT(displayName = "Ikke vurdert"),
+    ;
 
     fun kanIkkeSendesTilOppdrag(): Boolean =
         this in listOf(FORTSATT_INNVILGET, AVSLÅTT, FORTSATT_OPPHØRT, ENDRET_UTEN_UTBETALING)
@@ -358,6 +358,12 @@ enum class Behandlingsresultat(val displayName: String) {
     fun erAvslått(): Boolean = this in listOf(AVSLÅTT, AVSLÅTT_OG_OPPHØRT, AVSLÅTT_OG_ENDRET, AVSLÅTT_ENDRET_OG_OPPHØRT)
 
     fun erFortsattInnvilget(): Boolean = this in listOf(FORTSATT_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET)
+
+    fun erOpphør(): Boolean = this in listOf(
+        OPPHØRT,
+        ENDRET_OG_OPPHØRT,
+        FORTSATT_OPPHØRT,
+    )
 }
 
 /**
@@ -381,7 +387,8 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     MIGRERING("Migrering"),
     ENDRE_MIGRERINGSDATO("Endre migreringsdato"),
-    HELMANUELL_MIGRERING("Manuell migrering");
+    HELMANUELL_MIGRERING("Manuell migrering"),
+    ;
 
     fun erOmregningsårsak(): Boolean =
         this == OMREGNING_6ÅR || this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG
@@ -398,10 +405,6 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     fun erManuellMigreringsårsak(): Boolean = this == HELMANUELL_MIGRERING || this == ENDRE_MIGRERINGSDATO
 
     fun erFørstegangMigreringsårsak(): Boolean = this == HELMANUELL_MIGRERING || this == MIGRERING
-
-    fun årsakSomKanEndreBehandlingKategori(): Boolean =
-        this == SØKNAD || this == ÅRLIG_KONTROLL || this == NYE_OPPLYSNINGER ||
-            this == KLAGE || this == ENDRE_MIGRERINGSDATO || this == MIGRERING || this == HELMANUELL_MIGRERING
 }
 
 enum class BehandlingType(val visningsnavn: String) {
@@ -410,12 +413,13 @@ enum class BehandlingType(val visningsnavn: String) {
     MIGRERING_FRA_INFOTRYGD("Migrering fra infotrygd"),
     MIGRERING_FRA_INFOTRYGD_OPPHØRT("Opphør migrering fra infotrygd"),
     TEKNISK_OPPHØR("Teknisk opphør"), // Ikke lenger i bruk. Bruk heller teknisk endring
-    TEKNISK_ENDRING("Teknisk endring")
+    TEKNISK_ENDRING("Teknisk endring"),
 }
 
 enum class BehandlingKategori(val visningsnavn: String, val nivå: Int) {
     EØS("EØS", 2),
-    NASJONAL("Nasjonal", 1);
+    NASJONAL("Nasjonal", 1),
+    ;
 
     fun tilOppgavebehandlingType(): OppgaveBehandlingType {
         return when (this) {
@@ -436,7 +440,8 @@ fun List<BehandlingKategori>.finnHøyesteKategori(): BehandlingKategori? = this.
 enum class BehandlingUnderkategori(val visningsnavn: String, val nivå: Int) {
     INSTITUSJON("Institusjon", 3),
     UTVIDET("Utvidet", 2),
-    ORDINÆR("Ordinær", 1);
+    ORDINÆR("Ordinær", 1),
+    ;
 
     fun tilOppgaveBehandlingTema(): OppgaveBehandlingTema {
         return when (this) {
@@ -447,25 +452,21 @@ enum class BehandlingUnderkategori(val visningsnavn: String, val nivå: Int) {
     }
 }
 
-fun List<BehandlingUnderkategori?>.finnHøyesteKategori(): BehandlingUnderkategori? =
-    this.filterNotNull().maxByOrNull { it.nivå }
-
 fun initStatus(): BehandlingStatus {
     return BehandlingStatus.UTREDES
 }
 
 enum class BehandlingStatus {
-    OPPRETTET,
     UTREDES,
+    SATT_PÅ_VENT,
+    SATT_PÅ_MASKINELL_VENT,
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
-    AVSLUTTET;
+    AVSLUTTET,
+    ;
 
     fun erLåstMenIkkeAvsluttet() = this == FATTER_VEDTAK || this == IVERKSETTER_VEDTAK
-}
-
-fun BehandlingStatus.erÅpen(): Boolean {
-    return this != BehandlingStatus.AVSLUTTET
+    fun erLåstForVidereRedigering() = this != UTREDES
 }
 
 class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {

@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt
 
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
@@ -13,14 +15,16 @@ import java.time.LocalDate
 @RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 class EndringstidspunktController(
-    val endringstidspunktService: EndringstidspunktService
+    val vedtaksperiodeService: VedtaksperiodeService,
+    val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     @GetMapping("/behandlinger/{behandlingId}/endringstidspunkt")
     fun hentEndringstidspunkt(
-        @PathVariable behandlingId: Long
+        @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<LocalDate>> = ResponseEntity.ok(
         Ressurs.success(
-            endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId)
-        )
+            behandlingHentOgPersisterService.hent(behandlingId).overstyrtEndringstidspunkt
+                ?: vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId),
+        ),
     )
 }

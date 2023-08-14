@@ -56,8 +56,8 @@ internal class AuditLoggerTest {
                 personIdent = "12345678901",
                 custom1 = CustomKeyValue("k", "v"),
                 custom2 = CustomKeyValue("k2", "v2"),
-                custom3 = CustomKeyValue("k3", "v3")
-            )
+                custom3 = CustomKeyValue("k3", "v3"),
+            ),
         )
         assertThat(listAppender.list).hasSize(1)
         assertThat(getMessage())
@@ -66,7 +66,7 @@ internal class AuditLoggerTest {
 
     private fun getMessage() = listAppender.list[0].message.replace("""end=\d+""".toRegex(), "end=123")
 
-    private val expectedBaseLog = "CEF:0|familie-ba-sak|auditLog|1.0|audit:access|Saksbehandling|INFO|end=123 " +
+    private val expectedBaseLog = "CEF:0|Familie|familie-ba-sak|1.0|audit:access|Saksbehandling|INFO|end=123 " +
         "suid=Z1234567 " +
         "duid=12345678901 " +
         "sproc=00001111 " +

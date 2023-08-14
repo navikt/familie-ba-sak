@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 @Service
 class VedtakService(
     private val vedtakRepository: VedtakRepository,
-    private val dokumentGenereringService: DokumentGenereringService
+    private val dokumentGenereringService: DokumentGenereringService,
 ) {
 
     fun hent(vedtakId: Long): Vedtak {
@@ -23,6 +23,11 @@ class VedtakService(
 
     fun hentAktivForBehandlingThrows(behandlingId: Long): Vedtak {
         return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
+    }
+
+    fun hentVedtaksdatoForBehandlingThrows(behandlingId: Long): LocalDateTime {
+        return vedtakRepository.finnVedtaksdatoForBehandling(behandlingId)
+            ?: error("Finner ikke vedtaksato for behandling=$behandlingId")
     }
 
     fun oppdater(vedtak: Vedtak): Vedtak {

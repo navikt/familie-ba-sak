@@ -14,7 +14,7 @@ import java.time.temporal.TemporalAdjusters
  */
 fun nesteGyldigeTriggertidForBehandlingIHverdager(
     minutesToAdd: Long = 0,
-    triggerTid: LocalDateTime = LocalDateTime.now()
+    triggerTid: LocalDateTime = LocalDateTime.now(),
 ): LocalDateTime {
     var date = triggerTid.plusMinutes(minutesToAdd)
 
@@ -32,6 +32,14 @@ fun nesteGyldigeTriggertidForBehandlingIHverdager(
         date.dayOfMonth == 17 && date.month == Month.MAY -> date = date.plusDays(1)
         date.dayOfMonth == 25 && date.month == Month.DECEMBER -> date = date.plusDays(2)
         date.dayOfMonth == 26 && date.month == Month.DECEMBER -> date = date.plusDays(1)
+    }
+
+    when (date.dayOfWeek) {
+        DayOfWeek.SATURDAY -> date = date.plusDays(2)
+        DayOfWeek.SUNDAY -> date = date.plusDays(1)
+        else -> {
+            // NOP
+        }
     }
 
     return date

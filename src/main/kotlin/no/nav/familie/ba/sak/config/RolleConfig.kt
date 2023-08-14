@@ -11,8 +11,10 @@ class RolleConfig(
     val SAKSBEHANDLER_ROLLE: String,
     @Value("\${rolle.veileder}")
     val VEILEDER_ROLLE: String,
+    @Value("\${rolle.forvalter}")
+    val FORVALTER_ROLLE: String,
     @Value("\${rolle.kode6}")
     val KODE6: String,
     @Value("\${rolle.kode7}")
-    val KODE7: String
+    val KODE7: String,
 )

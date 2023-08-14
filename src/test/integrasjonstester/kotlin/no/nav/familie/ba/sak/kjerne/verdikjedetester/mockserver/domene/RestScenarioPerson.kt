@@ -24,10 +24,10 @@ data class RestScenarioPerson(
             land = "NOR",
             gyldigFraOgMed = LocalDate.parse(fødselsdato),
             bekreftelsesdato = LocalDate.parse(fødselsdato),
-            gyldigTilOgMed = null
-        )
+            gyldigTilOgMed = null,
+        ),
     ),
-    val bostedsadresser: List<Bostedsadresse> = defaultBostedsadresseHistorikk
+    val bostedsadresser: List<Bostedsadresse> = defaultBostedsadresseHistorikk,
 ) {
 
     val navn = "$fornavn $etternavn"
@@ -44,8 +44,8 @@ val defaultBostedsadresseHistorikk = mutableListOf(
             bruksenhetsnummer = "H301",
             tilleggsnavn = "navn",
             postnummer = "0202",
-            kommunenummer = "2231"
-        )
+            kommunenummer = "2231",
+        ),
     ),
     Bostedsadresse(
         angittFlyttedato = LocalDate.of(2018, Month.JANUARY, 1),
@@ -55,12 +55,12 @@ val defaultBostedsadresseHistorikk = mutableListOf(
             bruksenhetsnummer = "H301",
             tilleggsnavn = "navn",
             postnummer = "0202",
-            kommunenummer = "2231"
-        )
-    )
+            kommunenummer = "2231",
+        ),
+    ),
 )
 
 data class ForelderBarnRelasjon(
     val relatertPersonsIdent: String,
-    val relatertPersonsRolle: String
+    val relatertPersonsRolle: String,
 )

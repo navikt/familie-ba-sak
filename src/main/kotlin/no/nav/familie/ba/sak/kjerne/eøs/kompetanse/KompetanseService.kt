@@ -11,11 +11,11 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class KompetanseService(
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
-    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>
+    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>,
 ) {
     val skjemaService = PeriodeOgBarnSkjemaService(
         kompetanseRepository,
-        endringsabonnenter
+        endringsabonnenter,
     )
 
     fun hentKompetanser(behandlingId: BehandlingId) =
@@ -29,8 +29,8 @@ class KompetanseService(
         skjemaService.endreSkjemaer(behandlingId, oppdatering)
 
     @Transactional
-    fun slettKompetanse(kompetanseId: Long) =
-        skjemaService.slettSkjema(kompetanseId)
+    fun slettKompetanse(behandlingId: BehandlingId, kompetanseId: Long) =
+        skjemaService.slettSkjema(behandlingId, kompetanseId)
 
     @Transactional
     fun kopierOgErstattKompetanser(fraBehandlingId: BehandlingId, tilBehandlingId: BehandlingId) =

@@ -10,11 +10,11 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class UtenlandskPeriodebeløpService(
     utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp>>
+    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp>>,
 ) {
     val skjemaService = PeriodeOgBarnSkjemaService(
         utenlandskPeriodebeløpRepository,
-        endringsabonnenter
+        endringsabonnenter,
     )
 
     fun hentUtenlandskePeriodebeløp(behandlingId: BehandlingId) =
@@ -23,8 +23,8 @@ class UtenlandskPeriodebeløpService(
     fun oppdaterUtenlandskPeriodebeløp(behandlingId: BehandlingId, utenlandskPeriodebeløp: UtenlandskPeriodebeløp) =
         skjemaService.endreSkjemaer(behandlingId, utenlandskPeriodebeløp)
 
-    fun slettUtenlandskPeriodebeløp(utenlandskPeriodebeløpId: Long) =
-        skjemaService.slettSkjema(utenlandskPeriodebeløpId)
+    fun slettUtenlandskPeriodebeløp(behandlingId: BehandlingId, utenlandskPeriodebeløpId: Long) =
+        skjemaService.slettSkjema(behandlingId, utenlandskPeriodebeløpId)
 
     @Transactional
     fun kopierOgErstattUtenlandskPeriodebeløp(fraBehandlingId: BehandlingId, tilBehandlingId: BehandlingId) =

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
@@ -13,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.somOverlapper
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtterEndretUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
@@ -22,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun hentPersonidenterGjeldendeForBegrunnelse(
     triggesAv: TriggesAv,
+    begrunnelse: IVedtakBegrunnelse,
     periode: NullablePeriode,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
     vedtaksperiodetype: Vedtaksperiodetype,
@@ -30,29 +33,32 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     identerMedReduksjonPåPeriode: List<String> = emptyList(),
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
-    dødeBarnForrigePeriode: List<String>
+    dødeBarnForrigePeriode: List<String>,
+    featureToggleService: FeatureToggleService,
 ): Set<String> {
     val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType.erFortsattInnvilget()
     val erEndretUtbetalingBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
     val erUtbetalingMedReduksjonFraSistIverksatteBehandling =
         vedtaksperiodetype == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING && vedtakBegrunnelseType.erReduksjon() && !triggesAv.vilkår.contains(
-            Vilkår.UNDER_18_ÅR
+            Vilkår.UNDER_18_ÅR,
         )
 
     fun hentPersonerForUtgjørendeVilkår() = hentPersonerForAlleUtgjørendeVilkår(
         minimertePersonResultater = restBehandlingsgrunnlagForBrev.minimertePersonResultater,
         vedtaksperiode = Periode(
             fom = periode.fom ?: TIDENES_MORGEN,
-            tom = periode.tom ?: TIDENES_ENDE
+            tom = periode.tom ?: TIDENES_ENDE,
         ),
         oppdatertBegrunnelseType = vedtakBegrunnelseType,
         aktuellePersonerForVedtaksperiode = hentAktuellePersonerForVedtaksperiode(
             restBehandlingsgrunnlagForBrev.personerPåBehandling,
             vedtakBegrunnelseType,
-            identerMedUtbetalingPåPeriode
+            identerMedUtbetalingPåPeriode,
         ),
+        begrunnelse = begrunnelse,
         triggesAv = triggesAv,
-        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
+        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+        featureToggleService = featureToggleService,
     ).map { person -> person.personIdent }
 
     return when {
@@ -60,14 +66,14 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             identerMedUtbetaling = identerMedUtbetalingPåPeriode,
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
             periode = periode,
-            fagsakType = restBehandlingsgrunnlagForBrev.fagsakType
+            fagsakType = restBehandlingsgrunnlagForBrev.fagsakType,
         ) + when {
             triggesAv.vilkår.any { it != Vilkår.UTVIDET_BARNETRYGD } -> hentPersonerForUtgjørendeVilkår()
             else -> emptyList()
         }
 
         triggesAv.barnMedSeksårsdag -> restBehandlingsgrunnlagForBrev.personerPåBehandling.barnMedSeksårsdagPåFom(
-            periode.fom
+            periode.fom,
         ).map { person -> person.personIdent }
 
         triggesAv.personerManglerOpplysninger -> if (restBehandlingsgrunnlagForBrev.minimertePersonResultater.harPersonerSomManglerOpplysninger()) {
@@ -81,10 +87,10 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = triggesAv,
             endredeUtbetalingAndelerSomOverlapperMedPeriode = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler.filter {
                 it.erOverlappendeMed(
-                    nullableMånedPeriode = periode.tilNullableMånedPeriode()
+                    nullableMånedPeriode = periode.tilNullableMånedPeriode(),
                 )
             },
-            minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer
+            minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
         )
 
         erUtbetalingMedReduksjonFraSistIverksatteBehandling -> identerMedReduksjonPåPeriode
@@ -92,7 +98,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
         triggesAv.etterEndretUtbetaling -> hentPersonerForEtterEndretUtbetalingsperiode(
             minimerteEndredeUtbetalingAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
             fom = periode.fom,
-            endringsaarsaker = triggesAv.endringsaarsaker
+            endringsaarsaker = triggesAv.endringsaarsaker,
         )
 
         triggesAv.barnDød -> dødeBarnForrigePeriode
@@ -104,7 +110,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 private fun hentPersonerForEndretUtbetalingBegrunnelse(
     triggesAv: TriggesAv,
     endredeUtbetalingAndelerSomOverlapperMedPeriode: List<MinimertRestEndretAndel>,
-    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
 ): List<String> {
     val personerMedRiktigTypeEndringer =
         endredeUtbetalingAndelerSomOverlapperMedPeriode.filter { triggesAv.endringsaarsaker.contains(it.årsak) }
@@ -135,7 +141,7 @@ private fun hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
     identerMedUtbetaling: List<String>,
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     periode: NullablePeriode,
-    fagsakType: FagsakType
+    fagsakType: FagsakType,
 ): List<String> {
     val identerFraSammenfallendeEndringsperioder =
         restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler.somOverlapper(periode.tilNullableMånedPeriode())
@@ -145,7 +151,9 @@ private fun hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
         restBehandlingsgrunnlagForBrev.personerPåBehandling.find {
             when (fagsakType) {
                 FagsakType.NORMAL,
-                FagsakType.INSTITUSJON -> it.type == PersonType.SØKER
+                FagsakType.INSTITUSJON,
+                -> it.type == PersonType.SØKER
+
                 FagsakType.BARN_ENSLIG_MINDREÅRIG -> it.type == PersonType.BARN
             }
         }?.personIdent
@@ -157,7 +165,7 @@ private fun hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
 private fun hentAktuellePersonerForVedtaksperiode(
     personerPåBehandling: List<MinimertRestPerson>,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
-    identerMedUtbetalingPåPeriode: List<String>
+    identerMedUtbetalingPåPeriode: List<String>,
 ): List<MinimertRestPerson> = personerPåBehandling.filter { person ->
     if (vedtakBegrunnelseType.erInnvilget()) {
         identerMedUtbetalingPåPeriode.contains(person.personIdent) || person.type == PersonType.SØKER

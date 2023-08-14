@@ -1,13 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import io.mockk.every
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -61,15 +59,13 @@ class PeriodeOffsetIntegrasjonTest(
     private val iverksettMotOppdrag: IverksettMotOppdrag,
 
     @Autowired
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 
 ) : AbstractSpringIntegrationTest() {
 
     @Test
     @Tag("integration")
     fun `Sjekk at offset settes på andel tilkjent ytelse når behandlingen iverksettes`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY) } returns false
-
         val fnr = randomFnr()
         val barnFnr = randomFnr()
         val stønadFom = LocalDate.now()
@@ -92,7 +88,7 @@ class PeriodeOffsetIntegrasjonTest(
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = fagsak.aktør,
-                barnAktør = barnAktør
+                barnAktør = barnAktør,
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
@@ -119,8 +115,8 @@ class PeriodeOffsetIntegrasjonTest(
                     behandlingsId = behandling.id,
                     vedtaksId = vedtak.id,
                     saksbehandlerId = "ansvarligSaksbehandler",
-                    personIdent = fagsak.aktør.aktivFødselsnummer()
-                )
+                    personIdent = fagsak.aktør.aktivFødselsnummer(),
+                ),
             )
         }
 
@@ -134,8 +130,6 @@ class PeriodeOffsetIntegrasjonTest(
     @Test
     @Tag("integration")
     fun `Sjekk at offset IKKE settes på andel tilkjent ytelse når behandlingen simuleres`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY) } returns false
-
         val fnr = randomFnr()
         val barnFnr = randomFnr()
         val stønadFom = LocalDate.now()
@@ -158,7 +152,7 @@ class PeriodeOffsetIntegrasjonTest(
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = fagsak.aktør,
-                barnAktør = barnAktør
+                barnAktør = barnAktør,
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
@@ -195,7 +189,7 @@ class PeriodeOffsetIntegrasjonTest(
         søkerAktør: Aktør,
         barnAktør: Aktør,
         stønadFom: LocalDate,
-        stønadTom: LocalDate
+        stønadTom: LocalDate,
     ): Vilkårsvurdering {
         val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
@@ -207,7 +201,7 @@ class PeriodeOffsetIntegrasjonTest(
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,
                 lagFullstendigVilkårResultat = true,
-                personType = PersonType.SØKER
+                personType = PersonType.SØKER,
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
@@ -216,8 +210,8 @@ class PeriodeOffsetIntegrasjonTest(
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,
                 lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN
-            )
+                personType = PersonType.BARN,
+            ),
         )
         return vilkårsvurdering
     }

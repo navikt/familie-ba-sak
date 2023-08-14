@@ -24,13 +24,15 @@ data class FeilutbetaltValuta(
     var tom: LocalDate,
     @Column(name = "feilutbetalt_beloep", nullable = false)
     var feilutbetaltBeløp: Int,
+    @Column(name = "er_per_maaned")
+    var erPerMåned: Boolean,
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "feilutbetalt_valuta_seq_generator")
     @SequenceGenerator(
         name = "feilutbetalt_valuta_seq_generator",
         sequenceName = "feilutbetalt_valuta_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
-    val id: Long = 0
+    val id: Long = 0,
 ) : BaseEntitet()

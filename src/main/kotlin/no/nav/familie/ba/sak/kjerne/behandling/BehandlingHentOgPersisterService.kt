@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 @Service
 class BehandlingHentOgPersisterService(
     private val behandlingRepository: BehandlingRepository,
-    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher
+    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 ) {
     fun lagreEllerOppdater(behandling: Behandling, sendTilDvh: Boolean = true): Behandling {
         return behandlingRepository.save(behandling).also {
@@ -41,12 +41,15 @@ class BehandlingHentOgPersisterService(
             ?: throw Feil("Finner ikke behandling med id $behandlingId")
     }
 
+    fun hentStatus(behandlingId: Long): BehandlingStatus {
+        return behandlingRepository.finnStatus(behandlingId)
+    }
+
     /**
      * Henter siste iverksatte behandling på fagsak
      */
     fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
-        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
-        return Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
+        return behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
     }
 
     /**
@@ -89,11 +92,11 @@ class BehandlingHentOgPersisterService(
 
     private fun List<Behandling>.hentSisteSomErVedtatt() =
         filter { !it.erHenlagt() && it.status == BehandlingStatus.AVSLUTTET }
-            .maxByOrNull { it.opprettetTidspunkt }
+            .maxByOrNull { it.aktivertTidspunkt }
 
     private fun List<Behandling>.hentSisteSomErSentTilØkonomi() =
         filter { !it.erHenlagt() && (it.status == BehandlingStatus.AVSLUTTET || it.status == BehandlingStatus.IVERKSETTER_VEDTAK) }
-            .maxByOrNull { it.opprettetTidspunkt }
+            .maxByOrNull { it.aktivertTidspunkt }
 
     /**
      * Henter siste behandling som er vedtatt FØR en gitt behandling

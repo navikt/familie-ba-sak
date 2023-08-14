@@ -9,25 +9,20 @@ import org.springframework.stereotype.Service
 class InstitusjonService(
     val fagsakRepository: FagsakRepository,
     val samhandlerKlient: SamhandlerKlient,
-    val institusjonRepository: InstitusjonRepository
+    val institusjonRepository: InstitusjonRepository,
 ) {
 
     fun hentEllerOpprettInstitusjon(orgNummer: String, tssEksternId: String?): Institusjon {
         return institusjonRepository.findByOrgNummer(orgNummer) ?: institusjonRepository.saveAndFlush(
             Institusjon(
                 orgNummer = orgNummer,
-                tssEksternId = tssEksternId
-            )
+                tssEksternId = tssEksternId,
+            ),
         )
     }
 
     fun hentSamhandler(orgNummer: String): SamhandlerInfo {
         return samhandlerKlient.hentSamhandler(orgNummer)
-    }
-
-    fun hentOrgnummerForTssEksternId(tssEksternId: String): String? {
-        return institusjonRepository.findByTssEksternId(tssEksternId)?.orgNummer
-            ?: samhandlerKlient.hentSamhandlerVedTssEksternId(tssEksternId).orgNummer
     }
 
     fun søkSamhandlere(navn: String?, postnummer: String?, område: String?): List<SamhandlerInfo> {

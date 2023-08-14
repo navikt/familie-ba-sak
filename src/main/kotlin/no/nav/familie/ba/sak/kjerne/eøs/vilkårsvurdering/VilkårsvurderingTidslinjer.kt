@@ -4,8 +4,10 @@ import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
@@ -19,12 +21,12 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 
 class VilkårsvurderingTidslinjer(
     vilkårsvurdering: Vilkårsvurdering,
-    personopplysningGrunnlag: PersonopplysningGrunnlag
+    søkerOgBarn: List<PersonEnkel>,
 ) {
-    private val barna: List<Aktør> = personopplysningGrunnlag.barna.map { it.aktør }
-    private val søker: Aktør = personopplysningGrunnlag.søker.aktør
+    private val barna: List<PersonEnkel> = søkerOgBarn.barn()
+    private val søker: Aktør = søkerOgBarn.søker().aktør
 
-    internal val barnOgFødselsdatoer = personopplysningGrunnlag.barna.associate { it.aktør to it.fødselsdato }
+    internal val barnOgFødselsdatoer = barna.associate { it.aktør to it.fødselsdato }
 
     private val aktørTilPersonResultater =
         vilkårsvurdering.personResultater.associateBy { it.aktør }
@@ -36,19 +38,24 @@ class VilkårsvurderingTidslinjer(
         }
 
     private val søkersTidslinje: SøkersTidslinjer =
-        SøkersTidslinjer(tidslinjer = this, aktør = søker, fagsakType = vilkårsvurdering.behandling.fagsak.type, behandlingUnderkategori = vilkårsvurdering.behandling.underkategori)
+        SøkersTidslinjer(
+            tidslinjer = this,
+            aktør = søker,
+            fagsakType = vilkårsvurdering.behandling.fagsak.type,
+            behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
+        )
 
     fun søkersTidslinjer(): SøkersTidslinjer = søkersTidslinje
 
     private val barnasTidslinjer: Map<Aktør, BarnetsTidslinjer> =
-        barna.associateWith {
-            BarnetsTidslinjer(
+        barna.map {
+            it.aktør to BarnetsTidslinjer(
                 tidslinjer = this,
-                aktør = it,
+                aktør = it.aktør,
                 fagsakType = vilkårsvurdering.behandling.fagsak.type,
-                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori
+                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
             )
-        }
+        }.toMap()
 
     fun forBarn(barn: Person) = barnasTidslinjer[barn.aktør]!!
 
@@ -59,7 +66,7 @@ class VilkårsvurderingTidslinjer(
         tidslinjer: VilkårsvurderingTidslinjer,
         aktør: Aktør,
         fagsakType: FagsakType,
-        behandlingUnderkategori: BehandlingUnderkategori
+        behandlingUnderkategori: BehandlingUnderkategori,
     ) {
         val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør] ?: listOf(TomTidslinje())
 
@@ -72,7 +79,7 @@ class VilkårsvurderingTidslinjer(
                     personType = PersonType.SØKER,
                     alleVilkårResultater = it,
                     fagsakType = fagsakType,
-                    behandlingUnderkategori = behandlingUnderkategori
+                    behandlingUnderkategori = behandlingUnderkategori,
                 )
             }
     }
@@ -81,7 +88,7 @@ class VilkårsvurderingTidslinjer(
         tidslinjer: VilkårsvurderingTidslinjer,
         aktør: Aktør,
         fagsakType: FagsakType,
-        behandlingUnderkategori: BehandlingUnderkategori
+        behandlingUnderkategori: BehandlingUnderkategori,
     ) {
         private val søkersTidslinje = tidslinjer.søkersTidslinje
 
@@ -100,7 +107,7 @@ class VilkårsvurderingTidslinjer(
                         personType = PersonType.BARN,
                         alleVilkårResultater = it,
                         fagsakType = fagsakType,
-                        behandlingUnderkategori = behandlingUnderkategori
+                        behandlingUnderkategori = behandlingUnderkategori,
                     )
                 }
                 .beskjærEtter(erUnder18ÅrVilkårTidslinje)

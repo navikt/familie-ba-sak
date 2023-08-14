@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelsePerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequest
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequestVariables
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -20,30 +23,50 @@ import java.net.URI
 class SystemOnlyPdlRestClient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
     @Qualifier("jwtBearerClientCredentials") override val restTemplate: RestOperations,
-    override val personidentService: PersonidentService
+    override val personidentService: PersonidentService,
 ) : PdlRestClient(pdlBaseUrl, restTemplate, personidentService) {
 
     @Cacheable("adressebeskyttelse", cacheManager = "shortCache")
     fun hentAdressebeskyttelse(aktør: Aktør): List<Adressebeskyttelse> {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-            query = hentGraphqlQuery("hent-adressebeskyttelse")
+            query = hentGraphqlQuery("hent-adressebeskyttelse"),
         )
 
         val pdlResponse: PdlBaseResponse<PdlAdressebeskyttelseResponse> = kallEksternTjeneste(
             tjeneste = "pdl",
             uri = pdlUri,
-            formål = "Hent adressebeskyttelse"
+            formål = "Hent adressebeskyttelse",
         ) {
             postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
         }
 
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
-            pdlResponse = pdlResponse
+            pdlResponse = pdlResponse,
         ) {
             it.person!!.adressebeskyttelse
         }
+    }
+
+    @Cacheable("adressebeskyttelsebolk", cacheManager = "shortCache")
+    fun hentAdressebeskyttelseBolk(personIdentList: List<String>): Map<String, PdlAdressebeskyttelsePerson> {
+        val pdlPersonRequest = PdlPersonBolkRequest(
+            variables = PdlPersonBolkRequestVariables(personIdentList),
+            query = hentGraphqlQuery("hent-adressebeskyttelse-bolk"),
+        )
+
+        val pdlResponse: PdlBolkResponse<PdlAdressebeskyttelsePerson> = kallEksternTjeneste(
+            tjeneste = "pdl",
+            uri = pdlUri,
+            formål = "Hent adressebeskyttelse i bolk",
+        ) {
+            postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+        }
+
+        return feilsjekkOgReturnerData(
+            pdlResponse = pdlResponse,
+        )
     }
 }
 

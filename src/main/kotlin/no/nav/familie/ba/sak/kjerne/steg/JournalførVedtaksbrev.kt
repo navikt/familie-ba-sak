@@ -37,7 +37,7 @@ class JournalførVedtaksbrev(
     private val fagsakRepository: FagsakRepository,
     private val organisasjonService: OrganisasjonService,
     private val brevmottakerService: BrevmottakerService,
-    private val brevmalService: BrevmalService
+    private val brevmalService: BrevmalService,
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: JournalførVedtaksbrevDTO): StegType {
@@ -82,7 +82,7 @@ class JournalførVedtaksbrev(
                     mottakerInfo.erInstitusjonVerge
                 } else {
                     (mottakerInfo.navn != null && mottakerInfo.navn != brevmottakerService.hentMottakerNavn(søkersident))
-                } // mottakersnavn fyller ut kun når manuell mottaker finnes
+                }, // mottakersnavn fyller ut kun når manuell mottaker finnes
             ).also { journalposterTilDistribusjon[it] = mottakerInfo }
         }
 
@@ -94,7 +94,7 @@ class JournalførVedtaksbrev(
     private fun lagTaskForÅDistribuereVedtaksbrev(
         journalposterTilDistribusjon: Map<String, MottakerInfo>,
         data: JournalførVedtaksbrevDTO,
-        behandling: Behandling
+        behandling: Behandling,
     ) {
         journalposterTilDistribusjon.forEach {
             val finnesBrevMottaker =
@@ -107,9 +107,9 @@ class JournalførVedtaksbrev(
                             distribuerDokumentDTO = lagDistribuerDokumentDto(
                                 behandling = behandling,
                                 journalPostId = it.key,
-                                mottakerInfo = it.value
+                                mottakerInfo = it.value,
                             ),
-                            properties = data.task.metadata
+                            properties = data.task.metadata,
                         )
                 taskRepository.save(distribuerTilVergeTask)
             } else { // Denne tasken sender vedtaksbrev og håndterer steg videre
@@ -117,9 +117,9 @@ class JournalførVedtaksbrev(
                     distribuerDokumentDTO = lagDistribuerDokumentDto(
                         behandling = behandling,
                         journalPostId = it.key,
-                        mottakerInfo = it.value
+                        mottakerInfo = it.value,
                     ),
-                    properties = data.task.metadata
+                    properties = data.task.metadata,
                 )
                 taskRepository.save(distribuerTilSøkerTask)
             }
@@ -132,7 +132,7 @@ class JournalførVedtaksbrev(
         vedtak: Vedtak,
         journalførendeEnhet: String,
         mottakerInfo: MottakerInfo,
-        tilManuellMottakerEllerVerge: Boolean
+        tilManuellMottakerEllerVerge: Boolean,
     ): String {
         val vedleggPdf =
             hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
@@ -142,21 +142,21 @@ class JournalførVedtaksbrev(
                 vedtak.stønadBrevPdF!!,
                 filtype = Filtype.PDFA,
                 dokumenttype = vedtak.behandling.resultat.tilDokumenttype(),
-                tittel = hentOverstyrtDokumenttittel(vedtak.behandling)
-            )
+                tittel = hentOverstyrtDokumenttittel(vedtak.behandling),
+            ),
         )
         logger.info(
             "Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${
-            hentOverstyrtDokumenttittel(vedtak.behandling)
-            }"
+                hentOverstyrtDokumenttittel(vedtak.behandling)
+            }",
         )
         val vedlegg = listOf(
             Dokument(
                 vedleggPdf,
                 filtype = Filtype.PDFA,
                 dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
-                tittel = VEDTAK_VEDLEGG_TITTEL
-            )
+                tittel = VEDTAK_VEDLEGG_TITTEL,
+            ),
         )
         return utgåendeJournalføringService.journalførDokument(
             fnr = fnr,
@@ -166,7 +166,7 @@ class JournalførVedtaksbrev(
             vedlegg = vedlegg,
             behandlingId = vedtak.behandling.id,
             avsenderMottaker = utledAvsenderMottaker(mottakerInfo),
-            tilManuellMottakerEllerVerge = tilManuellMottakerEllerVerge
+            tilManuellMottakerEllerVerge = tilManuellMottakerEllerVerge,
         )
     }
 
@@ -182,7 +182,7 @@ class JournalførVedtaksbrev(
                 AvsenderMottaker(
                     idType = mottakerInfo.brukerIdType,
                     id = mottakerInfo.brukerId,
-                    navn = organisasjonService.hentOrganisasjon(mottakerInfo.brukerId).navn
+                    navn = organisasjonService.hentOrganisasjon(mottakerInfo.brukerId).navn,
                 )
             }
 
@@ -190,15 +190,15 @@ class JournalførVedtaksbrev(
                 AvsenderMottaker(
                     idType = mottakerInfo.brukerIdType,
                     id = mottakerInfo.brukerId,
-                    navn = brevmottakerService.hentMottakerNavn(mottakerInfo.brukerId)
+                    navn = brevmottakerService.hentMottakerNavn(mottakerInfo.brukerId),
                 )
             }
 
-            mottakerInfo.brukerIdType == BrukerIdType.FNR && mottakerInfo.navn != null -> {
+            mottakerInfo.navn != null -> {
                 AvsenderMottaker(
                     idType = mottakerInfo.brukerIdType,
-                    id = mottakerInfo.brukerId,
-                    navn = mottakerInfo.navn
+                    id = mottakerInfo.brukerIdType?.let { mottakerInfo.brukerId },
+                    navn = mottakerInfo.navn,
                 )
             }
 
@@ -211,7 +211,7 @@ class JournalførVedtaksbrev(
     private fun lagDistribuerDokumentDto(
         behandling: Behandling,
         journalPostId: String,
-        mottakerInfo: MottakerInfo
+        mottakerInfo: MottakerInfo,
     ) =
         DistribuerDokumentDTO(
             personEllerInstitusjonIdent = mottakerInfo.brukerId,
@@ -219,7 +219,7 @@ class JournalførVedtaksbrev(
             journalpostId = journalPostId,
             brevmal = brevmalService.hentBrevmal(behandling),
             erManueltSendt = false,
-            manuellAdresseInfo = mottakerInfo.manuellAdresseInfo
+            manuellAdresseInfo = mottakerInfo.manuellAdresseInfo,
         )
 
     override fun stegType(): StegType {

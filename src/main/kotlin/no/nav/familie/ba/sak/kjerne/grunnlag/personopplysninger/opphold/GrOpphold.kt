@@ -32,7 +32,7 @@ data class GrOpphold(
     @SequenceGenerator(
         name = "po_opphold_seq_generator",
         sequenceName = "po_opphold_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -45,8 +45,11 @@ data class GrOpphold(
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
-    val person: Person
+    val person: Person,
 ) : BaseEntitet() {
+
+    fun tilKopiForNyPerson(nyPerson: Person): GrOpphold =
+        copy(id = 0, person = nyPerson)
 
     fun gjeldendeNå(): Boolean {
         if (gyldigPeriode == null) return true
@@ -74,7 +77,7 @@ data class GrOpphold(
     fun tilRestRegisteropplysning() = RestRegisteropplysning(
         fom = this.gyldigPeriode?.fom,
         tom = this.gyldigPeriode?.tom,
-        verdi = this.type.name.replace('_', ' ').storForbokstav()
+        verdi = this.type.name.replace('_', ' ').storForbokstav(),
     )
 
     companion object {
@@ -83,10 +86,10 @@ data class GrOpphold(
             GrOpphold(
                 gyldigPeriode = DatoIntervallEntitet(
                     fom = opphold.oppholdFra,
-                    tom = opphold.oppholdTil
+                    tom = opphold.oppholdTil,
                 ),
                 type = opphold.type,
-                person = person
+                person = person,
             )
     }
 }

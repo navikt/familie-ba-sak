@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlNotFoundException
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
 import no.nav.familie.ba.sak.common.RessursUtils.frontendFeil
 import no.nav.familie.ba.sak.common.RessursUtils.funksjonellFeil
@@ -14,7 +15,6 @@ import no.nav.familie.ba.sak.common.RessursUtils.unauthorized
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBServiceException
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.KanIkkeMigrereException
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
@@ -69,6 +69,13 @@ class ApiExceptionHandler {
         return illegalState(integrasjonException.message.toString(), integrasjonException)
     }
 
+    @ExceptionHandler(PdlPersonKanIkkeBehandlesIFagsystem::class)
+    fun handlePdlPersonKanIkkeBehandlesIFagsystem(feil: PdlPersonKanIkkeBehandlesIFagsystem): ResponseEntity<Ressurs<Nothing>> {
+        logger.warn("Person kan ikke behandles i fagsystem ${feil.årsak}")
+        secureLogger.warn("Person kan ikke behandles i fagsystem", feil)
+        return funksjonellFeil(feil)
+    }
+
     @ExceptionHandler(PdlNotFoundException::class)
     fun handlePdlNotFoundException(feil: PdlNotFoundException): ResponseEntity<Ressurs<Nothing>> {
         logger.warn("Finner ikke personen i PDL")
@@ -113,26 +120,6 @@ class ApiExceptionHandler {
         logger.info("Feil ekstern tjeneste: path:${feil.eksternTjenesteFeil.path} status:${feil.eksternTjenesteFeil.status} exception:${feil.eksternTjenesteFeil.exception}")
 
         return ResponseEntity.status(feil.eksternTjenesteFeil.status).body(feil.eksternTjenesteFeil)
-    }
-
-    @ExceptionHandler(KanIkkeMigrereException::class)
-    fun handleKanIkkeMigrereException(feil: KanIkkeMigrereException): ResponseEntity<Ressurs<String>> {
-        val mostSpecificThrowable =
-            if (feil.throwable != null) NestedExceptionUtils.getMostSpecificCause(feil.throwable!!) else null
-
-        val feilmelding = if (feil.melding != null) feil.melding else feil.feiltype.beskrivelse
-
-        val ressurs: Ressurs<String> = Ressurs.failure<String>(
-            errorMessage = feilmelding,
-            frontendFeilmelding = feilmelding,
-            error = mostSpecificThrowable
-        ).copy(data = feil.feiltype.name)
-        secureLogger.warn("Feil ved migrering. feiltype=${feil.feiltype} melding=$feilmelding", feil.throwable)
-        logger.warn("Feil ved migrering. feiltype=${feil.feiltype} melding=$feilmelding")
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-            ressurs
-        )
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)

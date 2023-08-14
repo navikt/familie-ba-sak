@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
@@ -29,27 +30,28 @@ class EndretUtbetalingAndelController(
     private val tilgangService: TilgangService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService
+    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService,
 ) {
 
     @PutMapping(path = ["{behandlingId}/{endretUtbetalingAndelId}"])
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         @PathVariable behandlingId: Long,
         @PathVariable endretUtbetalingAndelId: Long,
-        @RequestBody restEndretUtbetalingAndel: RestEndretUtbetalingAndel
+        @RequestBody restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Oppdater endretutbetalingandel"
+            handling = "Oppdater endretutbetalingandel",
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
 
         endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             behandling,
             endretUtbetalingAndelId,
-            restEndretUtbetalingAndel
+            restEndretUtbetalingAndel,
         )
 
         tilbakestillBehandlingTilBehandlingsresultatService
@@ -58,27 +60,28 @@ class EndretUtbetalingAndelController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
-            )
+                    .lagRestUtvidetBehandling(behandlingId = behandling.id),
+            ),
         )
     }
 
     @DeleteMapping(path = ["{behandlingId}/{endretUtbetalingAndelId}"])
     fun fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         @PathVariable behandlingId: Long,
-        @PathVariable endretUtbetalingAndelId: Long
+        @PathVariable endretUtbetalingAndelId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Oppdater endretutbetalingandel"
+            handling = "Oppdater endretutbetalingandel",
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
 
         endretUtbetalingAndelService.fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             behandling,
-            endretUtbetalingAndelId
+            endretUtbetalingAndelId,
         )
 
         tilbakestillBehandlingTilBehandlingsresultatService
@@ -86,22 +89,23 @@ class EndretUtbetalingAndelController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
-            )
+                    .lagRestUtvidetBehandling(behandlingId = behandling.id),
+            ),
         )
     }
 
     @PostMapping(path = ["/{behandlingId}"])
     fun lagreEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
-        @PathVariable behandlingId: Long
+        @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Opprett endretutbetalingandel"
+            handling = "Opprett endretutbetalingandel",
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
         endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
 
         tilbakestillBehandlingTilBehandlingsresultatService
@@ -110,27 +114,28 @@ class EndretUtbetalingAndelController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
-            )
+                    .lagRestUtvidetBehandling(behandlingId = behandling.id),
+            ),
         )
     }
 
     @PostMapping(path = ["/{behandlingId}/tilbakestill"])
     fun tilbakestillBehandlingTilBehandlingsresultat(
-        @PathVariable behandlingId: Long
+        @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<String>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Opprett endretutbetalingandel"
+            handling = "Opprett endretutbetalingandel",
         )
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
 
         tilbakestillBehandlingTilBehandlingsresultatService
             .tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
 
         return ResponseEntity.ok(
-            Ressurs.success("OK")
+            Ressurs.success("OK"),
         )
     }
 }

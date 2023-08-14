@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.util.VirkedagerProvider
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -16,7 +17,7 @@ import java.time.LocalDate
 @TaskStepBeskrivelse(
     taskStepType = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
     beskrivelse = "Grensesnittavstemming mot oppdrag",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val taskRepository: TaskRepositoryWrapper) :
     AsyncTaskStep {
@@ -33,9 +34,9 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
 
         val nesteAvstemmingTask = Task(
             type = TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(nesteAvstemmingTaskDTO)
+            payload = objectMapper.writeValueAsString(nesteAvstemmingTaskDTO),
         ).medTriggerTid(
-            nesteAvstemmingTaskDTO.tomDato.toLocalDate().atTime(8, 0)
+            nesteAvstemmingTaskDTO.tomDato.toLocalDate().atTime(8, 0),
         )
 
         taskRepository.save(nesteAvstemmingTask)
@@ -44,8 +45,7 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
     fun nesteAvstemmingDTO(tideligereTriggerDato: LocalDate): GrensesnittavstemmingTaskDTO =
         GrensesnittavstemmingTaskDTO(
             tideligereTriggerDato.atStartOfDay(),
-            nesteGyldigeTriggertidForBehandlingIHverdager((24 * 60).toLong(), tideligereTriggerDato.atStartOfDay())
-                .toLocalDate().atStartOfDay()
+            VirkedagerProvider.nesteVirkedag(tideligereTriggerDato).atStartOfDay(),
         )
 
     companion object {

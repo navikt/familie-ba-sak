@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
@@ -7,6 +8,8 @@ import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -25,16 +28,24 @@ import java.time.LocalDate
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class ValutakursController(
+    private val tilgangService: TilgangService,
     private val valutakursService: ValutakursService,
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val ecbService: ECBService
+    private val ecbService: ECBService,
 ) {
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterValutakurs(
         @PathVariable behandlingId: Long,
-        @RequestBody restValutakurs: RestValutakurs
+        @RequestBody restValutakurs: RestValutakurs,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Oppdaterer valutakurs",
+        )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
+
         val barnAktører = restValutakurs.barnIdenter.map { personidentService.hentAktør(it) }
 
         val valutaKurs = if (skalManueltSetteValutakurs(restValutakurs)) {
@@ -51,9 +62,16 @@ class ValutakursController(
     @DeleteMapping(path = ["{behandlingId}/{valutakursId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun slettValutakurs(
         @PathVariable behandlingId: Long,
-        @PathVariable valutakursId: Long
+        @PathVariable valutakursId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        valutakursService.slettValutakurs(valutakursId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Sletter valutakurs",
+        )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
+
+        valutakursService.slettValutakurs(BehandlingId(behandlingId), valutakursId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -63,8 +81,8 @@ class ValutakursController(
             valutakurs.copy(
                 kurs = ecbService.hentValutakurs(
                     restValutakurs.valutakode!!,
-                    restValutakurs.valutakursdato!!
-                )
+                    restValutakurs.valutakursdato!!,
+                ),
             )
         } else {
             valutakurs
@@ -75,7 +93,7 @@ class ValutakursController(
      */
     private fun skalManueltSetteValutakurs(restValutakurs: RestValutakurs): Boolean {
         return restValutakurs.valutakursdato != null && restValutakurs.valutakode == "ISK" && restValutakurs.valutakursdato.isBefore(
-            LocalDate.of(2018, 2, 1)
+            LocalDate.of(2018, 2, 1),
         )
     }
 

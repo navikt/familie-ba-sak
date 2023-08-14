@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -47,7 +48,7 @@ class BehandlingstemaServiceTest {
         loggService = loggService,
         oppgaveService = oppgaveService,
         vilkårsvurderingTidslinjeService = tidslinjeService,
-        vilkårsvurderingRepository = vilkårsvurderingRepository
+        vilkårsvurderingRepository = vilkårsvurderingRepository,
     )
     val defaultFagsak = defaultFagsak()
     val defaultBehandling = lagBehandling(defaultFagsak)
@@ -61,7 +62,7 @@ class BehandlingstemaServiceTest {
     fun `Skal utlede EØS dersom minst ett vilkår i har blitt behandlet i inneværende behandling`() {
         val barn = randomAktør()
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling
+            behandling = defaultBehandling,
         )
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -70,14 +71,14 @@ class BehandlingstemaServiceTest {
                 lagVilkårResultat(
                     vilkår = Vilkår.BOSATT_I_RIKET,
                     vilkårRegelverk = Regelverk.NASJONALE_REGLER,
-                    behandlingId = defaultBehandling.id
+                    behandlingId = defaultBehandling.id,
                 ),
                 lagVilkårResultat(
                     vilkår = Vilkår.BOSATT_I_RIKET,
                     vilkårRegelverk = Regelverk.EØS_FORORDNINGEN,
-                    behandlingId = defaultBehandling.id
-                )
-            )
+                    behandlingId = defaultBehandling.id,
+                ),
+            ),
         )
         vilkårsvurdering.personResultater = setOf(personResultat)
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.id) } returns vilkårsvurdering
@@ -91,7 +92,7 @@ class BehandlingstemaServiceTest {
     fun `Skal utlede NASJONAL dersom EØS vilkåret ble behandlet i annen behandling`() {
         val barn = randomAktør()
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling
+            behandling = defaultBehandling,
         )
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -100,14 +101,14 @@ class BehandlingstemaServiceTest {
                 lagVilkårResultat(
                     vilkår = Vilkår.BOSATT_I_RIKET,
                     vilkårRegelverk = Regelverk.NASJONALE_REGLER,
-                    behandlingId = defaultBehandling.id
+                    behandlingId = defaultBehandling.id,
                 ),
                 lagVilkårResultat(
                     vilkår = Vilkår.BOSATT_I_RIKET,
                     vilkårRegelverk = Regelverk.EØS_FORORDNINGEN,
-                    behandlingId = 0L
-                )
-            )
+                    behandlingId = 0L,
+                ),
+            ),
         )
         vilkårsvurdering.personResultater = setOf(personResultat)
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.id) } returns vilkårsvurdering
@@ -120,7 +121,7 @@ class BehandlingstemaServiceTest {
     @Test
     fun `Skal utlede UTVIDET dersom minst ett vilkår i har blitt behandlet i inneværende behandling`() {
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling
+            behandling = defaultBehandling,
         )
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -128,13 +129,13 @@ class BehandlingstemaServiceTest {
             vilkårResultater = mutableSetOf(
                 lagVilkårResultat(
                     vilkår = Vilkår.UTVIDET_BARNETRYGD,
-                    behandlingId = defaultBehandling.id
+                    behandlingId = defaultBehandling.id,
                 ),
                 lagVilkårResultat(
                     vilkår = Vilkår.UTVIDET_BARNETRYGD,
-                    behandlingId = defaultBehandling.id
-                )
-            )
+                    behandlingId = defaultBehandling.id,
+                ),
+            ),
         )
         vilkårsvurdering.personResultater = setOf(personResultat)
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.id) } returns vilkårsvurdering
@@ -148,7 +149,7 @@ class BehandlingstemaServiceTest {
     fun `Skal utlede ORDINÆR dersom UTVIDET vilkåret ble behandlet i annen behandling`() {
         val barn = randomAktør()
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling
+            behandling = defaultBehandling,
         )
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -157,9 +158,9 @@ class BehandlingstemaServiceTest {
                 lagVilkårResultat(
                     vilkår = Vilkår.UTVIDET_BARNETRYGD,
                     vilkårRegelverk = Regelverk.NASJONALE_REGLER,
-                    behandlingId = 0L
-                )
-            )
+                    behandlingId = 0L,
+                ),
+            ),
         )
         vilkårsvurdering.personResultater = setOf(personResultat)
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.id) } returns vilkårsvurdering
@@ -177,7 +178,8 @@ class BehandlingstemaServiceTest {
         every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = lagVilkårsvurdering(tilAktør(søkerFnr), defaultBehandling, Resultat.OPPFYLT),
-                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, randomFnr(), barnFnr)
+                søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, randomFnr(), barnFnr)
+                    .tilPersonEnkelSøkerOgBarn(),
             )
         assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }
@@ -198,12 +200,13 @@ class BehandlingstemaServiceTest {
             tilAktør(barnFnr),
             tilAktør(barn2Fnr),
             LocalDate.now().minusMonths(1),
-            LocalDate.now().plusYears(2)
+            LocalDate.now().plusYears(2),
         )
         every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                    .tilPersonEnkelSøkerOgBarn(),
             )
         assertEquals(BehandlingKategori.EØS, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }
@@ -224,12 +227,13 @@ class BehandlingstemaServiceTest {
             tilAktør(barnFnr),
             tilAktør(barn2Fnr),
             LocalDate.now().minusMonths(3),
-            LocalDate.now().minusMonths(2)
+            LocalDate.now().minusMonths(2),
         )
         every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                    .tilPersonEnkelSøkerOgBarn(),
             )
         assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }

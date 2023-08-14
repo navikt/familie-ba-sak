@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.logg.BehandlingLoggRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -52,19 +53,20 @@ class BehandlingService(
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val fagsakRepository: FagsakRepository,
     private val vedtakRepository: VedtakRepository,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val loggService: LoggService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val infotrygdService: InfotrygdService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
         val fagsak = fagsakRepository.finnFagsak(nyBehandling.fagsakId) ?: throw FunksjonellFeil(
             melding = "Kan ikke lage behandling på person. Fant ikke fagsak ${nyBehandling.fagsakId}",
-            frontendFeilmelding = "Kan ikke lage behandling på person. Fant ikke fagsak."
+            frontendFeilmelding = "Kan ikke lage behandling på person. Fant ikke fagsak.",
         )
 
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)
@@ -76,15 +78,15 @@ class BehandlingService(
                 overstyrtKategori = nyBehandling.kategori,
                 behandlingType = nyBehandling.behandlingType,
                 behandlingÅrsak = nyBehandling.behandlingÅrsak,
-                kategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeKategori(fagsak.id)
+                kategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeKategori(fagsak.id),
             )
 
             val underkategori = bestemUnderkategori(
                 overstyrtUnderkategori = nyBehandling.underkategori,
                 underkategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsak.id),
                 underkategoriFraInneværendeBehandling = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(
-                    fagsak.id
-                )
+                    fagsak.id,
+                ),
             )
 
             val behandling = Behandling(
@@ -93,23 +95,27 @@ class BehandlingService(
                 type = nyBehandling.behandlingType,
                 kategori = kategori,
                 underkategori = underkategori,
-                skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk
+                skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk,
             )
                 .initBehandlingStegTilstand()
 
             behandling.validerBehandlingstype(
-                sisteBehandlingSomErVedtatt = sisteBehandlingSomErVedtatt
+                sisteBehandlingSomErVedtatt = sisteBehandlingSomErVedtatt,
             )
             val lagretBehandling = lagreNyOgDeaktiverGammelBehandling(behandling).also {
                 if (nyBehandling.søknadMottattDato != null) {
-                    behandlingSøknadsinfoService.lagreNedSøknadMottattDato(nyBehandling.søknadMottattDato, behandling)
+                    behandlingSøknadsinfoService.lagreNedSøknadsinfo(
+                        mottattDato = nyBehandling.søknadMottattDato,
+                        søknadsinfo = nyBehandling.søknadsinfo,
+                        behandling = behandling,
+                    )
                 }
                 saksstatistikkEventPublisher.publiserBehandlingsstatistikk(it.id)
             }
             opprettOgInitierNyttVedtakForBehandling(behandling = lagretBehandling)
 
             loggService.opprettBehandlingLogg(
-                BehandlingLoggRequest(behandling = lagretBehandling, barnasIdenter = nyBehandling.barnasIdenter)
+                BehandlingLoggRequest(behandling = lagretBehandling, barnasIdenter = nyBehandling.barnasIdenter),
             )
             if (lagretBehandling.opprettBehandleSakOppgave()) {
                 /**
@@ -121,8 +127,8 @@ class BehandlingService(
                         behandlingId = lagretBehandling.id,
                         oppgavetype = Oppgavetype.BehandleSak,
                         fristForFerdigstillelse = LocalDate.now(),
-                        tilordnetRessurs = nyBehandling.navIdent
-                    )
+                        tilordnetRessurs = nyBehandling.navIdent,
+                    ),
                 )
             }
 
@@ -135,7 +141,7 @@ class BehandlingService(
         } else {
             throw FunksjonellFeil(
                 melding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
-                frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt."
+                frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
             )
         }
     }
@@ -150,7 +156,7 @@ class BehandlingService(
     fun opprettOgInitierNyttVedtakForBehandling(
         behandling: Behandling,
         kopierVedtakBegrunnelser: Boolean = false,
-        begrunnelseVilkårPekere: List<OriginalOgKopiertVilkårResultat> = emptyList()
+        begrunnelseVilkårPekere: List<OriginalOgKopiertVilkårResultat> = emptyList(),
     ) {
         behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
             ?: error("Forsøker å initiere vedtak på steg ${behandling.steg}")
@@ -161,13 +167,13 @@ class BehandlingService(
 
         val nyttVedtak = Vedtak(
             behandling = behandling,
-            vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
+            vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null,
         )
 
         if (kopierVedtakBegrunnelser && deaktivertVedtak != null) {
             vedtaksperiodeService.kopierOverVedtaksperioder(
                 deaktivertVedtak = deaktivertVedtak,
-                aktivtVedtak = nyttVedtak
+                aktivtVedtak = nyttVedtak,
             )
         }
 
@@ -182,6 +188,7 @@ class BehandlingService(
         return behandlingHentOgPersisterService.lagreEllerOppdater(behandling = behandling, sendTilDvh = true)
     }
 
+    @Transactional
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)
 
@@ -191,7 +198,7 @@ class BehandlingService(
         } else if (harAktivInfotrygdSak(behandling)) {
             throw FunksjonellFeil(
                 "Kan ikke lage behandling på person med aktiv sak i Infotrygd",
-                "Kan ikke lage behandling på person med aktiv sak i Infotrygd"
+                "Kan ikke lage behandling på person med aktiv sak i Infotrygd",
             )
         }
 
@@ -199,7 +206,7 @@ class BehandlingService(
         return behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false).also {
             arbeidsfordelingService.fastsettBehandlendeEnhet(
                 it,
-                behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(it.fagsak.id)
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(it.fagsak.id),
             )
             if (it.versjon == 0L) {
                 behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(it)
@@ -207,7 +214,7 @@ class BehandlingService(
         }
     }
 
-    private fun harAktivInfotrygdSak(behandling: Behandling): Boolean {
+    fun harAktivInfotrygdSak(behandling: Behandling): Boolean {
         val søkerIdenter = behandling.fagsak.aktør.personidenter.map { it.fødselsnummer }
         return infotrygdService.harÅpenSakIInfotrygd(søkerIdenter) ||
             !behandling.erMigrering() && infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
@@ -233,7 +240,7 @@ class BehandlingService(
         loggService.opprettVilkårsvurderingLogg(
             behandling = behandling,
             forrigeBehandlingsresultat = behandling.resultat,
-            nyttBehandlingsresultat = resultat
+            nyttBehandlingsresultat = resultat,
         )
 
         behandling.resultat = resultat
@@ -242,7 +249,7 @@ class BehandlingService(
 
     fun leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
         behandlingId: Long,
-        steg: StegType
+        steg: StegType,
     ): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         behandling.leggTilBehandlingStegTilstand(steg)
@@ -253,12 +260,12 @@ class BehandlingService(
     fun harBehandlingsårsakAlleredeKjørt(
         fagsakId: Long,
         behandlingÅrsak: BehandlingÅrsak,
-        måned: YearMonth
+        måned: YearMonth,
     ): Boolean {
         return Behandlingutils.harBehandlingsårsakAlleredeKjørt(
             behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId),
             behandlingÅrsak = behandlingÅrsak,
-            måned = måned
+            måned = måned,
         )
     }
 
@@ -271,7 +278,7 @@ class BehandlingService(
                 ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
                     ?.takeIf { it.erMigrering() }?.let { // fordi migreringsdato kun kan lagret for migreringsbehandling
                         vilkårsvurderingService.hentTidligsteVilkårsvurderingKnyttetTilMigrering(
-                            behandlingId = it.id
+                            behandlingId = it.id,
                         )
                     }
 
@@ -300,6 +307,10 @@ class BehandlingService(
         behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)
             ?.let { behandlingMigreringsinfoRepository.delete(it) }
     }
+
+    fun erLøpende(behandling: Behandling): Boolean =
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+            .any { it.erLøpende() }
 
     companion object {
 

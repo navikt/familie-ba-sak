@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -29,7 +30,7 @@ internal class VilkårsvurderingTidslinjerTest {
 
         val defaultBehandling = lagBehandling(defaultFagsak())
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling
+            behandling = defaultBehandling,
         ).also {
             it.personResultater = lagPersonResultaterForSøkerOgToBarn(
                 it,
@@ -37,7 +38,7 @@ internal class VilkårsvurderingTidslinjerTest {
                 tilAktør(barnFnr),
                 tilAktør(barn2Fnr),
                 LocalDate.now().minusMonths(3),
-                LocalDate.now().minusMonths(2)
+                LocalDate.now().minusMonths(2),
             )
         }
 
@@ -51,15 +52,16 @@ internal class VilkårsvurderingTidslinjerTest {
                     behandlingId = defaultBehandling.id,
                     periodeFom = null, // uendelig lenge siden
                     periodeTom = null, // uendelig lenge til
-                    resultat = Resultat.IKKE_OPPFYLT
-                )
+                    resultat = Resultat.IKKE_OPPFYLT,
+                ),
             )
         }
 
         assertDoesNotThrow {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                    .tilPersonEnkelSøkerOgBarn(),
             )
         }
     }
@@ -73,7 +75,7 @@ internal class VilkårsvurderingTidslinjerTest {
 
         val defaultBehandling = lagBehandling(defaultFagsak())
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling
+            behandling = defaultBehandling,
         ).also {
             it.personResultater = lagPersonResultaterForSøkerOgToBarn(
                 it,
@@ -81,7 +83,7 @@ internal class VilkårsvurderingTidslinjerTest {
                 tilAktør(barnFnr),
                 tilAktør(barn2Fnr),
                 LocalDate.now().minusMonths(3),
-                LocalDate.now().minusMonths(2)
+                LocalDate.now().minusMonths(2),
             )
         }
 
@@ -94,15 +96,16 @@ internal class VilkårsvurderingTidslinjerTest {
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     behandlingId = defaultBehandling.id,
                     periodeTom = null,
-                    resultat = Resultat.OPPFYLT
-                )
+                    resultat = Resultat.OPPFYLT,
+                ),
             )
         }
 
         assertThrows<Tidslinje.Companion.TidslinjeFeilException> {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                    .tilPersonEnkelSøkerOgBarn(),
             )
         }
     }
@@ -116,7 +119,7 @@ internal class VilkårsvurderingTidslinjerTest {
         periodeTom: LocalDate? = LocalDate.of(2010, 1, 31),
         begrunnelse: String = "",
         behandlingId: Long = lagBehandling().id,
-        utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
+        utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
     ) = VilkårResultat(
         id = id,
         personResultat = personResultat,
@@ -126,6 +129,6 @@ internal class VilkårsvurderingTidslinjerTest {
         periodeTom = periodeTom,
         begrunnelse = begrunnelse,
         behandlingId = behandlingId,
-        utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
+        utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
     )
 }

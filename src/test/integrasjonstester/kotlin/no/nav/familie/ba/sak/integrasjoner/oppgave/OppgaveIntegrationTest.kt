@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,6 +46,11 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
     @Autowired
     private lateinit var databaseCleanupService: DatabaseCleanupService
 
+    @BeforeEach
+    fun setUp() {
+        databaseCleanupService.truncate()
+    }
+
     @Test
     fun `Skal opprette oppgave og ferdigstille oppgave for behandling`() {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
@@ -55,7 +61,7 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
             SØKER_FNR,
             listOf(BARN_FNR),
             søkerAktør = fagsak.aktør,
-            barnAktør = barnAktør
+            barnAktør = barnAktør,
         )
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -72,11 +78,11 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
         Assertions.assertEquals(behandling.status, opprettetOppgave.behandling.status)
         Assertions.assertEquals(
             behandling.behandlingStegTilstand.first().behandlingSteg,
-            opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingSteg
+            opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingSteg,
         )
         Assertions.assertEquals(
             behandling.behandlingStegTilstand.first().behandlingStegStatus,
-            opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingStegStatus
+            opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingStegStatus,
         )
         Assertions.assertFalse(opprettetOppgave.erFerdigstilt)
         Assertions.assertEquals(godkjenneVedtakOppgaveId, opprettetOppgave.gsakId)
@@ -86,8 +92,8 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
         Assertions.assertNull(
             oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
                 Oppgavetype.GodkjenneVedtak,
-                behandling
-            )
+                behandling,
+            ),
         )
     }
 
@@ -100,13 +106,13 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val barnAktør = personidentService.hentAktørIder(listOf(BARN_FNR))
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(BARN_FNR), true)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandling.id,
             SØKER_FNR,
             listOf(BARN_FNR),
             søkerAktør = fagsak.aktør,
-            barnAktør = barnAktør
+            barnAktør = barnAktør,
         )
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -132,7 +138,7 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
             SØKER_FNR,
             listOf(BARN_FNR),
             søkerAktør = fagsak.aktør,
-            barnAktør = barnAktør
+            barnAktør = barnAktør,
         )
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)

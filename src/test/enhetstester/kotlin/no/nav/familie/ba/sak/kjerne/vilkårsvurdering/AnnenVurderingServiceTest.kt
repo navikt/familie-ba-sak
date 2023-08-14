@@ -35,7 +35,7 @@ class AnnenVurderingServiceTest {
             person = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 1, 1)),
             resultat = Resultat.OPPFYLT,
             periodeFom = LocalDate.of(2020, 1, 1),
-            periodeTom = LocalDate.of(2020, 7, 1)
+            periodeTom = LocalDate.of(2020, 7, 1),
         )
     }
 
@@ -46,26 +46,27 @@ class AnnenVurderingServiceTest {
                 resultat = Resultat.OPPFYLT,
                 type = AnnenVurderingType.OPPLYSNINGSPLIKT,
                 begrunnelse = "begrunnelse",
-                personResultat = personResultat
-            )
+                personResultat = personResultat,
+            ),
         )
         val nyAnnenVurering = AnnenVurdering(
             resultat = Resultat.IKKE_OPPFYLT,
             type = AnnenVurderingType.OPPLYSNINGSPLIKT,
             begrunnelse = "begrunnelse to",
-            personResultat = personResultat
+            personResultat = personResultat,
         )
 
         every { annenVurderingRepository.save(any()) } returns nyAnnenVurering
 
         annenVurderingService.endreAnnenVurdering(
+            personResultat.vilkårsvurdering.behandling.id,
             123L,
             RestAnnenVurdering(
                 123L,
                 Resultat.IKKE_OPPFYLT,
                 type = AnnenVurderingType.OPPLYSNINGSPLIKT,
-                begrunnelse = "begrunnelse to"
-            )
+                begrunnelse = "begrunnelse to",
+            ),
         )
 
         verify(exactly = 1) {

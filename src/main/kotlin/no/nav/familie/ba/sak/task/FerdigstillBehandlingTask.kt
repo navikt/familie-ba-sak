@@ -14,19 +14,19 @@ import java.util.Properties
 @TaskStepBeskrivelse(
     taskStepType = FerdigstillBehandlingTask.TASK_STEP_TYPE,
     beskrivelse = "Ferdigstill behandling",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class FerdigstillBehandlingTask(
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    val stegService: StegService
+    val stegService: StegService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val ferdigstillBehandling = objectMapper.readValue(task.payload, FerdigstillBehandlingDTO::class.java)
         stegService.håndterFerdigstillBehandling(
             behandling = behandlingHentOgPersisterService.hent(
-                ferdigstillBehandling.behandlingsId
-            )
+                ferdigstillBehandling.behandlingsId,
+            ),
         )
     }
 
@@ -40,13 +40,13 @@ class FerdigstillBehandlingTask(
                 payload = objectMapper.writeValueAsString(
                     FerdigstillBehandlingDTO(
                         personIdent = søkerIdent,
-                        behandlingsId = behandlingsId
-                    )
+                        behandlingsId = behandlingsId,
+                    ),
                 ),
                 properties = Properties().apply {
                     this["personIdent"] = søkerIdent
                     this["behandlingsId"] = behandlingsId.toString()
-                }
+                },
             )
         }
     }

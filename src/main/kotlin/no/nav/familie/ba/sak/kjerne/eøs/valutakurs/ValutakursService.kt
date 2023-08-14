@@ -10,11 +10,11 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ValutakursService(
     valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
-    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs>>
+    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs>>,
 ) {
     val skjemaService = PeriodeOgBarnSkjemaService(
         valutakursRepository,
-        endringsabonnenter
+        endringsabonnenter,
     )
 
     fun hentValutakurs(valutakursId: Long): Valutakurs = skjemaService.hentMedId(valutakursId)
@@ -25,8 +25,8 @@ class ValutakursService(
     fun oppdaterValutakurs(behandlingId: BehandlingId, valutakurs: Valutakurs) =
         skjemaService.endreSkjemaer(behandlingId, valutakurs)
 
-    fun slettValutakurs(valutakursId: Long) =
-        skjemaService.slettSkjema(valutakursId)
+    fun slettValutakurs(behandlingId: BehandlingId, valutakursId: Long) =
+        skjemaService.slettSkjema(behandlingId, valutakursId)
 
     @Transactional
     fun kopierOgErstattValutakurser(fraBehandlingId: BehandlingId, tilBehandlingId: BehandlingId) =

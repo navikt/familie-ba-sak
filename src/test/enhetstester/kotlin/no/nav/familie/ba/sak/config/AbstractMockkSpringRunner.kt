@@ -3,7 +3,8 @@ package no.nav.familie.ba.sak.config
 import io.mockk.isMockKMock
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
-import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
+import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClientMock
@@ -32,6 +33,9 @@ abstract class AbstractMockkSpringRunner {
 
     @Autowired
     private lateinit var mockIntegrasjonClient: IntegrasjonClient
+
+    @Autowired
+    private lateinit var mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
 
     @Autowired
     private lateinit var mockEfSakRestClient: EfSakRestClient
@@ -91,6 +95,7 @@ abstract class AbstractMockkSpringRunner {
         }
 
         IntegrasjonClientMock.clearIntegrasjonMocks(mockIntegrasjonClient)
+        IntegrasjonClientMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(mockFamilieIntegrasjonerTilgangskontrollClient)
 
         if (isMockKMock(mockFeatureToggleService)) {
             ClientMocks.clearFeatureToggleMocks(mockFeatureToggleService)

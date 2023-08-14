@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -22,36 +21,29 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFø
 import java.time.LocalDate
 
 data class VilkårsvurderingForNyBehandlingUtils(
-    val personopplysningGrunnlag: PersonopplysningGrunnlag
+    val personopplysningGrunnlag: PersonopplysningGrunnlag,
 ) {
     fun genererInitiellVilkårsvurdering(
         behandling: Behandling,
-        barnaAktørSomAlleredeErVurdert: List<Aktør>
+        barnaAktørSomAlleredeErVurdert: List<Aktør>,
     ): Vilkårsvurdering {
         return Vilkårsvurdering(behandling = behandling).apply {
             when {
-                behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD &&
-                    behandling.opprettetÅrsak == BehandlingÅrsak.MIGRERING -> {
-                    personResultater = lagPersonResultaterForMigreringsbehandling(
-                        vilkårsvurdering = this
-                    )
-                }
-
                 behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
                     personResultater = lagPersonResultaterForFødselshendelse(
                         vilkårsvurdering = this,
-                        barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert
+                        barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert,
                     )
                 }
 
                 !behandling.skalBehandlesAutomatisk -> {
                     personResultater = lagPersonResultaterForManuellVilkårsvurdering(
-                        vilkårsvurdering = this
+                        vilkårsvurdering = this,
                     )
                 }
 
                 else -> personResultater = lagPersonResultaterForTomVilkårsvurdering(
-                    vilkårsvurdering = this
+                    vilkårsvurdering = this,
                 )
             }
         }
@@ -61,13 +53,13 @@ data class VilkårsvurderingForNyBehandlingUtils(
         initiellVilkårsvurdering: Vilkårsvurdering,
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering,
         behandling: Behandling,
-        løpendeUnderkategori: BehandlingUnderkategori?
+        løpendeUnderkategori: BehandlingUnderkategori?,
     ): Vilkårsvurdering {
         val (vilkårsvurdering) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
             aktivVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
-            forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering
+            forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
         )
 
         return if (behandling.type == BehandlingType.REVURDERING) {
@@ -90,7 +82,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                             .maxByOrNull { it.periodeTom ?: TIDENES_ENDE }
 
                     if (vilkårAvTypeMedSenesteTom != null && dødsDato.isBefore(
-                            vilkårAvTypeMedSenesteTom.periodeTom ?: TIDENES_ENDE
+                            vilkårAvTypeMedSenesteTom.periodeTom ?: TIDENES_ENDE,
                         ) && dødsDato.isAfter(vilkårAvTypeMedSenesteTom.periodeFom)
                     ) {
                         vilkårAvTypeMedSenesteTom.periodeTom = dødsDato
@@ -102,47 +94,9 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return vilkårsvurdering
     }
 
-    private fun lagPersonResultaterForMigreringsbehandling(
-        vilkårsvurdering: Vilkårsvurdering
-    ): Set<PersonResultat> {
-        return personopplysningGrunnlag.søkerOgBarn.map { person ->
-            val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
-
-            val vilkårTyperForPerson = Vilkår.hentVilkårFor(
-                personType = person.type,
-                fagsakType = vilkårsvurdering.behandling.fagsak.type,
-                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori
-            )
-
-            val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
-                val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
-
-                val tom: LocalDate? =
-                    if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.til18ÅrsVilkårsdato() else null
-
-                val begrunnelse = "Migrering"
-
-                VilkårResultat(
-                    personResultat = personResultat,
-                    erAutomatiskVurdert = false,
-                    resultat = Resultat.OPPFYLT,
-                    vilkårType = vilkår,
-                    periodeFom = fom,
-                    periodeTom = tom,
-                    begrunnelse = begrunnelse,
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id
-                )
-            }.toSortedSet(VilkårResultat.VilkårResultatComparator)
-
-            personResultat.setSortedVilkårResultater(vilkårResultater)
-
-            personResultat
-        }.toSet()
-    }
-
     private fun lagPersonResultaterForFødselshendelse(
         vilkårsvurdering: Vilkårsvurdering,
-        barnaAktørSomAlleredeErVurdert: List<Aktør>
+        barnaAktørSomAlleredeErVurdert: List<Aktør>,
     ): Set<PersonResultat> {
         val annenForelder = personopplysningGrunnlag.annenForelder
         val eldsteBarnSomVurderesSinFødselsdato =
@@ -156,7 +110,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
             val vilkårForPerson = Vilkår.hentVilkårFor(
                 personType = person.type,
                 fagsakType = vilkårsvurdering.behandling.fagsak.type,
-                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori
+                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
             )
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
@@ -165,7 +119,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     annenForelder = annenForelder,
                     eldsteBarnSinFødselsdato = eldsteBarnSomVurderesSinFødselsdato,
                     personResultat = personResultat,
-                    vilkår = vilkår
+                    vilkår = vilkår,
                 )
             }
 
@@ -176,7 +130,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
     }
 
     private fun lagPersonResultaterForManuellVilkårsvurdering(
-        vilkårsvurdering: Vilkårsvurdering
+        vilkårsvurdering: Vilkårsvurdering,
     ): Set<PersonResultat> {
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             genererPersonResultatForPerson(vilkårsvurdering, person)
@@ -184,7 +138,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
     }
 
     private fun lagPersonResultaterForTomVilkårsvurdering(
-        vilkårsvurdering: Vilkårsvurdering
+        vilkårsvurdering: Vilkårsvurdering,
     ): Set<PersonResultat> {
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
@@ -192,7 +146,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
             val vilkårForPerson = Vilkår.hentVilkårFor(
                 personType = person.type,
                 fagsakType = vilkårsvurdering.behandling.fagsak.type,
-                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori
+                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
             )
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
@@ -202,7 +156,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     resultat = Resultat.IKKE_VURDERT,
                     vilkårType = vilkår,
                     begrunnelse = "",
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id
+                    behandlingId = personResultat.vilkårsvurdering.behandling.id,
                 )
             }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
@@ -215,7 +169,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
     fun lagPersonResultaterForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
         vilkårsvurdering: Vilkårsvurdering,
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering,
-        nyMigreringsdato: LocalDate
+        nyMigreringsdato: LocalDate,
     ): Set<PersonResultat> {
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
@@ -230,7 +184,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     forrigeBehandlingVilkårsvurdering,
                     vilkår,
                     person,
-                    nyMigreringsdato
+                    nyMigreringsdato,
                 )
 
                 val tom: LocalDate? =
@@ -238,29 +192,38 @@ data class VilkårsvurderingForNyBehandlingUtils(
                         forrigeBehandlingVilkårsvurdering,
                         vilkår,
                         person,
-                        fom
+                        fom,
                     )
 
-                val begrunnelse = "Migrering"
+                val eksisterendeVilkårSomErForlengetEllerForkortet =
+                    VilkårsvurderingMigreringUtils.finnEksisterendeVilkårResultatSomBlirForskjøvet(
+                        forrigeBehandlingVilkårsvurdering,
+                        vilkår,
+                        person,
+                        fom,
+                        tom,
+                    )
 
-                VilkårResultat(
-                    personResultat = personResultat,
-                    erAutomatiskVurdert = false,
-                    resultat = Resultat.OPPFYLT,
-                    vilkårType = vilkår,
-                    periodeFom = fom,
-                    periodeTom = tom,
-                    begrunnelse = begrunnelse,
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id
-                )
+                // Sørger for at vi kopierer over alle felter fra VilkårResultat som blir forsøvet pga ny migreringsdato
+                eksisterendeVilkårSomErForlengetEllerForkortet.tilKopiForNyttPersonResultat(personResultat)
+                    .also { vilkårResultat ->
+                        vilkårResultat.periodeFom = fom
+                        vilkårResultat.periodeTom = tom
+                        if (vilkårResultat.begrunnelse.isEmpty()) {
+                            vilkårResultat.begrunnelse = "Migrering"
+                        }
+                    }
             }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
             val manglendePerioder = VilkårsvurderingMigreringUtils.kopiManglendePerioderFraForrigeVilkårsvurdering(
                 vilkårResultater,
                 forrigeBehandlingVilkårsvurdering,
-                person
+                person,
+                personResultat,
             )
-            vilkårResultater.addAll(manglendePerioder.map { it.kopierMedParent(personResultat) }.toSet())
+
+            vilkårResultater.addAll(manglendePerioder)
+
             personResultat.setSortedVilkårResultater(vilkårResultater)
 
             personResultat
@@ -269,7 +232,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
 
     fun lagPersonResultaterForHelmanuellMigrering(
         vilkårsvurdering: Vilkårsvurdering,
-        nyMigreringsdato: LocalDate
+        nyMigreringsdato: LocalDate,
     ): Set<PersonResultat> {
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
@@ -277,7 +240,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
             val vilkårTyperForPerson = Vilkår.hentVilkårFor(
                 personType = person.type,
                 fagsakType = vilkårsvurdering.behandling.fagsak.type,
-                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori
+                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
             )
             val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
                 val fom = when {
@@ -303,7 +266,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     periodeFom = fom,
                     periodeTom = tom,
                     begrunnelse = begrunnelse,
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id
+                    behandlingId = personResultat.vilkårsvurdering.behandling.id,
                 )
             }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 

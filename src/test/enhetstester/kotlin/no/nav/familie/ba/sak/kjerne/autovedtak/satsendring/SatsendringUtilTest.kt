@@ -13,12 +13,10 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.time.YearMonth
 
 class SatsendringUtilTest {
 
     private val UGYLDIG_SATS = 1000
-    private val SATSTIDSPUNKT = YearMonth.of(2023, 3)
 
     @Test
     fun `Skal returnere true dersom vi har siste sats`() {
@@ -30,7 +28,7 @@ class SatsendringUtilTest {
                     fom = sisteSats.gyldigFom.toYearMonth(),
                     tom = sisteSats.gyldigTom.toYearMonth(),
                     sats = sisteSats.beløp,
-                    ytelseType = it.tilYtelseType()
+                    ytelseType = it.tilYtelseType(),
                 )
             }
 
@@ -47,7 +45,7 @@ class SatsendringUtilTest {
                     fom = sisteSats.gyldigFom.toYearMonth().plusYears(1),
                     tom = sisteSats.gyldigFom.toYearMonth().plusYears(1),
                     sats = sisteSats.beløp,
-                    ytelseType = it.tilYtelseType()
+                    ytelseType = it.tilYtelseType(),
                 )
             }
 
@@ -65,8 +63,8 @@ class SatsendringUtilTest {
                         fom = sisteSats.gyldigFom.toYearMonth(),
                         tom = sisteSats.gyldigTom.toYearMonth(),
                         sats = sisteSats.beløp - 1,
-                        ytelseType = it.tilYtelseType()
-                    )
+                        ytelseType = it.tilYtelseType(),
+                    ),
                 )
 
                 assertFalse(andelerMedFeilSats.erOppdatertMedSisteSatser())
@@ -84,8 +82,8 @@ class SatsendringUtilTest {
                         fom = sisteSats.gyldigFom.toYearMonth().minusMonths(100),
                         tom = sisteSats.gyldigFom.toYearMonth().minusMonths(1),
                         sats = sisteSats.beløp - 1,
-                        ytelseType = it.tilYtelseType()
-                    )
+                        ytelseType = it.tilYtelseType(),
+                    ),
                 )
 
                 assertTrue(andelerSomErFørSisteSats.erOppdatertMedSisteSatser())
@@ -104,8 +102,8 @@ class SatsendringUtilTest {
                         tom = sisteSats.gyldigTom.toYearMonth(),
                         sats = sisteSats.beløp - 1,
                         prosent = BigDecimal.ZERO,
-                        ytelseType = it.tilYtelseType()
-                    )
+                        ytelseType = it.tilYtelseType(),
+                    ),
                 )
 
                 assertTrue(andelerMedFeilSats.erOppdatertMedSisteSatser())
@@ -119,7 +117,7 @@ class SatsendringUtilTest {
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
                 SatsType.SMA,
                 behandling,
-                YtelseType.SMÅBARNSTILLEGG
+                YtelseType.SMÅBARNSTILLEGG,
             )
 
         Assertions.assertThat(atyMedBareSmåbarnstillegg.erOppdatertMedSisteSatser()).isEqualTo(true)
@@ -128,7 +126,7 @@ class SatsendringUtilTest {
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
                 SatsType.UTVIDET_BARNETRYGD,
                 behandling,
-                YtelseType.UTVIDET_BARNETRYGD
+                YtelseType.UTVIDET_BARNETRYGD,
             )
 
         Assertions.assertThat(atyMedBareUtvidet.erOppdatertMedSisteSatser()).isEqualTo(true)
@@ -137,7 +135,7 @@ class SatsendringUtilTest {
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
                 SatsType.ORBA,
                 behandling,
-                YtelseType.ORDINÆR_BARNETRYGD
+                YtelseType.ORDINÆR_BARNETRYGD,
             )
 
         Assertions.assertThat(atyMedBareOrba.erOppdatertMedSisteSatser()).isEqualTo(true)
@@ -146,14 +144,14 @@ class SatsendringUtilTest {
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
                 SatsType.TILLEGG_ORBA,
                 behandling,
-                YtelseType.ORDINÆR_BARNETRYGD
+                YtelseType.ORDINÆR_BARNETRYGD,
             )
 
         Assertions.assertThat(atyMedBareTilleggOrba.erOppdatertMedSisteSatser()).isEqualTo(true)
 
         Assertions.assertThat(
             (atyMedBareTilleggOrba + atyMedBareOrba + atyMedBareUtvidet + atyMedBareSmåbarnstillegg)
-                .erOppdatertMedSisteSatser()
+                .erOppdatertMedSisteSatser(),
         ).isEqualTo(true)
     }
 
@@ -165,7 +163,7 @@ class SatsendringUtilTest {
                 SatsType.SMA,
                 behandling,
                 YtelseType.SMÅBARNSTILLEGG,
-                UGYLDIG_SATS
+                UGYLDIG_SATS,
             )
 
         Assertions.assertThat(atyMedUgyldigSatsSmåbarnstillegg.erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -175,7 +173,7 @@ class SatsendringUtilTest {
                 SatsType.UTVIDET_BARNETRYGD,
                 behandling,
                 YtelseType.UTVIDET_BARNETRYGD,
-                UGYLDIG_SATS
+                UGYLDIG_SATS,
             )
 
         Assertions.assertThat(atyMedUglydligSatsUtvidet.erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -185,7 +183,7 @@ class SatsendringUtilTest {
                 SatsType.ORBA,
                 behandling,
                 YtelseType.ORDINÆR_BARNETRYGD,
-                UGYLDIG_SATS
+                UGYLDIG_SATS,
             )
 
         Assertions.assertThat(atyMedUgyldigSatsBareOrba.erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -195,7 +193,7 @@ class SatsendringUtilTest {
                 SatsType.TILLEGG_ORBA,
                 behandling,
                 YtelseType.ORDINÆR_BARNETRYGD,
-                UGYLDIG_SATS
+                UGYLDIG_SATS,
             )
 
         Assertions.assertThat(atyMedUgyldigSatsTilleggOrba.erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -209,25 +207,25 @@ class SatsendringUtilTest {
                 SatsType.SMA,
                 behandling,
                 YtelseType.SMÅBARNSTILLEGG,
-                UGYLDIG_SATS
+                UGYLDIG_SATS,
             )
 
         val atyMedGyldigUtvidet =
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
                 SatsType.UTVIDET_BARNETRYGD,
                 behandling,
-                YtelseType.UTVIDET_BARNETRYGD
+                YtelseType.UTVIDET_BARNETRYGD,
             )
 
         val atyMedBGyldigOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
                 SatsType.ORBA,
                 behandling,
-                YtelseType.ORDINÆR_BARNETRYGD
+                YtelseType.ORDINÆR_BARNETRYGD,
             )
 
         Assertions.assertThat(
-            (atyMedBGyldigOrba + atyMedGyldigUtvidet + atyMedUgyldigSatsSmåbarnstillegg).erOppdatertMedSisteSatser()
+            (atyMedBGyldigOrba + atyMedGyldigUtvidet + atyMedUgyldigSatsSmåbarnstillegg).erOppdatertMedSisteSatser(),
         ).isEqualTo(false)
     }
 
@@ -236,28 +234,28 @@ class SatsendringUtilTest {
         val behandling = lagBehandling()
         val atySomGårUtPåSatstidspunktGyldig =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT.minusMonths(1),
-                tom = SATSTIDSPUNKT,
+                fom = datoForSisteSatsendringForSatsType(SatsType.ORBA).minusMonths(1),
+                tom = datoForSisteSatsendringForSatsType(SatsType.ORBA),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
                 person = lagPerson(),
                 aktør = lagPerson().aktør,
                 periodeIdOffset = 1,
-                beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp
+                beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
             )
 
         Assertions.assertThat(listOf(atySomGårUtPåSatstidspunktGyldig).erOppdatertMedSisteSatser()).isEqualTo(true)
 
         val atySomGårUtPåSatstidspunktUgyldig =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT.minusMonths(1),
-                tom = SATSTIDSPUNKT,
+                fom = datoForSisteSatsendringForSatsType(SatsType.ORBA).minusMonths(1),
+                tom = datoForSisteSatsendringForSatsType(SatsType.ORBA),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
                 person = lagPerson(),
                 aktør = lagPerson().aktør,
                 periodeIdOffset = 1,
-                beløp = UGYLDIG_SATS
+                beløp = UGYLDIG_SATS,
             )
 
         Assertions.assertThat(listOf(atySomGårUtPåSatstidspunktUgyldig).erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -268,14 +266,14 @@ class SatsendringUtilTest {
         val behandling = lagBehandling()
         val utgåttAndelTilkjentYtelse =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT.minusMonths(10),
-                tom = SATSTIDSPUNKT.minusMonths(1),
+                fom = datoForSisteSatsendringForSatsType(SatsType.ORBA).minusMonths(10),
+                tom = datoForSisteSatsendringForSatsType(SatsType.ORBA).minusMonths(1),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
                 person = lagPerson(),
                 aktør = lagPerson().aktør,
                 periodeIdOffset = 1,
-                beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp
+                beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
             )
 
         Assertions.assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatser()).isEqualTo(true)
@@ -286,14 +284,14 @@ class SatsendringUtilTest {
         val behandling = lagBehandling()
         val utgåttAndelTilkjentYtelse =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT,
-                tom = SATSTIDSPUNKT.plusYears(10),
+                fom = datoForSisteSatsendringForSatsType(SatsType.ORBA),
+                tom = datoForSisteSatsendringForSatsType(SatsType.ORBA).plusYears(10),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
                 person = lagPerson(),
                 aktør = lagPerson().aktør,
                 periodeIdOffset = 1,
-                beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp
+                beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
             )
 
         Assertions.assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatser()).isEqualTo(true)
@@ -304,14 +302,14 @@ class SatsendringUtilTest {
         val behandling = lagBehandling()
         val utgåttAndelTilkjentYtelse =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT,
-                tom = SATSTIDSPUNKT.plusYears(10),
+                fom = datoForSisteSatsendringForSatsType(SatsType.ORBA),
+                tom = datoForSisteSatsendringForSatsType(SatsType.ORBA).plusYears(10),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
                 person = lagPerson(),
                 aktør = lagPerson().aktør,
                 periodeIdOffset = 1,
-                beløp = UGYLDIG_SATS
+                beløp = UGYLDIG_SATS,
             )
 
         Assertions.assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -321,7 +319,7 @@ class SatsendringUtilTest {
         satsType: SatsType,
         behandling: Behandling,
         ytelseType: YtelseType,
-        beløp: Int? = null
+        beløp: Int? = null,
     ) = listOf(
         lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = SatsService.finnSisteSatsFor(satsType).gyldigFom.minusMonths(1).toYearMonth(),
@@ -331,7 +329,10 @@ class SatsendringUtilTest {
             person = lagPerson(),
             aktør = lagPerson().aktør,
             periodeIdOffset = 1,
-            beløp = beløp ?: SatsService.finnSisteSatsFor(satsType).beløp
-        )
+            beløp = beløp ?: SatsService.finnSisteSatsFor(satsType).beløp,
+        ),
     )
+
+    private fun datoForSisteSatsendringForSatsType(satsType: SatsType) =
+        SatsService.finnSisteSatsFor(satsType).gyldigFom.toYearMonth()
 }

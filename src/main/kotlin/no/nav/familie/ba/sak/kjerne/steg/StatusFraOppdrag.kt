@@ -19,18 +19,18 @@ import java.util.Properties
 
 data class StatusFraOppdragMedTask(
     val statusFraOppdragDTO: StatusFraOppdragDTO,
-    val task: Task
+    val task: Task,
 )
 
 @Service
 class StatusFraOppdrag(
     private val økonomiService: ØkonomiService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
 ) : BehandlingSteg<StatusFraOppdragMedTask> {
 
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: StatusFraOppdragMedTask
+        data: StatusFraOppdragMedTask,
     ): StegType {
         val statusFraOppdragDTO = data.statusFraOppdragDTO
         val task = data.task
@@ -41,7 +41,7 @@ class StatusFraOppdrag(
             if (oppdragStatus == OppdragStatus.LAGT_PÅ_KØ) {
                 throw RekjørSenereException(
                     årsak = "Mottok lagt på kø kvittering fra oppdrag.",
-                    triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd = if (behandling.erMigrering()) 1 else 15)
+                    triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd = if (behandling.erMigrering()) 1 else 15),
                 )
             } else {
                 taskRepository.save(task.copy(status = Status.MANUELL_OPPFØLGING))
@@ -57,11 +57,11 @@ class StatusFraOppdrag(
             when (nesteSteg) {
                 StegType.JOURNALFØR_VEDTAKSBREV -> opprettTaskJournalførVedtaksbrev(
                     statusFraOppdragDTO.vedtaksId,
-                    task
+                    task,
                 )
                 StegType.IVERKSETT_MOT_FAMILIE_TILBAKE -> opprettTaskIverksettMotTilbake(
                     statusFraOppdragDTO.behandlingsId,
-                    task.metadata
+                    task.metadata,
                 )
                 StegType.FERDIGSTILLE_BEHANDLING -> opprettFerdigstillBehandling(statusFraOppdragDTO)
                 else -> error("Neste task er ikke implementert.")
@@ -74,7 +74,7 @@ class StatusFraOppdrag(
     private fun opprettFerdigstillBehandling(statusFraOppdragDTO: StatusFraOppdragDTO) {
         val ferdigstillBehandling = FerdigstillBehandlingTask.opprettTask(
             søkerIdent = statusFraOppdragDTO.aktørId,
-            behandlingsId = statusFraOppdragDTO.behandlingsId
+            behandlingsId = statusFraOppdragDTO.behandlingsId,
         )
         taskRepository.save(ferdigstillBehandling)
     }
@@ -82,7 +82,7 @@ class StatusFraOppdrag(
     private fun opprettTaskIverksettMotTilbake(behandlingsId: Long, metadata: Properties) {
         val ferdigstillBehandling = IverksettMotFamilieTilbakeTask.opprettTask(
             behandlingsId,
-            metadata
+            metadata,
         )
         taskRepository.save(ferdigstillBehandling)
     }
@@ -91,7 +91,7 @@ class StatusFraOppdrag(
         val task = Task(
             type = JournalførVedtaksbrevTask.TASK_STEP_TYPE,
             payload = "$vedtakId",
-            properties = gammelTask.metadata
+            properties = gammelTask.metadata,
         )
         taskRepository.save(task)
     }

@@ -11,7 +11,7 @@ import java.time.YearMonth
 
 fun lagKompetanse(
     behandlingId: Long = lagBehandling().id,
-    fom: YearMonth? = null,
+    fom: YearMonth? = YearMonth.now(),
     tom: YearMonth? = null,
     barnAktører: Set<Aktør> = emptySet(),
     søkersAktivitet: SøkersAktivitet? = null,
@@ -19,7 +19,7 @@ fun lagKompetanse(
     annenForeldersAktivitetsland: String? = null,
     barnetsBostedsland: String? = null,
     kompetanseResultat: KompetanseResultat? = null,
-    søkersAktivitetsland: String? = null
+    søkersAktivitetsland: String? = null,
 ) = Kompetanse(
     fom = fom,
     tom = tom,
@@ -29,7 +29,7 @@ fun lagKompetanse(
     annenForeldersAktivitetsland = annenForeldersAktivitetsland,
     barnetsBostedsland = barnetsBostedsland,
     resultat = kompetanseResultat,
-    søkersAktivitetsland = søkersAktivitetsland
+    søkersAktivitetsland = søkersAktivitetsland,
 ).also { it.behandlingId = behandlingId }
 
 fun lagValutakurs(
@@ -39,14 +39,14 @@ fun lagValutakurs(
     barnAktører: Set<Aktør> = emptySet(),
     valutakursdato: LocalDate? = null,
     valutakode: String? = null,
-    kurs: BigDecimal? = null
+    kurs: BigDecimal? = null,
 ) = Valutakurs(
     fom = fom,
     tom = tom,
     barnAktører = barnAktører,
     valutakursdato = valutakursdato,
     valutakode = valutakode,
-    kurs = kurs
+    kurs = kurs,
 ).also { it.behandlingId = behandlingId }
 
 fun lagUtenlandskPeriodebeløp(
@@ -57,7 +57,7 @@ fun lagUtenlandskPeriodebeløp(
     beløp: BigDecimal? = null,
     valutakode: String? = null,
     intervall: Intervall? = null,
-    utbetalingsland: String = ""
+    utbetalingsland: String = "",
 ) = UtenlandskPeriodebeløp(
     fom = fom,
     tom = tom,
@@ -65,5 +65,5 @@ fun lagUtenlandskPeriodebeløp(
     valutakode = valutakode,
     beløp = beløp,
     intervall = intervall,
-    utbetalingsland = utbetalingsland
+    utbetalingsland = utbetalingsland,
 ).also { it.behandlingId = behandlingId }

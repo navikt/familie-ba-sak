@@ -16,8 +16,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -29,7 +27,7 @@ class BehandlingsresultatService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
-    private val kompetanseService: KompetanseService
+    private val kompetanseService: KompetanseService,
 ) {
 
     internal fun finnPersonerFremstiltKravFor(behandling: Behandling, søknadDTO: SøknadDTO?, forrigeBehandling: Behandling?): List<Aktør> {
@@ -71,10 +69,13 @@ class BehandlingsresultatService(
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandlingId)
 
+        val personerIBehandling = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id).personer.toSet()
+        val personerIForrigeBehandling = forrigeBehandling?.let { persongrunnlagService.hentAktivThrows(behandlingId = forrigeBehandling.id).personer.toSet() } ?: emptySet()
+
         val personerFremstiltKravFor = finnPersonerFremstiltKravFor(
             behandling = behandling,
             søknadDTO = søknadDTO,
-            forrigeBehandling = forrigeBehandling
+            forrigeBehandling = forrigeBehandling,
         )
 
         BehandlingsresultatValideringUtils.validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(personerFremstiltKravFor = personerFremstiltKravFor, personResultater = vilkårsvurdering.personResultater)
@@ -88,7 +89,7 @@ class BehandlingsresultatService(
                 personerFremstiltKravFor = personerFremstiltKravFor,
                 nåværendePersonResultater = vilkårsvurdering.personResultater,
                 behandlingÅrsak = behandling.opprettetÅrsak,
-                finnesUregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.isNotEmpty() ?: false
+                finnesUregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.isNotEmpty() ?: false,
             )
         } else {
             null
@@ -109,7 +110,9 @@ class BehandlingsresultatService(
                 forrigePersonResultat = forrigeVilkårsvurdering.personResultater,
                 nåværendeKompetanser = kompetanser.toList(),
                 forrigeKompetanser = forrigeKompetanser.toList(),
-                personerFremstiltKravFor = personerFremstiltKravFor
+                personerFremstiltKravFor = personerFremstiltKravFor,
+                personerIBehandling = personerIBehandling,
+                personerIForrigeBehandling = personerIForrigeBehandling,
             )
         } else {
             Endringsresultat.INGEN_ENDRING
@@ -120,18 +123,12 @@ class BehandlingsresultatService(
             nåværendeAndeler = andelerTilkjentYtelse,
             forrigeAndeler = forrigeAndelerTilkjentYtelse,
             nåværendeEndretAndeler = endretUtbetalingAndeler,
-            forrigeEndretAndeler = forrigeEndretUtbetalingAndeler
+            forrigeEndretAndeler = forrigeEndretUtbetalingAndeler,
         )
 
         // KOMBINER
         val behandlingsresultat = BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(søknadsresultat, endringsresultat, opphørsresultat)
 
         return behandlingsresultat
-    }
-
-    companion object {
-
-        private val logger: Logger = LoggerFactory.getLogger(BehandlingsresultatService::class.java)
-        private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }

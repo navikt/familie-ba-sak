@@ -14,10 +14,10 @@ import java.time.LocalDate
 @TaskStepBeskrivelse(
     taskStepType = OpprettOppgaveTask.TASK_STEP_TYPE,
     beskrivelse = "Opprett oppgave i GOSYS for behandling",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class OpprettOppgaveTask(
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -27,7 +27,8 @@ class OpprettOppgaveTask(
             oppgavetype = opprettOppgaveTaskDTO.oppgavetype,
             fristForFerdigstillelse = opprettOppgaveTaskDTO.fristForFerdigstillelse,
             tilordnetNavIdent = opprettOppgaveTaskDTO.tilordnetRessurs,
-            beskrivelse = opprettOppgaveTaskDTO.beskrivelse
+            beskrivelse = opprettOppgaveTaskDTO.beskrivelse,
+            manuellOppgaveType = opprettOppgaveTaskDTO.manuellOppgaveType,
         )
     }
 
@@ -40,7 +41,7 @@ class OpprettOppgaveTask(
             oppgavetype: Oppgavetype,
             fristForFerdigstillelse: LocalDate,
             tilordnetRessurs: String? = null,
-            beskrivelse: String? = null
+            beskrivelse: String? = null,
         ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
@@ -50,9 +51,10 @@ class OpprettOppgaveTask(
                         oppgavetype,
                         fristForFerdigstillelse,
                         tilordnetRessurs,
-                        beskrivelse
-                    )
-                )
+                        beskrivelse,
+                        null,
+                    ),
+                ),
             )
         }
     }

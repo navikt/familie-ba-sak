@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -40,7 +41,7 @@ class OppgaveService(
     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
     private val opprettTaskService: OpprettTaskService,
     private val loggService: LoggService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
 
@@ -49,7 +50,8 @@ class OppgaveService(
         oppgavetype: Oppgavetype,
         fristForFerdigstillelse: LocalDate,
         tilordnetNavIdent: String? = null,
-        beskrivelse: String? = null
+        beskrivelse: String? = null,
+        manuellOppgaveType: ManuellOppgaveType? = null,
     ): String {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val fagsakId = behandling.fagsak.id
@@ -61,7 +63,7 @@ class OppgaveService(
             logger.warn(
                 "Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt " +
                     "ved opprettelse av ny oppgave $eksisterendeOppgave. " +
-                    "Vi oppretter ikke ny oppgave, men gjenbruker eksisterende."
+                    "Vi oppretter ikke ny oppgave, men gjenbruker eksisterende.",
             )
 
             eksisterendeOppgave.gsakId
@@ -72,7 +74,7 @@ class OppgaveService(
             if (arbeidsfordelingsenhet == null) {
                 logger.warn(
                     "Fant ikke behandlende enhet på behandling ${behandling.id} " +
-                        "ved opprettelse av $oppgavetype-oppgave."
+                        "ved opprettelse av $oppgavetype-oppgave.",
                 )
             }
 
@@ -92,9 +94,9 @@ class OppgaveService(
                 tilordnetRessurs = tilordnetNavIdent,
                 behandlesAvApplikasjon = when {
                     oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype) -> "familie-ba-sak"
-                    oppgavetype == Oppgavetype.VurderLivshendelse && !behandling.erVedtatt() -> "familie-ba-sak"
+                    manuellOppgaveType?.settBehandlesAvApplikasjon == true -> "familie-ba-sak"
                     else -> null
-                }
+                },
             )
             val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave).oppgaveId.toString()
 
@@ -109,22 +111,22 @@ class OppgaveService(
 
     fun opprettOppgaveForManuellBehandling(
         behandling: Behandling,
-        oppgavetype: Oppgavetype,
         begrunnelse: String = "",
-        opprettLogginnslag: Boolean = false
+        opprettLogginnslag: Boolean = false,
+        manuellOppgaveType: ManuellOppgaveType,
     ): String {
         logger.info("Sender autovedtak til manuell behandling, se secureLogger for mer detaljer.")
         secureLogger.info("Sender autovedtak til manuell behandling. Begrunnelse: $begrunnelse")
-        opprettTaskService.opprettOppgaveTask(
+        opprettTaskService.opprettOppgaveForManuellBehandlingTask(
             behandlingId = behandling.id,
-            oppgavetype = oppgavetype,
-            beskrivelse = begrunnelse
+            beskrivelse = begrunnelse,
+            manuellOppgaveType = manuellOppgaveType,
         )
 
         if (opprettLogginnslag) {
             loggService.opprettAutovedtakTilManuellBehandling(
                 behandling = behandling,
-                tekst = begrunnelse
+                tekst = begrunnelse,
             )
         }
 
@@ -174,7 +176,7 @@ class OppgaveService(
             if (oppgave.tilordnetRessurs != null) {
                 throw FunksjonellFeil(
                     melding = "Oppgaven er allerede fordelt",
-                    frontendFeilmelding = "Oppgaven er allerede fordelt til ${oppgave.tilordnetRessurs}"
+                    frontendFeilmelding = "Oppgaven er allerede fordelt til ${oppgave.tilordnetRessurs}",
                 )
             }
         }
@@ -203,8 +205,8 @@ class OppgaveService(
         oppgaveRepository.finnOppgaverSomSkalFerdigstilles(
             oppgavetype = oppgavetype,
             behandling = behandlingHentOgPersisterService.hent(
-                behandlingId = behandlingId
-            )
+                behandlingId = behandlingId,
+            ),
         ).forEach {
             val oppgave = hentOppgave(it.gsakId.toLong())
 
@@ -321,11 +323,11 @@ class OppgaveService(
     companion object {
 
         private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLoger")
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private val oppgavetyperSomBehandlesAvBaSak = listOf(
             Oppgavetype.BehandleSak,
             Oppgavetype.GodkjenneVedtak,
-            Oppgavetype.BehandleUnderkjentVedtak
+            Oppgavetype.BehandleUnderkjentVedtak,
         )
     }
 }

@@ -25,7 +25,7 @@ object OrdinærBarnetrygdUtil {
     internal fun beregnAndelerTilkjentYtelseForBarna(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         personResultater: Set<PersonResultat>,
-        fagsakType: FagsakType
+        fagsakType: FagsakType,
     ): List<BeregnetAndel> {
         val tidslinjerMedRettTilProsentPerBarn =
             personResultater.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag, fagsakType)
@@ -43,7 +43,7 @@ object OrdinærBarnetrygdUtil {
                     stønadTom = it.tilOgMed.tilYearMonth(),
                     beløp = innholdIPeriode.sats.avrundetHeltallAvProsent(innholdIPeriode.prosent),
                     sats = innholdIPeriode.sats,
-                    prosent = innholdIPeriode.prosent
+                    prosent = innholdIPeriode.prosent,
                 )
             }
         }
@@ -51,7 +51,7 @@ object OrdinærBarnetrygdUtil {
 
     private fun kombinerProsentOgSatsTidslinjer(
         tidslinjeMedRettTilProsentForBarn: Tidslinje<BigDecimal, Måned>,
-        satsTidslinje: Tidslinje<Int, Måned>
+        satsTidslinje: Tidslinje<Int, Måned>,
     ) = tidslinjeMedRettTilProsentForBarn.kombinerMed(satsTidslinje) { rettTilProsent, sats ->
         when {
             rettTilProsent == null -> null
@@ -62,7 +62,7 @@ object OrdinærBarnetrygdUtil {
 
     private data class SatsProsent(
         val sats: Int,
-        val prosent: BigDecimal
+        val prosent: BigDecimal,
     )
 
     private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag: PersonopplysningGrunnlag, fagsakType: FagsakType): Map<Person, Tidslinje<BigDecimal, Måned>> {
@@ -78,7 +78,7 @@ object OrdinærBarnetrygdUtil {
 
     private fun kombinerSøkerMedHvertBarnSinTidslinje(
         barnasTidslinjer: Map<Person, Tidslinje<BigDecimal, Måned>>,
-        søkerTidslinje: Tidslinje<BigDecimal, Måned>
+        søkerTidslinje: Tidslinje<BigDecimal, Måned>,
     ) = barnasTidslinjer.mapValues { (_, barnTidslinje) ->
         barnTidslinje.kombinerMed(søkerTidslinje) { barnProsent, søkerProsent ->
             when {
@@ -90,23 +90,23 @@ object OrdinærBarnetrygdUtil {
 
     private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerPerson(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        fagsakType: FagsakType
+        fagsakType: FagsakType,
     ) = this.associate { personResultat ->
         val person = personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør }
             ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av andeler tilkjent ytelse")
         person to personResultat.tilTidslinjeMedRettTilProsentForPerson(
-            personType = person.type,
-            fagsakType = fagsakType
+            person = person,
+            fagsakType = fagsakType,
         )
     }
 
     internal fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(
-        personType: PersonType,
-        fagsakType: FagsakType
+        person: Person,
+        fagsakType: FagsakType,
     ): Tidslinje<BigDecimal, Måned> {
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(person.fødselsdato)
 
-        return tidslinjer.kombiner { it.mapTilProsentEllerNull(personType, fagsakType) }.slåSammenLike().filtrerIkkeNull()
+        return tidslinjer.kombiner { it.mapTilProsentEllerNull(person.type, fagsakType) }.slåSammenLike().filtrerIkkeNull()
     }
 
     internal fun Iterable<VilkårResultat>.mapTilProsentEllerNull(personType: PersonType, fagsakType: FagsakType): BigDecimal? {

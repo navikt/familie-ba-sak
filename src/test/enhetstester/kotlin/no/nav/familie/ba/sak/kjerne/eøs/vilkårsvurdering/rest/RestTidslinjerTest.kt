@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.rest
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -40,7 +41,8 @@ internal class RestTidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+            søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+                .tilPersonEnkelSøkerOgBarn(),
         )
 
         val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()
@@ -49,18 +51,18 @@ internal class RestTidslinjerTest {
         // Stopper ved søkers siste til-og-med-dato fordi Regelverk er <null> etter det, som filtreres bort
         assertEquals(
             31.jan(2022).tilLocalDate(),
-            barnetsTidslinjer.regelverkTidslinje.last().tilOgMed
+            barnetsTidslinjer.regelverkTidslinje.last().tilOgMed,
         )
         assertEquals(
             31.jan(2022).tilLocalDate(),
-            barnetsTidslinjer.oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje.last().tilOgMed
+            barnetsTidslinjer.oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje.last().tilOgMed,
         )
 
         // Alle vilkårene til barnet kuttes ved siste dag i måneden før barnet fyller 18 år
         barnetsTidslinjer.vilkårTidslinjer.forEach {
             assertEquals(
                 31.des(2037).tilLocalDate(),
-                it.last().tilOgMed
+                it.last().tilOgMed,
             )
         }
     }
@@ -95,7 +97,8 @@ internal class RestTidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
+            søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
+                .tilPersonEnkelSøkerOgBarn(),
         )
 
         val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()
@@ -105,13 +108,13 @@ internal class RestTidslinjerTest {
         søkersTidslinjer.vilkårTidslinjer.forEach {
             assertEquals(
                 30.nov(2039).tilLocalDate(),
-                it.last().tilOgMed
+                it.last().tilOgMed,
             )
         }
 
         assertEquals(
             30.nov(2039).tilLocalDate(),
-            søkersTidslinjer.oppfyllerEgneVilkårTidslinje.last().tilOgMed
+            søkersTidslinjer.oppfyllerEgneVilkårTidslinje.last().tilOgMed,
         )
     }
 }

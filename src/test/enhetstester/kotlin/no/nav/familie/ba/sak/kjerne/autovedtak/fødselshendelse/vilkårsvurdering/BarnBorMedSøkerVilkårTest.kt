@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.dataGenerator.grunnlag.opprettAdresse
+import no.nav.familie.ba.sak.datagenerator.grunnlag.opprettAdresse
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -55,16 +55,16 @@ class BarnBorMedSøkerVilkårTest {
 
     private fun opprettFaktaPerson(
         bostedsadresseSøker: GrBostedsadresse,
-        bostedsadresseBarn: GrBostedsadresse
+        bostedsadresseBarn: GrBostedsadresse,
     ): Person {
         val barnMedAdresse = barn.copy(bostedsadresser = mutableListOf(bostedsadresseBarn))
         barnMedAdresse.personopplysningGrunnlag.personer.clear()
         barnMedAdresse.personopplysningGrunnlag.personer.add(
             søker.copy(
                 bostedsadresser = mutableListOf(
-                    bostedsadresseSøker
-                )
-            )
+                    bostedsadresseSøker,
+                ),
+            ),
         )
 
         return barnMedAdresse

@@ -29,13 +29,13 @@ import java.time.LocalDate
 class UtenlandskPeriodebeløpTestController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService
+    private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
 ) {
 
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun endreUtenlandskePeriodebeløp(
         @PathVariable behandlingId: Long,
-        @RequestBody restUtenlandskePeriodebeløp: Map<LocalDate, String>
+        @RequestBody restUtenlandskePeriodebeløp: Map<LocalDate, String>,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandlingIdObjekt = BehandlingId(behandlingId)
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingIdObjekt.id)!!
@@ -49,7 +49,7 @@ class UtenlandskPeriodebeløpTestController(
 
 private fun Map<LocalDate, String>.tilUtenlandskePeriodebeløp(
     behandlingId: BehandlingId,
-    personopplysningGrunnlag: PersonopplysningGrunnlag
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
 ): Collection<UtenlandskPeriodebeløp> {
     return this.map { (dato, tidslinje) ->
         val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }

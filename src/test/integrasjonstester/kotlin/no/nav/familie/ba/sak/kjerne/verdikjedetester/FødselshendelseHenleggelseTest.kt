@@ -32,12 +32,13 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.util.sisteTilleggOrdinærSats
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
 import no.nav.familie.ba.sak.util.tilleggOrdinærSatsNesteMånedTilTester
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
@@ -62,7 +63,8 @@ class FødselshendelseHenleggelseTest(
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val utvidetBehandlingService: UtvidetBehandlingService,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val opprettOppgaveForManuellBehandlingTask: OpprettOppgaveTask,
 ) : AbstractVerdikjedetest() {
 
     @BeforeEach
@@ -90,26 +92,26 @@ class FødselshendelseHenleggelseTest(
                                 sisteTilleggOrdinærSats(),
                                 listOf("1234"),
                                 "OR",
-                                "OS"
-                            )
+                                "OS",
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = now().minusMonths(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
-                    )
-                )
-            )
+                        etternavn = "Barnesen",
+                    ),
+                ),
+            ),
         )
 
         val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -117,7 +119,7 @@ class FødselshendelseHenleggelseTest(
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
         assertNull(behandling)
@@ -134,22 +136,22 @@ class FødselshendelseHenleggelseTest(
                 søker = RestScenarioPerson(
                     fødselsdato = now().minusYears(16).toString(),
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = now().minusMonths(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
-                    )
-                )
-            )
+                        etternavn = "Barnesen",
+                    ),
+                ),
+            ),
         )
 
         val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -157,7 +159,7 @@ class FødselshendelseHenleggelseTest(
             personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -165,10 +167,10 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = behandling!!.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
-                beskrivelse = "Fødselshendelse: Mor er under 18 år."
+                beskrivelse = "Fødselshendelse: Mor er under 18 år.",
+                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
             )
         }
 
@@ -196,8 +198,8 @@ class FødselshendelseHenleggelseTest(
                                 bruksenhetsnummer = "H301",
                                 tilleggsnavn = "navn",
                                 postnummer = "0202",
-                                kommunenummer = "2231"
-                            )
+                                kommunenummer = "2231",
+                            ),
                         ),
                         Bostedsadresse(
                             angittFlyttedato = null,
@@ -207,8 +209,8 @@ class FødselshendelseHenleggelseTest(
                                 bruksenhetsnummer = "H301",
                                 tilleggsnavn = "navn",
                                 postnummer = "0202",
-                                kommunenummer = "2231"
-                            )
+                                kommunenummer = "2231",
+                            ),
                         ),
                         Bostedsadresse(
                             angittFlyttedato = now(),
@@ -218,25 +220,25 @@ class FødselshendelseHenleggelseTest(
                                 bruksenhetsnummer = "H301",
                                 tilleggsnavn = "navn",
                                 postnummer = "0202",
-                                kommunenummer = "2231"
-                            )
-                        )
-                    )
+                                kommunenummer = "2231",
+                            ),
+                        ),
+                    ),
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = now().toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
-                    )
-                )
-            )
+                        etternavn = "Barnesen",
+                    ),
+                ),
+            ),
         )
 
         val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -244,7 +246,7 @@ class FødselshendelseHenleggelseTest(
             personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -252,10 +254,10 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = behandling!!.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
-                beskrivelse = "Fødselshendelse: Mor har flere bostedsadresser uten fra- og med dato"
+                beskrivelse = "Fødselshendelse: Mor har flere bostedsadresser uten fra- og med dato",
+                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
             )
         }
     }
@@ -270,17 +272,17 @@ class FødselshendelseHenleggelseTest(
                         fødselsdato = now().toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
-                        bostedsadresser = emptyList()
-                    )
-                )
-            )
+                        bostedsadresser = emptyList(),
+                    ),
+                ),
+            ),
         )
 
         val barnIdent = scenario.barna.first().ident!!
         val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -288,7 +290,7 @@ class FødselshendelseHenleggelseTest(
             personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -296,13 +298,13 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = behandling!!.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Barnet (fødselsdato: ${
-                LocalDate.parse(scenario.barna.first().fødselsdato)
-                    .tilKortString()
-                }) er ikke bosatt med mor."
+                    LocalDate.parse(scenario.barna.first().fødselsdato)
+                        .tilKortString()
+                }) er ikke bosatt med mor.",
+                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
             )
         }
 
@@ -326,21 +328,21 @@ class FødselshendelseHenleggelseTest(
                 søker = RestScenarioPerson(
                     fødselsdato = now().minusYears(26).førsteDagINesteMåned().plusDays(6).toString(),
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = now().minusMonths(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
+                        etternavn = "Barnesen",
                     ),
                     RestScenarioPerson(
                         fødselsdato = now().minusYears(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
-                    )
-                )
-            )
+                        etternavn = "Barnesen",
+                    ),
+                ),
+            ),
         )
 
         val behandling = kjørStegprosessForFGB(
@@ -354,7 +356,7 @@ class FødselshendelseHenleggelseTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -362,14 +364,14 @@ class FødselshendelseHenleggelseTest(
         assertEquals(
             tilleggOrdinærSatsNesteMånedTilTester().beløp + sisteUtvidetSatsTilTester(),
             hentNåværendeEllerNesteMånedsUtbetaling(
-                behandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)
-            )
+                behandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id),
+            ),
         )
 
         val revurdering = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -377,7 +379,7 @@ class FødselshendelseHenleggelseTest(
             personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -386,10 +388,10 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = revurdering!!.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
-                beskrivelse = "Fødselshendelse: Mor mottar utvidet barnetrygd."
+                beskrivelse = "Fødselshendelse: Mor mottar utvidet barnetrygd.",
+                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
             )
         }
     }
@@ -401,21 +403,21 @@ class FødselshendelseHenleggelseTest(
                 søker = RestScenarioPerson(
                     fødselsdato = now().minusYears(26).førsteDagINesteMåned().plusDays(6).toString(),
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = now().minusMonths(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
+                        etternavn = "Barnesen",
                     ),
                     RestScenarioPerson(
                         fødselsdato = now().minusYears(2).toString(),
                         fornavn = "Barn2",
-                        etternavn = "Barnesen"
-                    )
-                )
-            )
+                        etternavn = "Barnesen",
+                    ),
+                ),
+            ),
         )
 
         val behandling = kjørStegprosessForFGB(
@@ -429,7 +431,7 @@ class FødselshendelseHenleggelseTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -438,7 +440,7 @@ class FødselshendelseHenleggelseTest(
         val revurdering = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -446,7 +448,7 @@ class FødselshendelseHenleggelseTest(
             personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -455,10 +457,10 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = revurdering!!.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
-                beskrivelse = "Fødselshendelse: Mor har EØS-barnetrygd"
+                beskrivelse = "Fødselshendelse: Mor har EØS-barnetrygd",
+                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
             )
         }
     }
@@ -475,32 +477,32 @@ class FødselshendelseHenleggelseTest(
                             land = "UKR",
                             gyldigFraOgMed = LocalDate.parse(fødselsdato),
                             bekreftelsesdato = LocalDate.parse(fødselsdato),
-                            gyldigTilOgMed = null
-                        )
-                    )
+                            gyldigTilOgMed = null,
+                        ),
+                    ),
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = barnFødselsdato.toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
+                        etternavn = "Barnesen",
                     ).copy(
                         statsborgerskap = listOf(
                             Statsborgerskap(
                                 land = "UKR",
                                 gyldigFraOgMed = barnFødselsdato,
                                 bekreftelsesdato = barnFødselsdato,
-                                gyldigTilOgMed = null
-                            )
-                        )
-                    )
-                )
-            )
+                                gyldigTilOgMed = null,
+                            ),
+                        ),
+                    ),
+                ),
+            ),
         )
         val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -508,7 +510,7 @@ class FødselshendelseHenleggelseTest(
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )!!
 
@@ -516,10 +518,10 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling.steg)
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = behandling.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
-                beskrivelse = "Fødselshendelse: ${VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN.beskrivelse}"
+                beskrivelse = "Fødselshendelse: ${VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN.beskrivelse}",
+                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
             )
         }
     }

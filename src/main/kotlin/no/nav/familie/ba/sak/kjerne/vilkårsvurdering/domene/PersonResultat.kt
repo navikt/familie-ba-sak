@@ -34,7 +34,7 @@ class PersonResultat(
     @SequenceGenerator(
         name = "periode_resultat_seq_generator",
         sequenceName = "periode_resultat_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -51,7 +51,7 @@ class PersonResultat(
         fetch = FetchType.EAGER,
         mappedBy = "personResultat",
         cascade = [CascadeType.ALL],
-        orphanRemoval = true
+        orphanRemoval = true,
     )
     val vilkårResultater: MutableSet<VilkårResultat> = sortedSetOf(VilkårResultatComparator),
 
@@ -59,9 +59,9 @@ class PersonResultat(
         fetch = FetchType.EAGER,
         mappedBy = "personResultat",
         cascade = [CascadeType.ALL],
-        orphanRemoval = true
+        orphanRemoval = true,
     )
-    val andreVurderinger: MutableSet<AnnenVurdering> = mutableSetOf()
+    val andreVurderinger: MutableSet<AnnenVurdering> = mutableSetOf(),
 
 ) : BaseEntitet() {
 
@@ -94,7 +94,7 @@ class PersonResultat(
         val vilkårResultat = vilkårResultater.find { it.id == vilkårResultatId }
             ?: throw Feil(
                 message = "Prøver å slette et vilkår som ikke finnes",
-                frontendFeilmelding = "Vilkåret du prøver å slette finnes ikke i systemet."
+                frontendFeilmelding = "Vilkåret du prøver å slette finnes ikke i systemet.",
             )
 
         val perioderMedSammeVilkårType = vilkårResultater
@@ -109,11 +109,11 @@ class PersonResultat(
 
     fun kopierMedParent(
         vilkårsvurdering: Vilkårsvurdering,
-        inkluderAndreVurderinger: Boolean = false
+        inkluderAndreVurderinger: Boolean = false,
     ): PersonResultat {
         val nyttPersonResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = aktør
+            aktør = aktør,
         )
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =
             vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(VilkårResultatComparator)
@@ -125,6 +125,29 @@ class PersonResultat(
 
             nyttPersonResultat.setAndreVurderinger(kopierteAndreVurderinger)
         }
+        return nyttPersonResultat
+    }
+
+    fun tilKopiForNyVilkårsvurdering(
+        nyVilkårsvurdering: Vilkårsvurdering,
+    ): PersonResultat {
+        val nyttPersonResultat = PersonResultat(
+            vilkårsvurdering = nyVilkårsvurdering,
+            aktør = aktør,
+            andreVurderinger = mutableSetOf(), // Vi kopierer ikke over andreVurderinger da den aldri skal være med i ny behandling
+        )
+
+        val nyeVilkårResultater = vilkårResultater
+            .filter { it.erOppfylt() }
+            .map {
+                it.tilKopiForNyttPersonResultat(
+                    nyttPersonResultat = nyttPersonResultat,
+                )
+            }
+            .toSet()
+
+        nyttPersonResultat.setSortedVilkårResultater(nyeVilkårResultater)
+
         return nyttPersonResultat
     }
 

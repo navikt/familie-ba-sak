@@ -8,23 +8,23 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedKunVerdi
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullOgIkkeTom
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 data class UtvidetBarnetrygdGenerator(
     val behandlingId: Long,
-    val tilkjentYtelse: TilkjentYtelse
+    val tilkjentYtelse: TilkjentYtelse,
 ) {
     fun lagUtvidetBarnetrygdAndeler(
         utvidetVilkår: List<VilkårResultat>,
-        andelerBarna: List<AndelTilkjentYtelse>
+        andelerBarna: List<AndelTilkjentYtelse>,
     ): List<AndelTilkjentYtelse> {
         if (utvidetVilkår.isEmpty() || andelerBarna.isEmpty()) return emptyList()
 
         val søkerAktør = utvidetVilkår.first().personResultat?.aktør ?: error("Vilkår mangler PersonResultat")
 
-        val utvidetVilkårTidslinje = utvidetVilkår.tilForskjøvetTidslinjeForOppfyltVilkår(Vilkår.UTVIDET_BARNETRYGD)
+        val utvidetVilkårTidslinje = utvidetVilkår.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson(Vilkår.UTVIDET_BARNETRYGD)
 
         val størsteProsentTidslinje = andelerBarna
             .tilSeparateTidslinjerForBarna().values
@@ -32,7 +32,7 @@ data class UtvidetBarnetrygdGenerator(
 
         val utvidetAndeler = utvidetVilkårTidslinje.kombinerMedKunVerdi(
             størsteProsentTidslinje,
-            satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD)
+            satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD),
         ) { _, prosent, sats ->
             val nasjonaltPeriodebeløp = sats.avrundetHeltallAvProsent(prosent)
             AndelTilkjentYtelseForTidslinje(
@@ -40,14 +40,14 @@ data class UtvidetBarnetrygdGenerator(
                 beløp = nasjonaltPeriodebeløp,
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 sats = sats,
-                prosent = prosent
+                prosent = prosent,
             )
         }.tilAndelerTilkjentYtelse(tilkjentYtelse)
 
         if (utvidetAndeler.isEmpty()) {
             throw FunksjonellFeil(
                 "Du har lagt til utvidet barnetrygd for en periode der det ikke er rett til barnetrygd for " +
-                    "noen av barna. Hvis du trenger hjelp, meld sak i Porten."
+                    "noen av barna. Hvis du trenger hjelp, meld sak i Porten.",
             )
         }
 

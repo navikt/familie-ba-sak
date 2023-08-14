@@ -122,15 +122,6 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
-      familie-ba-migrering-clientcredentials:
-        resource-url: ${FAMILIE_BA_MIGRERING_API_URL}
-        token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
-        grant-type: client_credentials
-        scope: api://prod-gcp.teamfamilie.familie-ba-migrering/.default
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
       familie-statistikk-clientcredentials:
         resource-url: ${FAMILIE_STATISTIKK_URL}
         token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
@@ -178,5 +169,9 @@ FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.prod-fss-pu
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.prod-fss-pub.nais.io/api
 FAMILIE_OPPDRAG_SCOPE: api://prod-fss.teamfamilie.familie-oppdrag/.default
 FAMILIE_STATISTIKK_URL: https://familie-ba-statistikk.prod-fss-pub.nais.io/api
+
+# Swagger
+AUTHORIZATION_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/authorize
+TOKEN_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
 
 ENVIRONMENT_NAME: p

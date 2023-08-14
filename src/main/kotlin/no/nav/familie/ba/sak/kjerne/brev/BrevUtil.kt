@@ -18,8 +18,9 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 
 fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
@@ -38,7 +39,8 @@ fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
         BehandlingÅrsak.OMREGNING_6ÅR,
         BehandlingÅrsak.OMREGNING_18ÅR,
         BehandlingÅrsak.SMÅBARNSTILLEGG,
-        BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
+        BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
+        -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
 
         else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
     }
@@ -55,7 +57,7 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
                 INNVILGET_OG_ENDRET,
                 INNVILGET_OG_OPPHØRT,
                 DELVIS_INNVILGET_OG_OPPHØRT,
-                ENDRET_OG_OPPHØRT
+                ENDRET_OG_OPPHØRT,
             ).contains(behandling.resultat) -> "Vedtak om endret barnetrygd"
 
             behandling.resultat.erFortsattInnvilget() -> "Vedtak om fortsatt barnetrygd"
@@ -76,14 +78,15 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>, lovForHjemmel: String): String
 
 fun hentHjemmeltekst(
     minimerteVedtaksperioder: List<MinimertVedtaksperiode>,
-    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     opplysningspliktHjemlerSkalMedIBrev: Boolean = false,
     målform: Målform,
-    vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false
+    vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false,
+    refusjonEøsHjemmelSkalMedIBrev: Boolean = false,
 ): String {
     val sanityStandardbegrunnelser = minimerteVedtaksperioder.flatMap { vedtaksperiode ->
         vedtaksperiode.begrunnelser.mapNotNull { begrunnelse ->
-            begrunnelse.standardbegrunnelse.tilISanityBegrunnelse(sanityBegrunnelser)
+            sanityBegrunnelser[begrunnelse.standardbegrunnelse]
         }
     }
 
@@ -98,7 +101,7 @@ fun hentHjemmeltekst(
             hjemler = (sanityStandardbegrunnelser.flatMap { it.hjemler } + sanityEøsBegrunnelser.flatMap { it.hjemler })
                 .toMutableSet(),
             opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev,
-            finnesVedtaksperiodeMedFritekst = minimerteVedtaksperioder.flatMap { it.fritekster }.isNotEmpty()
+            finnesVedtaksperiodeMedFritekst = minimerteVedtaksperioder.flatMap { it.fritekster }.isNotEmpty(),
         )
 
     val forvaltningsloverHjemler = hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev)
@@ -110,12 +113,24 @@ fun hentHjemmeltekst(
         hjemlerFraFolketrygdloven = (sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven })
             .distinct(),
         hjemlerEØSForordningen883 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen883 }.distinct(),
-        hjemlerEØSForordningen987 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 }.distinct(),
+        hjemlerEØSForordningen987 = hentHjemlerForEøsForordningen987(sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev),
         målform = målform,
-        hjemlerFraForvaltningsloven = forvaltningsloverHjemler
+        hjemlerFraForvaltningsloven = forvaltningsloverHjemler,
     )
 
     return slåSammenHjemlerAvUlikeTyper(alleHjemlerForBegrunnelser)
+}
+
+private fun hentHjemlerForEøsForordningen987(sanityEøsBegrunnelser: List<SanityEØSBegrunnelse>, refusjonEøsHjemmelSkalMedIBrev: Boolean): List<String> {
+    val hjemler = mutableListOf<String>()
+
+    hjemler.addAll(sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 })
+
+    if (refusjonEøsHjemmelSkalMedIBrev) {
+        hjemler.add("60")
+    }
+
+    return hjemler.distinct()
 }
 
 private fun slåSammenHjemlerAvUlikeTyper(hjemler: List<String>) = when (hjemler.size) {
@@ -141,7 +156,7 @@ private fun hentAlleTyperHjemler(
     hjemlerEØSForordningen883: List<String>,
     hjemlerEØSForordningen987: List<String>,
     målform: Målform,
-    hjemlerFraForvaltningsloven: List<String>
+    hjemlerFraForvaltningsloven: List<String>,
 ): List<String> {
     val alleHjemlerForBegrunnelser = mutableListOf<String>()
 
@@ -149,45 +164,45 @@ private fun hentAlleTyperHjemler(
     if (hjemlerSeparasjonsavtaleStorbritannia.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
             "${
-            when (målform) {
-                Målform.NB -> "Separasjonsavtalen mellom Storbritannia og Norge artikkel"
-                Målform.NN -> "Separasjonsavtalen mellom Storbritannia og Noreg artikkel"
-            }
+                when (målform) {
+                    Målform.NB -> "Separasjonsavtalen mellom Storbritannia og Norge artikkel"
+                    Målform.NN -> "Separasjonsavtalen mellom Storbritannia og Noreg artikkel"
+                }
             } ${
-            Utils.slåSammen(
-                hjemlerSeparasjonsavtaleStorbritannia
-            )
-            }"
+                Utils.slåSammen(
+                    hjemlerSeparasjonsavtaleStorbritannia,
+                )
+            }",
         )
     }
     if (ordinæreHjemler.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
             "${
-            when (målform) {
-                Målform.NB -> "barnetrygdloven"
-                Målform.NN -> "barnetrygdlova"
-            }
+                when (målform) {
+                    Målform.NB -> "barnetrygdloven"
+                    Målform.NN -> "barnetrygdlova"
+                }
             } ${
-            hjemlerTilHjemmeltekst(
-                hjemler = ordinæreHjemler,
-                lovForHjemmel = "barnetrygdloven"
-            )
-            }"
+                hjemlerTilHjemmeltekst(
+                    hjemler = ordinæreHjemler,
+                    lovForHjemmel = "barnetrygdloven",
+                )
+            }",
         )
     }
     if (hjemlerFraFolketrygdloven.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
             "${
-            when (målform) {
-                Målform.NB -> "folketrygdloven"
-                Målform.NN -> "folketrygdlova"
-            }
+                when (målform) {
+                    Målform.NB -> "folketrygdloven"
+                    Målform.NN -> "folketrygdlova"
+                }
             } ${
-            hjemlerTilHjemmeltekst(
-                hjemler = hjemlerFraFolketrygdloven,
-                lovForHjemmel = "folketrygdloven"
-            )
-            }"
+                hjemlerTilHjemmeltekst(
+                    hjemler = hjemlerFraFolketrygdloven,
+                    lovForHjemmel = "folketrygdloven",
+                )
+            }",
         )
     }
     if (hjemlerEØSForordningen883.isNotEmpty()) {
@@ -199,13 +214,13 @@ private fun hentAlleTyperHjemler(
     if (hjemlerFraForvaltningsloven.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
             "${
-            when (målform) {
-                Målform.NB -> "forvaltningsloven"
-                Målform.NN -> "forvaltningslova"
-            }
+                when (målform) {
+                    Målform.NB -> "forvaltningsloven"
+                    Målform.NN -> "forvaltningslova"
+                }
             } ${
-            hjemlerTilHjemmeltekst(hjemler = hjemlerFraForvaltningsloven, lovForHjemmel = "forvaltningsloven")
-            }"
+                hjemlerTilHjemmeltekst(hjemler = hjemlerFraForvaltningsloven, lovForHjemmel = "forvaltningsloven")
+            }",
         )
     }
     return alleHjemlerForBegrunnelser
@@ -214,7 +229,7 @@ private fun hentAlleTyperHjemler(
 private fun hentOrdinæreHjemler(
     hjemler: MutableSet<String>,
     opplysningspliktHjemlerSkalMedIBrev: Boolean,
-    finnesVedtaksperiodeMedFritekst: Boolean
+    finnesVedtaksperiodeMedFritekst: Boolean,
 ): List<String> {
     if (opplysningspliktHjemlerSkalMedIBrev) {
         val hjemlerNårOpplysningspliktIkkeOppfylt = listOf("17", "18")

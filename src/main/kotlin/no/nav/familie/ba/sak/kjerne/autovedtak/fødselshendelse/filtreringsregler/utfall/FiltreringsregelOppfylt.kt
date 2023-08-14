@@ -12,26 +12,32 @@ enum class FiltreringsregelOppfylt(val beskrivelse: String, private val filtreri
     MOR_ER_MYNDIG("Mor er myndig.", Filtreringsregel.MOR_HAR_IKKE_VERGE),
     MOR_MOTTAR_IKKE_LØPENDE_UTVIDET(
         "Mor mottar ikke utvidet barnetrygd.",
-        Filtreringsregel.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET
+        Filtreringsregel.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET,
     ),
     MOR_LEVER("Det er ikke registrert dødsdato på mor.", Filtreringsregel.MOR_LEVER),
     BARNET_LEVER("Det er ikke registrert dødsdato på barnet.", Filtreringsregel.BARN_LEVER),
     MER_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL(
         "Det har gått mer enn fem måneder siden forrige barn ble født.",
-        Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN
+        Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
     ),
     FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT(
         "Fagsaken har ikke blitt migrert fra infotrygd etter barn ble født.",
-        Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT
+        Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
     ),
     LØPER_IKKE_BARNETRYGD_FOR_BARNET(
         "Det løper ikke barnetrygd for barnet på annen forelder",
-        Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET
+        Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET,
     ),
     MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD(
         "Mor har ikke løpende EØS-barnetrygd",
-        Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD
-    );
+        Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
+    ),
+    MOR_OPPFYLLER_IKKE_VILKÅR_FOR_UTVIDET_BARNETRYGD_VED_FØDSELSDATO(
+        "Mor oppfyller ikke vilkår for utvidet barnetrygd",
+        Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+    ),
+
+    ;
 
     override fun hentBeskrivelse(): String {
         return beskrivelse

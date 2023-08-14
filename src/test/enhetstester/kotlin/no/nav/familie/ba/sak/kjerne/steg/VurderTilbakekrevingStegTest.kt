@@ -30,12 +30,12 @@ class VurderTilbakekrevingStegTest {
     private val behandling: Behandling = lagBehandling(
         behandlingType = BehandlingType.REVURDERING,
         årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-        førsteSteg = StegType.VURDER_TILBAKEKREVING
+        førsteSteg = StegType.VURDER_TILBAKEKREVING,
     )
     private val restTilbakekreving: RestTilbakekreving = RestTilbakekreving(
         valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
         varsel = "testverdi",
-        begrunnelse = "testverdi"
+        begrunnelse = "testverdi",
     )
 
     @BeforeEach
@@ -51,7 +51,7 @@ class VurderTilbakekrevingStegTest {
         val stegType = assertDoesNotThrow {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
                 behandling,
-                restTilbakekreving
+                restTilbakekreving,
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
@@ -65,7 +65,7 @@ class VurderTilbakekrevingStegTest {
         val stegType = assertDoesNotThrow {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
                 behandling,
-                restTilbakekreving
+                restTilbakekreving,
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }

@@ -13,7 +13,7 @@ class MinimertPerson(
     val fødselsdato: LocalDate,
     val aktørId: String,
     val aktivPersonIdent: String,
-    val dødsfallsdato: LocalDate?
+    val dødsfallsdato: LocalDate?,
 ) {
     val erDød = {
         dødsfallsdato != null
@@ -23,7 +23,7 @@ class MinimertPerson(
     fun tilMinimertRestPerson() = MinimertRestPerson(
         personIdent = aktivPersonIdent,
         fødselsdato = fødselsdato,
-        type = type
+        type = type,
     )
 }
 
@@ -37,7 +37,7 @@ fun List<Person>.tilMinimertePersoner(): List<MinimertPerson> =
             it.fødselsdato,
             it.aktør.aktørId,
             it.aktør.aktivFødselsnummer(),
-            it.dødsfall?.dødsfallDato
+            it.dødsfall?.dødsfallDato,
         )
     }
 

@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -32,35 +31,34 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VilkårController(
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårService: VilkårService,
     private val annenVurderingService: AnnenVurderingService,
     private val personidentService: PersonidentService,
     private val tilgangService: TilgangService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val tilbakestillBehandlingService: TilbakestillBehandlingService
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
 
     @PutMapping(path = ["/{behandlingId}/{vilkaarId}"])
     fun endreVilkår(
         @PathVariable behandlingId: Long,
         @PathVariable vilkaarId: Long,
-        @RequestBody restPersonResultat: RestPersonResultat
+        @RequestBody restPersonResultat: RestPersonResultat,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "endre vilkår"
+            handling = "endre vilkår",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         vilkårService.endreVilkår(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             vilkårId = vilkaarId,
-            restPersonResultat = restPersonResultat
+            restPersonResultat = restPersonResultat,
         )
-        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id)
+        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
@@ -68,17 +66,19 @@ class VilkårController(
     fun endreAnnenVurdering(
         @PathVariable behandlingId: Long,
         @PathVariable annenVurderingId: Long,
-        @RequestBody restAnnenVurdering: RestAnnenVurdering
+        @RequestBody restAnnenVurdering: RestAnnenVurdering,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Annen vurdering"
+            handling = "Annen vurdering",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         annenVurderingService.endreAnnenVurdering(
+            behandlingId = behandlingId,
             annenVurderingId = annenVurderingId,
-            restAnnenVurdering = restAnnenVurdering
+            restAnnenVurdering = restAnnenVurdering,
         )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
@@ -88,36 +88,38 @@ class VilkårController(
     fun slettVilkårsperiode(
         @PathVariable behandlingId: Long,
         @PathVariable vilkaarId: Long,
-        @RequestBody personIdent: String
+        @RequestBody personIdent: String,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "slette vilkårsperiode"
+            handling = "slette vilkårsperiode",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         val aktør = personidentService.hentAktør(personIdent)
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+
         vilkårService.deleteVilkårsperiode(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             vilkårId = vilkaarId,
-            aktør = aktør
+            aktør = aktør,
         )
 
-        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id)
+        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
     @DeleteMapping(path = ["/{behandlingId}/vilkaar"])
     fun slettVilkår(
         @PathVariable behandlingId: Long,
-        @RequestBody restSlettVilkår: RestSlettVilkår
+        @RequestBody restSlettVilkår: RestSlettVilkår,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "slette vilkår"
+            handling = "slette vilkår",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         vilkårService.deleteVilkår(behandlingId, restSlettVilkår)
 
@@ -126,13 +128,13 @@ class VilkårController(
     }
 
     @PostMapping(path = ["/{behandlingId}"])
-    fun nyttVilkår(@PathVariable behandlingId: Long, @RequestBody restNyttVilkår: RestNyttVilkår):
-        ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    fun nyttVilkår(@PathVariable behandlingId: Long, @RequestBody restNyttVilkår: RestNyttVilkår): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "legge til vilkår"
+            handling = "legge til vilkår",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         vilkårService.postVilkår(behandlingId, restNyttVilkår)
 
@@ -140,8 +142,8 @@ class VilkårController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandlingId)
-            )
+                    .lagRestUtvidetBehandling(behandlingId = behandlingId),
+            ),
         )
     }
 

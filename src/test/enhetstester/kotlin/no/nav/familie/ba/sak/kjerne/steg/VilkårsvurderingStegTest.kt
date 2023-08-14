@@ -4,11 +4,13 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -54,12 +56,12 @@ class VilkårsvurderingStegTest {
         persongrunnlagService,
         tilbakestillBehandlingService,
         tilpassKompetanserTilRegelverkService,
-        vilkårsvurderingForNyBehandlingService
+        vilkårsvurderingForNyBehandlingService,
     )
 
     val behandling = lagBehandling(
         behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-        årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
+        årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
     )
     val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(1984, 1, 1))
     val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 1, 1))
@@ -69,11 +71,11 @@ class VilkårsvurderingStegTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
-            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer())
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
         )
         every { tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling) } returns Unit
         every { beregningService.genererTilkjentYtelseFraVilkårsvurdering(any(), any()) } returns lagInitiellTilkjentYtelse(
-            behandling
+            behandling,
         )
 
         every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
@@ -90,7 +92,7 @@ class VilkårsvurderingStegTest {
             periodeTom = LocalDate.now(),
             lagFullstendigVilkårResultat = true,
             personType = PersonType.SØKER,
-            erDeltBosted = false
+            erDeltBosted = false,
         )
         val barnPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
@@ -100,7 +102,7 @@ class VilkårsvurderingStegTest {
             periodeTom = LocalDate.now(),
             lagFullstendigVilkårResultat = true,
             personType = PersonType.BARN,
-            erDeltBosted = true
+            erDeltBosted = true,
         )
         vikårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
         every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurdering
@@ -124,10 +126,10 @@ class VilkårsvurderingStegTest {
             .byggPerson()
 
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+        val søkerOgBarnPåBehandling = listOf(søker.tilPersonEnkel(), barn1.tilPersonEnkel())
 
         every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
-        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id) } returns søkerOgBarnPåBehandling
 
         assertDoesNotThrow { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
     }
@@ -150,15 +152,15 @@ class VilkårsvurderingStegTest {
             .byggPerson()
 
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+        val søkerOgBarnPåBehandling = listOf(søker.tilPersonEnkel(), barn1.tilPersonEnkel())
 
         every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
-        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id) } returns søkerOgBarnPåBehandling
 
-        val exception = assertThrows<RuntimeException> { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
+        val exception = assertThrows<FunksjonellFeil> { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
         assertEquals(
             "Det er forskjellig regelverk for en eller flere perioder for søker eller barna",
-            exception.message
+            exception.message,
         )
     }
 }

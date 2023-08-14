@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt
 enum class Uendelighet {
     INGEN,
     FORTID,
-    FREMTID
+    FREMTID,
 }
 
 interface Tidsenhet
@@ -11,7 +11,7 @@ class Dag : Tidsenhet
 class Måned : Tidsenhet
 
 abstract class Tidspunkt<T : Tidsenhet> internal constructor(
-    internal open val uendelighet: Uendelighet
+    internal open val uendelighet: Uendelighet,
 ) : Comparable<Tidspunkt<T>> {
     abstract fun flytt(tidsenheter: Long): Tidspunkt<T>
     internal abstract fun medUendelighet(uendelighet: Uendelighet): Tidspunkt<T>
@@ -36,11 +36,22 @@ abstract class Tidspunkt<T : Tidsenhet> internal constructor(
 
     protected abstract fun sammenliknMed(tidspunkt: Tidspunkt<T>): Int
 
-    override fun equals(other: Any?): Boolean {
-        return if (other is Tidspunkt<*>) {
-            this.uendelighet != Uendelighet.INGEN && this.uendelighet == other.uendelighet
-        } else {
-            super.equals(other)
-        }
-    }
+    /**
+     * Det samme som tidspunkt.somEndelig() <= tilOgMed.somEndelig()
+     * Men unngår å kopiere seg selv, og trenger ikke sjekke for andre verdier av [Uendelighet] i [compareTo]
+     */
+    fun endeligMindreEllerLik(tidspunkt: Tidspunkt<T>) = sammenliknMed(tidspunkt) <= 0
+
+    /**
+     * Det samme som
+     * tidspunkt.somEndelig() == tilOgMed.somEndelig()
+     * Men unngår å kopiere seg selv, og trenger ikke sjekke for andre verdier av [Uendelighet] i [compareTo]
+     */
+    fun endeligLik(tidspunkt: Tidspunkt<T>) = sammenliknMed(tidspunkt) == 0
+
+    /**
+     * Det samme som tidspunkt.somEndelig() < tilOgMed.somEndelig()
+     * Men unngår å kopiere seg selv, og trenger ikke sjekke for andre verdier av [Uendelighet] i [compareTo]
+     */
+    fun endeligMindre(tidspunkt: Tidspunkt<T>) = sammenliknMed(tidspunkt) < 0
 }

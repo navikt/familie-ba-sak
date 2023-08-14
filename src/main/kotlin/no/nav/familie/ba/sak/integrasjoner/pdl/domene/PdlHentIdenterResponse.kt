@@ -7,5 +7,5 @@ data class PdlIdenter(val identer: List<IdentInformasjon>)
 data class IdentInformasjon(
     val ident: String,
     val historisk: Boolean,
-    val gruppe: String
+    val gruppe: String,
 )

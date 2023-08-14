@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -14,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -42,12 +42,12 @@ class BeslutteVedtak(
     private val featureToggleService: FeatureToggleService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val saksbehandlerContext: SaksbehandlerContext,
-    private val simuleringService: SimuleringService
+    private val automatiskBeslutningService: AutomatiskBeslutningService,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: RestBeslutningPåVedtak
+        data: RestBeslutningPåVedtak,
     ): StegType {
         if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
             throw FunksjonellFeil("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
@@ -58,32 +58,34 @@ class BeslutteVedtak(
         ) {
             throw FunksjonellFeil(
                 melding = "Årsak ${BehandlingÅrsak.KORREKSJON_VEDTAKSBREV.visningsnavn} og toggle ${FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV} false",
-                frontendFeilmelding = "Du har ikke tilgang til å beslutte for denne behandlingen. Ta kontakt med teamet dersom dette ikke stemmer."
+                frontendFeilmelding = "Du har ikke tilgang til å beslutte for denne behandlingen. Ta kontakt med teamet dersom dette ikke stemmer.",
             )
         } else if (behandling.erTekniskBehandling() && !featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING)) {
             throw FunksjonellFeil(
-                "Du har ikke tilgang til å beslutte en behandling med årsak=${behandling.opprettetÅrsak.visningsnavn}. Ta kontakt med teamet dersom dette ikke stemmer."
+                "Du har ikke tilgang til å beslutte en behandling med årsak=${behandling.opprettetÅrsak.visningsnavn}. Ta kontakt med teamet dersom dette ikke stemmer.",
             )
         }
 
-        val behandlingErAutomatiskBesluttet =
-            behandling.erManuellMigrering() && simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
+        val behandlingSkalAutomatiskBesluttes =
+            automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)
 
-        val beslutter = if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
-        val beslutterId = if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
+        val beslutter =
+            if (behandlingSkalAutomatiskBesluttes) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
+        val beslutterId =
+            if (behandlingSkalAutomatiskBesluttes) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
 
         val totrinnskontroll = totrinnskontrollService.besluttTotrinnskontroll(
             behandling = behandling,
             beslutter = beslutter,
             beslutterId = beslutterId,
             beslutning = data.beslutning,
-            kontrollerteSider = data.kontrollerteSider
+            kontrollerteSider = data.kontrollerteSider,
         )
 
         opprettTaskFerdigstillGodkjenneVedtak(
             behandling = behandling,
             beslutning = data,
-            behandlingErAutomatiskBesluttet = behandlingErAutomatiskBesluttet
+            behandlingErAutomatiskBesluttet = behandlingSkalAutomatiskBesluttes,
         )
 
         return if (data.beslutning.erGodkjent()) {
@@ -130,15 +132,15 @@ class BeslutteVedtak(
                 begrunnelseVilkårPekere =
                 VilkårsvurderingService.matchVilkårResultater(
                     vilkårsvurdering,
-                    kopiertVilkårsVurdering
-                )
+                    kopiertVilkårsVurdering,
+                ),
             )
 
             val behandleUnderkjentVedtakTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
                 tilordnetRessurs = totrinnskontroll.saksbehandlerId,
-                fristForFerdigstillelse = LocalDate.now()
+                fristForFerdigstillelse = LocalDate.now(),
             )
             taskRepository.save(behandleUnderkjentVedtakTask)
             StegType.SEND_TIL_BESLUTTER
@@ -163,7 +165,7 @@ class BeslutteVedtak(
     private fun opprettFerdigstillBehandlingTask(behandling: Behandling) {
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
             søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-            behandlingsId = behandling.id
+            behandlingsId = behandling.id,
         )
         taskRepository.save(ferdigstillBehandlingTask)
     }
@@ -171,13 +173,13 @@ class BeslutteVedtak(
     private fun opprettTaskFerdigstillGodkjenneVedtak(
         behandling: Behandling,
         beslutning: RestBeslutningPåVedtak,
-        behandlingErAutomatiskBesluttet: Boolean
+        behandlingErAutomatiskBesluttet: Boolean,
     ) {
         loggService.opprettBeslutningOmVedtakLogg(
             behandling = behandling,
             beslutning = beslutning.beslutning,
             begrunnelse = beslutning.begrunnelse,
-            behandlingErAutomatiskBesluttet = behandlingErAutomatiskBesluttet
+            behandlingErAutomatiskBesluttet = behandlingErAutomatiskBesluttet,
         )
 
         if (!behandling.erManuellMigrering() || !behandlingErAutomatiskBesluttet) {
@@ -196,7 +198,7 @@ class BeslutteVedtak(
         val task = JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
             vedtakId = vedtak.id,
             personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-            behandlingId = behandling.id
+            behandlingId = behandling.id,
         )
         taskRepository.save(task)
     }

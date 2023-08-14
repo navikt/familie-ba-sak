@@ -41,37 +41,37 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
             erLikBruker = true,
             id = personIdent,
             land = "NO",
-            type = AvsenderMottakerIdType.FNR
+            type = AvsenderMottakerIdType.FNR,
         ),
         journalforendeEnhet = DEFAULT_JOURNALFØRENDE_ENHET,
         kanal = "NAV_NO",
         dokumenter = listOf(
             DokumentInfo(
                 tittel = "Søknad om barnetrygd",
-                brevkode = "mock",
+                brevkode = "NAV 33-00.07",
                 dokumentstatus = null,
                 dokumentvarianter = emptyList(),
                 dokumentInfoId = "1",
-                logiskeVedlegg = listOf(LogiskVedlegg("123", "Oppholdstillatelse"))
+                logiskeVedlegg = listOf(LogiskVedlegg("123", "Oppholdstillatelse")),
             ),
             DokumentInfo(
                 tittel = "Ekstra vedlegg",
-                brevkode = "mock",
+                brevkode = null,
                 dokumentstatus = null,
                 dokumentvarianter = emptyList(),
                 dokumentInfoId = "2",
-                logiskeVedlegg = listOf(LogiskVedlegg("123", "Pass"))
-            )
+                logiskeVedlegg = listOf(LogiskVedlegg("123", "Pass")),
+            ),
         ),
         sak = Sak(
             arkivsaksnummer = "",
             arkivsaksystem = "GSAK",
             sakstype = Sakstype.FAGSAK.name,
             fagsakId = "10695768",
-            fagsaksystem = FAGSYSTEM
+            fagsaksystem = FAGSYSTEM,
         ),
         tittel = "Søknad om ordinær barnetrygd",
-        relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT"))
+        relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT")),
     )
 }
 
@@ -84,7 +84,7 @@ fun lagTestOppgave(): OpprettOppgaveRequest {
         fristFerdigstillelse = LocalDate.now(),
         beskrivelse = "test",
         enhetsnummer = "1234",
-        behandlingstema = "behandlingstema"
+        behandlingstema = "behandlingstema",
     )
 }
 
@@ -92,7 +92,7 @@ fun lagTestOppgaveDTO(
     oppgaveId: Long,
     oppgavetype: Oppgavetype = Oppgavetype.Journalføring,
     tildeltRessurs: String? = null,
-    tildeltEnhetsnr: String? = "4820"
+    tildeltEnhetsnr: String? = "4820",
 ): Oppgave {
     return Oppgave(
         id = oppgaveId,
@@ -110,14 +110,14 @@ fun lagTestOppgaveDTO(
         opprettetTidspunkt = LocalDate.of(
             2020,
             1,
-            1
+            1,
         ).toString(),
         fristFerdigstillelse = LocalDate.of(
             2020,
             2,
-            1
+            1,
         ).toString(),
         prioritet = OppgavePrioritet.NORM,
-        status = StatusEnum.OPPRETTET
+        status = StatusEnum.OPPRETTET,
     )
 }
