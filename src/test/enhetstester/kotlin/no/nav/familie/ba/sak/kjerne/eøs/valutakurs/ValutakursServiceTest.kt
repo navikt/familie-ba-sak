@@ -92,7 +92,7 @@ internal class ValutakursServiceTest {
             ).medBehandlingId(behandlingId),
         ).single()
 
-        valutakursService.slettValutakurs(lagretValutakurs.id)
+        valutakursService.slettValutakurs(behandlingId, lagretValutakurs.id)
 
         val faktiskValutakurs = valutakursService.hentValutakurser(behandlingId).single()
 

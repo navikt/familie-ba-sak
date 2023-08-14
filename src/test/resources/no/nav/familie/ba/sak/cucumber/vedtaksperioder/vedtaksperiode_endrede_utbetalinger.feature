@@ -83,7 +83,7 @@ Egenskap: Vedtaksperioder med endrede utbetalinger
       | 5678    | 08.12.2021 | 31.10.2031 | 1354  | 1            |
       | 5678    | 08.12.2021 | 31.10.2031 | 1354  | 2            |
 
-    Når vedtaksperioder med begrunnelser genereres der forrige behandling allerede er vedtatt for behandling 2
+    Når vedtaksperioder med begrunnelser genereres for behandling 2
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato | Vedtaksperiodetype | Kommentar |
@@ -125,7 +125,7 @@ Egenskap: Vedtaksperioder med endrede utbetalinger
       | 3456    | 31.05.2021 | 30.10.2033 | 1354  | 1            |
       | 3456    | 31.04.2023 | 30.10.2033 | 1354  | 2            |
 
-    Når vedtaksperioder med begrunnelser genereres der forrige behandling allerede er vedtatt for behandling 2
+    Når vedtaksperioder med begrunnelser genereres for behandling 2
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                              |
