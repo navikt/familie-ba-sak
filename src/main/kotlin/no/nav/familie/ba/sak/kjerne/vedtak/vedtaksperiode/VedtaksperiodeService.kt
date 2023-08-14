@@ -399,28 +399,14 @@ class VedtaksperiodeService(
     }
 
     @Transactional
-    fun genererVedtaksperiodeForOverstyrtEndringstidspunkt(
-        restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt,
-    ) {
+    fun oppdaterEndringstidspunktOgGenererVedtaksperioderPåNytt(restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt) {
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(restGenererVedtaksperioder.behandlingId)
-        validerBehandlingKanRedigeres(vedtak.behandling)
 
-        val overstyrtEndringstidspunkt = restGenererVedtaksperioder.overstyrtEndringstidspunkt
-        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
-            oppdaterVedtakMedVedtaksperioder(vedtak)
-        } else {
-            vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
-            val vedtaksperioder = if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
-                finnVedtaksperioderForBehandling(vedtak.behandling.id)
-            } else {
-                genererVedtaksperioderMedBegrunnelserGammel(
-                    vedtak = vedtak,
-                    manueltOverstyrtEndringstidspunkt = overstyrtEndringstidspunkt,
-                )
-            }
-            vedtaksperiodeHentOgPersisterService.lagre(vedtaksperioder.sortedBy { it.fom })
-        }
-        lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, overstyrtEndringstidspunkt)
+        lagreNedOverstyrtEndringstidspunkt(
+            behandlingId = vedtak.behandling.id,
+            overstyrtEndringstidspunkt = restGenererVedtaksperioder.overstyrtEndringstidspunkt
+        )
+        oppdaterVedtakMedVedtaksperioder(vedtak)
     }
 
     private fun lagreNedOverstyrtEndringstidspunkt(behandlingId: Long, overstyrtEndringstidspunkt: LocalDate) {
