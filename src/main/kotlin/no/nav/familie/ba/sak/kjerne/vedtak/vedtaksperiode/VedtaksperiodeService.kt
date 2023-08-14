@@ -402,6 +402,8 @@ class VedtaksperiodeService(
     fun oppdaterEndringstidspunktOgGenererVedtaksperioderPåNytt(restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt) {
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(restGenererVedtaksperioder.behandlingId)
 
+        validerBehandlingKanRedigeres(vedtak.behandling)
+
         lagreNedOverstyrtEndringstidspunkt(
             behandlingId = vedtak.behandling.id,
             overstyrtEndringstidspunkt = restGenererVedtaksperioder.overstyrtEndringstidspunkt
