@@ -104,7 +104,7 @@ class VedtaksperiodeMedBegrunnelserController(
             handling = "Oppdaterer vedtaksperiode med endringstidspunkt",
         )
 
-        vedtaksperiodeService.genererVedtaksperiodeForOverstyrtEndringstidspunkt(restGenererVedtaksperioder)
+        vedtaksperiodeService.oppdaterEndringstidspunktOgGenererVedtaksperioderPåNytt(restGenererVedtaksperioder)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
