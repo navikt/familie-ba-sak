@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -186,6 +187,10 @@ object TilkjentYtelseValidering {
             }
         }
         if (barnMedUtbetalingsikkerhetFeil.isNotEmpty()) {
+            LoggerFactory.getLogger("secureLogger").info("${barnMedAndreRelevanteTilkjentYtelser
+                .filter { barnMedUtbetalingsikkerhetFeil.contains(it.first) }
+                .map { "Andeler for barn ${it.first.fødselsdato}: ${it.second.map { tilkjentYtelse -> "[Fagsak ${tilkjentYtelse.behandling.fagsak}: ${tilkjentYtelse.andelerTilkjentYtelse}], " }}" }}")
+
             throw UtbetalingsikkerhetFeil(
                 melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${
                     barnMedUtbetalingsikkerhetFeil.tilFeilmeldingTekst()
