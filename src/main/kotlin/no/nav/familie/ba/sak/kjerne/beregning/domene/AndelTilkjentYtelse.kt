@@ -259,6 +259,12 @@ enum class YtelseType(val klassifisering: String) {
         UTVIDET_BARNETRYGD -> listOf(SatsType.UTVIDET_BARNETRYGD)
         SMÅBARNSTILLEGG -> listOf(SatsType.SMA)
     }
+
+    fun tilYtelseType(): no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType = when (this) {
+        ORDINÆR_BARNETRYGD -> no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType.ORDINÆR_BARNETRYGD
+        UTVIDET_BARNETRYGD -> no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType.UTVIDET_BARNETRYGD
+        SMÅBARNSTILLEGG -> no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType.SMÅBARNSTILLEGG
+    }
 }
 
 private fun regelverkavhenigeVilkår(): List<Vilkår> {

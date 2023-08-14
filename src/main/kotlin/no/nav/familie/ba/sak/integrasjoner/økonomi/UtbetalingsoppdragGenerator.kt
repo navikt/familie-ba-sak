@@ -9,18 +9,119 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
+import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
+import no.nav.familie.felles.utbetalingsgenerator.domain.AndelData
+import no.nav.familie.felles.utbetalingsgenerator.domain.Behandlingsinformasjon
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Component
 class UtbetalingsoppdragGenerator(
     private val beregningService: BeregningService,
 ) {
+
+    fun lagUtbetalingsoppdrag(
+        saksbehandlerId: String,
+        vedtak: Vedtak,
+        forrigeTilkjentYtelse: TilkjentYtelse?,
+        nyTilkjentYtelse: TilkjentYtelse,
+        erSimulering: Boolean,
+        erEndretMigreringsdato: Boolean,
+        endretMigreringsDato: YearMonth? = null,
+    ) {
+        var counter = 0
+        fun nextId() = (++counter).toString()
+
+        val personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer()
+        val ytelseType = vedtak.behandling.hentYtelseTypeTilVilkår()
+
+        Utbetalingsgenerator().lagUtbetalingsoppdrag(
+            behandlingsinformasjon = Behandlingsinformasjon(
+                saksbehandlerId = saksbehandlerId,
+                behandlingId = vedtak.behandling.id.toString(),
+                eksternBehandlingId = vedtak.behandling.id,
+                eksternFagsakId = vedtak.behandling.fagsak.id,
+                ytelse = Ytelsestype.BARNETRYGD,
+                personIdent = personIdent,
+                vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
+                opphørFra = opphørFra(forrigeTilkjentYtelse, nyTilkjentYtelse, erSimulering, endretMigreringsDato),
+                utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
+                erGOmregning = false,
+            ),
+            forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.map {
+                it.tilAndelData(
+                    id = nextId(),
+                    personIdent = personIdent,
+                    ytelseType = ytelseType,
+                )
+            } ?: emptyList(),
+            nyeAndeler = nyTilkjentYtelse.andelerTilkjentYtelse.map {
+                it.tilAndelData(
+                    id = nextId(),
+                    personIdent = personIdent,
+                    ytelseType = ytelseType,
+                )
+            },
+            // TODO bruk ny metode for å hente ut sisteAndelPerKjede.
+            sisteAndelPerKjede = emptyMap(),
+        )
+    }
+
+    private fun AndelTilkjentYtelse.tilAndelData(id: String, personIdent: String, ytelseType: YtelseType): AndelData =
+        AndelData(
+            id = id,
+            fom = periode.fom,
+            tom = periode.tom,
+            beløp = kalkulertUtbetalingsbeløp,
+            personIdent = personIdent,
+            type = ytelseType.tilYtelseType(),
+            periodeId = periodeOffset,
+            forrigePeriodeId = forrigePeriodeOffset,
+            kildeBehandlingId = kildeBehandlingId?.toString(),
+        )
+
+    private fun opphørFra(
+        forrigeTilkjentYtelse: TilkjentYtelse?,
+        nyTilkjentYtelseMedMetaData: TilkjentYtelse,
+        erSimulering: Boolean,
+        endretMigreringsDato: YearMonth?,
+    ): YearMonth? {
+        if (forrigeTilkjentYtelse == null) return null
+        if (endretMigreringsDato != null) return endretMigreringsDato
+        if (erSimulering) {
+            return forrigeTilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.periode.fom }
+        }
+        val forrigeStartdato = forrigeTilkjentYtelse.stønadFom!!
+        val nyStartdato = nyTilkjentYtelseMedMetaData.stønadFom!!
+        val førsteAndelDato =
+            nyTilkjentYtelseMedMetaData.andelerTilkjentYtelse.minOfOrNull { it.periode.fom }
+        if (nyStartdato < forrigeStartdato && (førsteAndelDato == null || nyStartdato < førsteAndelDato)) {
+            return nyStartdato
+        }
+        return null
+    }
+
+    private fun hentUtebetalesTil(fagsak: Fagsak): String {
+        return when (fagsak.type) {
+            FagsakType.INSTITUSJON -> {
+                fagsak.institusjon?.tssEksternId
+                    ?: error("Fagsak ${fagsak.id} er av type institusjon og mangler informasjon om institusjonen")
+            }
+
+            else -> {
+                fagsak.aktør.aktivFødselsnummer()
+            }
+        }
+    }
 
     /**
      * Lager utbetalingsoppdrag med kjedede perioder av andeler.
