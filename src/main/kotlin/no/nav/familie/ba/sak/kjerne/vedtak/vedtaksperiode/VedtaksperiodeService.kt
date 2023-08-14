@@ -301,8 +301,7 @@ class VedtaksperiodeService(
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
         val behandling = vedtak.behandling
 
-        // Rent fortsatt innvilget-resultat er det eneste som kun skal gi én vedtaksperiode
-        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
+        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || behandling.opprettetÅrsak.erOmregningsårsak()) {
             val vedtaksbrevmal = brevmalService.hentVedtaksbrevmal(
                 behandling,
             )
