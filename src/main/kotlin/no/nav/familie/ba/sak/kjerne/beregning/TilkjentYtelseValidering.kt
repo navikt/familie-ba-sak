@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
@@ -31,7 +32,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -187,7 +187,7 @@ object TilkjentYtelseValidering {
             }
         }
         if (barnMedUtbetalingsikkerhetFeil.isNotEmpty()) {
-            LoggerFactory.getLogger("secureLogger").info(
+            secureLogger.info(
                 "${barnMedAndreRelevanteTilkjentYtelser
                     .filter { barnMedUtbetalingsikkerhetFeil.contains(it.first) }
                     .map { "Andeler for barn ${it.first.fødselsdato}: ${it.second.map { tilkjentYtelse -> "[Fagsak ${tilkjentYtelse.behandling.fagsak}: ${tilkjentYtelse.andelerTilkjentYtelse}], " }}" }}",
