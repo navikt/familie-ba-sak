@@ -96,7 +96,7 @@ class BehandlingstemaService(
 
     fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori {
         val forrigeIverksattBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
                 ?: return BehandlingKategori.NASJONAL
 
         val barnasTidslinjer =
@@ -150,7 +150,7 @@ class BehandlingstemaService(
 
     private fun hentForrigeAndeler(fagsakId: Long): List<AndelTilkjentYtelse>? {
         val forrigeIverksattBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId) ?: return null
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId) ?: return null
         return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeIverksattBehandling.id)
     }
 }
