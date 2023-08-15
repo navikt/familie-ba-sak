@@ -17,6 +17,8 @@ import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelData
 import no.nav.familie.felles.utbetalingsgenerator.domain.Behandlingsinformasjon
+import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdrag
+import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -34,17 +36,16 @@ class UtbetalingsoppdragGenerator(
         vedtak: Vedtak,
         forrigeTilkjentYtelse: TilkjentYtelse?,
         nyTilkjentYtelse: TilkjentYtelse,
+        sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>?,
         erSimulering: Boolean,
-        erEndretMigreringsdato: Boolean,
         endretMigreringsDato: YearMonth? = null,
-    ) {
+    ): BeregnetUtbetalingsoppdrag {
         var counter = 0
         fun nextId() = (++counter).toString()
 
         val personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer()
-        val ytelseType = vedtak.behandling.hentYtelseTypeTilVilkår()
 
-        Utbetalingsgenerator().lagUtbetalingsoppdrag(
+        return Utbetalingsgenerator().lagUtbetalingsoppdrag(
             behandlingsinformasjon = Behandlingsinformasjon(
                 saksbehandlerId = saksbehandlerId,
                 behandlingId = vedtak.behandling.id.toString(),
@@ -60,30 +61,26 @@ class UtbetalingsoppdragGenerator(
             forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.map {
                 it.tilAndelData(
                     id = nextId(),
-                    personIdent = personIdent,
-                    ytelseType = ytelseType,
                 )
             } ?: emptyList(),
             nyeAndeler = nyTilkjentYtelse.andelerTilkjentYtelse.map {
                 it.tilAndelData(
                     id = nextId(),
-                    personIdent = personIdent,
-                    ytelseType = ytelseType,
                 )
             },
-            // TODO bruk ny metode for å hente ut sisteAndelPerKjede.
-            sisteAndelPerKjede = emptyMap(),
+            sisteAndelPerKjede = sisteAndelPerKjede?.mapValues { it.value.tilAndelData("-1") }
+                ?: emptyMap(),
         )
     }
 
-    private fun AndelTilkjentYtelse.tilAndelData(id: String, personIdent: String, ytelseType: YtelseType): AndelData =
+    private fun AndelTilkjentYtelse.tilAndelData(id: String): AndelData =
         AndelData(
             id = id,
             fom = periode.fom,
             tom = periode.tom,
             beløp = kalkulertUtbetalingsbeløp,
-            personIdent = personIdent,
-            type = ytelseType.tilYtelseType(),
+            personIdent = aktør.aktivFødselsnummer(),
+            type = type.tilYtelseType(),
             periodeId = periodeOffset,
             forrigePeriodeId = forrigePeriodeOffset,
             kildeBehandlingId = kildeBehandlingId?.toString(),

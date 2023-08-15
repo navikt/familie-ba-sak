@@ -41,6 +41,7 @@ class SimuleringService(
     private val vedtakRepository: VedtakRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService,
 ) {
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
@@ -55,7 +56,7 @@ class SimuleringService(
          * Denne verdien brukes ikke til noe i simulering.
          */
 
-        val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+        val utbetalingsoppdragGammel = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak = vedtak,
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
@@ -63,10 +64,18 @@ class SimuleringService(
         )
 
         // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
-        if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
+        if (utbetalingsoppdragGammel.utbetalingsperiode.isEmpty()) return null
+
+        val detaljertSimuleringResultat = økonomiKlient.hentSimulering(utbetalingsoppdragGammel)
+
+        kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+            vedtak = vedtak,
+            simuleringResultatGammel = detaljertSimuleringResultat,
+            erSimulering = true,
+        )
 
         simulert.increment()
-        return økonomiKlient.hentSimulering(utbetalingsoppdrag)
+        return detaljertSimuleringResultat
     }
 
     @Transactional

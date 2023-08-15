@@ -11,10 +11,14 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
+import no.nav.familie.ba.sak.kjerne.simulering.KontrollerNyUtbetalingsgeneratorService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdrag
+import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
@@ -34,6 +38,8 @@ class ØkonomiService(
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService,
 
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
@@ -49,9 +55,15 @@ class ØkonomiService(
             saksbehandlerId,
             andelTilkjentYtelseForUtbetalingsoppdragFactory,
         )
+
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
 
         tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId = vedtak.behandling.id)
+
+        kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+            vedtak = vedtak,
+            utbetalingsoppdrag = utbetalingsoppdrag,
+        )
         iverksettOppdrag(utbetalingsoppdrag, oppdatertBehandling.id)
         return utbetalingsoppdrag
     }
@@ -85,6 +97,34 @@ class ØkonomiService(
         } else {
             OppdragStatus.KVITTERT_OK
         }
+
+    fun genererUtbetalingsoppdrag(
+        vedtak: Vedtak,
+        saksbehandlerId: String,
+        erSimulering: Boolean = false,
+    ): BeregnetUtbetalingsoppdrag {
+        val forrigeBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = vedtak.behandling)
+        val forrigeTilkjentYtelse =
+            forrigeBehandling?.let { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandlingId = it.id) }
+        val nyTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = vedtak.behandling.id)
+        val endretMigreringsDato = beregnOmMigreringsDatoErEndret(
+            vedtak.behandling,
+            forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minByOrNull { it.stønadFom }?.stønadFom,
+        )
+        val sisteAndelPerKjede =
+            andelTilkjentYtelseRepository.hentSisteAndelPerIdent(fagsakId = vedtak.behandling.fagsak.id)
+                .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
+        return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+            saksbehandlerId = saksbehandlerId,
+            vedtak = vedtak,
+            forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+            nyTilkjentYtelse = nyTilkjentYtelse,
+            sisteAndelPerKjede = sisteAndelPerKjede,
+            erSimulering = erSimulering,
+            endretMigreringsDato = endretMigreringsDato,
+        )
+    }
 
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
