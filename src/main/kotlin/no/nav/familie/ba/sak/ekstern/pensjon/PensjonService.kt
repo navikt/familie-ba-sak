@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.UUID
 
 @Service
 class PensjonService(
@@ -37,7 +38,17 @@ class PensjonService(
         return barnetrygdMedRelaterteSaker.plus(barnetrygdTilPensjon).distinct()
     }
 
-    private fun hentBarnetrygdForRelatertPersonTilPensjon(personIdent: String, fraDato: LocalDate, forelderAktør: Aktør): List<BarnetrygdTilPensjon> {
+    fun lagTaskForHentingAvIdenterTilPensjon(år: String): UUID {
+        // Lage task som faktisk heter alle identen og legger på kafka.
+
+        return UUID.randomUUID()
+    }
+
+    private fun hentBarnetrygdForRelatertPersonTilPensjon(
+        personIdent: String,
+        fraDato: LocalDate,
+        forelderAktør: Aktør,
+    ): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
         val fagsaker = fagsakRepository.finnFagsakerSomHarAndelerForAktør(aktør)
             .filter { it.type == FagsakType.NORMAL } // skal kun ha normale fagsaker til med her
@@ -45,6 +56,7 @@ class PensjonService(
             .distinct()
         return fagsaker.mapNotNull { fagsak -> hentBarnetrygdTilPensjon(fagsak, fraDato) }
     }
+
     private fun hentBarnetrygdTilPensjon(fagsak: Fagsak, fraDato: LocalDate): BarnetrygdTilPensjon? {
         val behandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id)
             ?: return null
@@ -86,6 +98,7 @@ class PensjonService(
             YtelseType.UTVIDET_BARNETRYGD -> YtelseTypeEkstern.UTVIDET_BARNETRYGD
         }
     }
+
     companion object {
         private val logger = LoggerFactory.getLogger(BisysService::class.java)
     }

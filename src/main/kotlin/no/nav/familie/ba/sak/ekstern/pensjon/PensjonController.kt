@@ -88,6 +88,71 @@ class PensjonController(private val pensjonService: PensjonService) {
             )
         }
 
-        return ResponseEntity.ok(BarnetrygdTilPensjonResponse(pensjonService.hentBarnetrygd(request.ident, request.fraDato)))
+        return ResponseEntity.ok(
+            BarnetrygdTilPensjonResponse(
+                pensjonService.hentBarnetrygd(
+                    request.ident,
+                    request.fraDato,
+                ),
+            ),
+        )
+    }
+
+    @Operation(
+        description = "Tjeneste for Pensjon for å hente barnetrygd og relaterte saker for en gitt person.",
+
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description =
+                """Liste over fagsaker og relaterte fagsaker(hvis barna finnes i flere fagsaker) fra ba-sak 
+                                        
+                   fagsakId:                unik id for fagsaken
+                   fagsakEiersIdent:        Fnr for eier av fagsaken
+                   barnetrygdPerioder:      Liste over perioder med barnetrygd
+                   
+                """,
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        array = (
+                            ArraySchema(schema = Schema(implementation = BarnetrygdTilPensjon::class))
+                            ),
+                    ),
+                ],
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Ugyldig input. fraDato maks tilbake 2 år",
+                content = [Content()],
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "Uventet feil",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        array = (
+                            ArraySchema(schema = Schema(implementation = Ressurs::class))
+                            ),
+                    ),
+                ],
+            ),
+        ],
+    )
+    @PostMapping(
+        path = ["/bestill-personer-med-barnetrygd"],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun bestillPersonerMedBarnetrygdForGittÅrPåKafka(
+        @RequestBody
+        år: String,
+    ): ResponseEntity<String> {
+        // lage task som henter identer
+
+        return ResponseEntity.accepted().body("id-fra-task")
     }
 }
