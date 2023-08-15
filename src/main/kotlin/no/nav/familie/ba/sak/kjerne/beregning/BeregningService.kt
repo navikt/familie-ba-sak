@@ -107,12 +107,12 @@ class BeregningService(
             .filter { it.id != fagsakId }
 
         return andreFagsaker.mapNotNull { fagsak ->
-            val behandlingSomErSendtTilGodkjenning = behandlingRepository.finnBehandlingerSentTilGodkjenning(
+            val behandlingSomLiggerTilGodkjenning = behandlingRepository.finnBehandlingerSomLiggerTilGodkjenning(
                 fagsakId = fagsak.id,
             ).singleOrNull()
 
-            if (behandlingSomErSendtTilGodkjenning != null) {
-                behandlingSomErSendtTilGodkjenning
+            if (behandlingSomLiggerTilGodkjenning != null) {
+                behandlingSomLiggerTilGodkjenning
             } else {
                 val godkjenteBehandlingerSomIkkeErIverksattEnda =
                     behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
