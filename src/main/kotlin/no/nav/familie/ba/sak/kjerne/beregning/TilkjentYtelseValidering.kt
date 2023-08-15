@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
@@ -187,12 +186,6 @@ object TilkjentYtelseValidering {
             }
         }
         if (barnMedUtbetalingsikkerhetFeil.isNotEmpty()) {
-            secureLogger.info(
-                "${barnMedAndreRelevanteTilkjentYtelser
-                    .filter { barnMedUtbetalingsikkerhetFeil.contains(it.first) }
-                    .map { "Andeler for barn ${it.first.fødselsdato}: ${it.second.map { tilkjentYtelse -> "[Fagsak ${tilkjentYtelse.behandling.fagsak}: ${tilkjentYtelse.andelerTilkjentYtelse}], " }}" }}",
-            )
-
             throw UtbetalingsikkerhetFeil(
                 melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${
                     barnMedUtbetalingsikkerhetFeil.tilFeilmeldingTekst()
