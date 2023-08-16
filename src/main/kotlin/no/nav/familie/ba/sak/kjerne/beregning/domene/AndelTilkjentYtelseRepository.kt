@@ -65,4 +65,26 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
         fom: LocalDateTime,
         tom: LocalDateTime,
     ): List<AndelTilkjentYtelsePeriode>
+
+    // Fagsak  -> andel_tilkjent_ytelse
+
+    @Query(
+        """
+            SELECT DISTINCT p.foedselsnummer AS ident
+            FROM andel_tilkjent_ytelse aty
+                     INNER JOIN tilkjent_ytelse ty ON aty.fk_behandling_id = ty.fk_behandling_id
+                     INNER JOIN behandling b ON aty.fk_behandling_id = b.id
+                     INNER JOIN fagsak f ON b.fk_fagsak_id = f.id
+                     INNER JOIN personident p ON f.fk_aktoer_id = p.fk_aktoer_id
+            WHERE p.aktiv = true
+              AND ty.utbetalingsoppdrag is not null
+              AND date_trunc('year', aty.stonad_fom) <= TO_DATE(:år, 'YYYY')
+              AND date_trunc('year', aty.stonad_tom) >= TO_DATE(:år, 'YYYY');
+        """,
+        nativeQuery = true,
+    )
+    @Timed
+    fun finnIdenterMedLøpendeBarnetrygdForGittÅr(
+        år: String,
+    ): List<String>
 }

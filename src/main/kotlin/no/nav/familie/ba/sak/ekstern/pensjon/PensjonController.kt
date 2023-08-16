@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api/ekstern/pensjon")
@@ -150,9 +151,8 @@ class PensjonController(private val pensjonService: PensjonService) {
     fun bestillPersonerMedBarnetrygdForGittÅrPåKafka(
         @RequestBody
         år: String,
-    ): ResponseEntity<String> {
+    ): ResponseEntity<UUID> {
         // lage task som henter identer
-
-        return ResponseEntity.accepted().body("id-fra-task")
+        return ResponseEntity.accepted().body(pensjonService.lagTaskForHentingAvIdenterTilPensjon(år))
     }
 }
