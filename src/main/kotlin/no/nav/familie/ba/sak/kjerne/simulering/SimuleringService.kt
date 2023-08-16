@@ -56,7 +56,7 @@ class SimuleringService(
          * Denne verdien brukes ikke til noe i simulering.
          */
 
-        val utbetalingsoppdragGammel = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+        val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak = vedtak,
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
@@ -64,13 +64,14 @@ class SimuleringService(
         )
 
         // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
-        if (utbetalingsoppdragGammel.utbetalingsperiode.isEmpty()) return null
+        if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
 
-        val detaljertSimuleringResultat = økonomiKlient.hentSimulering(utbetalingsoppdragGammel)
+        val detaljertSimuleringResultat = økonomiKlient.hentSimulering(utbetalingsoppdrag)
 
         kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
             vedtak = vedtak,
             simuleringResultatGammel = detaljertSimuleringResultat,
+            utbetalingsoppdragGammel = utbetalingsoppdrag,
             erSimulering = true,
         )
 

@@ -11,9 +11,11 @@ import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.simulering.KontrollerNyUtbetalingsgeneratorService
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdrag
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -36,6 +38,10 @@ class HentStatusTest {
 
     private val beregningService: BeregningService = mockk()
 
+    private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService = mockk()
+
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
+
     lateinit var statusFraOppdrag: StatusFraOppdrag
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
@@ -50,6 +56,8 @@ class HentStatusTest {
             behandlingService = mockk(),
             tilkjentYtelseValideringService = mockk(),
             tilkjentYtelseRepository = tilkjentYtelseRepository,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            kontrollerNyUtbetalingsgeneratorService = kontrollerNyUtbetalingsgeneratorService,
         )
         statusFraOppdrag = StatusFraOppdrag(
             økonomiService = økonomiService,

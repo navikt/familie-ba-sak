@@ -46,6 +46,7 @@ internal class SimuleringServiceEnhetTest {
     private val vedtakRepository: VedtakRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
+    private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService = mockk()
 
     private val simuleringService: SimuleringService = SimuleringService(
         økonomiKlient,
@@ -57,6 +58,7 @@ internal class SimuleringServiceEnhetTest {
         vedtakRepository,
         behandlingHentOgPersisterService,
         persongrunnlagService,
+        kontrollerNyUtbetalingsgeneratorService,
     )
 
     val februar2023 = LocalDate.of(2023, 2, 1)
