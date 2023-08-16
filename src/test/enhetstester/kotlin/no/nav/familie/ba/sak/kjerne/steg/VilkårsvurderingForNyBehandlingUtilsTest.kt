@@ -169,16 +169,17 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
         Assertions.assertThat(søkersUtvidetVilkår).hasSize(2)
 
         val utvidetVilkårSortert = søkersUtvidetVilkår?.sortedBy { it.periodeTom }
-        /*Assertions.assertEquals(tomPåFørsteUtvidetVilkår, utvidetVilkårSortert?.first()?.periodeTom)
-        Assertions.assertEquals(LocalDate.now().minusYears(2), utvidetVilkårSortert?.first()?.periodeFom)
 
-        Assertions.assertEquals(søker.dødsfall?.dødsfallDato, utvidetVilkårSortert?.last()?.periodeTom)
-        Assertions.assertEquals(tomPåFørsteUtvidetVilkår.plusMonths(1), utvidetVilkårSortert?.last()?.periodeFom)
+        Assertions.assertThat(utvidetVilkårSortert?.first()?.periodeTom).isEqualTo(tomPåFørsteUtvidetVilkår)
+        Assertions.assertThat(utvidetVilkårSortert?.first()?.periodeFom).isEqualTo(LocalDate.now().minusYears(2))
 
-        Assertions.assertEquals(1, søkerVilkårResultater.filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }.size)
-        Assertions.assertEquals(søker.dødsfall?.dødsfallDato, søkerVilkårResultater.first { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }.periodeTom)
+        Assertions.assertThat(utvidetVilkårSortert?.last()?.periodeTom).isEqualTo(søker.dødsfall?.dødsfallDato)
+        Assertions.assertThat(utvidetVilkårSortert?.last()?.periodeFom).isEqualTo(tomPåFørsteUtvidetVilkår.plusMonths(1))
 
-        Assertions.assertEquals(1, søkerVilkårResultater.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }.size)
-        Assertions.assertEquals(søker.dødsfall?.dødsfallDato, søkerVilkårResultater.first { it.vilkårType == Vilkår.BOSATT_I_RIKET }.periodeTom)*/
+        Assertions.assertThat(søkerVilkårResultater.filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }).hasSize(1)
+        Assertions.assertThat(søkerVilkårResultater.first { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }.periodeTom).isEqualTo(søker.dødsfall?.dødsfallDato)
+
+        Assertions.assertThat(søkerVilkårResultater.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }).hasSize(1)
+        Assertions.assertThat(søkerVilkårResultater.first { it.vilkårType == Vilkår.BOSATT_I_RIKET }.periodeTom).isEqualTo(søker.dødsfall?.dødsfallDato)
     }
 }
