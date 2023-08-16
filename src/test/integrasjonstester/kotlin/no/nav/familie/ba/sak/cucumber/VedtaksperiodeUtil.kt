@@ -43,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.math.BigDecimal
@@ -112,10 +113,17 @@ fun leggTilVilkårResultatPåPersonResultat(
     personResultat.vilkårResultater.clear()
 
     vilkårResultaterPerPerson[personResultat.aktør.aktørId]?.forEach { rad ->
-        val vilkårResultaterForÉnRad = parseEnumListe<Vilkår>(
+        val vilkårForÉnRad = parseEnumListe<Vilkår>(
             VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.VILKÅR,
             rad,
-        ).map { vilkår ->
+        )
+
+        val utdypendeVilkårsvurderingForÉnRad = parseEnumListe<UtdypendeVilkårsvurdering>(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.UTDYPENDE_VILKÅR,
+            rad,
+        )
+
+        val vilkårResultaterForÉnRad = vilkårForÉnRad.map { vilkår ->
             VilkårResultat(
                 behandlingId = behandlingId,
                 personResultat = personResultat,
@@ -131,6 +139,7 @@ fun leggTilVilkårResultatPåPersonResultat(
                     rad,
                 ),
                 begrunnelse = "",
+                utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingForÉnRad,
             )
         }
         personResultat.vilkårResultater.addAll(vilkårResultaterForÉnRad)
