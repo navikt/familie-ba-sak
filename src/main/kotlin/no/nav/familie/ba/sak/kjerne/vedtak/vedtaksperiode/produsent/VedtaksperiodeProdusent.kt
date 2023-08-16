@@ -114,7 +114,7 @@ fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.fjernOv
         .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
 
     val perioderTilOgMedSisteInnvilgede = sortertePerioder.dropLastWhile { periode ->
-        periode.innhold == null || periode.innhold.none { it.gjeldende is GrunnlagForPersonInnvilget }
+        periode.innhold == null || periode.innhold.none { it.gjeldende is GrunnlagForPersonVilkårInnvilget }
     }
 
     val perioderEtterSisteInnvilgedePeriode =
@@ -153,8 +153,8 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.sl�
     val kombinerteAvslagOgReduksjonsperioder = this.map { grunnlagForDenneOgForrigeBehandlingTidslinje ->
         grunnlagForDenneOgForrigeBehandlingTidslinje.filtrerIkkeNull {
             val gjeldendeErIkkeInnvilgetIkkeAvslag =
-                it.gjeldende is GrunnlagForPersonIkkeInnvilget && !it.gjeldende.erEksplisittAvslag
-            val gjeldendeErInnvilget = it.gjeldende is GrunnlagForPersonInnvilget
+                it.gjeldende is GrunnlagForPersonVilkårIkkeInnvilget && !it.gjeldende.erEksplisittAvslag
+            val gjeldendeErInnvilget = it.gjeldende is GrunnlagForPersonVilkårInnvilget
             val gjeldendeErNullForrigeErInnvilget = it.gjeldendeErNullForrigeErInnvilget
 
             gjeldendeErIkkeInnvilgetIkkeAvslag || gjeldendeErInnvilget || gjeldendeErNullForrigeErInnvilget
@@ -236,8 +236,8 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
         val grunnlagForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling[aktørId]
 
         grunnlagstidslinje.kombinerMed(grunnlagForrigeBehandling ?: TomTidslinje()) { gjeldende, forrige ->
-            val gjeldendeErIkkeOppfylt = gjeldende !is GrunnlagForPersonInnvilget
-            val forrigeErOppfylt = forrige is GrunnlagForPersonInnvilget
+            val gjeldendeErIkkeOppfylt = gjeldende !is GrunnlagForPersonVilkårInnvilget
+            val forrigeErOppfylt = forrige is GrunnlagForPersonVilkårInnvilget
 
             if (gjeldendeErIkkeOppfylt && forrigeErOppfylt) {
                 GrunnlagForGjeldendeOgForrigeBehandling(gjeldende, true)
@@ -276,7 +276,7 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
 private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksperiodeType(): Vedtaksperiodetype {
     val erUtbetalingsperiode =
         this.innhold != null && this.innhold.any {
-            it.gjeldende is GrunnlagForPersonInnvilget &&
+            it.gjeldende is GrunnlagForPersonVilkårInnvilget &&
                 !it.gjeldende.erEndretTilIngenUtbetalingIkkeDeltBosted()
         }
     val erAvslagsperiode = this.innhold != null && this.innhold.all { it.gjeldende?.erEksplisittAvslag() == true }
@@ -305,7 +305,7 @@ private fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>
         GrupperingskriterierForVedtaksperioder(
             fom = periode.fraOgMed,
             tom = periode.tilOgMed,
-            periodeInneholderInnvilgelse = periode.innhold?.any { it.gjeldende is GrunnlagForPersonInnvilget } == true,
+            periodeInneholderInnvilgelse = periode.innhold?.any { it.gjeldende is GrunnlagForPersonVilkårInnvilget } == true,
         )
     }.map { (grupperingskriterier, verdi) ->
         Periode(

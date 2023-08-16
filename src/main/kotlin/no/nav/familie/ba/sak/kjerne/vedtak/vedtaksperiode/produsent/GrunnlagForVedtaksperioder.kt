@@ -166,7 +166,7 @@ data class GrunnlagForVedtaksperioder(
         .kombinerUtenNull { it.toList() }
         .map { vilkårResultater ->
             vilkårResultater?.let {
-                GrunnlagForPersonIkkeInnvilget(
+                GrunnlagForPersonVilkårIkkeInnvilget(
                     person = person,
                     vilkårResultaterForVedtaksperiode = it.map { vilkårResultat ->
                         VilkårResultatForVedtaksperiode(
@@ -361,7 +361,7 @@ private fun lagGrunnlagForVilkårOgAndel(
         )
     }
 
-    GrunnlagForPersonInnvilget(
+    GrunnlagForPersonVilkårInnvilget(
         vilkårResultaterForVedtaksperiode = vilkårResultater
             ?: error("vilkårResultatene burde alltid finnes om vi har innvilget vedtaksperiode."),
         person = person,
@@ -373,7 +373,7 @@ private fun lagGrunnlagForVilkårOgAndel(
             ),
     )
 } else {
-    GrunnlagForPersonIkkeInnvilget(
+    GrunnlagForPersonVilkårIkkeInnvilget(
         vilkårResultaterForVedtaksperiode = vilkårResultater ?: emptyList(),
         person = person,
     )
@@ -383,8 +383,8 @@ private fun lagGrunnlagMedKompetanse(
     grunnlagForPerson: GrunnlagForPerson?,
     kompetanse: KompetanseForVedtaksperiode?,
 ) = when (grunnlagForPerson) {
-    is GrunnlagForPersonInnvilget -> grunnlagForPerson.copy(kompetanse = kompetanse)
-    is GrunnlagForPersonIkkeInnvilget -> grunnlagForPerson
+    is GrunnlagForPersonVilkårInnvilget -> grunnlagForPerson.copy(kompetanse = kompetanse)
+    is GrunnlagForPersonVilkårIkkeInnvilget -> grunnlagForPerson
     null -> null
 }
 
@@ -392,8 +392,8 @@ private fun lagGrunnlagMedEndretUtbetalingAndel(
     grunnlagForPerson: GrunnlagForPerson?,
     endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode?,
 ) = when (grunnlagForPerson) {
-    is GrunnlagForPersonInnvilget -> grunnlagForPerson.copy(endretUtbetalingAndel = endretUtbetalingAndel)
-    is GrunnlagForPersonIkkeInnvilget -> {
+    is GrunnlagForPersonVilkårInnvilget -> grunnlagForPerson.copy(endretUtbetalingAndel = endretUtbetalingAndel)
+    is GrunnlagForPersonVilkårIkkeInnvilget -> {
         if (endretUtbetalingAndel != null) {
             throw Feil("GrunnlagForPersonIkkeInnvilget for aktør ${grunnlagForPerson.person.aktør} kan ikke ha endretUtbetalingAndel siden den ikke er innvilget")
         }
@@ -407,8 +407,8 @@ private fun lagGrunnlagMedOvergangsstønad(
     grunnlagForPerson: GrunnlagForPerson?,
     overgangsstønad: OvergangsstønadForVedtaksperiode?,
 ) = when (grunnlagForPerson) {
-    is GrunnlagForPersonInnvilget -> grunnlagForPerson.copy(overgangsstønad = overgangsstønad)
-    is GrunnlagForPersonIkkeInnvilget -> grunnlagForPerson
+    is GrunnlagForPersonVilkårInnvilget -> grunnlagForPerson.copy(overgangsstønad = overgangsstønad)
+    is GrunnlagForPersonVilkårIkkeInnvilget -> grunnlagForPerson
     null -> null
 }
 
@@ -487,7 +487,7 @@ private fun List<VilkårResultat>.filtrerPåAktør(aktør: Aktør) =
 private fun Periode<GrunnlagForPerson, Måned>.erInnvilgetEllerEksplisittAvslag(): Boolean {
     val grunnlagForPerson = innhold ?: return false
 
-    val erInnvilget = grunnlagForPerson is GrunnlagForPersonInnvilget
+    val erInnvilget = grunnlagForPerson is GrunnlagForPersonVilkårInnvilget
     val erEksplisittAvslag =
         grunnlagForPerson.vilkårResultaterForVedtaksperiode.any { it.erEksplisittAvslagPåSøknad == true }
 

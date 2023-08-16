@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent
 
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonInnvilget
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonVilkårInnvilget
 
 sealed interface BegrunnelseGrunnlag
 
@@ -20,7 +20,7 @@ fun lagBegrunnelseGrunnlag(
     sammePeriodeForrigeBehandling: GrunnlagForPerson?,
 ) = if (dennePerioden == null) {
     BegrunnelseGrunnlagIngenVerdiIDenneBehandlingen(
-        erInnvilgetForrigeBehandling = sammePeriodeForrigeBehandling is GrunnlagForPersonInnvilget,
+        erInnvilgetForrigeBehandling = sammePeriodeForrigeBehandling is GrunnlagForPersonVilkårInnvilget,
     )
 } else {
     BegrunnelseGrunnlagMedVerdiIDennePerioden(

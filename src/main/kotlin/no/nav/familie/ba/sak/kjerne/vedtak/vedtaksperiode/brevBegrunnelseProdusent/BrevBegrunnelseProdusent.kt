@@ -22,9 +22,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksp
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.EndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonIkkeInnvilget
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonVilkårIkkeInnvilget
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonVilkårInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -92,12 +92,12 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetype(
     when (begrunnelseGrunnlag) {
         is BegrunnelseGrunnlagMedVerdiIDennePerioden -> {
             when (begrunnelseGrunnlag.grunnlagForVedtaksperiode) {
-                is GrunnlagForPersonInnvilget -> {
+                is GrunnlagForPersonVilkårInnvilget -> {
                     it.resultat in listOf(SanityVedtakResultat.INNVILGET_ELLER_ØKNING) ||
                         erReduksjonDelBostedBegrunnelse(it)
                 }
 
-                is GrunnlagForPersonIkkeInnvilget -> {
+                is GrunnlagForPersonVilkårIkkeInnvilget -> {
                     it.resultat in listOf(
                         SanityVedtakResultat.REDUKSJON,
                         SanityVedtakResultat.IKKE_INNVILGET,
@@ -118,12 +118,12 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetypeFor
     when (begrunnelseGrunnlag) {
         is BegrunnelseGrunnlagMedVerdiIDennePerioden -> {
             when (begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode) {
-                is GrunnlagForPersonInnvilget -> {
+                is GrunnlagForPersonVilkårInnvilget -> {
                     it.resultat in listOf(SanityVedtakResultat.INNVILGET_ELLER_ØKNING) ||
                         erReduksjonDelBostedBegrunnelse(it)
                 }
 
-                is GrunnlagForPersonIkkeInnvilget -> {
+                is GrunnlagForPersonVilkårIkkeInnvilget -> {
                     it.resultat in listOf(
                         SanityVedtakResultat.REDUKSJON,
                         SanityVedtakResultat.IKKE_INNVILGET,
@@ -218,7 +218,7 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåDeltBostedUtbe
 private fun hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag: BegrunnelseGrunnlag) =
     if (
         begrunnelseGrunnlag is BegrunnelseGrunnlagMedVerdiIDennePerioden &&
-        begrunnelseGrunnlag.grunnlagForVedtaksperiode is GrunnlagForPersonInnvilget
+        begrunnelseGrunnlag.grunnlagForVedtaksperiode is GrunnlagForPersonVilkårInnvilget
     ) {
         begrunnelseGrunnlag.grunnlagForVedtaksperiode.endretUtbetalingAndel
     } else {
@@ -228,7 +228,7 @@ private fun hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag: BegrunnelseGr
 private fun hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag: BegrunnelseGrunnlag) =
     if (
         begrunnelseGrunnlag is BegrunnelseGrunnlagMedVerdiIDennePerioden &&
-        begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode is GrunnlagForPersonInnvilget
+        begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode is GrunnlagForPersonVilkårInnvilget
     ) {
         begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode.endretUtbetalingAndel
     } else {
@@ -346,7 +346,7 @@ private fun Tidslinje<GrunnlagForPerson, Måned>.fjernOverflødigePerioderPåSlu
         .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
 
     val perioderTilOgMedSisteInnvilgede = sortertePerioder
-        .dropLastWhile { it.innhold !is GrunnlagForPersonInnvilget }
+        .dropLastWhile { it.innhold !is GrunnlagForPersonVilkårInnvilget }
 
     val perioderEtterSisteInnvilgedePeriode =
         sortertePerioder.subList(perioderTilOgMedSisteInnvilgede.size, sortertePerioder.size)

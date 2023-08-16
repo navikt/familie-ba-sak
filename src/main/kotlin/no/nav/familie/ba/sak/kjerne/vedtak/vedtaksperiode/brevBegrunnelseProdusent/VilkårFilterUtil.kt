@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProduse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlagMedVerdiIDennePerioden
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonInnvilget
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonVilkårInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -93,7 +93,7 @@ private fun finnUtgjørendeVilkår(
     val oppfylteVilkårResultaterForrigePeriode =
         begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode?.hentOppfylteVilkår() ?: emptyList()
 
-    return if (begrunnelseGrunnlag.grunnlagForVedtaksperiode is GrunnlagForPersonInnvilget) {
+    return if (begrunnelseGrunnlag.grunnlagForVedtaksperiode is GrunnlagForPersonVilkårInnvilget) {
         val vilkårTjentEllerEndrerUtbetaling = hentVilkårTjent(
             oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
             oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
