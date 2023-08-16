@@ -184,9 +184,9 @@ object VilkårsvurderingUtils {
      *
      * @param initiellVilkårsvurdering - Vilkårsvurdering med vilkår basert på siste behandlignsgrunnlag. Skal bli neste aktive.
      * @param aktivVilkårsvurdering -  Vilkårsvurdering med vilkår basert på forrige behandlingsgrunnlag
-     * @param forrigeBehandlingVilkårsvurdering - Vilkårsvurdering fra forrige behandling (om den eksisterer).
-     *                                            Brukes for å sjekke om utvidet-vilkåret skal kopieres med videre.
      * @param løpendeUnderkategori - Den løpende underkategorien for fagsaken. Brukes for å sjekke om utvidet-vilkåret skal kopieres med videre.
+     * @param utvidetVilkårSomKanKopieresFraForrigeBehandling - Liste med utvidet vilkår som kan kopieres fra forrige behandling
+     *
      * @return oppdaterte versjoner av initieltResultat og aktivtResultat:
      * initieltResultat (neste aktivt) med vilkår som skal benyttes videre
      * aktivtResultat med hvilke vilkår som ikke skal benyttes videre
@@ -194,8 +194,8 @@ object VilkårsvurderingUtils {
     fun flyttResultaterTilInitielt(
         initiellVilkårsvurdering: Vilkårsvurdering,
         aktivVilkårsvurdering: Vilkårsvurdering,
-        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering? = null,
         løpendeUnderkategori: BehandlingUnderkategori? = null,
+        utvidetVilkårSomKanKopieresFraForrigeBehandling: List<VilkårResultat> = emptyList()
     ): Pair<Vilkårsvurdering, Vilkårsvurdering> {
         // OBS!! MÅ jobbe på kopier av vilkårsvurderingen her for å ikke oppdatere databasen
         // Viktig at det er vår egen implementasjon av kopier som brukes, da kotlin sin copy-funksjon er en shallow copy
@@ -225,9 +225,9 @@ object VilkårsvurderingUtils {
                     personFraInit = personFraInit,
                     kopieringSkjerFraForrigeBehandling = initiellVilkårsvurderingKopi.behandling.id != aktivVilkårsvurderingKopi.behandling.id,
                     personTilOppdatert = personTilOppdatert,
-                    forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
                     løpendeUnderkategori = løpendeUnderkategori,
                     personResultaterAktivt = personResultaterAktivt,
+                    utvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieresFraForrigeBehandling
                 )
             }
             personResultaterOppdatert.add(personTilOppdatert)
@@ -244,9 +244,9 @@ object VilkårsvurderingUtils {
         personFraInit: PersonResultat,
         kopieringSkjerFraForrigeBehandling: Boolean,
         personTilOppdatert: PersonResultat,
-        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering?,
         løpendeUnderkategori: BehandlingUnderkategori?,
         personResultaterAktivt: MutableSet<PersonResultat>,
+        utvidetVilkårSomKanKopieresFraForrigeBehandling: List<VilkårResultat>
     ) {
         val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
         val personsAndreVurderingerAktivt = personenSomFinnes.andreVurderinger.toMutableSet()
@@ -283,19 +283,17 @@ object VilkårsvurderingUtils {
                 personsAndreVurderingerAktivt.remove(it)
             }
         }
-        val eksistererUtvidetVilkårPåForrigeBehandling =
-            forrigeBehandlingVilkårsvurdering?.personResultater
-                ?.firstOrNull { it.aktør == personFraInit.aktør }
-                ?.vilkårResultater
-                ?.any {
-                    it.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
-                        it.resultat == Resultat.OPPFYLT
-                } ?: false
 
-        // Hvis forrige behandling inneholdt utvidet-vilkåret eller underkategorien er utvidet skal
+        val erUtvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieresFraForrigeBehandling.any {
+            it.personResultat?.aktør == personFraInit.aktør
+                && it.vilkårType == Vilkår.UTVIDET_BARNETRYGD
+                && it.resultat == Resultat.OPPFYLT 
+        }
+
+        // Hvis forrige behandling inneholdt utvidet-vilkåret (og det førte til utbetaling) eller underkategorien er utvidet skal
         // utvidet-vilkåret kopieres med videre uansett nåværende underkategori
         if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
-            (eksistererUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
+            (erUtvidetVilkårSomKanKopieresFraForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
         ) {
             val utvidetVilkår =
                 personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
