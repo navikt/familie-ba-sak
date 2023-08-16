@@ -30,8 +30,12 @@ class HentAlleIdenterTilPsysTask(
 
     override fun doTask(task: Task) {
         val hentAlleIdenterDto = objectMapper.readValue(task.payload, HentAlleIdenterTilPsysRequestDTO::class.java)
+        logger.info("Starter på å hente alle identer fra DB for request ${hentAlleIdenterDto.requestId}")
         val identer = andelTilkjentYtelseRepository.finnIdenterMedLøpendeBarnetrygdForGittÅr(hentAlleIdenterDto.år)
+        logger.info("Ferdig med å hente alle identer fra DB for request ${hentAlleIdenterDto.requestId}")
+        logger.info("Starter på å sende alle identer til kafka for request ${hentAlleIdenterDto.requestId}")
         identer.forEach { kafkaProducer.sendIdentTilPSys(it, hentAlleIdenterDto.requestId) }
+        logger.info("ferdig med å sende alle identer til kafka for request ${hentAlleIdenterDto.requestId}")
     }
 
     override fun onCompletion(task: Task) {

@@ -63,6 +63,13 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/kafka/prod/dvh_sakstatistikk_behandling_v1_topic.yaml
+      - name: Deploy psys_list_alle_med_barnetrygd til prod
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          CLUSTER: prod-gcp
+          RESOURCE: .deploy/nais/kafka/prod/psys_list_alle_med_barnetrygd.yaml
+
   loggfeil:
     name: Send logg til slack ved feil
     runs-on: ubuntu-latest

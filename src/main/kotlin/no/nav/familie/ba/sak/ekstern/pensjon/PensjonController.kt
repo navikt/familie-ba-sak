@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.lang.IllegalArgumentException
 import java.time.LocalDate
 import java.util.UUID
 
@@ -108,7 +109,7 @@ class PensjonController(private val pensjonService: PensjonService) {
     @ApiResponses(
         value = [
             ApiResponse(
-                responseCode = "200",
+                responseCode = "202",
                 description =
                 """
                     RequestId som blir med kafka-meldingene
@@ -142,6 +143,14 @@ class PensjonController(private val pensjonService: PensjonService) {
         @PathVariable
         år: String,
     ): ResponseEntity<UUID> {
-        return ResponseEntity.accepted().body(pensjonService.lagTaskForHentingAvIdenterTilPensjon(år))
+        if (år.length != 4 && erTall(år)) {
+            return ResponseEntity.accepted().body(pensjonService.lagTaskForHentingAvIdenterTilPensjon(år))
+        } else {
+            throw IllegalArgumentException("År må være 4 siffer")
+        }
+    }
+
+    private fun erTall(input: String): Boolean {
+        return input.toIntOrNull() != null
     }
 }
