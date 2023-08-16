@@ -13,6 +13,8 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -100,7 +102,7 @@ class PensjonController(private val pensjonService: PensjonService) {
     }
 
     @Operation(
-        description = "Tjeneste for Pensjon for å hente barnetrygd og relaterte saker for en gitt person.",
+        description = "Tjeneste for Pensjon for å bestille identer med barnetrygd for et gitt år på kafka.",
 
     )
     @ApiResponses(
@@ -108,25 +110,18 @@ class PensjonController(private val pensjonService: PensjonService) {
             ApiResponse(
                 responseCode = "200",
                 description =
-                """Liste over fagsaker og relaterte fagsaker(hvis barna finnes i flere fagsaker) fra ba-sak 
-                                        
-                   fagsakId:                unik id for fagsaken
-                   fagsakEiersIdent:        Fnr for eier av fagsaken
-                   barnetrygdPerioder:      Liste over perioder med barnetrygd
-                   
+                """
+                    RequestId som blir med kafka-meldingene
                 """,
                 content = [
                     Content(
                         mediaType = "application/json",
-                        array = (
-                            ArraySchema(schema = Schema(implementation = BarnetrygdTilPensjon::class))
-                            ),
                     ),
                 ],
             ),
             ApiResponse(
                 responseCode = "400",
-                description = "Ugyldig input. fraDato maks tilbake 2 år",
+                description = "Ugyldig input. År må være av type string - 4 tegn",
                 content = [Content()],
             ),
             ApiResponse(
@@ -135,24 +130,20 @@ class PensjonController(private val pensjonService: PensjonService) {
                 content = [
                     Content(
                         mediaType = "application/json",
-                        array = (
-                            ArraySchema(schema = Schema(implementation = Ressurs::class))
-                            ),
                     ),
                 ],
             ),
         ],
     )
-    @PostMapping(
-        path = ["/bestill-personer-med-barnetrygd"],
+    @GetMapping(
+        path = ["/bestill-personer-med-barnetrygd/{år}"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun bestillPersonerMedBarnetrygdForGittÅrPåKafka(
-        @RequestBody
+        @PathVariable
         år: String,
     ): ResponseEntity<UUID> {
-        // lage task som henter identer
         return ResponseEntity.accepted().body(pensjonService.lagTaskForHentingAvIdenterTilPensjon(år))
     }
 }
