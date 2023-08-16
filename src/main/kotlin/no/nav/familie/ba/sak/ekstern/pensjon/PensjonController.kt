@@ -137,8 +137,6 @@ class PensjonController(private val pensjonService: PensjonService) {
     )
     @GetMapping(
         path = ["/bestill-personer-med-barnetrygd/{år}"],
-        consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun bestillPersonerMedBarnetrygdForGittÅrPåKafka(
         @PathVariable
