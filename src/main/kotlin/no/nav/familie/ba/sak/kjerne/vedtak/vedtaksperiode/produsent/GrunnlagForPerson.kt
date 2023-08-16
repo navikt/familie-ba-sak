@@ -84,7 +84,7 @@ data class VilkårResultatForVedtaksperiode(
     )
 }
 
-fun List<VilkårResultatForVedtaksperiode>.sammenlignUtenFomOgTom(other: List<VilkårResultatForVedtaksperiode>): Boolean {
+fun List<VilkårResultatForVedtaksperiode>.erLikUtenFomOgTom(other: List<VilkårResultatForVedtaksperiode>): Boolean {
     return this.map { it.copy(fom = null, tom = null) }.toSet() == other.map { it.copy(fom = null, tom = null) }.toSet()
 }
 
