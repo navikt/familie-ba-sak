@@ -15,9 +15,9 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
-import no.nav.familie.felles.utbetalingsgenerator.domain.AndelData
+import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.Behandlingsinformasjon
-import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdrag
+import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
@@ -39,10 +39,7 @@ class UtbetalingsoppdragGenerator(
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>?,
         erSimulering: Boolean,
         endretMigreringsDato: YearMonth? = null,
-    ): BeregnetUtbetalingsoppdrag {
-        var counter = 0
-        fun nextId() = (++counter).toString()
-
+    ): BeregnetUtbetalingsoppdragLongId {
         val personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer()
 
         return Utbetalingsgenerator().lagUtbetalingsoppdrag(
@@ -59,22 +56,18 @@ class UtbetalingsoppdragGenerator(
                 erGOmregning = false,
             ),
             forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.map {
-                it.tilAndelData(
-                    id = nextId(),
-                )
+                it.tilAndelDataLongId()
             } ?: emptyList(),
             nyeAndeler = nyTilkjentYtelse.andelerTilkjentYtelse.map {
-                it.tilAndelData(
-                    id = nextId(),
-                )
+                it.tilAndelDataLongId()
             },
-            sisteAndelPerKjede = sisteAndelPerKjede?.mapValues { it.value.tilAndelData("-1") }
+            sisteAndelPerKjede = sisteAndelPerKjede?.mapValues { it.value.tilAndelDataLongId() }
                 ?: emptyMap(),
         )
     }
 
-    private fun AndelTilkjentYtelse.tilAndelData(id: String): AndelData =
-        AndelData(
+    private fun AndelTilkjentYtelse.tilAndelDataLongId(): AndelDataLongId =
+        AndelDataLongId(
             id = id,
             fom = periode.fom,
             tom = periode.tom,
@@ -83,7 +76,7 @@ class UtbetalingsoppdragGenerator(
             type = type.tilYtelseType(),
             periodeId = periodeOffset,
             forrigePeriodeId = forrigePeriodeOffset,
-            kildeBehandlingId = kildeBehandlingId?.toString(),
+            kildeBehandlingId = kildeBehandlingId,
         )
 
     private fun opphørFra(

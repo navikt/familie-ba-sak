@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.simulering.KontrollerNyUtbetalingsgeneratorService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdrag
+import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
@@ -102,7 +102,7 @@ class ØkonomiService(
         vedtak: Vedtak,
         saksbehandlerId: String,
         erSimulering: Boolean = false,
-    ): BeregnetUtbetalingsoppdrag {
+    ): BeregnetUtbetalingsoppdragLongId {
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = vedtak.behandling)
         val forrigeTilkjentYtelse =

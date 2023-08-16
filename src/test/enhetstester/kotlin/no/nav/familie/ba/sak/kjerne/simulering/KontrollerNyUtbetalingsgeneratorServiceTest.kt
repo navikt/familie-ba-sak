@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.jun
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
-import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdrag
+import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
@@ -55,7 +55,7 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     fun beforeAll() {
         every { featureToggleService.isEnabled(any()) } returns true
 
-        val beregnetUtbetalingsoppdragMock = mockk<BeregnetUtbetalingsoppdrag>()
+        val beregnetUtbetalingsoppdragMock = mockk<BeregnetUtbetalingsoppdragLongId>()
 
         every { beregnetUtbetalingsoppdragMock.utbetalingsoppdrag } returns mockk()
 
