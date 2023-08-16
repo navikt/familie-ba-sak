@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -18,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -233,19 +232,19 @@ class VilkårsvurderingForNyBehandlingService(
     }
 
     /***
-     * Utvidet vilkår kan kun kopieres med hvis det finnes utbetaling av utvidet-barnetrygd i samme behandling
+     * Utvidet vilkår kan kun kopieres med hvis det finnes utbetaling av utvidet barnetrygd i samme behandling
      */
-    private fun finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(forrigeBehandlingSomErVedtatt: Behandling?) =
+    private fun finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(forrigeBehandlingSomErVedtatt: Behandling?): List<VilkårResultat> =
         forrigeBehandlingSomErVedtatt?.let {
             val forrigeAndeler =
                 andelerTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandlingSomErVedtatt.id)
             val forrigeVilkårsvurdering = hentVilkårsvurdering(
                 forrigeBehandlingSomErVedtatt.id,
             )
-            forrigeVilkårsvurdering?.personResultater
-                ?.filter { personResultat -> forrigeAndeler.any { andel -> andel.erUtvidet() && andel.aktør == personResultat.aktør } }
-                ?.flatMap { personResultat -> personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT } }
-                ?: emptyList()
+            finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(
+                forrigeAndeler,
+                forrigeVilkårsvurdering
+            )
         } ?: emptyList()
 
     private fun tellMetrikkerForFødselshendelse(
