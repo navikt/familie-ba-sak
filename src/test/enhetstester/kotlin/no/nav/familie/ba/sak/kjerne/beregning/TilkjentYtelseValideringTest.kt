@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
@@ -217,6 +218,53 @@ class TilkjentYtelseValideringTest {
                 andelerForPerson = emptyList(),
                 gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
             ),
+        )
+    }
+
+    @Test
+    fun `Skal finne overlappende perioder og returnere periode med første fom og siste tom`() {
+        val barn = tilfeldigPerson()
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 2108,
+                person = barn,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().plusMonths(1),
+                tom = inneværendeMåned().plusYears(1),
+                beløp = 2108,
+                person = barn,
+            ),
+        )
+        val andelerFraTidligere = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1).plusMonths(1),
+                tom = inneværendeMåned().plusMonths(2),
+                beløp = 2108,
+                person = barn,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().plusMonths(3),
+                tom = inneværendeMåned().plusYears(1).minusMonths(1),
+                beløp = 2108,
+                person = barn,
+            ),
+        )
+
+        Assertions.assertEquals(
+            listOf(
+                MånedPeriode(
+                    inneværendeMåned().minusYears(1).plusMonths(1),
+                    inneværendeMåned().plusYears(1).minusMonths(1),
+                ),
+            ),
+            TilkjentYtelseValidering.finnPeriodeMedOverlappAvAndeler(andeler, andelerFraTidligere),
+        )
+        Assertions.assertEquals(
+            TilkjentYtelseValidering.finnPeriodeMedOverlappAvAndeler(andeler, emptyList()),
+            emptyList<MånedPeriode>(),
         )
     }
 

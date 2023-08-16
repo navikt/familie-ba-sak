@@ -38,7 +38,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
-    private var overstyrtEndringstidspunkt = mapOf<Long, LocalDate>()
+    private var overstyrteEndringstidspunkt = mapOf<Long, LocalDate>()
     private var overgangsstønad = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
     private var uregistrerteBarn = listOf<BarnMedOpplysninger>()
 
@@ -78,7 +78,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
 
     @Og("med overstyrt endringstidspunkt")
     fun settEndringstidspunkt(dataTable: DataTable) {
-        overstyrtEndringstidspunkt = dataTable.asMaps().associate { rad ->
+        overstyrteEndringstidspunkt = dataTable.asMaps().associate { rad ->
             parseLong(Domenebegrep.BEHANDLING_ID, rad) to
                 parseDato(DomenebegrepVedtaksperiodeMedBegrunnelser.ENDRINGSTIDSPUNKT, rad)
         }
@@ -124,25 +124,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             kompetanser = kompetanser,
             endredeUtbetalinger = endredeUtbetalinger,
             andelerTilkjentYtelse = andelerTilkjentYtelse,
-            endringstidspunkt = overstyrtEndringstidspunkt,
-            overgangsstønad = overgangsstønad,
-            uregistrerteBarn = uregistrerteBarn,
-        )
-    }
-
-    @Når("vedtaksperioder med begrunnelser genereres der forrige behandling allerede er vedtatt for behandling {}")
-    fun `generer vedtaksperiode med begrunnelse med utledet endringstidspunkt`(behandlingId: Long) {
-        gjeldendeBehandlingId = behandlingId
-
-        vedtaksperioderMedBegrunnelser = lagVedtaksPerioderMedUtledetEndringsTidspunkt(
-            behandlingId = behandlingId,
-            vedtaksListe = vedtaksliste,
-            behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
-            personGrunnlag = persongrunnlag,
-            personResultater = personResultater,
-            kompetanser = kompetanser,
-            endredeUtbetalinger = endredeUtbetalinger,
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            overstyrteEndringstidspunkt = overstyrteEndringstidspunkt,
             overgangsstønad = overgangsstønad,
             uregistrerteBarn = uregistrerteBarn,
         )

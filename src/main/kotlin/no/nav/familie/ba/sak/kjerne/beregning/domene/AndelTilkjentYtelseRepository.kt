@@ -66,8 +66,6 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
         tom: LocalDateTime,
     ): List<AndelTilkjentYtelsePeriode>
 
-    // Fagsak  -> andel_tilkjent_ytelse
-
     @Query(
         """
             SELECT DISTINCT p.foedselsnummer AS ident
@@ -87,4 +85,23 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
     fun finnIdenterMedLøpendeBarnetrygdForGittÅr(
         år: String,
     ): List<String>
+
+    @Query(
+        """
+        WITH andeler AS (
+            SELECT
+             aty.id,
+             row_number() OVER (PARTITION BY aty.type, aty.fk_aktoer_id ORDER BY aty.periode_offset DESC) rn
+             FROM andel_tilkjent_ytelse aty
+              JOIN tilkjent_ytelse ty ON ty.id = aty.tilkjent_ytelse_id
+              JOIN Behandling b ON b.id = aty.fk_behandling_id
+             WHERE b.fk_fagsak_id = :fagsakId
+               AND ty.utbetalingsoppdrag IS NOT NULL
+               AND aty.periode_offset IS NOT NULL
+               AND b.status = 'AVSLUTTET')
+        SELECT aty.* FROM andel_tilkjent_ytelse aty WHERE id IN (SELECT id FROM andeler WHERE rn = 1)
+    """,
+        nativeQuery = true,
+    )
+    fun hentSisteAndelPerIdent(fagsakId: Long): List<AndelTilkjentYtelse>
 }

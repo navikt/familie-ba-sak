@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -40,6 +41,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvni
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import java.time.LocalDate
 
 typealias AktørId = String
 
@@ -365,8 +367,9 @@ private fun lagGrunnlagForVilkårOgAndel(
         person = person,
         andeler = andeler
             ?: error(
-                "andeler må finnes for innvilgede vedtaksperioder. Vedtaksperioden er innenfor " +
-                    "${vilkårResultater.firstOrNull()?.fom} -> ${vilkårResultater.firstOrNull()?.tom}",
+                "andeler må finnes for innvilgede vedtaksperioder. Vedtaksperioden er innenfor ${
+                    vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }.minOf { it.fom ?: LocalDate.MIN }
+                } -> ${vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }.maxOf { it.tom ?: LocalDate.MAX }}",
             ),
     )
 } else {

@@ -340,7 +340,9 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 3456    | 01.01.2022 | 31.03.2023 | 1676  | 2            |
       | 3456    | 01.01.2030 | 30.02.2039 | 1676  | 2            |
 
-
+    Og med overstyrt endringstidspunkt
+      | Endringstidspunkt | BehandlingId |
+      | 01.01.2021        | 2            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 2
 

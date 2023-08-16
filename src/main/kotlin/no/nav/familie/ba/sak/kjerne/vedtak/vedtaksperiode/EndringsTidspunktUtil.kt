@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForP
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonIkkeInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.sammenlignUtenFomOgTom
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.erLikUtenFomOgTom
 import java.time.LocalDate
 
 fun utledEndringstidspunkt(
@@ -66,22 +66,22 @@ private fun loggEndringstidspunktOgEndringer(
     when (grunnlagIPeriodeMedEndring) {
         is GrunnlagForPersonInnvilget -> {
             if (grunnlagIPeriodeMedEndringForrigeBehanlding is GrunnlagForPersonInnvilget) {
-                if (grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.sammenlignUtenFomOgTom(
+                if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
                         grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode,
                     )
                 ) {
                     endringer.add("Endring i vilkårene")
                 }
-                if (grunnlagIPeriodeMedEndring.kompetanse == grunnlagIPeriodeMedEndringForrigeBehanlding.kompetanse) {
+                if (grunnlagIPeriodeMedEndring.kompetanse != grunnlagIPeriodeMedEndringForrigeBehanlding.kompetanse) {
                     endringer.add("Endring i kompetansen")
                 }
-                if (grunnlagIPeriodeMedEndring.endretUtbetalingAndel == grunnlagIPeriodeMedEndringForrigeBehanlding.endretUtbetalingAndel) {
+                if (grunnlagIPeriodeMedEndring.endretUtbetalingAndel != grunnlagIPeriodeMedEndringForrigeBehanlding.endretUtbetalingAndel) {
                     endringer.add("Endring i de endrede utbetalingene")
                 }
-                if (grunnlagIPeriodeMedEndring.overgangsstønad == grunnlagIPeriodeMedEndringForrigeBehanlding.overgangsstønad) {
+                if (grunnlagIPeriodeMedEndring.overgangsstønad != grunnlagIPeriodeMedEndringForrigeBehanlding.overgangsstønad) {
                     endringer.add("Endring i overgangsstønaden")
                 }
-                if (grunnlagIPeriodeMedEndring.andeler.toSet() == grunnlagIPeriodeMedEndringForrigeBehanlding.andeler.toSet()) {
+                if (grunnlagIPeriodeMedEndring.andeler.toSet() != grunnlagIPeriodeMedEndringForrigeBehanlding.andeler.toSet()) {
                     endringer.add("Endring i andelene")
                 }
             } else {
@@ -91,7 +91,7 @@ private fun loggEndringstidspunktOgEndringer(
 
         is GrunnlagForPersonIkkeInnvilget ->
             if (grunnlagIPeriodeMedEndringForrigeBehanlding is GrunnlagForPersonIkkeInnvilget) {
-                if (grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.sammenlignUtenFomOgTom(
+                if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
                         grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode,
                     )
                 ) {
@@ -126,7 +126,7 @@ private fun GrunnlagForPerson?.erLik(
 ): Boolean = when (this) {
     is GrunnlagForPersonInnvilget ->
         grunnlagForVedtaksperiodeForrigeBehandling is GrunnlagForPersonInnvilget &&
-            this.vilkårResultaterForVedtaksperiode.sammenlignUtenFomOgTom(
+            this.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
                 grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode,
             ) &&
             this.kompetanse == grunnlagForVedtaksperiodeForrigeBehandling.kompetanse &&
