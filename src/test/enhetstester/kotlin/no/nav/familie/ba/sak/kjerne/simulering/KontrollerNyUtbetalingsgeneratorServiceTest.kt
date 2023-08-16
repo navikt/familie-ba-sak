@@ -7,8 +7,8 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsgeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
@@ -43,7 +43,7 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     private lateinit var featureToggleService: FeatureToggleService
 
     @MockK
-    private lateinit var økonomiService: ØkonomiService
+    private lateinit var utbetalingsgeneratorService: UtbetalingsgeneratorService
 
     @MockK
     private lateinit var økonomiKlient: ØkonomiKlient
@@ -61,7 +61,13 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
 
         every { beregnetUtbetalingsoppdragMock.andeler } returns mockk()
 
-        every { økonomiService.genererUtbetalingsoppdrag(any(), any(), any()) } returns beregnetUtbetalingsoppdragMock
+        every {
+            utbetalingsgeneratorService.genererUtbetalingsoppdrag(
+                any(),
+                any(),
+                any(),
+            )
+        } returns beregnetUtbetalingsoppdragMock
     }
 
     @Test
@@ -175,6 +181,37 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
         assertThat(
             simuleringsPeriodeDiffFeil.first(),
         ).isEqualTo(DiffFeilType.UliktResultatISammePeriode)
+    }
+
+    @Test
+    fun `kontrollerNyUtbetalingsgenerator - skal gi feil dersom gammel simulering har endring før ny simulering`() {
+        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
+            listOf(
+                Periode(jan(2023), feb(2023), 100),
+                Periode(mar(2023), apr(2023), 200),
+                Periode(mai(2023), jun(2023), 320),
+                Periode(jul(2023), aug(2023), 200),
+            ),
+        )
+
+        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
+            listOf(
+                Periode(mar(2023), apr(2023), 200),
+                Periode(mai(2023), jun(2023), 320),
+                Periode(jul(2023), aug(2023), 200),
+            ),
+        )
+
+        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+            vedtak = lagVedtak(),
+            simuleringResultatGammel = simuleringBasertPåGammelGenerator,
+            utbetalingsoppdragGammel = mockk(),
+        )
+
+        assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(1)
+        assertThat(
+            simuleringsPeriodeDiffFeil.first(),
+        ).isEqualTo(DiffFeilType.TidligerePerioderIGammelUlik0)
     }
 
     @Test

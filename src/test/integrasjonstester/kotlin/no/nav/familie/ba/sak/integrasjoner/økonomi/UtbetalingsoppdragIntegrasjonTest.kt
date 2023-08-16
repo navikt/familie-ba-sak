@@ -68,7 +68,7 @@ class UtbetalingsoppdragIntegrasjonTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val økonomiService: ØkonomiService,
+    private val utbetalingsgeneratorService: UtbetalingsgeneratorService,
 
     @Autowired
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
@@ -1195,7 +1195,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         førsteTilkjentYtelse.utbetalingsoppdrag = "utbetalingsoppdrg"
         tilkjentYtelseRepository.saveAndFlush(førsteTilkjentYtelse)
 
-        økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+        utbetalingsgeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             førsteVedtak,
             "Z123",
             AndelTilkjentYtelseForIverksettingFactory(),
@@ -1236,7 +1236,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         andreTilkjentYtelse.andelerTilkjentYtelse.addAll(andreAndelerTilkjentYtelse)
         tilkjentYtelseRepository.saveAndFlush(andreTilkjentYtelse)
 
-        val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+        val utbetalingsoppdrag = utbetalingsgeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             andreVedtak,
             "Z123",
             AndelTilkjentYtelseForIverksettingFactory(),
@@ -1377,10 +1377,46 @@ class UtbetalingsoppdragIntegrasjonTest(
 
             with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
                 val andeler = listOf(
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.SMÅBARNSTILLEGG, 1, behandling, søker, aktørSøker, tilkjentYtelse = this),
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 2, behandling, søker, aktørSøker, tilkjentYtelse = this),
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.ORDINÆR_BARNETRYGD, 3, behandling, barn, aktørBarn, tilkjentYtelse = this),
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 4, behandling, barn, aktørBarn, tilkjentYtelse = this),
+                    lagAndelTilkjentYtelse(
+                        fom,
+                        tom,
+                        YtelseType.SMÅBARNSTILLEGG,
+                        1,
+                        behandling,
+                        søker,
+                        aktørSøker,
+                        tilkjentYtelse = this,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom,
+                        tom,
+                        YtelseType.UTVIDET_BARNETRYGD,
+                        2,
+                        behandling,
+                        søker,
+                        aktørSøker,
+                        tilkjentYtelse = this,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom,
+                        tom,
+                        YtelseType.ORDINÆR_BARNETRYGD,
+                        3,
+                        behandling,
+                        barn,
+                        aktørBarn,
+                        tilkjentYtelse = this,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom,
+                        tom,
+                        YtelseType.UTVIDET_BARNETRYGD,
+                        4,
+                        behandling,
+                        barn,
+                        aktørBarn,
+                        tilkjentYtelse = this,
+                    ),
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -1396,10 +1432,46 @@ class UtbetalingsoppdragIntegrasjonTest(
 
             with(lagInitiellTilkjentYtelse(revurdering, utbetalingsoppdrag = "utbetalingsoppdrag")) {
                 val andeler = listOf(
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.SMÅBARNSTILLEGG, 2, revurdering, søker, aktørSøker, tilkjentYtelse = this),
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 3, revurdering, søker, aktørSøker, tilkjentYtelse = this),
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.ORDINÆR_BARNETRYGD, 4, revurdering, barn, aktørBarn, tilkjentYtelse = this),
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 5, revurdering, barn, aktørBarn, tilkjentYtelse = this),
+                    lagAndelTilkjentYtelse(
+                        fom,
+                        tom,
+                        YtelseType.SMÅBARNSTILLEGG,
+                        2,
+                        revurdering,
+                        søker,
+                        aktørSøker,
+                        tilkjentYtelse = this,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom,
+                        tom,
+                        YtelseType.UTVIDET_BARNETRYGD,
+                        3,
+                        revurdering,
+                        søker,
+                        aktørSøker,
+                        tilkjentYtelse = this,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom,
+                        tom,
+                        YtelseType.ORDINÆR_BARNETRYGD,
+                        4,
+                        revurdering,
+                        barn,
+                        aktørBarn,
+                        tilkjentYtelse = this,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom,
+                        tom,
+                        YtelseType.UTVIDET_BARNETRYGD,
+                        5,
+                        revurdering,
+                        barn,
+                        aktørBarn,
+                        tilkjentYtelse = this,
+                    ),
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -1530,6 +1602,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 aktør = aktør ?: aktørSøker,
                 tilkjentYtelse = tilkjentYtelse,
             )
+
         private fun opprettRevurdering() =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
                 lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING),
@@ -1537,7 +1610,7 @@ class UtbetalingsoppdragIntegrasjonTest(
     }
 
     private fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak: Vedtak): Utbetalingsoppdrag {
-        return økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+        return utbetalingsgeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak,
             "Z123",
             AndelTilkjentYtelseForIverksettingFactory(),

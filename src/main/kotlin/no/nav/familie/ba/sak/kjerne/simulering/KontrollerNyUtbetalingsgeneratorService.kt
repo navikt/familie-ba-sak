@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsgeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
 import no.nav.familie.ba.sak.kjerne.simulering.domene.tilTidslinje
@@ -24,13 +24,16 @@ import java.math.BigDecimal
 @Service
 class KontrollerNyUtbetalingsgeneratorService(
     private val featureToggleService: FeatureToggleService,
-    private val økonomiService: ØkonomiService,
     private val økonomiKlient: ØkonomiKlient,
+    private val utbetalingsgeneratorService: UtbetalingsgeneratorService,
 ) {
 
     private val logger = LoggerFactory.getLogger(KontrollerNyUtbetalingsgeneratorService::class.java)
 
-    fun kontrollerNyUtbetalingsgenerator(vedtak: Vedtak, utbetalingsoppdrag: Utbetalingsoppdrag) {
+    fun kontrollerNyUtbetalingsgenerator(
+        vedtak: Vedtak,
+        utbetalingsoppdrag: Utbetalingsoppdrag,
+    ) {
         if (!featureToggleService.isEnabled("familie.ba.sak.kontroller-ny-utbetalingsgenerator")) return
 
         val simuleringResultatGammel = økonomiKlient.hentSimulering(utbetalingsoppdrag)
@@ -54,7 +57,7 @@ class KontrollerNyUtbetalingsgeneratorService(
 
         val behandling = vedtak.behandling
 
-        val beregnetUtbetalingsoppdrag = økonomiService.genererUtbetalingsoppdrag(
+        val beregnetUtbetalingsoppdrag = utbetalingsgeneratorService.genererUtbetalingsoppdrag(
             vedtak = vedtak,
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             erSimulering = erSimulering,
