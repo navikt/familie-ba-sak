@@ -60,6 +60,8 @@ class KontrollerNyUtbetalingsgeneratorService(
             erSimulering = erSimulering,
         )
 
+        logger.info("Behandling ${behandling.id} har følgende oppdaterte andeler: ${beregnetUtbetalingsoppdrag.andeler}")
+
         logger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med gammel generator: $utbetalingsoppdragGammel")
         logger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med ny generator: ${beregnetUtbetalingsoppdrag.utbetalingsoppdrag}")
 

@@ -59,6 +59,8 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
 
         every { beregnetUtbetalingsoppdragMock.utbetalingsoppdrag } returns mockk()
 
+        every { beregnetUtbetalingsoppdragMock.andeler } returns mockk()
+
         every { økonomiService.genererUtbetalingsoppdrag(any(), any(), any()) } returns beregnetUtbetalingsoppdragMock
     }
 
