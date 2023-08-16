@@ -41,7 +41,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 begrunnelse = "",
                 behandlingId = vilkårsvurdering.behandling.id,
                 utdypendeVilkårsvurderinger = emptyList(),
-            )
+            ),
         )
 
         søkerPersonResultat.setSortedVilkårResultater(søkerVilkårResultater)
@@ -53,13 +53,13 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 fom = YearMonth.now().minusYears(2).plusMonths(1),
                 tom = YearMonth.now(),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = søker
-            )
+                person = søker,
+            ),
         )
 
         val utvidetVilkårSomKanKopieres = finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(
             forrigeAndeler = andeler,
-            forrigeVilkårsvurdering = vilkårsvurdering
+            forrigeVilkårsvurdering = vilkårsvurdering,
         )
 
         Assertions.assertThat(utvidetVilkårSomKanKopieres).isEmpty()
@@ -84,7 +84,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 begrunnelse = "",
                 behandlingId = vilkårsvurdering.behandling.id,
                 utdypendeVilkårsvurderinger = emptyList(),
-            )
+            ),
         )
 
         søkerPersonResultat.setSortedVilkårResultater(søkerVilkårResultater)
@@ -96,13 +96,13 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 fom = fomDatoVilkår.plusMonths(1).toYearMonth(),
                 tom = YearMonth.now(),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                person = søker
-            )
+                person = søker,
+            ),
         )
 
         val utvidetVilkårSomKanKopieres = finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(
             forrigeAndeler = andeler,
-            forrigeVilkårsvurdering = vilkårsvurdering
+            forrigeVilkårsvurdering = vilkårsvurdering,
         )
 
         Assertions.assertThat(utvidetVilkårSomKanKopieres).hasSize(1)

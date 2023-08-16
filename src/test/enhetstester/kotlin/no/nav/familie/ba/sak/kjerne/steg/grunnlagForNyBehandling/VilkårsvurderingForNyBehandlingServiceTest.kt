@@ -57,7 +57,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             vilkårsvurderingMetrics = vilkårsvurderingMetrics,
             featureToggleService = featureToggleService,
-            andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_KOPIER_GRUNNLAG_FRA_FORRIGE_BEHANDLING) } returns true

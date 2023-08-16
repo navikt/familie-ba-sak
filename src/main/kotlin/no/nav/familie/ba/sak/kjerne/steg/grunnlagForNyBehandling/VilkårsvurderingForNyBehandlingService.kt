@@ -32,7 +32,7 @@ class VilkårsvurderingForNyBehandlingService(
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
     private val featureToggleService: FeatureToggleService,
-    private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
     fun opprettVilkårsvurderingUtenomHovedflyt(
@@ -219,7 +219,7 @@ class VilkårsvurderingForNyBehandlingService(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             aktivVilkårsvurdering = aktivVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
-            utvidetVilkårSomKanKopieresFraForrigeBehandling = finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(forrigeBehandlingSomErVedtatt)
+            utvidetVilkårSomKanKopieresFraForrigeBehandling = finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(forrigeBehandlingSomErVedtatt),
         )
 
         if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
@@ -243,7 +243,7 @@ class VilkårsvurderingForNyBehandlingService(
             )
             finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(
                 forrigeAndeler,
-                forrigeVilkårsvurdering
+                forrigeVilkårsvurdering,
             )
         } ?: emptyList()
 
@@ -280,7 +280,7 @@ class VilkårsvurderingForNyBehandlingService(
             forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id),
             behandling = behandling,
             løpendeUnderkategori = løpendeUnderkategori,
-            utvidetVilkårSomKanKopieresFraForrigeBehandling = finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(forrigeBehandlingSomErVedtatt)
+            utvidetVilkårSomKanKopieresFraForrigeBehandling = finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(forrigeBehandlingSomErVedtatt),
         )
         endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
             behandling,

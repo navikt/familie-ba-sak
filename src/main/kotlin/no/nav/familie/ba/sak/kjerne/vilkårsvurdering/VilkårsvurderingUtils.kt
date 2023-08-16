@@ -195,7 +195,7 @@ object VilkårsvurderingUtils {
         initiellVilkårsvurdering: Vilkårsvurdering,
         aktivVilkårsvurdering: Vilkårsvurdering,
         løpendeUnderkategori: BehandlingUnderkategori? = null,
-        utvidetVilkårSomKanKopieresFraForrigeBehandling: List<VilkårResultat> = emptyList()
+        utvidetVilkårSomKanKopieresFraForrigeBehandling: List<VilkårResultat> = emptyList(),
     ): Pair<Vilkårsvurdering, Vilkårsvurdering> {
         // OBS!! MÅ jobbe på kopier av vilkårsvurderingen her for å ikke oppdatere databasen
         // Viktig at det er vår egen implementasjon av kopier som brukes, da kotlin sin copy-funksjon er en shallow copy
@@ -227,7 +227,7 @@ object VilkårsvurderingUtils {
                     personTilOppdatert = personTilOppdatert,
                     løpendeUnderkategori = løpendeUnderkategori,
                     personResultaterAktivt = personResultaterAktivt,
-                    utvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieresFraForrigeBehandling
+                    utvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieresFraForrigeBehandling,
                 )
             }
             personResultaterOppdatert.add(personTilOppdatert)
@@ -246,7 +246,7 @@ object VilkårsvurderingUtils {
         personTilOppdatert: PersonResultat,
         løpendeUnderkategori: BehandlingUnderkategori?,
         personResultaterAktivt: MutableSet<PersonResultat>,
-        utvidetVilkårSomKanKopieresFraForrigeBehandling: List<VilkårResultat>
+        utvidetVilkårSomKanKopieresFraForrigeBehandling: List<VilkårResultat>,
     ) {
         val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
         val personsAndreVurderingerAktivt = personenSomFinnes.andreVurderinger.toMutableSet()
@@ -285,9 +285,9 @@ object VilkårsvurderingUtils {
         }
 
         val finnesUtvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieresFraForrigeBehandling.any {
-            it.personResultat?.aktør == personFraInit.aktør
-                && it.vilkårType == Vilkår.UTVIDET_BARNETRYGD
-                && it.resultat == Resultat.OPPFYLT 
+            it.personResultat?.aktør == personFraInit.aktør &&
+                it.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
+                it.resultat == Resultat.OPPFYLT
         }
 
         // Hvis forrige behandling inneholdt utvidet-vilkåret (og det førte til utbetaling) eller underkategorien er utvidet skal
