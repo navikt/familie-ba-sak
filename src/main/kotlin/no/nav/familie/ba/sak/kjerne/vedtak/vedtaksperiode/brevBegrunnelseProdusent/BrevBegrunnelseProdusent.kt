@@ -75,7 +75,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
         )
 
         val filtrertPåEtterEndretUtbetaling =
-            begrunnelserFiltrertPåPeriodetypeForrigePeriode.filtrerPåEtterEndretUtbetaling(
+            sanityBegrunnelser.filtrerPåEtterEndretUtbetaling(
                 endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
                 endretUtbetalingForrigePeriode = hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag),
             )
