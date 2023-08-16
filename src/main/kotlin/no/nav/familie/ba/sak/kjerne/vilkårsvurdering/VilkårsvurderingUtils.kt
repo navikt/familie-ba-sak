@@ -284,7 +284,7 @@ object VilkårsvurderingUtils {
             }
         }
 
-        val erUtvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieresFraForrigeBehandling.any {
+        val finnesUtvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieresFraForrigeBehandling.any {
             it.personResultat?.aktør == personFraInit.aktør
                 && it.vilkårType == Vilkår.UTVIDET_BARNETRYGD
                 && it.resultat == Resultat.OPPFYLT 
@@ -293,7 +293,7 @@ object VilkårsvurderingUtils {
         // Hvis forrige behandling inneholdt utvidet-vilkåret (og det førte til utbetaling) eller underkategorien er utvidet skal
         // utvidet-vilkåret kopieres med videre uansett nåværende underkategori
         if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
-            (erUtvidetVilkårSomKanKopieresFraForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
+            (finnesUtvidetVilkårSomKanKopieresFraForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
         ) {
             val utvidetVilkår =
                 personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
