@@ -26,6 +26,8 @@ sealed interface GrunnlagForPerson {
 
     fun erEksplisittAvslag(): Boolean = this is GrunnlagForPersonVilkårIkkeInnvilget && this.erEksplisittAvslag
 
+    fun erInnvilget() = this is GrunnlagForPersonVilkårInnvilget && this.erInnvilgetEndretUtbetaling()
+
     fun kopier(
         person: Person = this.person,
         vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode> = this.vilkårResultaterForVedtaksperiode,
@@ -45,8 +47,8 @@ data class GrunnlagForPersonVilkårInnvilget(
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
     val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
 ) : GrunnlagForPerson {
-    fun erEndretTilIngenUtbetalingIkkeDeltBosted() =
-        andeler.all { it.prosent == BigDecimal.ZERO } && endretUtbetalingAndel?.årsak != Årsak.DELT_BOSTED == true
+    fun erInnvilgetEndretUtbetaling() =
+        endretUtbetalingAndel?.prosent != BigDecimal.ZERO || endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
 }
 
 data class GrunnlagForPersonVilkårIkkeInnvilget(
