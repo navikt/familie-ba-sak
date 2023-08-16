@@ -3,14 +3,23 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
+import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.task.dto.HentAlleIdenterTilPsysRequestDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
+import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
 import java.util.Properties
 import java.util.UUID
 
+@Service
+@TaskStepBeskrivelse(
+    taskStepType = TASK_STEP_TYPE,
+    beskrivelse = "Henter alle identer som har barnetrygd for gjeldende år til psys",
+    maxAntallFeil = 1,
+)
 class HentAlleIdenterTilPsysTask(
     private val kafkaProducer: KafkaProducer,
     private val taskRepository: TaskRepositoryWrapper,
@@ -35,7 +44,7 @@ class HentAlleIdenterTilPsysTask(
                 payload = objectMapper.writeValueAsString(HentAlleIdenterTilPsysRequestDTO(år = år, requestId = uuid)),
                 properties = Properties().apply {
                     this["år"] = år
-                    this["uuid"] = uuid
+                    this["uuid"] = uuid.toString()
                 },
             )
         }
