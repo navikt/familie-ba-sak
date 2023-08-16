@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRoll
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.EndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonVilkårIkkeInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonVilkårInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
 import java.math.BigDecimal
@@ -75,7 +74,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
         )
 
         val filtrertPåEtterEndretUtbetaling =
-            sanityBegrunnelser.filtrerPåEtterEndretUtbetaling(
+            begrunnelserFiltrertPåPeriodetypeForrigePeriode.filtrerPåEtterEndretUtbetaling(
                 endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
                 endretUtbetalingForrigePeriode = hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag),
             )
@@ -91,18 +90,14 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetype(
 ) = this.filterValues {
     when (begrunnelseGrunnlag) {
         is BegrunnelseGrunnlagMedVerdiIDennePerioden -> {
-            when (begrunnelseGrunnlag.grunnlagForVedtaksperiode) {
-                is GrunnlagForPersonVilkårInnvilget -> {
-                    it.resultat in listOf(SanityVedtakResultat.INNVILGET_ELLER_ØKNING) ||
-                        erReduksjonDelBostedBegrunnelse(it)
-                }
-
-                is GrunnlagForPersonVilkårIkkeInnvilget -> {
-                    it.resultat in listOf(
-                        SanityVedtakResultat.REDUKSJON,
-                        SanityVedtakResultat.IKKE_INNVILGET,
-                    )
-                }
+            if (begrunnelseGrunnlag.grunnlagForVedtaksperiode.erInnvilget()) {
+                it.resultat in listOf(SanityVedtakResultat.INNVILGET_ELLER_ØKNING) ||
+                    erReduksjonDelBostedBegrunnelse(it)
+            } else {
+                it.resultat in listOf(
+                    SanityVedtakResultat.REDUKSJON,
+                    SanityVedtakResultat.IKKE_INNVILGET,
+                )
             }
         }
 
@@ -117,13 +112,13 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetypeFor
 ) = this.filterValues {
     when (begrunnelseGrunnlag) {
         is BegrunnelseGrunnlagMedVerdiIDennePerioden -> {
-            when (begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode) {
-                is GrunnlagForPersonVilkårInnvilget -> {
+            when (begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode?.erInnvilget()) {
+                true -> {
                     it.resultat in listOf(SanityVedtakResultat.INNVILGET_ELLER_ØKNING) ||
                         erReduksjonDelBostedBegrunnelse(it)
                 }
 
-                is GrunnlagForPersonVilkårIkkeInnvilget -> {
+                false -> {
                     it.resultat in listOf(
                         SanityVedtakResultat.REDUKSJON,
                         SanityVedtakResultat.IKKE_INNVILGET,
