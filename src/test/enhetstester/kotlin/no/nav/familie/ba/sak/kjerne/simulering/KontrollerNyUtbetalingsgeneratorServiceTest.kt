@@ -7,7 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsgeneratorService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
@@ -43,7 +43,7 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     private lateinit var featureToggleService: FeatureToggleService
 
     @MockK
-    private lateinit var utbetalingsgeneratorService: UtbetalingsgeneratorService
+    private lateinit var utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService
 
     @MockK
     private lateinit var økonomiKlient: ØkonomiKlient
@@ -62,7 +62,7 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
         every { beregnetUtbetalingsoppdragMock.andeler } returns mockk()
 
         every {
-            utbetalingsgeneratorService.genererUtbetalingsoppdrag(
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(
                 any(),
                 any(),
                 any(),

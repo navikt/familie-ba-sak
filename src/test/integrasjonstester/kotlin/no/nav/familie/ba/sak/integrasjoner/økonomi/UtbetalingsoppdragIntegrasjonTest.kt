@@ -68,7 +68,7 @@ class UtbetalingsoppdragIntegrasjonTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val utbetalingsgeneratorService: UtbetalingsgeneratorService,
+    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
 
     @Autowired
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
@@ -1195,7 +1195,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         førsteTilkjentYtelse.utbetalingsoppdrag = "utbetalingsoppdrg"
         tilkjentYtelseRepository.saveAndFlush(førsteTilkjentYtelse)
 
-        utbetalingsgeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+        utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             førsteVedtak,
             "Z123",
             AndelTilkjentYtelseForIverksettingFactory(),
@@ -1236,7 +1236,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         andreTilkjentYtelse.andelerTilkjentYtelse.addAll(andreAndelerTilkjentYtelse)
         tilkjentYtelseRepository.saveAndFlush(andreTilkjentYtelse)
 
-        val utbetalingsoppdrag = utbetalingsgeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+        val utbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             andreVedtak,
             "Z123",
             AndelTilkjentYtelseForIverksettingFactory(),
@@ -1610,7 +1610,7 @@ class UtbetalingsoppdragIntegrasjonTest(
     }
 
     private fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak: Vedtak): Utbetalingsoppdrag {
-        return utbetalingsgeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+        return utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak,
             "Z123",
             AndelTilkjentYtelseForIverksettingFactory(),

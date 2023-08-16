@@ -23,7 +23,7 @@ class ØkonomiService(
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService,
-    private val utbetalingsgeneratorService: UtbetalingsgeneratorService,
+    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
 
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
@@ -34,7 +34,13 @@ class ØkonomiService(
         andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
-        val utbetalingsoppdrag = utbetalingsgeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+
+        kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+            vedtak = vedtak,
+            saksbehandlerId = saksbehandlerId,
+        )
+
+        val utbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak,
             saksbehandlerId,
             andelTilkjentYtelseForUtbetalingsoppdragFactory,
@@ -44,10 +50,6 @@ class ØkonomiService(
 
         tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId = vedtak.behandling.id)
 
-        kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = vedtak,
-            utbetalingsoppdrag = utbetalingsoppdrag,
-        )
         iverksettOppdrag(utbetalingsoppdrag, oppdatertBehandling.id)
         return utbetalingsoppdrag
     }

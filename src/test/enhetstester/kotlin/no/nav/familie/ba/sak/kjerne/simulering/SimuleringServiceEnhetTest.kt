@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsgeneratorService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -48,7 +48,7 @@ internal class SimuleringServiceEnhetTest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService = mockk()
-    private val utbetalingsgeneratorService: UtbetalingsgeneratorService = mockk()
+    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
 
     private val simuleringService: SimuleringService = SimuleringService(
         økonomiKlient,
@@ -57,7 +57,7 @@ internal class SimuleringServiceEnhetTest {
         tilgangService,
         featureToggleService,
         vedtakRepository,
-        utbetalingsgeneratorService,
+        utbetalingsoppdragGeneratorService,
         behandlingHentOgPersisterService,
         persongrunnlagService,
         kontrollerNyUtbetalingsgeneratorService,

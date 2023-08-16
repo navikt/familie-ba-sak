@@ -43,7 +43,7 @@ class HentStatusTest {
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
 
-    private val utbetalingsgeneratorService: UtbetalingsgeneratorService = mockk()
+    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
 
     @BeforeEach
     fun setUp() {
@@ -54,7 +54,7 @@ class HentStatusTest {
             tilkjentYtelseValideringService = mockk(),
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             kontrollerNyUtbetalingsgeneratorService = kontrollerNyUtbetalingsgeneratorService,
-            utbetalingsgeneratorService = utbetalingsgeneratorService,
+            utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
         )
         statusFraOppdrag = StatusFraOppdrag(
             økonomiService = økonomiService,

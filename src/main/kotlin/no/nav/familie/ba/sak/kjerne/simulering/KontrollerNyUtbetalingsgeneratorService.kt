@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsgeneratorService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
@@ -25,17 +26,23 @@ import java.math.BigDecimal
 class KontrollerNyUtbetalingsgeneratorService(
     private val featureToggleService: FeatureToggleService,
     private val økonomiKlient: ØkonomiKlient,
-    private val utbetalingsgeneratorService: UtbetalingsgeneratorService,
+    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
 ) {
 
     private val logger = LoggerFactory.getLogger(KontrollerNyUtbetalingsgeneratorService::class.java)
 
     fun kontrollerNyUtbetalingsgenerator(
         vedtak: Vedtak,
-        utbetalingsoppdrag: Utbetalingsoppdrag,
+        saksbehandlerId: String,
     ) {
         if (!featureToggleService.isEnabled("familie.ba.sak.kontroller-ny-utbetalingsgenerator")) return
 
+        val utbetalingsoppdrag =
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = vedtak,
+                saksbehandlerId = saksbehandlerId,
+                andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
+            )
         val simuleringResultatGammel = økonomiKlient.hentSimulering(utbetalingsoppdrag)
 
         kontrollerNyUtbetalingsgenerator(
@@ -57,7 +64,7 @@ class KontrollerNyUtbetalingsgeneratorService(
 
         val behandling = vedtak.behandling
 
-        val beregnetUtbetalingsoppdrag = utbetalingsgeneratorService.genererUtbetalingsoppdrag(
+        val beregnetUtbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(
             vedtak = vedtak,
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             erSimulering = erSimulering,

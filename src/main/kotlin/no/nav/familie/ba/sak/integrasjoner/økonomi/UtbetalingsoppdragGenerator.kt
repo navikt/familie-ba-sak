@@ -91,11 +91,10 @@ class UtbetalingsoppdragGenerator(
             return forrigeTilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.periode.fom }
         }
         val forrigeStartdato = forrigeTilkjentYtelse.stønadFom!!
-        val nyStartdato = nyTilkjentYtelseMedMetaData.stønadFom!!
-        val førsteAndelDato =
+        val førsteNyeAndelDato =
             nyTilkjentYtelseMedMetaData.andelerTilkjentYtelse.minOfOrNull { it.periode.fom }
-        if (nyStartdato < forrigeStartdato && (førsteAndelDato == null || nyStartdato < førsteAndelDato)) {
-            return nyStartdato
+        if (førsteNyeAndelDato != null && førsteNyeAndelDato.isBefore(forrigeStartdato)) {
+            return førsteNyeAndelDato
         }
         return null
     }

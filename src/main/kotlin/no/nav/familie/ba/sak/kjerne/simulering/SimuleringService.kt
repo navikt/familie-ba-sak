@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
-import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsgeneratorService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -38,7 +38,7 @@ class SimuleringService(
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
     private val vedtakRepository: VedtakRepository,
-    private val utbetalingsgeneratorService: UtbetalingsgeneratorService,
+    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
     private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService,
@@ -56,7 +56,7 @@ class SimuleringService(
          * Denne verdien brukes ikke til noe i simulering.
          */
 
-        val utbetalingsoppdrag = utbetalingsgeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+        val utbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak = vedtak,
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),

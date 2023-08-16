@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
 
 @Service
-class UtbetalingsgeneratorService(
+class UtbetalingsoppdragGeneratorService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
