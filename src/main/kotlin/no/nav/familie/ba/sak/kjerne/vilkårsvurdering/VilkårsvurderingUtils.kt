@@ -186,7 +186,7 @@ object VilkårsvurderingUtils {
      * @param initiellVilkårsvurdering - Vilkårsvurdering med vilkår basert på siste behandlignsgrunnlag. Skal bli neste aktive.
      * @param aktivVilkårsvurdering -  Vilkårsvurdering med vilkår basert på forrige behandlingsgrunnlag
      * @param løpendeUnderkategori - Den løpende underkategorien for fagsaken. Brukes for å sjekke om utvidet-vilkåret skal kopieres med videre.
-     * @param utvidetVilkårSomKanKopieresFraForrigeBehandling - Liste med utvidet vilkår som kan kopieres fra forrige behandling
+     * @param aktørerMedUtvidetAndelerIForrigeBehandling - Liste med aktører som hadde utvidet andeler i forrige behandling
      *
      * @return oppdaterte versjoner av initieltResultat og aktivtResultat:
      * initieltResultat (neste aktivt) med vilkår som skal benyttes videre
