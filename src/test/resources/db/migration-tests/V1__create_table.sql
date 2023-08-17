@@ -2254,8 +2254,6 @@ COPY public.skyggesak (id, fk_fagsak_id, sendt_tid) FROM stdin;
 --
 
 COPY public.task (id, payload, status, versjon, opprettet_tid, type, metadata, trigger_tid, avvikstype) FROM stdin;
-51	1654	UBEHANDLET	1	2023-08-18 00:01:16.767	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-07.01.2022	2023-08-18 00:01:16.766814	\N
-1	1654	UBEHANDLET	1	2023-08-18 00:01:16.748	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-06.01.2022	2023-08-18 00:01:16.747836	\N
 \.
 
 
