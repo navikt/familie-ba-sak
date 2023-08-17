@@ -17,7 +17,7 @@ spec:
   acl:
     - team: teamfamilie
       application: familie-ba-sak #owner
-      access: write   # readwrite
+      access: write
     - team: pensjon
       application: psys #consumer
       access: read
