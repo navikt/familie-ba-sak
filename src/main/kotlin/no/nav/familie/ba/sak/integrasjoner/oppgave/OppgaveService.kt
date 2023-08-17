@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
@@ -321,9 +322,7 @@ class OppgaveService(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private val oppgavetyperSomBehandlesAvBaSak = listOf(
             Oppgavetype.BehandleSak,
             Oppgavetype.GodkjenneVedtak,

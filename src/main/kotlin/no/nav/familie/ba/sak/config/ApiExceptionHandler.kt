@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.rolleTilgangResponse
 import no.nav.familie.ba.sak.common.RessursUtils.unauthorized
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBServiceException
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.http.client.RessursException
@@ -33,7 +34,6 @@ import java.io.StringWriter
 class ApiExceptionHandler {
 
     private val logger = LoggerFactory.getLogger(ApiExceptionHandler::class.java)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @ExceptionHandler(JwtTokenUnauthorizedException::class)
     fun handleThrowable(jwtTokenUnauthorizedException: JwtTokenUnauthorizedException): ResponseEntity<Ressurs<Nothing>> {
@@ -124,6 +124,12 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleInputValideringFeil(valideringFeil: MethodArgumentNotValidException): ResponseEntity<Ressurs<Nothing>> {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure(valideringFeil.bindingResult.fieldErrors.map { fieldError -> fieldError.defaultMessage }.joinToString(" ,")))
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(
+                Ressurs.failure(
+                    valideringFeil.bindingResult.fieldErrors.map { fieldError -> fieldError.defaultMessage }
+                        .joinToString(" ,"),
+                ),
+            )
     }
 }
