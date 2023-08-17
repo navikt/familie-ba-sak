@@ -55,7 +55,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering,
         behandling: Behandling,
         løpendeUnderkategori: BehandlingUnderkategori?,
-        aktørerMedUtvidetAndelerIForrigeBehandling: List<Aktør>
+        aktørerMedUtvidetAndelerIForrigeBehandling: List<Aktør>,
     ): Vilkårsvurdering {
         val (vilkårsvurdering) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
             aktivVilkårsvurdering = forrigeBehandlingVilkårsvurdering,

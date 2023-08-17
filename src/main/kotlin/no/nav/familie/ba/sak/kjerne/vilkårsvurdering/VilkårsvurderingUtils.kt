@@ -247,7 +247,7 @@ object VilkårsvurderingUtils {
         personTilOppdatert: PersonResultat,
         løpendeUnderkategori: BehandlingUnderkategori?,
         personResultaterAktivt: MutableSet<PersonResultat>,
-        aktørerMedUtvidetAndelerIForrigeBehandling: List<Aktør>
+        aktørerMedUtvidetAndelerIForrigeBehandling: List<Aktør>,
     ) {
         val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
         val personsAndreVurderingerAktivt = personenSomFinnes.andreVurderinger.toMutableSet()

@@ -44,7 +44,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
         )
 
         val aktørerMedUtvidet = finnAktørerMedUtvidetFraAndeler(
-            andeler = andeler
+            andeler = andeler,
         )
 
         Assertions.assertThat(aktørerMedUtvidet).containsExactly(søker.aktør)
