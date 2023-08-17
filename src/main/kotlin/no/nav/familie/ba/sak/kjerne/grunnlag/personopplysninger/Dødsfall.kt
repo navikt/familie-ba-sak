@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsboAdresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.LocalDate
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -35,13 +36,13 @@ data class Dødsfall(
     val dødsfallDato: LocalDate,
 
     @Column(name = "doedsfall_adresse", nullable = true)
-    val dødsfallAdresse: String?,
+    val dødsfallAdresse: String? = null,
 
     @Column(name = "doedsfall_postnummer", nullable = true)
-    val dødsfallPostnummer: String?,
+    val dødsfallPostnummer: String? = null,
 
     @Column(name = "doedsfall_poststed", nullable = true)
-    val dødsfallPoststed: String?,
+    val dødsfallPoststed: String? = null,
 ) : BaseEntitet() {
 
     fun tilKopiForNyPerson(nyPerson: Person): Dødsfall =
@@ -58,12 +59,12 @@ data class Dødsfall(
     )
 }
 
-fun lagDødsfall(
+fun lagDødsfallFraPdl(
     person: Person,
     dødsfallDatoFraPdl: String?,
     dødsfallAdresseFraPdl: PdlKontaktinformasjonForDødsboAdresse?,
 ): Dødsfall? {
-    if (dødsfallDatoFraPdl == null || dødsfallDatoFraPdl == "") {
+    if (dødsfallDatoFraPdl.isNullOrBlank()) {
         return null
     }
     return Dødsfall(
@@ -72,5 +73,8 @@ fun lagDødsfall(
         dødsfallAdresse = dødsfallAdresseFraPdl?.adresselinje1,
         dødsfallPostnummer = dødsfallAdresseFraPdl?.postnummer,
         dødsfallPoststed = dødsfallAdresseFraPdl?.poststedsnavn,
-    )
+    ).also {
+        // Ved registrering av dødsfall fra PDL skal vi sette endretAv til system forkortelsen.
+        it.endretAv = SikkerhetContext.SYSTEM_FORKORTELSE
+    }
 }

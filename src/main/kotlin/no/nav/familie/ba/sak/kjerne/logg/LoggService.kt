@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.Brevmottaker
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetaling
@@ -605,6 +606,19 @@ class LoggService(
                 Periode: ${refusjonEøs.fom.tilKortString()} - ${refusjonEøs.tom.tilKortString()}
                 Beløp: ${refusjonEøs.refusjonsbeløp} kr/mnd
                 """.trimIndent(),
+            ),
+        )
+
+    fun loggManueltRegistrertDødsfallDato(behandlingId: BehandlingId, person: Person) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId.id,
+                type = LoggType.MANUELL_DØDSFALL_DATO_REGISTRERT,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER,
+                ),
+                tekst = "Dødsfall dato er manuelt registrert for barn født ${person.fødselsdato}",
             ),
         )
 

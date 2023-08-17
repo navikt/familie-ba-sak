@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
@@ -25,12 +26,15 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class PersongrunnlagService(
@@ -44,6 +48,7 @@ class PersongrunnlagService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val loggService: LoggService,
     private val arbeidsforholdService: ArbeidsforholdService,
+    private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
 
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
@@ -291,7 +296,7 @@ class PersongrunnlagService(
                         person = person,
                     )
                 }?.sortedBy { it.gyldigPeriode?.fom }?.toMutableList() ?: mutableListOf()
-            person.dødsfall = lagDødsfall(
+            person.dødsfall = lagDødsfallFraPdl(
                 person = person,
                 dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato,
                 dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse,
@@ -330,6 +335,33 @@ class PersongrunnlagService(
     fun hentSøkersMålform(behandlingId: Long) =
         hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform
 
+    @Transactional
+    fun registrerManuellDødsfallPåPerson(
+        behandlingId: BehandlingId,
+        personIdent: PersonIdent,
+        dødsfallDato: LocalDate,
+    ) {
+        val personopplysningGrunnlag = hentAktivThrows(behandlingId.id)
+        val aktør = personidentService.hentAktør(personIdent.ident)
+
+        val person = personopplysningGrunnlag.personer.singleOrNull { it.aktør == aktør } ?: run {
+            secureLogger.info("Klarte ikke registrere manuell dødsfall dato siden $aktør ikke finnes i personopplysningsgrunnlaget til behandlingen")
+            throw Feil("Manuell registrering av dødsfall dato feilet i behandling ${behandlingId.id}. Se securelog for mer informasjon.")
+        }
+
+        validerAtDødsfallKanManueltRegistreresPåPerson(person, dødsfallDato)
+
+        person.dødsfall = Dødsfall(person = person, dødsfallDato = dødsfallDato)
+        vilkårsvurderingService.oppdaterVilkårVedDødsfall(behandlingId, dødsfallDato, aktør)
+        loggService.loggManueltRegistrertDødsfallDato(behandlingId, person)
+    }
+
+    private fun validerAtDødsfallKanManueltRegistreresPåPerson(person: Person, dødsfallDato: LocalDate) {
+        when {
+            person.erDød() -> throw FunksjonellFeil("Dødsfall dato er allerede registrert på person med navn ${person.navn}")
+            person.fødselsdato < dødsfallDato -> throw FunksjonellFeil("Du kan ikke sette dødsfall dato til en dato som er før ${person.navn} sin fødselsdato")
+        }
+    }
     companion object {
         private val logger = LoggerFactory.getLogger(PersongrunnlagService::class.java)
     }

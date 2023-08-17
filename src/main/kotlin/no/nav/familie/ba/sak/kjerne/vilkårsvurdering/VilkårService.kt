@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
@@ -33,7 +32,6 @@ class VilkårService(
     private val behandlingService: BehandlingService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val personidentService: PersonidentService,
-    private val featureToggleService: FeatureToggleService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
 

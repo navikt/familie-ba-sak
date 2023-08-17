@@ -1,9 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -14,17 +17,27 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.kontrakter.felles.PersonIdent
 import org.assertj.core.api.Assertions
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.time.YearMonth
+import org.hamcrest.CoreMatchers.`is` as Is
 
-class PersonoGrunnlagServiceTest {
+class PersongrunnlagServiceTest {
     val personidentService = mockk<PersonidentService>()
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     val personopplysningerService = mockk<PersonopplysningerService>()
     val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
+    val loggService = mockk<LoggService>()
+    val vilkårsvurderingService = mockk<VilkårsvurderingService>()
 
     val persongrunnlagService = spyk(
         PersongrunnlagService(
@@ -36,8 +49,9 @@ class PersonoGrunnlagServiceTest {
             saksstatistikkEventPublisher = mockk(relaxed = true),
             behandlingHentOgPersisterService = mockk(),
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            loggService = mockk(),
+            loggService = loggService,
             arbeidsforholdService = mockk(),
+            vilkårsvurderingService = vilkårsvurderingService,
         ),
     )
 
@@ -134,5 +148,93 @@ class PersonoGrunnlagServiceTest {
                     .containsExactly(PersonType.BARN)
             }
         }
+    }
+
+    @Test
+    fun `registrerManuellDødsfallPåPerson skal kaste feil dersom man registrer dødsfall dato før personen er født`() {
+        val dødsfallsDato = LocalDate.of(2020, 10, 10)
+        val person = lagPerson(fødselsdato = dødsfallsDato.minusMonths(10))
+        val personFnr = person.aktør.aktivFødselsnummer()
+        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                personer = arrayOf(person),
+            )
+
+        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
+        every { personidentService.hentAktør(personFnr) } returns person.aktør
+
+        val funksjonellFeil = assertThrows<FunksjonellFeil> {
+            persongrunnlagService.registrerManuellDødsfallPåPerson(
+                behandlingId = BehandlingId(behandling.id),
+                personIdent = PersonIdent(personFnr),
+                dødsfallDato = dødsfallsDato,
+            )
+        }
+
+        assertThat(funksjonellFeil.melding, Is("Du kan ikke sette dødsfalls dato til en dato som er før SØKER sin fødselsdato"))
+    }
+
+    @Test
+    fun `registrerManuellDødsfallPåPerson skal kaste feil dersom man registrer dødsfall dato når personen allerede har dødsfallsdato registrert`() {
+        val dødsfallsDato = LocalDate.of(2020, 10, 10)
+        val person = lagPerson(fødselsdato = dødsfallsDato.minusMonths(10)).also {
+            it.dødsfall = Dødsfall(person = it, dødsfallDato = dødsfallsDato)
+        }
+
+        val personFnr = person.aktør.aktivFødselsnummer()
+        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                personer = arrayOf(person),
+            )
+
+        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
+        every { personidentService.hentAktør(personFnr) } returns person.aktør
+
+        val funksjonellFeil = assertThrows<FunksjonellFeil> {
+            persongrunnlagService.registrerManuellDødsfallPåPerson(
+                behandlingId = BehandlingId(behandling.id),
+                personIdent = PersonIdent(personFnr),
+                dødsfallDato = dødsfallsDato,
+            )
+        }
+
+        assertThat(funksjonellFeil.melding, Is("Dødsfallsdato er allerede registrert på person med navn ${person.navn}"))
+    }
+
+    @Test
+    fun `registrerManuellDødsfallPåPerson skal endre på vilkår og logge at manuelt dødsfalldato er registrert`() {
+        val dødsfallsDato = LocalDate.of(2020, 10, 10)
+        val person = lagPerson(fødselsdato = dødsfallsDato.plusYears(10))
+
+        val personFnr = person.aktør.aktivFødselsnummer()
+        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                personer = arrayOf(person),
+            )
+
+        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
+        every { personidentService.hentAktør(personFnr) } returns person.aktør
+        every { loggService.loggManueltRegistrertDødsfallDato(any(), any()) } returns mockk()
+        every { vilkårsvurderingService.oppdaterVilkårVedDødsfall(any(), any(), any()) } just runs
+
+        persongrunnlagService.registrerManuellDødsfallPåPerson(
+            behandlingId = BehandlingId(behandling.id),
+            personIdent = PersonIdent(personFnr),
+            dødsfallDato = dødsfallsDato,
+        )
+
+        verify(exactly = 1) { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) }
+        verify(exactly = 1) { personidentService.hentAktør(personFnr) }
+        verify(exactly = 1) { loggService.loggManueltRegistrertDødsfallDato(any(), any()) }
+        verify(exactly = 1) { vilkårsvurderingService.oppdaterVilkårVedDødsfall(any(), any(), any()) }
     }
 }
