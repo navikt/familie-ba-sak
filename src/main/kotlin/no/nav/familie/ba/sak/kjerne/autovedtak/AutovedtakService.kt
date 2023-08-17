@@ -75,6 +75,5 @@ class AutovedtakService(
 
     companion object {
         val logger = LoggerFactory.getLogger(AutovedtakService::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

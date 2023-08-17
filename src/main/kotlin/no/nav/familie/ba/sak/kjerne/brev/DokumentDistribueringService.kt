@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -139,6 +140,5 @@ class DokumentDistribueringService(
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(this::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

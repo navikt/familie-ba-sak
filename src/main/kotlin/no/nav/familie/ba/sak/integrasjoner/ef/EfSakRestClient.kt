@@ -7,7 +7,6 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -28,9 +27,5 @@ class EfSakRestClient(
             uri = uri,
             formål = "Hente perioder med full overgangsstønad",
         ) { postForEntity(uri, PersonIdent(personIdent)) }.getDataOrThrow()
-    }
-
-    companion object {
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

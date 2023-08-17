@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
@@ -45,8 +46,6 @@ class SaksstatistikkScheduler(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(SaksstatistikkScheduler::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import no.nav.familie.ba.sak.common.secureLogger
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.Logger
@@ -17,7 +18,6 @@ import java.util.concurrent.atomic.AtomicLong
 class KafkaAivenErrorHandler : CommonContainerStoppingErrorHandler() {
 
     val logger: Logger = LoggerFactory.getLogger(KafkaAivenErrorHandler::class.java)
-    val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
     private val executor: Executor
     private val teller = AtomicInteger(0)
