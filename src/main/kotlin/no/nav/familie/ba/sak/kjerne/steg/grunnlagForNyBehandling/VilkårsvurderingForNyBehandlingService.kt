@@ -232,7 +232,7 @@ class VilkårsvurderingForNyBehandlingService(
     }
 
     /***
-     * Utvidet vilkår kan kun kopieres med hvis det finnes utbetaling av utvidet barnetrygd i samme behandling
+     * Utvidet vilkår kan kun kopieres med fra forrige behandling hvis det finnes utbetaling av utvidet barnetrygd i forrige behandling
      */
     private fun finnAktørerMedUtvidetBarnetrygdIForrigeBehandling(forrigeBehandlingSomErVedtatt: Behandling?): List<Aktør> =
         forrigeBehandlingSomErVedtatt?.let {
