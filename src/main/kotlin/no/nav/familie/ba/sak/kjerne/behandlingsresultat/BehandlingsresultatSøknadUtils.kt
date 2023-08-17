@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import org.slf4j.LoggerFactory
 
 internal enum class Søknadsresultat {
     INNVILGET,
@@ -22,8 +21,6 @@ internal enum class Søknadsresultat {
 }
 
 object BehandlingsresultatSøknadUtils {
-
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     internal fun utledResultatPåSøknad(
         forrigeAndeler: List<AndelTilkjentYtelse>,

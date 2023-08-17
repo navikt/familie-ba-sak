@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlass
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.secureLogger
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -226,7 +227,6 @@ class StønadsstatistikkService(
     companion object {
 
         private val logger = LoggerFactory.getLogger(StønadsstatistikkService::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private val TIMEZONE = ZoneId.of("Europe/Paris")
     }
 }

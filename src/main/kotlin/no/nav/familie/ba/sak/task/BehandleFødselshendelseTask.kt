@@ -84,7 +84,6 @@ class BehandleFødselshendelseTask(
 
         const val TASK_STEP_TYPE = "behandleFødselshendelseTask"
         private val logger = LoggerFactory.getLogger(BehandleFødselshendelseTask::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
             val triggerTid = if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()

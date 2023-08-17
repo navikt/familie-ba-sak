@@ -153,7 +153,6 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     companion object {
 
         private val logger = LoggerFactory.getLogger(DefaultKafkaProducer::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private const val VEDTAKV2_TOPIC = "teamfamilie.aapen-barnetrygd-vedtak-v2"
         private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "teamfamilie.aapen-barnetrygd-saksstatistikk-behandling-v1"
         private const val SAKSSTATISTIKK_SAK_TOPIC = "teamfamilie.aapen-barnetrygd-saksstatistikk-sak-v1"

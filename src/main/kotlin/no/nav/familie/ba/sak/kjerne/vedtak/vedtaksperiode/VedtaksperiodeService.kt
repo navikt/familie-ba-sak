@@ -68,7 +68,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.genererVedta
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utbetalingsperiodemedbegrunnelser.UtbetalingsperiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import utledEndringstidspunkt
@@ -823,10 +822,5 @@ class VedtaksperiodeService(
                     }
                 }
             }.toSet().takeIf { it.isNotEmpty() }
-    }
-
-    companion object {
-
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

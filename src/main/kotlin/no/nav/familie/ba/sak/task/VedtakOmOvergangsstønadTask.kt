@@ -38,7 +38,6 @@ class VedtakOmOvergangsstønadTask(
 
         const val TASK_STEP_TYPE = "vedtakOmOvergangsstønadTask"
         private val logger = LoggerFactory.getLogger(VedtakOmOvergangsstønadTask::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(personIdent: String): Task {
             return Task(

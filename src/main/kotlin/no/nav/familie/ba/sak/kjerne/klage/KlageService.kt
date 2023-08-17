@@ -45,7 +45,6 @@ class KlageService(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun opprettKlage(fagsakId: Long, opprettKlageDto: OpprettKlageDto) {
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)

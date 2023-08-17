@@ -296,8 +296,6 @@ class AutovedtakFødselshendelseService(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(BehandleFødselshendelseTask::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

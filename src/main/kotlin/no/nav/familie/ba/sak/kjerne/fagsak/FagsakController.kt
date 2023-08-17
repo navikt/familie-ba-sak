@@ -211,7 +211,6 @@ class FagsakController(
     companion object {
 
         private val logger: Logger = LoggerFactory.getLogger(FagsakController::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 

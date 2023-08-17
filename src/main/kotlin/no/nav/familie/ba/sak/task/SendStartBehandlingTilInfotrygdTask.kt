@@ -9,7 +9,6 @@ import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.util.Properties
@@ -31,7 +30,6 @@ class SendStartBehandlingTilInfotrygdTask(
     companion object {
 
         const val TASK_STEP_TYPE = "SendStartBehandlingTilInfotrygd"
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(aktørStoenadsmottaker: Aktør): Task {
             secureLogger.info("Oppretter task for å sende StartBehandling for ${aktørStoenadsmottaker.aktivFødselsnummer()} til Infotrygd.")

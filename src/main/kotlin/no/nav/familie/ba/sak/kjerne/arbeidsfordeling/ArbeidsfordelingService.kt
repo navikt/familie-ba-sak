@@ -221,8 +221,6 @@ class ArbeidsfordelingService(
     )
 
     companion object {
-
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private val logger = LoggerFactory.getLogger(ArbeidsfordelingService::class.java)
     }
 }

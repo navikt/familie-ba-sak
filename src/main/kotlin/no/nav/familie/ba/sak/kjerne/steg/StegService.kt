@@ -588,8 +588,6 @@ class StegService(
     companion object {
 
         private val logger = LoggerFactory.getLogger(StegService::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
-
         private fun hentUkjentBehandlingTypeOgÅrsakFeilMelding(nyBehandling: NyBehandling) =
             "Ukjent oppførsel ved opprettelse av ny behandling med årsak " +
                 "${nyBehandling.behandlingÅrsak.visningsnavn} og " +
