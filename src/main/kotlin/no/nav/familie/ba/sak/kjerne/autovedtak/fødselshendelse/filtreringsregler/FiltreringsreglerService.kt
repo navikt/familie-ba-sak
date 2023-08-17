@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
@@ -192,6 +193,5 @@ class FiltreringsreglerService(
     companion object {
 
         val logger = LoggerFactory.getLogger(FiltreringsreglerService::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
