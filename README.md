@@ -196,7 +196,7 @@ curl -X POST "http://igroup:itest@localhost:8840/api/v1/topics" -H "Accept: appl
 
 ## Produksjonssetting
 
-Master-branchen blir automatisk bygget ved merge og deployet først til preprod og dernest til prod.
+Main-branchen blir automatisk bygget ved merge og deployet først til preprod og dernest til prod.
 
 ### Hastedeploy
 
