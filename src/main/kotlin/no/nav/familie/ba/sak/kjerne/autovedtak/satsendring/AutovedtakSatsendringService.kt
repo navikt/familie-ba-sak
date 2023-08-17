@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SATSENDRING_SNIKE_I_KØEN
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -204,7 +205,6 @@ class AutovedtakSatsendringService(
 
     companion object {
         val logger = LoggerFactory.getLogger(AutovedtakSatsendringService::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 

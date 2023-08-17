@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.erTilogMed3ÅrTidslinje
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -30,7 +31,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -76,7 +76,9 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     )
 }
 
-private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.førerTilEndringIUtbetalingFraForrigeBehandling(forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): Boolean {
+private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.førerTilEndringIUtbetalingFraForrigeBehandling(
+    forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+): Boolean {
     val endringstidslinje = EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
         nåværendeAndeler = this.map { it.andel },
         forrigeAndeler = forrigeAndeler.map { it.andel },
@@ -170,13 +172,12 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
 
     val vedtaksperiodeSomSkalOppdateres = vedtaksperiodeSomSkalOppdateresOgBegrunnelse?.first
     if (vedtaksperiodeSomSkalOppdateres == null) {
-        LoggerFactory.getLogger("secureLogger")
-            .info(
-                "Finner ikke aktuell periode å begrunne ved autovedtak småbarnstillegg.\n" +
-                    "Innvilget periode: $innvilgetMånedPeriode.\n" +
-                    "Redusert periode: $redusertMånedPeriode.\n" +
-                    "Perioder: ${vedtaksperioderMedBegrunnelser.map { "Periode(type=${it.type}, fom=${it.fom}, tom=${it.tom})" }}",
-            )
+        secureLogger.info(
+            "Finner ikke aktuell periode å begrunne ved autovedtak småbarnstillegg.\n" +
+                "Innvilget periode: $innvilgetMånedPeriode.\n" +
+                "Redusert periode: $redusertMånedPeriode.\n" +
+                "Perioder: ${vedtaksperioderMedBegrunnelser.map { "Periode(type=${it.type}, fom=${it.fom}, tom=${it.tom})" }}",
+        )
 
         throw VedtaksperiodefinnerSmåbarnstilleggFeil("Finner ikke aktuell periode å begrunne ved autovedtak småbarnstillegg. Se securelogger for å periodene som ble generert.")
     }
