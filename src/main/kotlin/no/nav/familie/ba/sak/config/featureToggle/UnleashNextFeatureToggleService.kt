@@ -19,7 +19,7 @@ class UnleashNextFeatureToggleService(
         defaultUnleash = DefaultUnleash(
             UnleashConfig.builder()
                 .appName(appName)
-                .unleashAPI(apiUrl)
+                .unleashAPI("$apiUrl/api")
                 .apiKey(apiToken)
                 .unleashContextProvider(lagUnleashContextProvider()).build(),
         )
