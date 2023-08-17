@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle.SOKER
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -38,9 +39,13 @@ data class SanityBegrunnelse(
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
     val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null,
     val valgbarhet: Valgbarhet? = null,
+    val resultat: SanityVedtakResultat? = null,
 ) : ISanityBegrunnelse {
 
     val triggesAv: TriggesAv by lazy { this.tilTriggesAv() }
+
+    fun gjelderEtterEndretUtbetaling() =
+        this.endretUtbetalingsperiodeTriggere?.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) == true
 }
 
 data class RestSanityBegrunnelse(
@@ -60,6 +65,7 @@ data class RestSanityBegrunnelse(
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
     val valgbarhet: String? = null,
+    val vedtakResultat: String?,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
         if (apiNavn == null) return null
@@ -110,6 +116,9 @@ data class RestSanityBegrunnelse(
                 finnEnumverdi(it, UtvidetBarnetrygdTrigger.values(), apiNavn)
             },
             valgbarhet = valgbarhet?.let { finnEnumverdi(valgbarhet, Valgbarhet.values(), apiNavn) },
+            resultat = vedtakResultat?.let {
+                finnEnumverdi(it, SanityVedtakResultat.values(), apiNavn)
+            },
         )
     }
 }
@@ -160,6 +169,22 @@ enum class VilkårTrigger {
     MEDLEMSKAP,
     DELT_BOSTED,
     DELT_BOSTED_SKAL_IKKE_DELES,
+}
+
+fun List<VilkårTrigger>.tilUtdypendeVilkårsvurderinger() = this.map {
+    when (it) {
+        VilkårTrigger.VURDERING_ANNET_GRUNNLAG -> UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
+        VilkårTrigger.MEDLEMSKAP -> UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+        VilkårTrigger.DELT_BOSTED -> UtdypendeVilkårsvurdering.DELT_BOSTED
+        VilkårTrigger.DELT_BOSTED_SKAL_IKKE_DELES -> UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
+    }
+}
+
+enum class SanityVedtakResultat {
+    INNVILGET_ELLER_ØKNING,
+    INGEN_ENDRING,
+    IKKE_INNVILGET,
+    REDUKSJON,
 }
 
 enum class ØvrigTrigger {

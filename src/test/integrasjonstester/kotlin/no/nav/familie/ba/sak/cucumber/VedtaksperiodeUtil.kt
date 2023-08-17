@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.cucumber
 
 import io.cucumber.datatable.DataTable
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -24,21 +23,27 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.math.BigDecimal
@@ -50,43 +55,29 @@ fun Map<Long, Behandling>.finnBehandling(behandlingId: Long) =
 fun Map<Long, PersonopplysningGrunnlag>.finnPersonGrunnlagForBehandling(behandlingId: Long): PersonopplysningGrunnlag =
     this[behandlingId] ?: error("Finner ikke persongrunnlag for behandling med id $behandlingId")
 
-fun List<MutableMap<String, String>>?.tilVilkårResultater(
-    behandlingId: Long,
-    personResultat: PersonResultat,
-) =
-    this?.map {
-        VilkårResultat(
-            vilkårType = parseEnum(
-                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.VILKÅR,
-                it,
-            ),
-            resultat = parseEnum(
-                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT,
-                it,
-            ),
-            periodeFom = parseValgfriDato(Domenebegrep.FRA_DATO, it),
-            periodeTom = parseValgfriDato(Domenebegrep.TIL_DATO, it),
-            begrunnelse = "",
-            behandlingId = behandlingId,
-            personResultat = personResultat,
-            erEksplisittAvslagPåSøknad = parseValgfriBoolean(
-                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.ER_EKSPLISITT_AVSLAG,
-                it,
-            ),
-        )
-    } ?: emptyList()
+fun lagFagsaker(dataTable: DataTable) = dataTable.asMaps().map { rad ->
+    Fagsak(
+        id = parseLong(Domenebegrep.FAGSAK_ID, rad),
+        type = parseValgfriEnum<FagsakType>(Domenebegrep.FAGSAK_TYPE, rad) ?: FagsakType.NORMAL,
+        aktør = randomAktør(),
+    )
+}.associateBy { it.id }
 
 fun lagVedtak(
     dataTable: DataTable,
     behandlinger: MutableMap<Long, Behandling>,
     behandlingTilForrigeBehandling: MutableMap<Long, Long?>,
     vedtaksListe: MutableList<Vedtak>,
+    fagsaker: Map<Long, Fagsak>,
 ) {
-    val fagsak = defaultFagsak()
     behandlinger.putAll(
-        dataTable.groupByBehandlingId()
-            .map { lagBehandling(fagsak = fagsak).copy(id = it.key) }
-            .associateBy { it.id },
+        dataTable.asMaps().map { rad ->
+            val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+            val fagsakId = parseValgfriLong(Domenebegrep.FAGSAK_ID, rad)
+            val fagsak = fagsaker[fagsakId] ?: defaultFagsak()
+
+            lagBehandling(fagsak = fagsak).copy(id = behandlingId)
+        }.associateBy { it.id },
     )
     behandlingTilForrigeBehandling.putAll(
         dataTable.asMaps().associate { rad ->
@@ -122,10 +113,17 @@ fun leggTilVilkårResultatPåPersonResultat(
     personResultat.vilkårResultater.clear()
 
     vilkårResultaterPerPerson[personResultat.aktør.aktørId]?.forEach { rad ->
-        val vilkårResultaterForÉnRad = parseEnumListe<Vilkår>(
+        val vilkårForÉnRad = parseEnumListe<Vilkår>(
             VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.VILKÅR,
             rad,
-        ).map { vilkår ->
+        )
+
+        val utdypendeVilkårsvurderingForÉnRad = parseEnumListe<UtdypendeVilkårsvurdering>(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.UTDYPENDE_VILKÅR,
+            rad,
+        )
+
+        val vilkårResultaterForÉnRad = vilkårForÉnRad.map { vilkår ->
             VilkårResultat(
                 behandlingId = behandlingId,
                 personResultat = personResultat,
@@ -141,6 +139,7 @@ fun leggTilVilkårResultatPåPersonResultat(
                     rad,
                 ),
                 begrunnelse = "",
+                utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingForÉnRad,
             )
         }
         personResultat.vilkårResultater.addAll(vilkårResultaterForÉnRad)
@@ -205,10 +204,15 @@ fun lagEndredeUtbetalinger(
             fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
             tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
             person = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId },
-            prosent = BigDecimal.ZERO,
-            årsak = Årsak.ALLEREDE_UTBETALT,
+            prosent = parseValgfriLong(
+                VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT,
+                rad,
+            )?.toBigDecimal() ?: BigDecimal.ZERO,
+            årsak = parseValgfriEnum<Årsak>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.ÅRSAK, rad)
+                ?: Årsak.ALLEREDE_UTBETALT,
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "Fordi at...",
+            avtaletidspunktDeltBosted = LocalDate.now(),
         )
     }.groupBy { it.behandlingId }
         .toMutableMap()
@@ -252,9 +256,32 @@ fun lagAndelerTilkjentYtelse(
         behandling = behandlinger.finnBehandling(behandlingId),
         person = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId }!!,
         beløp = parseInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad),
+        ytelseType = parseValgfriEnum<YtelseType>(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepAndelTilkjentYtelse.YTELSE_TYPE,
+            rad,
+        ) ?: YtelseType.ORDINÆR_BARNETRYGD,
+        prosent = parseValgfriLong(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT,
+            rad,
+        )?.toBigDecimal() ?: BigDecimal(100),
     )
 }.groupBy { it.behandlingId }
     .toMutableMap()
+
+fun lagOvergangsstønad(
+    dataTable: DataTable,
+    persongrunnlag: Map<Long, PersonopplysningGrunnlag>,
+): Map<Long, List<InternPeriodeOvergangsstønad>> = dataTable.asMaps()
+    .groupBy({ rad -> parseLong(Domenebegrep.BEHANDLING_ID, rad) }, { rad ->
+        val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+        val aktørId = VedtaksperiodeMedBegrunnelserParser.parseAktørId(rad)
+
+        InternPeriodeOvergangsstønad(
+            fomDato = parseDato(Domenebegrep.FRA_DATO, rad),
+            tomDato = parseDato(Domenebegrep.TIL_DATO, rad),
+            personIdent = persongrunnlag[behandlingId]!!.personer.single { it.aktør.aktørId == aktørId }.aktør.aktivFødselsnummer(),
+        )
+    })
 
 fun lagVedtaksPerioder(
     behandlingId: Long,
@@ -265,10 +292,14 @@ fun lagVedtaksPerioder(
     kompetanser: Map<Long, List<Kompetanse>>,
     endredeUtbetalinger: Map<Long, List<EndretUtbetalingAndel>>,
     andelerTilkjentYtelse: Map<Long, List<AndelTilkjentYtelse>>,
-    endringstidspunkt: Map<Long, LocalDate?>,
+    overstyrteEndringstidspunkt: Map<Long, LocalDate?>,
+    overgangsstønad: Map<Long, List<InternPeriodeOvergangsstønad>?>,
+    uregistrerteBarn: List<BarnMedOpplysninger>,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val vedtak = vedtaksListe.find { it.behandling.id == behandlingId && it.aktiv }
         ?: error("Finner ikke vedtak")
+
+    vedtak.behandling.overstyrtEndringstidspunkt = overstyrteEndringstidspunkt[behandlingId]
     val grunnlagForVedtaksperiode = GrunnlagForVedtaksperioder(
         persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
         personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
@@ -276,7 +307,8 @@ fun lagVedtaksPerioder(
         kompetanser = kompetanser[behandlingId] ?: emptyList(),
         endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
         andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
-        perioderOvergangsstønad = emptyList(),
+        perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
+        uregistrerteBarn = uregistrerteBarn,
     )
 
     val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
@@ -291,7 +323,8 @@ fun lagVedtaksPerioder(
             kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
             endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
             andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
-            perioderOvergangsstønad = emptyList(),
+            perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
+            uregistrerteBarn = emptyList(),
         )
     }
 
@@ -299,6 +332,5 @@ fun lagVedtaksPerioder(
         vedtak = vedtak,
         grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
         grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
-        endringstidspunkt = endringstidspunkt[behandlingId] ?: TIDENES_MORGEN,
     )
 }

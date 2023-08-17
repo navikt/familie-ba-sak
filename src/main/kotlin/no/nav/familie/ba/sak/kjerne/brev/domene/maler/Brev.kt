@@ -27,6 +27,11 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         "innhenteOpplysningerEtterSoknadISED",
         "Innhente opplysninger etter søknad i SED",
     ),
+    INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT(
+        erVedtaksbrev = false,
+        apiNavn = "innhentingOgInfoAnnenForelderMedSelvstendigRettSokt",
+        visningsTekst = "Innhente opplysninger og informasjon om at annen forelder med selvstendig rett har søkt",
+    ),
     INNHENTE_OPPLYSNINGER_INSTITUSJON(false, "innhenteOpplysningerInstitusjon", "Innhente opplysninger institusjon"),
     HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "Henlegge trukket søknad"),
     VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "Varsel om revurdering"),
@@ -77,6 +82,30 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     INFORMASJONSBREV_KAN_SØKE_EØS(false, "informasjonsbrevKanSokeEOS", "Informasjonsbrev kan søke EØS"),
     INFORMASJONSBREV_FØDSEL_GENERELL(false, "informasjonsbrevFodselGenerell", "Informasjonsbrev fødsel generell"),
 
+    INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_FÅTT_EN_SØKNAD_FRA_ANNEN_FORELDER(
+        erVedtaksbrev = false,
+        apiNavn = "tilForelderOmfattetNorskLovgivningHarFaattSoknadFraAnnenForelder",
+        visningsTekst = "Informasjon til forelder omfattet norsk lovgivning - har fått en søknad fra annen forelder",
+    ),
+
+    INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_GJORT_VEDTAK_TIL_ANNEN_FORELDER(
+        erVedtaksbrev = false,
+        apiNavn = "tilForelderOmfattetNorskLovgivningHarGjortVedtakTilAnnenForelder",
+        visningsTekst = "Informasjon til forelder omfattet norsk lovgivning - har gjort vedtak til annen forelder",
+    ),
+
+    INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_VARSEL_OM_ÅRLIG_KONTROLL(
+        erVedtaksbrev = false,
+        apiNavn = "tilForelderOmfattetNorskLovgivningVarselOmAarligKontroll",
+        visningsTekst = "Informasjon til forelder omfattet norsk lovgivning - varsel om årlig kontroll",
+    ),
+
+    INFORMASJONSBREV_TIL_FORELDER_MED_SELVSTENDIG_RETT_VI_HAR_FÅTT_F016_KAN_SØKE_OM_BARNETRYGD(
+        erVedtaksbrev = false,
+        apiNavn = "tilForelderMedSelvstendigRettKanSokeOmBarnetrygd",
+        visningsTekst = "Informasjon til forelder med selvstendig rett vi har fått F016 - kan søke om barnetrygd",
+    ),
+
     VEDTAK_FØRSTEGANGSVEDTAK(true, "forstegangsvedtak", "Førstegangsvedtak"),
     VEDTAK_ENDRING(true, "vedtakEndring", "Vedtak endring"),
     VEDTAK_OPPHØRT(true, "opphort", "Opphørt"),
@@ -105,7 +134,12 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         when (this) {
             INNHENTE_OPPLYSNINGER,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
+            INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT,
             INNHENTE_OPPLYSNINGER_INSTITUSJON,
+            INFORMASJONSBREV_TIL_FORELDER_MED_SELVSTENDIG_RETT_VI_HAR_FÅTT_F016_KAN_SØKE_OM_BARNETRYGD,
+            INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_FÅTT_EN_SØKNAD_FRA_ANNEN_FORELDER,
+            INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_GJORT_VEDTAK_TIL_ANNEN_FORELDER,
+            INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_VARSEL_OM_ÅRLIG_KONTROLL,
             VARSEL_OM_REVURDERING,
             VARSEL_OM_REVURDERING_INSTITUSJON,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
@@ -164,7 +198,12 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_MINDREÅRIG
             INFORMASJONSBREV_KAN_SØKE -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE
             INFORMASJONSBREV_FØDSEL_GENERELL -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_GENERELL
+            INFORMASJONSBREV_TIL_FORELDER_MED_SELVSTENDIG_RETT_VI_HAR_FÅTT_F016_KAN_SØKE_OM_BARNETRYGD -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_TIL_FORELDER_MED_SELVSTENDIG_RETT_VI_HAR_FÅTT_F016_KAN_SØKE_OM_BARNETRYGD
+            INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_FÅTT_EN_SØKNAD_FRA_ANNEN_FORELDER -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_FÅTT_EN_SØKNAD_FRA_ANNEN_FORELDER
+            INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_GJORT_VEDTAK_TIL_ANNEN_FORELDER -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_GJORT_VEDTAK_TIL_ANNEN_FORELDER
+            INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_VARSEL_OM_ÅRLIG_KONTROLL -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_VARSEL_OM_ÅRLIG_KONTROLL
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED -> Dokumenttype.BARNETRYGD_INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED
+            INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT -> Dokumenttype.BARNETRYGD_INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> Dokumenttype.BARNETRYGD_VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS -> Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS
             VARSEL_OM_ÅRLIG_REVURDERING_EØS -> Dokumenttype.BARNETRYGD_VARSEL_OM_ÅRLIG_REVURDERING_EØS
@@ -199,6 +238,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INFORMASJONSBREV_DELT_BOSTED -> Distribusjonstype.VIKTIG
             INNHENTE_OPPLYSNINGER, INNHENTE_OPPLYSNINGER_INSTITUSJON -> Distribusjonstype.VIKTIG
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED -> Distribusjonstype.VIKTIG
+            INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT -> Distribusjonstype.VIKTIG
             HENLEGGE_TRUKKET_SØKNAD -> Distribusjonstype.ANNET
             VARSEL_OM_REVURDERING -> Distribusjonstype.VIKTIG
             VARSEL_OM_REVURDERING_INSTITUSJON -> Distribusjonstype.VIKTIG
@@ -215,6 +255,10 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INFORMASJONSBREV_KAN_SØKE -> Distribusjonstype.ANNET
             INFORMASJONSBREV_KAN_SØKE_EØS -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_GENERELL -> Distribusjonstype.ANNET
+            INFORMASJONSBREV_TIL_FORELDER_MED_SELVSTENDIG_RETT_VI_HAR_FÅTT_F016_KAN_SØKE_OM_BARNETRYGD -> Distribusjonstype.VIKTIG
+            INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_FÅTT_EN_SØKNAD_FRA_ANNEN_FORELDER -> Distribusjonstype.VIKTIG
+            INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_GJORT_VEDTAK_TIL_ANNEN_FORELDER -> Distribusjonstype.VIKTIG
+            INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_VARSEL_OM_ÅRLIG_KONTROLL -> Distribusjonstype.VIKTIG
             VEDTAK_FØRSTEGANGSVEDTAK -> Distribusjonstype.VEDTAK
             VEDTAK_ENDRING -> Distribusjonstype.VEDTAK
             VEDTAK_OPPHØRT -> Distribusjonstype.VEDTAK

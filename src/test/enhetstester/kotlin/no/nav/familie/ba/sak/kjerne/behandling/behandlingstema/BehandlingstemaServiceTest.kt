@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -177,7 +178,8 @@ class BehandlingstemaServiceTest {
         every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = lagVilkårsvurdering(tilAktør(søkerFnr), defaultBehandling, Resultat.OPPFYLT),
-                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, randomFnr(), barnFnr),
+                søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, randomFnr(), barnFnr)
+                    .tilPersonEnkelSøkerOgBarn(),
             )
         assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }
@@ -203,7 +205,8 @@ class BehandlingstemaServiceTest {
         every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr),
+                søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                    .tilPersonEnkelSøkerOgBarn(),
             )
         assertEquals(BehandlingKategori.EØS, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }
@@ -229,7 +232,8 @@ class BehandlingstemaServiceTest {
         every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr),
+                søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                    .tilPersonEnkelSøkerOgBarn(),
             )
         assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }

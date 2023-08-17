@@ -12,10 +12,13 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -25,27 +28,35 @@ import java.time.LocalDate
 
 class VedtaksperiodeMedBegrunnelserStepDefinition {
 
+    private var fagsaker: Map<Long, Fagsak> = emptyMap()
     private var behandlinger = mutableMapOf<Long, Behandling>()
     private var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
     private var vedtaksliste = mutableListOf<Vedtak>()
-    private var persongrunnlag = mutableMapOf<Long, PersonopplysningGrunnlag>()
+    private var persongrunnlag = mapOf<Long, PersonopplysningGrunnlag>()
     private var personResultater = mutableMapOf<Long, Set<PersonResultat>>()
     private var vedtaksperioderMedBegrunnelser = listOf<VedtaksperiodeMedBegrunnelser>()
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
-    private var overstyrtEndringstidspunkt = mapOf<Long, LocalDate?>()
+    private var overstyrteEndringstidspunkt = mapOf<Long, LocalDate>()
+    private var overgangsstønad = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
+    private var uregistrerteBarn = listOf<BarnMedOpplysninger>()
 
     private var gjeldendeBehandlingId: Long? = null
 
+    @Gitt("følgende fagsaker")
+    fun `følgende fagsaker`(dataTable: DataTable) {
+        fagsaker = lagFagsaker(dataTable)
+    }
+
     @Gitt("følgende vedtak")
     fun `følgende vedtak`(dataTable: DataTable) {
-        lagVedtak(dataTable, behandlinger, behandlingTilForrigeBehandling, vedtaksliste)
+        lagVedtak(dataTable, behandlinger, behandlingTilForrigeBehandling, vedtaksliste, fagsaker)
     }
 
     @Og("følgende persongrunnlag")
     fun `følgende persongrunnlag`(dataTable: DataTable) {
-        persongrunnlag.putAll(lagPersonGrunnlag(dataTable))
+        persongrunnlag = lagPersonGrunnlag(dataTable)
     }
 
     @Og("lag personresultater for behandling {}")
@@ -67,7 +78,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
 
     @Og("med overstyrt endringstidspunkt")
     fun settEndringstidspunkt(dataTable: DataTable) {
-        overstyrtEndringstidspunkt = dataTable.asMaps().associate { rad ->
+        overstyrteEndringstidspunkt = dataTable.asMaps().associate { rad ->
             parseLong(Domenebegrep.BEHANDLING_ID, rad) to
                 parseDato(DomenebegrepVedtaksperiodeMedBegrunnelser.ENDRINGSTIDSPUNKT, rad)
         }
@@ -90,6 +101,16 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         andelerTilkjentYtelse = lagAndelerTilkjentYtelse(dataTable, behandlinger, persongrunnlag)
     }
 
+    @Og("med overgangsstønad")
+    fun `med overgangsstønad`(dataTable: DataTable) {
+        overgangsstønad = lagOvergangsstønad(dataTable, persongrunnlag)
+    }
+
+    @Og("med uregistrerte barn")
+    fun `med uregistrerte barn`() {
+        uregistrerteBarn = listOf(BarnMedOpplysninger(ident = ""))
+    }
+
     @Når("vedtaksperioder med begrunnelser genereres for behandling {}")
     fun `generer vedtaksperiode med begrunnelse`(behandlingId: Long) {
         gjeldendeBehandlingId = behandlingId
@@ -103,7 +124,9 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             kompetanser = kompetanser,
             endredeUtbetalinger = endredeUtbetalinger,
             andelerTilkjentYtelse = andelerTilkjentYtelse,
-            endringstidspunkt = overstyrtEndringstidspunkt,
+            overstyrteEndringstidspunkt = overstyrteEndringstidspunkt,
+            overgangsstønad = overgangsstønad,
+            uregistrerteBarn = uregistrerteBarn,
         )
     }
 
@@ -117,6 +140,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
 
         val vedtaksperioderComparator = compareBy<VedtaksperiodeMedBegrunnelser>({ it.type }, { it.fom }, { it.tom })
         Assertions.assertThat(vedtaksperioderMedBegrunnelser.sortedWith(vedtaksperioderComparator))
+            .usingRecursiveComparison().ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt")
             .isEqualTo(forventedeVedtaksperioder.sortedWith(vedtaksperioderComparator))
     }
 }

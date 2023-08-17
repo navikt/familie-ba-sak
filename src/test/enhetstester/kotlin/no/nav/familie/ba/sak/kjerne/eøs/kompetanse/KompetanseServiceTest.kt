@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
@@ -92,7 +93,7 @@ internal class KompetanseServiceTest {
         assertEqualsUnordered(forventedeKompetanser, kompetanseService.hentKompetanser(behandlingId))
 
         val kompetanseSomSkalSlettes = kompetanseService.finnKompetanse(behandlingId, oppdatertKompetanse)
-        kompetanseService.slettKompetanse(kompetanseSomSkalSlettes.id)
+        kompetanseService.slettKompetanse(behandlingId, kompetanseSomSkalSlettes.id)
 
         assertEqualsUnordered(listOf(lagretKompetanse), kompetanseService.hentKompetanser(behandlingId))
     }
@@ -257,7 +258,8 @@ internal class KompetanseServiceTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2),
+            søkerOgBarn = lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2)
+                .tilPersonEnkelSøkerOgBarn(),
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
@@ -303,7 +305,8 @@ internal class KompetanseServiceTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2),
+            søkerOgBarn = lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2)
+                .tilPersonEnkelSøkerOgBarn(),
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
@@ -346,7 +349,8 @@ internal class KompetanseServiceTest {
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurdering,
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2, barn3),
+            søkerOgBarn = lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2, barn3)
+                .tilPersonEnkelSøkerOgBarn(),
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer

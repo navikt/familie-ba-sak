@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,5 +34,13 @@ class BehandlingHentOgPersisterServiceTest(
         )
         assertEquals(fødselsnummere[0], aktivFødselsnummere[behandling1.id])
         assertEquals(fødselsnummere[1], aktivFødselsnummere[behandling2.id])
+    }
+
+    @Test
+    fun `skal hente status på behandling`() {
+        val fnr = randomFnr()
+        val fagsak1 = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling1 = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak1), false)
+        assertThat(behandlingHentOgPersisterService.hentStatus(behandling1.id)).isEqualTo(behandling1.status)
     }
 }

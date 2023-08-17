@@ -1,18 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
-import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
@@ -57,13 +57,25 @@ class PersongrunnlagService(
         return restPerson
     }
 
-    fun hentSøker(behandlingId: Long): Person? {
+    fun hentSøker(behandlingId: Long): Person {
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.søker
     }
 
     fun hentBarna(behandling: Behandling): List<Person> {
         return hentBarna(behandling.id)
     }
+
+    fun hentSøkerOgBarnPåBehandlingThrows(behandlingId: Long): List<PersonEnkel> =
+        hentSøkerOgBarnPåBehandling(behandlingId)
+            ?: error("Finner ikke søker/barn på behandling=$behandlingId")
+
+    fun hentSøkerOgBarnPåBehandling(behandlingId: Long): List<PersonEnkel>? =
+        personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandlingId)
+            .takeIf { it.isNotEmpty() }
+
+    fun hentSøkerOgBarnPåFagsak(fagsakId: Long): Set<PersonEnkel>? =
+        personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilFagsak(fagsakId)
+            .takeIf { it.isNotEmpty() }
 
     fun hentBarna(behandlingId: Long): List<Person> = personopplysningGrunnlagRepository
         .findByBehandlingAndAktiv(behandlingId)!!.barna
@@ -90,7 +102,8 @@ class PersongrunnlagService(
         val nåværendeGrunnlag = hentAktivThrows(behandlingId = behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
-        if (behandling.status != BehandlingStatus.UTREDES) throw Feil("BehandlingStatus må være UTREDES for å manuelt oppdatere registeropplysninger")
+        validerBehandlingKanRedigeres(behandling)
+
         return hentOgLagreSøkerOgBarnINyttGrunnlag(
             aktør = nåværendeGrunnlag.søker.aktør,
             barnFraInneværendeBehandling = nåværendeGrunnlag.barna.map { it.aktør },
@@ -315,7 +328,7 @@ class PersongrunnlagService(
     }
 
     fun hentSøkersMålform(behandlingId: Long) =
-        hentSøker(behandlingId)?.målform ?: Målform.NB
+        hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform
 
     companion object {
         private val logger = LoggerFactory.getLogger(PersongrunnlagService::class.java)

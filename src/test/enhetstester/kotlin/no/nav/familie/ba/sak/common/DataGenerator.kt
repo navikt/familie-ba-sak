@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBost
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVedtakResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
@@ -58,6 +59,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -203,6 +205,9 @@ fun tilfeldigPerson(
         kjønn = kjønn,
         målform = Målform.NB,
     ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+
+fun Person.tilPersonEnkel() =
+    PersonEnkel(this.type, this.aktør, this.fødselsdato, this.dødsfall?.dødsfallDato, this.målform)
 
 fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
@@ -428,6 +433,9 @@ fun lagTestPersonopplysningGrunnlag(
     }
     return personopplysningGrunnlag
 }
+
+fun PersonopplysningGrunnlag.tilPersonEnkelSøkerOgBarn() =
+    this.søkerOgBarn.map { it.tilPersonEnkel() }
 
 fun dato(s: String) = LocalDate.parse(s)
 fun årMnd(s: String) = YearMonth.parse(s)
@@ -1183,6 +1191,8 @@ fun lagRestSanityBegrunnelse(
     hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: String = "",
     endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
+    vedtakResultat: String? = null,
+
 ): RestSanityBegrunnelse = RestSanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1198,6 +1208,7 @@ fun lagRestSanityBegrunnelse(
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
+    vedtakResultat = vedtakResultat,
 )
 
 fun lagSanityBegrunnelse(
@@ -1216,6 +1227,7 @@ fun lagSanityBegrunnelse(
     endretUtbetalingsperiodeDeltBostedTriggere: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
     valgbarhet: Valgbarhet? = null,
+    resultat: SanityVedtakResultat? = null,
 ): SanityBegrunnelse = SanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1231,7 +1243,7 @@ fun lagSanityBegrunnelse(
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
-    valgbarhet = valgbarhet,
+    resultat = resultat,
 )
 
 fun lagSanityEøsBegrunnelse(

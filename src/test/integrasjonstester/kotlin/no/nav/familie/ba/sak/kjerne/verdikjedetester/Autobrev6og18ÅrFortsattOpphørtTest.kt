@@ -1,18 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import io.mockk.every
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.Autobrev6og18ÅrService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -20,8 +19,10 @@ import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -34,17 +35,15 @@ import java.time.LocalDate
 class Autobrev6og18ÅrFortsattOpphørtTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    @Autowired private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
     @Autowired private val brevmalService: BrevmalService,
-    @Autowired private val featureToggleService: FeatureToggleService,
 ) : AbstractVerdikjedetest() {
 
     @Test
     fun `Skal støtte fortsatt opphørt som resultat`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY) } returns false
-
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
@@ -174,5 +173,175 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
         val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
 
         Assertions.assertEquals(2, behandlinger.size)
+    }
+
+    @Test
+    fun `Skal lage opphørsperiode for riktig barn`() {
+        val scenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
+                barna = listOf(
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.now().minusYears(18).toString(),
+                        fornavn = "Attenåring",
+                        etternavn = "Barnesen",
+                        bostedsadresser = emptyList(),
+                    ),
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.now().minusYears(12).toString(),
+                        fornavn = "Tolvåring",
+                        etternavn = "Barnesen",
+                        bostedsadresser = emptyList(),
+                    ),
+                ),
+            ),
+        )
+
+        val fagsakId = familieBaSakKlient().opprettFagsak(søkersIdent = scenario.søker.ident!!).data?.id!!
+        familieBaSakKlient().opprettBehandling(søkersIdent = scenario.søker.ident, fagsakId = fagsakId)
+
+        val restFagsakEtterOpprettelse = familieBaSakKlient().hentFagsak(fagsakId = fagsakId)
+
+        val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakEtterOpprettelse.data!!)
+        val restRegistrerSøknad =
+            RestRegistrerSøknad(
+                søknad = lagSøknadDTO(
+                    søkerIdent = scenario.søker.ident,
+                    barnasIdenter = scenario.barna.map { it.ident!! },
+                ),
+                bekreftEndringerViaFrontend = false,
+            )
+        val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
+            familieBaSakKlient().registrererSøknad(
+                behandlingId = aktivBehandling.behandlingId,
+                restRegistrerSøknad = restRegistrerSøknad,
+            )
+
+        // Godkjenner alle vilkår på førstegangsbehandling.
+        restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
+            restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }
+                .forEach { restVilkårResultat ->
+                    oppdaterVilkår(
+                        restUtvidetBehandling,
+                        restVilkårResultat,
+                        restPersonResultat,
+                        restVilkårResultat.copy(
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.now().minusMonths(2),
+                        ),
+                    )
+                }
+        }
+
+        val personResultatTolvÅr = restUtvidetBehandling.data!!.personResultater
+            .find { it.personIdent == scenario.barna.find { it.alder == 12 }!!.ident }
+
+        personResultatTolvÅr.let { restPersonResultat ->
+            val borMedSøkervilkår = restPersonResultat!!.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }
+            borMedSøkervilkår.let { restVilkårResultat ->
+                oppdaterVilkår(
+                    restUtvidetBehandling,
+                    restVilkårResultat!!,
+                    restPersonResultat,
+                    restVilkårResultat.copy(
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = LocalDate.now().minusMonths(2),
+                        periodeTom = LocalDate.now(),
+                    ),
+                )
+            }
+        }
+
+        familieBaSakKlient().validerVilkårsvurdering(
+            behandlingId = restUtvidetBehandling.data!!.behandlingId,
+        )
+
+        val restUtvidetBehandlingEtterBehandlingsresultat =
+            familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
+                behandlingId = restUtvidetBehandling.data!!.behandlingId,
+            )
+
+        val restUtvidetBehandlingEtterVurderTilbakekreving =
+            familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
+                restUtvidetBehandlingEtterBehandlingsresultat.data!!.behandlingId,
+                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
+            )
+
+        val førsteVedtaksperiodeId =
+            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
+                .first()
+        familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
+            vedtaksperiodeId = førsteVedtaksperiodeId.id,
+            restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                standardbegrunnelser = listOf(
+                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+                ),
+            ),
+        )
+
+        val restUtvidetBehandlingEtterSendTilBeslutter =
+            familieBaSakKlient().sendTilBeslutter(behandlingId = restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId)
+
+        familieBaSakKlient().iverksettVedtak(
+            behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
+            restBeslutningPåVedtak = RestBeslutningPåVedtak(
+                Beslutning.GODKJENT,
+            ),
+            beslutterHeaders = HttpHeaders().apply {
+                setBearerAuth(
+                    token(
+                        mapOf(
+                            "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
+                            "azp" to "azp-test",
+                            "name" to "Mock McMockface Beslutter",
+                            "NAVident" to "Z0000",
+                        ),
+                    ),
+                )
+            },
+        )
+
+        håndterIverksettingAvBehandling(
+            behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsakId)!!,
+            søkerFnr = scenario.søker.ident,
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            stegService = stegService,
+            brevmalService = brevmalService,
+
+        )
+
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(
+            autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
+                fagsakId = fagsakId,
+                alder = 18,
+                årMåned = inneværendeMåned(),
+            ),
+        )
+
+        val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
+        Assertions.assertEquals(2, behandlinger.size)
+
+        val omregningsBehandling = behandlinger.find { it.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR }!!
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(omregningsBehandling.id)
+        val vedtaksperioder = vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtak.id)
+        Assertions.assertEquals(1, vedtaksperioder.size)
+        Assertions.assertEquals(LocalDate.now().withDayOfMonth(1), vedtaksperioder.single().fom)
+    }
+
+    private fun oppdaterVilkår(
+        restUtvidetBehandling: Ressurs<RestUtvidetBehandling>,
+        restVilkårResultat: RestVilkårResultat,
+        restPersonResultat: RestPersonResultat,
+        nyeVilkårResultat: RestVilkårResultat,
+    ) {
+        familieBaSakKlient().putVilkår(
+            behandlingId = restUtvidetBehandling.data!!.behandlingId,
+            vilkårId = restVilkårResultat.id,
+            restPersonResultat = RestPersonResultat(
+                personIdent = restPersonResultat.personIdent,
+                vilkårResultater = listOf(nyeVilkårResultat),
+            ),
+        )
     }
 }

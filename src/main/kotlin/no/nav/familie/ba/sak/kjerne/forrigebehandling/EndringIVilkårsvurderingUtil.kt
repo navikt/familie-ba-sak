@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -19,10 +19,14 @@ object EndringIVilkårsvurderingUtil {
     fun utledEndringstidspunktForVilkårsvurdering(
         nåværendePersonResultat: Set<PersonResultat>,
         forrigePersonResultat: Set<PersonResultat>,
+        personerIBehandling: Set<Person>,
+        personerIForrigeBehandling: Set<Person>,
     ): YearMonth? {
         val endringIVilkårsvurderingTidslinje = lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultater = nåværendePersonResultat,
             forrigePersonResultater = forrigePersonResultat,
+            personerIBehandling = personerIBehandling,
+            personerIForrigeBehandling = personerIForrigeBehandling,
         )
 
         return endringIVilkårsvurderingTidslinje.tilFørsteEndringstidspunkt()
@@ -31,11 +35,16 @@ object EndringIVilkårsvurderingUtil {
     fun lagEndringIVilkårsvurderingTidslinje(
         nåværendePersonResultater: Set<PersonResultat>,
         forrigePersonResultater: Set<PersonResultat>,
+        personerIBehandling: Set<Person>,
+        personerIForrigeBehandling: Set<Person>,
     ): Tidslinje<Boolean, Måned> {
         val allePersonerMedPersonResultat =
             (nåværendePersonResultater.map { it.aktør } + forrigePersonResultater.map { it.aktør }).distinct()
 
         val tidslinjerPerPersonOgVilkår = allePersonerMedPersonResultat.flatMap { aktør ->
+            val personIBehandling = personerIBehandling.singleOrNull { it.aktør == aktør }
+            val personIForrigeBehandling = personerIForrigeBehandling.singleOrNull { it.aktør == aktør }
+
             Vilkår.values().map { vilkår ->
                 lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
                     nåværendeOppfylteVilkårResultater = nåværendePersonResultater
@@ -47,6 +56,8 @@ object EndringIVilkårsvurderingUtil {
                         .flatMap { it.vilkårResultater }
                         .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
                     vilkår = vilkår,
+                    personIBehandling = personIBehandling,
+                    personIForrigeBehandling = personIForrigeBehandling,
                 )
             }
         }
@@ -66,35 +77,20 @@ object EndringIVilkårsvurderingUtil {
         nåværendeOppfylteVilkårResultater: List<VilkårResultat>,
         forrigeOppfylteVilkårResultater: List<VilkårResultat>,
         vilkår: Vilkår,
+        personIBehandling: Person?,
+        personIForrigeBehandling: Person?,
     ): Tidslinje<Boolean, Måned> {
-        // Antar fødselsdato er første oppfylte fom for 18-årsvilkåret.
-        // Denne koden er ikke i bruk i prod og skal fjernes når denne toggelen:
-        // https://unleash.nais.io/#/features/strategies/familie-ba-sak.endringstidspunkt
-        // har levd lenge nok
-        val nåværendeVilkårResultatTidslinje =
-            if (nåværendeOppfylteVilkårResultater.isNotEmpty()) {
-                nåværendeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(
-                    vilkår = vilkår,
-                    fødselsdato = nåværendeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull(),
-                )
-            } else {
-                tidslinje { emptyList() }
-            }
+        val nåværendeVilkårResultatTidslinje = nåværendeOppfylteVilkårResultater
+            .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIBehandling?.fødselsdato)
 
-        val tidligereVilkårResultatTidslinje =
-            if (forrigeOppfylteVilkårResultater.isNotEmpty()) {
-                forrigeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(
-                    vilkår = vilkår,
-                    fødselsdato = forrigeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull(),
-                )
-            } else {
-                tidslinje { emptyList() }
-            }
+        val tidligereVilkårResultatTidslinje = forrigeOppfylteVilkårResultater
+            .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIForrigeBehandling?.fødselsdato)
 
         val endringIVilkårResultat =
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
 
-                val erEndringerIUtdypendeVilkårsvurdering = nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet()
+                val erEndringerIUtdypendeVilkårsvurdering =
+                    nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet()
                 val erEndringerIRegelverk = nåværende.vurderesEtter != forrige.vurderesEtter
                 val erVilkårSomErSplittetOpp = nåværende.periodeFom != forrige.periodeFom
 
@@ -118,6 +114,7 @@ object EndringIVilkårsvurderingUtil {
                 Vilkår.BOSATT_I_RIKET,
                 Vilkår.BOR_MED_SØKER,
                 -> true
+
                 Vilkår.UNDER_18_ÅR,
                 Vilkår.LOVLIG_OPPHOLD,
                 Vilkår.GIFT_PARTNERSKAP,

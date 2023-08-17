@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering.SEND_TIL_BA
@@ -142,8 +143,6 @@ class VelgFagSystemService(
     }
 
     companion object {
-
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
         val logger = LoggerFactory.getLogger(VelgFagSystemService::class.java)
     }
 }

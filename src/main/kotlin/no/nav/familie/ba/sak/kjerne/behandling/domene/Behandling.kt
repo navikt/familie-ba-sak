@@ -205,7 +205,7 @@ data class Behandling(
                 resultat in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT) -> true
 
             skalBehandlesAutomatisk && erMigrering() && !erManuellMigreringForEndreMigreringsdato() && resultat == Behandlingsresultat.INNVILGET -> true
-            skalBehandlesAutomatisk && erFødselshendelse() && resultat == Behandlingsresultat.INNVILGET -> true
+            skalBehandlesAutomatisk && erFødselshendelse() -> true
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
             else -> false
         }
@@ -463,6 +463,10 @@ enum class BehandlingStatus {
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
     AVSLUTTET,
+    ;
+
+    fun erLåstMenIkkeAvsluttet() = this == FATTER_VEDTAK || this == IVERKSETTER_VEDTAK
+    fun erLåstForVidereRedigering() = this != UTREDES
 }
 
 class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {
