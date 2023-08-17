@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.statistikk.StatistikkClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
