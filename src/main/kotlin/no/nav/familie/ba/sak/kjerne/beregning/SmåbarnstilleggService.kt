@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
@@ -17,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsst
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.tilPeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -151,9 +151,5 @@ class SmåbarnstilleggService(
         return efSakRestClient.hentPerioderMedFullOvergangsstønad(
             aktør.aktivFødselsnummer(),
         ).perioder
-    }
-
-    companion object {
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

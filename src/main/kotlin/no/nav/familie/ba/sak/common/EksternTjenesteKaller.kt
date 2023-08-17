@@ -9,7 +9,6 @@ import org.springframework.web.client.HttpClientErrorException
 import java.net.URI
 
 val eksternTjenesteKallerLogger = LoggerFactory.getLogger("eksternTjenesteKaller")
-val secureLogger = LoggerFactory.getLogger("secureLogger")
 inline fun <reified Data> kallEksternTjeneste(
     tjeneste: String,
     uri: URI,

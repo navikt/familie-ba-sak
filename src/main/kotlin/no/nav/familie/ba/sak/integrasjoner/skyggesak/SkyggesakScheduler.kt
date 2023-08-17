@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.skyggesak
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.leader.LeaderClient
@@ -69,6 +70,5 @@ class SkyggesakScheduler(
         private const val SKYGGESAK_RETENTION = 14
 
         private val logger = LoggerFactory.getLogger(SkyggesakScheduler::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

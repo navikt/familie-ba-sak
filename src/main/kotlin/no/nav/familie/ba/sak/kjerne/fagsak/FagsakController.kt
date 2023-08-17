@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
@@ -211,7 +212,6 @@ class FagsakController(
     companion object {
 
         private val logger: Logger = LoggerFactory.getLogger(FagsakController::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 
