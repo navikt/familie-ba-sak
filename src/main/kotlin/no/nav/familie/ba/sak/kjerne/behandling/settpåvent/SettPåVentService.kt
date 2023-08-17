@@ -120,6 +120,5 @@ class SettPåVentService(
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(SettPåVentService::class.java)
-        val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }

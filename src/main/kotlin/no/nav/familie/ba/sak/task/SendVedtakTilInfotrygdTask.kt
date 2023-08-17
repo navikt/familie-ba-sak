@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedTaskDto
@@ -12,7 +13,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.fpsak.tidsserie.LocalDateSegment
-import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -56,7 +56,6 @@ class SendVedtakTilInfotrygdTask(
     companion object {
 
         const val TASK_STEP_TYPE = "sendVedtakFeedTilInfotrygd"
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(fnrStoenadsmottaker: String, behandlingId: Long): Task {
             secureLogger.info("Oppretter task for å sende vedtaksmelding for $fnrStoenadsmottaker til Infotrygd.")
