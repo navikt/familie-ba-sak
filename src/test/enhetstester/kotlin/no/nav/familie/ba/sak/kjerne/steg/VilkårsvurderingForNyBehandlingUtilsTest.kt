@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagBarnVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagSøkerVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -12,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingUtils
-import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.finnUtvidetVilkårSomKanKopieresFraForrigeBehandling
+import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.finnAktørerMedUtvidetFraAndeler
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -25,93 +24,30 @@ import java.time.YearMonth
 class VilkårsvurderingForNyBehandlingUtilsTest {
 
     @Test
-    fun `Skal ikke ta med oppfylt utvidet vilkår fra forrige behandling hvis det ikke finnes utvidet-andel på forrige behandling`() {
-        val behandling = lagBehandling()
-        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+    fun `Skal kun ta med aktører som hadde andeler med utvidet barnetrygd`() {
         val søker = lagPerson(type = PersonType.SØKER)
-        val søkerPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = søker.aktør)
-
-        val søkerVilkårResultater = lagSøkerVilkårResultat(søkerPersonResultat = søkerPersonResultat, periodeFom = LocalDate.now().minusYears(2), periodeTom = null, behandlingId = behandling.id) + setOf(
-            VilkårResultat(
-                personResultat = søkerPersonResultat,
-                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.now().minusYears(2),
-                periodeTom = null,
-                begrunnelse = "",
-                behandlingId = vilkårsvurdering.behandling.id,
-                utdypendeVilkårsvurderinger = emptyList(),
-            ),
-        )
-
-        søkerPersonResultat.setSortedVilkårResultater(søkerVilkårResultater)
-
-        vilkårsvurdering.personResultater = setOf(søkerPersonResultat)
+        val barn = lagPerson(type = PersonType.BARN)
 
         val andeler = listOf(
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now().minusYears(2).plusMonths(1),
                 tom = YearMonth.now(),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = søker,
+                person = barn,
             ),
-        )
-
-        val utvidetVilkårSomKanKopieres = finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(
-            forrigeAndeler = andeler,
-            forrigeVilkårsvurdering = vilkårsvurdering,
-        )
-
-        Assertions.assertThat(utvidetVilkårSomKanKopieres).isEmpty()
-    }
-
-    @Test
-    fun `Skal ta med oppfylt utvidet vilkår fra forrige behandling hvis det finnes utvidet-andel på forrige behandling`() {
-        val behandling = lagBehandling()
-        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
-        val søker = lagPerson(type = PersonType.SØKER)
-        val søkerPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = søker.aktør)
-
-        val fomDatoVilkår = LocalDate.now().minusYears(2)
-
-        val søkerVilkårResultater = lagSøkerVilkårResultat(søkerPersonResultat = søkerPersonResultat, periodeFom = LocalDate.now().minusYears(2), periodeTom = null, behandlingId = behandling.id) + setOf(
-            VilkårResultat(
-                personResultat = søkerPersonResultat,
-                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = fomDatoVilkår,
-                periodeTom = null,
-                begrunnelse = "",
-                behandlingId = vilkårsvurdering.behandling.id,
-                utdypendeVilkårsvurderinger = emptyList(),
-            ),
-        )
-
-        søkerPersonResultat.setSortedVilkårResultater(søkerVilkårResultater)
-
-        vilkårsvurdering.personResultater = setOf(søkerPersonResultat)
-
-        val andeler = listOf(
             lagAndelTilkjentYtelse(
-                fom = fomDatoVilkår.plusMonths(1).toYearMonth(),
+                fom = YearMonth.now().minusYears(1),
                 tom = YearMonth.now(),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 person = søker,
             ),
         )
 
-        val utvidetVilkårSomKanKopieres = finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(
-            forrigeAndeler = andeler,
-            forrigeVilkårsvurdering = vilkårsvurdering,
+        val aktørerMedUtvidet = finnAktørerMedUtvidetFraAndeler(
+            andeler = andeler
         )
 
-        Assertions.assertThat(utvidetVilkårSomKanKopieres).hasSize(1)
-
-        val utvidetVilkår = utvidetVilkårSomKanKopieres[0]
-
-        Assertions.assertThat(utvidetVilkår.personResultat).isEqualTo(søkerPersonResultat)
-        Assertions.assertThat(utvidetVilkår.periodeFom).isEqualTo(fomDatoVilkår)
-        Assertions.assertThat(utvidetVilkår.periodeTom).isNull()
+        Assertions.assertThat(aktørerMedUtvidet).containsExactly(søker.aktør)
     }
 
     @Test

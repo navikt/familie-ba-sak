@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -195,7 +196,7 @@ object VilkårsvurderingUtils {
         initiellVilkårsvurdering: Vilkårsvurdering,
         aktivVilkårsvurdering: Vilkårsvurdering,
         løpendeUnderkategori: BehandlingUnderkategori? = null,
-        utvidetVilkårSomKanKopieresFraForrigeBehandling: List<VilkårResultat> = emptyList(),
+        aktørerMedUtvidetAndelerIForrigeBehandling: List<Aktør> = emptyList(),
     ): Pair<Vilkårsvurdering, Vilkårsvurdering> {
         // OBS!! MÅ jobbe på kopier av vilkårsvurderingen her for å ikke oppdatere databasen
         // Viktig at det er vår egen implementasjon av kopier som brukes, da kotlin sin copy-funksjon er en shallow copy
@@ -227,7 +228,7 @@ object VilkårsvurderingUtils {
                     personTilOppdatert = personTilOppdatert,
                     løpendeUnderkategori = løpendeUnderkategori,
                     personResultaterAktivt = personResultaterAktivt,
-                    utvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieresFraForrigeBehandling,
+                    aktørerMedUtvidetAndelerIForrigeBehandling = aktørerMedUtvidetAndelerIForrigeBehandling,
                 )
             }
             personResultaterOppdatert.add(personTilOppdatert)
@@ -246,7 +247,7 @@ object VilkårsvurderingUtils {
         personTilOppdatert: PersonResultat,
         løpendeUnderkategori: BehandlingUnderkategori?,
         personResultaterAktivt: MutableSet<PersonResultat>,
-        utvidetVilkårSomKanKopieresFraForrigeBehandling: List<VilkårResultat>,
+        aktørerMedUtvidetAndelerIForrigeBehandling: List<Aktør>
     ) {
         val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
         val personsAndreVurderingerAktivt = personenSomFinnes.andreVurderinger.toMutableSet()
@@ -284,16 +285,12 @@ object VilkårsvurderingUtils {
             }
         }
 
-        val finnesUtvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieresFraForrigeBehandling.any {
-            it.personResultat?.aktør == personFraInit.aktør &&
-                it.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
-                it.resultat == Resultat.OPPFYLT
-        }
+        val personHaddeUtvidetIForrigeBehandling = aktørerMedUtvidetAndelerIForrigeBehandling.contains(personFraInit.aktør)
 
         // Hvis forrige behandling inneholdt utvidet-vilkåret (og det førte til utbetaling) eller underkategorien er utvidet skal
         // utvidet-vilkåret kopieres med videre uansett nåværende underkategori
         if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
-            (finnesUtvidetVilkårSomKanKopieresFraForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
+            (personHaddeUtvidetIForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
         ) {
             val utvidetVilkår =
                 personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }

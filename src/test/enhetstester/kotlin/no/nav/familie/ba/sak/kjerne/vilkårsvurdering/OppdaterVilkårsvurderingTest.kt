@@ -239,12 +239,10 @@ class OppdaterVilkårsvurderingTest {
                 listOf(Vilkår.UTVIDET_BARNETRYGD),
             )
 
-        val utvidetVilkårSomKanKopieres = aktivMedUtvidetVilkår.personResultater.flatMap { personResultat -> personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT } }
-
         val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivMedUtvidetVilkår,
-            utvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieres,
+            aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
             løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
         )
 
@@ -300,7 +298,7 @@ class OppdaterVilkårsvurderingTest {
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivMedUtvidetVilkår,
             løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR,
-            utvidetVilkårSomKanKopieresFraForrigeBehandling = emptyList(),
+            aktørerMedUtvidetAndelerIForrigeBehandling = emptyList(),
         )
 
         val nyInitInnholderIkkeUtvidetVilkår =
@@ -347,13 +345,11 @@ class OppdaterVilkårsvurderingTest {
         personResultat.setSortedVilkårResultater(utvidetVilkårResultater)
         aktivVilkårsvurderingMedUtvidet.personResultater = setOf(personResultat)
 
-        val utvidetVilkårSomKanKopieres = aktivVilkårsvurderingMedUtvidet.personResultater.flatMap { personResultat -> personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT } }
-
         val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
             løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-            utvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieres,
+            aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
         )
 
         val nyInitUtvidetVilkår =
@@ -397,13 +393,11 @@ class OppdaterVilkårsvurderingTest {
         personResultat.setSortedVilkårResultater(utvidetVilkårResultater)
         aktivVilkårsvurderingMedUtvidet.personResultater = setOf(personResultat)
 
-        val utvidetVilkårSomKanKopieres = aktivVilkårsvurderingMedUtvidet.personResultater.flatMap { personResultat -> personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT } }
-
         val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
             løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-            utvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieres,
+            aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
         )
 
         val nyInitUtvidetVilkår =
@@ -448,13 +442,11 @@ class OppdaterVilkårsvurderingTest {
         personResultat.setSortedVilkårResultater(utvidetVilkårResultater)
         aktivVilkårsvurderingMedUtvidetIkkeOppfylt.personResultater = setOf(personResultat)
 
-        val utvidetVilkårSomKanKopieres = aktivVilkårsvurderingMedUtvidetIkkeOppfylt.personResultater.flatMap { personResultat -> personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT } }
-
         val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidetIkkeOppfylt,
             løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-            utvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieres,
+            aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
         )
 
         val nyInitInneholderIkkeUtvidetVilkår =

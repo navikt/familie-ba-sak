@@ -55,13 +55,13 @@ data class VilkårsvurderingForNyBehandlingUtils(
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering,
         behandling: Behandling,
         løpendeUnderkategori: BehandlingUnderkategori?,
-        utvidetVilkårSomKanKopieresFraForrigeBehandling: List<VilkårResultat>,
+        aktørerMedUtvidetAndelerIForrigeBehandling: List<Aktør>
     ): Vilkårsvurdering {
         val (vilkårsvurdering) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
             aktivVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
-            utvidetVilkårSomKanKopieresFraForrigeBehandling = utvidetVilkårSomKanKopieresFraForrigeBehandling,
+            aktørerMedUtvidetAndelerIForrigeBehandling = aktørerMedUtvidetAndelerIForrigeBehandling,
         )
 
         return if (behandling.type == BehandlingType.REVURDERING) {
@@ -283,8 +283,6 @@ fun førstegangskjøringAvVilkårsvurdering(aktivVilkårsvurdering: Vilkårsvurd
     return aktivVilkårsvurdering == null
 }
 
-fun finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(forrigeAndeler: List<AndelTilkjentYtelse>, forrigeVilkårsvurdering: Vilkårsvurdering?) =
-    forrigeVilkårsvurdering?.personResultater
-        ?.filter { personResultat -> forrigeAndeler.any { andel -> andel.erUtvidet() && andel.aktør == personResultat.aktør } }
-        ?.flatMap { personResultat -> personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT } }
-        ?: emptyList()
+fun finnAktørerMedUtvidetFraAndeler(andeler: List<AndelTilkjentYtelse>): List<Aktør> {
+    return andeler.filter { it.erUtvidet() }.map { it.aktør }
+}

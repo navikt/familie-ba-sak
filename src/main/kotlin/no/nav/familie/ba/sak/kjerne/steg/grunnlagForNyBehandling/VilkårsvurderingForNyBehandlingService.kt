@@ -14,10 +14,10 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelServic
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -219,7 +219,7 @@ class VilkårsvurderingForNyBehandlingService(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             aktivVilkårsvurdering = aktivVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
-            utvidetVilkårSomKanKopieresFraForrigeBehandling = finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(forrigeBehandlingSomErVedtatt),
+            aktørerMedUtvidetAndelerIForrigeBehandling = finnAktørerMedUtvidetBarnetrygdIForrigeBehandling(forrigeBehandlingSomErVedtatt),
         )
 
         if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
@@ -234,17 +234,12 @@ class VilkårsvurderingForNyBehandlingService(
     /***
      * Utvidet vilkår kan kun kopieres med hvis det finnes utbetaling av utvidet barnetrygd i samme behandling
      */
-    private fun finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(forrigeBehandlingSomErVedtatt: Behandling?): List<VilkårResultat> =
+    private fun finnAktørerMedUtvidetBarnetrygdIForrigeBehandling(forrigeBehandlingSomErVedtatt: Behandling?): List<Aktør> =
         forrigeBehandlingSomErVedtatt?.let {
             val forrigeAndeler =
                 andelerTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandlingSomErVedtatt.id)
-            val forrigeVilkårsvurdering = hentVilkårsvurdering(
-                forrigeBehandlingSomErVedtatt.id,
-            )
-            finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(
-                forrigeAndeler,
-                forrigeVilkårsvurdering,
-            )
+
+            finnAktørerMedUtvidetFraAndeler(andeler = forrigeAndeler)
         } ?: emptyList()
 
     private fun tellMetrikkerForFødselshendelse(
@@ -280,7 +275,7 @@ class VilkårsvurderingForNyBehandlingService(
             forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id),
             behandling = behandling,
             løpendeUnderkategori = løpendeUnderkategori,
-            utvidetVilkårSomKanKopieresFraForrigeBehandling = finnUtvidetVilkårSomKanKopieresFraForrigeBehandling(forrigeBehandlingSomErVedtatt),
+            aktørerMedUtvidetAndelerIForrigeBehandling = finnAktørerMedUtvidetBarnetrygdIForrigeBehandling(forrigeBehandlingSomErVedtatt),
         )
         endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
             behandling,
