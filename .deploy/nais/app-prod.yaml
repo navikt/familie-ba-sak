@@ -13,6 +13,7 @@ metadata:
 spec:
   envFrom:
     - secret: familie-ba-sak
+    - secret: familie-ba-sak-unleash-api-token
   image: {{image}}
   port: 8089
   leaderElection: true
@@ -107,6 +108,7 @@ spec:
         - host: sdw-wsrest.ecb.europa.eu
         - host: sentry.gc.nav.no
         - host: data-api.ecb.europa.eu
+        - host: teamfamilie-unleash-api.nav.cloud.nais.io
   replicas:
     min: 3
     max: 5
