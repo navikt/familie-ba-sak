@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
+import no.nav.familie.ba.sak.common.secureLogger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -24,6 +25,5 @@ class IntegrasjonException(
     companion object {
 
         private val logger = LoggerFactory.getLogger(IntegrasjonException::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

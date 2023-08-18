@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
@@ -188,6 +189,5 @@ class PersonidentService(
 
     companion object {
         val logger = LoggerFactory.getLogger(PersonidentService::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

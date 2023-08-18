@@ -47,7 +47,7 @@
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <testcontainers.postgresql.version>1.18.3</testcontainers.postgresql.version>
         <unleash.version>7.1.0</unleash.version>
-        <maven.model.version>4.0.0-alpha-7</maven.model.version>
+        <maven.model.version>3.9.4</maven.model.version>
         <jackson.module.kotlin.version>2.15.2</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <fpsak-tidslinje.version>2.6.8</fpsak-tidslinje.version>

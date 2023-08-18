@@ -2,7 +2,7 @@ name: Build-Deploy-Prod-GCP
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
 
 jobs:
   integrasjonstester:
