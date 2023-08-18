@@ -141,16 +141,14 @@ class PensjonController(private val pensjonService: PensjonService) {
     )
     fun bestillPersonerMedBarnetrygdForGittÅrPåKafka(
         @PathVariable
-        år: String,
+        år: Long,
     ): ResponseEntity<UUID> {
-        if (år.length != 4 && erTall(år)) {
+        val minÅr: Long = 1900
+        val maxÅr: Long = 2300
+        if (år in minÅr..maxÅr) {
             return ResponseEntity.accepted().body(pensjonService.lagTaskForHentingAvIdenterTilPensjon(år))
         } else {
-            throw IllegalArgumentException("År må være 4 siffer")
+            throw IllegalArgumentException("$år er ikke et gyldig år. År må være et tall i intervallet $minÅr til $maxÅr")
         }
-    }
-
-    private fun erTall(input: String): Boolean {
-        return input.toIntOrNull() != null
     }
 }

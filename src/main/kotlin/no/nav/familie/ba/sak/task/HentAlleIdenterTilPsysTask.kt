@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask.Companion.TASK_STEP_TYPE
@@ -22,7 +21,6 @@ import java.util.UUID
 )
 class HentAlleIdenterTilPsysTask(
     private val kafkaProducer: KafkaProducer,
-    private val taskRepository: TaskRepositoryWrapper,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) : AsyncTaskStep {
 
@@ -30,24 +28,24 @@ class HentAlleIdenterTilPsysTask(
 
     override fun doTask(task: Task) {
         val hentAlleIdenterDto = objectMapper.readValue(task.payload, HentAlleIdenterTilPsysRequestDTO::class.java)
-        logger.info("Starter på å hente alle identer fra DB for request ${hentAlleIdenterDto.requestId}")
+        logger.info("Starter med å hente alle identer fra DB for request ${hentAlleIdenterDto.requestId}")
         val identer = andelTilkjentYtelseRepository.finnIdenterMedLøpendeBarnetrygdForGittÅr(hentAlleIdenterDto.år)
         logger.info("Ferdig med å hente alle identer fra DB for request ${hentAlleIdenterDto.requestId}")
         logger.info("Starter på å sende alle identer til kafka for request ${hentAlleIdenterDto.requestId}")
         identer.forEach { kafkaProducer.sendIdentTilPSys(it, hentAlleIdenterDto.requestId) }
-        logger.info("ferdig med å sende alle identer til kafka for request ${hentAlleIdenterDto.requestId}")
+        logger.info("Ferdig med å sende alle identer til kafka for request ${hentAlleIdenterDto.requestId}")
     }
 
     override fun onCompletion(task: Task) {
     }
 
     companion object {
-        fun lagTask(år: String, uuid: UUID): Task {
+        fun lagTask(år: Long, uuid: UUID): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(HentAlleIdenterTilPsysRequestDTO(år = år, requestId = uuid)),
                 properties = Properties().apply {
-                    this["år"] = år
+                    this["år"] = år.toString()
                     this["uuid"] = uuid.toString()
                 },
             )

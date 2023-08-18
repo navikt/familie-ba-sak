@@ -83,7 +83,7 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
     )
     @Timed
     fun finnIdenterMedLøpendeBarnetrygdForGittÅr(
-        år: String,
+        år: Long,
     ): List<String>
 
     @Query(
