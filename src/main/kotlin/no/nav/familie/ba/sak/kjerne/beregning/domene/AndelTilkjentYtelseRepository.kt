@@ -68,6 +68,26 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
 
     @Query(
         """
+            SELECT DISTINCT p.foedselsnummer AS ident
+            FROM andel_tilkjent_ytelse aty
+                     INNER JOIN tilkjent_ytelse ty ON aty.fk_behandling_id = ty.fk_behandling_id
+                     INNER JOIN behandling b ON aty.fk_behandling_id = b.id
+                     INNER JOIN fagsak f ON b.fk_fagsak_id = f.id
+                     INNER JOIN personident p ON f.fk_aktoer_id = p.fk_aktoer_id
+            WHERE p.aktiv = true
+              AND ty.utbetalingsoppdrag is not null
+              AND EXTRACT('Year' FROM aty.stonad_fom) <= CAST(:år AS INTEGER )
+              AND EXTRACT('Year' FROM aty.stonad_tom) >= CAST(:år AS INTEGER );
+        """,
+        nativeQuery = true,
+    )
+    @Timed
+    fun finnIdenterMedLøpendeBarnetrygdForGittÅr(
+        år: Int,
+    ): List<String>
+
+    @Query(
+        """
         WITH andeler AS (
             SELECT
              aty.id,

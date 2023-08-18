@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultatUtils.genererVilkårResultatForEtVilkårPåEnPerson
@@ -54,12 +55,13 @@ data class VilkårsvurderingForNyBehandlingUtils(
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering,
         behandling: Behandling,
         løpendeUnderkategori: BehandlingUnderkategori?,
+        aktørerMedUtvidetAndelerIForrigeBehandling: List<Aktør>,
     ): Vilkårsvurdering {
         val (vilkårsvurdering) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
             aktivVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
-            forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
+            aktørerMedUtvidetAndelerIForrigeBehandling = aktørerMedUtvidetAndelerIForrigeBehandling,
         )
 
         return if (behandling.type == BehandlingType.REVURDERING) {
@@ -279,4 +281,8 @@ data class VilkårsvurderingForNyBehandlingUtils(
 
 fun førstegangskjøringAvVilkårsvurdering(aktivVilkårsvurdering: Vilkårsvurdering?): Boolean {
     return aktivVilkårsvurdering == null
+}
+
+fun finnAktørerMedUtvidetFraAndeler(andeler: List<AndelTilkjentYtelse>): List<Aktør> {
+    return andeler.filter { it.erUtvidet() }.map { it.aktør }
 }
