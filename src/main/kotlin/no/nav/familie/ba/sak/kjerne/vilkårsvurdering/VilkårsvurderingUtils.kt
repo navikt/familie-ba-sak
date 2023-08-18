@@ -287,7 +287,7 @@ object VilkårsvurderingUtils {
 
         val personHaddeUtvidetIForrigeBehandling = aktørerMedUtvidetAndelerIForrigeBehandling.contains(personFraInit.aktør)
 
-        // Hvis forrige behandling inneholdt utvidet-vilkåret (og det førte til utbetaling) eller underkategorien er utvidet skal
+        // Hvis forrige behandling hadde utbetaling av utvidet på personen eller underkategorien er utvidet skal
         // utvidet-vilkåret kopieres med videre uansett nåværende underkategori
         if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
             (personHaddeUtvidetIForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
