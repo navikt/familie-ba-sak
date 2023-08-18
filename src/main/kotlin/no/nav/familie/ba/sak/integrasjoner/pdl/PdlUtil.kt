@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.PdlNotFoundException
 import no.nav.familie.ba.sak.common.PdlRequestException
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 val logger: Logger = LoggerFactory.getLogger("PdlUtil")
 
 inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(

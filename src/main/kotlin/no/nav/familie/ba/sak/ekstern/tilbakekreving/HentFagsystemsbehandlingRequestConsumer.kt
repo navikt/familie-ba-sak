@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.tilbakekreving
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
@@ -21,7 +22,6 @@ import java.util.concurrent.CountDownLatch
 class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingService: FagsystemsbehandlingService) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     var latch: CountDownLatch = CountDownLatch(1)
 

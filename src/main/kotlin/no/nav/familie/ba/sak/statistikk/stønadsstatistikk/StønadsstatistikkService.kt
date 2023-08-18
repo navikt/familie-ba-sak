@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -226,7 +227,6 @@ class StønadsstatistikkService(
     companion object {
 
         private val logger = LoggerFactory.getLogger(StønadsstatistikkService::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private val TIMEZONE = ZoneId.of("Europe/Paris")
     }
 }
