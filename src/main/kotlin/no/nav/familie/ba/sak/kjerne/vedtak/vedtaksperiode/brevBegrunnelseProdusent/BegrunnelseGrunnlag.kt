@@ -10,7 +10,7 @@ data class BegrunnelseGrunnlagMedVerdiIDennePerioden(
     val grunnlagForForrigeVedtaksperiode: GrunnlagForPerson?,
 ) : BegrunnelseGrunnlag
 
-data class BegrunnelseGrunnlagIngenVerdiIDenneBehandlingen(
+data class BegrunnelseGrunnlagIngenVerdiIDennePerioden(
     val erInnvilgetForrigeBehandling: Boolean,
 ) : BegrunnelseGrunnlag
 
@@ -19,7 +19,7 @@ fun lagBegrunnelseGrunnlag(
     forrigePeriode: GrunnlagForPerson?,
     sammePeriodeForrigeBehandling: GrunnlagForPerson?,
 ) = if (dennePerioden == null) {
-    BegrunnelseGrunnlagIngenVerdiIDenneBehandlingen(
+    BegrunnelseGrunnlagIngenVerdiIDennePerioden(
         erInnvilgetForrigeBehandling = sammePeriodeForrigeBehandling is GrunnlagForPersonInnvilget,
     )
 } else {
