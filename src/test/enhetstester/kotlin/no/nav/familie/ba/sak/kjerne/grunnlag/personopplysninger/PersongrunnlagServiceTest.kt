@@ -171,10 +171,11 @@ class PersongrunnlagServiceTest {
                 behandlingId = BehandlingId(behandling.id),
                 personIdent = PersonIdent(personFnr),
                 dødsfallDato = dødsfallsDato,
+                begrunnelse = "test",
             )
         }
 
-        assertThat(funksjonellFeil.melding, Is("Du kan ikke sette dødsfalls dato til en dato som er før SØKER sin fødselsdato"))
+        assertThat(funksjonellFeil.melding, Is("Du kan ikke sette dødsfall dato til en dato som er før SØKER sin fødselsdato"))
     }
 
     @Test
@@ -201,10 +202,11 @@ class PersongrunnlagServiceTest {
                 behandlingId = BehandlingId(behandling.id),
                 personIdent = PersonIdent(personFnr),
                 dødsfallDato = dødsfallsDato,
+                begrunnelse = "test",
             )
         }
 
-        assertThat(funksjonellFeil.melding, Is("Dødsfallsdato er allerede registrert på person med navn ${person.navn}"))
+        assertThat(funksjonellFeil.melding, Is("Dødsfall dato er allerede registrert på person med navn ${person.navn}"))
     }
 
     @Test
@@ -223,18 +225,19 @@ class PersongrunnlagServiceTest {
 
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
         every { personidentService.hentAktør(personFnr) } returns person.aktør
-        every { loggService.loggManueltRegistrertDødsfallDato(any(), any()) } returns mockk()
+        every { loggService.loggManueltRegistrertDødsfallDato(any(), any(), "test") } returns mockk()
         every { vilkårsvurderingService.oppdaterVilkårVedDødsfall(any(), any(), any()) } just runs
 
         persongrunnlagService.registrerManuellDødsfallPåPerson(
             behandlingId = BehandlingId(behandling.id),
             personIdent = PersonIdent(personFnr),
             dødsfallDato = dødsfallsDato,
+            begrunnelse = "test",
         )
 
         verify(exactly = 1) { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) }
         verify(exactly = 1) { personidentService.hentAktør(personFnr) }
-        verify(exactly = 1) { loggService.loggManueltRegistrertDødsfallDato(any(), any()) }
+        verify(exactly = 1) { loggService.loggManueltRegistrertDødsfallDato(any(), any(), "test") }
         verify(exactly = 1) { vilkårsvurderingService.oppdaterVilkårVedDødsfall(any(), any(), any()) }
     }
 }

@@ -609,7 +609,7 @@ class LoggService(
             ),
         )
 
-    fun loggManueltRegistrertDødsfallDato(behandlingId: BehandlingId, person: Person) =
+    fun loggManueltRegistrertDødsfallDato(behandlingId: BehandlingId, person: Person, begrunnelse: String) =
         lagre(
             Logg(
                 behandlingId = behandlingId.id,
@@ -618,7 +618,8 @@ class LoggService(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER,
                 ),
-                tekst = "Dødsfall dato er manuelt registrert for barn født ${person.fødselsdato}",
+                tekst = "Begrunnelse: $begrunnelse",
+                tittel = "Dødsfall dato er manuelt registrert for barn født ${person.fødselsdato}",
             ),
         )
 

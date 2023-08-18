@@ -340,6 +340,7 @@ class PersongrunnlagService(
         behandlingId: BehandlingId,
         personIdent: PersonIdent,
         dødsfallDato: LocalDate,
+        begrunnelse: String,
     ) {
         val personopplysningGrunnlag = hentAktivThrows(behandlingId.id)
         val aktør = personidentService.hentAktør(personIdent.ident)
@@ -353,7 +354,7 @@ class PersongrunnlagService(
 
         person.dødsfall = Dødsfall(person = person, dødsfallDato = dødsfallDato)
         vilkårsvurderingService.oppdaterVilkårVedDødsfall(behandlingId, dødsfallDato, aktør)
-        loggService.loggManueltRegistrertDødsfallDato(behandlingId, person)
+        loggService.loggManueltRegistrertDødsfallDato(behandlingId, person, begrunnelse)
     }
 
     private fun validerAtDødsfallKanManueltRegistreresPåPerson(person: Person, dødsfallDato: LocalDate) {

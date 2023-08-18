@@ -6,4 +6,5 @@ import java.time.LocalDate
 data class RestManuellDødsfall(
     val dødsfallDato: LocalDate,
     val personIdent: PersonIdent,
+    val begrunnelse: String,
 )

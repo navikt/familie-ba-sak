@@ -97,6 +97,7 @@ class PersonController(
             behandlingId = BehandlingId(behandlingId),
             personIdent = restManuellDødsfall.personIdent,
             dødsfallDato = restManuellDødsfall.dødsfallDato,
+            begrunnelse = restManuellDødsfall.begrunnelse,
         )
 
         return ResponseEntity.ok(
