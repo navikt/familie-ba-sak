@@ -76,8 +76,8 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
                      INNER JOIN personident p ON f.fk_aktoer_id = p.fk_aktoer_id
             WHERE p.aktiv = true
               AND ty.utbetalingsoppdrag is not null
-              AND EXTRACT('Year' FROM aty.stonad_fom) <= :år
-              AND EXTRACT('Year' FROM aty.stonad_tom) >= :år;
+              AND EXTRACT('Year' FROM aty.stonad_fom) <= CAST(:år AS INTEGER )
+              AND EXTRACT('Year' FROM aty.stonad_tom) >= CAST(:år AS INTEGER );
         """,
         nativeQuery = true,
     )
