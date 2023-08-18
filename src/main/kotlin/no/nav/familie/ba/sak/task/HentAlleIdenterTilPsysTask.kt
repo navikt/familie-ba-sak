@@ -40,7 +40,7 @@ class HentAlleIdenterTilPsysTask(
     }
 
     companion object {
-        fun lagTask(år: Long, uuid: UUID): Task {
+        fun lagTask(år: Int, uuid: UUID): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(HentAlleIdenterTilPsysRequestDTO(år = år, requestId = uuid)),

@@ -142,9 +142,9 @@ class PensjonController(private val pensjonService: PensjonService) {
     )
     fun bestillPersonerMedBarnetrygdForGittÅrPåKafka(
         @PathVariable
-        år: Long,
+        år: Int,
     ): ResponseEntity<UUID> {
-        val minÅr: Long = 1900
+        val minÅr: Long = 1970
         val maxÅr: Long = 2300
         if (år in minÅr..maxÅr) {
             return ResponseEntity.accepted().body(pensjonService.lagTaskForHentingAvIdenterTilPensjon(år))

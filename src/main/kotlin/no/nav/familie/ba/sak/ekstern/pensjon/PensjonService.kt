@@ -41,7 +41,7 @@ class PensjonService(
         return barnetrygdMedRelaterteSaker.plus(barnetrygdTilPensjon).distinct()
     }
 
-    fun lagTaskForHentingAvIdenterTilPensjon(år: Long): UUID {
+    fun lagTaskForHentingAvIdenterTilPensjon(år: Int): UUID {
         val uuid = UUID.randomUUID()
         taskRepository.save(HentAlleIdenterTilPsysTask.lagTask(år, uuid))
         return uuid
