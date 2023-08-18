@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring.Companion.SATSENDRINGMÅNED_MARS_2023
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -29,7 +29,7 @@ import org.springframework.data.domain.Pageable
 internal class StartSatsendringTest {
 
     private val fagsakRepository: FagsakRepository = mockk()
-    private val behandlingRepository: BehandlingRepository = mockk()
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val satskjøringRepository: SatskjøringRepository = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val personidentService: PersonidentService = mockk()
@@ -52,7 +52,7 @@ internal class StartSatsendringTest {
         startSatsendring = spyk(
             StartSatsendring(
                 fagsakRepository = fagsakRepository,
-                behandlingRepository = behandlingRepository,
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                 opprettTaskService = opprettTaskService,
                 satskjøringRepository = satskjøringRepository,
                 featureToggleService = featureToggleService,
@@ -75,7 +75,7 @@ internal class StartSatsendringTest {
             0,
         )
 
-        every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns behandling
 
         startSatsendring.startSatsendring(5)
 
@@ -95,7 +95,7 @@ internal class StartSatsendringTest {
             5,
         )
 
-        every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns behandling
 
         startSatsendring.startSatsendring(5)
 
@@ -105,7 +105,7 @@ internal class StartSatsendringTest {
 
     @Test
     fun `kanStarteSatsendringPåFagsak gir false når vi ikke har noen tidligere behandling`() {
-        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns null
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns null
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns Satskjøring(
             fagsakId = 1L,
             satsTidspunkt = SATSENDRINGMÅNED_MARS_2023,
@@ -116,7 +116,7 @@ internal class StartSatsendringTest {
 
     @Test
     fun `kanStarteSatsendringPåFagsak gir false når vi har en satskjøring for fagsaken i satskjøringsrepoet`() {
-        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns Satskjøring(
             fagsakId = 1L,
             satsTidspunkt = SATSENDRINGMÅNED_MARS_2023,
@@ -127,7 +127,7 @@ internal class StartSatsendringTest {
 
     @Test
     fun `kanStarteSatsendringPåFagsak gir false når harSisteSats er true`() {
-        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns null
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
@@ -136,7 +136,7 @@ internal class StartSatsendringTest {
 
     @Test
     fun `kanStarteSatsendringPåFagsak gir true når harSisteSats er false`() {
-        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns null
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns false
 
@@ -145,14 +145,14 @@ internal class StartSatsendringTest {
 
     @Test
     fun `kanGjennomføreSatsendringManuelt gir false når vi ikke har noen tidligere behandling`() {
-        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns null
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns null
 
         assertFalse(startSatsendring.kanGjennomføreSatsendringManuelt(1L))
     }
 
     @Test
     fun `kanGjennomføreSatsendringManuelt gir false når harSisteSats er true`() {
-        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns null
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
@@ -172,9 +172,7 @@ internal class StartSatsendringTest {
     fun `kanGjennomføreSatsendringManuelt skal kaste feil for alle andre resultater enn OK`() {
         every { startSatsendring.kanGjennomføreSatsendringManuelt(any()) } returns true
 
-        val satsendringSvar = SatsendringSvar.values()
-
-        satsendringSvar.forEach {
+        SatsendringSvar.entries.forEach {
             every { autovedtakSatsendringService.kjørBehandling(any()) } returns it
 
             when (it) {
