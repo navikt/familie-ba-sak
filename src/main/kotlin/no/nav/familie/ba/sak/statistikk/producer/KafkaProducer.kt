@@ -138,8 +138,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
         requestId: UUID,
     ) {
         val hentAlleIdenterTilPsysResponseDTO = HentAlleIdenterTilPsysResponseDTO(requestId = requestId, personident = ident)
-        val key = requestId.toString() + ident
-        kafkaAivenTemplate.send(BARNETRYGD_PENSJON_TOPIC, key, objectMapper.writeValueAsString(hentAlleIdenterTilPsysResponseDTO))
+        kafkaAivenTemplate.send(BARNETRYGD_PENSJON_TOPIC, objectMapper.writeValueAsString(hentAlleIdenterTilPsysResponseDTO))
             .exceptionally {
                 val feilmelding =
                     "Melding på topic $BARNETRYGD_PENSJON_TOPIC kan ikke sendes for " +
