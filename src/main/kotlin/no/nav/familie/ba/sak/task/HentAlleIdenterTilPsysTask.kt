@@ -46,7 +46,8 @@ class HentAlleIdenterTilPsysTask(
                 payload = objectMapper.writeValueAsString(HentAlleIdenterTilPsysRequestDTO(år = år, requestId = uuid)),
                 properties = Properties().apply {
                     this["år"] = år.toString()
-                    this["uuid"] = uuid.toString()
+                    this["requestId"] = uuid.toString()
+                    this["callId"] = uuid.toString()
                 },
             )
         }
