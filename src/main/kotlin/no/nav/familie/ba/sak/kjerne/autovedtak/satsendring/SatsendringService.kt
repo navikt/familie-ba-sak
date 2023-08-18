@@ -21,12 +21,12 @@ class SatsendringService(
     fun erFagsakOppdatertMedSisteSatser(fagsakId: Long): Boolean {
         // Må se på siste iverksatte og ikke siste vedtatte siden vi ønsker å se på
         // den forrige behandlingen som sendte noe til økonomi
-        val sisteIverksatteBehandlingId =
+        val sisteIverksatteEllerVedtatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId) ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)
 
-        return sisteIverksatteBehandlingId == null ||
+        return sisteIverksatteEllerVedtatteBehandling == null ||
             andelerTilkjentYtelseOgEndreteUtbetalingerService
-                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteIverksatteBehandlingId.id)
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteIverksatteEllerVedtatteBehandling.id)
                 .erOppdatertMedSisteSatser()
     }
 
