@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
@@ -70,10 +71,10 @@ class KontrollerNyUtbetalingsgeneratorService(
             erSimulering = erSimulering,
         )
 
-        logger.info("Behandling ${behandling.id} har følgende oppdaterte andeler: ${beregnetUtbetalingsoppdrag.andeler}")
+        secureLogger.info("Behandling ${behandling.id} har følgende oppdaterte andeler: ${beregnetUtbetalingsoppdrag.andeler}")
 
-        logger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med gammel generator: $utbetalingsoppdragGammel")
-        logger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med ny generator: ${beregnetUtbetalingsoppdrag.utbetalingsoppdrag}")
+        secureLogger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med gammel generator: $utbetalingsoppdragGammel")
+        secureLogger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med ny generator: ${beregnetUtbetalingsoppdrag.utbetalingsoppdrag}")
 
         val simuleringResultatNy =
             økonomiKlient.hentSimulering(beregnetUtbetalingsoppdrag.utbetalingsoppdrag)
@@ -136,7 +137,7 @@ class KontrollerNyUtbetalingsgeneratorService(
                 .filter { !it.innhold!!.erLike }
 
         if (månederMedUliktResultat.isNotEmpty()) {
-            logger.warn("Behandling ${behandling.id}  har diff i simuleringsresultat ved bruk av ny utbetalingsgenerator - følgende måneder har ulikt resultat: [${månederMedUliktResultat.joinToString { "${it.fraOgMed} - ${it.tilOgMed}: Gammel ${it.innhold!!.gammel?.resultat} vs Ny ${it.innhold.ny?.resultat}" }}]")
+            secureLogger.warn("Behandling ${behandling.id}  har diff i simuleringsresultat ved bruk av ny utbetalingsgenerator - følgende måneder har ulikt resultat: [${månederMedUliktResultat.joinToString { "${it.fraOgMed} - ${it.tilOgMed}: Gammel ${it.innhold!!.gammel?.resultat} vs Ny ${it.innhold.ny?.resultat}" }}]")
             return DiffFeilType.UliktResultatISammePeriode
         }
         return null
@@ -158,7 +159,7 @@ class KontrollerNyUtbetalingsgeneratorService(
             .filter { it.innhold!!.resultat != BigDecimal.ZERO }
 
         if (perioderFraGammelFørNyMedResultatUlik0.isNotEmpty()) {
-            logger.warn("Behandling ${behandling.id}  har diff i simuleringsresultat ved bruk av ny utbetalingsgenerator - simuleringsperioder før simuleringsperioder fra ny generator gir resultat ulik 0. [${perioderFraGammelFørNyMedResultatUlik0.joinToString() { it.toString() }}]")
+            secureLogger.warn("Behandling ${behandling.id}  har diff i simuleringsresultat ved bruk av ny utbetalingsgenerator - simuleringsperioder før simuleringsperioder fra ny generator gir resultat ulik 0. [${perioderFraGammelFørNyMedResultatUlik0.joinToString() { it.toString() }}]")
             return DiffFeilType.TidligerePerioderIGammelUlik0
         }
         return null
@@ -168,7 +169,7 @@ class KontrollerNyUtbetalingsgeneratorService(
         simuleringsPerioderGammel: List<SimuleringsPeriode>,
         simuleringsPerioderNy: List<SimuleringsPeriode>,
     ) {
-        logger.warn("Simuleringsperioder med diff - Gammel: [${simuleringsPerioderGammel.joinToString() { "${it.fom} - ${it.tom}: ${it.resultat}" }}] Ny: [${simuleringsPerioderNy.joinToString() { "${it.fom} - ${it.tom}: ${it.resultat}" }}]")
+        secureLogger.warn("Simuleringsperioder med diff - Gammel: [${simuleringsPerioderGammel.joinToString() { "${it.fom} - ${it.tom}: ${it.resultat}" }}] Ny: [${simuleringsPerioderNy.joinToString() { "${it.fom} - ${it.tom}: ${it.resultat}" }}]")
     }
 
     private fun DetaljertSimuleringResultat.tilSorterteSimuleringsPerioder(behandling: Behandling): List<SimuleringsPeriode> =

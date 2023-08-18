@@ -51,7 +51,7 @@ class UtbetalingsoppdragGenerator(
                 ytelse = Ytelsestype.BARNETRYGD,
                 personIdent = personIdent,
                 vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
-                opphørFra = opphørFra(forrigeTilkjentYtelse, nyTilkjentYtelse, erSimulering, endretMigreringsDato),
+                opphørFra = opphørFra(forrigeTilkjentYtelse, erSimulering, endretMigreringsDato),
                 utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
                 erGOmregning = false,
             ),
@@ -81,7 +81,6 @@ class UtbetalingsoppdragGenerator(
 
     private fun opphørFra(
         forrigeTilkjentYtelse: TilkjentYtelse?,
-        nyTilkjentYtelseMedMetaData: TilkjentYtelse,
         erSimulering: Boolean,
         endretMigreringsDato: YearMonth?,
     ): YearMonth? {
@@ -89,12 +88,6 @@ class UtbetalingsoppdragGenerator(
         if (endretMigreringsDato != null) return endretMigreringsDato
         if (erSimulering) {
             return forrigeTilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.periode.fom }
-        }
-        val forrigeStartdato = forrigeTilkjentYtelse.stønadFom!!
-        val førsteNyeAndelDato =
-            nyTilkjentYtelseMedMetaData.andelerTilkjentYtelse.minOfOrNull { it.periode.fom }
-        if (førsteNyeAndelDato != null && førsteNyeAndelDato.isBefore(forrigeStartdato)) {
-            return førsteNyeAndelDato
         }
         return null
     }
