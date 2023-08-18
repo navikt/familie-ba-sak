@@ -446,7 +446,7 @@ class OppdaterVilkårsvurderingTest {
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidetIkkeOppfylt,
             løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-            aktørerMedUtvidetAndelerIForrigeBehandling = listOf(),
+            aktørerMedUtvidetAndelerIForrigeBehandling = emptyList(),
         )
 
         val nyInitInneholderIkkeUtvidetVilkår =
