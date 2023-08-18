@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity
 object RessursUtils {
 
     private val logger = LoggerFactory.getLogger(RessursUtils::class.java)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun <T> unauthorized(errorMessage: String): ResponseEntity<Ressurs<T>> =
         ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Ressurs.failure(errorMessage))

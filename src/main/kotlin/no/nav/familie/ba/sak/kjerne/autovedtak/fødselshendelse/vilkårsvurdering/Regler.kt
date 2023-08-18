@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderi
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.isBetween
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
@@ -21,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.hentSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
-import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
 
@@ -98,11 +98,6 @@ data class VurderPersonErBosattIRiket(
             vurderFra,
             LocalDate.now(),
         ) == 0L
-
-    companion object {
-
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
-    }
 }
 
 data class VurderBarnErUnder18(

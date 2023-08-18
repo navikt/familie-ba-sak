@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.klage
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -45,7 +46,6 @@ class KlageService(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun opprettKlage(fagsakId: Long, opprettKlageDto: OpprettKlageDto) {
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)

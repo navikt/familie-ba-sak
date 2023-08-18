@@ -6,11 +6,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
-
-val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
 data class InternPeriodeOvergangsstønad(
     val personIdent: String,
