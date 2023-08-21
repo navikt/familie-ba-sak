@@ -44,16 +44,25 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
 
     private var gjeldendeBehandlingId: Long? = null
 
+    /**
+     * Mulige verdier: | FagsakId | Fagsaktype |
+     */
     @Gitt("følgende fagsaker")
     fun `følgende fagsaker`(dataTable: DataTable) {
         fagsaker = lagFagsaker(dataTable)
     }
 
+    /**
+     * Mulige verdier: | BehandlingId | ForrigeBehandlingId | FagsakId |
+     */
     @Gitt("følgende vedtak")
     fun `følgende vedtak`(dataTable: DataTable) {
         lagVedtak(dataTable, behandlinger, behandlingTilForrigeBehandling, vedtaksliste, fagsaker)
     }
 
+    /**
+     * Mulige verdier: | BehandlingId |  AktørId | Persontype | Fødselsdato |
+     */
     @Og("følgende persongrunnlag")
     fun `følgende persongrunnlag`(dataTable: DataTable) {
         persongrunnlag = lagPersonGrunnlag(dataTable)
@@ -66,6 +75,9 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         personResultater[behandlingId] = lagPersonresultater(persongrunnlagForBehandling, behandling)
     }
 
+    /**
+     * Mulige verdier: | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag |
+     */
     @Og("legg til nye vilkårresultater for behandling {}")
     fun `legg til nye vilkårresultater for behandling`(behandlingId: Long, dataTable: DataTable) {
         val vilkårResultaterPerPerson = dataTable.asMaps().groupBy { parseAktørId(it) }
@@ -76,6 +88,9 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             leggTilVilkårResultatPåPersonResultat(personResultatForBehandling, vilkårResultaterPerPerson, behandlingId)
     }
 
+    /**
+     * Mulige verdier: | BehandlingId | Endringstidspunkt |
+     */
     @Og("med overstyrt endringstidspunkt")
     fun settEndringstidspunkt(dataTable: DataTable) {
         overstyrteEndringstidspunkt = dataTable.asMaps().associate { rad ->
@@ -84,23 +99,35 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         }
     }
 
+    /**
+     * Mulige verdier: | AktørId | Fra dato | Til dato | Resultat | BehandlingId |
+     */
     @Og("med kompetanser")
     fun `med kompetanser`(dataTable: DataTable) {
         val nyeKompetanserPerBarn = dataTable.asMaps()
         kompetanser = lagKompetanser(nyeKompetanserPerBarn, persongrunnlag)
     }
 
+    /**
+     * Mulige verdier: | AktørId | Fra dato | Til dato | BehandlingId |  Årsak | Prosent |
+     */
     @Og("med endrede utbetalinger")
     fun `med endrede utbetalinger`(dataTable: DataTable) {
         val nyeEndredeUtbetalingAndeler = dataTable.asMaps()
         endredeUtbetalinger = lagEndredeUtbetalinger(nyeEndredeUtbetalingAndeler, persongrunnlag)
     }
 
+    /**
+     * Mulige verdier: | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent |
+     */
     @Og("med andeler tilkjent ytelse")
     fun `med andeler tilkjent ytelse`(dataTable: DataTable) {
         andelerTilkjentYtelse = lagAndelerTilkjentYtelse(dataTable, behandlinger, persongrunnlag)
     }
 
+    /**
+     * Mulige verdier: | BehandlingId | AktørId | Fra dato | Til dato |
+     */
     @Og("med overgangsstønad")
     fun `med overgangsstønad`(dataTable: DataTable) {
         overgangsstønad = lagOvergangsstønad(dataTable, persongrunnlag)

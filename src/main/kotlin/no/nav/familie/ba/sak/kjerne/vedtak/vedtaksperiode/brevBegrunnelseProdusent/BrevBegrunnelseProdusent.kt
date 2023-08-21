@@ -17,6 +17,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
@@ -32,6 +34,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
     grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
+    sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
     behandlingUnderkategori: BehandlingUnderkategori,
 ): Set<Standardbegrunnelse> {
     val gyldigeBegrunnelserPerPerson = hentGyldigeBegrunnelserPerPerson(
@@ -39,6 +42,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
         grunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperioderForrigeBehandling,
         behandlingUnderkategori = behandlingUnderkategori,
         sanityBegrunnelser = sanityBegrunnelser,
+        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
     )
 
     return gyldigeBegrunnelserPerPerson.values.flatten().toSet()
@@ -49,6 +53,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
     grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
     behandlingUnderkategori: BehandlingUnderkategori,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
+    sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
 ): Map<AktørOgRolleBegrunnelseGrunnlag, Set<Standardbegrunnelse>> {
     val begrunnelseGrunnlagPerPerson =
         this.finnBegrunnelseGrunnlagPerPerson(
@@ -101,7 +106,7 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetype(
             }
         }
 
-        is BegrunnelseGrunnlagIngenVerdiIDenneBehandlingen -> {
+        is BegrunnelseGrunnlagIngenVerdiIDennePerioden -> {
             it.resultat in listOf(SanityVedtakResultat.REDUKSJON)
         }
     }
@@ -129,7 +134,7 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetypeFor
             }
         }
 
-        is BegrunnelseGrunnlagIngenVerdiIDenneBehandlingen -> {
+        is BegrunnelseGrunnlagIngenVerdiIDennePerioden -> {
             it.resultat in listOf(SanityVedtakResultat.REDUKSJON)
         }
     }
