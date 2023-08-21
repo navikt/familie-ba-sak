@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.ekstern.pensjon
 
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.ekstern.bisys.BisysService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -12,9 +13,11 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.UUID
 
 @Service
 class PensjonService(
@@ -22,6 +25,7 @@ class PensjonService(
     private val fagsakRepository: FagsakRepository,
     private val personidentService: PersonidentService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val taskRepository: TaskRepositoryWrapper,
 ) {
     fun hentBarnetrygd(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
@@ -37,7 +41,17 @@ class PensjonService(
         return barnetrygdMedRelaterteSaker.plus(barnetrygdTilPensjon).distinct()
     }
 
-    private fun hentBarnetrygdForRelatertPersonTilPensjon(personIdent: String, fraDato: LocalDate, forelderAktør: Aktør): List<BarnetrygdTilPensjon> {
+    fun lagTaskForHentingAvIdenterTilPensjon(år: Int): UUID {
+        val uuid = UUID.randomUUID()
+        taskRepository.save(HentAlleIdenterTilPsysTask.lagTask(år, uuid))
+        return uuid
+    }
+
+    private fun hentBarnetrygdForRelatertPersonTilPensjon(
+        personIdent: String,
+        fraDato: LocalDate,
+        forelderAktør: Aktør,
+    ): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
         val fagsaker = fagsakRepository.finnFagsakerSomHarAndelerForAktør(aktør)
             .filter { it.type == FagsakType.NORMAL } // skal kun ha normale fagsaker til med her
@@ -45,6 +59,7 @@ class PensjonService(
             .distinct()
         return fagsaker.mapNotNull { fagsak -> hentBarnetrygdTilPensjon(fagsak, fraDato) }
     }
+
     private fun hentBarnetrygdTilPensjon(fagsak: Fagsak, fraDato: LocalDate): BarnetrygdTilPensjon? {
         val behandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id)
             ?: return null
@@ -86,6 +101,7 @@ class PensjonService(
             YtelseType.UTVIDET_BARNETRYGD -> YtelseTypeEkstern.UTVIDET_BARNETRYGD
         }
     }
+
     companion object {
         private val logger = LoggerFactory.getLogger(BisysService::class.java)
     }
