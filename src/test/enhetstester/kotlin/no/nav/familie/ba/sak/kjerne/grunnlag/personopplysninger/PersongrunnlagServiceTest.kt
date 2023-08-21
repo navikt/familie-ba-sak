@@ -153,7 +153,7 @@ class PersongrunnlagServiceTest {
     @Test
     fun `registrerManuellDødsfallPåPerson skal kaste feil dersom man registrer dødsfall dato før personen er født`() {
         val dødsfallsDato = LocalDate.of(2020, 10, 10)
-        val person = lagPerson(fødselsdato = dødsfallsDato.minusMonths(10))
+        val person = lagPerson(fødselsdato = dødsfallsDato.plusMonths(10))
         val personFnr = person.aktør.aktivFødselsnummer()
         val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
 

@@ -360,7 +360,7 @@ class PersongrunnlagService(
     private fun validerAtDødsfallKanManueltRegistreresPåPerson(person: Person, dødsfallDato: LocalDate) {
         when {
             person.erDød() -> throw FunksjonellFeil("Dødsfall dato er allerede registrert på person med navn ${person.navn}")
-            person.fødselsdato < dødsfallDato -> throw FunksjonellFeil("Du kan ikke sette dødsfall dato til en dato som er før ${person.navn} sin fødselsdato")
+            person.fødselsdato > dødsfallDato -> throw FunksjonellFeil("Du kan ikke sette dødsfall dato til en dato som er før ${person.navn} sin fødselsdato")
         }
     }
     companion object {
