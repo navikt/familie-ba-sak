@@ -24,9 +24,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksp
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.EndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonIkkeInnvilget
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonVilkårInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -80,7 +79,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
         )
 
         val filtrertPåEtterEndretUtbetaling =
-            sanityBegrunnelser.filtrerPåEtterEndretUtbetaling(
+            begrunnelserFiltrertPåPeriodetypeForrigePeriode.filtrerPåEtterEndretUtbetaling(
                 endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
                 endretUtbetalingForrigePeriode = hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag),
             )
@@ -96,18 +95,14 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetype(
 ) = this.filterValues {
     when (begrunnelseGrunnlag) {
         is BegrunnelseGrunnlagMedVerdiIDennePerioden -> {
-            when (begrunnelseGrunnlag.grunnlagForVedtaksperiode) {
-                is GrunnlagForPersonInnvilget -> {
-                    it.resultat in listOf(SanityVedtakResultat.INNVILGET_ELLER_ØKNING) ||
-                        erReduksjonDelBostedBegrunnelse(it)
-                }
-
-                is GrunnlagForPersonIkkeInnvilget -> {
-                    it.resultat in listOf(
-                        SanityVedtakResultat.REDUKSJON,
-                        SanityVedtakResultat.IKKE_INNVILGET,
-                    )
-                }
+            if (begrunnelseGrunnlag.grunnlagForVedtaksperiode.erInnvilget()) {
+                it.resultat in listOf(SanityVedtakResultat.INNVILGET_ELLER_ØKNING) ||
+                    erReduksjonDelBostedBegrunnelse(it)
+            } else {
+                it.resultat in listOf(
+                    SanityVedtakResultat.REDUKSJON,
+                    SanityVedtakResultat.IKKE_INNVILGET,
+                )
             }
         }
 
@@ -122,13 +117,13 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetypeFor
 ) = this.filterValues {
     when (begrunnelseGrunnlag) {
         is BegrunnelseGrunnlagMedVerdiIDennePerioden -> {
-            when (begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode) {
-                is GrunnlagForPersonInnvilget -> {
+            when (begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode?.erInnvilget()) {
+                true -> {
                     it.resultat in listOf(SanityVedtakResultat.INNVILGET_ELLER_ØKNING) ||
                         erReduksjonDelBostedBegrunnelse(it)
                 }
 
-                is GrunnlagForPersonIkkeInnvilget -> {
+                false -> {
                     it.resultat in listOf(
                         SanityVedtakResultat.REDUKSJON,
                         SanityVedtakResultat.IKKE_INNVILGET,
@@ -223,7 +218,7 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåDeltBostedUtbe
 private fun hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag: BegrunnelseGrunnlag) =
     if (
         begrunnelseGrunnlag is BegrunnelseGrunnlagMedVerdiIDennePerioden &&
-        begrunnelseGrunnlag.grunnlagForVedtaksperiode is GrunnlagForPersonInnvilget
+        begrunnelseGrunnlag.grunnlagForVedtaksperiode is GrunnlagForPersonVilkårInnvilget
     ) {
         begrunnelseGrunnlag.grunnlagForVedtaksperiode.endretUtbetalingAndel
     } else {
@@ -233,7 +228,7 @@ private fun hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag: BegrunnelseGr
 private fun hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag: BegrunnelseGrunnlag) =
     if (
         begrunnelseGrunnlag is BegrunnelseGrunnlagMedVerdiIDennePerioden &&
-        begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode is GrunnlagForPersonInnvilget
+        begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode is GrunnlagForPersonVilkårInnvilget
     ) {
         begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode.endretUtbetalingAndel
     } else {
@@ -351,7 +346,7 @@ private fun Tidslinje<GrunnlagForPerson, Måned>.fjernOverflødigePerioderPåSlu
         .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
 
     val perioderTilOgMedSisteInnvilgede = sortertePerioder
-        .dropLastWhile { it.innhold !is GrunnlagForPersonInnvilget }
+        .dropLastWhile { it.innhold !is GrunnlagForPersonVilkårInnvilget }
 
     val perioderEtterSisteInnvilgedePeriode =
         sortertePerioder.subList(perioderTilOgMedSisteInnvilgede.size, sortertePerioder.size)

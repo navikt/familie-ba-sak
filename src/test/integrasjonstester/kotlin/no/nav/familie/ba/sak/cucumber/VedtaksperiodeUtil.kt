@@ -207,7 +207,7 @@ fun lagEndredeUtbetalinger(
             prosent = parseValgfriLong(
                 VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT,
                 rad,
-            )?.toBigDecimal() ?: BigDecimal.ZERO,
+            )?.toBigDecimal() ?: BigDecimal.valueOf(100),
             årsak = parseValgfriEnum<Årsak>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.ÅRSAK, rad)
                 ?: Årsak.ALLEREDE_UTBETALT,
             søknadstidspunkt = LocalDate.now(),
