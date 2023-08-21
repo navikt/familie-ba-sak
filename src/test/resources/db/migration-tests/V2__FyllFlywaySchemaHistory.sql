@@ -1,27 +1,3 @@
---
--- PostgreSQL database dump
---
-
--- Dumped from database version 14.5 (Debian 14.5-1.pgdg110+1)
--- Dumped by pg_dump version 14.6 (Homebrew)
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
---
--- Data for Name: flyway_schema_history; Type: TABLE DATA; Schema: public; Owner: -
---
-
-INSERT INTO public.flyway_schema_history (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) VALUES (1, '1', 'sak', 'SQL', 'V1__sak.sql', -288092157, 'postgres', '2023-08-18 00:01:12.241065', 32, true);
-INSERT INTO public.flyway_schema_history (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) VALUES (2, '2', 'enkel personopplysning', 'SQL', 'V2__enkel_personopplysning.sql', -1485278879, 'postgres', '2023-08-18 00:01:12.32237', 35, true);
 INSERT INTO public.flyway_schema_history (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) VALUES (3, '3', 'vedtak', 'SQL', 'V3__vedtak.sql', -117979632, 'postgres', '2023-08-18 00:01:12.400387', 17, true);
 INSERT INTO public.flyway_schema_history (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) VALUES (4, '4', 'behandling aktiv', 'SQL', 'V4__behandling_aktiv.sql', -910119557, 'postgres', '2023-08-18 00:01:12.446011', 13, true);
 INSERT INTO public.flyway_schema_history (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) VALUES (5, '5', 'vedtak aktiv', 'SQL', 'V5__vedtak_aktiv.sql', -1803372790, 'postgres', '2023-08-18 00:01:12.494088', 12, true);
