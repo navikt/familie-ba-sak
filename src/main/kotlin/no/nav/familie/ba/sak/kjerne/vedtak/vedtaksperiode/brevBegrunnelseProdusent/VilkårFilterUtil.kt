@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilUtdypendeVilkårsvurderinger
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlagIngenVerdiIDenneBehandlingen
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlagIngenVerdiIDennePerioden
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlagMedVerdiIDennePerioden
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
@@ -41,7 +41,7 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåVilkår(
             )
         }
 
-        is BegrunnelseGrunnlagIngenVerdiIDenneBehandlingen ->
+        is BegrunnelseGrunnlagIngenVerdiIDennePerioden ->
             relevanteBegrunnelser.filtrerBegrunnelserSomMatcherVilkårType(vilkårForPerson)
     }
 }

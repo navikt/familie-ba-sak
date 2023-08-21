@@ -174,7 +174,7 @@ class BehandlingstemaServiceTest {
     fun `skal hente løpende kategori til NASJONAL når siste behandling er NASJONAL og har løpende utbetaling`() {
         val søkerFnr = randomFnr()
         val barnFnr = listOf(randomFnr())
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(defaultFagsak.id) } returns defaultBehandling
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(defaultFagsak.id) } returns defaultBehandling
         every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = lagVilkårsvurdering(tilAktør(søkerFnr), defaultBehandling, Resultat.OPPFYLT),
@@ -191,7 +191,7 @@ class BehandlingstemaServiceTest {
         val barn2Fnr = randomFnr()
         val barnaFnr = listOf(barnFnr, barn2Fnr)
         val behandlingMedEøsRegelverk = defaultBehandling.copy(kategori = BehandlingKategori.EØS)
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(defaultFagsak.id) } returns
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(defaultFagsak.id) } returns
             behandlingMedEøsRegelverk
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandlingMedEøsRegelverk)
         vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(
@@ -218,7 +218,7 @@ class BehandlingstemaServiceTest {
         val barn2Fnr = randomFnr()
         val barnaFnr = listOf(barnFnr, barn2Fnr)
         val behandlingMedEøsRegelverk = defaultBehandling.copy(kategori = BehandlingKategori.EØS)
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(defaultFagsak.id) } returns
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(defaultFagsak.id) } returns
             behandlingMedEøsRegelverk
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandlingMedEøsRegelverk)
         vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(
