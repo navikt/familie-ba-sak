@@ -212,7 +212,7 @@ class PersongrunnlagServiceTest {
     @Test
     fun `registrerManuellDødsfallPåPerson skal endre på vilkår og logge at manuelt dødsfalldato er registrert`() {
         val dødsfallsDato = LocalDate.of(2020, 10, 10)
-        val person = lagPerson(fødselsdato = dødsfallsDato.plusYears(10))
+        val person = lagPerson(fødselsdato = dødsfallsDato.minusMonths(10))
 
         val personFnr = person.aktør.aktivFødselsnummer()
         val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
