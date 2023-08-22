@@ -10,21 +10,21 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonVilkårIkkeInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonVilkårInnvilget
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.erLikUtenFomOgTom
 import java.time.LocalDate
 
 fun utledEndringstidspunkt(
-    grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
-    grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
+    behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
+    behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
 ): LocalDate {
     val grunnlagTidslinjePerPerson =
-        grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson().mapValues { it.value.grunnlagForPerson }
+        behandlingsGrunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson().mapValues { it.value.grunnlagForPerson }
     val grunnlagTidslinjePerPersonForrigeBehandling =
-        grunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson()
+        behandlingsGrunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson()
             ?.mapValues { it.value.grunnlagForPerson } ?: emptyMap()
 
     val erPeriodeLikSammePeriodeIForrigeBehandlingTidslinjer =

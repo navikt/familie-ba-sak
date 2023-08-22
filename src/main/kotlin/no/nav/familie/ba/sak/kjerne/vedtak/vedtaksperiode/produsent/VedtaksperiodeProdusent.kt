@@ -28,8 +28,8 @@ import utledEndringstidspunkt
 import java.time.LocalDate
 
 fun genererVedtaksperioder(
-    grunnlagForVedtakPerioder: GrunnlagForVedtaksperioder,
-    grunnlagForVedtakPerioderForrigeBehandling: GrunnlagForVedtaksperioder?,
+    grunnlagForVedtakPerioder: BehandlingsGrunnlagForVedtaksperioder,
+    grunnlagForVedtakPerioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
     vedtak: Vedtak,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val grunnlagTidslinjePerPerson = grunnlagForVedtakPerioder.utledGrunnlagTidslinjePerPerson()
@@ -44,8 +44,8 @@ fun genererVedtaksperioder(
             grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson,
             grunnlagTidslinjePerPersonForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling,
             endringstidspunkt = vedtak.behandling.overstyrtEndringstidspunkt ?: utledEndringstidspunkt(
-                grunnlagForVedtaksperioder = grunnlagForVedtakPerioder,
-                grunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtakPerioderForrigeBehandling,
+                behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtakPerioder,
+                behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtakPerioderForrigeBehandling,
             ),
         )
 
