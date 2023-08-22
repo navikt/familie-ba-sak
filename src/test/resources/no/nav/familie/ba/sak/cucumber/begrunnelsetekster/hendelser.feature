@@ -35,7 +35,7 @@ Egenskap: Begrunnelser for hendelser
       | 01.04.2023 | 31.03.2035 | UTBETALING         | REDUKSJON_UNDER_6_ÅR    |                          |
       | 01.04.2035 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR      |                          |
 
-  Scenario: Skal ta med dødsfallbegrunnelse om baret er dødt
+  Scenario: Skal ta med dødsfallbegrunnelse om barnet er dødt
     Og følgende persongrunnlag for begrunnelse
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1234    | SØKER      | 11.01.1970  |              |

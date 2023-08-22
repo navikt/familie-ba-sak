@@ -89,7 +89,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
                 endretUtbetalingForrigePeriode = hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag),
             )
 
-        val filtrertPåHendelse = begrunnelserFiltrertPåPeriodetype.filtrerPåHendelser(
+        val filtrertPåHendelser = begrunnelserFiltrertPåPeriodetype.filtrerPåHendelser(
             begrunnelseGrunnlag,
             this.fom,
         )
@@ -97,7 +97,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
         filtrertPåVilkår.keys.toSet() +
             filtrertPåEndretUtbetaling.keys.toSet() +
             filtrertPåEtterEndretUtbetaling.keys.toSet() +
-            filtrertPåHendelse.keys.toSet()
+            filtrertPåHendelser.keys.toSet()
     }
 }
 
