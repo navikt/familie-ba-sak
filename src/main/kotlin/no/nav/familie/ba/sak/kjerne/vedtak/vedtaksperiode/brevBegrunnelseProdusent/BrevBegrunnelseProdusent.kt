@@ -84,9 +84,75 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
                 endretUtbetalingForrigePeriode = hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag),
             )
 
+        val filtrertPåHendelse = begrunnelserFiltrertPåPeriodetype.filtrerPåHendelser(
+            begrunnelseGrunnlag,
+            this.fom,
+        )
+
         filtrertPåVilkår.keys.toSet() +
             filtrertPåEndretUtbetaling.keys.toSet() +
-            filtrertPåEtterEndretUtbetaling.keys.toSet()
+            filtrertPåEtterEndretUtbetaling.keys.toSet() +
+            filtrertPåHendelse.keys.toSet()
+    }
+}
+
+fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåHendelser(
+    begrunnelseGrunnlag: BegrunnelseGrunnlag,
+    fomVedtaksperiode: LocalDate?,
+): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    return if (begrunnelseGrunnlag !is BegrunnelseGrunnlagMedVerdiIDennePerioden || begrunnelseGrunnlag.grunnlagForVedtaksperiode !is GrunnlagForPersonVilkårInnvilget) {
+        emptyMap()
+    } else {
+        val person = begrunnelseGrunnlag.grunnlagForVedtaksperiode.person
+
+        this.filtrerPåBarn6år(person, fomVedtaksperiode) +
+            this.filtrerPåPersonDød(person, fomVedtaksperiode) +
+            this.filtrerPåSatsendring(person, begrunnelseGrunnlag.grunnlagForVedtaksperiode.andeler, fomVedtaksperiode)
+    }
+}
+
+fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåBarn6år(
+    person: Person,
+    fomVedtaksperiode: LocalDate?,
+): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    val blirPerson6DennePerioden = person.hentSeksårsdag().toYearMonth() == fomVedtaksperiode?.toYearMonth()
+
+    return if (blirPerson6DennePerioden) {
+        this.filterValues { it.ovrigeTriggere?.contains(ØvrigTrigger.BARN_MED_6_ÅRS_DAG) == true }
+    } else {
+        emptyMap()
+    }
+}
+
+fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPersonDød(
+    person: Person,
+    fomVedtaksperiode: LocalDate?,
+): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    val dødsfall = person.dødsfall
+    val personDødeForrigeMåned =
+        dødsfall != null && dødsfall.dødsfallDato.toYearMonth() == fomVedtaksperiode?.toYearMonth()?.plusMonths(1)
+
+    return if (personDødeForrigeMåned) {
+        this.filterValues { it.ovrigeTriggere?.contains(ØvrigTrigger.BARN_MED_6_ÅRS_DAG) == true }
+    } else {
+        emptyMap()
+    }
+}
+
+fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSatsendring(
+    person: Person,
+    andeler: Iterable<AndelForVedtaksperiode>,
+    fomVedtaksperiode: LocalDate?,
+): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    val satstyper = andeler.map { it.type }.map { it.tilSatsType(person, fomVedtaksperiode ?: TIDENES_MORGEN) }.toSet()
+
+    val erSatsendringPåEnAvSatsene =
+        satstyper.any { satstype -> SatsService.finnAlleSatserFor(satstype).any { it.gyldigFom == fomVedtaksperiode } }
+
+    return if (erSatsendringPåEnAvSatsene) {
+        this.filterValues { it.ovrigeTriggere?.contains(ØvrigTrigger.SATSENDRING) == true }
+    } else {
+        emptyMap()
     }
 }
 
@@ -96,18 +162,21 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetype(
     when (begrunnelseGrunnlag) {
         is BegrunnelseGrunnlagMedVerdiIDennePerioden -> {
             if (begrunnelseGrunnlag.grunnlagForVedtaksperiode.erInnvilget()) {
-                it.resultat in listOf(SanityVedtakResultat.INNVILGET_ELLER_ØKNING) ||
-                    erReduksjonDelBostedBegrunnelse(it)
+                it.resultat in listOf(
+                    SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
+                    SanityVedtakResultat.REDUKSJON,
+                )
             } else {
                 it.resultat in listOf(
                     SanityVedtakResultat.REDUKSJON,
                     SanityVedtakResultat.IKKE_INNVILGET,
                 )
-            }
+            } && it.ovrigeTriggere?.contains(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT) != true
         }
 
         is BegrunnelseGrunnlagIngenVerdiIDennePerioden -> {
-            it.resultat in listOf(SanityVedtakResultat.REDUKSJON)
+            it.resultat in listOf(SanityVedtakResultat.REDUKSJON) &&
+                it.ovrigeTriggere?.contains(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT) == true
         }
     }
 }
@@ -119,8 +188,10 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetypeFor
         is BegrunnelseGrunnlagMedVerdiIDennePerioden -> {
             when (begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode?.erInnvilget()) {
                 true -> {
-                    it.resultat in listOf(SanityVedtakResultat.INNVILGET_ELLER_ØKNING) ||
-                        erReduksjonDelBostedBegrunnelse(it)
+                    it.resultat in listOf(
+                        SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
+                        SanityVedtakResultat.REDUKSJON,
+                    )
                 }
 
                 false -> {
@@ -131,11 +202,12 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetypeFor
                 }
 
                 null -> it.resultat in listOf(SanityVedtakResultat.REDUKSJON)
-            }
+            } && it.ovrigeTriggere?.contains(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT) != true
         }
 
         is BegrunnelseGrunnlagIngenVerdiIDennePerioden -> {
-            it.resultat in listOf(SanityVedtakResultat.REDUKSJON)
+            it.resultat in listOf(SanityVedtakResultat.REDUKSJON) &&
+                it.ovrigeTriggere?.contains(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT) == true
         }
     }
 }
