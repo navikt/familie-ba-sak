@@ -242,7 +242,7 @@ class OppdaterVilkårsvurderingTest {
         val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivMedUtvidetVilkår,
-            forrigeBehandlingVilkårsvurdering = aktivMedUtvidetVilkår,
+            aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
             løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
         )
 
@@ -298,7 +298,7 @@ class OppdaterVilkårsvurderingTest {
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivMedUtvidetVilkår,
             løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR,
-            forrigeBehandlingVilkårsvurdering = initUtenUtvidetVilkår,
+            aktørerMedUtvidetAndelerIForrigeBehandling = emptyList(),
         )
 
         val nyInitInnholderIkkeUtvidetVilkår =
@@ -349,7 +349,7 @@ class OppdaterVilkårsvurderingTest {
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
             løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-            forrigeBehandlingVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
+            aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
         )
 
         val nyInitUtvidetVilkår =
@@ -397,7 +397,7 @@ class OppdaterVilkårsvurderingTest {
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
             løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-            forrigeBehandlingVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
+            aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
         )
 
         val nyInitUtvidetVilkår =
@@ -446,7 +446,7 @@ class OppdaterVilkårsvurderingTest {
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidetIkkeOppfylt,
             løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-            forrigeBehandlingVilkårsvurdering = aktivVilkårsvurderingMedUtvidetIkkeOppfylt,
+            aktørerMedUtvidetAndelerIForrigeBehandling = emptyList(),
         )
 
         val nyInitInneholderIkkeUtvidetVilkår =

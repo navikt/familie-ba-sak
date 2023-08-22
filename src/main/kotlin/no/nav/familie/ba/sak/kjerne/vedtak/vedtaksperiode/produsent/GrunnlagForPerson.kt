@@ -24,20 +24,22 @@ sealed interface GrunnlagForPerson {
     val person: Person
     val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>
 
-    fun erEksplisittAvslag(): Boolean = this is GrunnlagForPersonIkkeInnvilget && this.erEksplisittAvslag
+    fun erEksplisittAvslag(): Boolean = this is GrunnlagForPersonVilkårIkkeInnvilget && this.erEksplisittAvslag
+
+    fun erInnvilget() = this is GrunnlagForPersonVilkårInnvilget && this.erInnvilgetEndretUtbetaling()
 
     fun kopier(
         person: Person = this.person,
         vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode> = this.vilkårResultaterForVedtaksperiode,
     ): GrunnlagForPerson {
         return when (this) {
-            is GrunnlagForPersonIkkeInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
-            is GrunnlagForPersonInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
+            is GrunnlagForPersonVilkårIkkeInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
+            is GrunnlagForPersonVilkårInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
         }
     }
 }
 
-data class GrunnlagForPersonInnvilget(
+data class GrunnlagForPersonVilkårInnvilget(
     override val person: Person,
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
     val andeler: Iterable<AndelForVedtaksperiode>,
@@ -45,11 +47,11 @@ data class GrunnlagForPersonInnvilget(
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
     val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
 ) : GrunnlagForPerson {
-    fun erEndretTilIngenUtbetalingIkkeDeltBosted() =
-        andeler.all { it.prosent == BigDecimal.ZERO } && endretUtbetalingAndel?.årsak != Årsak.DELT_BOSTED == true
+    fun erInnvilgetEndretUtbetaling() =
+        endretUtbetalingAndel?.prosent != BigDecimal.ZERO || endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
 }
 
-data class GrunnlagForPersonIkkeInnvilget(
+data class GrunnlagForPersonVilkårIkkeInnvilget(
     override val person: Person,
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
 ) : GrunnlagForPerson {

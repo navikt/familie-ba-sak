@@ -206,7 +206,7 @@ class BehandlingService(
         return behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false).also {
             arbeidsfordelingService.fastsettBehandlendeEnhet(
                 it,
-                behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(it.fagsak.id),
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(it.fagsak.id),
             )
             if (it.versjon == 0L) {
                 behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(it)
