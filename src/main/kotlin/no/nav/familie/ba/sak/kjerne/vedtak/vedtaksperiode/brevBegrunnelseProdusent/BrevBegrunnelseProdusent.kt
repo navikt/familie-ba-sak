@@ -152,7 +152,7 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSatsendring(
     andeler: Iterable<AndelForVedtaksperiode>,
     fomVedtaksperiode: LocalDate?,
 ): Map<Standardbegrunnelse, SanityBegrunnelse> {
-    val satstyper = andeler.map { it.type }.map { it.tilSatsType(person, fomVedtaksperiode ?: TIDENES_MORGEN) }.toSet()
+    val satstyper = andeler.map { it.type.tilSatsType(person, fomVedtaksperiode ?: TIDENES_MORGEN) }.toSet()
 
     val erSatsendringPåEnAvSatsene =
         satstyper.any { satstype -> SatsService.finnAlleSatserFor(satstype).any { it.gyldigFom == fomVedtaksperiode } }
