@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtaksperioder med mor og et barn
+Egenskap: Begrunnelse etter endret utbetaling
 
   Bakgrunn:
     Gitt følgende behandling
@@ -40,7 +40,7 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 01.02.2021 | 31.03.2038 | UTBETALING         | ENDRET_UTBETALING_SEKUNDÆR_DELT_BOSTED_FULL_UTBETALING_FØR_SØKNAD, ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALT_UTVIDET_NY |                                                                   |
       | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                                                                                                                  |                                                                   |
 
-  Scenario: Begrunnelse endret utbetaling allerede utbetalt
+  Scenario: Begrunnelse etter endret utbetaling ETTERBETALING_3ÅR
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
@@ -51,18 +51,19 @@ Egenskap: Vedtaksperioder med mor og et barn
 
     Og med endrede utbetalinger for begrunnelse
       | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak             | Prosent |
-      | 3456    | 01.05.2020 | 31.01.2021 | 1            | ALLEREDE_UTBETALT | 0       |
+      | 3456    | 01.05.2020 | 31.01.2021 | 1            | ETTERBETALING_3ÅR | 0       |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId | Prosent |
-      | 3456    | 01.05.2020 | 31.03.2038 | 0     | 1            | 0       |
+      | 3456    | 01.05.2020 | 31.01.2021 | 0     | 1            | 0       |
+      | 3456    | 01.02.2021 | 31.03.2038 | 1000  | 1            | 100     |
 
     Når begrunnelsetekster genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                     | Ekskluderte Begrunnelser |
-      | 01.05.2020 | 31.01.2021 | UTBETALING         | ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS |                          |
-      | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                          |                          |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser               | Ekskluderte Begrunnelser |
+      | 01.02.2021 | 31.03.2038 | UTBETALING         | ETTER_ENDRET_UTBETALING_ETTERBETALING |                          |
+      | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                    |                          |
 
 
 
