@@ -51,7 +51,7 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest() : AbstractSpringIntegrati
     fun `Skal plukke riktig identer som har hatt barnetryd i løpet av gitt år`() {
         val søker = tilfeldigPerson()
         val barn1 = tilfeldigPerson()
-        val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
+        personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
         val barnAktør = personidentService.hentOgLagreAktør(barn1.aktør.aktivFødselsnummer(), true)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
@@ -82,7 +82,7 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest() : AbstractSpringIntegrati
     fun `Verifiser at ingen har barnetrygd for angitt år `() {
         val søker = tilfeldigPerson()
         val barn1 = tilfeldigPerson()
-        val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
+        personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
         val barnAktør = personidentService.hentOgLagreAktør(barn1.aktør.aktivFødselsnummer(), true)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
