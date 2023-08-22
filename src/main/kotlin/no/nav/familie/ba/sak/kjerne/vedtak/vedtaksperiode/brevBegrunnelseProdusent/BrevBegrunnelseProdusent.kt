@@ -167,9 +167,12 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSatsendring(
 private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetype(
     begrunnelseGrunnlag: BegrunnelseGrunnlag,
 ) = this.filterValues {
+    val begrunnelseGjelderFraInnvilgelsestidspunkt =
+        it.ovrigeTriggere?.contains(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT) == true
+
     when (begrunnelseGrunnlag) {
         is BegrunnelseGrunnlagMedVerdiIDennePerioden -> {
-            if (begrunnelseGrunnlag.grunnlagForVedtaksperiode.erInnvilget()) {
+            val resultater = if (begrunnelseGrunnlag.grunnlagForVedtaksperiode.erInnvilget()) {
                 it.resultat in listOf(
                     SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
                     SanityVedtakResultat.REDUKSJON,
@@ -179,12 +182,15 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetype(
                     SanityVedtakResultat.REDUKSJON,
                     SanityVedtakResultat.IKKE_INNVILGET,
                 )
-            } && it.ovrigeTriggere?.contains(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT) != true
+            }
+
+            !begrunnelseGjelderFraInnvilgelsestidspunkt && resultater
         }
 
         is BegrunnelseGrunnlagIngenVerdiIDennePerioden -> {
-            it.resultat in listOf(SanityVedtakResultat.REDUKSJON) &&
-                it.ovrigeTriggere?.contains(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT) == true
+            begrunnelseGrunnlag.erInnvilgetForrigeBehandling &&
+                it.resultat in listOf(SanityVedtakResultat.REDUKSJON) &&
+                begrunnelseGjelderFraInnvilgelsestidspunkt
         }
     }
 }
