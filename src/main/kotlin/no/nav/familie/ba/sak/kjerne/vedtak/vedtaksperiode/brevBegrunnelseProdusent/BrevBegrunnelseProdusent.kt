@@ -138,10 +138,10 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPersonDød(
 ): Map<Standardbegrunnelse, SanityBegrunnelse> {
     val dødsfall = person.dødsfall
     val personDødeForrigeMåned =
-        dødsfall != null && dødsfall.dødsfallDato.toYearMonth() == fomVedtaksperiode?.toYearMonth()?.plusMonths(1)
+        dødsfall != null && dødsfall.dødsfallDato.toYearMonth().plusMonths(1) == fomVedtaksperiode?.toYearMonth()
 
     return if (personDødeForrigeMåned) {
-        this.filterValues { it.ovrigeTriggere?.contains(ØvrigTrigger.BARN_MED_6_ÅRS_DAG) == true }
+        this.filterValues { it.ovrigeTriggere?.contains(ØvrigTrigger.BARN_DØD) == true }
     } else {
         emptyMap()
     }
