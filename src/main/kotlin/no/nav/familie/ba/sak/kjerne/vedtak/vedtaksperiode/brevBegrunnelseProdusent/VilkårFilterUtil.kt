@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProduse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlagIngenVerdiIDennePerioden
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlagMedVerdiIDennePerioden
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonVilkårInnvilget
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VedtaksperiodeGrunnlagForPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VedtaksperiodeGrunnlagForPersonVilkårInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -93,7 +93,7 @@ private fun finnUtgjørendeVilkår(
     val oppfylteVilkårResultaterForrigePeriode =
         begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode?.hentOppfylteVilkår() ?: emptyList()
 
-    return if (begrunnelseGrunnlag.grunnlagForVedtaksperiode is GrunnlagForPersonVilkårInnvilget) {
+    return if (begrunnelseGrunnlag.grunnlagForVedtaksperiode is VedtaksperiodeGrunnlagForPersonVilkårInnvilget) {
         val vilkårTjentEllerEndrerUtbetaling = hentVilkårTjent(
             oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
             oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
@@ -115,7 +115,7 @@ private fun finnUtgjørendeVilkår(
     }.toSet()
 }
 
-private fun GrunnlagForPerson.hentOppfylteVilkår() =
+private fun VedtaksperiodeGrunnlagForPerson.hentOppfylteVilkår() =
     vilkårResultaterForVedtaksperiode.filter { it.resultat == Resultat.OPPFYLT }
 
 private fun hentVilkårSomFørerTilØkingEllerReduksjonAvUtbetaling(
