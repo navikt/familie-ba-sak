@@ -36,11 +36,11 @@ class HentAlleIdenterTilPsysTask(
         logger.info("Starter på å sende alle identer til kafka for request ${hentAlleIdenterDto.requestId}")
 
         kafkaProducer.sendIdentTilPSys(
-            HentAlleIdenterTilPsysResponseDTO(meldingstype = Meldingstype.START, requestId = hentAlleIdenterDto.requestId, personident = "")
+            HentAlleIdenterTilPsysResponseDTO(meldingstype = Meldingstype.START, requestId = hentAlleIdenterDto.requestId, personident = ""),
         )
         identer.forEach { kafkaProducer.sendIdentTilPSys(HentAlleIdenterTilPsysResponseDTO(meldingstype = Meldingstype.DATA, personident = it, requestId = hentAlleIdenterDto.requestId)) }
         kafkaProducer.sendIdentTilPSys(
-            HentAlleIdenterTilPsysResponseDTO(meldingstype = Meldingstype.SLUTT, requestId = hentAlleIdenterDto.requestId, personident = "")
+            HentAlleIdenterTilPsysResponseDTO(meldingstype = Meldingstype.SLUTT, requestId = hentAlleIdenterDto.requestId, personident = ""),
         )
         logger.info("Ferdig med å sende alle identer til kafka for request ${hentAlleIdenterDto.requestId}")
     }
