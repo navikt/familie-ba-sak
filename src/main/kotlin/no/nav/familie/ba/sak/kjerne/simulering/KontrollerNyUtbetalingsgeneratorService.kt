@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
@@ -19,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -30,13 +30,11 @@ class KontrollerNyUtbetalingsgeneratorService(
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
 ) {
 
-    private val logger = LoggerFactory.getLogger(KontrollerNyUtbetalingsgeneratorService::class.java)
-
     fun kontrollerNyUtbetalingsgenerator(
         vedtak: Vedtak,
         saksbehandlerId: String,
-    ) {
-        if (!featureToggleService.isEnabled("familie.ba.sak.kontroller-ny-utbetalingsgenerator")) return
+    ): List<DiffFeilType> {
+        if (!skalKontrollereOppMotNyUtbetalingsgenerator()) return emptyList()
 
         val utbetalingsoppdrag =
             utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -46,7 +44,7 @@ class KontrollerNyUtbetalingsgeneratorService(
             )
         val simuleringResultatGammel = økonomiKlient.hentSimulering(utbetalingsoppdrag)
 
-        kontrollerNyUtbetalingsgenerator(
+        return kontrollerNyUtbetalingsgenerator(
             vedtak = vedtak,
             simuleringResultatGammel = simuleringResultatGammel,
             utbetalingsoppdragGammel = utbetalingsoppdrag,
@@ -59,7 +57,7 @@ class KontrollerNyUtbetalingsgeneratorService(
         utbetalingsoppdragGammel: Utbetalingsoppdrag,
         erSimulering: Boolean = false,
     ): List<DiffFeilType> {
-        if (!featureToggleService.isEnabled("familie.ba.sak.kontroller-ny-utbetalingsgenerator")) return emptyList()
+        if (!skalKontrollereOppMotNyUtbetalingsgenerator()) return emptyList()
 
         val diffFeilTyper = mutableListOf<DiffFeilType>()
 
@@ -110,6 +108,9 @@ class KontrollerNyUtbetalingsgeneratorService(
 
         return diffFeilTyper
     }
+
+    private fun skalKontrollereOppMotNyUtbetalingsgenerator(): Boolean =
+        featureToggleService.isEnabled(FeatureToggleConfig.KONTROLLER_NY_UTBETALINGSGENERATOR, false)
 
     private fun validerAtSimuleringsPerioderGammelHarResultatLikSimuleringsPerioderNyEtterFomTilNy(
         simuleringsPerioderGammelTidslinje: Tidslinje<SimuleringsPeriode, Måned>,

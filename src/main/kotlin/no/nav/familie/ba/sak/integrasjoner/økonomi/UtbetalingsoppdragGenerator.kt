@@ -36,7 +36,7 @@ class UtbetalingsoppdragGenerator(
         vedtak: Vedtak,
         forrigeTilkjentYtelse: TilkjentYtelse?,
         nyTilkjentYtelse: TilkjentYtelse,
-        sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>?,
+        sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         erSimulering: Boolean,
         endretMigreringsDato: YearMonth? = null,
     ): BeregnetUtbetalingsoppdragLongId {
@@ -53,7 +53,6 @@ class UtbetalingsoppdragGenerator(
                 vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
                 opphørFra = opphørFra(forrigeTilkjentYtelse, erSimulering, endretMigreringsDato),
                 utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
-                erGOmregning = false,
             ),
             forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.map {
                 it.tilAndelDataLongId()

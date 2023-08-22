@@ -8,7 +8,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
@@ -32,18 +34,13 @@ class UtbetalingsoppdragGeneratorService(
         saksbehandlerId: String,
         erSimulering: Boolean = false,
     ): BeregnetUtbetalingsoppdragLongId {
-        val forrigeBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = vedtak.behandling)
-        val forrigeTilkjentYtelse =
-            forrigeBehandling?.let { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandlingId = it.id) }
+        val forrigeTilkjentYtelse = hentForrigeTilkjentYtelse(vedtak.behandling)
         val nyTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = vedtak.behandling.id)
         val endretMigreringsDato = beregnOmMigreringsDatoErEndret(
             vedtak.behandling,
             forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minByOrNull { it.stønadFom }?.stønadFom,
         )
-        val sisteAndelPerKjede =
-            andelTilkjentYtelseRepository.hentSisteAndelPerIdent(fagsakId = vedtak.behandling.fagsak.id)
-                .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
+        val sisteAndelPerKjede = hentSisteAndelTilkjentYtelse(vedtak.behandling.fagsak)
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
             vedtak = vedtak,
@@ -54,6 +51,14 @@ class UtbetalingsoppdragGeneratorService(
             endretMigreringsDato = endretMigreringsDato,
         )
     }
+
+    private fun hentForrigeTilkjentYtelse(behandling: Behandling): TilkjentYtelse? =
+        behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)
+            ?.let { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandlingId = it.id) }
+
+    private fun hentSisteAndelTilkjentYtelse(fagsak: Fagsak) =
+        andelTilkjentYtelseRepository.hentSisteAndelPerIdent(fagsakId = fagsak.id)
+            .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
 
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
