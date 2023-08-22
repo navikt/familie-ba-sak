@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import java.util.UUID
 
 interface KafkaProducer {
 
@@ -42,8 +41,7 @@ interface KafkaProducer {
     )
 
     fun sendIdentTilPSys(
-        ident: String,
-        requestId: UUID,
+        hentAlleIdenterTilPsysResponseDTO: HentAlleIdenterTilPsysResponseDTO,
     )
 }
 
@@ -134,15 +132,13 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     }
 
     override fun sendIdentTilPSys(
-        ident: String,
-        requestId: UUID,
+        hentAlleIdenterTilPsysResponseDTO: HentAlleIdenterTilPsysResponseDTO,
     ) {
-        val hentAlleIdenterTilPsysResponseDTO = HentAlleIdenterTilPsysResponseDTO(requestId = requestId, personident = ident)
         kafkaAivenTemplate.send(BARNETRYGD_PENSJON_TOPIC, objectMapper.writeValueAsString(hentAlleIdenterTilPsysResponseDTO))
             .exceptionally {
                 val feilmelding =
                     "Melding på topic $BARNETRYGD_PENSJON_TOPIC kan ikke sendes for " +
-                        "RequestId: $requestId. Feiler med ${it.message}"
+                        "RequestId: ${hentAlleIdenterTilPsysResponseDTO.requestId}. Feiler med ${it.message}"
                 logger.warn(feilmelding)
                 throw Feil(message = feilmelding)
             }
@@ -226,10 +222,9 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
         logger.info("Skipper sending av fagsystemsbehandling respons for $behandlingId fordi kafka ikke er enablet")
     }
     override fun sendIdentTilPSys(
-        ident: String,
-        requestId: UUID,
+        hentAlleIdenterTilPsysResponseDTO: HentAlleIdenterTilPsysResponseDTO,
     ) {
-        logger.info("Skipper sending av sendBarnetrygdBisysMelding respons for $requestId fordi kafka ikke er enablet")
+        logger.info("Skipper sending av sendBarnetrygdBisysMelding respons for $hentAlleIdenterTilPsysResponseDTO.requestId fordi kafka ikke er enablet")
     }
 
     override fun sendBarnetrygdBisysMelding(

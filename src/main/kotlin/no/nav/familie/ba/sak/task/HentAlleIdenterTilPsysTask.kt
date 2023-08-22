@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.ekstern.pensjon.HentAlleIdenterTilPsysResponseDTO
+import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask.Companion.TASK_STEP_TYPE
@@ -32,7 +34,14 @@ class HentAlleIdenterTilPsysTask(
         val identer = andelTilkjentYtelseRepository.finnIdenterMedLøpendeBarnetrygdForGittÅr(hentAlleIdenterDto.år)
         logger.info("Ferdig med å hente alle identer fra DB for request ${hentAlleIdenterDto.requestId}")
         logger.info("Starter på å sende alle identer til kafka for request ${hentAlleIdenterDto.requestId}")
-        identer.forEach { kafkaProducer.sendIdentTilPSys(it, hentAlleIdenterDto.requestId) }
+
+        kafkaProducer.sendIdentTilPSys(
+            HentAlleIdenterTilPsysResponseDTO(meldingstype = Meldingstype.START, requestId = hentAlleIdenterDto.requestId, personident = "")
+        )
+        identer.forEach { kafkaProducer.sendIdentTilPSys(HentAlleIdenterTilPsysResponseDTO(meldingstype = Meldingstype.DATA, personident = it, requestId = hentAlleIdenterDto.requestId)) }
+        kafkaProducer.sendIdentTilPSys(
+            HentAlleIdenterTilPsysResponseDTO(meldingstype = Meldingstype.SLUTT, requestId = hentAlleIdenterDto.requestId, personident = "")
+        )
         logger.info("Ferdig med å sende alle identer til kafka for request ${hentAlleIdenterDto.requestId}")
     }
 
