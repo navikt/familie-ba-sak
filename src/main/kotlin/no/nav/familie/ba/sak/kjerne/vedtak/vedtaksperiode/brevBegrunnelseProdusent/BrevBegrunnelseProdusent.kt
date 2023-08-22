@@ -152,12 +152,14 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSatsendring(
     andeler: Iterable<AndelForVedtaksperiode>,
     fomVedtaksperiode: LocalDate?,
 ): Map<Standardbegrunnelse, SanityBegrunnelse> {
-    val satstyper = andeler.map { it.type.tilSatsType(person, fomVedtaksperiode ?: TIDENES_MORGEN) }.toSet()
+    val satstyperPåAndelene = andeler.map { it.type.tilSatsType(person, fomVedtaksperiode ?: TIDENES_MORGEN) }.toSet()
 
-    val erSatsendringPåEnAvSatsene =
-        satstyper.any { satstype -> SatsService.finnAlleSatserFor(satstype).any { it.gyldigFom == fomVedtaksperiode } }
+    val erSatsendringIPeriodenForPerson =
+        satstyperPåAndelene.any { satstype ->
+            SatsService.finnAlleSatserFor(satstype).any { it.gyldigFom == fomVedtaksperiode }
+        }
 
-    return if (erSatsendringPåEnAvSatsene) {
+    return if (erSatsendringIPeriodenForPerson) {
         this.filterValues { it.ovrigeTriggere?.contains(ØvrigTrigger.SATSENDRING) == true }
     } else {
         emptyMap()
