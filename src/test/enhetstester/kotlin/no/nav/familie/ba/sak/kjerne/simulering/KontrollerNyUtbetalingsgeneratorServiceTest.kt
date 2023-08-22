@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
@@ -53,7 +54,12 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
 
     @BeforeEach
     fun beforeAll() {
-        every { featureToggleService.isEnabled(any()) } returns true
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.KONTROLLER_NY_UTBETALINGSGENERATOR,
+                false,
+            )
+        } returns true
 
         val beregnetUtbetalingsoppdragMock = mockk<BeregnetUtbetalingsoppdragLongId>()
 
