@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeli
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonIkkeInnvilget
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonInnvilget
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonVilkårIkkeInnvilget
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonVilkårInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.erLikUtenFomOgTom
 import java.time.LocalDate
@@ -64,8 +64,8 @@ private fun loggEndringstidspunktOgEndringer(
     val endringer = mutableListOf<String>()
 
     when (grunnlagIPeriodeMedEndring) {
-        is GrunnlagForPersonInnvilget -> {
-            if (grunnlagIPeriodeMedEndringForrigeBehanlding is GrunnlagForPersonInnvilget) {
+        is GrunnlagForPersonVilkårInnvilget -> {
+            if (grunnlagIPeriodeMedEndringForrigeBehanlding is GrunnlagForPersonVilkårInnvilget) {
                 if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
                         grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode,
                     )
@@ -89,8 +89,8 @@ private fun loggEndringstidspunktOgEndringer(
             }
         }
 
-        is GrunnlagForPersonIkkeInnvilget ->
-            if (grunnlagIPeriodeMedEndringForrigeBehanlding is GrunnlagForPersonIkkeInnvilget) {
+        is GrunnlagForPersonVilkårIkkeInnvilget ->
+            if (grunnlagIPeriodeMedEndringForrigeBehanlding is GrunnlagForPersonVilkårIkkeInnvilget) {
                 if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
                         grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode,
                     )
@@ -124,8 +124,8 @@ private fun Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<Boolean, Måned>>.fi
 private fun GrunnlagForPerson?.erLik(
     grunnlagForVedtaksperiodeForrigeBehandling: GrunnlagForPerson?,
 ): Boolean = when (this) {
-    is GrunnlagForPersonInnvilget ->
-        grunnlagForVedtaksperiodeForrigeBehandling is GrunnlagForPersonInnvilget &&
+    is GrunnlagForPersonVilkårInnvilget ->
+        grunnlagForVedtaksperiodeForrigeBehandling is GrunnlagForPersonVilkårInnvilget &&
             this.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
                 grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode,
             ) &&
@@ -134,8 +134,8 @@ private fun GrunnlagForPerson?.erLik(
             this.overgangsstønad == grunnlagForVedtaksperiodeForrigeBehandling.overgangsstønad &&
             this.andeler.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.andeler.toSet()
 
-    is GrunnlagForPersonIkkeInnvilget ->
-        grunnlagForVedtaksperiodeForrigeBehandling is GrunnlagForPersonIkkeInnvilget &&
+    is GrunnlagForPersonVilkårIkkeInnvilget ->
+        grunnlagForVedtaksperiodeForrigeBehandling is GrunnlagForPersonVilkårIkkeInnvilget &&
             this.vilkårResultaterForVedtaksperiode.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode.toSet()
 
     null -> grunnlagForVedtaksperiodeForrigeBehandling == null
