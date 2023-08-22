@@ -75,7 +75,7 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest() : AbstractSpringIntegrati
         }
         val identer = andelTilkjentYtelseRepository.finnIdenterMedLøpendeBarnetrygdForGittÅr(2023)
         Assertions.assertTrue(identer.isNotEmpty())
-        identer.contains(søker.aktør.aktivFødselsnummer())
+        Assertions.assertTrue(identer.contains(søker.aktør.aktivFødselsnummer()))
     }
 
     @Test
@@ -106,7 +106,7 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest() : AbstractSpringIntegrati
         }
 
         val identer = andelTilkjentYtelseRepository.finnIdenterMedLøpendeBarnetrygdForGittÅr(2018)
-        Assertions.assertTrue(!identer.contains(søker.aktør.aktivFødselsnummer()))
+        Assertions.assertFalse(identer.contains(søker.aktør.aktivFødselsnummer()))
     }
 
     private fun avsluttOgLagreBehandling(behandling: Behandling) {
