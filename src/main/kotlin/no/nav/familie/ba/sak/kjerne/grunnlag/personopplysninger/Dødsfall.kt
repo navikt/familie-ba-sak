@@ -74,3 +74,20 @@ fun lagDødsfall(
         dødsfallPoststed = dødsfallAdresseFraPdl?.poststedsnavn,
     )
 }
+
+fun lagDødsfall(
+    person: Person,
+    dødsfallDato: LocalDate,
+    dødsfallAdresse: String? = null,
+    dødsfallPostnummer: String? = null,
+    dødsfallPoststed: String? = null,
+
+): Dødsfall {
+    return Dødsfall(
+        person = person,
+        dødsfallDato = dødsfallDato,
+        dødsfallAdresse = dødsfallAdresse,
+        dødsfallPostnummer = dødsfallPostnummer,
+        dødsfallPoststed = dødsfallPoststed,
+    )
+}
