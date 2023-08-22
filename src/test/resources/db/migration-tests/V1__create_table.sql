@@ -202,7 +202,8 @@ CREATE TABLE public.behandling (
     opprettet_aarsak character varying DEFAULT 'MANUELL'::character varying,
     skal_behandles_automatisk boolean DEFAULT false,
     resultat character varying DEFAULT 'IKKE_VURDERT'::character varying NOT NULL,
-    overstyrt_endringstidspunkt timestamp(3) without time zone
+    overstyrt_endringstidspunkt timestamp(3) without time zone,
+    aktivert_tid timestamp(3) without time zone NOT NULL
 );
 
 
@@ -258,7 +259,10 @@ CREATE TABLE public.behandling_soknadsinfo (
     opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
     endret_av character varying,
-    endret_tid timestamp(3) without time zone
+    endret_tid timestamp(3) without time zone,
+    er_digital boolean,
+    journalpost_id character varying,
+    brevkode character varying
 );
 
 
@@ -483,7 +487,8 @@ CREATE TABLE public.feilutbetalt_valuta (
     opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
     endret_av character varying,
-    endret_tid timestamp(3) without time zone
+    endret_tid timestamp(3) without time zone,
+    er_per_maaned boolean DEFAULT false NOT NULL
 );
 
 
@@ -1216,6 +1221,38 @@ CREATE SEQUENCE public.po_statsborgerskap_seq
 
 
 --
+-- Name: refusjon_eos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.refusjon_eos (
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    fom timestamp(3) without time zone NOT NULL,
+    tom timestamp(3) without time zone NOT NULL,
+    refusjonsbeloep numeric NOT NULL,
+    land character varying NOT NULL,
+    refusjon_avklart boolean NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
+);
+
+
+--
+-- Name: refusjon_eos_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.refusjon_eos_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
 -- Name: saksstatistikk_mellomlagring; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1267,7 +1304,8 @@ CREATE TABLE public.satskjoering (
     fk_fagsak_id bigint NOT NULL,
     start_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
     ferdig_tid timestamp(3) without time zone,
-    feiltype character varying
+    feiltype character varying,
+    sats_tid timestamp(3) without time zone DEFAULT to_timestamp('01-03-2023'::text, 'DD-MM-YYYY SS:MS'::text) NOT NULL
 );
 
 
@@ -1768,7 +1806,8 @@ CREATE TABLE public.vilkar_resultat (
     er_eksplisitt_avslag_paa_soknad boolean,
     vedtak_begrunnelse_spesifikasjoner text DEFAULT ''::text,
     vurderes_etter character varying,
-    utdypende_vilkarsvurderinger character varying
+    utdypende_vilkarsvurderinger character varying,
+    resultat_begrunnelse character varying
 );
 
 
@@ -1902,7 +1941,7 @@ COPY public.batch (id, kjoredato, status) FROM stdin;
 -- Data for Name: behandling; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.behandling (id, fk_fagsak_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, behandling_type, aktiv, status, kategori, underkategori, opprettet_aarsak, skal_behandles_automatisk, resultat, overstyrt_endringstidspunkt) FROM stdin;
+COPY public.behandling (id, fk_fagsak_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, behandling_type, aktiv, status, kategori, underkategori, opprettet_aarsak, skal_behandles_automatisk, resultat, overstyrt_endringstidspunkt, aktivert_tid) FROM stdin;
 \.
 
 
@@ -1918,7 +1957,7 @@ COPY public.behandling_migreringsinfo (id, fk_behandling_id, migreringsdato, ver
 -- Data for Name: behandling_soknadsinfo; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.behandling_soknadsinfo (id, fk_behandling_id, mottatt_dato, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
+COPY public.behandling_soknadsinfo (id, fk_behandling_id, mottatt_dato, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, er_digital, journalpost_id, brevkode) FROM stdin;
 \.
 
 
@@ -1974,7 +2013,7 @@ COPY public.fagsak (id, versjon, opprettet_av, opprettet_tid, endret_av, endret_
 -- Data for Name: feilutbetalt_valuta; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.feilutbetalt_valuta (id, fk_behandling_id, fom, tom, feilutbetalt_beloep, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
+COPY public.feilutbetalt_valuta (id, fk_behandling_id, fom, tom, feilutbetalt_beloep, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, er_per_maaned) FROM stdin;
 \.
 
 
@@ -2171,6 +2210,14 @@ COPY public.po_statsborgerskap (id, fk_po_person_id, landkode, fom, tom, opprett
 
 
 --
+-- Data for Name: refusjon_eos; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.refusjon_eos (id, fk_behandling_id, fom, tom, refusjonsbeloep, land, refusjon_avklart, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
+\.
+
+
+--
 -- Data for Name: saksstatistikk_mellomlagring; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -2182,7 +2229,7 @@ COPY public.saksstatistikk_mellomlagring (id, offset_verdi, funksjonell_id, type
 -- Data for Name: satskjoering; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.satskjoering (id, fk_fagsak_id, start_tid, ferdig_tid, feiltype) FROM stdin;
+COPY public.satskjoering (id, fk_fagsak_id, start_tid, ferdig_tid, feiltype, sats_tid) FROM stdin;
 \.
 
 
@@ -2310,7 +2357,7 @@ COPY public.vilkaarsvurdering (id, fk_behandling_id, aktiv, versjon, opprettet_a
 -- Data for Name: vilkar_resultat; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.vilkar_resultat (id, vilkar, resultat, regel_input, regel_output, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, fk_person_resultat_id, begrunnelse, periode_fom, periode_tom, fk_behandling_id, evaluering_aarsak, er_automatisk_vurdert, er_eksplisitt_avslag_paa_soknad, vedtak_begrunnelse_spesifikasjoner, vurderes_etter, utdypende_vilkarsvurderinger) FROM stdin;
+COPY public.vilkar_resultat (id, vilkar, resultat, regel_input, regel_output, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, fk_person_resultat_id, begrunnelse, periode_fom, periode_tom, fk_behandling_id, evaluering_aarsak, er_automatisk_vurdert, er_eksplisitt_avslag_paa_soknad, vedtak_begrunnelse_spesifikasjoner, vurderes_etter, utdypende_vilkarsvurderinger, resultat_begrunnelse) FROM stdin;
 \.
 
 
@@ -2581,6 +2628,13 @@ SELECT pg_catalog.setval('public.po_statsborgerskap_seq', 1000000, false);
 
 
 --
+-- Name: refusjon_eos_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.refusjon_eos_seq', 1000000, false);
+
+
+--
 -- Name: saksstatistikk_mellomlagring_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2619,7 +2673,7 @@ SELECT pg_catalog.setval('public.skyggesak_seq', 1000000, false);
 -- Name: task_logg_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.task_logg_seq', 151, true);
+SELECT pg_catalog.setval('public.task_logg_seq', 1, false);
 
 
 --
@@ -3089,6 +3143,14 @@ ALTER TABLE ONLY public.po_statsborgerskap
 
 
 --
+-- Name: refusjon_eos refusjon_eos_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.refusjon_eos
+    ADD CONSTRAINT refusjon_eos_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: saksstatistikk_mellomlagring saksstatistikk_mellomlagring_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3442,6 +3504,13 @@ CREATE INDEX journalpost_fk_behandling_id_idx ON public.journalpost USING btree 
 
 
 --
+-- Name: journalpost_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX journalpost_id_idx ON public.behandling_soknadsinfo USING btree (journalpost_id);
+
+
+--
 -- Name: kompetanse_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3568,6 +3637,13 @@ CREATE INDEX po_statsborgerskap_fk_idx ON public.po_statsborgerskap USING btree 
 
 
 --
+-- Name: refusjon_eos_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX refusjon_eos_fk_behandling_id_idx ON public.refusjon_eos USING btree (fk_behandling_id);
+
+
+--
 -- Name: saksstatistikk_mellomlagring_sendt_tid_null_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3636,6 +3712,20 @@ CASE
     WHEN (aktiv = true) THEN aktiv
     ELSE NULL::boolean
 END));
+
+
+--
+-- Name: uidx_behandling_02; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uidx_behandling_02 ON public.behandling USING btree (fk_fagsak_id) WHERE (((status)::text <> 'AVSLUTTET'::text) AND ((status)::text <> 'SATT_PÅ_MASKINELL_VENT'::text));
+
+
+--
+-- Name: uidx_behandling_03; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uidx_behandling_03 ON public.behandling USING btree (fk_fagsak_id) WHERE ((status)::text = 'SATT_PÅ_MASKINELL_VENT'::text);
 
 
 --
@@ -4245,6 +4335,14 @@ ALTER TABLE ONLY public.po_sivilstand
 
 ALTER TABLE ONLY public.po_statsborgerskap
     ADD CONSTRAINT po_statsborgerskap_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id);
+
+
+--
+-- Name: refusjon_eos refusjon_eos_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.refusjon_eos
+    ADD CONSTRAINT refusjon_eos_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
 
 
 --
