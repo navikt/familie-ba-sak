@@ -42,7 +42,7 @@ Egenskap: Begrunnelser for hendelser
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 13.04.2017 | 12.04.2035 | Oppfylt  |
-      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.04.2017 | 31.03.2024 | Oppfylt  |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.04.2017 | 02.03.2024 | Oppfylt  |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
