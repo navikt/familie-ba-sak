@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsboAdresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.LocalDate
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -43,6 +42,9 @@ data class Dødsfall(
 
     @Column(name = "doedsfall_poststed", nullable = true)
     val dødsfallPoststed: String? = null,
+
+    @Column(name = "manuell_registrert", nullable = false)
+    val manuellRegistrert: Boolean = false,
 ) : BaseEntitet() {
 
     fun tilKopiForNyPerson(nyPerson: Person): Dødsfall =
@@ -73,8 +75,6 @@ fun lagDødsfallFraPdl(
         dødsfallAdresse = dødsfallAdresseFraPdl?.adresselinje1,
         dødsfallPostnummer = dødsfallAdresseFraPdl?.postnummer,
         dødsfallPoststed = dødsfallAdresseFraPdl?.poststedsnavn,
-    ).also {
-        // Ved registrering av dødsfall fra PDL skal vi sette endretAv til system forkortelsen.
-        it.endretAv = SikkerhetContext.SYSTEM_FORKORTELSE
-    }
+        manuellRegistrert = false,
+    )
 }

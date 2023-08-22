@@ -352,7 +352,7 @@ class PersongrunnlagService(
 
         validerAtDødsfallKanManueltRegistreresPåPerson(person, dødsfallDato)
 
-        person.dødsfall = Dødsfall(person = person, dødsfallDato = dødsfallDato)
+        person.dødsfall = Dødsfall(person = person, dødsfallDato = dødsfallDato, manuellRegistrert = true)
         vilkårsvurderingService.oppdaterVilkårVedDødsfall(behandlingId, dødsfallDato, aktør)
         loggService.loggManueltRegistrertDødsfallDato(behandlingId, person, begrunnelse)
     }
