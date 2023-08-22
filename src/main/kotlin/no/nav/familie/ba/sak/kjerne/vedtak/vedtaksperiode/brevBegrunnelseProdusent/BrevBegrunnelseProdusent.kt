@@ -110,7 +110,7 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåHendelser(
     } else if (begrunnelseGrunnlag.grunnlagForVedtaksperiode !is GrunnlagForPersonVilkårInnvilget) {
         val person = begrunnelseGrunnlag.grunnlagForVedtaksperiode.person
 
-        this.filtrerPåPersonDød(person, fomVedtaksperiode)
+        this.filtrerPåBarnDød(person, fomVedtaksperiode)
     } else {
         val person = begrunnelseGrunnlag.grunnlagForVedtaksperiode.person
 
@@ -132,7 +132,7 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåBarn6år(
     }
 }
 
-fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPersonDød(
+fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåBarnDød(
     person: Person,
     fomVedtaksperiode: LocalDate?,
 ): Map<Standardbegrunnelse, SanityBegrunnelse> {
@@ -140,7 +140,7 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPersonDød(
     val personDødeForrigeMåned =
         dødsfall != null && dødsfall.dødsfallDato.toYearMonth().plusMonths(1) == fomVedtaksperiode?.toYearMonth()
 
-    return if (personDødeForrigeMåned) {
+    return if (personDødeForrigeMåned && person.type == PersonType.BARN) {
         this.filterValues { it.ovrigeTriggere?.contains(ØvrigTrigger.BARN_DØD) == true }
     } else {
         emptyMap()
