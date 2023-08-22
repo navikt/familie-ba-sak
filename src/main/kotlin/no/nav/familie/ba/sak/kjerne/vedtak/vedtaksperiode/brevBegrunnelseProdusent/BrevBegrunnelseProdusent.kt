@@ -105,13 +105,16 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåHendelser(
     begrunnelseGrunnlag: BegrunnelseGrunnlag,
     fomVedtaksperiode: LocalDate?,
 ): Map<Standardbegrunnelse, SanityBegrunnelse> {
-    return if (begrunnelseGrunnlag !is BegrunnelseGrunnlagMedVerdiIDennePerioden || begrunnelseGrunnlag.grunnlagForVedtaksperiode !is GrunnlagForPersonVilkårInnvilget) {
+    return if (begrunnelseGrunnlag !is BegrunnelseGrunnlagMedVerdiIDennePerioden) {
         emptyMap()
+    } else if (begrunnelseGrunnlag.grunnlagForVedtaksperiode !is GrunnlagForPersonVilkårInnvilget) {
+        val person = begrunnelseGrunnlag.grunnlagForVedtaksperiode.person
+
+        this.filtrerPåPersonDød(person, fomVedtaksperiode)
     } else {
         val person = begrunnelseGrunnlag.grunnlagForVedtaksperiode.person
 
         this.filtrerPåBarn6år(person, fomVedtaksperiode) +
-            this.filtrerPåPersonDød(person, fomVedtaksperiode) +
             this.filtrerPåSatsendring(person, begrunnelseGrunnlag.grunnlagForVedtaksperiode.andeler, fomVedtaksperiode)
     }
 }
