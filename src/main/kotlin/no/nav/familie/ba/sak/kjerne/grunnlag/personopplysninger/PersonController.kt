@@ -86,7 +86,7 @@ class PersonController(
         )
     }
 
-    @PostMapping(path = ["/registrer-manuell-dødsfall/{behandlingId}"])
+    @PostMapping(path = ["/registrer-manuell-dodsfall/{behandlingId}"])
     fun registrerManuellDødsfallPåPerson(
         @PathVariable behandlingId: Long,
         @RequestBody restManuellDødsfall: RestManuellDødsfall,
@@ -95,7 +95,7 @@ class PersonController(
 
         persongrunnlagService.registrerManuellDødsfallPåPerson(
             behandlingId = BehandlingId(behandlingId),
-            personIdent = restManuellDødsfall.personIdent,
+            personIdent = PersonIdent(restManuellDødsfall.personIdent),
             dødsfallDato = restManuellDødsfall.dødsfallDato,
             begrunnelse = restManuellDødsfall.begrunnelse,
         )
