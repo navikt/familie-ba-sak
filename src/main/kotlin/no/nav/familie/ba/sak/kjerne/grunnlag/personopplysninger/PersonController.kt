@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.ekstern.restDomene.RestManuellDødsfall
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
@@ -8,6 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfoMedNavnOgAdress
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -17,6 +19,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
@@ -79,6 +82,28 @@ class PersonController(
             Ressurs.success(
                 utvidetBehandlingService
                     .lagRestUtvidetBehandling(behandlingId = personopplysningGrunnlag.behandlingId),
+            ),
+        )
+    }
+
+    @PostMapping(path = ["/registrer-manuell-dodsfall/{behandlingId}"])
+    fun registrerManuellDødsfallPåPerson(
+        @PathVariable behandlingId: Long,
+        @RequestBody restManuellDødsfall: RestManuellDødsfall,
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+
+        persongrunnlagService.registrerManuellDødsfallPåPerson(
+            behandlingId = BehandlingId(behandlingId),
+            personIdent = PersonIdent(restManuellDødsfall.personIdent),
+            dødsfallDato = restManuellDødsfall.dødsfallDato,
+            begrunnelse = restManuellDødsfall.begrunnelse,
+        )
+
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService
+                    .lagRestUtvidetBehandling(behandlingId = behandlingId),
             ),
         )
     }

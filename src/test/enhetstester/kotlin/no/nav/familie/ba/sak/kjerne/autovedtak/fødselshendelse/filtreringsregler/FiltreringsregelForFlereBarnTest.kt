@@ -29,7 +29,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfallFraPdl
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -296,7 +296,7 @@ class FiltreringsregelForFlereBarnTest {
             .apply {
                 this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this))
                 if (dødsfallDato != null) {
-                    this.dødsfall = lagDødsfall(
+                    this.dødsfall = lagDødsfallFraPdl(
                         person = this,
                         dødsfallDatoFraPdl = dødsfallDato,
                         dødsfallAdresseFraPdl = PdlKontaktinformasjonForDødsboAdresse(
