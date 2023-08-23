@@ -40,8 +40,6 @@ class UtbetalingsoppdragGenerator(
         erSimulering: Boolean,
         endretMigreringsDato: YearMonth? = null,
     ): BeregnetUtbetalingsoppdragLongId {
-        val personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer()
-
         return Utbetalingsgenerator().lagUtbetalingsoppdrag(
             behandlingsinformasjon = Behandlingsinformasjon(
                 saksbehandlerId = saksbehandlerId,
@@ -49,7 +47,7 @@ class UtbetalingsoppdragGenerator(
                 eksternBehandlingId = vedtak.behandling.id,
                 eksternFagsakId = vedtak.behandling.fagsak.id,
                 ytelse = Ytelsestype.BARNETRYGD,
-                personIdent = personIdent,
+                personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
                 vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
                 opphørFra = opphørFra(forrigeTilkjentYtelse, erSimulering, endretMigreringsDato),
                 utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
@@ -60,8 +58,7 @@ class UtbetalingsoppdragGenerator(
             nyeAndeler = nyTilkjentYtelse.andelerTilkjentYtelse.map {
                 it.tilAndelDataLongId()
             },
-            sisteAndelPerKjede = sisteAndelPerKjede?.mapValues { it.value.tilAndelDataLongId() }
-                ?: emptyMap(),
+            sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
         )
     }
 
@@ -156,12 +153,18 @@ class UtbetalingsoppdragGenerator(
         }
 
         val andelerTilOpphør =
-            andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato, sisteAndelPerIdent)
+            andelerTilOpphørMedDato(
+                forrigeKjeder,
+                sisteBeståenAndelIHverKjede,
+                endretMigreringsDato,
+                sisteAndelPerIdent,
+            )
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelseForUtbetalingsoppdrag>> =
             andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
         val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty()) {
-            val sisteOffsetIKjedeOversikt = sisteAndelPerIdent.map { it.key to it.value.periodeOffset!!.toInt() }.toMap()
+            val sisteOffsetIKjedeOversikt =
+                sisteAndelPerIdent.map { it.key to it.value.periodeOffset!!.toInt() }.toMap()
             lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(
                 andeler = andelerTilOpprettelse,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
