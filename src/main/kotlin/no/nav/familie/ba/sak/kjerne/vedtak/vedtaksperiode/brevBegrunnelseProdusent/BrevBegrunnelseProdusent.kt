@@ -199,8 +199,8 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetypeFor
 ) = this.filterValues {
     when (begrunnelseGrunnlag) {
         is BegrunnelseGrunnlagMedVerdiIDennePerioden -> {
-            val dennePerioden = begrunnelseGrunnlag.grunnlagForVedtaksperiode
-            when (dennePerioden.erOrdinæreVilkårInnvilget() && dennePerioden.erInnvilgetEtterEndretUtbetaling()) {
+            val forrigePeriode = begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode
+            when (forrigePeriode?.erOrdinæreVilkårInnvilget() == true && forrigePeriode.erInnvilgetEtterEndretUtbetaling()) {
                 true -> {
                     it.resultat in listOf(
                         SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
