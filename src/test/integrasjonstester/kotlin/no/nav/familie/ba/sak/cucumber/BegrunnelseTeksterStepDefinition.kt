@@ -27,7 +27,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -131,7 +131,7 @@ class BegrunnelseTeksterStepDefinition {
 
         vedtak.behandling.overstyrtEndringstidspunkt = overstyrteEndringstidspunkt[behandlingId]
 
-        val grunnlagForVedtaksperiode = GrunnlagForVedtaksperioder(
+        val grunnlagForVedtaksperiode = BehandlingsGrunnlagForVedtaksperioder(
             persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
             personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
             fagsakType = vedtak.behandling.fagsak.type,
@@ -146,7 +146,7 @@ class BegrunnelseTeksterStepDefinition {
         val grunnlagForVedtaksperiodeForrigeBehandling = forrigeBehandlingId?.let {
             val forrigeVedtak =
                 vedtaksliste.find { it.behandling.id == forrigeBehandlingId && it.aktiv } ?: error("Finner ikke vedtak")
-            GrunnlagForVedtaksperioder(
+            BehandlingsGrunnlagForVedtaksperioder(
                 persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
                 personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
                 fagsakType = forrigeVedtak.behandling.fagsak.type,

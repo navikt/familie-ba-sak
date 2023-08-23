@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vilkår påvirker begrunnelser
+Egenskap: Begrunnelser ved endring av vilkår
 
   Bakgrunn:
     Gitt følgende behandling

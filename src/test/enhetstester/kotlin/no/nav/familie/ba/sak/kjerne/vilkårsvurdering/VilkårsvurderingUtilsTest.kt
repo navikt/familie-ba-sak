@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfallFraPdl
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -220,7 +220,7 @@ class VilkårsvurderingUtilsTest {
         val nyBehandling = lagBehandling()
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
-        val dødtBarn = lagPerson(type = PersonType.BARN).apply { dødsfall = lagDødsfall(this, "2012-12-12", null) }
+        val dødtBarn = lagPerson(type = PersonType.BARN).apply { dødsfall = lagDødsfallFraPdl(this, "2012-12-12", null) }
 
         val personResultatForDødtBarn = genererPersonResultatForPerson(
             vilkårsvurdering = vilkårsvurdering,

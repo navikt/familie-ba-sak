@@ -194,6 +194,7 @@ fun tilfeldigPerson(
     kjønn: Kjønn = Kjønn.MANN,
     aktør: Aktør = randomAktør(),
     personId: Long = nestePersonId(),
+    dødsfall: Dødsfall? = null,
 ) =
     Person(
         id = personId,
@@ -204,6 +205,7 @@ fun tilfeldigPerson(
         navn = "",
         kjønn = kjønn,
         målform = Målform.NB,
+        dødsfall = dødsfall,
     ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun Person.tilPersonEnkel() =
