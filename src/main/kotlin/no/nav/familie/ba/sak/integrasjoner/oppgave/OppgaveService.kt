@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåB
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
@@ -87,9 +86,8 @@ class OppgaveService(
                 fristFerdigstillelse = fristForFerdigstillelse,
                 beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
                 enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
-                behandlingstema = when (behandling.underkategori) {
-                    BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET, BehandlingUnderkategori.INSTITUSJON ->
-                        behandling.underkategori.tilOppgaveBehandlingTema().value
+                behandlingstema = when (behandling.fagsak.type) {
+                    else -> behandling.tilOppgaveBehandlingTema().value
                 },
                 behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
                 tilordnetRessurs = tilordnetNavIdent,
