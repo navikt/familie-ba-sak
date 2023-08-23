@@ -64,7 +64,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utbetalingsperiodemedbegrunnelser.UtbetalingsperiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -127,8 +127,8 @@ class VedtaksperiodeService(
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
 
         return utledEndringstidspunkt(
-            grunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
-            grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
+            behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
+            behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
         )
     }
 
@@ -351,8 +351,8 @@ class VedtaksperiodeService(
         )
     }
 
-    fun Behandling.hentGrunnlagForVedtaksperioder(): GrunnlagForVedtaksperioder =
-        GrunnlagForVedtaksperioder(
+    fun Behandling.hentGrunnlagForVedtaksperioder(): BehandlingsGrunnlagForVedtaksperioder =
+        BehandlingsGrunnlagForVedtaksperioder(
             persongrunnlag = persongrunnlagService.hentAktivThrows(this.id),
             personResultater = vilkårsvurderingService.hentAktivForBehandling(this.id)?.personResultater ?: emptySet(),
             fagsakType = fagsak.type,
@@ -525,8 +525,8 @@ class VedtaksperiodeService(
                         behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
                     utvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
-                        grunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
-                        grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
+                        behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
+                        behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEØSBegrunnelser,
                         behandlingUnderkategori = behandling.underkategori,

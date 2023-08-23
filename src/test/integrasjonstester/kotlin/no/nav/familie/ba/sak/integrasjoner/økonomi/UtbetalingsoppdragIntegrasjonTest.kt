@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningTestUtil.sisteAndelPerIdent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -40,7 +41,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -218,11 +218,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 forrigeKjeder = ØkonomiUtils.grupperAndeler(
                     andelerTilkjentYtelse.forIverksetting(),
                 ),
-                sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
-                    ØkonomiUtils.grupperAndeler(
-                        andelerTilkjentYtelse.forIverksetting(),
-                    ),
-                ),
+                sisteAndelPerIdent = sisteAndelPerIdent(andelerTilkjentYtelse),
             )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
@@ -352,7 +348,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             ),
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
-        val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = behandling2)
+        val sisteAndelPerIdent = beregningService.hentSisteAndelPerIdent(behandling.fagsak.id)
 
         val utbetalingsoppdrag =
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -362,16 +358,12 @@ class UtbetalingsoppdragIntegrasjonTest(
                 forrigeKjeder = ØkonomiUtils.grupperAndeler(
                     andelerFørstegangsbehandling.forIverksetting(),
                 ),
-                sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
-                    ØkonomiUtils.grupperAndeler(
-                        andelerFørstegangsbehandling.forIverksetting(),
-                    ),
-                ),
-                sisteOffsetPåFagsak = sisteOffsetPåFagsak,
+                sisteAndelPerIdent = sisteAndelPerIdent,
                 oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
                     andelerRevurdering.forIverksetting(),
                 ),
             )
+        avsluttOgLagreBehandling(behandling2)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -492,7 +484,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             ),
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
-        val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = behandling2)
+        val sisteAndelPerIdent = beregningService.hentSisteAndelPerIdent(behandling2.fagsak.id)
 
         val utbetalingsoppdrag =
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -502,12 +494,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 forrigeKjeder = ØkonomiUtils.grupperAndeler(
                     andelerFørstegangsbehandling.forIverksetting(),
                 ),
-                sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
-                    ØkonomiUtils.grupperAndeler(
-                        andelerFørstegangsbehandling.forIverksetting(),
-                    ),
-                ),
-                sisteOffsetPåFagsak = sisteOffsetPåFagsak,
+                sisteAndelPerIdent = sisteAndelPerIdent,
                 oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
                     andelerRevurdering.forIverksetting(),
                 ),
@@ -746,7 +733,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             ),
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
-        val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = behandling2)
+        val sisteAndelPerIdent = beregningService.hentSisteAndelPerIdent(behandling2.fagsak.id)
 
         val utbetalingsoppdrag =
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -756,12 +743,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 forrigeKjeder = ØkonomiUtils.grupperAndeler(
                     andelerFørstegangsbehandling.forIverksetting(),
                 ),
-                sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
-                    ØkonomiUtils.grupperAndeler(
-                        andelerFørstegangsbehandling.forIverksetting(),
-                    ),
-                ),
-                sisteOffsetPåFagsak = sisteOffsetPåFagsak,
+                sisteAndelPerIdent = sisteAndelPerIdent,
                 oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
                     andelerRevurdering.forIverksetting(),
                 ),
@@ -916,7 +898,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
-        val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = behandling2)
+        val sisteAndelPerIdent = beregningService.hentSisteAndelPerIdent(behandling2.fagsak.id)
 
         val utbetalingsoppdrag =
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -926,12 +908,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 forrigeKjeder = ØkonomiUtils.grupperAndeler(
                     andelerFørstegangsbehandling.forIverksetting(),
                 ),
-                sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
-                    ØkonomiUtils.grupperAndeler(
-                        andelerFørstegangsbehandling.forIverksetting(),
-                    ),
-                ),
-                sisteOffsetPåFagsak = sisteOffsetPåFagsak,
+                sisteAndelPerIdent = sisteAndelPerIdent,
                 oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
                     andelerRevurdering.forIverksetting(),
                 ),
@@ -984,95 +961,6 @@ class UtbetalingsoppdragIntegrasjonTest(
             "2035-01-01",
             "2038-12-31",
         )
-    }
-
-    @Test
-    fun `Skal teste at forrige offset er samme som den høyeste offsetten for den identen`() {
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak,
-                førsteSteg = StegType.BEHANDLING_AVSLUTTET,
-            ),
-        )
-
-        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
-        val person = tilfeldigPerson()
-        val vedtak = lagVedtak(behandling)
-        val andelerFørstegangsbehandling = listOf(
-            lagAndelTilkjentYtelse(
-                årMnd("2020-01"),
-                årMnd("2024-12"),
-                YtelseType.ORDINÆR_BARNETRYGD,
-                1054,
-                behandling,
-                periodeIdOffset = 0,
-                person = person,
-                aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse,
-            ),
-            lagAndelTilkjentYtelse(
-                årMnd("2025-01"),
-                årMnd("2029-12"),
-                YtelseType.ORDINÆR_BARNETRYGD,
-                1654,
-                behandling,
-                periodeIdOffset = 1,
-                forrigeperiodeIdOffset = 0,
-                person = person,
-                aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse,
-            ),
-        )
-
-        val andelerAndregangsbehandling = listOf(
-            lagAndelTilkjentYtelse(
-                årMnd("2020-01"),
-                årMnd("2024-12"),
-                YtelseType.ORDINÆR_BARNETRYGD,
-                1254,
-                behandling,
-                periodeIdOffset = 0,
-                person = person,
-                aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse,
-            ),
-        )
-        val andelerRevurderingsbehandling = listOf(
-            lagAndelTilkjentYtelse(
-                årMnd("2020-01"),
-                årMnd("2029-12"),
-                YtelseType.ORDINÆR_BARNETRYGD,
-                1654,
-                behandling,
-                person = person,
-                aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse,
-            ),
-        )
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerRevurderingsbehandling)
-        tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
-
-        val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-            "saksbehandler",
-            vedtak,
-            false,
-            sisteOffsetPåFagsak = 1,
-            forrigeKjeder = ØkonomiUtils.grupperAndeler(
-                andelerAndregangsbehandling.forIverksetting(),
-            ),
-            sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
-                ØkonomiUtils.grupperAndeler(
-                    (andelerFørstegangsbehandling + andelerAndregangsbehandling).forIverksetting(),
-                ),
-            ),
-            oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                andelerRevurderingsbehandling.forIverksetting(),
-            ),
-        )
-
-        assertEquals(1, utbetalingsoppdrag.utbetalingsperiode.single() { it.opphør == null }.forrigePeriodeId)
-        assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.single() { it.opphør == null }.periodeId)
     }
 
     @Test
@@ -1154,7 +1042,10 @@ class UtbetalingsoppdragIntegrasjonTest(
         )
         tilkjentYtelse3.andelerTilkjentYtelse.addAll(andelerRevurdering2)
 
-        assertEquals(0, beregningService.hentSisteOffsetPåFagsak(behandling = behandling3))
+        assertEquals(
+            0,
+            beregningService.hentSisteAndelPerIdent(behandling3.fagsak.id).maxOf { it.value.periodeOffset!! },
+        )
     }
 
     @Test
@@ -1488,7 +1379,6 @@ class UtbetalingsoppdragIntegrasjonTest(
         }
 
         @Test
-        @Disabled // Denne virker ikke ennå, men skal bli fikset
         fun `skal alltid peke til siste andelen i kjeden ved opphør, selv opphør etter opphør`() {
             fun assertHarKunOpphør(utbetalingsoppdrag: Utbetalingsoppdrag, opphørFom: YearMonth) {
                 assertThat(utbetalingsoppdrag.kodeEndring).isEqualTo(Utbetalingsoppdrag.KodeEndring.ENDR)
@@ -1603,11 +1493,13 @@ class UtbetalingsoppdragIntegrasjonTest(
                 tilkjentYtelse = tilkjentYtelse,
             )
 
-        private fun opprettRevurdering() =
-            behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING),
-            )
+        private fun opprettRevurdering() = opprettRevurdering(fagsak)
     }
+
+    private fun opprettRevurdering(fagsak: Fagsak) =
+        behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING),
+        )
 
     private fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak: Vedtak): Utbetalingsoppdrag {
         return utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(

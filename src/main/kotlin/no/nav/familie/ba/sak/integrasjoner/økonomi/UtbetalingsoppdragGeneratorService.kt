@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -73,10 +75,10 @@ class UtbetalingsoppdragGeneratorService(
             beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = oppdatertBehandling.id)
                 .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
-        val oppdaterteKjeder = ØkonomiUtils.grupperAndeler(oppdatertTilstand)
+        val oppdaterteKjeder = grupperAndeler(oppdatertTilstand)
 
         val erFørsteIverksatteBehandlingPåFagsak =
-            beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId = oppdatertBehandling.fagsak.id)
+            beregningService.hentSisteAndelPerIdent(fagsakId = oppdatertBehandling.fagsak.id)
                 .isEmpty()
 
         val utbetalingsoppdrag = if (erFørsteIverksatteBehandlingPåFagsak) {
@@ -96,20 +98,12 @@ class UtbetalingsoppdragGeneratorService(
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
                     .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
-            val forrigeKjeder = ØkonomiUtils.grupperAndeler(forrigeTilstand)
+            val forrigeKjeder = grupperAndeler(forrigeTilstand)
 
-            val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(
-                forrigeBehandling.fagsak.id,
-                andelTilkjentYtelseForUtbetalingsoppdragFactory,
-            )
-
-            val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
+            val sisteAndelPerIdent = beregningService.hentSisteAndelPerIdent(forrigeBehandling.fagsak.id)
 
             if (oppdatertTilstand.isNotEmpty()) {
-                ØkonomiUtils.oppdaterBeståendeAndelerMedOffset(
-                    oppdaterteKjeder = oppdaterteKjeder,
-                    forrigeKjeder = forrigeKjeder,
-                )
+                oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
                 val tilkjentYtelseMedOppdaterteAndeler = oppdatertTilstand.first().tilkjentYtelse
                 beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
             }
@@ -119,8 +113,7 @@ class UtbetalingsoppdragGeneratorService(
                 vedtak = vedtak,
                 erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                 forrigeKjeder = forrigeKjeder,
-                sisteOffsetPerIdent = sisteOffsetPerIdent,
-                sisteOffsetPåFagsak = sisteOffsetPåFagsak,
+                sisteAndelPerIdent = sisteAndelPerIdent,
                 oppdaterteKjeder = oppdaterteKjeder,
                 erSimulering = erSimulering,
                 endretMigreringsDato = beregnOmMigreringsDatoErEndret(
