@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
@@ -27,8 +26,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksp
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.EndretUtbetalingAndelForVedtaksperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VedtaksperiodeGrunnlagForPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VedtaksperiodeGrunnlagForPersonVilkårInnvilget
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -373,28 +370,6 @@ private fun Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned>.lagTidslinje
             )
         }
     }
-}
-
-private fun Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned>.fjernOverflødigePerioderPåSlutten(): Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned> {
-    val sortertePerioder = this.perioder()
-        .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
-
-    val perioderTilOgMedSisteInnvilgede = sortertePerioder
-        .dropLastWhile { it.innhold !is VedtaksperiodeGrunnlagForPersonVilkårInnvilget }
-
-    val perioderEtterSisteInnvilgedePeriode =
-        sortertePerioder.subList(perioderTilOgMedSisteInnvilgede.size, sortertePerioder.size)
-
-    val (eksplisitteAvslagEtterSisteInnvilgedePeriode, opphørEtterSisteInnvilgedePeriode) =
-        perioderEtterSisteInnvilgedePeriode
-            .filter { it.innhold != null }
-            .partition { it.innhold!!.erEksplisittAvslag() }
-
-    val førsteOpphørEtterSisteInnvilgedePeriode =
-        opphørEtterSisteInnvilgedePeriode.firstOrNull()?.copy(tilOgMed = MånedTidspunkt.uendeligLengeTil())
-
-    return (perioderTilOgMedSisteInnvilgede + førsteOpphørEtterSisteInnvilgedePeriode + eksplisitteAvslagEtterSisteInnvilgedePeriode).filterNotNull()
-        .tilTidslinje()
 }
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode(): Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned> {

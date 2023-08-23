@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedNullable
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AndelForVedtaksperiode
@@ -55,7 +57,9 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagTidslinjer(): Ma
 fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslinje(person: Person): Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned> {
     val forskjøvedeVilkårResultaterForPerson =
         this.personResultater.single { it.aktør == person.aktør }
-            .vilkårResultater.tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
+            .vilkårResultater
+            .filter { it.erEksplisittAvslagPåSøknad != true }
+            .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
             .map { tidslinje -> tidslinje.map { it?.let { VilkårResultatForVedtaksperiode(it) } } }
             .kombiner { it }
 
@@ -72,7 +76,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
         this.perioderOvergangsstønad.filtrerPåAktør(person.aktør)
             .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(andelerTilkjentYtelseTidslinje.hentErUtbetalingSmåbarnstilleggTidslinje())
 
-    return forskjøvedeVilkårResultaterForPerson
+    val begrunnelseGrunnlagForPersonIPeriode = forskjøvedeVilkårResultaterForPerson
         .kombinerMed(
             andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForVedtaksPeriodeTidslinje(),
         ) { vilkårResultater, andeler ->
@@ -90,4 +94,20 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
         }.kombinerMedNullable(overgangsstønadTidslinje) { grunnlagForPerson, overgangsstønad ->
             grunnlagForPerson?.let { grunnlagForPerson.copy(overgangsstønad = overgangsstønad) }
         }
+    return begrunnelseGrunnlagForPersonIPeriode.fjernOverflødigePerioderPåSlutten()
+}
+
+private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.fjernOverflødigePerioderPåSlutten(): Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned> {
+    val sortertePerioder = this.perioder()
+        .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
+
+    val perioderTilOgMedSisteInnvilgede = sortertePerioder
+        .dropLastWhile { it.innhold?.erOrdinæreVilkårInnvilget() != true }
+
+    val førstePeriodeEtterSisteInnvilgedePeriode =
+        sortertePerioder.subList(perioderTilOgMedSisteInnvilgede.size, sortertePerioder.size).firstOrNull()
+            ?.copy(tilOgMed = MånedTidspunkt.uendeligLengeTil())
+
+    return (perioderTilOgMedSisteInnvilgede + førstePeriodeEtterSisteInnvilgedePeriode).filterNotNull()
+        .tilTidslinje()
 }
