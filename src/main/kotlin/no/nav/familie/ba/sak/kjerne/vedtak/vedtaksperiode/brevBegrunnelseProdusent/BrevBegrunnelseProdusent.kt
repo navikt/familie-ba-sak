@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.mapInnhold
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
@@ -315,8 +316,7 @@ private fun Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned>.lagTidslinje
     grunnlagTidslinjePerPersonForrigeBehandling: Map<Person, Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>>?,
     person: Person,
 ): Tidslinje<BegrunnelseGrunnlagForPeriode, Måned> {
-    val grunnlagMedForrigePeriodeTidslinje =
-        grunnlagTidslinje.tilForrigeOgNåværendePeriodeTidslinje()
+    val grunnlagMedForrigePeriodeTidslinje = grunnlagTidslinje.tilForrigeOgNåværendePeriodeTidslinje(this)
 
     val grunnlagForrigeBehandlingTidslinje =
         grunnlagTidslinjePerPersonForrigeBehandling?.get(person) ?: TomTidslinje()
@@ -356,11 +356,17 @@ data class ForrigeOgDennePerioden(
     val denne: BegrunnelseGrunnlagForPersonIPeriode?,
 )
 
-private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOgNåværendePeriodeTidslinje(): Tidslinje<ForrigeOgDennePerioden, Måned> {
+private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOgNåværendePeriodeTidslinje(
+    vedtaksperiodeTidslinje: Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned>,
+): Tidslinje<ForrigeOgDennePerioden, Måned> {
+    val grunnlagPerioderSplittetPåVedtaksperiode = kombinerMed(vedtaksperiodeTidslinje) { grunnlag, periode ->
+        Pair(grunnlag, periode)
+    }.perioder().mapInnhold { it?.first }
+
     return (
         listOf(
             månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
-        ) + this.perioder()
+        ) + grunnlagPerioderSplittetPåVedtaksperiode
         ).zipWithNext { forrige, denne ->
         periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
     }.tilTidslinje()
