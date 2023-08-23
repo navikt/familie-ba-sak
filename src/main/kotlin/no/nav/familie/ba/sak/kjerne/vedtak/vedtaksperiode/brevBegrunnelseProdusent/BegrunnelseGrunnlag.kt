@@ -17,8 +17,7 @@ fun lagBegrunnelseGrunnlag(
     sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?,
 ) = if (dennePerioden == null) {
     BegrunnelseGrunnlagIngenVerdiIDennePerioden(
-        // Setter Denne til false midlertidig
-        erInnvilgetForrigeBehandling = false,
+        erInnvilgetForrigeBehandling = sammePeriodeForrigeBehandling?.erOrdinæreVilkårInnvilget() == true,
     )
 } else {
     BegrunnelseGrunnlagMedVerdiIDennePerioden(

@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent
 
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -21,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.hentErUtbeta
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.tilAndelerForVedtaksPeriodeTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.Companion.hentOrdinæreVilkårFor
+import java.math.BigDecimal
 
 data class BegrunnelseGrunnlagForPersonIPeriode(
     val person: Person,
@@ -29,9 +33,26 @@ data class BegrunnelseGrunnlagForPersonIPeriode(
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
     val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
-)
+) {
+    fun erOrdinæreVilkårInnvilget() =
+        hentOrdinæreVilkårFor(person.type).all { ordinærtVilkårForPerson ->
+            vilkårResultater.any { it.vilkårType == ordinærtVilkårForPerson && it.resultat == Resultat.OPPFYLT }
+        }
 
-fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonIPeriode(person: Person): Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned> {
+    fun erInnvilgetEtterEndretUtbetaling(): Boolean {
+        val erEndretUtbetaling = endretUtbetalingAndel != null
+        val erEndretUtbetalingPåNullProsent = endretUtbetalingAndel?.prosent == BigDecimal.ZERO
+        val erÅrsakDeltBosted = endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
+
+        return !erEndretUtbetaling || !erEndretUtbetalingPåNullProsent || erÅrsakDeltBosted
+    }
+}
+
+fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagTidslinjer(): Map<Person, Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>> {
+    return this.persongrunnlag.personer.associateWith { this.lagBegrunnelseGrunnlagForPersonTidslinje(it) }
+}
+
+fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslinje(person: Person): Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned> {
     val forskjøvedeVilkårResultaterForPerson =
         this.personResultater.single { it.aktør == person.aktør }
             .vilkårResultater.tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
