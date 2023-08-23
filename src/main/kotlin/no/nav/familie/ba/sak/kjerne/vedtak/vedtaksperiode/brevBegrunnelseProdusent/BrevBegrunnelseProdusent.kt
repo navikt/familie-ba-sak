@@ -66,9 +66,16 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
         val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
 
-        val begrunnelserFiltrertPåPeriodetype = sanityBegrunnelser.filtrerPåPeriodetype(begrunnelseGrunnlag)
+        val begrunnelserFiltrertPåPeriodetype =
+            sanityBegrunnelser.filtrerPåPeriodetype(
+                begrunnelseGrunnlagForPeriode = begrunnelseGrunnlag.dennePerioden,
+                begrunnelseGrunnlagForrigePeriode = begrunnelseGrunnlag.forrigePeriode,
+            )
         val begrunnelserFiltrertPåPeriodetypeForrigePeriode =
-            sanityBegrunnelser.filtrerPåPeriodetypeForrigePeriode(begrunnelseGrunnlag)
+            sanityBegrunnelser.filtrerPåPeriodetype(
+                begrunnelseGrunnlagForPeriode = begrunnelseGrunnlag.forrigePeriode,
+                begrunnelseGrunnlagForrigePeriode = null,
+            )
 
         val filtrertPåVilkår = begrunnelserFiltrertPåPeriodetype.filtrerPåVilkår(
             begrunnelseGrunnlag = begrunnelseGrunnlag,
@@ -160,15 +167,28 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSatsendring(
 }
 
 private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetype(
-    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
+    begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode?,
+    begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
 ) = this.filterValues {
-    val dennePerioden = begrunnelseGrunnlag.dennePerioden
-
-    if (dennePerioden.erOrdinæreVilkårInnvilget() && dennePerioden.erInnvilgetEtterEndretUtbetaling()) {
-        it.resultat in listOf(
-            SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
-            SanityVedtakResultat.REDUKSJON,
+    if (begrunnelseGrunnlagForPeriode?.erOrdinæreVilkårInnvilget() == true &&
+        begrunnelseGrunnlagForPeriode.erInnvilgetEtterEndretUtbetaling()
+    ) {
+        val erReduksjonIAndel = erReduksjon(
+            andelerDennePerioden = begrunnelseGrunnlagForPeriode.andeler,
+            andelerForrigePeriode = begrunnelseGrunnlagForrigePeriode?.andeler ?: emptyList(),
         )
+        val erØkingIAndel = erØking(
+            andelerDennePerioden = begrunnelseGrunnlagForPeriode.andeler,
+            andelerForrigePeriode = begrunnelseGrunnlagForrigePeriode?.andeler ?: emptyList(),
+        )
+
+        val relevanteResultater = listOfNotNull(
+            if (erØkingIAndel) SanityVedtakResultat.INNVILGET_ELLER_ØKNING else null,
+            if (erReduksjonIAndel) SanityVedtakResultat.REDUKSJON else null,
+            if (!erØkingIAndel && !erReduksjonIAndel) SanityVedtakResultat.INGEN_ENDRING else null,
+        )
+
+        it.resultat in relevanteResultater
     } else {
         it.resultat in listOf(
             SanityVedtakResultat.REDUKSJON,
@@ -177,20 +197,35 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetype(
     }
 }
 
-private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetypeForrigePeriode(
-    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
-) = this.filterValues {
-    val forrigePeriode = begrunnelseGrunnlag.forrigePeriode
-    if (forrigePeriode?.erOrdinæreVilkårInnvilget() == true && forrigePeriode.erInnvilgetEtterEndretUtbetaling()) {
-        it.resultat in listOf(
-            SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
-            SanityVedtakResultat.REDUKSJON,
-        )
-    } else {
-        it.resultat in listOf(
-            SanityVedtakResultat.REDUKSJON,
-            SanityVedtakResultat.IKKE_INNVILGET,
-        )
+private fun erReduksjon(
+    andelerDennePerioden: Iterable<AndelForVedtaksperiode>,
+    andelerForrigePeriode: Iterable<AndelForVedtaksperiode>,
+): Boolean {
+    return andelerForrigePeriode.any { andelIForrigePeriode ->
+        val sammeAndelDennePerioden =
+            andelerDennePerioden.singleOrNull { andelIForrigePeriode.type == it.type }
+
+        val erAndelenMistet = sammeAndelDennePerioden == null
+        val harAndelenGåttNedIProsent =
+            sammeAndelDennePerioden != null && andelIForrigePeriode.prosent > sammeAndelDennePerioden.prosent
+
+        erAndelenMistet || harAndelenGåttNedIProsent
+    }
+}
+
+private fun erØking(
+    andelerDennePerioden: Iterable<AndelForVedtaksperiode>,
+    andelerForrigePeriode: Iterable<AndelForVedtaksperiode>,
+): Boolean {
+    return andelerDennePerioden.any { andelIPeriode ->
+        val sammeAndelForrigePeriod =
+            andelerForrigePeriode.singleOrNull { andelIPeriode.type == it.type }
+
+        val erAndelenTjent = sammeAndelForrigePeriod == null
+        val harAndelenGåttOppIProsent =
+            sammeAndelForrigePeriod != null && andelIPeriode.prosent > sammeAndelForrigePeriod.prosent
+
+        erAndelenTjent || harAndelenGåttOppIProsent
     }
 }
 
