@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRe
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -29,23 +31,6 @@ class VilkårsvurderingService(
 
     fun hentAktivForBehandlingThrows(behandlingId: Long): Vilkårsvurdering = hentAktivForBehandling(behandlingId)
         ?: throw Feil("Fant ikke vilkårsvurdering knyttet til behandling=$behandlingId")
-
-    fun finnBarnMedEksplisittAvslagPåBehandling(behandlingId: Long): List<Aktør> {
-        val eksplisistteAvslagPåBehandling = hentEksplisitteAvslagPåBehandling(behandlingId)
-        return eksplisistteAvslagPåBehandling
-            .filterNot {
-                it.personResultat?.erSøkersResultater()
-                    ?: error("VilkårResultat mangler kobling til PersonResultat")
-            }
-            .map { it.personResultat!!.aktør }
-            .distinct()
-    }
-
-    private fun hentEksplisitteAvslagPåBehandling(behandlingId: Long): List<VilkårResultat> {
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
-        return vilkårsvurdering?.personResultater?.flatMap { it.vilkårResultater }
-            ?.filter { it.erEksplisittAvslagPåSøknad ?: false } ?: emptyList()
-    }
 
     fun oppdater(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer vilkårsvurdering $vilkårsvurdering")
@@ -91,6 +76,18 @@ class VilkårsvurderingService(
             ?.minByOrNull { it.periodeFom!! }
             ?.periodeFom
             ?.toYearMonth()
+    }
+
+    @Transactional
+    fun oppdaterVilkårVedDødsfall(behandlingId: BehandlingId, dødsfallsDato: LocalDate, aktør: Aktør) {
+        val vilkårsvurdering = hentAktivForBehandlingThrows(behandlingId.id)
+
+        val personResultat = vilkårsvurdering.personResultater.find { it.aktør == aktør }
+            ?: throw Feil(message = "Fant ikke vilkårsvurdering for person under manuell registrering av dødsfall dato")
+
+        personResultat.vilkårResultater.filter { it.periodeTom != null && it.periodeTom!! > dødsfallsDato }.forEach {
+            it.periodeTom = dødsfallsDato
+        }
     }
 
     companion object {
