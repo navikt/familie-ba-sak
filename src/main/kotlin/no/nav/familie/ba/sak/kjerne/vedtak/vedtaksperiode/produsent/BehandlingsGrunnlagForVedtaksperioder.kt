@@ -65,11 +65,11 @@ data class BehandlingsGrunnlagForVedtaksperioder(
     val perioderOvergangsstønad: List<InternPeriodeOvergangsstønad>,
     val uregistrerteBarn: List<BarnMedOpplysninger>,
 ) {
-    private val utfylteEndredeUtbetalinger = endredeUtbetalinger
+    val utfylteEndredeUtbetalinger = endredeUtbetalinger
         .map { it.tilIEndretUtbetalingAndel() }
         .filterIsInstance<IUtfyltEndretUtbetalingAndel>()
 
-    private val utfylteKompetanser = kompetanser
+    val utfylteKompetanser = kompetanser
         .map { it.tilIKompetanse() }
         .filterIsInstance<UtfyltKompetanse>()
 
@@ -444,14 +444,14 @@ private fun Tidslinje<List<VilkårResultat>, Måned>.tilHarRettPåUtbetalingTids
     }
 }
 
-private fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje() =
+fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje() =
     tilTidslinjerPerAktørOgType()
         .values
         .map { tidslinje -> tidslinje.mapIkkeNull { AndelForVedtaksperiode(it) } }
         .kombiner { it }
 
 // Vi trenger dette for å kunne begrunne nye perioder med småbarnstillegg som vi ikke hadde i forrige behandling
-private fun List<InternPeriodeOvergangsstønad>.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(
+fun List<InternPeriodeOvergangsstønad>.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(
     erUtbetalingSmåbarnstilleggTidslinje: Tidslinje<Boolean, Måned>,
 ) = this
     .map { OvergangsstønadForVedtaksperiode(it) }
@@ -465,23 +465,23 @@ private fun Tidslinje<List<VilkårResultat>, Måned>.tilVilkårResultaterForVedt
     this.map { vilkårResultater -> vilkårResultater?.map { VilkårResultatForVedtaksperiode(it) } }
 
 @JvmName("internPeriodeOvergangsstønaderFiltrerPåAktør")
-private fun List<InternPeriodeOvergangsstønad>.filtrerPåAktør(aktør: Aktør) =
+fun List<InternPeriodeOvergangsstønad>.filtrerPåAktør(aktør: Aktør) =
     this.filter { it.personIdent == aktør.aktivFødselsnummer() }
 
 @JvmName("andelerTilkjentYtelserFiltrerPåAktør")
-private fun List<AndelTilkjentYtelse>.filtrerPåAktør(aktør: Aktør) =
+fun List<AndelTilkjentYtelse>.filtrerPåAktør(aktør: Aktør) =
     this.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == aktør }
 
 @JvmName("endredeUtbetalingerFiltrerPåAktør")
-private fun List<IUtfyltEndretUtbetalingAndel>.filtrerPåAktør(aktør: Aktør) =
+fun List<IUtfyltEndretUtbetalingAndel>.filtrerPåAktør(aktør: Aktør) =
     this.filter { endretUtbetaling -> endretUtbetaling.person.aktør == aktør }
 
 @JvmName("utfyltKompetanseFiltrerPåAktør")
-private fun List<UtfyltKompetanse>.filtrerPåAktør(aktør: Aktør) =
+fun List<UtfyltKompetanse>.filtrerPåAktør(aktør: Aktør) =
     this.filter { it.barnAktører.contains(aktør) }
 
 @JvmName("vilkårResultatFiltrerPåAktør")
-private fun List<VilkårResultat>.filtrerPåAktør(aktør: Aktør) =
+fun List<VilkårResultat>.filtrerPåAktør(aktør: Aktør) =
     filter { it.personResultat?.aktør == aktør }
 
 private fun Periode<VedtaksperiodeGrunnlagForPerson, Måned>.erInnvilgetEllerEksplisittAvslag(): Boolean {
@@ -494,10 +494,13 @@ private fun Periode<VedtaksperiodeGrunnlagForPerson, Måned>.erInnvilgetEllerEks
     return erInnvilget || erEksplisittAvslag
 }
 
-private fun List<AndelTilkjentYtelse>.hentErUtbetalingSmåbarnstilleggTidslinje() =
-    this.tilAndelerForVedtaksPeriodeTidslinje()
-        .mapIkkeNull { andelerIPeriode ->
-            andelerIPeriode.any {
-                it.type == YtelseType.SMÅBARNSTILLEGG && it.kalkulertUtbetalingsbeløp > 0
-            }
+private fun List<AndelTilkjentYtelse>.hentErUtbetalingSmåbarnstilleggTidslinje(): Tidslinje<Boolean, Måned> {
+    return tilAndelerForVedtaksPeriodeTidslinje().hentErUtbetalingSmåbarnstilleggTidslinje()
+}
+
+fun Tidslinje<Iterable<AndelForVedtaksperiode>, Måned>.hentErUtbetalingSmåbarnstilleggTidslinje() =
+    this.mapIkkeNull { andelerIPeriode ->
+        andelerIPeriode.any {
+            it.type == YtelseType.SMÅBARNSTILLEGG && it.kalkulertUtbetalingsbeløp > 0
         }
+    }

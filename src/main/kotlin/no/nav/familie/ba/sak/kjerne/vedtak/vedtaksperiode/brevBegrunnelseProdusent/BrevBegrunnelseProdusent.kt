@@ -335,69 +335,15 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
     val grunnlagTidslinjePerPersonForrigeBehandling =
         behandlingsGrunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson()
 
-    val grunnlagPerPerson =
-        grunnlagTidslinjePerPerson.mapValues { (aktørOgRolleForVedtaksgrunnlag, grunnlagTidslinje) ->
-            val grunnlagMedForrigePeriodeOgBehandlingTidslinje =
-                tidslinjeMedVedtaksperioden.lagTidslinjeGrunnlagDennePeriodenForrigePeriodeOgPeriodeForrigeBehandling(
-                    grunnlagTidslinje,
-                    grunnlagTidslinjePerPersonForrigeBehandling,
-                    aktørOgRolleForVedtaksgrunnlag,
-                )
-
-            grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder().mapNotNull { it.innhold }.single()
-        }
-
-    return grunnlagPerPerson.flyttSøkersOrdinæreVilkårFraBarnaTilSøker()
-}
-
-/**
- * Søker sine ordinære vilkår er knyttet til barnet når vi lager vedtaksperiodene fordi de er med på å bestemme om
- * barnet får andeler.
- * Siden vi gjenbruker dataklassene fra generering av vedtaksperiodene må vi flytte søker sine ordinære vilkår tilbake
- * til søker fra barna.
- */
-private fun Map<AktørOgRolleBegrunnelseGrunnlag, BegrunnelseGrunnlag>.flyttSøkersOrdinæreVilkårFraBarnaTilSøker(): Map<AktørOgRolleBegrunnelseGrunnlag, BegrunnelseGrunnlag> {
-    val førsteBarnMedVilkårIPerioden = toList()
-        .filter { it.first.rolleBegrunnelseGrunnlag == PersonType.BARN }
-        .map { it.second }
-        .filterIsInstance<BegrunnelseGrunnlagMedVerdiIDennePerioden>()
-        .firstOrNull()
-
-    val søkerGrunnlag = toList()
-        .single { it.first.rolleBegrunnelseGrunnlag == PersonType.SØKER }
-
-    val søkersOrdinæreVilkårDennePerioden =
-        førsteBarnMedVilkårIPerioden?.grunnlagForVedtaksperiode?.vilkårResultaterForVedtaksperiode?.filter {
-            it.aktørId == søkerGrunnlag.first.aktør.aktørId
-        } ?: emptyList()
-
-    val søkersOrdinæreVilkårForrigePeriode =
-        førsteBarnMedVilkårIPerioden?.grunnlagForForrigeVedtaksperiode?.vilkårResultaterForVedtaksperiode?.filter {
-            it.aktørId == søkerGrunnlag.first.aktør.aktørId
-        } ?: emptyList()
-
-    return this.mapValues { (aktørOgRolle, begrunnelseGrunnlag) ->
-        if (aktørOgRolle == søkerGrunnlag.first && begrunnelseGrunnlag is BegrunnelseGrunnlagMedVerdiIDennePerioden) {
-            begrunnelseGrunnlag.copy(
-                grunnlagForVedtaksperiode = begrunnelseGrunnlag.grunnlagForVedtaksperiode.kopier(
-                    vilkårResultaterForVedtaksperiode = begrunnelseGrunnlag.grunnlagForVedtaksperiode.vilkårResultaterForVedtaksperiode + søkersOrdinæreVilkårDennePerioden,
-                ),
-                grunnlagForForrigeVedtaksperiode = begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode?.kopier(
-                    vilkårResultaterForVedtaksperiode = begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode.vilkårResultaterForVedtaksperiode + søkersOrdinæreVilkårForrigePeriode,
-                ),
+    return grunnlagTidslinjePerPerson.mapValues { (aktørOgRolleForVedtaksgrunnlag, grunnlagTidslinje) ->
+        val grunnlagMedForrigePeriodeOgBehandlingTidslinje =
+            tidslinjeMedVedtaksperioden.lagTidslinjeGrunnlagDennePeriodenForrigePeriodeOgPeriodeForrigeBehandling(
+                grunnlagTidslinje,
+                grunnlagTidslinjePerPersonForrigeBehandling,
+                aktørOgRolleForVedtaksgrunnlag,
             )
-        } else if (begrunnelseGrunnlag is BegrunnelseGrunnlagMedVerdiIDennePerioden) {
-            begrunnelseGrunnlag.copy(
-                grunnlagForVedtaksperiode = begrunnelseGrunnlag.grunnlagForVedtaksperiode.kopier(
-                    vilkårResultaterForVedtaksperiode = begrunnelseGrunnlag.grunnlagForVedtaksperiode.vilkårResultaterForVedtaksperiode.filter { it.aktørId == aktørOgRolle.aktør.aktørId },
-                ),
-                grunnlagForForrigeVedtaksperiode = begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode?.kopier(
-                    vilkårResultaterForVedtaksperiode = begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode.vilkårResultaterForVedtaksperiode.filter { it.aktørId == aktørOgRolle.aktør.aktørId },
-                ),
-            )
-        } else {
-            begrunnelseGrunnlag
-        }
+
+        grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder().mapNotNull { it.innhold }.single()
     }
 }
 
