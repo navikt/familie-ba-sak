@@ -1,5 +1,6 @@
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVedtakResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
@@ -16,18 +17,18 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VilkårResul
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
-fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåVilkår(
+fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
     begrunnelseGrunnlag: BegrunnelseGrunnlag,
     aktørOgRolle: AktørOgRolleBegrunnelseGrunnlag,
     behandlingUnderkategori: BehandlingUnderkategori,
-): Map<Standardbegrunnelse, SanityBegrunnelse> {
+): Boolean {
+    if (this.vilkår.isEmpty()) return false
+
     val vilkårForPerson = Vilkår.hentVilkårFor(
         personType = aktørOgRolle.rolleBegrunnelseGrunnlag,
         fagsakType = FagsakType.NORMAL,
         behandlingUnderkategori = behandlingUnderkategori,
     )
-
-    val relevanteBegrunnelser = this.filterValues { it.vilkår.isNotEmpty() }
 
     return when (begrunnelseGrunnlag) {
         is BegrunnelseGrunnlagMedVerdiIDennePerioden -> {
@@ -36,19 +37,23 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåVilkår(
                 vilkårForPerson = vilkårForPerson,
             )
 
-            relevanteBegrunnelser.filtrerBegrunnelserSomMatcherVilkårOgUtdypendeVilkår(
-                utgjørendeVilkårResultater,
-            )
+            this.vilkår.all { vilkårISanityBegrunnelse ->
+                val vilkårResultat = utgjørendeVilkårResultater.find { it.vilkårType == vilkårISanityBegrunnelse }
+
+                vilkårResultat != null && matcherMedUtdypendeVilkår(vilkårResultat)
+            }
         }
 
-        is BegrunnelseGrunnlagIngenVerdiIDennePerioden ->
-            relevanteBegrunnelser.filtrerBegrunnelserSomMatcherVilkårType(vilkårForPerson)
+        is BegrunnelseGrunnlagIngenVerdiIDennePerioden -> {
+            this.vilkår.all { it in vilkårForPerson }
+        }
     }
 }
 
-fun erReduksjonDelBostedBegrunnelse(it: SanityBegrunnelse) =
-    it.resultat == SanityVedtakResultat.REDUKSJON && it.vilkår.contains(Vilkår.BOR_MED_SØKER) &&
-        it.borMedSokerTriggere?.contains(VilkårTrigger.DELT_BOSTED) == true
+fun SanityBegrunnelse.erReduksjonDelBostedBegrunnelse() =
+    resultat == SanityVedtakResultat.REDUKSJON &&
+        vilkår.contains(Vilkår.BOR_MED_SØKER) &&
+        borMedSokerTriggere.contains(VilkårTrigger.DELT_BOSTED)
 
 private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerBegrunnelserSomMatcherVilkårType(
     vilkårForPerson: Collection<Vilkår>,
@@ -64,7 +69,7 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerBegrunnelserSomMa
     }
 }
 
-fun SanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResultatForVedtaksperiode): Boolean {
+fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResultatForVedtaksperiode): Boolean {
     return when (vilkårResultat.vilkårType) {
         Vilkår.UNDER_18_ÅR -> true
         Vilkår.BOR_MED_SØKER -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.borMedSokerTriggere)

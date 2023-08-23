@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtaksperioder med mor og et barn
+Egenskap: Vilkår påvirker begrunnelser
 
   Bakgrunn:
     Gitt følgende behandling

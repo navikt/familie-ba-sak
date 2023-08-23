@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVedtakResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -47,7 +49,7 @@ data class RestSanityEØSBegrunnelse(
             hjemlerEØSForordningen883 = hjemlerEOSForordningen883 ?: emptyList(),
             hjemlerEØSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
             hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
-            vilkår = eosVilkaar?.mapNotNull { konverterTilEnumverdi<Vilkår>(it) } ?: emptyList(),
+            vilkår = eosVilkaar?.mapNotNull { konverterTilEnumverdi<Vilkår>(it) }?.toSet() ?: emptySet(),
         )
     }
 
@@ -58,6 +60,8 @@ data class RestSanityEØSBegrunnelse(
 data class SanityEØSBegrunnelse(
     override val apiNavn: String,
     override val navnISystem: String,
+    override val resultat: SanityVedtakResultat? = null,
+    override val vilkår: Set<Vilkår>,
     val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
@@ -66,5 +70,9 @@ data class SanityEØSBegrunnelse(
     val hjemlerEØSForordningen883: List<String>,
     val hjemlerEØSForordningen987: List<String>,
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>,
-    val vilkår: List<Vilkår>,
-) : ISanityBegrunnelse
+) : ISanityBegrunnelse {
+    override val lovligOppholdTriggere: List<VilkårTrigger> = emptyList()
+    override val bosattIRiketTriggere: List<VilkårTrigger> = emptyList()
+    override val giftPartnerskapTriggere: List<VilkårTrigger> = emptyList()
+    override val borMedSokerTriggere: List<VilkårTrigger> = emptyList()
+}

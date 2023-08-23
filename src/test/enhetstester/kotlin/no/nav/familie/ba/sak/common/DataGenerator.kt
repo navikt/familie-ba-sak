@@ -1214,18 +1214,18 @@ fun lagRestSanityBegrunnelse(
 fun lagSanityBegrunnelse(
     apiNavn: String = "",
     navnISystem: String = "",
-    vilkaar: List<SanityVilkår>? = null,
+    vilkaar: List<SanityVilkår> = emptyList(),
     rolle: List<VilkårRolle> = emptyList(),
-    lovligOppholdTriggere: List<VilkårTrigger>? = null,
-    bosattIRiketTriggere: List<VilkårTrigger>? = null,
-    giftPartnerskapTriggere: List<VilkårTrigger>? = null,
-    borMedSokerTriggere: List<VilkårTrigger>? = null,
-    ovrigeTriggere: List<ØvrigTrigger>? = null,
-    endringsaarsaker: List<Årsak>? = null,
+    lovligOppholdTriggere: List<VilkårTrigger> = emptyList(),
+    bosattIRiketTriggere: List<VilkårTrigger> = emptyList(),
+    giftPartnerskapTriggere: List<VilkårTrigger> = emptyList(),
+    borMedSokerTriggere: List<VilkårTrigger> = emptyList(),
+    ovrigeTriggere: List<ØvrigTrigger> = emptyList(),
+    endringsaarsaker: List<Årsak> = emptyList(),
     hjemler: List<String> = emptyList(),
     hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
-    endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
+    endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
     valgbarhet: Valgbarhet? = null,
     resultat: SanityVedtakResultat? = null,
 ): SanityBegrunnelse = SanityBegrunnelse(
@@ -1269,7 +1269,7 @@ fun lagSanityEøsBegrunnelse(
     hjemlerEØSForordningen883 = hjemlerEØSForordningen883,
     hjemlerEØSForordningen987 = hjemlerEØSForordningen987,
     hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina,
-    vilkår = vilkår,
+    vilkår = vilkår.toSet(),
 )
 
 fun lagTriggesAv(
