@@ -39,7 +39,6 @@ fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
     )
 }
 
-
 fun erReduksjonDelBostedBegrunnelse(it: SanityBegrunnelse) =
     it.resultat == SanityVedtakResultat.REDUKSJON && it.vilkår.contains(Vilkår.BOR_MED_SØKER) &&
         it.borMedSokerTriggere?.contains(VilkårTrigger.DELT_BOSTED) == true
@@ -50,8 +49,8 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerBegrunnelserSomMa
 
 private fun ISanityBegrunnelse.filtrerBegrunnelserSomMatcherVilkårOgUtdypendeVilkår(
     vilkårResultaterForPerson: Collection<VilkårResultatForVedtaksperiode>,
-) :Boolean {
-    this.vilkår.all { vilkårISanityBegrunnelse ->
+): Boolean {
+    return this.vilkår.all { vilkårISanityBegrunnelse ->
         val vilkårResultat = vilkårResultaterForPerson.find { it.vilkårType == vilkårISanityBegrunnelse }
 
         vilkårResultat != null && this.matcherMedUtdypendeVilkår(vilkårResultat)

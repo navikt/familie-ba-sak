@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.EndretUtbetalingAndelForVedtaksperiode
@@ -71,7 +70,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
             sanityBegrunnelser,
             person,
             behandlingUnderkategori,
-            this.fom
+            this.fom,
         )
 
         val eøsBegrunnelser = hentEØSStandardBegrunnelser(
@@ -90,7 +89,7 @@ private fun hentStandardBegrunnelser(
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     person: Person,
     behandlingUnderkategori: BehandlingUnderkategori,
-    periodeFom: LocalDate
+    periodeFom: LocalDate?,
 ): Set<Standardbegrunnelse> {
     val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
 
