@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent
 
 import filtrerPåVilkår
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -97,21 +98,17 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
 }
 
 fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåHendelser(
-    begrunnelseGrunnlag: BegrunnelseGrunnlag,
+    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
     fomVedtaksperiode: LocalDate?,
-): Map<Standardbegrunnelse, SanityBegrunnelse> {
-    return if (begrunnelseGrunnlag !is BegrunnelseGrunnlagMedVerdiIDennePerioden) {
-        emptyMap()
-    } else if (!begrunnelseGrunnlag.grunnlagForVedtaksperiode.erOrdinæreVilkårInnvilget()) {
-        val person = begrunnelseGrunnlag.grunnlagForVedtaksperiode.person
+): Map<Standardbegrunnelse, SanityBegrunnelse> = if (!begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget()) {
+    val person = begrunnelseGrunnlag.dennePerioden.person
 
-        this.filtrerPåBarnDød(person, fomVedtaksperiode)
-    } else {
-        val person = begrunnelseGrunnlag.grunnlagForVedtaksperiode.person
+    this.filtrerPåBarnDød(person, fomVedtaksperiode)
+} else {
+    val person = begrunnelseGrunnlag.dennePerioden.person
 
-        this.filtrerPåBarn6år(person, fomVedtaksperiode) +
-            this.filtrerPåSatsendring(person, begrunnelseGrunnlag.grunnlagForVedtaksperiode.andeler, fomVedtaksperiode)
-    }
+    this.filtrerPåBarn6år(person, fomVedtaksperiode) +
+        this.filtrerPåSatsendring(person, begrunnelseGrunnlag.dennePerioden.andeler, fomVedtaksperiode)
 }
 
 fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåBarn6år(
@@ -162,67 +159,37 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSatsendring(
 }
 
 private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetype(
-    begrunnelseGrunnlag: BegrunnelseGrunnlag,
+    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
 ) = this.filterValues {
-    val begrunnelseGjelderFraInnvilgelsestidspunkt =
-        it.ovrigeTriggere?.contains(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT) == true
+    val dennePerioden = begrunnelseGrunnlag.dennePerioden
 
-    when (begrunnelseGrunnlag) {
-        is BegrunnelseGrunnlagMedVerdiIDennePerioden -> {
-            val dennePerioden = begrunnelseGrunnlag.grunnlagForVedtaksperiode
-            val resultater =
-                if (dennePerioden.erOrdinæreVilkårInnvilget() && dennePerioden.erInnvilgetEtterEndretUtbetaling()) {
-                    it.resultat in listOf(
-                        SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
-                        SanityVedtakResultat.REDUKSJON,
-                    )
-                } else {
-                    it.resultat in listOf(
-                        SanityVedtakResultat.REDUKSJON,
-                        SanityVedtakResultat.IKKE_INNVILGET,
-                    )
-                }
-
-            !begrunnelseGjelderFraInnvilgelsestidspunkt && resultater
-        }
-
-        is BegrunnelseGrunnlagIngenVerdiIDennePerioden -> {
-            begrunnelseGrunnlag.erInnvilgetForrigeBehandling &&
-                it.resultat in listOf(SanityVedtakResultat.REDUKSJON) &&
-                begrunnelseGjelderFraInnvilgelsestidspunkt
-        }
+    if (dennePerioden.erOrdinæreVilkårInnvilget() && dennePerioden.erInnvilgetEtterEndretUtbetaling()) {
+        it.resultat in listOf(
+            SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
+            SanityVedtakResultat.REDUKSJON,
+        )
+    } else {
+        it.resultat in listOf(
+            SanityVedtakResultat.REDUKSJON,
+            SanityVedtakResultat.IKKE_INNVILGET,
+        )
     }
 }
 
 private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetypeForrigePeriode(
-    begrunnelseGrunnlag: BegrunnelseGrunnlag,
+    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
 ) = this.filterValues {
-    when (begrunnelseGrunnlag) {
-        is BegrunnelseGrunnlagMedVerdiIDennePerioden -> {
-            val forrigePeriode = begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode
-            when (forrigePeriode?.erOrdinæreVilkårInnvilget() == true && forrigePeriode.erInnvilgetEtterEndretUtbetaling()) {
-                true -> {
-                    it.resultat in listOf(
-                        SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
-                        SanityVedtakResultat.REDUKSJON,
-                    )
-                }
-
-                false -> {
-                    it.resultat in listOf(
-                        SanityVedtakResultat.REDUKSJON,
-                        SanityVedtakResultat.IKKE_INNVILGET,
-                    )
-                }
-
-                null -> it.resultat in listOf(SanityVedtakResultat.REDUKSJON)
-            } && it.ovrigeTriggere?.contains(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT) != true
-        }
-
-        is BegrunnelseGrunnlagIngenVerdiIDennePerioden -> {
-            it.resultat in listOf(SanityVedtakResultat.REDUKSJON) &&
-                it.ovrigeTriggere?.contains(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT) == true
-        }
+    val forrigePeriode = begrunnelseGrunnlag.forrigePeriode
+    if (forrigePeriode?.erOrdinæreVilkårInnvilget() == true && forrigePeriode.erInnvilgetEtterEndretUtbetaling()) {
+        it.resultat in listOf(
+            SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
+            SanityVedtakResultat.REDUKSJON,
+        )
+    } else {
+        it.resultat in listOf(
+            SanityVedtakResultat.REDUKSJON,
+            SanityVedtakResultat.IKKE_INNVILGET,
+        )
     }
 }
 
@@ -301,22 +268,20 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåDeltBostedUtbe
     }
 }
 
-private fun hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag: BegrunnelseGrunnlag) =
+private fun hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode) =
     if (
-        begrunnelseGrunnlag is BegrunnelseGrunnlagMedVerdiIDennePerioden &&
-        begrunnelseGrunnlag.grunnlagForVedtaksperiode.erOrdinæreVilkårInnvilget()
+        begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget()
     ) {
-        begrunnelseGrunnlag.grunnlagForVedtaksperiode.endretUtbetalingAndel
+        begrunnelseGrunnlag.dennePerioden.endretUtbetalingAndel
     } else {
         null
     }
 
-private fun hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag: BegrunnelseGrunnlag) =
+private fun hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode) =
     if (
-        begrunnelseGrunnlag is BegrunnelseGrunnlagMedVerdiIDennePerioden &&
-        begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode?.erOrdinæreVilkårInnvilget() == true
+        begrunnelseGrunnlag.forrigePeriode?.erOrdinæreVilkårInnvilget() == true
     ) {
-        begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode.endretUtbetalingAndel
+        begrunnelseGrunnlag.forrigePeriode.endretUtbetalingAndel
     } else {
         null
     }
@@ -324,7 +289,7 @@ private fun hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag: BegrunnelseG
 private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
     behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
-): Map<Person, BegrunnelseGrunnlag> {
+): Map<Person, BegrunnelseGrunnlagForPeriode> {
     val tidslinjeMedVedtaksperioden = this.tilTidslinjeForAktuellPeriode()
 
     val begrunnelsegrunnlagTidslinjerPerPerson =
@@ -349,7 +314,7 @@ private fun Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned>.lagTidslinje
     grunnlagTidslinje: Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>,
     grunnlagTidslinjePerPersonForrigeBehandling: Map<Person, Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>>?,
     person: Person,
-): Tidslinje<BegrunnelseGrunnlag, Måned> {
+): Tidslinje<BegrunnelseGrunnlagForPeriode, Måned> {
     val grunnlagMedForrigePeriodeTidslinje =
         grunnlagTidslinje.tilForrigeOgNåværendePeriodeTidslinje()
 
@@ -360,11 +325,15 @@ private fun Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned>.lagTidslinje
         grunnlagMedForrigePeriodeTidslinje,
         grunnlagForrigeBehandlingTidslinje,
     ) { vedtaksPerioden, forrigeOgDennePerioden, forrigeBehandling ->
+        val dennePerioden = forrigeOgDennePerioden?.denne
+
         if (vedtaksPerioden == null) {
             null
+        } else if (dennePerioden == null) {
+            throw Feil("Ingen data på person i perioden ${vedtaksPerioden.fom} - ${vedtaksPerioden.tom}")
         } else {
-            lagBegrunnelseGrunnlag(
-                dennePerioden = forrigeOgDennePerioden?.denne,
+            BegrunnelseGrunnlagForPeriode(
+                dennePerioden = dennePerioden,
                 forrigePeriode = forrigeOgDennePerioden?.forrige,
                 sammePeriodeForrigeBehandling = forrigeBehandling,
             )
