@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtaksperioder med utdypende vilkår og utbetaling
+Egenskap: Begrunnelser for utdypende vilkårsvurdering med utbetaling
 
   Bakgrunn:
     Gitt følgende behandling
