@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -21,7 +21,7 @@ import java.time.YearMonth
 @Service
 class StartSatsendring(
     private val fagsakRepository: FagsakRepository,
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val opprettTaskService: OpprettTaskService,
     private val satskjøringRepository: SatskjøringRepository,
     private val featureToggleService: FeatureToggleService,
@@ -91,12 +91,12 @@ class StartSatsendring(
             return false
         }
 
-        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
-        return if (sisteIverksatteBehandling != null) {
+        val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)
+        return if (sisteVedtatteBehandling != null) {
             opprettTaskService.opprettSatsendringTask(fagsakId, satsTidspunkt)
             true
         } else {
-            logger.info("Satsendring utføres ikke på fagsak=$fagsakId fordi fagsaken mangler en iverksatt behandling")
+            logger.info("Satsendring trigges ikke på fagsak=$fagsakId fordi fagsaken mangler en vedtatt behandling")
             ignorerteFagsaker.add(fagsakId)
             false
         }
