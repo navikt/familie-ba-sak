@@ -41,7 +41,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -306,7 +306,7 @@ fun lagVedtaksPerioder(
         ?: error("Finner ikke vedtak")
 
     vedtak.behandling.overstyrtEndringstidspunkt = overstyrteEndringstidspunkt[behandlingId]
-    val grunnlagForVedtaksperiode = GrunnlagForVedtaksperioder(
+    val grunnlagForVedtaksperiode = BehandlingsGrunnlagForVedtaksperioder(
         persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
         personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
         fagsakType = vedtak.behandling.fagsak.type,
@@ -322,7 +322,7 @@ fun lagVedtaksPerioder(
     val grunnlagForVedtaksperiodeForrigeBehandling = forrigeBehandlingId?.let {
         val forrigeVedtak = vedtaksListe.find { it.behandling.id == forrigeBehandlingId && it.aktiv }
             ?: error("Finner ikke vedtak")
-        GrunnlagForVedtaksperioder(
+        BehandlingsGrunnlagForVedtaksperioder(
             persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
             personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
             fagsakType = forrigeVedtak.behandling.fagsak.type,

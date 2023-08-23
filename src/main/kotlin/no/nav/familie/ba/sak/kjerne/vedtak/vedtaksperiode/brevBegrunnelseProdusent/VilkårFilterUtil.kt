@@ -5,24 +5,23 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVedtakResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilUtdypendeVilkårsvurderinger
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlagIngenVerdiIDennePerioden
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlagMedVerdiIDennePerioden
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonVilkårInnvilget
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VedtaksperiodeGrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåVilkår(
     begrunnelseGrunnlag: BegrunnelseGrunnlag,
-    aktørOgRolle: AktørOgRolleBegrunnelseGrunnlag,
+    person: Person,
     behandlingUnderkategori: BehandlingUnderkategori,
 ): Map<Standardbegrunnelse, SanityBegrunnelse> {
     val vilkårForPerson = Vilkår.hentVilkårFor(
-        personType = aktørOgRolle.rolleBegrunnelseGrunnlag,
+        personType = person.type,
         fagsakType = FagsakType.NORMAL,
         behandlingUnderkategori = behandlingUnderkategori,
     )
@@ -89,11 +88,13 @@ private fun finnUtgjørendeVilkår(
     begrunnelseGrunnlag: BegrunnelseGrunnlagMedVerdiIDennePerioden,
     vilkårForPerson: Set<Vilkår>,
 ): Set<VilkårResultatForVedtaksperiode> {
-    val oppfylteVilkårResultaterDennePerioden = begrunnelseGrunnlag.grunnlagForVedtaksperiode.hentOppfylteVilkår()
+    val oppfylteVilkårResultaterDennePerioden =
+        begrunnelseGrunnlag.grunnlagForVedtaksperiode.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
     val oppfylteVilkårResultaterForrigePeriode =
-        begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode?.hentOppfylteVilkår() ?: emptyList()
+        begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode?.vilkårResultater?.filter { it.resultat == Resultat.OPPFYLT }
+            ?: emptyList()
 
-    return if (begrunnelseGrunnlag.grunnlagForVedtaksperiode is GrunnlagForPersonVilkårInnvilget) {
+    return if (begrunnelseGrunnlag.grunnlagForVedtaksperiode.erOrdinæreVilkårInnvilget()) {
         val vilkårTjentEllerEndrerUtbetaling = hentVilkårTjent(
             oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
             oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
@@ -102,7 +103,7 @@ private fun finnUtgjørendeVilkår(
             oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
         )
 
-        begrunnelseGrunnlag.grunnlagForVedtaksperiode.hentOppfylteVilkår()
+        begrunnelseGrunnlag.grunnlagForVedtaksperiode.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
             .filter { it.vilkårType in vilkårTjentEllerEndrerUtbetaling }
     } else {
         val vilkårTapt = hentVilkårTapt(
@@ -115,7 +116,7 @@ private fun finnUtgjørendeVilkår(
     }.toSet()
 }
 
-private fun GrunnlagForPerson.hentOppfylteVilkår() =
+private fun VedtaksperiodeGrunnlagForPerson.hentOppfylteVilkår() =
     vilkårResultaterForVedtaksperiode.filter { it.resultat == Resultat.OPPFYLT }
 
 private fun hentVilkårSomFørerTilØkingEllerReduksjonAvUtbetaling(

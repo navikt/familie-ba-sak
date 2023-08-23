@@ -20,41 +20,46 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.math.BigDecimal
 import java.time.LocalDate
 
-sealed interface GrunnlagForPerson {
+sealed interface VedtaksperiodeGrunnlagForPerson {
     val person: Person
     val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>
 
-    fun erEksplisittAvslag(): Boolean = this is GrunnlagForPersonVilkårIkkeInnvilget && this.erEksplisittAvslag
+    fun erEksplisittAvslag(): Boolean =
+        this is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget && this.erEksplisittAvslag
 
-    fun erInnvilget() = this is GrunnlagForPersonVilkårInnvilget && this.erInnvilgetEndretUtbetaling()
+    fun erInnvilget() = this is VedtaksperiodeGrunnlagForPersonVilkårInnvilget && this.erInnvilgetEndretUtbetaling()
 
     fun kopier(
         person: Person = this.person,
         vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode> = this.vilkårResultaterForVedtaksperiode,
-    ): GrunnlagForPerson {
+    ): VedtaksperiodeGrunnlagForPerson {
         return when (this) {
-            is GrunnlagForPersonVilkårIkkeInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
-            is GrunnlagForPersonVilkårInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
+            is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> this.copy(
+                person,
+                vilkårResultaterForVedtaksperiode,
+            )
+
+            is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
         }
     }
 }
 
-data class GrunnlagForPersonVilkårInnvilget(
+data class VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
     override val person: Person,
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
     val andeler: Iterable<AndelForVedtaksperiode>,
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
     val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
-) : GrunnlagForPerson {
+) : VedtaksperiodeGrunnlagForPerson {
     fun erInnvilgetEndretUtbetaling() =
         endretUtbetalingAndel?.prosent != BigDecimal.ZERO || endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
 }
 
-data class GrunnlagForPersonVilkårIkkeInnvilget(
+data class VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
     override val person: Person,
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
-) : GrunnlagForPerson {
+) : VedtaksperiodeGrunnlagForPerson {
     val erEksplisittAvslag: Boolean = vilkårResultaterForVedtaksperiode.inneholderEksplisittAvslag()
 
     fun List<VilkårResultatForVedtaksperiode>.inneholderEksplisittAvslag() =
