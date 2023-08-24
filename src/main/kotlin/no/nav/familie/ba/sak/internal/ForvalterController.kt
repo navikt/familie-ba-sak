@@ -112,9 +112,13 @@ class ForvalterController(
     }
 
     @GetMapping("/finnBehandlingerMedPotensieltFeilUtbetalingsoppdrag")
-    fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<List<Long>> {
-        val behandlingsIder = forvalterService.identifiserBehandlingerSomKanKrevePatching()
-        return ResponseEntity.ok(behandlingsIder)
+    fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<Pair<String, String>> {
+        val callId = UUID.randomUUID().toString()
+        thread {
+            val behandlingsIder = forvalterService.identifiserBehandlingerSomKanKrevePatching()
+            logger.warn("Følgende behandlinger har ikke korrekte opphørsdatoer: [$behandlingsIder]")
+        }
+        return ResponseEntity.ok(Pair("callId", callId))
     }
 
     @GetMapping("/sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato")
