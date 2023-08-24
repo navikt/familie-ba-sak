@@ -76,7 +76,7 @@ Egenskap: Begrunnelser ved endring av vilkår
       | 01.05.2021 | 31.03.2022 | UTBETALING         | INNVILGET_BOR_HOS_SØKER       | REDUKSJON_IKKE_BOSATT_I_NORGE |
       | 01.04.2022 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER |                               |
     
-  Scenario: Skal ikke gi redukjsonsbegrunnelse når det er innvilgelse
+  Scenario: Skal ikke gi reduksjonsbegrunnelse når det er innvilgelse
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
