@@ -169,8 +169,8 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSatsendring(
 private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetype(
     begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode?,
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
-) = this.filterValues {
-    if (begrunnelseGrunnlagForPeriode?.erOrdinæreVilkårInnvilget() == true &&
+): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    val relevanteResultater = if (begrunnelseGrunnlagForPeriode?.erOrdinæreVilkårInnvilget() == true &&
         begrunnelseGrunnlagForPeriode.erInnvilgetEtterEndretUtbetaling()
     ) {
         val erReduksjonIAndel = erReduksjon(
@@ -182,18 +182,24 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetype(
             andelerForrigePeriode = begrunnelseGrunnlagForrigePeriode?.andeler ?: emptyList(),
         )
 
-        val relevanteResultater = listOfNotNull(
-            if (erØkingIAndel) SanityVedtakResultat.INNVILGET_ELLER_ØKNING else null,
-            if (erReduksjonIAndel) SanityVedtakResultat.REDUKSJON else null,
-            if (!erØkingIAndel && !erReduksjonIAndel) SanityVedtakResultat.INGEN_ENDRING else null,
-        )
+        val erSøker = begrunnelseGrunnlagForPeriode.person.type == PersonType.SØKER
+        val erOrdinæreVilkårOppfyltIForrigePeriode =
+            begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true
 
-        it.resultat in relevanteResultater
+        listOfNotNull(
+            if (erØkingIAndel || erSøker) SanityVedtakResultat.INNVILGET_ELLER_ØKNING else null,
+            if (erReduksjonIAndel) SanityVedtakResultat.REDUKSJON else null,
+            if (!erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode) SanityVedtakResultat.INGEN_ENDRING else null,
+        )
     } else {
-        it.resultat in listOf(
+        listOf(
             SanityVedtakResultat.REDUKSJON,
             SanityVedtakResultat.IKKE_INNVILGET,
         )
+    }
+
+    return this.filterValues {
+        it.resultat in relevanteResultater
     }
 }
 
