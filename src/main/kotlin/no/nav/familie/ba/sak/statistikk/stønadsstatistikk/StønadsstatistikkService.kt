@@ -78,7 +78,6 @@ class StønadsstatistikkService(
             underkategoriV2 = when (behandling.underkategori) {
                 BehandlingUnderkategori.ORDINÆR -> UnderkategoriV2.ORDINÆR
                 BehandlingUnderkategori.UTVIDET -> UnderkategoriV2.UTVIDET
-                BehandlingUnderkategori.INSTITUSJON -> UnderkategoriV2.ORDINÆR // Institusjon er ordinær og ligger under fagsakType på stønadsstatistikk
             },
             behandlingTypeV2 = BehandlingTypeV2.valueOf(behandling.type.name),
             utbetalingsperioderV2 = hentUtbetalingsperioderV2(behandling, persongrunnlag),
