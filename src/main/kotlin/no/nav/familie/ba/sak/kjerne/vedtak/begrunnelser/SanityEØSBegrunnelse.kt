@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVedtakResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
@@ -52,8 +52,8 @@ data class RestSanityEØSBegrunnelse(
             hjemlerEØSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
             hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
             vilkår = eosVilkaar?.mapNotNull { konverterTilEnumverdi<Vilkår>(it) }?.toSet() ?: emptySet(),
-            vedtakResultat = vedtakResultat?.let {
-                finnEnumverdi(it, SanityVedtakResultat.entries.toTypedArray(), apiNavn)
+            periodeResultat = vedtakResultat?.let {
+                finnEnumverdi(it, SanityPeriodeResultat.entries.toTypedArray(), apiNavn)
             },
         )
     }
@@ -65,7 +65,7 @@ data class RestSanityEØSBegrunnelse(
 data class SanityEØSBegrunnelse(
     override val apiNavn: String,
     override val navnISystem: String,
-    override val vedtakResultat: SanityVedtakResultat? = null,
+    override val periodeResultat: SanityPeriodeResultat? = null,
     override val vilkår: Set<Vilkår>,
     val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
