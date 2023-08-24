@@ -86,5 +86,5 @@ Egenskap: Begrunnelser for hendelser
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                     | Ekskluderte Begrunnelser |
       | 01.05.2017 | 28.02.2023 | UTBETALING         |                                             |                          |
-      | 01.03.2023 | 31.03.2035 | UTBETALING         | REDUKSJON_UNDER_6_ÅR, INNVILGET_SATSENDRING |                          |
+      | 01.03.2023 | 31.03.2035 | UTBETALING         | REDUKSJON_UNDER_6_ÅR, REDUKSJON_SATSENDRING |                          |
       | 01.04.2035 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                          |                          |
