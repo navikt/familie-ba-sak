@@ -1,13 +1,10 @@
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVedtakResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilUtdypendeVilkårsvurderinger
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VedtaksperiodeGrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VilkårResultatForVedtaksperiode
@@ -27,27 +24,17 @@ fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
         behandlingUnderkategori = behandlingUnderkategori,
     )
 
-    if (this.vilkår.isEmpty()) return false
-
     val utgjørendeVilkårResultater = finnUtgjørendeVilkår(
         begrunnelseGrunnlag = begrunnelseGrunnlag,
         vilkårForPerson = vilkårForPerson,
     )
 
-    return this.filtrerBegrunnelserSomMatcherVilkårOgUtdypendeVilkår(
+    return this.erLikVilkårOgUtdypendeVilkårIPeriode(
         utgjørendeVilkårResultater,
     )
 }
 
-fun erReduksjonDelBostedBegrunnelse(it: SanityBegrunnelse) =
-    it.resultat == SanityVedtakResultat.REDUKSJON && it.vilkår.contains(Vilkår.BOR_MED_SØKER) &&
-        it.borMedSokerTriggere?.contains(VilkårTrigger.DELT_BOSTED) == true
-
-private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerBegrunnelserSomMatcherVilkårType(
-    vilkårForPerson: Collection<Vilkår>,
-) = this.filterValues { sanityBegrunnelse -> sanityBegrunnelse.vilkår.all { it in vilkårForPerson } }
-
-private fun ISanityBegrunnelse.filtrerBegrunnelserSomMatcherVilkårOgUtdypendeVilkår(
+private fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
     vilkårResultaterForPerson: Collection<VilkårResultatForVedtaksperiode>,
 ): Boolean {
     return this.vilkår.all { vilkårISanityBegrunnelse ->
