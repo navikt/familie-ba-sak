@@ -93,8 +93,8 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
 
         val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
             vedtak = lagVedtak(),
-            simuleringResultatGammel = simuleringBasertPåGammelGenerator,
-            utbetalingsoppdragGammel = mockk(),
+            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+            gammeltUtbetalingsoppdrag = mockk(),
         )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(2)
@@ -125,8 +125,8 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
 
         val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
             vedtak = lagVedtak(),
-            simuleringResultatGammel = simuleringBasertPåGammelGenerator,
-            utbetalingsoppdragGammel = mockk(),
+            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+            gammeltUtbetalingsoppdrag = mockk(),
         )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(0)
@@ -150,8 +150,8 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
 
         val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
             vedtak = lagVedtak(),
-            simuleringResultatGammel = simuleringBasertPåGammelGenerator,
-            utbetalingsoppdragGammel = mockk(),
+            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+            gammeltUtbetalingsoppdrag = mockk(),
         )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(0)
@@ -179,8 +179,8 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
 
         val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
             vedtak = lagVedtak(),
-            simuleringResultatGammel = simuleringBasertPåGammelGenerator,
-            utbetalingsoppdragGammel = mockk(),
+            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+            gammeltUtbetalingsoppdrag = mockk(),
         )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(1)
@@ -210,8 +210,8 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
 
         val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
             vedtak = lagVedtak(),
-            simuleringResultatGammel = simuleringBasertPåGammelGenerator,
-            utbetalingsoppdragGammel = mockk(),
+            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+            gammeltUtbetalingsoppdrag = mockk(),
         )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(1)
@@ -240,8 +240,8 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
 
         val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
             vedtak = lagVedtak(),
-            simuleringResultatGammel = simuleringBasertPåGammelGenerator,
-            utbetalingsoppdragGammel = mockk(),
+            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+            gammeltUtbetalingsoppdrag = mockk(),
         )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(0)

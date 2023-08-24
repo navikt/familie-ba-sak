@@ -38,28 +38,28 @@ class KontrollerNyUtbetalingsgeneratorService(
     ): List<DiffFeilType> {
         if (!skalKontrollereOppMotNyUtbetalingsgenerator()) return emptyList()
 
-        val utbetalingsoppdrag =
+        val gammeltUtbetalingsoppdrag =
             utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 vedtak = vedtak,
                 saksbehandlerId = saksbehandlerId,
                 andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
             )
 
-        if (!utbetalingsoppdrag.skalIverksettesMotOppdrag()) return emptyList()
+        if (!gammeltUtbetalingsoppdrag.skalIverksettesMotOppdrag()) return emptyList()
 
-        val simuleringResultatGammel = økonomiKlient.hentSimulering(utbetalingsoppdrag)
+        val gammeltSimuleringResultat = økonomiKlient.hentSimulering(gammeltUtbetalingsoppdrag)
 
         return kontrollerNyUtbetalingsgenerator(
             vedtak = vedtak,
-            simuleringResultatGammel = simuleringResultatGammel,
-            utbetalingsoppdragGammel = utbetalingsoppdrag,
+            gammeltSimuleringResultat = gammeltSimuleringResultat,
+            gammeltUtbetalingsoppdrag = gammeltUtbetalingsoppdrag,
         )
     }
 
     fun kontrollerNyUtbetalingsgenerator(
         vedtak: Vedtak,
-        simuleringResultatGammel: DetaljertSimuleringResultat,
-        utbetalingsoppdragGammel: Utbetalingsoppdrag,
+        gammeltSimuleringResultat: DetaljertSimuleringResultat,
+        gammeltUtbetalingsoppdrag: Utbetalingsoppdrag,
         erSimulering: Boolean = false,
     ): List<DiffFeilType> {
         if (!skalKontrollereOppMotNyUtbetalingsgenerator()) return emptyList()
@@ -78,15 +78,23 @@ class KontrollerNyUtbetalingsgeneratorService(
 
         secureLogger.info("Behandling ${behandling.id} har følgende oppdaterte andeler: ${beregnetUtbetalingsoppdrag.andeler}")
 
-        secureLogger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med gammel generator: $utbetalingsoppdragGammel")
+        secureLogger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med gammel generator: $gammeltUtbetalingsoppdrag")
         secureLogger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med ny generator: ${beregnetUtbetalingsoppdrag.utbetalingsoppdrag}")
 
-        val simuleringResultatNy =
+        val nyttSimuleringResultat =
             økonomiKlient.hentSimulering(beregnetUtbetalingsoppdrag.utbetalingsoppdrag)
 
-        val simuleringsPerioderGammel = simuleringResultatGammel.tilSorterteSimuleringsPerioder(behandling)
+        if (nyttSimuleringResultat.simuleringMottaker.isEmpty() && gammeltSimuleringResultat.simuleringMottaker.isEmpty()) return emptyList()
 
-        val simuleringsPerioderNy = simuleringResultatNy.tilSorterteSimuleringsPerioder(behandling)
+        validerAtBådeNyOgGammelGirEtResultat(
+            nyttSimuleringResultat = nyttSimuleringResultat,
+            gammeltSimuleringResultat = gammeltSimuleringResultat,
+            behandling = behandling,
+        )?.let { diffFeilTyper.add(it) }
+
+        val simuleringsPerioderGammel = gammeltSimuleringResultat.tilSorterteSimuleringsPerioder(behandling)
+
+        val simuleringsPerioderNy = nyttSimuleringResultat.tilSorterteSimuleringsPerioder(behandling)
 
         val simuleringsPerioderGammelTidslinje: Tidslinje<SimuleringsPeriode, Måned> =
             simuleringsPerioderGammel.tilTidslinje()
@@ -95,16 +103,16 @@ class KontrollerNyUtbetalingsgeneratorService(
             simuleringsPerioderNy.tilTidslinje()
 
         validerAtSimuleringsPerioderGammelHarResultatLik0ForPerioderFørSimuleringsPerioderNy(
-            simuleringsPerioderGammelTidslinje,
-            simuleringsPerioderNyTidslinje,
-            behandling,
+            simuleringsPerioderGammelTidslinje = simuleringsPerioderGammelTidslinje,
+            simuleringsPerioderNyTidslinje = simuleringsPerioderNyTidslinje,
+            behandling = behandling,
         )?.let {
             diffFeilTyper.add(it)
         }
         validerAtSimuleringsPerioderGammelHarResultatLikSimuleringsPerioderNyEtterFomTilNy(
-            simuleringsPerioderGammelTidslinje,
-            simuleringsPerioderNyTidslinje,
-            behandling,
+            simuleringsPerioderGammelTidslinje = simuleringsPerioderGammelTidslinje,
+            simuleringsPerioderNyTidslinje = simuleringsPerioderNyTidslinje,
+            behandling = behandling,
         )?.let {
             diffFeilTyper.add(it)
         }
@@ -114,6 +122,18 @@ class KontrollerNyUtbetalingsgeneratorService(
         }
 
         return diffFeilTyper
+    }
+
+    private fun validerAtBådeNyOgGammelGirEtResultat(
+        nyttSimuleringResultat: DetaljertSimuleringResultat,
+        gammeltSimuleringResultat: DetaljertSimuleringResultat,
+        behandling: Behandling,
+    ): DiffFeilType? {
+        if ((nyttSimuleringResultat.simuleringMottaker.isNotEmpty() && gammeltSimuleringResultat.simuleringMottaker.isEmpty()) || (nyttSimuleringResultat.simuleringMottaker.isEmpty() && gammeltSimuleringResultat.simuleringMottaker.isNotEmpty())) {
+            secureLogger.warn("Behandling ${behandling.id} får tomt simuleringsresultat med ny eller gammel generator. Ny er tom: ${nyttSimuleringResultat.simuleringMottaker.isEmpty()}, Gammel er tom: ${gammeltSimuleringResultat.simuleringMottaker.isEmpty()}")
+            return DiffFeilType.DetEneSimuleringsresultatetErTomt
+        }
+        return null
     }
 
     private fun skalKontrollereOppMotNyUtbetalingsgenerator(): Boolean =
@@ -201,4 +221,5 @@ class KontrollerNyUtbetalingsgeneratorService(
 enum class DiffFeilType {
     TidligerePerioderIGammelUlik0,
     UliktResultatISammePeriode,
+    DetEneSimuleringsresultatetErTomt,
 }
