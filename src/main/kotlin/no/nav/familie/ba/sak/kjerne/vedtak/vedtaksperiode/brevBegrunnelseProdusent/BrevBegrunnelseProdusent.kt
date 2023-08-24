@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
@@ -150,7 +151,23 @@ private fun hentEØSStandardBegrunnelser(
         )
     }
 
-    return filtrertPåVilkår.keys.toSet()
+    val filtrertPåKompetanse = filtrertPåVilkår.filterValues {
+        it.erLikKompetanseIPeriode(
+            begrunnelseGrunnlag,
+        )
+    }
+
+    return filtrertPåKompetanse.keys.toSet()
+}
+
+fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
+    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
+): Boolean {
+    val kompetanseIPeriode = begrunnelseGrunnlag.dennePerioden.kompetanse ?: return false
+
+    return this.annenForeldersAktivitet.contains(kompetanseIPeriode.annenForeldersAktivitet) &&
+        this.barnetsBostedsland.contains(landkodeTilBarnetsBostedsland(kompetanseIPeriode.barnetsBostedsland)) &&
+        this.kompetanseResultat.contains(kompetanseIPeriode.resultat)
 }
 
 fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåHendelser(
@@ -220,12 +237,12 @@ private fun ISanityBegrunnelse.harPeriodeTypeSomSkalBegrunnes(
     val dennePerioden = begrunnelseGrunnlag.dennePerioden
 
     return if (dennePerioden.erOrdinæreVilkårInnvilget() && dennePerioden.erInnvilgetEtterEndretUtbetaling()) {
-        this.resultat in listOf(
+        this.vedtakResultat in listOf(
             SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
             SanityVedtakResultat.REDUKSJON,
         )
     } else {
-        this.resultat in listOf(
+        this.vedtakResultat in listOf(
             SanityVedtakResultat.REDUKSJON,
             SanityVedtakResultat.IKKE_INNVILGET,
         )
@@ -237,12 +254,12 @@ private fun ISanityBegrunnelse.harPeriodeTypeSomSkalBegrunnesForrigePeriode(
 ): Boolean {
     val forrigePeriode = begrunnelseGrunnlag.forrigePeriode
     return if (forrigePeriode?.erOrdinæreVilkårInnvilget() == true && forrigePeriode.erInnvilgetEtterEndretUtbetaling()) {
-        this.resultat in listOf(
+        this.vedtakResultat in listOf(
             SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
             SanityVedtakResultat.REDUKSJON,
         )
     } else {
-        this.resultat in listOf(
+        this.vedtakResultat in listOf(
             SanityVedtakResultat.REDUKSJON,
             SanityVedtakResultat.IKKE_INNVILGET,
         )
