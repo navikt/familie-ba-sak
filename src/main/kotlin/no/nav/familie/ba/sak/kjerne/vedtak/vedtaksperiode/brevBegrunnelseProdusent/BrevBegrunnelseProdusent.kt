@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent
 
 import erGjeldendeForUtgjørendeVilkår
+import erGjeldendeForUtgjørendeVilkårInkluderHvisIkkeVilkår
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -145,7 +146,7 @@ private fun hentEØSStandardBegrunnelser(
     }
 
     val filtrertPåVilkår = begrunnelserFiltrertPåPeriodetype.filterValues {
-        it.erGjeldendeForUtgjørendeVilkår(
+        it.erGjeldendeForUtgjørendeVilkårInkluderHvisIkkeVilkår(
             begrunnelseGrunnlag,
             person,
             behandlingUnderkategori,
@@ -192,7 +193,7 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåBarn6år(
     val blirPerson6DennePerioden = person.hentSeksårsdag().toYearMonth() == fomVedtaksperiode?.toYearMonth()
 
     return if (blirPerson6DennePerioden) {
-        this.filterValues { it.ovrigeTriggere?.contains(ØvrigTrigger.BARN_MED_6_ÅRS_DAG) == true }
+        this.filterValues { it.ovrigeTriggere.contains(ØvrigTrigger.BARN_MED_6_ÅRS_DAG) }
     } else {
         emptyMap()
     }
@@ -207,7 +208,7 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåBarnDød(
         dødsfall != null && dødsfall.dødsfallDato.toYearMonth().plusMonths(1) == fomVedtaksperiode?.toYearMonth()
 
     return if (personDødeForrigeMåned && person.type == PersonType.BARN) {
-        this.filterValues { it.ovrigeTriggere?.contains(ØvrigTrigger.BARN_DØD) == true }
+        this.filterValues { it.ovrigeTriggere.contains(ØvrigTrigger.BARN_DØD) }
     } else {
         emptyMap()
     }
@@ -226,7 +227,7 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSatsendring(
         }
 
     return if (erSatsendringIPeriodenForPerson) {
-        this.filterValues { it.ovrigeTriggere?.contains(ØvrigTrigger.SATSENDRING) == true }
+        this.filterValues { it.ovrigeTriggere.contains(ØvrigTrigger.SATSENDRING) }
     } else {
         emptyMap()
     }
