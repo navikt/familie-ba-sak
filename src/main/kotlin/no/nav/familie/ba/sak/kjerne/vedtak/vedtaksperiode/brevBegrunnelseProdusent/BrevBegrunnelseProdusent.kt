@@ -93,11 +93,11 @@ private fun hentStandardBegrunnelser(
 ): Set<Standardbegrunnelse> {
     val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
 
-    val relevanteResultater =
+    val relevantePeriodeResultater =
         hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
 
     val begrunnelserFiltrertPåPeriodetype = sanityBegrunnelser.filterValues {
-        it.resultat in relevanteResultater
+        it.resultat in relevantePeriodeResultater
     }
 
     val filtrertPåVilkår = begrunnelserFiltrertPåPeriodetype.filterValues {
@@ -108,11 +108,11 @@ private fun hentStandardBegrunnelser(
         )
     }
 
-    val relevanteResultaterForrigePeriode =
+    val relevantePeriodeResultaterForrigePeriode =
         hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode)
 
     val begrunnelserFiltrertPåPeriodetypeForrigePeriode = sanityBegrunnelser.filterValues {
-        it.resultat in relevanteResultaterForrigePeriode
+        it.resultat in relevantePeriodeResultaterForrigePeriode
     }
 
     val filtrertPåEndretUtbetaling = begrunnelserFiltrertPåPeriodetype.filterValues {
@@ -144,11 +144,11 @@ private fun hentEØSStandardBegrunnelser(
     person: Person,
     behandlingUnderkategori: BehandlingUnderkategori,
 ): Set<EØSStandardbegrunnelse> {
-    val relevanteResultater =
+    val relevantePeriodeResultater =
         hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
 
     val begrunnelserFiltrertPåPeriodetype = sanityEØSBegrunnelser.filterValues {
-        it.resultat in relevanteResultater
+        it.resultat in relevantePeriodeResultater
     }
 
     val filtrertPåVilkår = begrunnelserFiltrertPåPeriodetype.filterValues {
