@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.skalIverksettesMotOppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.stereotype.Service
@@ -42,6 +44,9 @@ class KontrollerNyUtbetalingsgeneratorService(
                 saksbehandlerId = saksbehandlerId,
                 andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
             )
+
+        if (!utbetalingsoppdrag.skalIverksettesMotOppdrag()) return emptyList()
+
         val simuleringResultatGammel = økonomiKlient.hentSimulering(utbetalingsoppdrag)
 
         return kontrollerNyUtbetalingsgenerator(
@@ -68,6 +73,8 @@ class KontrollerNyUtbetalingsgeneratorService(
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             erSimulering = erSimulering,
         )
+
+        if (!beregnetUtbetalingsoppdrag.kanSimuleres()) return emptyList()
 
         secureLogger.info("Behandling ${behandling.id} har følgende oppdaterte andeler: ${beregnetUtbetalingsoppdrag.andeler}")
 
@@ -165,6 +172,9 @@ class KontrollerNyUtbetalingsgeneratorService(
         }
         return null
     }
+
+    private fun BeregnetUtbetalingsoppdragLongId.kanSimuleres(): Boolean =
+        this.utbetalingsoppdrag.utbetalingsperiode.isNotEmpty()
 
     private fun loggSimuleringsPerioderMedDiff(
         simuleringsPerioderGammel: List<SimuleringsPeriode>,
