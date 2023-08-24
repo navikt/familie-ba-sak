@@ -18,4 +18,7 @@ interface TilkjentYtelseRepository : JpaRepository<TilkjentYtelse, Long> {
 
     @Query("SELECT ty FROM TilkjentYtelse ty JOIN ty.behandling b WHERE b.id = :behandlingId AND ty.utbetalingsoppdrag is not null")
     fun findByBehandlingAndHasUtbetalingsoppdrag(behandlingId: Long): TilkjentYtelse?
+
+    @Query("select ty from TilkjentYtelse ty JOIN Behandling b on b.id = ty.behandling.id where DATE(ty.endretDato) > '2023-06-07 00:00:00.000000' and Date(ty.endretDato) < '2023-08-15 00:00:00.000000' and ty.utbetalingsoppdrag is not null and b.resultat <> 'INNVILGET' and ty.opphørFom is not null")
+    fun findTilkjentYtelseMedFeilUtbetalingsoppdrag(): List<TilkjentYtelse>
 }
