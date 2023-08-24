@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.stereotype.Service
@@ -74,7 +73,7 @@ class KontrollerNyUtbetalingsgeneratorService(
             erSimulering = erSimulering,
         )
 
-        if (!beregnetUtbetalingsoppdrag.kanSimuleres()) return emptyList()
+        if (!beregnetUtbetalingsoppdrag.utbetalingsoppdrag.skalIverksettesMotOppdrag()) return emptyList()
 
         secureLogger.info("Behandling ${behandling.id} har følgende oppdaterte andeler: ${beregnetUtbetalingsoppdrag.andeler}")
 
@@ -192,9 +191,6 @@ class KontrollerNyUtbetalingsgeneratorService(
         }
         return null
     }
-
-    private fun BeregnetUtbetalingsoppdragLongId.kanSimuleres(): Boolean =
-        this.utbetalingsoppdrag.utbetalingsperiode.isNotEmpty()
 
     private fun loggSimuleringsPerioderMedDiff(
         simuleringsPerioderGammel: List<SimuleringsPeriode>,
