@@ -149,7 +149,7 @@ private fun hentEØSStandardBegrunnelser(
         hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
 
     val begrunnelserFiltrertPåPeriodetype = sanityEØSBegrunnelser.filterValues {
-        it.resultat in relevantePeriodeResultater
+        it.periodeResultat in relevantePeriodeResultater
     }
 
     val filtrertPåVilkår = begrunnelserFiltrertPåPeriodetype.filterValues {

@@ -65,7 +65,7 @@ data class RestSanityEØSBegrunnelse(
 data class SanityEØSBegrunnelse(
     override val apiNavn: String,
     override val navnISystem: String,
-    override val resultat: SanityPeriodeResultat? = null,
+    override val periodeResultat: SanityPeriodeResultat? = null,
     override val vilkår: Set<Vilkår>,
     val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
