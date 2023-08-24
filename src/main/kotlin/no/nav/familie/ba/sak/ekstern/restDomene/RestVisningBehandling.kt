@@ -40,17 +40,14 @@ fun Behandling.tilRestVisningBehandling(vedtaksdato: LocalDateTime?) = RestVisni
 enum class BehandlingUnderkategoriDTO {
     ORDINÆR,
     UTVIDET,
-    INSTITUSJON,
 }
 
 fun BehandlingUnderkategoriDTO.tilDomene() = when (this) {
     BehandlingUnderkategoriDTO.ORDINÆR -> BehandlingUnderkategori.ORDINÆR
     BehandlingUnderkategoriDTO.UTVIDET -> BehandlingUnderkategori.UTVIDET
-    BehandlingUnderkategoriDTO.INSTITUSJON -> BehandlingUnderkategori.INSTITUSJON
 }
 
 fun BehandlingUnderkategori.tilDto() = when (this) {
     BehandlingUnderkategori.ORDINÆR -> BehandlingUnderkategoriDTO.ORDINÆR
     BehandlingUnderkategori.UTVIDET -> BehandlingUnderkategoriDTO.UTVIDET
-    BehandlingUnderkategori.INSTITUSJON -> BehandlingUnderkategoriDTO.INSTITUSJON
 }
