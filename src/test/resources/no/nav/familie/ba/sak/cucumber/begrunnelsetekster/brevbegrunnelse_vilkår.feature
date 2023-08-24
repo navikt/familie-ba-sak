@@ -75,4 +75,24 @@ Egenskap: Begrunnelser ved endring av vilkår
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser      |
       | 01.05.2021 | 31.03.2022 | UTBETALING         | INNVILGET_BOR_HOS_SØKER       | REDUKSJON_IKKE_BOSATT_I_NORGE |
       | 01.04.2022 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER |                               |
+    
+  Scenario: Skal ikke gi reduksjonsbegrunnelse når det er innvilgelse
+    Og lag personresultater for begrunnelse for behandling 1
 
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 15.01.1990 |            | Oppfylt  |
+      | 3456    | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
+      | 3456    | BOR_MED_SØKER                                    | 13.04.2021 | 10.03.2022 | Oppfylt  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | 3456    | 01.05.2021 | 31.03.2022 | 1354  | 1            |
+
+    Når begrunnelsetekster genereres for behandling 1
+
+    Så forvent følgende standardBegrunnelser
+      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser |
+      | 01.05.2021 | 31.03.2022 | UTBETALING         | INNVILGET_BOR_HOS_SØKER       | REDUKSJON_FLYTTET_BARN   |
+      | 01.04.2022 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER |                          |
