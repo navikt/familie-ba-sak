@@ -245,11 +245,11 @@ private fun hentResultaterForPeriode(
 ) = if (begrunnelseGrunnlagForPeriode?.erOrdinæreVilkårInnvilget() == true &&
     begrunnelseGrunnlagForPeriode.erInnvilgetEtterEndretUtbetaling()
 ) {
-    val erReduksjonIAndel = erReduksjon(
+    val erReduksjonIAndel = erReduksjonIAndelMellomPerioder(
         begrunnelseGrunnlagForPeriode,
         begrunnelseGrunnlagForrigePeriode,
     )
-    val erØkingIAndel = erØking(
+    val erØkingIAndel = erØkningIAndelMellomPerioder(
         begrunnelseGrunnlagForPeriode,
         begrunnelseGrunnlagForrigePeriode,
     )
@@ -270,7 +270,7 @@ private fun hentResultaterForPeriode(
     )
 }
 
-private fun erReduksjon(
+private fun erReduksjonIAndelMellomPerioder(
     begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode?,
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
 ): Boolean {
@@ -291,7 +291,7 @@ private fun erReduksjon(
     }
 }
 
-private fun erØking(
+private fun erØkningIAndelMellomPerioder(
     begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode,
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
 ): Boolean {
