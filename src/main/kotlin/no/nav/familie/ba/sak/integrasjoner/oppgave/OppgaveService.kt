@@ -86,9 +86,7 @@ class OppgaveService(
                 fristFerdigstillelse = fristForFerdigstillelse,
                 beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
                 enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
-                behandlingstema = when (behandling.fagsak.type) {
-                    else -> behandling.tilOppgaveBehandlingTema().value
-                },
+                behandlingstema = behandling.tilOppgaveBehandlingTema().value,
                 behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
                 tilordnetRessurs = tilordnetNavIdent,
                 behandlesAvApplikasjon = when {
