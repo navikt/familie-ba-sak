@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
@@ -97,7 +98,7 @@ private fun hentStandardBegrunnelser(
         hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
 
     val begrunnelserFiltrertPåPeriodetype = sanityBegrunnelser.filterValues {
-        it.resultat in relevantePeriodeResultater
+        it.periodeResultat in relevantePeriodeResultater
     }
 
     val filtrertPåVilkår = begrunnelserFiltrertPåPeriodetype.filterValues {
@@ -112,7 +113,7 @@ private fun hentStandardBegrunnelser(
         hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode)
 
     val begrunnelserFiltrertPåPeriodetypeForrigePeriode = sanityBegrunnelser.filterValues {
-        it.resultat in relevantePeriodeResultaterForrigePeriode
+        it.periodeResultat in relevantePeriodeResultaterForrigePeriode
     }
 
     val filtrertPåEndretUtbetaling = begrunnelserFiltrertPåPeriodetype.filterValues {
@@ -148,7 +149,7 @@ private fun hentEØSStandardBegrunnelser(
         hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
 
     val begrunnelserFiltrertPåPeriodetype = sanityEØSBegrunnelser.filterValues {
-        it.resultat in relevantePeriodeResultater
+        it.periodeResultat in relevantePeriodeResultater
     }
 
     val filtrertPåVilkår = begrunnelserFiltrertPåPeriodetype.filterValues {
@@ -159,7 +160,24 @@ private fun hentEØSStandardBegrunnelser(
         )
     }
 
-    return filtrertPåVilkår.keys.toSet()
+    val filtrertPåKompetanse = begrunnelserFiltrertPåPeriodetype.filterValues {
+        it.erLikKompetanseIPeriode(
+            begrunnelseGrunnlag,
+        )
+    }
+
+    return filtrertPåVilkår.keys.toSet() +
+        filtrertPåKompetanse.keys.toSet()
+}
+
+fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
+    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
+): Boolean {
+    val kompetanseIPeriode = begrunnelseGrunnlag.dennePerioden.kompetanse ?: return false
+
+    return this.annenForeldersAktivitet.contains(kompetanseIPeriode.annenForeldersAktivitet) &&
+        this.barnetsBostedsland.contains(landkodeTilBarnetsBostedsland(kompetanseIPeriode.barnetsBostedsland)) &&
+        this.kompetanseResultat.contains(kompetanseIPeriode.resultat)
 }
 
 fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåHendelser(
@@ -183,7 +201,7 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåBarn6år(
     val blirPerson6DennePerioden = person.hentSeksårsdag().toYearMonth() == fomVedtaksperiode?.toYearMonth()
 
     return if (blirPerson6DennePerioden) {
-        this.filterValues { it.ovrigeTriggere?.contains(ØvrigTrigger.BARN_MED_6_ÅRS_DAG) == true }
+        this.filterValues { it.ovrigeTriggere.contains(ØvrigTrigger.BARN_MED_6_ÅRS_DAG) }
     } else {
         emptyMap()
     }
@@ -198,7 +216,7 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåBarnDød(
         dødsfall != null && dødsfall.dødsfallDato.toYearMonth().plusMonths(1) == fomVedtaksperiode?.toYearMonth()
 
     return if (personDødeForrigeMåned && person.type == PersonType.BARN) {
-        this.filterValues { it.ovrigeTriggere?.contains(ØvrigTrigger.BARN_DØD) == true }
+        this.filterValues { it.ovrigeTriggere.contains(ØvrigTrigger.BARN_DØD) }
     } else {
         emptyMap()
     }
@@ -217,7 +235,7 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSatsendring(
         }
 
     return if (erSatsendringIPeriodenForPerson) {
-        this.filterValues { it.ovrigeTriggere?.contains(ØvrigTrigger.SATSENDRING) == true }
+        this.filterValues { it.ovrigeTriggere.contains(ØvrigTrigger.SATSENDRING) }
     } else {
         emptyMap()
     }
