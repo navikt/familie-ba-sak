@@ -342,21 +342,51 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
                 simuleringMottaker =
                 listOf(
                     SimuleringMottaker(
-                        simulertPostering = perioder.map {
-                            SimulertPostering(
-                                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                                fom = it.fraOgMed.tilLocalDate(),
-                                tom = it.tilOgMed.tilLocalDate(),
-                                betalingType = BetalingType.DEBIT,
-                                beløp = BigDecimal(it.innhold!!),
-                                posteringType = PosteringType.YTELSE,
-                                forfallsdato = des(2023).tilLocalDate(),
-                                utenInntrekk = true,
-                            )
+                        simulertPostering = perioder.fold(mutableListOf()) { acc, periode ->
+                            if (periode.innhold!! == 0) {
+                                acc.addAll(
+                                    listOf(
+                                        lagSimulertPostering(periode, overstyrtBeløp = 1000),
+                                        lagSimulertPostering(
+                                            periode = periode,
+                                            overstyrtBeløp = 1000,
+                                            negativtFortegn = true,
+                                        ),
+                                    ),
+                                )
+                                acc
+                            } else {
+                                acc.add(
+                                    lagSimulertPostering(periode),
+                                )
+                                acc
+                            }
                         },
                         mottakerType = MottakerType.BRUKER,
                     ),
                 ),
             )
         }
+
+    fun lagSimulertPostering(
+        periode: Periode<Int, Måned>,
+        overstyrtBeløp: Int? = null,
+        negativtFortegn: Boolean = false,
+    ) =
+        SimulertPostering(
+            fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+            fom = periode.fraOgMed.tilLocalDate(),
+            tom = periode.tilOgMed.tilLocalDate(),
+            betalingType = BetalingType.DEBIT,
+            beløp = if (negativtFortegn) {
+                -BigDecimal(overstyrtBeløp ?: periode.innhold!!).setScale(10)
+            } else {
+                BigDecimal(overstyrtBeløp ?: periode.innhold!!).setScale(
+                    10,
+                )
+            },
+            posteringType = PosteringType.YTELSE,
+            forfallsdato = des(2023).tilLocalDate(),
+            utenInntrekk = true,
+        )
 }

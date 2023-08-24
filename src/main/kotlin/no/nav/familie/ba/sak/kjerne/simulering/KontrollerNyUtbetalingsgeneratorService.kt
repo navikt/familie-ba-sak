@@ -187,10 +187,11 @@ class KontrollerNyUtbetalingsgeneratorService(
                 simuleringsPerioderGammelTidslinje.fraOgMed()!!,
                 simuleringsPerioderNyTidslinje.fraOgMed()!!.tilForrigeMåned(),
             ).perioder()
-            .filter { it.innhold!!.resultat != BigDecimal.ZERO }
+            // Bruker compareTo for å ignorere scale. 0 == 0.00 gir false, mens 0.compareTo(0.00) gir 0 som betyr at de er like.
+            .filter { it.innhold!!.resultat.compareTo(BigDecimal.ZERO) != 0 }
 
         if (perioderFraGammelFørNyMedResultatUlik0.isNotEmpty()) {
-            secureLogger.warn("Behandling ${behandling.id}  har diff i simuleringsresultat ved bruk av ny utbetalingsgenerator - simuleringsperioder før simuleringsperioder fra ny generator gir resultat ulik 0. [${perioderFraGammelFørNyMedResultatUlik0.joinToString() { it.toString() }}]")
+            secureLogger.warn("Behandling ${behandling.id}  har diff i simuleringsresultat ved bruk av ny utbetalingsgenerator - simuleringsperioder før simuleringsperioder fra gammel generator gir resultat ulik 0. [${perioderFraGammelFørNyMedResultatUlik0.joinToString() { it.toString() }}]")
             return DiffFeilType.TidligerePerioderIGammelUlik0
         }
         return null
