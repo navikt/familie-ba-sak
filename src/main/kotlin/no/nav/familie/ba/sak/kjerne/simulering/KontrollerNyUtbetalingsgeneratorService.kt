@@ -85,11 +85,15 @@ class KontrollerNyUtbetalingsgeneratorService(
 
         if (nyttSimuleringResultat.simuleringMottaker.isEmpty() && gammeltSimuleringResultat.simuleringMottaker.isEmpty()) return emptyList()
 
-        validerAtBådeNyOgGammelGirEtResultat(
-            nyttSimuleringResultat = nyttSimuleringResultat,
-            gammeltSimuleringResultat = gammeltSimuleringResultat,
-            behandling = behandling,
-        )?.let { diffFeilTyper.add(it) }
+        if (!bådeNyOgGammelGirEtResultat(
+                nyttSimuleringResultat = nyttSimuleringResultat,
+                gammeltSimuleringResultat = gammeltSimuleringResultat,
+                behandling = behandling,
+            )
+        ) {
+            diffFeilTyper.add(DiffFeilType.DetEneSimuleringsresultatetErTomt)
+            return diffFeilTyper
+        }
 
         val simuleringsPerioderGammel = gammeltSimuleringResultat.tilSorterteSimuleringsPerioder(behandling)
 
@@ -123,16 +127,16 @@ class KontrollerNyUtbetalingsgeneratorService(
         return diffFeilTyper
     }
 
-    private fun validerAtBådeNyOgGammelGirEtResultat(
+    private fun bådeNyOgGammelGirEtResultat(
         nyttSimuleringResultat: DetaljertSimuleringResultat,
         gammeltSimuleringResultat: DetaljertSimuleringResultat,
         behandling: Behandling,
-    ): DiffFeilType? {
-        if ((nyttSimuleringResultat.simuleringMottaker.isNotEmpty() && gammeltSimuleringResultat.simuleringMottaker.isEmpty()) || (nyttSimuleringResultat.simuleringMottaker.isEmpty() && gammeltSimuleringResultat.simuleringMottaker.isNotEmpty())) {
+    ): Boolean {
+        if (!(nyttSimuleringResultat.simuleringMottaker.isNotEmpty() && gammeltSimuleringResultat.simuleringMottaker.isNotEmpty())) {
             secureLogger.warn("Behandling ${behandling.id} får tomt simuleringsresultat med ny eller gammel generator. Ny er tom: ${nyttSimuleringResultat.simuleringMottaker.isEmpty()}, Gammel er tom: ${gammeltSimuleringResultat.simuleringMottaker.isEmpty()}")
-            return DiffFeilType.DetEneSimuleringsresultatetErTomt
+            return false
         }
-        return null
+        return true
     }
 
     private fun skalKontrollereOppMotNyUtbetalingsgenerator(): Boolean =

@@ -289,23 +289,74 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(0)
     }
 
-    fun lagDetaljertSimuleringsResultat(perioder: List<Periode<Int, Måned>>) = DetaljertSimuleringResultat(
-        simuleringMottaker = listOf(
-            SimuleringMottaker(
-                simulertPostering = perioder.map {
-                    SimulertPostering(
-                        fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                        fom = it.fraOgMed.tilLocalDate(),
-                        tom = it.tilOgMed.tilLocalDate(),
-                        betalingType = BetalingType.DEBIT,
-                        beløp = BigDecimal(it.innhold!!),
-                        posteringType = PosteringType.YTELSE,
-                        forfallsdato = des(2023).tilLocalDate(),
-                        utenInntrekk = true,
-                    )
-                },
-                mottakerType = MottakerType.BRUKER,
+    @Test
+    fun `kontrollerNyUtbetalingsgenerator - skal gi feil dersom ett av simuleringsresultatene ikke er tomt men det andre er det`() {
+        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
+            listOf(
+                Periode(jan(2023), feb(2023), 100),
+                Periode(mai(2023), jun(2023), 300),
+                Periode(aug(2023), sep(2023), 200),
             ),
-        ),
-    )
+        )
+
+        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
+            emptyList(),
+        )
+
+        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+            vedtak = lagVedtak(),
+            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+            gammeltUtbetalingsoppdrag = mockk(),
+        )
+
+        assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(1)
+        assertThat(
+            simuleringsPeriodeDiffFeil.first(),
+        ).isEqualTo(DiffFeilType.DetEneSimuleringsresultatetErTomt)
+    }
+
+    @Test
+    fun `kontrollerNyUtbetalingsgenerator - skal ikke kjøre sammenligning dersom begge simuleringsresultatene er tomme`() {
+        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
+            emptyList(),
+        )
+
+        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
+            emptyList(),
+        )
+
+        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+            vedtak = lagVedtak(),
+            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+            gammeltUtbetalingsoppdrag = mockk(),
+        )
+
+        assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(0)
+    }
+
+    fun lagDetaljertSimuleringsResultat(perioder: List<Periode<Int, Måned>>) =
+        if (perioder.isEmpty()) {
+            DetaljertSimuleringResultat(emptyList())
+        } else {
+            DetaljertSimuleringResultat(
+                simuleringMottaker =
+                listOf(
+                    SimuleringMottaker(
+                        simulertPostering = perioder.map {
+                            SimulertPostering(
+                                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                                fom = it.fraOgMed.tilLocalDate(),
+                                tom = it.tilOgMed.tilLocalDate(),
+                                betalingType = BetalingType.DEBIT,
+                                beløp = BigDecimal(it.innhold!!),
+                                posteringType = PosteringType.YTELSE,
+                                forfallsdato = des(2023).tilLocalDate(),
+                                utenInntrekk = true,
+                            )
+                        },
+                        mottakerType = MottakerType.BRUKER,
+                    ),
+                ),
+            )
+        }
 }
