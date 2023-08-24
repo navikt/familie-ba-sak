@@ -84,8 +84,6 @@ class SaksstatistikkService(
             behandlingKategori = when (behandling.underkategori) { // Gjøres pga. tilpasning til DVH-modell
                 BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET ->
                     behandling.underkategori.name
-
-                BehandlingUnderkategori.INSTITUSJON -> BehandlingUnderkategori.ORDINÆR.name // Institusjon er ordinær og ligger under behandlingUnderkategori i saksstatiskk-kontrakt
             },
             behandlingUnderkategori = when (behandling.fagsak.type) { // <-'
                 NORMAL -> null

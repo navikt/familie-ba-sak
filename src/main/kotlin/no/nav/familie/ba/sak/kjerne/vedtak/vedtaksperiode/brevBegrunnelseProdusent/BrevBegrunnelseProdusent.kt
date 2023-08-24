@@ -1,12 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent
 
-import filtrerPåVilkår
+import erGjeldendeForUtgjørendeVilkår
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
+import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVedtakResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
@@ -38,7 +40,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
     behandlingUnderkategori: BehandlingUnderkategori,
-): Set<Standardbegrunnelse> {
+): Set<IVedtakBegrunnelse> {
     val gyldigeBegrunnelserPerPerson = hentGyldigeBegrunnelserPerPerson(
         behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
         behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
@@ -56,7 +58,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
     behandlingUnderkategori: BehandlingUnderkategori,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
-): Map<Person, Set<Standardbegrunnelse>> {
+): Map<Person, Set<IVedtakBegrunnelse>> {
     val begrunnelseGrunnlagPerPerson =
         this.finnBegrunnelseGrunnlagPerPerson(
             behandlingsGrunnlagForVedtaksperioder,
@@ -64,38 +66,92 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
         )
 
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
-        val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
+        val standardBegrunnelser = hentStandardBegrunnelser(
+            begrunnelseGrunnlag,
+            sanityBegrunnelser,
+            person,
+            behandlingUnderkategori,
+            this.fom,
+        )
 
-        val begrunnelserFiltrertPåPeriodetype = sanityBegrunnelser.filtrerPåPeriodetype(begrunnelseGrunnlag)
-        val begrunnelserFiltrertPåPeriodetypeForrigePeriode =
-            sanityBegrunnelser.filtrerPåPeriodetypeForrigePeriode(begrunnelseGrunnlag)
+        val eøsBegrunnelser = hentEØSStandardBegrunnelser(
+            sanityEØSBegrunnelser,
+            begrunnelseGrunnlag,
+            person,
+            behandlingUnderkategori,
+        )
 
-        val filtrertPåVilkår = begrunnelserFiltrertPåPeriodetype.filtrerPåVilkår(
+        standardBegrunnelser + eøsBegrunnelser
+    }
+}
+
+private fun hentStandardBegrunnelser(
+    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
+    person: Person,
+    behandlingUnderkategori: BehandlingUnderkategori,
+    periodeFom: LocalDate?,
+): Set<Standardbegrunnelse> {
+    val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
+
+    val begrunnelserFiltrertPåPeriodetype = sanityBegrunnelser.filterValues {
+        it.harPeriodeTypeSomSkalBegrunnes(begrunnelseGrunnlag)
+    }
+
+    val filtrertPåVilkår = begrunnelserFiltrertPåPeriodetype.filterValues {
+        it.erGjeldendeForUtgjørendeVilkår(
             begrunnelseGrunnlag = begrunnelseGrunnlag,
             person = person,
             behandlingUnderkategori = behandlingUnderkategori,
         )
+    }
 
-        val filtrertPåEndretUtbetaling = begrunnelserFiltrertPåPeriodetype.filtrerPåEndretUtbetaling(
-            endretUtbetaling = endretUtbetalingDennePerioden,
-        )
+    val begrunnelserFiltrertPåPeriodetypeForrigePeriode = sanityBegrunnelser.filterValues {
+        it.harPeriodeTypeSomSkalBegrunnesForrigePeriode(begrunnelseGrunnlag)
+    }
 
-        val filtrertPåEtterEndretUtbetaling =
-            begrunnelserFiltrertPåPeriodetypeForrigePeriode.filtrerPåEtterEndretUtbetaling(
+    val filtrertPåEndretUtbetaling = begrunnelserFiltrertPåPeriodetype.filterValues {
+        it.erEndretUtbetaling(endretUtbetaling = endretUtbetalingDennePerioden)
+    }
+
+    val filtrertPåEtterEndretUtbetaling =
+        begrunnelserFiltrertPåPeriodetypeForrigePeriode.filterValues {
+            it.erEtterEndretUtbetaling(
                 endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
                 endretUtbetalingForrigePeriode = hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag),
             )
+        }
 
-        val filtrertPåHendelser = begrunnelserFiltrertPåPeriodetype.filtrerPåHendelser(
-            begrunnelseGrunnlag,
-            this.fom,
-        )
+    val filtrertPåHendelser = begrunnelserFiltrertPåPeriodetype.filtrerPåHendelser(
+        begrunnelseGrunnlag,
+        periodeFom,
+    )
 
-        filtrertPåVilkår.keys.toSet() +
-            filtrertPåEndretUtbetaling.keys.toSet() +
-            filtrertPåEtterEndretUtbetaling.keys.toSet() +
-            filtrertPåHendelser.keys.toSet()
+    return filtrertPåVilkår.keys.toSet() +
+        filtrertPåEndretUtbetaling.keys.toSet() +
+        filtrertPåEtterEndretUtbetaling.keys.toSet() +
+        filtrertPåHendelser.keys.toSet()
+}
+
+private fun hentEØSStandardBegrunnelser(
+    sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
+    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
+    person: Person,
+    behandlingUnderkategori: BehandlingUnderkategori,
+): Set<EØSStandardbegrunnelse> {
+    val begrunnelserFiltrertPåPeriodetype = sanityEØSBegrunnelser.filterValues {
+        it.harPeriodeTypeSomSkalBegrunnes(begrunnelseGrunnlag)
     }
+
+    val filtrertPåVilkår = begrunnelserFiltrertPåPeriodetype.filterValues {
+        it.erGjeldendeForUtgjørendeVilkår(
+            begrunnelseGrunnlag,
+            person,
+            behandlingUnderkategori,
+        )
+    }
+
+    return filtrertPåVilkår.keys.toSet()
 }
 
 fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåHendelser(
@@ -159,109 +215,103 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSatsendring(
     }
 }
 
-private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetype(
+private fun ISanityBegrunnelse.harPeriodeTypeSomSkalBegrunnes(
     begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
-) = this.filterValues {
+): Boolean {
     val dennePerioden = begrunnelseGrunnlag.dennePerioden
 
-    if (dennePerioden.erOrdinæreVilkårInnvilget() && dennePerioden.erInnvilgetEtterEndretUtbetaling()) {
-        it.resultat in listOf(
+    return if (dennePerioden.erOrdinæreVilkårInnvilget() && dennePerioden.erInnvilgetEtterEndretUtbetaling()) {
+        this.resultat in listOf(
             SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
             SanityVedtakResultat.REDUKSJON,
         )
     } else {
-        it.resultat in listOf(
+        this.resultat in listOf(
             SanityVedtakResultat.REDUKSJON,
             SanityVedtakResultat.IKKE_INNVILGET,
         )
     }
 }
 
-private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåPeriodetypeForrigePeriode(
+private fun ISanityBegrunnelse.harPeriodeTypeSomSkalBegrunnesForrigePeriode(
     begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
-) = this.filterValues {
+): Boolean {
     val forrigePeriode = begrunnelseGrunnlag.forrigePeriode
-    if (forrigePeriode?.erOrdinæreVilkårInnvilget() == true && forrigePeriode.erInnvilgetEtterEndretUtbetaling()) {
-        it.resultat in listOf(
+    return if (forrigePeriode?.erOrdinæreVilkårInnvilget() == true && forrigePeriode.erInnvilgetEtterEndretUtbetaling()) {
+        this.resultat in listOf(
             SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
             SanityVedtakResultat.REDUKSJON,
         )
     } else {
-        it.resultat in listOf(
+        this.resultat in listOf(
             SanityVedtakResultat.REDUKSJON,
             SanityVedtakResultat.IKKE_INNVILGET,
         )
     }
 }
 
-private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåEtterEndretUtbetaling(
+private fun SanityBegrunnelse.erEtterEndretUtbetaling(
     endretUtbetalingDennePerioden: EndretUtbetalingAndelForVedtaksperiode?,
     endretUtbetalingForrigePeriode: EndretUtbetalingAndelForVedtaksperiode?,
-): Map<Standardbegrunnelse, SanityBegrunnelse> {
-    val begrunnelserRelevanteForFilter = this.filterValues { it.erEndringsårsakOgGjelderEtterEndretUtbetaling() }
+): Boolean {
+    if (!this.erEndringsårsakOgGjelderEtterEndretUtbetaling()) return false
 
-    return begrunnelserRelevanteForFilter.filtrerPåOmMatcherEtterEndretUtbetaling(
+    return this.matcherEtterEndretUtbetaling(
         endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
         endretUtbetalingForrigePeriode = endretUtbetalingForrigePeriode,
     )
 }
 
-private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåOmMatcherEtterEndretUtbetaling(
+private fun SanityBegrunnelse.matcherEtterEndretUtbetaling(
     endretUtbetalingDennePerioden: EndretUtbetalingAndelForVedtaksperiode?,
     endretUtbetalingForrigePeriode: EndretUtbetalingAndelForVedtaksperiode?,
-): Map<Standardbegrunnelse, SanityBegrunnelse> {
-    val filtrerteBegrunnelser = this
-        .filterValues { sanityBegrunnelse ->
-            val begrunnelseMatcherEndretUtbetalingIForrigePeriode =
-                sanityBegrunnelse.endringsaarsaker?.all { it == endretUtbetalingForrigePeriode?.årsak } == true
+): Boolean {
+    val begrunnelseMatcherEndretUtbetalingIForrigePeriode =
+        this.endringsaarsaker.all { it == endretUtbetalingForrigePeriode?.årsak }
 
-            val begrunnelseMatcherEndretUtbetalingIDennePerioden =
-                sanityBegrunnelse.endringsaarsaker?.all { it == endretUtbetalingDennePerioden?.årsak } == true
+    val begrunnelseMatcherEndretUtbetalingIDennePerioden =
+        this.endringsaarsaker.all { it == endretUtbetalingDennePerioden?.årsak }
 
-            begrunnelseMatcherEndretUtbetalingIForrigePeriode && !begrunnelseMatcherEndretUtbetalingIDennePerioden
-        }
+    if (!begrunnelseMatcherEndretUtbetalingIForrigePeriode || begrunnelseMatcherEndretUtbetalingIDennePerioden) return false
 
-    return if (endretUtbetalingForrigePeriode?.årsak == Årsak.DELT_BOSTED) {
-        filtrerteBegrunnelser.filtrerPåDeltBostedUtbetalingstype(endretUtbetalingForrigePeriode)
-    } else {
-        filtrerteBegrunnelser
-    }
+    return endretUtbetalingForrigePeriode?.årsak != Årsak.DELT_BOSTED || this.erDeltBostedUtbetalingstype(
+        endretUtbetalingForrigePeriode,
+    )
 }
 
 private fun SanityBegrunnelse.erEndringsårsakOgGjelderEtterEndretUtbetaling() =
-    !this.endringsaarsaker.isNullOrEmpty() && this.gjelderEtterEndretUtbetaling()
+    this.endringsaarsaker.isNotEmpty() && this.gjelderEtterEndretUtbetaling()
 
-private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåEndretUtbetaling(
+private fun SanityBegrunnelse.erEndretUtbetaling(
     endretUtbetaling: EndretUtbetalingAndelForVedtaksperiode?,
-): Map<Standardbegrunnelse, SanityBegrunnelse> {
-    val begrunnelserRelevanteForFilter = this.filterValues { it.gjelderEndretUtbetaling() }
-
-    return begrunnelserRelevanteForFilter.filtrerPåOmMatcherEndretUtbetaling(endretUtbetaling)
+): Boolean {
+    return this.gjelderEndretUtbetaling() && this.erLikEndretUtbetalingIPeriode(endretUtbetaling)
 }
 
 private fun SanityBegrunnelse.gjelderEndretUtbetaling() =
-    !this.endringsaarsaker.isNullOrEmpty() && !this.gjelderEtterEndretUtbetaling()
+    this.endringsaarsaker.isNotEmpty() && !this.gjelderEtterEndretUtbetaling()
 
-private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåOmMatcherEndretUtbetaling(
+private fun SanityBegrunnelse.erLikEndretUtbetalingIPeriode(
     endretUtbetaling: EndretUtbetalingAndelForVedtaksperiode?,
-): Map<Standardbegrunnelse, SanityBegrunnelse> {
-    val filtrerteBegrunnelser = this.filterValues { sanityBegrunnelse ->
-        endretUtbetaling != null && sanityBegrunnelse.endringsaarsaker!!.all { it == endretUtbetaling.årsak }
-    }
+): Boolean {
+    if (endretUtbetaling == null) return false
 
-    return if (endretUtbetaling?.årsak == Årsak.DELT_BOSTED) {
-        filtrerteBegrunnelser.filtrerPåDeltBostedUtbetalingstype(endretUtbetaling)
+    val erEndringsårsakerIBegrunnelseOgPeriodeLike = this.endringsaarsaker.all { it == endretUtbetaling.årsak }
+    if (!erEndringsårsakerIBegrunnelseOgPeriodeLike) return false
+
+    return if (endretUtbetaling.årsak == Årsak.DELT_BOSTED) {
+        this.erDeltBostedUtbetalingstype(endretUtbetaling)
     } else {
-        filtrerteBegrunnelser
+        true
     }
 }
 
-private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåDeltBostedUtbetalingstype(
+private fun SanityBegrunnelse.erDeltBostedUtbetalingstype(
     endretUtbetaling: EndretUtbetalingAndelForVedtaksperiode,
-) = filter { (_, sanityBegrunnelse) ->
+): Boolean {
     val inneholderAndelSomSkalUtbetales = endretUtbetaling.prosent != BigDecimal.ZERO
 
-    when (sanityBegrunnelse.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger) {
+    return when (this.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger) {
         EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT -> true
         EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES -> inneholderAndelSomSkalUtbetales
         EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES -> !inneholderAndelSomSkalUtbetales
