@@ -1245,7 +1245,7 @@ fun lagSanityBegrunnelse(
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
-    resultat = resultat,
+    periodeResultat = resultat,
 )
 
 fun lagSanityEøsBegrunnelse(
