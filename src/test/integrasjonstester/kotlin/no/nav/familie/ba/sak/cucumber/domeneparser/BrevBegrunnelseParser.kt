@@ -50,7 +50,7 @@ object BrevBegrunnelseParser {
 
             Regelverk.EØS_FORORDNINGEN -> {
                 parseEnumListe<EØSStandardbegrunnelse>(
-                    DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser.INKLUDERTE_BEGRUNNELSER,
+                    inkludertEllerEkskludert,
                     rad,
                 ).toSet()
             }
@@ -59,8 +59,8 @@ object BrevBegrunnelseParser {
 
     enum class DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser(override val nøkkel: String) : Domenenøkkel {
         VEDTAKSPERIODE_TYPE("VedtaksperiodeType"),
-        INKLUDERTE_BEGRUNNELSER("Inkluderte Begrunnelser"), EKSKLUDERTE_BEGRUNNELSER("Ekskluderte Begrunnelser"), REGELVERK(
-            "Regelverk",
-        ),
+        INKLUDERTE_BEGRUNNELSER("Inkluderte Begrunnelser"),
+        EKSKLUDERTE_BEGRUNNELSER("Ekskluderte Begrunnelser"),
+        REGELVERK("Regelverk"),
     }
 }

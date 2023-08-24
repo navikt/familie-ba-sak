@@ -34,6 +34,27 @@ fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
     )
 }
 
+fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkårInkluderHvisIkkeVilkår(
+    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
+    person: Person,
+    behandlingUnderkategori: BehandlingUnderkategori,
+): Boolean {
+    val vilkårForPerson = Vilkår.hentVilkårFor(
+        personType = person.type,
+        fagsakType = FagsakType.NORMAL,
+        behandlingUnderkategori = behandlingUnderkategori,
+    )
+
+    val utgjørendeVilkårResultater = finnUtgjørendeVilkår(
+        begrunnelseGrunnlag = begrunnelseGrunnlag,
+        vilkårForPerson = vilkårForPerson,
+    )
+
+    return this.erLikVilkårOgUtdypendeVilkårIPeriode(
+        utgjørendeVilkårResultater,
+    )
+}
+
 private fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
     vilkårResultaterForPerson: Collection<VilkårResultatForVedtaksperiode>,
 ): Boolean {
