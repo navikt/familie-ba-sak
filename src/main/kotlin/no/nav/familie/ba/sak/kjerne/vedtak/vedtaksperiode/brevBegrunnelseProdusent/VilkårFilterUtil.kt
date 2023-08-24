@@ -1,60 +1,50 @@
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVedtakResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilUtdypendeVilkårsvurderinger
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VedtaksperiodeGrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
-fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåVilkår(
+fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
     begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
     person: Person,
     behandlingUnderkategori: BehandlingUnderkategori,
-): Map<Standardbegrunnelse, SanityBegrunnelse> {
+): Boolean {
+    if (this.vilkår.isEmpty()) return false
+
     val vilkårForPerson = Vilkår.hentVilkårFor(
         personType = person.type,
         fagsakType = FagsakType.NORMAL,
         behandlingUnderkategori = behandlingUnderkategori,
     )
 
-    val relevanteBegrunnelser = this.filterValues { it.vilkår.isNotEmpty() }
-
     val utgjørendeVilkårResultater = finnUtgjørendeVilkår(
         begrunnelseGrunnlag = begrunnelseGrunnlag,
         vilkårForPerson = vilkårForPerson,
     )
 
-    return relevanteBegrunnelser.filtrerBegrunnelserSomMatcherVilkårOgUtdypendeVilkår(
+    return this.erLikVilkårOgUtdypendeVilkårIPeriode(
         utgjørendeVilkårResultater,
     )
 }
 
-fun erReduksjonDelBostedBegrunnelse(it: SanityBegrunnelse) =
-    it.resultat == SanityVedtakResultat.REDUKSJON && it.vilkår.contains(Vilkår.BOR_MED_SØKER) &&
-        it.borMedSokerTriggere?.contains(VilkårTrigger.DELT_BOSTED) == true
-
-private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerBegrunnelserSomMatcherVilkårType(
-    vilkårForPerson: Collection<Vilkår>,
-) = this.filterValues { sanityBegrunnelse -> sanityBegrunnelse.vilkår.all { it in vilkårForPerson } }
-
-private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerBegrunnelserSomMatcherVilkårOgUtdypendeVilkår(
+private fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
     vilkårResultaterForPerson: Collection<VilkårResultatForVedtaksperiode>,
-) = this.filterValues { sanityBegrunnelse ->
-    sanityBegrunnelse.vilkår.all { vilkårISanityBegrunnelse ->
+): Boolean {
+    return this.vilkår.all { vilkårISanityBegrunnelse ->
         val vilkårResultat = vilkårResultaterForPerson.find { it.vilkårType == vilkårISanityBegrunnelse }
 
-        vilkårResultat != null && sanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat)
+        vilkårResultat != null && this.matcherMedUtdypendeVilkår(vilkårResultat)
     }
 }
 
-fun SanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResultatForVedtaksperiode): Boolean {
+fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResultatForVedtaksperiode): Boolean {
     return when (vilkårResultat.vilkårType) {
         Vilkår.UNDER_18_ÅR -> true
         Vilkår.BOR_MED_SØKER -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.borMedSokerTriggere)

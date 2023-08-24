@@ -185,7 +185,7 @@ class VilkårsvurderingUtilsTest {
     fun `skal liste opp begrunnelser uten vilkår`() {
         val sanityBegrunnelser = mapOf(
             Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to SanityBegrunnelse(
-                vilkaar = null,
+                vilkaar = emptyList(),
                 apiNavn = "innvilgetBosattIRiket",
                 navnISystem = "",
             ),
