@@ -36219,6 +36219,9 @@
     "_rev": "NDfx9S957IRtMdNtplloIf",
     "vedtakResultat": "REDUKSJON",
     "navnISystem": "Satsendring",
+    "ovrigeTriggere": [
+      "SATSENDRING"
+    ],
     "hjemler": [
       "2",
       "10"
