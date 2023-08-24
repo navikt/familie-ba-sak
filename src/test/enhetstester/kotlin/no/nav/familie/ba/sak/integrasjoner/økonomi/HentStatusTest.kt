@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.simulering.KontrollerNyUtbetalingsgeneratorService
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdrag
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -36,20 +37,24 @@ class HentStatusTest {
 
     private val beregningService: BeregningService = mockk()
 
+    private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService = mockk()
+
     lateinit var statusFraOppdrag: StatusFraOppdrag
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
 
+    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
+
     @BeforeEach
     fun setUp() {
         val økonomiService = ØkonomiService(
-            behandlingHentOgPersisterService = mockk(),
+
             økonomiKlient = økonomiKlient,
             beregningService = beregningService,
-            utbetalingsoppdragGenerator = mockk(),
-            behandlingService = mockk(),
             tilkjentYtelseValideringService = mockk(),
             tilkjentYtelseRepository = tilkjentYtelseRepository,
+            kontrollerNyUtbetalingsgeneratorService = kontrollerNyUtbetalingsgeneratorService,
+            utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
         )
         statusFraOppdrag = StatusFraOppdrag(
             økonomiService = økonomiService,

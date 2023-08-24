@@ -11,8 +11,6 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingMedOverstyrendeResultater
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -42,7 +40,6 @@ class VilkårsvurderingForNyBehandlingServiceTest {
     private val behandlingstemaService = mockk<BehandlingstemaService>()
     private val endretUtbetalingAndelService = mockk<EndretUtbetalingAndelService>()
     private val vilkårsvurderingMetrics = mockk<VilkårsvurderingMetrics>()
-    private val featureToggleService = mockk<FeatureToggleService>()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
 
     private lateinit var vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
@@ -56,11 +53,8 @@ class VilkårsvurderingForNyBehandlingServiceTest {
             behandlingstemaService = behandlingstemaService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             vilkårsvurderingMetrics = vilkårsvurderingMetrics,
-            featureToggleService = featureToggleService,
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
-
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_KOPIER_GRUNNLAG_FRA_FORRIGE_BEHANDLING) } returns true
     }
 
     @Test
