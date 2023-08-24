@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVedtakResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -60,7 +60,7 @@ data class RestSanityEØSBegrunnelse(
 data class SanityEØSBegrunnelse(
     override val apiNavn: String,
     override val navnISystem: String,
-    override val resultat: SanityVedtakResultat? = null,
+    override val resultat: SanityPeriodeResultat? = null,
     override val vilkår: Set<Vilkår>,
     val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,

@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVedtakResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -94,7 +94,7 @@ private fun hentStandardBegrunnelser(
     val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
 
     val relevanteResultater =
-        hentRelevanteBegrunnelseTyperForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
+        hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
 
     val begrunnelserFiltrertPåPeriodetype = sanityBegrunnelser.filterValues {
         it.resultat in relevanteResultater
@@ -109,7 +109,7 @@ private fun hentStandardBegrunnelser(
     }
 
     val relevanteResultaterForrigePeriode =
-        hentRelevanteBegrunnelseTyperForrigePeriode(begrunnelseGrunnlag.forrigePeriode)
+        hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode)
 
     val begrunnelserFiltrertPåPeriodetypeForrigePeriode = sanityBegrunnelser.filterValues {
         it.resultat in relevanteResultaterForrigePeriode
@@ -145,7 +145,7 @@ private fun hentEØSStandardBegrunnelser(
     behandlingUnderkategori: BehandlingUnderkategori,
 ): Set<EØSStandardbegrunnelse> {
     val relevanteResultater =
-        hentRelevanteBegrunnelseTyperForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
+        hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
 
     val begrunnelserFiltrertPåPeriodetype = sanityEØSBegrunnelser.filterValues {
         it.resultat in relevanteResultater
@@ -223,23 +223,23 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSatsendring(
     }
 }
 
-private fun hentRelevanteBegrunnelseTyperForrigePeriode(
+private fun hentResultaterForForrigePeriode(
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
 ) = if (begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true &&
     begrunnelseGrunnlagForrigePeriode.erInnvilgetEtterEndretUtbetaling()
 ) {
     listOf(
-        SanityVedtakResultat.REDUKSJON,
-        SanityVedtakResultat.INNVILGET_ELLER_ØKNING,
+        SanityPeriodeResultat.REDUKSJON,
+        SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
     )
 } else {
     listOf(
-        SanityVedtakResultat.REDUKSJON,
-        SanityVedtakResultat.IKKE_INNVILGET,
+        SanityPeriodeResultat.REDUKSJON,
+        SanityPeriodeResultat.IKKE_INNVILGET,
     )
 }
 
-private fun hentRelevanteBegrunnelseTyperForPeriode(
+private fun hentResultaterForPeriode(
     begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode?,
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
 ) = if (begrunnelseGrunnlagForPeriode?.erOrdinæreVilkårInnvilget() == true &&
@@ -259,14 +259,14 @@ private fun hentRelevanteBegrunnelseTyperForPeriode(
         begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true
 
     listOfNotNull(
-        if (erØkingIAndel || erSøker) SanityVedtakResultat.INNVILGET_ELLER_ØKNING else null,
-        if (erReduksjonIAndel) SanityVedtakResultat.REDUKSJON else null,
-        if (!erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode) SanityVedtakResultat.INGEN_ENDRING else null,
+        if (erØkingIAndel || erSøker) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
+        if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
+        if (!erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode) SanityPeriodeResultat.INGEN_ENDRING else null,
     )
 } else {
     listOf(
-        SanityVedtakResultat.REDUKSJON,
-        SanityVedtakResultat.IKKE_INNVILGET,
+        SanityPeriodeResultat.REDUKSJON,
+        SanityPeriodeResultat.IKKE_INNVILGET,
     )
 }
 
