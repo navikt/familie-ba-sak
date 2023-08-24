@@ -28,6 +28,7 @@
         <felles-kontrakter.version>3.0_20230808083340_ced4750</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230223155122_2e81c44</familie.kontrakter.stønadsstatistikk>
+        <utbetalingsgenerator.version>1.0_20230816154126_e551e82</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
         <cucumber.version>7.13.0</cucumber.version>
         <mockk.version>1.13.5</mockk.version>
@@ -305,6 +306,11 @@
             <artifactId>skatteetaten</artifactId>
             <version>${familie.kontrakter.skatteetaten}</version>
         </dependency>
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>familie-utbetalingsgenerator</artifactId>
+            <version>${utbetalingsgenerator.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -398,7 +404,8 @@
                             <phase>verify</phase>
                             <configuration>
                                 <target name="ktlint">
-                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
+                                          classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
                                         <arg value="src/**/*.kt"/>
                                     </java>
                                 </target>
@@ -411,7 +418,8 @@
                             <id>ktlint-format</id>
                             <configuration>
                                 <target name="ktlint">
-                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
+                                          classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
                                         <arg value="-F"/>
                                         <arg value="src/**/*.kt"/>
                                         <!-- Trenger dette for å kjøre ktlint med java 17 -->

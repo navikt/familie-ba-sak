@@ -20,6 +20,9 @@ class FeatureToggleConfig {
         // unleash toggles for satsendring, kan slettes etter at satsendring er skrudd på for alle satstyper
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
         const val SATSENDRING_SNIKE_I_KØEN = "familie-ba-sak.satsendring-snike-i-koen"
+
+        // Ny utbetalingsgenerator
+        const val KONTROLLER_NY_UTBETALINGSGENERATOR = "familie.ba.sak.kontroller-ny-utbetalingsgenerator"
     }
 }
 
