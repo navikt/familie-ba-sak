@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 interface ISanityBegrunnelse {
     val apiNavn: String
     val navnISystem: String
-    val resultat: SanityVedtakResultat?
+    val periodeResultat: SanityPeriodeResultat?
     val vilkår: Set<Vilkår>
     val borMedSokerTriggere: List<VilkårTrigger>
     val giftPartnerskapTriggere: List<VilkårTrigger>
@@ -30,7 +30,7 @@ interface ISanityBegrunnelse {
 data class SanityBegrunnelse(
     override val apiNavn: String,
     override val navnISystem: String,
-    override val resultat: SanityVedtakResultat? = null,
+    override val periodeResultat: SanityPeriodeResultat? = null,
     override val vilkår: Set<Vilkår> = emptySet(),
     override val lovligOppholdTriggere: List<VilkårTrigger> = emptyList(),
     override val bosattIRiketTriggere: List<VilkårTrigger> = emptyList(),
@@ -123,8 +123,8 @@ data class RestSanityBegrunnelse(
                 finnEnumverdi(it, UtvidetBarnetrygdTrigger.entries.toTypedArray(), apiNavn)
             } ?: emptyList(),
             valgbarhet = valgbarhet?.let { finnEnumverdi(valgbarhet, Valgbarhet.entries.toTypedArray(), apiNavn) },
-            resultat = vedtakResultat?.let {
-                finnEnumverdi(it, SanityVedtakResultat.entries.toTypedArray(), apiNavn)
+            periodeResultat = vedtakResultat?.let {
+                finnEnumverdi(it, SanityPeriodeResultat.entries.toTypedArray(), apiNavn)
             },
         )
     }
@@ -187,7 +187,7 @@ fun List<VilkårTrigger>.tilUtdypendeVilkårsvurderinger() = this.map {
     }
 }
 
-enum class SanityVedtakResultat {
+enum class SanityPeriodeResultat {
     INNVILGET_ELLER_ØKNING,
     INGEN_ENDRING,
     IKKE_INNVILGET,

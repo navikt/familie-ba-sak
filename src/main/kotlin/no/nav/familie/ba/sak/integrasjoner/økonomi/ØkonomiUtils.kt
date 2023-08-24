@@ -160,7 +160,7 @@ object ØkonomiUtils {
             .map { (identOgYtelse, kjedeEtterFørsteEndring) ->
                 val sisteAndel =
                     sisteAndelPerIdent[identOgYtelse] ?: error("Finner ikke siste andel for $identOgYtelse")
-                sisteAndel to (endretMigreringsDato ?: kjedeEtterFørsteEndring.first().stønadFom)
+                sisteAndel to (endretMigreringsDato ?: kjedeEtterFørsteEndring.minOf { it.stønadFom })
             }
 
     private fun altIKjedeOpphøres(
