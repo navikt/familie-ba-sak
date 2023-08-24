@@ -284,18 +284,19 @@ private fun SanityBegrunnelse.erEndringsårsakOgGjelderEtterEndretUtbetaling() =
 private fun SanityBegrunnelse.erEndretUtbetaling(
     endretUtbetaling: EndretUtbetalingAndelForVedtaksperiode?,
 ): Boolean {
-    if (!this.gjelderEndretUtbetaling()) return false
-
-    return this.erMatchPåEndretUtbetaling(endretUtbetaling)
+    return this.gjelderEndretUtbetaling() && this.erLikEndretUtbetalingIPeriode(endretUtbetaling)
 }
 
 private fun SanityBegrunnelse.gjelderEndretUtbetaling() =
     this.endringsaarsaker.isNotEmpty() && !this.gjelderEtterEndretUtbetaling()
 
-private fun SanityBegrunnelse.erMatchPåEndretUtbetaling(
+private fun SanityBegrunnelse.erLikEndretUtbetalingIPeriode(
     endretUtbetaling: EndretUtbetalingAndelForVedtaksperiode?,
 ): Boolean {
-    if (endretUtbetaling == null || !this.endringsaarsaker.all { it == endretUtbetaling.årsak }) return false
+    if (endretUtbetaling == null) return false
+
+    val erEndringsårsakerIBegrunnelseOgPeriodeLike = this.endringsaarsaker.all { it == endretUtbetaling.årsak }
+    if (!erEndringsårsakerIBegrunnelseOgPeriodeLike) return false
 
     return if (endretUtbetaling.årsak == Årsak.DELT_BOSTED) {
         this.erDeltBostedUtbetalingstype(endretUtbetaling)
