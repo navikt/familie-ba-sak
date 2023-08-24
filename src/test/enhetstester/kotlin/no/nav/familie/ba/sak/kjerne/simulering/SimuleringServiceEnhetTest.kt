@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -46,17 +47,20 @@ internal class SimuleringServiceEnhetTest {
     private val vedtakRepository: VedtakRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
+    private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService = mockk()
+    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
 
     private val simuleringService: SimuleringService = SimuleringService(
         økonomiKlient,
-        økonomiService,
         beregningService,
         økonomiSimuleringMottakerRepository,
         tilgangService,
         featureToggleService,
         vedtakRepository,
+        utbetalingsoppdragGeneratorService,
         behandlingHentOgPersisterService,
         persongrunnlagService,
+        kontrollerNyUtbetalingsgeneratorService,
     )
 
     val februar2023 = LocalDate.of(2023, 2, 1)
