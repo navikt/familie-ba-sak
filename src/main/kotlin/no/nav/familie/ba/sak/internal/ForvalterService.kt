@@ -248,8 +248,9 @@ class ForvalterService(
                     kjedeEtterFørsteEndring.last() to kjedeEtterFørsteEndring.minOf { it.stønadFom }
                 }
 
+            secureLogger.info("Andeler som som skal opphøres: $andelerTilOpphør for behandling ${tilkjentYtelse.behandling.id}")
             val utbetalingsperioderMedOpphør = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
-            secureLogger.info("Utbetalingsperioder med opphør: $utbetalingsperioderMedOpphør")
+            secureLogger.info("Utbetalingsperioder med opphør: $utbetalingsperioderMedOpphør for behandling ${tilkjentYtelse.behandling.id}")
 
             // Finner ut hvilken opphørsAndel som tilhører hvilken utbetalingsperiodeMedOpphør
             val alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato = utbetalingsperioderMedOpphør
@@ -257,16 +258,20 @@ class ForvalterService(
                     val andelerTilPersonMedOpphør =
                         andelerTilOpphør.filter { andelForPerson -> andelForPerson.first.periodeOffset == periodeMedOpphør.periodeId }
                     if (andelerTilPersonMedOpphør.size != 1) {
+                        secureLogger.info("Mer enn 1 eller ingen andeler med samme periodeOffsett som opphørsperioden $periodeMedOpphør for behandling ${tilkjentYtelse.behandling.id}")
                         false
                     } else {
-                        secureLogger.info("Andel fra forrige med korrekt opphørsdato: ${andelerTilPersonMedOpphør.first().second.førsteDagIInneværendeMåned()}. Opphørsperiode sendt til økonomi med opphørsdato: ${periodeMedOpphør.opphør!!.opphørDatoFom}")
+                        secureLogger.info("Andel fra forrige med korrekt opphørsdato: ${andelerTilPersonMedOpphør.first().second.førsteDagIInneværendeMåned()}. Opphørsperiode sendt til økonomi med opphørsdato: ${periodeMedOpphør.opphør!!.opphørDatoFom} for behandling ${tilkjentYtelse.behandling.id}")
                         andelerTilPersonMedOpphør.first().second
                             .førsteDagIInneværendeMåned() == periodeMedOpphør.opphør!!.opphørDatoFom
                     }
                 }
             return alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato
         } catch (e: Exception) {
-            secureLogger.warn("opphørsdatoErKorrekt kaster feil: ${e.message}", e)
+            secureLogger.warn(
+                "opphørsdatoErKorrekt kaster feil: ${e.message} for behandling ${tilkjentYtelse.behandling.id}",
+                e,
+            )
             return false
         }
     }
