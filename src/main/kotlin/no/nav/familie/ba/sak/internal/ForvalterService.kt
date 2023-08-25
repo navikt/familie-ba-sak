@@ -206,14 +206,16 @@ class ForvalterService(
     fun identifiserBehandlingerSomKanKrevePatching(): List<Long> {
         val tilkjentYtelseMedFeilIUtbetalingsoppdrag =
             tilkjentYtelseRepository.findTilkjentYtelseMedFeilUtbetalingsoppdrag()
-                .filter { opphørsdatoErKorrekt(it) }
-                .map { it.behandling.id }
+        logger.info("Behandlinger som potensielt har feil: ${tilkjentYtelseMedFeilIUtbetalingsoppdrag.map { it.behandling.id }}")
+
         return tilkjentYtelseMedFeilIUtbetalingsoppdrag
+            .filter { opphørsdatoErKorrekt(it) }
+            .map { it.behandling.id }
     }
 
     private fun opphørsdatoErKorrekt(tilkjentYtelse: TilkjentYtelse): Boolean {
         val utbetalingsoppdrag = tilkjentYtelse.utbetalingsoppdrag() ?: return true
-
+        logger.info("Sjekker behandling for korrekt opphørsdato ${tilkjentYtelse.behandling.id}")
         val grupperteNyeAndeler = grupperAndeler(
             beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = tilkjentYtelse.behandling.id)
                 .pakkInnForUtbetaling(AndelTilkjentYtelseForSimuleringFactory()),
@@ -221,7 +223,8 @@ class ForvalterService(
 
         val forrigeIverksatteBehandling =
             behandlingRepository.finnIverksatteBehandlinger(tilkjentYtelse.behandling.fagsak.id)
-                .filter { it.id != tilkjentYtelse.behandling.id }.maxByOrNull { it.aktivertTidspunkt }!!
+                .filter { it.id != tilkjentYtelse.behandling.id && it.aktivertTidspunkt < tilkjentYtelse.behandling.aktivertTidspunkt }
+                .maxByOrNull { it.aktivertTidspunkt }!!
 
         val grupperteForrigeAndeler = grupperAndeler(
             beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = forrigeIverksatteBehandling.id)
