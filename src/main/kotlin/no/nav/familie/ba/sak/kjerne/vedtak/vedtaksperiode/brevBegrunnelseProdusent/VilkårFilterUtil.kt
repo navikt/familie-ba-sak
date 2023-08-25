@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilUtdypendeVilkårsvurderinger
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlagForPeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VedtaksperiodeGrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -76,16 +75,16 @@ private fun finnUtgjørendeVilkår(
             ?: emptyList()
 
     return if (begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget()) {
-        val vilkårTjentEllerEndrerUtbetaling = hentVilkårTjent(
+        val vilkårTjentEllerEndretUtdypende = hentVilkårTjent(
             oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
             oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
-        ) + hentVilkårSomFørerTilØkingEllerReduksjonAvUtbetaling(
+        ) + hentOppfylteVilkårMedEndretUtdypende(
             oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
             oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
         )
 
-        begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
-            .filter { it.vilkårType in vilkårTjentEllerEndrerUtbetaling }
+        oppfylteVilkårResultaterDennePerioden
+            .filter { it.vilkårType in vilkårTjentEllerEndretUtdypende }
     } else {
         val vilkårTapt = hentVilkårTapt(
             oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
@@ -97,32 +96,19 @@ private fun finnUtgjørendeVilkår(
     }.toSet()
 }
 
-private fun VedtaksperiodeGrunnlagForPerson.hentOppfylteVilkår() =
-    vilkårResultaterForVedtaksperiode.filter { it.resultat == Resultat.OPPFYLT }
-
-private fun hentVilkårSomFørerTilØkingEllerReduksjonAvUtbetaling(
+private fun hentOppfylteVilkårMedEndretUtdypende(
     oppfylteVilkårResultaterDennePerioden: List<VilkårResultatForVedtaksperiode>,
     oppfylteVilkårResultaterForrigePeriode: List<VilkårResultatForVedtaksperiode>,
 ): List<Vilkår> {
-    val oppfyltBorMedSøkerDennePerioden =
-        oppfylteVilkårResultaterDennePerioden.singleOrNull { it.vilkårType == Vilkår.BOR_MED_SØKER && it.resultat == Resultat.OPPFYLT }
-    val oppfyltBorMedSøkerForrigePeriode =
-        oppfylteVilkårResultaterForrigePeriode.singleOrNull { it.vilkårType == Vilkår.BOR_MED_SØKER && it.resultat == Resultat.OPPFYLT }
+    return oppfylteVilkårResultaterForrigePeriode.filter { vilkårResultatForrigePeriode ->
+        val sammeVilkårResultatDennePerioden =
+            oppfylteVilkårResultaterDennePerioden.singleOrNull { it.vilkårType == vilkårResultatForrigePeriode.vilkårType }
+        val utdypendeVilkårsvurderingDennePerioden =
+            sammeVilkårResultatDennePerioden?.utdypendeVilkårsvurderinger?.toSet() ?: emptySet()
+        val utdypendeVilkårsvurderingForrigePeriode = vilkårResultatForrigePeriode.utdypendeVilkårsvurderinger.toSet()
 
-    return when {
-        oppfyltBorMedSøkerDennePerioden == null -> emptyList()
-        oppfyltBorMedSøkerForrigePeriode == null -> emptyList()
-
-        // Barnetrygden reduseres fra full til delt
-        !oppfyltBorMedSøkerDennePerioden.erDeltBosted() && oppfyltBorMedSøkerForrigePeriode.erDeltBosted() ->
-            listOf(Vilkår.BOR_MED_SØKER)
-
-        // Barnetrygden øker fra delt til full
-        oppfyltBorMedSøkerDennePerioden.erDeltBosted() && !oppfyltBorMedSøkerForrigePeriode.erDeltBosted() ->
-            listOf(Vilkår.BOR_MED_SØKER)
-
-        else -> emptyList()
-    }
+        utdypendeVilkårsvurderingForrigePeriode != utdypendeVilkårsvurderingDennePerioden
+    }.map { it.vilkårType }
 }
 
 private fun VilkårResultatForVedtaksperiode.erDeltBosted() =
