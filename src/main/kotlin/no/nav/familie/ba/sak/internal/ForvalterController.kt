@@ -121,7 +121,7 @@ class ForvalterController(
         return ResponseEntity.ok(Pair("callId", callId))
     }
 
-    @GetMapping("/sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato")
+    @GetMapping("/sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato/{behandlingId}")
     fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(@PathVariable behandlingId: Long): ResponseEntity<Boolean> {
         return ResponseEntity.ok(forvalterService.sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(behandlingId))
     }
