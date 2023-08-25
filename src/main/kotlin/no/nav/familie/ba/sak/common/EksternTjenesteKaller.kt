@@ -18,9 +18,15 @@ inline fun <reified Data> kallEksternTjeneste(
     loggEksternKall(tjeneste, uri, formål)
 
     return try {
-        eksterntKall().also {
-            eksternTjenesteKallerLogger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
-        }
+        val startTid = System.currentTimeMillis()
+        val data = eksterntKall()
+        val sluttTid = System.currentTimeMillis()
+
+        eksternTjenesteKallerLogger.info(
+            "${lagEksternKallPreMelding(tjeneste, uri)} Kall ok. Dette tok ${sluttTid - startTid} ms.",
+        )
+
+        data
     } catch (exception: Exception) {
         throw handleException(exception = exception, tjeneste = tjeneste, uri = uri, formål = formål)
     }
