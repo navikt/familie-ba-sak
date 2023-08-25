@@ -4,7 +4,9 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.jboss.logging.MDC
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -115,6 +117,8 @@ class ForvalterController(
     fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<Pair<String, String>> {
         val callId = UUID.randomUUID().toString()
         thread {
+            MDC.put(MDCConstants.MDC_CALL_ID, callId)
+            logger.info("Starter identifiserBehandlingerSomKanKrevePatching")
             val behandlingsIder = forvalterService.identifiserBehandlingerSomKanKrevePatching()
             logger.warn("Følgende behandlinger har ikke korrekte opphørsdatoer: [$behandlingsIder]")
         }
