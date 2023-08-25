@@ -105,8 +105,8 @@ private fun hentOppfylteVilkårMedEndretUtdypende(
             oppfylteVilkårResultaterDennePerioden.singleOrNull { it.vilkårType == vilkårResultatForrigePeriode.vilkårType }
         val utdypendeVilkårsvurderingDennePerioden =
             sammeVilkårResultatDennePerioden?.utdypendeVilkårsvurderinger?.toSet() ?: emptySet()
-
         val utdypendeVilkårsvurderingForrigePeriode = vilkårResultatForrigePeriode.utdypendeVilkårsvurderinger.toSet()
+
         utdypendeVilkårsvurderingForrigePeriode != utdypendeVilkårsvurderingDennePerioden
     }.map { it.vilkårType }
 }
