@@ -266,7 +266,7 @@ class ForvalterService(
                 }
             return alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato
         } catch (e: Exception) {
-            secureLogger.warn(e.message, e)
+            secureLogger.warn("opphørsdatoErKorrekt kaster feil: ${e.message}", e)
             return false
         }
     }
