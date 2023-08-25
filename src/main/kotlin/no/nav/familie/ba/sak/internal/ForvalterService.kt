@@ -8,10 +8,15 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -25,6 +30,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -57,6 +65,7 @@ class ForvalterService(
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -187,5 +196,69 @@ class ForvalterService(
                 logger.warn("Skipper sjekk 100% for fagsak $fagsakId pga manglende sisteIverksettBehandling")
             }
         }
+    }
+
+    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(behandlingId: Long): Boolean {
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
+        return opphørsdatoErKorrekt(tilkjentYtelse)
+    }
+
+    fun identifiserBehandlingerSomKanKrevePatching(): List<Long> {
+        val tilkjentYtelseMedFeilIUtbetalingsoppdrag =
+            tilkjentYtelseRepository.findTilkjentYtelseMedFeilUtbetalingsoppdrag()
+                .filter { opphørsdatoErKorrekt(it) }
+                .map { it.behandling.id }
+        return tilkjentYtelseMedFeilIUtbetalingsoppdrag
+    }
+
+    private fun opphørsdatoErKorrekt(tilkjentYtelse: TilkjentYtelse): Boolean {
+        val utbetalingsoppdrag = tilkjentYtelse.utbetalingsoppdrag() ?: return true
+
+        val grupperteNyeAndeler = grupperAndeler(
+            beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = tilkjentYtelse.behandling.id)
+                .pakkInnForUtbetaling(AndelTilkjentYtelseForSimuleringFactory()),
+        )
+
+        val forrigeIverksatteBehandling =
+            behandlingRepository.finnIverksatteBehandlinger(tilkjentYtelse.behandling.fagsak.id)
+                .filter { it.id != tilkjentYtelse.behandling.id }.maxByOrNull { it.aktivertTidspunkt }!!
+
+        val grupperteForrigeAndeler = grupperAndeler(
+            beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = forrigeIverksatteBehandling.id)
+                .pakkInnForUtbetaling(AndelTilkjentYtelseForSimuleringFactory()),
+        )
+
+        val sisteBeståendeAndelPerKjede =
+            ØkonomiUtils.sisteBeståendeAndelPerKjede(grupperteForrigeAndeler, grupperteNyeAndeler)
+
+        // Finner andeler som skal opphøres slik vi gjorde før
+        val andelerTilOpphør = grupperteForrigeAndeler
+            .mapValues { (person, forrigeAndeler) ->
+                forrigeAndeler.filter {
+                    it.stønadFom > sisteBeståendeAndelPerKjede[person]!!.stønadTom
+                }
+            }
+            .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
+            .map { (_, kjedeEtterFørsteEndring) ->
+                kjedeEtterFørsteEndring.last() to kjedeEtterFørsteEndring.minOf { it.stønadFom }
+            }
+
+        val utbetalingsperioderMedOpphør = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
+        secureLogger.info("Utbetalingsperioder med opphør: $utbetalingsperioderMedOpphør")
+
+        // Finner ut hvilken opphørsAndel som tilhører hvilken utbetalingsperiodeMedOpphør
+        val alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato = utbetalingsperioderMedOpphør
+            .all { periodeMedOpphør ->
+                val andelerTilPersonMedOpphør =
+                    andelerTilOpphør.filter { andelForPerson -> andelForPerson.first.periodeOffset == periodeMedOpphør.periodeId }
+                if (andelerTilPersonMedOpphør.size != 1) {
+                    false
+                } else {
+                    secureLogger.info("Andel fra forrige med korrekt opphørsdato: ${andelerTilPersonMedOpphør.first().second.førsteDagIInneværendeMåned()}. Opphørsperiode sendt til økonomi med opphørsdato: ${periodeMedOpphør.opphør!!.opphørDatoFom}")
+                    andelerTilPersonMedOpphør.first().second
+                        .førsteDagIInneværendeMåned() == periodeMedOpphør.opphør!!.opphørDatoFom
+                }
+            }
+        return alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato
     }
 }
