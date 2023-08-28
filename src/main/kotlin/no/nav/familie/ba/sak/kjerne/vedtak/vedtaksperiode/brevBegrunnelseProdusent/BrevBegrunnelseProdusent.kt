@@ -9,8 +9,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilPersonType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -67,11 +69,12 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
 
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
         val standardBegrunnelser = hentStandardBegrunnelser(
-            begrunnelseGrunnlag,
-            sanityBegrunnelser,
-            person,
-            behandlingUnderkategori,
-            this.fom,
+            begrunnelseGrunnlag = begrunnelseGrunnlag,
+            sanityBegrunnelser = sanityBegrunnelser,
+            person = person,
+            behandlingUnderkategori = behandlingUnderkategori,
+            periodeFom = this.fom,
+            fagsakType = behandlingsGrunnlagForVedtaksperioder.fagsakType,
         )
 
         val eøsBegrunnelser = hentEØSStandardBegrunnelser(
@@ -91,6 +94,7 @@ private fun hentStandardBegrunnelser(
     person: Person,
     behandlingUnderkategori: BehandlingUnderkategori,
     periodeFom: LocalDate?,
+    fagsakType: FagsakType,
 ): Set<Standardbegrunnelse> {
     val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
 
@@ -101,7 +105,11 @@ private fun hentStandardBegrunnelser(
         it.periodeResultat in relevantePeriodeResultater
     }
 
-    val filtrertPåVilkår = begrunnelserFiltrertPåPeriodetype.filterValues {
+    val filtrertPåRolleOgPeriodetype = begrunnelserFiltrertPåPeriodetype.filterValues { begrunnelse ->
+        begrunnelse.erGjeldendeForRolle(person, fagsakType)
+    }
+
+    val filtrertPåVilkår = filtrertPåRolleOgPeriodetype.filterValues {
         it.erGjeldendeForUtgjørendeVilkår(
             begrunnelseGrunnlag = begrunnelseGrunnlag,
             person = person,
@@ -116,19 +124,24 @@ private fun hentStandardBegrunnelser(
         it.periodeResultat in relevantePeriodeResultaterForrigePeriode
     }
 
-    val filtrertPåEndretUtbetaling = begrunnelserFiltrertPåPeriodetype.filterValues {
+    val filtrertPåRolleOgPeriodetypeForrigePeriode =
+        begrunnelserFiltrertPåPeriodetypeForrigePeriode.filterValues { begrunnelse ->
+            begrunnelse.erGjeldendeForRolle(person, fagsakType)
+        }
+
+    val filtrertPåEndretUtbetaling = filtrertPåRolleOgPeriodetype.filterValues {
         it.erEndretUtbetaling(endretUtbetaling = endretUtbetalingDennePerioden)
     }
 
     val filtrertPåEtterEndretUtbetaling =
-        begrunnelserFiltrertPåPeriodetypeForrigePeriode.filterValues {
+        filtrertPåRolleOgPeriodetypeForrigePeriode.filterValues {
             it.erEtterEndretUtbetaling(
                 endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
                 endretUtbetalingForrigePeriode = hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag),
             )
         }
 
-    val filtrertPåHendelser = begrunnelserFiltrertPåPeriodetype.filtrerPåHendelser(
+    val filtrertPåHendelser = filtrertPåRolleOgPeriodetype.filtrerPåHendelser(
         begrunnelseGrunnlag,
         periodeFom,
     )
@@ -168,6 +181,18 @@ private fun hentEØSStandardBegrunnelser(
 
     return filtrertPåVilkår.keys.toSet() +
         filtrertPåKompetanse.keys.toSet()
+}
+
+private fun SanityBegrunnelse.erGjeldendeForRolle(
+    person: Person,
+    fagsakType: FagsakType,
+): Boolean {
+    val rolleErRelevantForBegrunnelse = this.rolle.isNotEmpty()
+
+    val begrunnelseGjelderPersonSinRolle =
+        person.type in this.rolle.map { it.tilPersonType() } || fagsakType.erBarnSøker()
+
+    return !rolleErRelevantForBegrunnelse || begrunnelseGjelderPersonSinRolle
 }
 
 fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
