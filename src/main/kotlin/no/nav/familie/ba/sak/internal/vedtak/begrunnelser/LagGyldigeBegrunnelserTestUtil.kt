@@ -35,14 +35,14 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
     """
       
-      Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
-        Og lag personresultater for begrunnelse for behandling ${behandling.id}""" +
+  Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
+    Og lag personresultater for begrunnelse for behandling ${behandling.id}""" +
     hentTekstForVilkårresultater(personResultater, behandling.id) +
     hentTekstForVilkårresultater(personResultaterForrigeBehandling, forrigeBehandling?.id) +
     hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
     hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) + """
     
-        Når begrunnelsetekster genereres for behandling ${behandling.id}""" +
+    Når begrunnelsetekster genereres for behandling ${behandling.id}""" +
     hentTekstForVedtaksperioder(vedtaksperioder)
 
 fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: Behandling?) =
