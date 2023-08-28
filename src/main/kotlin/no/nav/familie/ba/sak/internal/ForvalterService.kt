@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
@@ -41,6 +42,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -53,6 +56,7 @@ import java.time.YearMonth
 @Service
 class ForvalterService(
     private val økonomiService: ØkonomiService,
+    private val økonomiKlient: ØkonomiKlient,
     private val vedtakService: VedtakService,
     private val beregningService: BeregningService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -200,23 +204,44 @@ class ForvalterService(
         }
     }
 
-    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(behandlingId: Long): Boolean {
+    fun lagKorrigertUtbetalingsoppdragOgIverksettMotØkonomi(behandlingId: Long) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
-        return opphørsdatoErKorrekt(tilkjentYtelse)
+        if (tilkjentYtelse.behandling.aktiv == false) throw Exception("Behandling $behandlingId er ikke den aktive behandlingen på fagsaken")
+        val validertUtbetalingsoppdrag = validerOpphørsdatoIUtbetalingsoppdrag(tilkjentYtelse)
+        if (!validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer && validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag != null) {
+            secureLogger.info("Iverksetter korrigert utbetalingsoppdrag ${validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag} for behandling $behandlingId")
+            økonomiKlient.iverksettOppdragPåNytt(validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag, 1)
+        } else {
+            throw Exception("Nytt utbetalingsoppdrag ikke sendt for behandling $behandlingId. HarKorrekteOpphørsdatoer: ${validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer}, Nytt utbetalingsoppdrag: ${validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag}")
+        }
     }
 
-    fun identifiserBehandlingerSomKanKrevePatching(): List<Long> {
+    fun validerOpphørsdatoIUtbetalingsoppdragForBehandling(behandlingId: Long): ValidertUtbetalingsoppdrag {
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
+        return validerOpphørsdatoIUtbetalingsoppdrag(tilkjentYtelse)
+    }
+
+    fun identifiserPåvirkedeBehandlingerOgValiderOpphørsdatoIUtbetalingsoppdrag(): BehandlingerMedFeilIUtbetalingsoppdrag {
         val tilkjenteYtelserMedOpphørSomKanVæreFeil =
             tilkjentYtelseRepository.findTilkjentYtelseMedFeilUtbetalingsoppdrag()
         logger.info("Behandlinger som potensielt har feil: ${tilkjenteYtelserMedOpphørSomKanVæreFeil.map { it.behandling.id }}")
 
-        return tilkjenteYtelserMedOpphørSomKanVæreFeil
-            .filter { !opphørsdatoErKorrekt(it) }
-            .map { it.behandling.id }
+        val validerteUtbetalingsoppdragMedFeil: Set<ValidertUtbetalingsoppdrag> =
+            tilkjenteYtelserMedOpphørSomKanVæreFeil
+                .map { validerOpphørsdatoIUtbetalingsoppdrag(it) }
+                .filter { !it.harKorrekteOpphørsdatoer }.toSet()
+
+        return BehandlingerMedFeilIUtbetalingsoppdrag(
+            behandlinger = validerteUtbetalingsoppdragMedFeil.map { it.behandlingId },
+            validerteUtbetalingsoppdrag = validerteUtbetalingsoppdragMedFeil,
+        )
     }
 
-    private fun opphørsdatoErKorrekt(tilkjentYtelse: TilkjentYtelse): Boolean {
-        val utbetalingsoppdrag = tilkjentYtelse.utbetalingsoppdrag() ?: return true
+    private fun validerOpphørsdatoIUtbetalingsoppdrag(tilkjentYtelse: TilkjentYtelse): ValidertUtbetalingsoppdrag {
+        val utbetalingsoppdrag = tilkjentYtelse.utbetalingsoppdrag() ?: return ValidertUtbetalingsoppdrag(
+            harKorrekteOpphørsdatoer = true,
+            behandlingId = tilkjentYtelse.behandling.id,
+        )
         logger.info("Sjekker behandling for korrekt opphørsdato ${tilkjentYtelse.behandling.id}")
         try {
             val grupperteNyeAndeler = grupperAndeler(
@@ -263,6 +288,9 @@ class ForvalterService(
             val utbetalingsperioderMedOpphør = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
             secureLogger.info("Utbetalingsperioder med opphør: $utbetalingsperioderMedOpphør for behandling ${tilkjentYtelse.behandling.id}")
 
+            val utbetalingsperioderMedFeilOpphørsdato = mutableListOf<Utbetalingsperiode>()
+            val korrigerteUtbetalingsperioder = mutableListOf<Utbetalingsperiode>()
+
             // Finner ut hvilken opphørsAndel som tilhører hvilken utbetalingsperiodeMedOpphør
             val alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato = utbetalingsperioderMedOpphør
                 .all { periodeMedOpphør ->
@@ -270,20 +298,57 @@ class ForvalterService(
                         andelerTilOpphør.filter { andelForPerson -> andelForPerson.first.periodeOffset == periodeMedOpphør.periodeId }
                     if (andelerTilPersonMedOpphør.size != 1) {
                         secureLogger.info("Mer enn 1 eller ingen andeler med samme periodeOffsett som opphørsperioden $periodeMedOpphør for behandling ${tilkjentYtelse.behandling.id}")
+                        utbetalingsperioderMedFeilOpphørsdato.add(periodeMedOpphør)
                         false
                     } else {
                         secureLogger.info("Andel fra forrige med korrekt opphørsdato: ${andelerTilPersonMedOpphør.first().second.førsteDagIInneværendeMåned()}. Opphørsperiode sendt til økonomi med opphørsdato: ${periodeMedOpphør.opphør!!.opphørDatoFom} for behandling ${tilkjentYtelse.behandling.id}")
-                        andelerTilPersonMedOpphør.first().second
-                            .førsteDagIInneværendeMåned() == periodeMedOpphør.opphør!!.opphørDatoFom
+                        if (andelerTilPersonMedOpphør.first().second
+                                .førsteDagIInneværendeMåned() != periodeMedOpphør.opphør!!.opphørDatoFom
+                        ) {
+                            utbetalingsperioderMedFeilOpphørsdato.add(periodeMedOpphør)
+                            korrigerteUtbetalingsperioder.add(
+                                periodeMedOpphør.copy(
+                                    opphør = periodeMedOpphør.opphør!!.copy(
+                                        opphørDatoFom = andelerTilPersonMedOpphør.first().second
+                                            .førsteDagIInneværendeMåned(),
+                                    ),
+                                ),
+                            )
+                            false
+                        } else {
+                            true
+                        }
                     }
                 }
-            return alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato
+            if (alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato) {
+                return ValidertUtbetalingsoppdrag(
+                    harKorrekteOpphørsdatoer = true,
+                    behandlingId = tilkjentYtelse.behandling.id,
+                )
+            }
+            return ValidertUtbetalingsoppdrag(
+                harKorrekteOpphørsdatoer = false,
+                behandlingId = tilkjentYtelse.behandling.id,
+                utbetalingsperioderMedFeilOpphørsdato = utbetalingsperioderMedFeilOpphørsdato,
+                korrigerteUtbetalingsperioder = korrigerteUtbetalingsperioder,
+                gammeltUtbetalingsoppdrag = utbetalingsoppdrag,
+                nyttUtbetalingsoppdrag = utbetalingsoppdrag.copy(
+                    utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode.map { utbetalingsperiode ->
+                        korrigerteUtbetalingsperioder.find { it.periodeId == utbetalingsperiode.periodeId }
+                            ?: utbetalingsperiode
+                    },
+                ),
+
+            )
         } catch (e: Exception) {
             secureLogger.warn(
                 "opphørsdatoErKorrekt kaster feil: ${e.message} for behandling ${tilkjentYtelse.behandling.id}",
                 e,
             )
-            return false
+            return ValidertUtbetalingsoppdrag(
+                harKorrekteOpphørsdatoer = false,
+                behandlingId = tilkjentYtelse.behandling.id,
+            )
         }
     }
 
@@ -310,3 +375,17 @@ class ForvalterService(
         }
     }
 }
+
+data class ValidertUtbetalingsoppdrag(
+    val harKorrekteOpphørsdatoer: Boolean,
+    val behandlingId: Long,
+    val utbetalingsperioderMedFeilOpphørsdato: List<Utbetalingsperiode>? = null,
+    val korrigerteUtbetalingsperioder: List<Utbetalingsperiode>? = null,
+    val gammeltUtbetalingsoppdrag: Utbetalingsoppdrag? = null,
+    val nyttUtbetalingsoppdrag: Utbetalingsoppdrag? = null,
+)
+
+data class BehandlingerMedFeilIUtbetalingsoppdrag(
+    val behandlinger: List<Long>,
+    val validerteUtbetalingsoppdrag: Set<ValidertUtbetalingsoppdrag>,
+)

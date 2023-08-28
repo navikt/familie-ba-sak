@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -112,15 +111,57 @@ class ForvalterController(
     }
 
     @PostMapping("/finnBehandlingerMedPotensieltFeilUtbetalingsoppdrag")
-    fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<List<Long>> {
+    fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<BehandlingerMedFeilIUtbetalingsoppdrag> {
         logger.info("Starter identifiserBehandlingerSomKanKrevePatching")
-        val behandlingsIder = forvalterService.identifiserBehandlingerSomKanKrevePatching()
-        logger.warn("Følgende behandlinger har ikke korrekte opphørsdatoer: [$behandlingsIder]")
-        return ResponseEntity.ok(behandlingsIder)
+        val validerteUtbetalingsoppdragMedFeil =
+            forvalterService.identifiserPåvirkedeBehandlingerOgValiderOpphørsdatoIUtbetalingsoppdrag()
+        secureLogger.warn("Følgende behandlinger har ikke korrekte opphørsdatoer: [$validerteUtbetalingsoppdragMedFeil]")
+        return ResponseEntity.ok(validerteUtbetalingsoppdragMedFeil)
     }
 
-    @GetMapping("/sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato/{behandlingId}")
-    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(@PathVariable behandlingId: Long): ResponseEntity<Boolean> {
-        return ResponseEntity.ok(forvalterService.sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(behandlingId))
+    @PostMapping("/sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato")
+    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(@RequestBody behandlingListe: List<Long>): ResponseEntity<BehandlingerMedFeilIUtbetalingsoppdrag> {
+        val validerteUtbetalingsoppdragMedFeil: Set<ValidertUtbetalingsoppdrag> =
+            behandlingListe.fold(LinkedHashSet()) { accumulator, behandlingId ->
+                val validertUtbetalingsoppdrag =
+                    forvalterService.validerOpphørsdatoIUtbetalingsoppdragForBehandling(behandlingId)
+                if (!validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer) {
+                    accumulator.add(validertUtbetalingsoppdrag)
+                }
+                accumulator
+            }
+
+        return ResponseEntity.ok(
+            BehandlingerMedFeilIUtbetalingsoppdrag(
+                behandlinger = validerteUtbetalingsoppdragMedFeil.map { it.behandlingId },
+                validerteUtbetalingsoppdrag = validerteUtbetalingsoppdragMedFeil,
+            ),
+        )
     }
+
+    @PostMapping("/sendKorrigertUtbetalingsoppdragForBehandlinger")
+    fun sendKorrigertUtbetalingsoppdragForBehandlinger(@RequestBody behandlinger: List<Long>): ResponseEntity<SendUtbetalingsoppdragPåNyttResponse> {
+        val harFeil = mutableSetOf<Pair<Long, String>>()
+        val iverksattOk = mutableSetOf<Long>()
+        behandlinger.forEach { behandlingId ->
+            try {
+                forvalterService.lagKorrigertUtbetalingsoppdragOgIverksettMotØkonomi(behandlingId)
+                iverksattOk.add(behandlingId)
+            } catch (e: Exception) {
+                secureLogger.warn("Feil ved iverksettelse mot økonomi. ${e.message}", e)
+                harFeil.add(
+                    Pair(
+                        behandlingId,
+                        e.message ?: "Ukjent feil ved iverksettelse av oppdrag på nytt for behandling $behandlingId",
+                    ),
+                )
+            }
+        }
+        return ResponseEntity.ok(SendUtbetalingsoppdragPåNyttResponse(iverksattOk = iverksattOk, harFeil = harFeil))
+    }
+
+    data class SendUtbetalingsoppdragPåNyttResponse(
+        val iverksattOk: Set<Long>,
+        val harFeil: Set<Pair<Long, String>>,
+    )
 }
