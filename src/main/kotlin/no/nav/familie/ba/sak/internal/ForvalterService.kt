@@ -218,7 +218,10 @@ class ForvalterService(
     }
 
     private fun validerOpphørsdatoIUtbetalingsoppdrag(tilkjentYtelse: TilkjentYtelse): ValidertUtbetalingsoppdrag {
-        val utbetalingsoppdrag = tilkjentYtelse.utbetalingsoppdrag() ?: return ValidertUtbetalingsoppdrag(true)
+        val utbetalingsoppdrag = tilkjentYtelse.utbetalingsoppdrag() ?: return ValidertUtbetalingsoppdrag(
+            harKorrekteOpphørsdatoer = true,
+            behandlingId = tilkjentYtelse.behandling.id,
+        )
         logger.info("Sjekker behandling for korrekt opphørsdato ${tilkjentYtelse.behandling.id}")
         try {
             val grupperteNyeAndeler = grupperAndeler(
@@ -298,10 +301,14 @@ class ForvalterService(
                     }
                 }
             if (alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato) {
-                return ValidertUtbetalingsoppdrag(harKorrekteOpphørsdatoer = true)
+                return ValidertUtbetalingsoppdrag(
+                    harKorrekteOpphørsdatoer = true,
+                    behandlingId = tilkjentYtelse.behandling.id,
+                )
             }
             return ValidertUtbetalingsoppdrag(
                 harKorrekteOpphørsdatoer = false,
+                behandlingId = tilkjentYtelse.behandling.id,
                 utbetalingsperioderMedFeilOpphørsdato = utbetalingsperioderMedFeilOpphørsdato,
                 korrigerteUtbetalingsperioder = korrigerteUtbetalingsperioder,
                 gammeltUtbetalingsoppdrag = utbetalingsoppdrag,
@@ -320,6 +327,7 @@ class ForvalterService(
             )
             return ValidertUtbetalingsoppdrag(
                 harKorrekteOpphørsdatoer = false,
+                behandlingId = tilkjentYtelse.behandling.id,
             )
         }
     }
@@ -349,6 +357,7 @@ class ForvalterService(
 
     data class ValidertUtbetalingsoppdrag(
         val harKorrekteOpphørsdatoer: Boolean,
+        val behandlingId: Long,
         val utbetalingsperioderMedFeilOpphørsdato: List<Utbetalingsperiode>? = null,
         val korrigerteUtbetalingsperioder: List<Utbetalingsperiode>? = null,
         val gammeltUtbetalingsoppdrag: Utbetalingsoppdrag? = null,
