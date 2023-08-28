@@ -78,7 +78,7 @@ spec:
         - application: bidrag-grunnlag
           namespace: bidrag
           cluster: dev-gcp
-        - application: popp
+        - application: omsorgsopptjening-start-innlesning
           namespace: pensjonopptjening
           cluster: dev-gcp
     outbound:

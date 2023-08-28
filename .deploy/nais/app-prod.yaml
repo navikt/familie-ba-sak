@@ -77,6 +77,9 @@ spec:
         - application: bidrag-grunnlag
           namespace: bidrag
           cluster: prod-gcp
+        - application: omsorgsopptjening-start-innlesning
+          namespace: pensjonopptjening
+          cluster: prod-gcp
     outbound:
       rules:
         - application: familie-brev
