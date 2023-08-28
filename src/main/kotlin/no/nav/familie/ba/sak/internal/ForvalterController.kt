@@ -148,6 +148,7 @@ class ForvalterController(
                 forvalterService.lagKorrigertUtbetalingsoppdragOgIverksettMotØkonomi(behandlingId)
                 iverksattOk.add(behandlingId)
             } catch (e: Exception) {
+                secureLogger.warn("Feil ved iverksettelse mot økonomi. ${e.message}", e)
                 harFeil.add(
                     Pair(
                         behandlingId,
