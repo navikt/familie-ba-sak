@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.internal.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilddMMyyyy
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -10,7 +11,9 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetaling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import org.apache.commons.lang3.RandomStringUtils
+import java.time.LocalDate
 
 fun lagGyldigeBegrunnelserTest(
     behandling: Behandling,
@@ -88,12 +91,34 @@ fun hentTekstForVilkårresultater(
         tilVilkårResultatRader(personResultater)
 }
 
+data class VilkårResultatRad(
+    val aktørId: String,
+    val utdypendeVilkårsvurderinger: Set<UtdypendeVilkårsvurdering>,
+    val fom: LocalDate?,
+    val tom: LocalDate?,
+    val resultat: Resultat,
+    val erEksplisittAvslagPåSøknad: Boolean?,
+)
+
 private fun tilVilkårResultatRader(personResultater: Set<PersonResultat>?) =
-    personResultater?.joinToString("") { personResultat ->
-        personResultat.vilkårResultater.joinToString("") {
-            """
-      | ${personResultat.aktør.aktørId} |${it.vilkårType}|${it.utdypendeVilkårsvurderinger.joinToString(",")}|${it.periodeFom?.tilddMMyyyy() ?: ""}|${it.periodeTom?.tilddMMyyyy() ?: ""}| ${it.resultat} | ${if (it.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} |"""
-        }
+    personResultater?.joinToString("\n") { personResultat ->
+        personResultat.vilkårResultater
+            .sortedBy { it.periodeFom }
+            .groupBy {
+                VilkårResultatRad(
+                    personResultat.aktør.aktørId,
+                    it.utdypendeVilkårsvurderinger.toSet(),
+                    it.periodeFom,
+                    it.periodeTom,
+                    it.resultat,
+                    it.erEksplisittAvslagPåSøknad,
+                )
+            }.toList().joinToString("") { (vilkårResultatRad, vilkårResultater) ->
+                """
+      | ${vilkårResultatRad.aktørId} |${vilkårResultater.map { it.vilkårType }.joinToString(",")}|${
+                    vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")
+                }|${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""}|${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""}| ${vilkårResultatRad.resultat} | ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} |"""
+            }
     } ?: ""
 
 fun hentTekstForTilkjentYtelse(
