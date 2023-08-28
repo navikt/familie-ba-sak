@@ -200,9 +200,9 @@ class ForvalterService(
         }
     }
 
-    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(behandlingId: Long): Boolean {
+    fun harTilkjentYtelseForBehandlingKorrektOpphørsdato(behandlingId: Long): Boolean {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
-        return opphørsdatoErKorrekt(tilkjentYtelse)
+        return erOpphørsdatoKorrekt(tilkjentYtelse)
     }
 
     fun identifiserBehandlingerSomKanKrevePatching(): List<Long> {
@@ -211,11 +211,11 @@ class ForvalterService(
         logger.info("Behandlinger som potensielt har feil: ${tilkjenteYtelserMedOpphørSomKanVæreFeil.map { it.behandling.id }}")
 
         return tilkjenteYtelserMedOpphørSomKanVæreFeil
-            .filter { !opphørsdatoErKorrekt(it) }
+            .filter { !erOpphørsdatoKorrekt(it) }
             .map { it.behandling.id }
     }
 
-    private fun opphørsdatoErKorrekt(tilkjentYtelse: TilkjentYtelse): Boolean {
+    private fun erOpphørsdatoKorrekt(tilkjentYtelse: TilkjentYtelse): Boolean {
         val utbetalingsoppdrag = tilkjentYtelse.utbetalingsoppdrag() ?: return true
         logger.info("Sjekker behandling for korrekt opphørsdato ${tilkjentYtelse.behandling.id}")
         try {
