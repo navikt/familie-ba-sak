@@ -138,4 +138,29 @@ class ForvalterController(
             ),
         )
     }
+
+    @PostMapping("/sendKorrigertUtbetalingsoppdragForBehandlinger")
+    fun sendKorrigertUtbetalingsoppdragForBehandlinger(@RequestBody behandlinger: List<Long>): ResponseEntity<SendUtbetalingsoppdragPåNyttResponse> {
+        val harFeil = mutableSetOf<Pair<Long, String>>()
+        val iverksattOk = mutableSetOf<Long>()
+        behandlinger.forEach { behandlingId ->
+            try {
+                forvalterService.lagKorrigertUtbetalingsoppdragOgIverksettMotØkonomi(behandlingId)
+                iverksattOk.add(behandlingId)
+            } catch (e: Exception) {
+                harFeil.add(
+                    Pair(
+                        behandlingId,
+                        e.message ?: "Ukjent feil ved iverksettelse av oppdrag på nytt for behandling $behandlingId",
+                    ),
+                )
+            }
+        }
+        return ResponseEntity.ok(SendUtbetalingsoppdragPåNyttResponse(iverksattOk = iverksattOk, harFeil = harFeil))
+    }
+
+    data class SendUtbetalingsoppdragPåNyttResponse(
+        val iverksattOk: Set<Long>,
+        val harFeil: Set<Pair<Long, String>>,
+    )
 }
