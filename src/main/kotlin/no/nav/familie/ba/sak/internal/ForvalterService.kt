@@ -207,14 +207,20 @@ class ForvalterService(
         return validerOpphørsdatoIUtbetalingsoppdrag(tilkjentYtelse)
     }
 
-    fun identifiserPåvirkedeBehandlingerOgValiderOpphørsdatoIUtbetalingsoppdrag(): List<ValidertUtbetalingsoppdrag> {
+    fun identifiserPåvirkedeBehandlingerOgValiderOpphørsdatoIUtbetalingsoppdrag(): BehandlingerMedFeilIUtbetalingsoppdrag {
         val tilkjenteYtelserMedOpphørSomKanVæreFeil =
             tilkjentYtelseRepository.findTilkjentYtelseMedFeilUtbetalingsoppdrag()
         logger.info("Behandlinger som potensielt har feil: ${tilkjenteYtelserMedOpphørSomKanVæreFeil.map { it.behandling.id }}")
 
-        return tilkjenteYtelserMedOpphørSomKanVæreFeil
-            .map { validerOpphørsdatoIUtbetalingsoppdrag(it) }
-            .filter { !it.harKorrekteOpphørsdatoer }
+        val validerteUtbetalingsoppdragMedFeil: Set<ValidertUtbetalingsoppdrag> =
+            tilkjenteYtelserMedOpphørSomKanVæreFeil
+                .map { validerOpphørsdatoIUtbetalingsoppdrag(it) }
+                .filter { !it.harKorrekteOpphørsdatoer }.toSet()
+
+        return BehandlingerMedFeilIUtbetalingsoppdrag(
+            behandlinger = validerteUtbetalingsoppdragMedFeil.map { it.behandlingId },
+            validerteUtbetalingsoppdrag = validerteUtbetalingsoppdragMedFeil,
+        )
     }
 
     private fun validerOpphørsdatoIUtbetalingsoppdrag(tilkjentYtelse: TilkjentYtelse): ValidertUtbetalingsoppdrag {
@@ -354,13 +360,18 @@ class ForvalterService(
             null
         }
     }
-
-    data class ValidertUtbetalingsoppdrag(
-        val harKorrekteOpphørsdatoer: Boolean,
-        val behandlingId: Long,
-        val utbetalingsperioderMedFeilOpphørsdato: List<Utbetalingsperiode>? = null,
-        val korrigerteUtbetalingsperioder: List<Utbetalingsperiode>? = null,
-        val gammeltUtbetalingsoppdrag: Utbetalingsoppdrag? = null,
-        val nyttUtbetalingsoppdrag: Utbetalingsoppdrag? = null,
-    )
 }
+
+data class ValidertUtbetalingsoppdrag(
+    val harKorrekteOpphørsdatoer: Boolean,
+    val behandlingId: Long,
+    val utbetalingsperioderMedFeilOpphørsdato: List<Utbetalingsperiode>? = null,
+    val korrigerteUtbetalingsperioder: List<Utbetalingsperiode>? = null,
+    val gammeltUtbetalingsoppdrag: Utbetalingsoppdrag? = null,
+    val nyttUtbetalingsoppdrag: Utbetalingsoppdrag? = null,
+)
+
+data class BehandlingerMedFeilIUtbetalingsoppdrag(
+    val behandlinger: List<Long>,
+    val validerteUtbetalingsoppdrag: Set<ValidertUtbetalingsoppdrag>,
+)

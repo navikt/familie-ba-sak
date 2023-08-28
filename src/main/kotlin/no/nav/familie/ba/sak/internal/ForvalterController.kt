@@ -111,7 +111,7 @@ class ForvalterController(
     }
 
     @PostMapping("/finnBehandlingerMedPotensieltFeilUtbetalingsoppdrag")
-    fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<List<ForvalterService.ValidertUtbetalingsoppdrag>> {
+    fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<BehandlingerMedFeilIUtbetalingsoppdrag> {
         logger.info("Starter identifiserBehandlingerSomKanKrevePatching")
         val validerteUtbetalingsoppdragMedFeil =
             forvalterService.identifiserPåvirkedeBehandlingerOgValiderOpphørsdatoIUtbetalingsoppdrag()
@@ -120,8 +120,8 @@ class ForvalterController(
     }
 
     @PostMapping("/sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato")
-    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(@RequestBody behandlingListe: List<Long>): ResponseEntity<Set<ForvalterService.ValidertUtbetalingsoppdrag>> {
-        val set: Set<ForvalterService.ValidertUtbetalingsoppdrag> =
+    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(@RequestBody behandlingListe: List<Long>): ResponseEntity<BehandlingerMedFeilIUtbetalingsoppdrag> {
+        val validerteUtbetalingsoppdragMedFeil: Set<ValidertUtbetalingsoppdrag> =
             behandlingListe.fold(LinkedHashSet()) { accumulator, behandlingId ->
                 val validertUtbetalingsoppdrag =
                     forvalterService.validerOpphørsdatoIUtbetalingsoppdragForBehandling(behandlingId)
@@ -131,6 +131,11 @@ class ForvalterController(
                 accumulator
             }
 
-        return ResponseEntity.ok(set)
+        return ResponseEntity.ok(
+            BehandlingerMedFeilIUtbetalingsoppdrag(
+                behandlinger = validerteUtbetalingsoppdragMedFeil.map { it.behandlingId },
+                validerteUtbetalingsoppdrag = validerteUtbetalingsoppdragMedFeil,
+            ),
+        )
     }
 }
