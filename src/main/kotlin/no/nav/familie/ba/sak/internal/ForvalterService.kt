@@ -244,11 +244,12 @@ class ForvalterService(
                     }
                 }
                 .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
+                .mapValues { andelForKjede -> andelForKjede.value.sortedBy { it.stønadFom } }
                 .map { (_, kjedeEtterFørsteEndring) ->
                     kjedeEtterFørsteEndring.last() to kjedeEtterFørsteEndring.minOf { it.stønadFom }
                 }
 
-            secureLogger.info("Andeler som som skal opphøres: $andelerTilOpphør for behandling ${tilkjentYtelse.behandling.id}")
+            secureLogger.info("Andeler som som skal opphøres: ${andelerTilOpphør.map { "PeriodeId: ${it.first.periodeOffset} ForrigePeriodeId: ${it.first.forrigePeriodeOffset} Opphørsdato: ${it.second}" }} for behandling ${tilkjentYtelse.behandling.id}")
             val utbetalingsperioderMedOpphør = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
             secureLogger.info("Utbetalingsperioder med opphør: $utbetalingsperioderMedOpphør for behandling ${tilkjentYtelse.behandling.id}")
 
