@@ -209,6 +209,7 @@ class ForvalterService(
         if (tilkjentYtelse.behandling.aktiv == false) throw Exception("Behandling $behandlingId er ikke den aktive behandlingen på fagsaken")
         val validertUtbetalingsoppdrag = validerOpphørsdatoIUtbetalingsoppdrag(tilkjentYtelse)
         if (!validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer && validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag != null) {
+            secureLogger.info("Iverksetter korrigert utbetalingsoppdrag ${validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag} for behandling $behandlingId")
             økonomiKlient.iverksettOppdragPåNytt(validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag, 1)
         } else {
             throw Exception("Nytt utbetalingsoppdrag ikke sendt for behandling $behandlingId. HarKorrekteOpphørsdatoer: ${validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer}, Nytt utbetalingsoppdrag: ${validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag}")
