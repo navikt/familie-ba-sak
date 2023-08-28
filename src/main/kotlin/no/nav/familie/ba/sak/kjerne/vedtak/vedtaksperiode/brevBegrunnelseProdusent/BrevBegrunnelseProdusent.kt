@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent
 
 import erGjeldendeForUtgjørendeVilkår
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -459,11 +458,9 @@ private fun Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned>.lagTidslinje
 
         if (vedtaksPerioden == null) {
             null
-        } else if (dennePerioden == null) {
-            throw Feil("Ingen data på person i perioden ${vedtaksPerioden.fom} - ${vedtaksPerioden.tom}")
         } else {
             BegrunnelseGrunnlagForPeriode(
-                dennePerioden = dennePerioden,
+                dennePerioden = dennePerioden ?: BegrunnelseGrunnlagForPersonIPeriode.tomPeriode(person),
                 forrigePeriode = forrigeOgDennePerioden?.forrige,
                 sammePeriodeForrigeBehandling = forrigeBehandling,
             )
