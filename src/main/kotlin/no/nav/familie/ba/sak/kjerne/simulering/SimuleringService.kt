@@ -70,8 +70,8 @@ class SimuleringService(
 
         kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
             vedtak = vedtak,
-            simuleringResultatGammel = detaljertSimuleringResultat,
-            utbetalingsoppdragGammel = utbetalingsoppdrag,
+            gammeltSimuleringResultat = detaljertSimuleringResultat,
+            gammeltUtbetalingsoppdrag = utbetalingsoppdrag,
             erSimulering = true,
         )
 

@@ -4,15 +4,12 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
-import no.nav.familie.log.mdc.MDCConstants
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.jboss.logging.MDC
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -113,20 +110,23 @@ class ForvalterController(
         return ResponseEntity.ok(Pair("callId", callId))
     }
 
-    @GetMapping("/finnBehandlingerMedPotensieltFeilUtbetalingsoppdrag")
-    fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<Pair<String, String>> {
-        val callId = UUID.randomUUID().toString()
-        thread {
-            MDC.put(MDCConstants.MDC_CALL_ID, callId)
-            logger.info("Starter identifiserBehandlingerSomKanKrevePatching")
-            val behandlingsIder = forvalterService.identifiserBehandlingerSomKanKrevePatching()
-            logger.warn("Følgende behandlinger har ikke korrekte opphørsdatoer: [$behandlingsIder]")
-        }
-        return ResponseEntity.ok(Pair("callId", callId))
+    @PostMapping("/finnBehandlingerMedPotensieltFeilUtbetalingsoppdrag")
+    fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<List<Long>> {
+        logger.info("Starter identifiserBehandlingerSomKanKrevePatching")
+        val behandlingsIder = forvalterService.identifiserBehandlingerSomKanKrevePatching()
+        logger.warn("Følgende behandlinger har ikke korrekte opphørsdatoer: [$behandlingsIder]")
+        return ResponseEntity.ok(behandlingsIder)
     }
 
-    @GetMapping("/sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato/{behandlingId}")
-    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(@PathVariable behandlingId: Long): ResponseEntity<Boolean> {
-        return ResponseEntity.ok(forvalterService.sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(behandlingId))
+    @PostMapping("/sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato")
+    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(@RequestBody behandlingListe: List<Long>): ResponseEntity<Set<Long>> {
+        val set: Set<Long> = behandlingListe.fold(LinkedHashSet()) { accumulator, behandlingId ->
+            if (!forvalterService.harTilkjentYtelseForBehandlingKorrektOpphørsdato(behandlingId)) {
+                accumulator.add(behandlingId)
+            }
+            accumulator
+        }
+
+        return ResponseEntity.ok(set)
     }
 }

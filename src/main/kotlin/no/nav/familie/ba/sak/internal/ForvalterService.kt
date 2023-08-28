@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
@@ -47,6 +48,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 
 @Service
 class ForvalterService(
@@ -198,67 +200,113 @@ class ForvalterService(
         }
     }
 
-    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(behandlingId: Long): Boolean {
+    fun harTilkjentYtelseForBehandlingKorrektOpphørsdato(behandlingId: Long): Boolean {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
-        return opphørsdatoErKorrekt(tilkjentYtelse)
+        return erOpphørsdatoKorrekt(tilkjentYtelse)
     }
 
     fun identifiserBehandlingerSomKanKrevePatching(): List<Long> {
-        val tilkjentYtelseMedFeilIUtbetalingsoppdrag =
+        val tilkjenteYtelserMedOpphørSomKanVæreFeil =
             tilkjentYtelseRepository.findTilkjentYtelseMedFeilUtbetalingsoppdrag()
-                .filter { opphørsdatoErKorrekt(it) }
-                .map { it.behandling.id }
-        return tilkjentYtelseMedFeilIUtbetalingsoppdrag
+        logger.info("Behandlinger som potensielt har feil: ${tilkjenteYtelserMedOpphørSomKanVæreFeil.map { it.behandling.id }}")
+
+        return tilkjenteYtelserMedOpphørSomKanVæreFeil
+            .filter { !erOpphørsdatoKorrekt(it) }
+            .map { it.behandling.id }
     }
 
-    private fun opphørsdatoErKorrekt(tilkjentYtelse: TilkjentYtelse): Boolean {
+    private fun erOpphørsdatoKorrekt(tilkjentYtelse: TilkjentYtelse): Boolean {
         val utbetalingsoppdrag = tilkjentYtelse.utbetalingsoppdrag() ?: return true
+        logger.info("Sjekker behandling for korrekt opphørsdato ${tilkjentYtelse.behandling.id}")
+        try {
+            val grupperteNyeAndeler = grupperAndeler(
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = tilkjentYtelse.behandling.id)
+                    .pakkInnForUtbetaling(AndelTilkjentYtelseForSimuleringFactory()),
+            )
 
-        val grupperteNyeAndeler = grupperAndeler(
-            beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = tilkjentYtelse.behandling.id)
-                .pakkInnForUtbetaling(AndelTilkjentYtelseForSimuleringFactory()),
-        )
+            val forrigeIverksatteBehandling =
+                behandlingRepository.finnIverksatteBehandlinger(tilkjentYtelse.behandling.fagsak.id)
+                    .filter { it.id != tilkjentYtelse.behandling.id && it.aktivertTidspunkt < tilkjentYtelse.behandling.aktivertTidspunkt }
+                    .maxByOrNull { it.aktivertTidspunkt }!!
 
-        val forrigeIverksatteBehandling =
-            behandlingRepository.finnIverksatteBehandlinger(tilkjentYtelse.behandling.fagsak.id)
-                .filter { it.id != tilkjentYtelse.behandling.id }.maxByOrNull { it.aktivertTidspunkt }!!
+            val grupperteForrigeAndeler = grupperAndeler(
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = forrigeIverksatteBehandling.id)
+                    .pakkInnForUtbetaling(AndelTilkjentYtelseForSimuleringFactory()),
+            )
 
-        val grupperteForrigeAndeler = grupperAndeler(
-            beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = forrigeIverksatteBehandling.id)
-                .pakkInnForUtbetaling(AndelTilkjentYtelseForSimuleringFactory()),
-        )
+            val sisteBeståendeAndelPerKjede =
+                ØkonomiUtils.sisteBeståendeAndelPerKjede(grupperteForrigeAndeler, grupperteNyeAndeler)
 
-        val sisteBeståendeAndelPerKjede =
-            ØkonomiUtils.sisteBeståendeAndelPerKjede(grupperteForrigeAndeler, grupperteNyeAndeler)
+            val endretMigreringsdato = beregnOmMigreringsDatoErEndret(
+                tilkjentYtelse.behandling,
+                grupperteForrigeAndeler.values.flatten().minByOrNull { it.stønadFom }?.stønadFom,
+            )
 
-        // Finner andeler som skal opphøres slik vi gjorde før
-        val andelerTilOpphør = grupperteForrigeAndeler
-            .mapValues { (person, forrigeAndeler) ->
-                forrigeAndeler.filter {
-                    it.stønadFom > sisteBeståendeAndelPerKjede[person]!!.stønadTom
+            // Finner andeler som skal opphøres slik vi gjorde før
+            val andelerTilOpphør = grupperteForrigeAndeler
+                .mapValues { (person, forrigeAndeler) ->
+                    forrigeAndeler.filter {
+                        sisteBeståendeAndelPerKjede[person] == null ||
+                            it.stønadFom > sisteBeståendeAndelPerKjede[person]!!.stønadTom
+                    }
                 }
-            }
-            .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
-            .map { (_, kjedeEtterFørsteEndring) ->
-                kjedeEtterFørsteEndring.last() to kjedeEtterFørsteEndring.minOf { it.stønadFom }
-            }
-
-        val utbetalingsperioderMedOpphør = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
-        secureLogger.info("Utbetalingsperioder med opphør: $utbetalingsperioderMedOpphør")
-
-        // Finner ut hvilken opphørsAndel som tilhører hvilken utbetalingsperiodeMedOpphør
-        val alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato = utbetalingsperioderMedOpphør
-            .all { periodeMedOpphør ->
-                val andelerTilPersonMedOpphør =
-                    andelerTilOpphør.filter { andelForPerson -> andelForPerson.first.periodeOffset == periodeMedOpphør.periodeId }
-                if (andelerTilPersonMedOpphør.size != 1) {
-                    false
-                } else {
-                    secureLogger.info("Andel fra forrige med korrekt opphørsdato: ${andelerTilPersonMedOpphør.first().second.førsteDagIInneværendeMåned()}. Opphørsperiode sendt til økonomi med opphørsdato: ${periodeMedOpphør.opphør!!.opphørDatoFom}")
-                    andelerTilPersonMedOpphør.first().second
-                        .førsteDagIInneværendeMåned() == periodeMedOpphør.opphør!!.opphørDatoFom
+                .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
+                .mapValues { andelForKjede -> andelForKjede.value.sortedBy { it.stønadFom } }
+                .map { (_, kjedeEtterFørsteEndring) ->
+                    kjedeEtterFørsteEndring.last() to (
+                        endretMigreringsdato
+                            ?: kjedeEtterFørsteEndring.minOf { it.stønadFom }
+                        )
                 }
-            }
-        return alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato
+
+            secureLogger.info("Andeler som som skal opphøres: ${andelerTilOpphør.map { "PeriodeId: ${it.first.periodeOffset} ForrigePeriodeId: ${it.first.forrigePeriodeOffset} Opphørsdato: ${it.second}" }} for behandling ${tilkjentYtelse.behandling.id}")
+            val utbetalingsperioderMedOpphør = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
+            secureLogger.info("Utbetalingsperioder med opphør: $utbetalingsperioderMedOpphør for behandling ${tilkjentYtelse.behandling.id}")
+
+            // Finner ut hvilken opphørsAndel som tilhører hvilken utbetalingsperiodeMedOpphør
+            val alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato = utbetalingsperioderMedOpphør
+                .all { periodeMedOpphør ->
+                    val andelerTilPersonMedOpphør =
+                        andelerTilOpphør.filter { andelForPerson -> andelForPerson.first.periodeOffset == periodeMedOpphør.periodeId }
+                    if (andelerTilPersonMedOpphør.size != 1) {
+                        secureLogger.info("Mer enn 1 eller ingen andeler med samme periodeOffsett som opphørsperioden $periodeMedOpphør for behandling ${tilkjentYtelse.behandling.id}")
+                        false
+                    } else {
+                        secureLogger.info("Andel fra forrige med korrekt opphørsdato: ${andelerTilPersonMedOpphør.first().second.førsteDagIInneværendeMåned()}. Opphørsperiode sendt til økonomi med opphørsdato: ${periodeMedOpphør.opphør!!.opphørDatoFom} for behandling ${tilkjentYtelse.behandling.id}")
+                        andelerTilPersonMedOpphør.first().second
+                            .førsteDagIInneværendeMåned() == periodeMedOpphør.opphør!!.opphørDatoFom
+                    }
+                }
+            return alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato
+        } catch (e: Exception) {
+            secureLogger.warn(
+                "opphørsdatoErKorrekt kaster feil: ${e.message} for behandling ${tilkjentYtelse.behandling.id}",
+                e,
+            )
+            return false
+        }
+    }
+
+    private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {
+        val erMigrertSak =
+            behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id)
+                .any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
+
+        if (!erMigrertSak) {
+            return null
+        }
+
+        val nyttTilstandFraDato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
+            ?.toYearMonth()
+            ?.plusMonths(1)
+
+        return if (forrigeTilstandFraDato != null &&
+            nyttTilstandFraDato != null &&
+            forrigeTilstandFraDato.isAfter(nyttTilstandFraDato)
+        ) {
+            nyttTilstandFraDato
+        } else {
+            null
+        }
     }
 }
