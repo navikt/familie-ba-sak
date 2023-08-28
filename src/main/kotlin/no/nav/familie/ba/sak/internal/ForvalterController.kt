@@ -113,9 +113,10 @@ class ForvalterController(
     @PostMapping("/finnBehandlingerMedPotensieltFeilUtbetalingsoppdrag")
     fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<List<ForvalterService.ValidertUtbetalingsoppdrag>> {
         logger.info("Starter identifiserBehandlingerSomKanKrevePatching")
-        val behandlingsIder = forvalterService.identifiserPåvirkedeBehandlingerOgValiderOpphørsdatoIUtbetalingsoppdrag()
-        logger.warn("Følgende behandlinger har ikke korrekte opphørsdatoer: [$behandlingsIder]")
-        return ResponseEntity.ok(behandlingsIder)
+        val validerteUtbetalingsoppdragMedFeil =
+            forvalterService.identifiserPåvirkedeBehandlingerOgValiderOpphørsdatoIUtbetalingsoppdrag()
+        secureLogger.warn("Følgende behandlinger har ikke korrekte opphørsdatoer: [$validerteUtbetalingsoppdragMedFeil]")
+        return ResponseEntity.ok(validerteUtbetalingsoppdragMedFeil)
     }
 
     @PostMapping("/sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato")
