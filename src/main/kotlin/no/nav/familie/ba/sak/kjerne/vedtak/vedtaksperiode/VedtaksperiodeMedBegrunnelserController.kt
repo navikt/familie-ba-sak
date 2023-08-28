@@ -136,7 +136,7 @@ class VedtaksperiodeMedBegrunnelserController(
     }
 
     @GetMapping(path = ["/behandling/{behandlingId}/hent-vedtaksperioder"])
-    fun hentPersonerMedUgyldigEtterbetalingsperiode(
+    fun hentRestUtvidetVedtaksperiodeMedBegrunnelser(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> = ResponseEntity.ok(
         Ressurs.success(
