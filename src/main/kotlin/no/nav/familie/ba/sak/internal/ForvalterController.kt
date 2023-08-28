@@ -111,22 +111,31 @@ class ForvalterController(
     }
 
     @PostMapping("/finnBehandlingerMedPotensieltFeilUtbetalingsoppdrag")
-    fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<List<Long>> {
+    fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<BehandlingerMedFeilIUtbetalingsoppdrag> {
         logger.info("Starter identifiserBehandlingerSomKanKrevePatching")
-        val behandlingsIder = forvalterService.identifiserBehandlingerSomKanKrevePatching()
-        logger.warn("Følgende behandlinger har ikke korrekte opphørsdatoer: [$behandlingsIder]")
-        return ResponseEntity.ok(behandlingsIder)
+        val validerteUtbetalingsoppdragMedFeil =
+            forvalterService.identifiserPåvirkedeBehandlingerOgValiderOpphørsdatoIUtbetalingsoppdrag()
+        secureLogger.warn("Følgende behandlinger har ikke korrekte opphørsdatoer: [$validerteUtbetalingsoppdragMedFeil]")
+        return ResponseEntity.ok(validerteUtbetalingsoppdragMedFeil)
     }
 
     @PostMapping("/sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato")
-    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(@RequestBody behandlingListe: List<Long>): ResponseEntity<Set<Long>> {
-        val set: Set<Long> = behandlingListe.fold(LinkedHashSet()) { accumulator, behandlingId ->
-            if (!forvalterService.harTilkjentYtelseForBehandlingKorrektOpphørsdato(behandlingId)) {
-                accumulator.add(behandlingId)
+    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(@RequestBody behandlingListe: List<Long>): ResponseEntity<BehandlingerMedFeilIUtbetalingsoppdrag> {
+        val validerteUtbetalingsoppdragMedFeil: Set<ValidertUtbetalingsoppdrag> =
+            behandlingListe.fold(LinkedHashSet()) { accumulator, behandlingId ->
+                val validertUtbetalingsoppdrag =
+                    forvalterService.validerOpphørsdatoIUtbetalingsoppdragForBehandling(behandlingId)
+                if (!validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer) {
+                    accumulator.add(validertUtbetalingsoppdrag)
+                }
+                accumulator
             }
-            accumulator
-        }
 
-        return ResponseEntity.ok(set)
+        return ResponseEntity.ok(
+            BehandlingerMedFeilIUtbetalingsoppdrag(
+                behandlinger = validerteUtbetalingsoppdragMedFeil.map { it.behandlingId },
+                validerteUtbetalingsoppdrag = validerteUtbetalingsoppdragMedFeil,
+            ),
+        )
     }
 }
