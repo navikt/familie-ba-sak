@@ -16,10 +16,10 @@ spec:
     retentionHours: 2 # -1 means unlimited
   acl:
     - team: teamfamilie
-      application: familie-ba-sak #owner
+      application: familie-ba-sak
       access: write
-    - team: pensjon
-      application: psys #consumer
+    - team: pensjonopptjening
+      application: omsorgsopptjening-start-innlesning
       access: read
     - team: teamfamilie
       application: familie-ba-kafka-manager
