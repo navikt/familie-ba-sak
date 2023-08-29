@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -133,6 +134,15 @@ class VedtaksperiodeMedBegrunnelserController(
 
         return ResponseEntity.ok(Ressurs.Companion.success(begrunnelser.toSet()))
     }
+
+    @GetMapping(path = ["/behandling/{behandlingId}/hent-vedtaksperioder"])
+    fun hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> = ResponseEntity.ok(
+        Ressurs.success(
+            vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId),
+        ),
+    )
 
     companion object {
         const val OPPDATERE_BEGRUNNELSER_HANDLING = "oppdatere vedtaksperiode med begrunnelser"
