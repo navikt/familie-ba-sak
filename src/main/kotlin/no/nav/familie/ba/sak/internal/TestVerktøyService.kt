@@ -49,19 +49,19 @@ class TestVerktøyService(
         val persongrunnlag: PersonopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!
         val persongrunnlagForrigeBehandling =
-            forrigeBehandling?.let { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(forrigeBehandling.id)!! }
+            forrigeBehandling?.let { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it.id)!! }
 
         val personResultater = vilkårService.hentVilkårsvurderingThrows(behandlingId).personResultater
         val personResultaterForrigeBehandling =
-            forrigeBehandling?.let { vilkårService.hentVilkårsvurderingThrows(forrigeBehandling.id).personResultater }
+            forrigeBehandling?.let { vilkårService.hentVilkårsvurderingThrows(it.id).personResultater }
 
         val andeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
         val andelerForrigeBehandling =
-            forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) }
+            forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
 
         val endredeUtbetalinger = endretUtbetalingRepository.findByBehandlingId(behandlingId)
         val endredeUtbetalingerForrigeBehandling =
-            forrigeBehandling?.let { endretUtbetalingRepository.findByBehandlingId(forrigeBehandling.id) }
+            forrigeBehandling?.let { endretUtbetalingRepository.findByBehandlingId(it.id) }
 
         val vedtaksperioder = vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
             vedtakService.hentAktivForBehandlingThrows(behandlingId).id,
