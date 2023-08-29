@@ -205,7 +205,7 @@ class ForvalterService(
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun lagKorrigertUtbetalingsoppdragOgIverksettMotØkonomi(behandlingId: Long) {
+    fun lagKorrigertUtbetalingsoppdragOgIverksettMotØkonomi(behandlingId: Long, versjon: Int = 1) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
         if (tilkjentYtelse.behandling.aktiv == false) throw Exception("Behandling $behandlingId er ikke den aktive behandlingen på fagsaken")
         val validertUtbetalingsoppdrag = validerOpphørsdatoIUtbetalingsoppdrag(tilkjentYtelse)
@@ -214,7 +214,7 @@ class ForvalterService(
             )
         ) {
             secureLogger.info("Iverksetter korrigert utbetalingsoppdrag ${validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag} for behandling $behandlingId")
-            økonomiKlient.iverksettOppdragPåNytt(validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag, 1)
+            økonomiKlient.iverksettOppdragPåNytt(validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag, versjon)
             secureLogger.info("Oppdaterer TilkjentYtelse med korrigert utbetalingsoppdrag ${validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag} for behandling $behandlingId")
             beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
                 tilkjentYtelse.behandling,
