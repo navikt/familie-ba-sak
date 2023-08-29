@@ -2,13 +2,13 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilUtdypendeVilkårsvurderinger
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlagForPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
-    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
+    begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
 ): Boolean {
     if (this.vilkår.isEmpty()) return false
     val utgjørendeVilkårResultater = finnUtgjørendeVilkår(
@@ -52,7 +52,7 @@ private fun Collection<UtdypendeVilkårsvurdering>.erLik(
 }
 
 private fun finnUtgjørendeVilkår(
-    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
+    begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
 ): Set<VilkårResultatForVedtaksperiode> {
     val oppfylteVilkårResultaterDennePerioden =
         begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
