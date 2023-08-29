@@ -15,7 +15,7 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
 
         ): IBegrunnelseGrunnlagForPeriode =
             if (periodetype == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING) {
-                BegrunnelseGrunnlagForPeriodeReduksjonPåTversAvbehanlding(
+                BegrunnelseGrunnlagForPeriodeReduksjonPåTversAvBehandling(
                     dennePerioden = dennePerioden,
                     forrigePeriode = forrigePeriode,
                     sammePeriodeForrigeBehandling = sammePeriodeForrigeBehandling,
@@ -31,7 +31,7 @@ data class BegrunnelseGrunnlagForPeriode(
     override val forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
 ) : IBegrunnelseGrunnlagForPeriode
 
-data class BegrunnelseGrunnlagForPeriodeReduksjonPåTversAvbehanlding(
+data class BegrunnelseGrunnlagForPeriodeReduksjonPåTversAvBehandling(
     override val dennePerioden: BegrunnelseGrunnlagForPersonIPeriode,
     override val forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
     val sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?,
