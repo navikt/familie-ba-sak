@@ -353,13 +353,15 @@ class ForvalterService(
                     behandlingId = tilkjentYtelse.behandling.id,
                 )
             }
-            val kjederMedOppdatertOpphørsdato: Map<Long, List<Utbetalingsperiode>> =
-                korrigerteUtbetalingsperioder.associate { it.periodeId to listOf(it) }
+            val kjederMedOppdatertOpphørsdato: MutableMap<Long, List<Utbetalingsperiode>> =
+                korrigerteUtbetalingsperioder.associate { it.periodeId to listOf(it) }.toMutableMap()
             utbetalingsoppdrag.utbetalingsperiode.sortedBy { it.periodeId }.forEach { utbetalingsperiode ->
                 val kjedeMedOppdatertOpphørsdato =
                     kjederMedOppdatertOpphørsdato.entries.find { kjede -> kjede.value.any { it.periodeId == utbetalingsperiode.forrigePeriodeId } }
                 if (kjedeMedOppdatertOpphørsdato != null) {
-                    kjederMedOppdatertOpphørsdato[kjedeMedOppdatertOpphørsdato.key]!!.plus(utbetalingsperiode)
+                    val kjedeElementer = kjederMedOppdatertOpphørsdato[kjedeMedOppdatertOpphørsdato.key]!!
+                    kjederMedOppdatertOpphørsdato[kjedeMedOppdatertOpphørsdato.key] =
+                        kjedeElementer.plus(utbetalingsperiode)
                 }
             }
             return ValidertUtbetalingsoppdrag(
