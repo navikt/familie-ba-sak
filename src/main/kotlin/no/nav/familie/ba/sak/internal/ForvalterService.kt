@@ -353,6 +353,15 @@ class ForvalterService(
                     behandlingId = tilkjentYtelse.behandling.id,
                 )
             }
+            val kjederMedOppdatertOpphørsdato: Map<Long, List<Utbetalingsperiode>> =
+                korrigerteUtbetalingsperioder.associate { it.periodeId to listOf(it) }
+            utbetalingsoppdrag.utbetalingsperiode.sortedBy { it.periodeId }.forEach { utbetalingsperiode ->
+                val kjedeMedOppdatertOpphørsdato =
+                    kjederMedOppdatertOpphørsdato.entries.find { kjede -> kjede.value.any { it.periodeId == utbetalingsperiode.forrigePeriodeId } }
+                if (kjedeMedOppdatertOpphørsdato != null) {
+                    kjederMedOppdatertOpphørsdato[kjedeMedOppdatertOpphørsdato.key]!!.plus(utbetalingsperiode)
+                }
+            }
             return ValidertUtbetalingsoppdrag(
                 harKorrekteOpphørsdatoer = false,
                 behandlingId = tilkjentYtelse.behandling.id,
@@ -361,12 +370,9 @@ class ForvalterService(
                 gammeltUtbetalingsoppdrag = utbetalingsoppdrag,
                 nyttUtbetalingsoppdrag = utbetalingsoppdrag.copy(
                     avstemmingTidspunkt = LocalDateTime.now(),
-                    utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode.map { utbetalingsperiode ->
-                        korrigerteUtbetalingsperioder.find { it.periodeId == utbetalingsperiode.periodeId }
-                            ?: utbetalingsperiode
-                    }.map { it.copy(erEndringPåEksisterendePeriode = true) },
+                    utbetalingsperiode = kjederMedOppdatertOpphørsdato.values.flatten()
+                        .map { it.copy(erEndringPåEksisterendePeriode = true) },
                 ),
-
             )
         } catch (e: Exception) {
             secureLogger.warn(
