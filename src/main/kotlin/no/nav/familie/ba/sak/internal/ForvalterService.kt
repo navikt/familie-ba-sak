@@ -204,6 +204,7 @@ class ForvalterService(
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun lagKorrigertUtbetalingsoppdragOgIverksettMotØkonomi(behandlingId: Long) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
         if (tilkjentYtelse.behandling.aktiv == false) throw Exception("Behandling $behandlingId er ikke den aktive behandlingen på fagsaken")
