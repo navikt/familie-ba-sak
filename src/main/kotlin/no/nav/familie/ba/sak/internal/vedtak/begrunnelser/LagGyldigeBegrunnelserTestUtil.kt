@@ -38,15 +38,21 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
     """
       
-  Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
-    Og lag personresultater for begrunnelse for behandling ${behandling.id}""" +
-    hentTekstForVilkårresultater(personResultater, behandling.id) +
+  Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}""" +
+    lagPersonresultaterTekst(forrigeBehandling) +
+    lagPersonresultaterTekst(behandling) +
     hentTekstForVilkårresultater(personResultaterForrigeBehandling, forrigeBehandling?.id) +
+    hentTekstForVilkårresultater(personResultater, behandling.id) +
     hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
     hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) + """
     
     Når begrunnelsetekster genereres for behandling ${behandling.id}""" +
     hentTekstForVedtaksperioder(vedtaksperioder)
+
+private fun lagPersonresultaterTekst(behandling: Behandling?) = behandling?.let {
+    """
+    Og lag personresultater for begrunnelse for behandling ${it.id}"""
+} ?: ""
 
 fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: Behandling?) =
     """
@@ -67,8 +73,8 @@ fun hentTekstForPersongrunnlag(
     
     Og følgende persongrunnlag for begrunnelse
       | BehandlingId | AktørId | Persontype | Fødselsdato |""" +
-        hentPersongrunnlagRader(persongrunnlag) +
-        hentPersongrunnlagRader(persongrunnlagForrigeBehandling)
+        hentPersongrunnlagRader(persongrunnlagForrigeBehandling) +
+        hentPersongrunnlagRader(persongrunnlag)
 
 private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): String =
     persongrunnlag?.personer?.joinToString("") {
@@ -129,8 +135,8 @@ fun hentTekstForTilkjentYtelse(
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent |""" +
-        hentAndelRader(andeler) +
-        hentAndelRader(andelerForrigeBehandling)
+        hentAndelRader(andelerForrigeBehandling) +
+        hentAndelRader(andeler)
 
 private fun hentAndelRader(andeler: List<AndelTilkjentYtelse>?): String =
     andeler?.joinToString("") {
@@ -150,8 +156,8 @@ fun hentTekstForEndretUtbetaling(
 
     Og med endrede utbetalinger for begrunnelse
       | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak             | Prosent |""" +
-        hentEndretUtbetalingRader(endredeUtbetalinger) +
-        hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling)
+        hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
+        hentEndretUtbetalingRader(endredeUtbetalinger)
 
 private fun hentEndretUtbetalingRader(endredeUtbetalinger: List<EndretUtbetalingAndel>?): String =
     endredeUtbetalinger
