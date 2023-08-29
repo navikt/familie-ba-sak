@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdus
 import erGjeldendeForUtgjørendeVilkår
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -23,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
@@ -44,12 +42,10 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
     behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
-    behandlingUnderkategori: BehandlingUnderkategori,
 ): Set<IVedtakBegrunnelse> {
     val gyldigeBegrunnelserPerPerson = hentGyldigeBegrunnelserPerPerson(
         behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
         behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-        behandlingUnderkategori = behandlingUnderkategori,
         sanityBegrunnelser = sanityBegrunnelser,
         sanityEØSBegrunnelser = sanityEØSBegrunnelser,
     )
@@ -60,7 +56,6 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
 private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
     behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
-    behandlingUnderkategori: BehandlingUnderkategori,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
 ): Map<Person, Set<IVedtakBegrunnelse>> {
@@ -81,16 +76,13 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
             begrunnelseGrunnlag = begrunnelseGrunnlag,
             sanityBegrunnelser = sanityBegrunnelser,
             person = person,
-            behandlingUnderkategori = behandlingUnderkategori,
             periodeFom = this.fom,
             fagsakType = behandlingsGrunnlagForVedtaksperioder.fagsakType,
         )
 
         val eøsBegrunnelser = hentEØSStandardBegrunnelser(
-            sanityEØSBegrunnelser,
-            begrunnelseGrunnlag,
-            person,
-            behandlingUnderkategori,
+            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+            begrunnelseGrunnlag = begrunnelseGrunnlag,
         )
 
         val avslagsbegrunnelser = avslagsbegrunnelserPerPerson[person] ?: emptySet()
@@ -122,7 +114,6 @@ private fun hentStandardBegrunnelser(
     begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     person: Person,
-    behandlingUnderkategori: BehandlingUnderkategori,
     periodeFom: LocalDate?,
     fagsakType: FagsakType,
 ): Set<Standardbegrunnelse> {
@@ -140,11 +131,7 @@ private fun hentStandardBegrunnelser(
     }
 
     val filtrertPåVilkår = filtrertPåRolleOgPeriodetype.filterValues {
-        it.erGjeldendeForUtgjørendeVilkår(
-            begrunnelseGrunnlag = begrunnelseGrunnlag,
-            person = person,
-            behandlingUnderkategori = behandlingUnderkategori,
-        )
+        it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag)
     }
 
     val relevantePeriodeResultaterForrigePeriode =
@@ -185,8 +172,6 @@ private fun hentStandardBegrunnelser(
 private fun hentEØSStandardBegrunnelser(
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
     begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
-    person: Person,
-    behandlingUnderkategori: BehandlingUnderkategori,
 ): Set<EØSStandardbegrunnelse> {
     val relevantePeriodeResultater =
         hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
@@ -196,11 +181,7 @@ private fun hentEØSStandardBegrunnelser(
     }
 
     val filtrertPåVilkår = begrunnelserFiltrertPåPeriodetype.filterValues {
-        it.erGjeldendeForUtgjørendeVilkår(
-            begrunnelseGrunnlag,
-            person,
-            behandlingUnderkategori,
-        )
+        it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag)
     }
 
     val filtrertPåKompetanse = begrunnelserFiltrertPåPeriodetype.filterValues {

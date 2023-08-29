@@ -194,7 +194,6 @@ class BegrunnelseTeksterStepDefinition {
                     grunnlagForVedtaksperiodeForrigeBehandling,
                     mockHentSanityBegrunnelser(),
                     mockHentSanityEØSBegrunnelser(),
-                    behandling.underkategori,
                 ).toList(),
             )
         }.toMutableList()
