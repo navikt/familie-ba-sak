@@ -319,14 +319,13 @@ class ForvalterService(
             val korrigerteUtbetalingsperioder = mutableListOf<Utbetalingsperiode>()
 
             // Finner ut hvilken opphørsAndel som tilhører hvilken utbetalingsperiodeMedOpphør
-            val alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato = utbetalingsperioderMedOpphør
-                .all { periodeMedOpphør ->
+            utbetalingsperioderMedOpphør
+                .forEach { periodeMedOpphør ->
                     val andelerTilPersonMedOpphør =
                         andelerTilOpphør.filter { andelForPerson -> andelForPerson.first.periodeOffset == periodeMedOpphør.periodeId }
                     if (andelerTilPersonMedOpphør.size != 1) {
                         secureLogger.info("Mer enn 1 eller ingen andeler med samme periodeOffsett som opphørsperioden $periodeMedOpphør for behandling ${tilkjentYtelse.behandling.id}")
                         utbetalingsperioderMedFeilOpphørsdato.add(periodeMedOpphør)
-                        false
                     } else {
                         secureLogger.info("Andel fra forrige med korrekt opphørsdato: ${andelerTilPersonMedOpphør.first().second.førsteDagIInneværendeMåned()}. Opphørsperiode sendt til økonomi med opphørsdato: ${periodeMedOpphør.opphør!!.opphørDatoFom} for behandling ${tilkjentYtelse.behandling.id}")
                         if (andelerTilPersonMedOpphør.first().second
@@ -341,13 +340,10 @@ class ForvalterService(
                                     ),
                                 ),
                             )
-                            false
-                        } else {
-                            true
                         }
                     }
                 }
-            if (alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato) {
+            if (utbetalingsperioderMedFeilOpphørsdato.isEmpty()) {
                 return ValidertUtbetalingsoppdrag(
                     harKorrekteOpphørsdatoer = true,
                     behandlingId = tilkjentYtelse.behandling.id,
