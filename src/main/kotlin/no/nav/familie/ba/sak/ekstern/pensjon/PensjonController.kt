@@ -116,7 +116,7 @@ class PensjonController(private val pensjonService: PensjonService) {
                 """,
                 content = [
                     Content(
-                        mediaType = "application/json",
+                        mediaType = MediaType.TEXT_PLAIN_VALUE,
                     ),
                 ],
             ),
@@ -130,7 +130,7 @@ class PensjonController(private val pensjonService: PensjonService) {
                 description = "Uventet feil",
                 content = [
                     Content(
-                        mediaType = "application/json",
+                        mediaType = MediaType.TEXT_PLAIN_VALUE,
                     ),
                 ],
             ),
@@ -138,7 +138,7 @@ class PensjonController(private val pensjonService: PensjonService) {
     )
     @GetMapping(
         path = ["/bestill-personer-med-barnetrygd/{år}"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.TEXT_PLAIN_VALUE],
     )
     fun bestillPersonerMedBarnetrygdForGittÅrPåKafka(
         @PathVariable
