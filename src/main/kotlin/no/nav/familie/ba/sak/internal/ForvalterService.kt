@@ -362,7 +362,7 @@ class ForvalterService(
                     utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode.map { utbetalingsperiode ->
                         korrigerteUtbetalingsperioder.find { it.periodeId == utbetalingsperiode.periodeId }
                             ?: utbetalingsperiode
-                    },
+                    }.map { it.copy(erEndringPåEksisterendePeriode = true) },
                 ),
 
             )
