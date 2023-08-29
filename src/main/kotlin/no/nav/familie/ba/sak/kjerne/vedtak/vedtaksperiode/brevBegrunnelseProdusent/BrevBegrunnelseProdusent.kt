@@ -546,23 +546,22 @@ private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
         UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG in utvidetBarnetrygdTriggere
 
     val begrunnelseMatcherPeriodeResultat =
-        matcherBegrunnelsePerioderesultat(erSmåbarnstilleggForrigePeriode, erSmåbarnstilleggDennePerioden, this)
+        this.matcherPerioderesultat(erSmåbarnstilleggForrigePeriode, erSmåbarnstilleggDennePerioden)
 
     val erEndringISmåbarnstillegg = erSmåbarnstilleggForrigePeriode != erSmåbarnstilleggDennePerioden
 
     return begrunnelseGjelderSmåbarnstillegg && begrunnelseMatcherPeriodeResultat && erEndringISmåbarnstillegg
 }
 
-private fun matcherBegrunnelsePerioderesultat(
+private fun SanityBegrunnelse.matcherPerioderesultat(
     erSmåbarnstilleggForrigePeriode: Boolean,
     erSmåbarnstilleggDennePerioden: Boolean,
-    begrunnelse: SanityBegrunnelse,
 ): Boolean {
     val erReduksjon = erSmåbarnstilleggForrigePeriode && !erSmåbarnstilleggDennePerioden
     val erØkning = !erSmåbarnstilleggForrigePeriode && erSmåbarnstilleggDennePerioden
 
-    val erBegrunnelseReduksjon = begrunnelse.periodeResultat == SanityPeriodeResultat.REDUKSJON
-    val erBegrunnelseØkning = begrunnelse.periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING
+    val erBegrunnelseReduksjon = periodeResultat == SanityPeriodeResultat.REDUKSJON
+    val erBegrunnelseØkning = periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING
 
     val reduksjonMatcher = erReduksjon == erBegrunnelseReduksjon
     val økningMatcher = erØkning == erBegrunnelseØkning
