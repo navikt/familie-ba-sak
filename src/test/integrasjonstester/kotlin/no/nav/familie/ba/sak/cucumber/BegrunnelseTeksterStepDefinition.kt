@@ -177,12 +177,12 @@ class BegrunnelseTeksterStepDefinition {
         val utvidedeVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
-                andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId]!!.map {
+                andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId]?.map {
                     AndelTilkjentYtelseMedEndreteUtbetalinger(
                         it,
                         endredeUtbetalinger[behandlingId] ?: emptySet(),
                     )
-                },
+                } ?: emptyList(),
                 skalBrukeNyVedtaksperiodeLøsning = true,
             )
         }
