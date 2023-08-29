@@ -51,6 +51,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Service
@@ -359,6 +360,7 @@ class ForvalterService(
                 korrigerteUtbetalingsperioder = korrigerteUtbetalingsperioder,
                 gammeltUtbetalingsoppdrag = utbetalingsoppdrag,
                 nyttUtbetalingsoppdrag = utbetalingsoppdrag.copy(
+                    avstemmingTidspunkt = LocalDateTime.now(),
                     utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode.map { utbetalingsperiode ->
                         korrigerteUtbetalingsperioder.find { it.periodeId == utbetalingsperiode.periodeId }
                             ?: utbetalingsperiode
