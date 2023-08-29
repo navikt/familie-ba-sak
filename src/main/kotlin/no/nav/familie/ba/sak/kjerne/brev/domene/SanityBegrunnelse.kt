@@ -25,6 +25,7 @@ interface ISanityBegrunnelse {
     val giftPartnerskapTriggere: List<VilkårTrigger>
     val bosattIRiketTriggere: List<VilkårTrigger>
     val lovligOppholdTriggere: List<VilkårTrigger>
+    val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>
 }
 
 data class SanityBegrunnelse(
@@ -36,6 +37,7 @@ data class SanityBegrunnelse(
     override val bosattIRiketTriggere: List<VilkårTrigger> = emptyList(),
     override val giftPartnerskapTriggere: List<VilkårTrigger> = emptyList(),
     override val borMedSokerTriggere: List<VilkårTrigger> = emptyList(),
+    override val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger> = emptyList(),
     @Deprecated("Bruk vilkår")
     val vilkaar: List<SanityVilkår> = emptyList(),
     val rolle: List<VilkårRolle> = emptyList(),
@@ -45,7 +47,6 @@ data class SanityBegrunnelse(
     val endringsaarsaker: List<Årsak> = emptyList(),
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
-    val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger> = emptyList(),
     val valgbarhet: Valgbarhet? = null,
 ) : ISanityBegrunnelse {
 

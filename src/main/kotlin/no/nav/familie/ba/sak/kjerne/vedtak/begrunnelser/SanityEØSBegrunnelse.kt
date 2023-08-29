@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
@@ -77,6 +78,7 @@ data class SanityEØSBegrunnelse(
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>,
 ) : ISanityBegrunnelse {
     override val lovligOppholdTriggere: List<VilkårTrigger> = emptyList()
+    override val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger> = emptyList()
     override val bosattIRiketTriggere: List<VilkårTrigger> = emptyList()
     override val giftPartnerskapTriggere: List<VilkårTrigger> = emptyList()
     override val borMedSokerTriggere: List<VilkårTrigger> = emptyList()

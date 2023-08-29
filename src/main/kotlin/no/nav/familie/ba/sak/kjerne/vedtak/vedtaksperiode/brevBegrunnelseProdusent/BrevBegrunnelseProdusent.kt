@@ -4,9 +4,11 @@ import erGjeldendeForUtgjørendeVilkår
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilPersonType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -134,6 +136,10 @@ private fun hentStandardBegrunnelser(
         it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag)
     }
 
+    val filtrertPåSmåbarnstillegg = filtrertPåRolleOgPeriodetype.filterValues { begrunnelse ->
+        begrunnelse.erGjeldendeForSmåbarnstillegg(begrunnelseGrunnlag)
+    }
+
     val relevantePeriodeResultaterForrigePeriode =
         hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode)
 
@@ -164,6 +170,7 @@ private fun hentStandardBegrunnelser(
     )
 
     return filtrertPåVilkår.keys.toSet() +
+        filtrertPåSmåbarnstillegg.keys.toSet() +
         filtrertPåEndretUtbetaling.keys.toSet() +
         filtrertPåEtterEndretUtbetaling.keys.toSet() +
         filtrertPåHendelser.keys.toSet()
@@ -525,4 +532,40 @@ private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOg
         ).zipWithNext { forrige, denne ->
         periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
     }.tilTidslinje()
+}
+
+private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
+    begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
+): Boolean {
+    val erSmåbarnstilleggForrigePeriode =
+        begrunnelseGrunnlag.forrigePeriode?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
+    val erSmåbarnstilleggDennePerioden =
+        begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.SMÅBARNSTILLEGG }
+
+    val begrunnelseGjelderSmåbarnstillegg =
+        UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG in utvidetBarnetrygdTriggere
+
+    val begrunnelseMatcherPeriodeResultat =
+        matcherBegrunnelsePerioderesultat(erSmåbarnstilleggForrigePeriode, erSmåbarnstilleggDennePerioden, this)
+
+    val erEndringISmåbarnstillegg = erSmåbarnstilleggForrigePeriode != erSmåbarnstilleggDennePerioden
+
+    return begrunnelseGjelderSmåbarnstillegg && begrunnelseMatcherPeriodeResultat && erEndringISmåbarnstillegg
+}
+
+private fun matcherBegrunnelsePerioderesultat(
+    erSmåbarnstilleggForrigePeriode: Boolean,
+    erSmåbarnstilleggDennePerioden: Boolean,
+    begrunnelse: SanityBegrunnelse,
+): Boolean {
+    val erReduksjon = erSmåbarnstilleggForrigePeriode && !erSmåbarnstilleggDennePerioden
+    val erØkning = !erSmåbarnstilleggForrigePeriode && erSmåbarnstilleggDennePerioden
+
+    val erBegrunnelseReduksjon = begrunnelse.periodeResultat == SanityPeriodeResultat.REDUKSJON
+    val erBegrunnelseØkning = begrunnelse.periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING
+
+    val reduksjonMatcher = erReduksjon == erBegrunnelseReduksjon
+    val økningMatcher = erØkning == erBegrunnelseØkning
+    val matcherPeriodeResultat = reduksjonMatcher && økningMatcher
+    return matcherPeriodeResultat
 }
