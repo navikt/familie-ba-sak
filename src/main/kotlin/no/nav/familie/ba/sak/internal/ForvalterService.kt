@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
@@ -50,11 +51,13 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Service
 class ForvalterService(
     private val økonomiService: ØkonomiService,
+    private val økonomiKlient: ØkonomiKlient,
     private val vedtakService: VedtakService,
     private val beregningService: BeregningService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -202,6 +205,45 @@ class ForvalterService(
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun lagKorrigertUtbetalingsoppdragOgIverksettMotØkonomi(behandlingId: Long, versjon: Int = 1) {
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
+        if (tilkjentYtelse.behandling.aktiv == false) throw Exception("Behandling $behandlingId er ikke den aktive behandlingen på fagsaken")
+        val validertUtbetalingsoppdrag = validerOpphørsdatoIUtbetalingsoppdrag(tilkjentYtelse)
+        if (!validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer && validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag != null && detFinnesUtbetalingsperioderMedFeilOgTilhørendeKorrigerteUtbetalingsperioder(
+                validertUtbetalingsoppdrag,
+            )
+        ) {
+            secureLogger.info("Iverksetter korrigert utbetalingsoppdrag ${validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag} for behandling $behandlingId")
+            økonomiKlient.iverksettOppdragPåNytt(validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag, versjon)
+            secureLogger.info("Oppdaterer TilkjentYtelse med korrigert utbetalingsoppdrag ${validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag} for behandling $behandlingId")
+            beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
+                tilkjentYtelse.behandling,
+                validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag,
+            )
+        } else {
+            throw Exception("Nytt utbetalingsoppdrag ikke sendt for behandling $behandlingId. HarKorrekteOpphørsdatoer: ${validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer}, Nytt utbetalingsoppdrag: ${validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag}, ")
+        }
+    }
+
+    private fun detFinnesUtbetalingsperioderMedFeilOgTilhørendeKorrigerteUtbetalingsperioder(validertUtbetalingsoppdrag: ValidertUtbetalingsoppdrag): Boolean {
+        if (
+            !validertUtbetalingsoppdrag.korrigerteUtbetalingsperioder.isNullOrEmpty() && !validertUtbetalingsoppdrag.utbetalingsperioderMedFeilOpphørsdato.isNullOrEmpty() &&
+            // De korrigerte utbetalingsperiodene matcher utbetalingsperiodene med feil
+            validertUtbetalingsoppdrag.korrigerteUtbetalingsperioder.size == validertUtbetalingsoppdrag.utbetalingsperioderMedFeilOpphørsdato.size &&
+            validertUtbetalingsoppdrag.utbetalingsperioderMedFeilOpphørsdato.all { utbetalingsperiodeMedFeil ->
+                validertUtbetalingsoppdrag.korrigerteUtbetalingsperioder.any { korrigertUtbetalingsperiode ->
+                    korrigertUtbetalingsperiode.periodeId == utbetalingsperiodeMedFeil.periodeId
+                }
+            }
+
+        ) {
+            return true
+        } else {
+            throw Exception("Korrigerte utbetalingsperioder matcher ikke utbetalingsperiodene med feil. UtbetalingsperioderMedFeil: ${validertUtbetalingsoppdrag.utbetalingsperioderMedFeilOpphørsdato}, KorrigerteUtbetalingsperioder: ${validertUtbetalingsoppdrag.korrigerteUtbetalingsperioder}")
+        }
+    }
+
     fun validerOpphørsdatoIUtbetalingsoppdragForBehandling(behandlingId: Long): ValidertUtbetalingsoppdrag {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
         return validerOpphørsdatoIUtbetalingsoppdrag(tilkjentYtelse)
@@ -278,35 +320,34 @@ class ForvalterService(
             val korrigerteUtbetalingsperioder = mutableListOf<Utbetalingsperiode>()
 
             // Finner ut hvilken opphørsAndel som tilhører hvilken utbetalingsperiodeMedOpphør
-            val alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato = utbetalingsperioderMedOpphør
-                .all { periodeMedOpphør ->
-                    val andelerTilPersonMedOpphør =
-                        andelerTilOpphør.filter { andelForPerson -> andelForPerson.first.periodeOffset == periodeMedOpphør.periodeId }
-                    if (andelerTilPersonMedOpphør.size != 1) {
-                        secureLogger.info("Mer enn 1 eller ingen andeler med samme periodeOffsett som opphørsperioden $periodeMedOpphør for behandling ${tilkjentYtelse.behandling.id}")
+            for (periodeMedOpphør in utbetalingsperioderMedOpphør) {
+                val andelerTilPersonMedOpphør =
+                    andelerTilOpphør.filter { andelForPerson -> andelForPerson.first.periodeOffset == periodeMedOpphør.periodeId }
+                if (andelerTilPersonMedOpphør.size != 1) {
+                    secureLogger.info("Mer enn 1 eller ingen andeler med samme periodeOffsett som opphørsperioden $periodeMedOpphør for behandling ${tilkjentYtelse.behandling.id}")
+                    utbetalingsperioderMedFeilOpphørsdato.add(periodeMedOpphør)
+                    // Nullstiller korrigerteUtbetalingsperioder slik at validering før iverksettelse feiler.
+                    korrigerteUtbetalingsperioder.clear()
+                    break
+                } else {
+                    secureLogger.info("Andel fra forrige med korrekt opphørsdato: ${andelerTilPersonMedOpphør.first().second.førsteDagIInneværendeMåned()}. Opphørsperiode sendt til økonomi med opphørsdato: ${periodeMedOpphør.opphør!!.opphørDatoFom} for behandling ${tilkjentYtelse.behandling.id}")
+                    if (andelerTilPersonMedOpphør.first().second
+                            .førsteDagIInneværendeMåned() != periodeMedOpphør.opphør!!.opphørDatoFom
+                    ) {
                         utbetalingsperioderMedFeilOpphørsdato.add(periodeMedOpphør)
-                        false
-                    } else {
-                        secureLogger.info("Andel fra forrige med korrekt opphørsdato: ${andelerTilPersonMedOpphør.first().second.førsteDagIInneværendeMåned()}. Opphørsperiode sendt til økonomi med opphørsdato: ${periodeMedOpphør.opphør!!.opphørDatoFom} for behandling ${tilkjentYtelse.behandling.id}")
-                        if (andelerTilPersonMedOpphør.first().second
-                                .førsteDagIInneværendeMåned() != periodeMedOpphør.opphør!!.opphørDatoFom
-                        ) {
-                            utbetalingsperioderMedFeilOpphørsdato.add(periodeMedOpphør)
-                            korrigerteUtbetalingsperioder.add(
-                                periodeMedOpphør.copy(
-                                    opphør = periodeMedOpphør.opphør!!.copy(
-                                        opphørDatoFom = andelerTilPersonMedOpphør.first().second
-                                            .førsteDagIInneværendeMåned(),
-                                    ),
+                        korrigerteUtbetalingsperioder.add(
+                            periodeMedOpphør.copy(
+                                opphør = periodeMedOpphør.opphør!!.copy(
+                                    opphørDatoFom = andelerTilPersonMedOpphør.first().second
+                                        .førsteDagIInneværendeMåned(),
                                 ),
-                            )
-                            false
-                        } else {
-                            true
-                        }
+                            ),
+                        )
                     }
                 }
-            if (alleUtbetalingsperioderMedOpphørHarKorrektOpphørsdato) {
+            }
+
+            if (utbetalingsperioderMedFeilOpphørsdato.isEmpty()) {
                 return ValidertUtbetalingsoppdrag(
                     harKorrekteOpphørsdatoer = true,
                     behandlingId = tilkjentYtelse.behandling.id,
@@ -319,10 +360,11 @@ class ForvalterService(
                 korrigerteUtbetalingsperioder = korrigerteUtbetalingsperioder,
                 gammeltUtbetalingsoppdrag = utbetalingsoppdrag,
                 nyttUtbetalingsoppdrag = utbetalingsoppdrag.copy(
+                    avstemmingTidspunkt = LocalDateTime.now(),
                     utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode.map { utbetalingsperiode ->
                         korrigerteUtbetalingsperioder.find { it.periodeId == utbetalingsperiode.periodeId }
                             ?: utbetalingsperiode
-                    },
+                    }.map { it.copy(erEndringPåEksisterendePeriode = true) },
                 ),
 
             )

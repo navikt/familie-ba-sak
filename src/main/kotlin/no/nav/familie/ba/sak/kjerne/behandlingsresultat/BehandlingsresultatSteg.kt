@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -9,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder
@@ -146,6 +148,12 @@ class BehandlingsresultatSteg(
             behandling,
             endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi,
         )
+    }
+
+    override fun postValiderSteg(behandling: Behandling) {
+        if (behandling.opprettetÅrsak.erOmregningsårsak() && behandling.resultat != FORTSATT_INNVILGET) {
+            throw Feil("Behandling ${behandling.id} er omregningssak men er ikke fortsatt innvilget.")
+        }
     }
 
     override fun stegType(): StegType {
