@@ -565,6 +565,5 @@ private fun SanityBegrunnelse.matcherPerioderesultat(
 
     val reduksjonMatcher = erReduksjon == erBegrunnelseReduksjon
     val økningMatcher = erØkning == erBegrunnelseØkning
-    val matcherPeriodeResultat = reduksjonMatcher && økningMatcher
-    return matcherPeriodeResultat
+    return reduksjonMatcher && økningMatcher
 }
