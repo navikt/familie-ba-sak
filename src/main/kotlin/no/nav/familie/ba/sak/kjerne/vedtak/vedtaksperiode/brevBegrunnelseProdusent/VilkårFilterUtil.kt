@@ -5,13 +5,13 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilUtdypendeVilkårsvurderinger
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.BegrunnelseGrunnlagForPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
-    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
+    begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
     person: Person,
     behandlingUnderkategori: BehandlingUnderkategori,
 ): Boolean {
@@ -65,7 +65,7 @@ private fun Collection<UtdypendeVilkårsvurdering>.erLik(
 }
 
 private fun finnUtgjørendeVilkår(
-    begrunnelseGrunnlag: BegrunnelseGrunnlagForPeriode,
+    begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
     vilkårForPerson: Set<Vilkår>,
 ): Set<VilkårResultatForVedtaksperiode> {
     val oppfylteVilkårResultaterDennePerioden =
