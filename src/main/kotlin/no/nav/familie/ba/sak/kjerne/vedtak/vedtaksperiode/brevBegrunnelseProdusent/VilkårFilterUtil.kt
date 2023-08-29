@@ -1,10 +1,7 @@
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilUtdypendeVilkårsvurderinger
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -12,20 +9,10 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
-    person: Person,
-    behandlingUnderkategori: BehandlingUnderkategori,
 ): Boolean {
     if (this.vilkår.isEmpty()) return false
-
-    val vilkårForPerson = Vilkår.hentVilkårFor(
-        personType = person.type,
-        fagsakType = FagsakType.NORMAL,
-        behandlingUnderkategori = behandlingUnderkategori,
-    )
-
     val utgjørendeVilkårResultater = finnUtgjørendeVilkår(
         begrunnelseGrunnlag = begrunnelseGrunnlag,
-        vilkårForPerson = vilkårForPerson,
     )
 
     return this.erLikVilkårOgUtdypendeVilkårIPeriode(
@@ -66,7 +53,6 @@ private fun Collection<UtdypendeVilkårsvurdering>.erLik(
 
 private fun finnUtgjørendeVilkår(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
-    vilkårForPerson: Set<Vilkår>,
 ): Set<VilkårResultatForVedtaksperiode> {
     val oppfylteVilkårResultaterDennePerioden =
         begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
@@ -83,13 +69,21 @@ private fun finnUtgjørendeVilkår(
             oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
         )
 
-        oppfylteVilkårResultaterDennePerioden
+        val vilkårTapt = hentVilkårTapt(
+            oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
+            oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
+        )
+
+        val vilkårResultaterTjentEllerEndret = begrunnelseGrunnlag.dennePerioden.vilkårResultater
             .filter { it.vilkårType in vilkårTjentEllerEndretUtdypende }
+        val vilkårResultaterTapt =
+            begrunnelseGrunnlag.forrigePeriode?.vilkårResultater?.filter { it.vilkårType in vilkårTapt } ?: emptySet()
+
+        vilkårResultaterTjentEllerEndret + vilkårResultaterTapt
     } else {
         val vilkårTapt = hentVilkårTapt(
             oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
             oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
-            vilkårForPerson,
         )
 
         oppfylteVilkårResultaterForrigePeriode.filter { it.vilkårType in vilkårTapt }
@@ -111,9 +105,6 @@ private fun hentOppfylteVilkårMedEndretUtdypende(
     }.map { it.vilkårType }
 }
 
-private fun VilkårResultatForVedtaksperiode.erDeltBosted() =
-    UtdypendeVilkårsvurdering.DELT_BOSTED in this.utdypendeVilkårsvurderinger
-
 private fun hentVilkårTjent(
     oppfylteVilkårResultaterDennePerioden: List<VilkårResultatForVedtaksperiode>,
     oppfylteVilkårResultaterForrigePeriode: List<VilkårResultatForVedtaksperiode>,
@@ -127,13 +118,10 @@ private fun hentVilkårTjent(
 private fun hentVilkårTapt(
     oppfylteVilkårResultaterDennePerioden: List<VilkårResultatForVedtaksperiode>,
     oppfylteVilkårResultaterForrigePeriode: List<VilkårResultatForVedtaksperiode>,
-    vilkårForPerson: Set<Vilkår>,
 ): Set<Vilkår> {
-    val manglendeVilkårDennePerioden =
-        vilkårForPerson - oppfylteVilkårResultaterDennePerioden.map { it.vilkårType }.toSet()
+    val oppfyltDennePerioden = oppfylteVilkårResultaterDennePerioden.map { it.vilkårType }.toSet()
 
-    val manglendeVilkårForrigePerioden =
-        vilkårForPerson - oppfylteVilkårResultaterForrigePeriode.map { it.vilkårType }.toSet()
+    val oppfyltForrigePeriode = oppfylteVilkårResultaterForrigePeriode.map { it.vilkårType }.toSet()
 
-    return manglendeVilkårDennePerioden - manglendeVilkårForrigePerioden
+    return oppfyltForrigePeriode - oppfyltDennePerioden
 }
