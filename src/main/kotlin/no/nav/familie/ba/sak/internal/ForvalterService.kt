@@ -208,11 +208,37 @@ class ForvalterService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
         if (tilkjentYtelse.behandling.aktiv == false) throw Exception("Behandling $behandlingId er ikke den aktive behandlingen på fagsaken")
         val validertUtbetalingsoppdrag = validerOpphørsdatoIUtbetalingsoppdrag(tilkjentYtelse)
-        if (!validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer && validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag != null) {
+        if (!validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer && validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag != null && detFinnesUtbetalingsperioderMedFeilOgTilhørendeKorrigerteUtbetalingsperioder(
+                validertUtbetalingsoppdrag,
+            )
+        ) {
             secureLogger.info("Iverksetter korrigert utbetalingsoppdrag ${validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag} for behandling $behandlingId")
             økonomiKlient.iverksettOppdragPåNytt(validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag, 1)
+            secureLogger.info("Oppdaterer TilkjentYtelse med korrigert utbetalingsoppdrag ${validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag} for behandling $behandlingId")
+            beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
+                tilkjentYtelse.behandling,
+                validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag,
+            )
         } else {
-            throw Exception("Nytt utbetalingsoppdrag ikke sendt for behandling $behandlingId. HarKorrekteOpphørsdatoer: ${validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer}, Nytt utbetalingsoppdrag: ${validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag}")
+            throw Exception("Nytt utbetalingsoppdrag ikke sendt for behandling $behandlingId. HarKorrekteOpphørsdatoer: ${validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer}, Nytt utbetalingsoppdrag: ${validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag}, ")
+        }
+    }
+
+    private fun detFinnesUtbetalingsperioderMedFeilOgTilhørendeKorrigerteUtbetalingsperioder(validertUtbetalingsoppdrag: ValidertUtbetalingsoppdrag): Boolean {
+        if (
+            !validertUtbetalingsoppdrag.korrigerteUtbetalingsperioder.isNullOrEmpty() && !validertUtbetalingsoppdrag.utbetalingsperioderMedFeilOpphørsdato.isNullOrEmpty() &&
+            // De korrigerte utbetalingsperiodene matcher utbetalingsperiodene med feil
+            validertUtbetalingsoppdrag.korrigerteUtbetalingsperioder.size == validertUtbetalingsoppdrag.utbetalingsperioderMedFeilOpphørsdato.size &&
+            validertUtbetalingsoppdrag.utbetalingsperioderMedFeilOpphørsdato.all { utbetalingsperiodeMedFeil ->
+                validertUtbetalingsoppdrag.korrigerteUtbetalingsperioder.any { korrigertUtbetalingsperiode ->
+                    korrigertUtbetalingsperiode.periodeId == utbetalingsperiodeMedFeil.periodeId
+                }
+            }
+
+        ) {
+            return true
+        } else {
+            throw Exception("Korrigerte utbetalingsperioder matcher ikke utbetalingsperiodene med feil. UtbetalingsperioderMedFeil: ${validertUtbetalingsoppdrag.utbetalingsperioderMedFeilOpphørsdato}, KorrigerteUtbetalingsperioder: ${validertUtbetalingsoppdrag.korrigerteUtbetalingsperioder}")
         }
     }
 
