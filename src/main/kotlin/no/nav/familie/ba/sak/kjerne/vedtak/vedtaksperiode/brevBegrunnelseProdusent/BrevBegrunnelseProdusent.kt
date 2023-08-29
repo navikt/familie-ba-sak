@@ -76,7 +76,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
             begrunnelseGrunnlag = begrunnelseGrunnlag,
             sanityBegrunnelser = sanityBegrunnelser,
             person = person,
-            periodeFom = this.fom,
+            vedtaksperiode = this,
             fagsakType = behandlingsGrunnlagForVedtaksperioder.fagsakType,
         )
 
@@ -114,13 +114,16 @@ private fun hentStandardBegrunnelser(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     person: Person,
-    periodeFom: LocalDate?,
+    vedtaksperiode: UtvidetVedtaksperiodeMedBegrunnelser,
     fagsakType: FagsakType,
 ): Set<Standardbegrunnelse> {
     val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
 
     val relevantePeriodeResultater =
         hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
+
+    val relevantePeriodeResultaterForrigePeriode =
+        hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode)
 
     val begrunnelserFiltrertPåPeriodetype = sanityBegrunnelser.filterValues {
         it.periodeResultat in relevantePeriodeResultater
@@ -131,11 +134,13 @@ private fun hentStandardBegrunnelser(
     }
 
     val filtrertPåVilkår = filtrertPåRolleOgPeriodetype.filterValues {
-        it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag)
+        ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT !in it.ovrigeTriggere &&
+            it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag)
     }
 
-    val relevantePeriodeResultaterForrigePeriode =
-        hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode)
+    val filtrertPåReduksjonFraForrigeBehandling = filtrertPåRolleOgPeriodetype.filterValues {
+        it.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag)
+    }
 
     val begrunnelserFiltrertPåPeriodetypeForrigePeriode = sanityBegrunnelser.filterValues {
         it.periodeResultat in relevantePeriodeResultaterForrigePeriode
@@ -160,13 +165,32 @@ private fun hentStandardBegrunnelser(
 
     val filtrertPåHendelser = filtrertPåRolleOgPeriodetype.filtrerPåHendelser(
         begrunnelseGrunnlag,
-        periodeFom,
+        vedtaksperiode.fom,
     )
 
     return filtrertPåVilkår.keys.toSet() +
+        filtrertPåReduksjonFraForrigeBehandling.keys.toSet() +
         filtrertPåEndretUtbetaling.keys.toSet() +
         filtrertPåEtterEndretUtbetaling.keys.toSet() +
         filtrertPåHendelser.keys.toSet()
+}
+
+private fun SanityBegrunnelse.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
+    if (begrunnelseGrunnlag !is BegrunnelseGrunnlagForPeriodeMedReduksjonPåTversAvBehandlinger) {
+        return false
+    }
+
+    val vilkårDenneBehandlingen = begrunnelseGrunnlag.dennePerioden.vilkårResultater.map { it.vilkårType }.toSet()
+    val vilkårForrigeBehandling =
+        begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.vilkårResultater?.map { it.vilkårType }?.toSet()
+            ?: emptySet()
+
+    val vilkårMistetSidenForrigeBehandling = vilkårForrigeBehandling - vilkårDenneBehandlingen
+    val begrunnelseGjelderReduksjonPåTversAvBehandlinger =
+        ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT in this.ovrigeTriggere
+    val begrunnelseGjelderMistedeVilkår = this.vilkår.all { it in vilkårMistetSidenForrigeBehandling }
+
+    return begrunnelseGjelderReduksjonPåTversAvBehandlinger && begrunnelseGjelderMistedeVilkår
 }
 
 private fun hentEØSStandardBegrunnelser(
