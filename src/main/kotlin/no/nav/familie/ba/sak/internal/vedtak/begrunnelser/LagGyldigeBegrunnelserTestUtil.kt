@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.internal.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -144,7 +145,7 @@ private fun hentAndelRader(andeler: List<AndelTilkjentYtelse>?): String =
       | ${it.aktør.aktørId} |${it.behandlingId}|${
             it.stønadFom.førsteDagIInneværendeMåned().tilddMMyyyy()
         }|${
-            it.stønadTom.førsteDagIInneværendeMåned().tilddMMyyyy()
+            it.stønadTom.sisteDagIInneværendeMåned().tilddMMyyyy()
         }|${it.kalkulertUtbetalingsbeløp}| ${it.type} | ${it.prosent} |"""
     } ?: ""
 
