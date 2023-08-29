@@ -13,7 +13,7 @@ Egenskap: Reduksjon utvidet
       | 1            | 1234    | SØKER      | 01.09.1984  |
       | 1            | 4567    | BARN       | 02.02.2015  |
 
-  Scenario: Skal håndere reduksjon utdvidet
+  Scenario: Skal håndere reduksjon utvidet
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
