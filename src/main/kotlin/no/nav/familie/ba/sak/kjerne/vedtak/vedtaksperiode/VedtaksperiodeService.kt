@@ -61,7 +61,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.sorter
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.genererVedtaksperioder
@@ -453,6 +456,22 @@ class VedtaksperiodeService(
         return vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }
 
+    fun hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId: Long): List<RestUtvidetVedtaksperiodeMedBegrunnelser> {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+
+        return if (behandling.status != BehandlingStatus.AVSLUTTET) {
+            val utvidetVedtaksperiodeMedBegrunnelser = hentUtvidetVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId),
+                personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId),
+            )
+            utvidetVedtaksperiodeMedBegrunnelser
+                .sorter()
+                .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }
+        } else {
+            emptyList()
+        }
+    }
+
     fun hentUtvidetVedtaksperiodeMedBegrunnelser(
         vedtak: Vedtak,
         personopplysningGrunnlag: PersonopplysningGrunnlag? = null,
@@ -503,6 +522,10 @@ class VedtaksperiodeService(
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
         val kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id)
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+
+        val behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder()
+        val behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder()
 
         return utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
             val kompetanserIPeriode = kompetanser.hentIPeriode(
@@ -520,12 +543,9 @@ class VedtaksperiodeService(
 
             utvidetVedtaksperiodeMedBegrunnelser.copy(
                 gyldigeBegrunnelser = if (featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)) {
-                    val forrigeBehandling =
-                        behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-
                     utvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
-                        behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
-                        behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
+                        behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
+                        behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEØSBegrunnelser,
                         behandlingUnderkategori = behandling.underkategori,

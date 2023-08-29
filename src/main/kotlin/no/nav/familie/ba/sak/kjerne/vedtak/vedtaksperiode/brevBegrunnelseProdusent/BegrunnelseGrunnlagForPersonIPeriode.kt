@@ -48,6 +48,11 @@ data class BegrunnelseGrunnlagForPersonIPeriode(
 
         return !erEndretUtbetaling || !erEndretUtbetalingPåNullProsent || erÅrsakDeltBosted
     }
+
+    companion object {
+        fun tomPeriode(person: Person) =
+            BegrunnelseGrunnlagForPersonIPeriode(person = person, vilkårResultater = emptyList(), andeler = emptyList())
+    }
 }
 
 fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagTidslinjer(): Map<Person, Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>> {

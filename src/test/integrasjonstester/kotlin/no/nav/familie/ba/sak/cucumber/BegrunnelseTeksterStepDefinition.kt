@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -36,6 +37,7 @@ import java.time.LocalDate
 
 class BegrunnelseTeksterStepDefinition {
 
+    private var fagsaker: Map<Long, Fagsak> = emptyMap()
     private var behandlinger = mutableMapOf<Long, Behandling>()
     private var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
     private var vedtaksliste = mutableListOf<Vedtak>()
@@ -52,6 +54,14 @@ class BegrunnelseTeksterStepDefinition {
     private var utvidetVedtaksperiodeMedBegrunnelser = mutableListOf<UtvidetVedtaksperiodeMedBegrunnelser>()
 
     /**
+     * Mulige verdier: | FagsakId | Fagsaktype |
+     */
+    @Gitt("følgende fagsaker for begrunnelse")
+    fun `følgende fagsaker for begrunnelse`(dataTable: DataTable) {
+        fagsaker = lagFagsaker(dataTable)
+    }
+
+    /**
      * Mulige felter:
      * | BehandlingId | FagsakId | ForrigeBehandlingId |
      */
@@ -62,7 +72,7 @@ class BegrunnelseTeksterStepDefinition {
             behandlinger = behandlinger,
             behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
             vedtaksListe = vedtaksliste,
-            fagsaker = emptyMap(),
+            fagsaker = fagsaker,
         )
     }
 
