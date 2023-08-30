@@ -148,9 +148,6 @@ private fun hentStandardBegrunnelser(
         begrunnelse.erGjeldendeForSmåbarnstillegg(begrunnelseGrunnlag)
     }
 
-    val relevantePeriodeResultaterForrigePeriode =
-        hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode)
-
     val begrunnelserFiltrertPåPeriodetypeForrigePeriode = sanityBegrunnelser.filterValues {
         it.periodeResultat in relevantePeriodeResultaterForrigePeriode
     }
