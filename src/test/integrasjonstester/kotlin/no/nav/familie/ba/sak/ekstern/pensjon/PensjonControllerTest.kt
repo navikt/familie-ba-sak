@@ -27,7 +27,7 @@ class PensjonControllerTest : WebSpringAuthTestRunner() {
             hentUrl("/api/ekstern/pensjon/bestill-personer-med-barnetrygd/2023"),
             HttpMethod.GET,
             entity,
-            String::class.java
+            String::class.java,
         )
         assertEquals(UUID.fromString(responseEntity.body.toString()).toString(), responseEntity.body.toString())
     }
