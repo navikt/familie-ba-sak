@@ -120,9 +120,11 @@ class OpplysningspliktTest(
                 RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
 
-        val vedtaksperiode =
-            behandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
-                .first()
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+            behandlingEtterVurderTilbakekreving.data!!.behandlingId,
+        )
+
+        val vedtaksperiode = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiode.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
