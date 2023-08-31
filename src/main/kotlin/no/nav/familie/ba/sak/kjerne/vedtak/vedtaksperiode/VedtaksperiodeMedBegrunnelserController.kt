@@ -48,7 +48,7 @@ class VedtaksperiodeMedBegrunnelserController(
         vedtaksperiodeId: Long,
         @RequestBody
         restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> {
         val behandlingId = vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId)
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -56,20 +56,26 @@ class VedtaksperiodeMedBegrunnelserController(
             handling = OPPDATERE_BEGRUNNELSER_HANDLING,
         )
 
-        val standardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull {
+        val standardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
             IVedtakBegrunnelse.konverterTilEnumVerdi(it)
         }
 
         val nasjonalebegrunnelser = standardbegrunnelser.filterIsInstance<Standardbegrunnelse>()
         val eøsStandardbegrunnelser = standardbegrunnelser.filterIsInstance<EØSStandardbegrunnelse>()
 
-        val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId,
             standardbegrunnelserFraFrontend = nasjonalebegrunnelser,
             eøsStandardbegrunnelserFraFrontend = eøsStandardbegrunnelser,
         )
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+                    behandlingId,
+                ),
+            ),
+        )
     }
 
     @PutMapping("/fritekster/{vedtaksperiodeId}")
