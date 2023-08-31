@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.util.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.konkatenerTidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.ogSenere
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.byggVilkårsvurderingTidslinjer
@@ -83,8 +85,8 @@ internal class TidslinjerTest {
         )
 
         assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
-        assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
-        assertEquals(barn2Result, vilkårsvurderingTidslinjer.forBarn(barn2).regelverkResultatTidslinje)
+        assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje.kombinertResultat)
+        assertEquals(barn2Result, vilkårsvurderingTidslinjer.forBarn(barn2).regelverkResultatTidslinje.kombinertResultat)
     }
 
     @Test
@@ -119,7 +121,7 @@ internal class TidslinjerTest {
         )
 
         assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
-        assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
+        assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje.kombinertResultat)
     }
 
     @Test
@@ -169,7 +171,7 @@ internal class TidslinjerTest {
 
         val barn1Result = "E".tilRegelverkResultatTidslinje(mai(2020))
 
-        assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
+        assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje.kombinertResultat)
     }
 
     @Test
@@ -187,7 +189,7 @@ internal class TidslinjerTest {
 
         val barn1Result = "N".tilRegelverkResultatTidslinje(mai(2020))
 
-        assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
+        assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje.kombinertResultat)
     }
 
     @Test
@@ -207,7 +209,7 @@ internal class TidslinjerTest {
 
         val barn1Result = "!".tilRegelverkResultatTidslinje(mai(2020))
 
-        assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
+        assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje.kombinertResultat)
     }
 
     @Test
@@ -300,7 +302,7 @@ internal class TidslinjerTest {
         val forventetRegelverkResultat =
             "NNNNNNNNNNNNNNNNEEEEEE".tilRegelverkResultatTidslinje(feb(2020))
 
-        assertEquals(forventetRegelverkResultat, barnaRegelverkTidslinjer[barn.aktør])
+        assertEquals(forventetRegelverkResultat, barnaRegelverkTidslinjer[barn.aktør]?.kombinertResultat)
         assertEquals(1, kompetanser.size)
         assertEquals(YearMonth.of(2021, 6), kompetanser.first().fom)
         assertEquals(YearMonth.of(2021, 11), kompetanser.first().tom)
@@ -355,3 +357,7 @@ internal class TidslinjerTest {
 
 fun VilkårsvurderingTidslinjer.barnasRegelverkResultatTidslinjer() = this.barnasTidslinjer()
     .mapValues { (_, barnetsTidslinjer) -> barnetsTidslinjer.regelverkResultatTidslinje }
+
+
+private val Tidslinje<KombinertRegelverkResultat, Måned>.kombinertResultat: Tidslinje<RegelverkResultat, Måned>
+    get() = map { it?.kombinertResultat }

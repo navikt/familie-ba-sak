@@ -59,8 +59,7 @@ class VilkårsvurderingTidslinjer(
 
     fun forBarn(barn: Person) = barnasTidslinjer[barn.aktør]!!
 
-    fun barnasTidslinjer(): Map<Aktør, BarnetsTidslinjer> =
-        barnasTidslinjer.entries.associate { it.key to it.value }
+    fun barnasTidslinjer(): Map<Aktør, BarnetsTidslinjer> = barnasTidslinjer
 
     class SøkersTidslinjer(
         tidslinjer: VilkårsvurderingTidslinjer,
@@ -114,7 +113,10 @@ class VilkårsvurderingTidslinjer(
 
         val regelverkResultatTidslinje = egetRegelverkResultatTidslinje
             .kombinerMed(søkersTidslinje.regelverkResultatTidslinje) { barnetsResultat, søkersResultat ->
-                barnetsResultat.kombinerMed(søkersResultat)
+                KombinertRegelverkResultat(
+                    barnetsResultat = barnetsResultat,
+                    søkersResultat = søkersResultat
+                )
             }
             // Barnets egne tidslinjer kan på dette tidspunktet strekke seg 18 år frem i tid,
             // og mye lenger enn søkers regelverk-tidslinje, som skal være begrensningen. Derfor besjærer vi mot den

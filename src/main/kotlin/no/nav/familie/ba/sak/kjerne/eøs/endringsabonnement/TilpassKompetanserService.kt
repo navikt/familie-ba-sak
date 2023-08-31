@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.replaceLast
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.EndretUtbetalingAndelTidslinjeService
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.KombinertRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.tilBarnasHarEtterbetaling3ÅrTidslinjer
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -102,7 +102,7 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
 
 fun tilpassKompetanserTilRegelverk(
     gjeldendeKompetanser: Collection<Kompetanse>,
-    barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat, Måned>>,
+    barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<KombinertRegelverkResultat, Måned>>,
     barnasHarEtterbetaling3ÅrTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
 ): Collection<Kompetanse> {
     val barnasEøsRegelverkTidslinjer = barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer()
@@ -120,15 +120,15 @@ fun tilpassKompetanserTilRegelverk(
         .tilSkjemaer()
 }
 
-fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId: BehandlingId): Map<Aktør, Tidslinje<RegelverkResultat, Måned>> =
+fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId: BehandlingId) =
     this.hentTidslinjerThrows(behandlingId).barnasTidslinjer()
         .mapValues { (_, tidslinjer) ->
             tidslinjer.regelverkResultatTidslinje
         }
 
-private fun Map<Aktør, Tidslinje<RegelverkResultat, Måned>>.tilBarnasEøsRegelverkTidslinjer() =
+private fun Map<Aktør, Tidslinje<KombinertRegelverkResultat, Måned>>.tilBarnasEøsRegelverkTidslinjer() =
     this.mapValues { (_, tidslinjer) ->
-        tidslinjer.map { it?.regelverk }
+        tidslinjer.map { it?.barnetsResultat?.regelverk }
             .filtrer { it == Regelverk.EØS_FORORDNINGEN }
             .filtrerIkkeNull()
             .forlengFremtidTilUendelig(MånedTidspunkt.nå())
