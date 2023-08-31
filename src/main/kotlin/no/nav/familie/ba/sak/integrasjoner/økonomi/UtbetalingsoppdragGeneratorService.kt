@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -16,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,6 +32,7 @@ class UtbetalingsoppdragGeneratorService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
     private val beregningService: BeregningService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun genererUtbetalingsoppdrag(
@@ -43,7 +47,7 @@ class UtbetalingsoppdragGeneratorService(
             forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minByOrNull { it.stønadFom }?.stønadFom,
         )
         val sisteAndelPerKjede = hentSisteAndelTilkjentYtelse(vedtak.behandling.fagsak)
-        return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+        val beregnetUtbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
             vedtak = vedtak,
             forrigeTilkjentYtelse = forrigeTilkjentYtelse,
@@ -52,6 +56,34 @@ class UtbetalingsoppdragGeneratorService(
             erSimulering = erSimulering,
             endretMigreringsDato = endretMigreringsDato,
         )
+
+        if (!erSimulering && featureToggleService.isEnabled(FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR, false)) {
+            oppdaterTilkjentYtelse(nyTilkjentYtelse, beregnetUtbetalingsoppdrag)
+        }
+
+        return beregnetUtbetalingsoppdrag
+    }
+
+    private fun oppdaterTilkjentYtelse(
+        tilkjentYtelse: TilkjentYtelse,
+        beregnetUtbetalingsoppdrag: BeregnetUtbetalingsoppdragLongId,
+    ) {
+        tilkjentYtelse.utbetalingsoppdrag =
+            objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag.utbetalingsoppdrag)
+        val andelerPåId = beregnetUtbetalingsoppdrag.andeler.associateBy { it.id }
+        val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
+        val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
+        if (beregnetUtbetalingsoppdrag.andeler.size != andelerSomSkalSendesTilOppdrag.size) {
+            error("Antallet andeler med oppdatert periodeOffset, forrigePeriodeOffset og kildeBehandlingId fra ny generator skal være likt antallet andeler med kalkulertUtbetalingsbeløp != 0. Generator gir ${beregnetUtbetalingsoppdrag.andeler.size} andeler men det er ${andelerSomSkalSendesTilOppdrag.size} andeler med kalkulertUtbetalingsbeløp != 0")
+        }
+        andelerSomSkalSendesTilOppdrag.forEach { andel ->
+            val andelMedOffset = andelerPåId[andel.id]
+                ?: error("Feil ved oppdaterig av offset på andeler. Finner ikke andel med id ${andel.id} blandt andelene med oppdatert offset fra ny generator. Ny generator returnerer andeler med ider [${andelerPåId.values.map { it.id }}]")
+            andel.periodeOffset = andelMedOffset.periodeId
+            andel.forrigePeriodeOffset = andelMedOffset.forrigePeriodeId
+            andel.kildeBehandlingId = andelMedOffset.kildeBehandlingId
+        }
+        tilkjentYtelseRepository.save(tilkjentYtelse)
     }
 
     private fun hentForrigeTilkjentYtelse(behandling: Behandling): TilkjentYtelse? =

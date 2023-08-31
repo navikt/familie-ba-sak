@@ -22,6 +22,7 @@ class FeatureToggleConfig {
 
         // Ny utbetalingsgenerator
         const val KONTROLLER_NY_UTBETALINGSGENERATOR = "familie.ba.sak.kontroller-ny-utbetalingsgenerator"
+        const val BRUK_NY_UTBETALINGSGENERATOR = "familie.ba.sak.bruk-ny-utbetalingsgenerator"
     }
 }
 
