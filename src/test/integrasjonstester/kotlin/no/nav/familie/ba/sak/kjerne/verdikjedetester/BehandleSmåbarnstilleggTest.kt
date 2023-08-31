@@ -250,11 +250,13 @@ class BehandleSmåbarnstilleggTest(
             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
         )
 
-        val vedtaksperiodeId =
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
-                .first()
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+        )
+
+        val vedtaksperiode = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
-            vedtaksperiodeId = vedtaksperiodeId.id,
+            vedtaksperiodeId = vedtaksperiode.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
                     Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),

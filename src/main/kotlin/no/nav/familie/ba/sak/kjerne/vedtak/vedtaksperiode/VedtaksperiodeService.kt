@@ -453,7 +453,7 @@ class VedtaksperiodeService(
     fun hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId: Long): List<RestUtvidetVedtaksperiodeMedBegrunnelser> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        return if (behandling.status != BehandlingStatus.AVSLUTTET) {
+        val vedtaksperioder = if (behandling.status != BehandlingStatus.AVSLUTTET) {
             val utvidetVedtaksperiodeMedBegrunnelser = hentUtvidetVedtaksperiodeMedBegrunnelser(
                 vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId),
                 personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId),
@@ -463,6 +463,16 @@ class VedtaksperiodeService(
                 .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }
         } else {
             emptyList()
+        }
+
+        val skalMinimeres = behandling.status != BehandlingStatus.UTREDES
+
+        return if (skalMinimeres) {
+            vedtaksperioder
+                .filter { it.begrunnelser.isNotEmpty() }
+                .map { it.copy(gyldigeBegrunnelser = emptyList()) }
+        } else {
+            vedtaksperioder
         }
     }
 

@@ -178,7 +178,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             lagToken = ::token,
             brevmalService = brevmalService,
-
+            vedtaksperiodeService = vedtaksperiodeService,
         )
     }
 
@@ -214,7 +214,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             lagToken = ::token,
             brevmalService = brevmalService,
-
+            vedtaksperiodeService = vedtaksperiodeService,
         )
     }
 }
