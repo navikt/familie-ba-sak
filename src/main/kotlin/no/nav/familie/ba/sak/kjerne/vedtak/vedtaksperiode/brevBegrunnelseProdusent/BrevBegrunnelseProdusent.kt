@@ -215,10 +215,8 @@ private fun hentEØSStandardBegrunnelser(
         it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag)
     }
 
-    val filtrertPåKompetanse = begrunnelserFiltrertPåPeriodetype.filterValues {
-        it.erLikKompetanseIPeriode(
-            begrunnelseGrunnlag,
-        )
+    val filtrertPåKompetanse = begrunnelserFiltrertPåPeriodetype.filterValues { begrunnelse ->
+        erEndringIKompetanse(begrunnelseGrunnlag) && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
     }
 
     return filtrertPåVilkår.keys.toSet() +
@@ -591,3 +589,7 @@ private fun SanityBegrunnelse.matcherPerioderesultat(
     val økningMatcher = erØkning == erBegrunnelseØkning
     return reduksjonMatcher && økningMatcher
 }
+
+private fun erEndringIKompetanse(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) =
+    begrunnelseGrunnlag.dennePerioden.kompetanse !=
+        begrunnelseGrunnlag.forrigePeriode?.kompetanse
