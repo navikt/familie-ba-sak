@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
@@ -48,6 +49,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
     @Autowired private val stegService: StegService,
     @Autowired private val featureToggleService: FeatureToggleService,
     @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
 ) : AbstractVerdikjedetest() {
 
     @BeforeEach
@@ -171,11 +173,13 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
         )
 
-        val vedtaksperiodeId =
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
-                .first()
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+        )
+
+        val vedtaksperiode = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
-            vedtaksperiodeId = vedtaksperiodeId.id,
+            vedtaksperiodeId = vedtaksperiode.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
                     Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
@@ -352,12 +356,14 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
         )
 
-        val vedtaksperiodeId =
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
-                .first()
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+        )
+
+        val vedtaksperiode = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
 
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
-            vedtaksperiodeId = vedtaksperiodeId.id,
+            vedtaksperiodeId = vedtaksperiode.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
                     Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),

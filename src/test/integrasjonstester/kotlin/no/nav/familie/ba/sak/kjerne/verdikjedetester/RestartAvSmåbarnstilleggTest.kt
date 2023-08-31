@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
@@ -61,6 +62,7 @@ class RestartAvSmåbarnstilleggTest(
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val autovedtakSatsendringService: AutovedtakSatsendringService,
     @Autowired private val featureToggleService: FeatureToggleService,
+    @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
@@ -463,9 +465,12 @@ class RestartAvSmåbarnstilleggTest(
                 RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
 
-        val utvidetVedtaksperiodeMedBegrunnelser =
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
-                .first()
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+        )
+
+        val utvidetVedtaksperiodeMedBegrunnelser = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
+
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
@@ -474,7 +479,7 @@ class RestartAvSmåbarnstilleggTest(
         )
         if (skalBegrunneSmåbarnstillegg) {
             val småbarnstilleggVedtaksperioder =
-                restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.filter {
+                vedtaksperioderMedBegrunnelser.filter {
                     it.utbetalingsperiodeDetaljer.filter { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.ytelseType == YtelseType.SMÅBARNSTILLEGG }
                         .isNotEmpty()
                 }

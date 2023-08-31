@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.lang.IllegalArgumentException
 import java.time.LocalDate
-import java.util.UUID
 
 @RestController
 @RequestMapping("/api/ekstern/pensjon")
@@ -143,7 +142,7 @@ class PensjonController(private val pensjonService: PensjonService) {
     fun bestillPersonerMedBarnetrygdForGittÅrPåKafka(
         @PathVariable
         år: Int,
-    ): ResponseEntity<UUID> {
+    ): ResponseEntity<String> {
         val minÅr: Long = 1970
         val maxÅr: Long = 2300
         if (år in minÅr..maxÅr) {
