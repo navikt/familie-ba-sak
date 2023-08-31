@@ -9,6 +9,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilIKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -28,6 +31,8 @@ fun lagGyldigeBegrunnelserTest(
     endredeUtbetalinger: List<EndretUtbetalingAndel>,
     endredeUtbetalingerForrigeBehandling: List<EndretUtbetalingAndel>?,
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
+    kompetanse: Collection<Kompetanse>,
+    kompetanseForrigeBehandling: Collection<Kompetanse>?,
 ) = """
 # language: no
 # encoding: UTF-8
@@ -45,7 +50,8 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     hentTekstForVilkårresultater(personResultaterForrigeBehandling, forrigeBehandling?.id) +
     hentTekstForVilkårresultater(personResultater, behandling.id) +
     hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
-    hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) + """
+    hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
+    hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
     Når begrunnelsetekster genereres for behandling ${behandling.id}""" +
     hentTekstForVedtaksperioder(vedtaksperioder)
@@ -152,13 +158,21 @@ private fun hentAndelRader(andeler: List<AndelTilkjentYtelse>?): String =
 fun hentTekstForEndretUtbetaling(
     endredeUtbetalinger: List<EndretUtbetalingAndel>,
     endredeUtbetalingerForrigeBehandling: List<EndretUtbetalingAndel>?,
-) =
-    """
+): String {
+    val rader = hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
+        hentEndretUtbetalingRader(endredeUtbetalinger)
+
+    return if (rader.isEmpty()) {
+        ""
+    } else {
+        """
 
     Og med endrede utbetalinger for begrunnelse
       | AktørId  | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |""" +
-        hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
-        hentEndretUtbetalingRader(endredeUtbetalinger)
+            hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
+            hentEndretUtbetalingRader(endredeUtbetalinger)
+    }
+}
 
 private fun hentEndretUtbetalingRader(endredeUtbetalinger: List<EndretUtbetalingAndel>?): String =
     endredeUtbetalinger
@@ -171,6 +185,53 @@ private fun hentEndretUtbetalingRader(endredeUtbetalinger: List<EndretUtbetaling
             }|${
                 it.tom.førsteDagIInneværendeMåned().tilddMMyyyy()
             }|${it.årsak} | ${it.prosent} |"""
+        } ?: ""
+
+fun hentTekstForKompetanse(
+    kompetanse: Collection<Kompetanse>,
+    kompetanseForrigeBehandling: Collection<Kompetanse>?,
+): String {
+    val rader = hentKompetanseRader(kompetanseForrigeBehandling) +
+        hentKompetanseRader(kompetanse)
+
+    return if (rader.isEmpty()) {
+        ""
+    } else {
+        """
+
+    Og med endrede utbetalinger for begrunnelse
+      | AktørId | Fra dato | Til dato | Resultat | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |""" +
+            rader
+    }
+}
+
+private fun hentKompetanseRader(kompetanser: Collection<Kompetanse>?): String =
+    kompetanser
+        ?.map { it.tilIKompetanse() }
+        ?.filterIsInstance<UtfyltKompetanse>()
+        ?.joinToString("") { kompetanse ->
+            """
+      | ${
+                kompetanse.barnAktører.joinToString("")
+            } |${
+                kompetanse.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
+            }|${
+                kompetanse.tom?.sisteDagIInneværendeMåned()?.tilddMMyyyy() ?: ""
+            }|${
+                kompetanse.resultat
+            }|${
+                kompetanse.behandlingId
+            }|${
+                kompetanse.søkersAktivitet
+            }|${
+                kompetanse.annenForeldersAktivitet
+            }|${
+                kompetanse.søkersAktivitetsland
+            }|${
+                kompetanse.annenForeldersAktivitetsland ?: ""
+            }|${
+                kompetanse.barnetsBostedsland
+            } |"""
         } ?: ""
 
 fun hentTekstForVedtaksperioder(

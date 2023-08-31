@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -22,6 +23,7 @@ class TestVerktøyService(
     private val endretUtbetalingRepository: EndretUtbetalingAndelRepository,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val vedtakService: VedtakService,
+    private val kompetanseRepository: KompetanseRepository,
 ) {
 
     @Transactional
@@ -63,6 +65,10 @@ class TestVerktøyService(
         val endredeUtbetalingerForrigeBehandling =
             forrigeBehandling?.let { endretUtbetalingRepository.findByBehandlingId(it.id) }
 
+        val kompetanse = kompetanseRepository.finnFraBehandlingId(behandlingId)
+        val kompetanseForrigeBehandling =
+            forrigeBehandling?.let { kompetanseRepository.finnFraBehandlingId(it.id) }
+
         val vedtaksperioder = vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
             vedtakService.hentAktivForBehandlingThrows(behandlingId).id,
         )
@@ -79,6 +85,8 @@ class TestVerktøyService(
             vedtaksperioder = vedtaksperioder,
             endredeUtbetalinger = endredeUtbetalinger,
             endredeUtbetalingerForrigeBehandling = endredeUtbetalingerForrigeBehandling,
+            kompetanse = kompetanse,
+            kompetanseForrigeBehandling = kompetanseForrigeBehandling,
         )
     }
 }
