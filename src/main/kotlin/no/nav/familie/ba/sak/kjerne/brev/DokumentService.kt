@@ -232,8 +232,4 @@ class DokumentService(
                 },
         ).also { taskRepository.save(it) }
     }
-
-    companion object {
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
-    }
 }

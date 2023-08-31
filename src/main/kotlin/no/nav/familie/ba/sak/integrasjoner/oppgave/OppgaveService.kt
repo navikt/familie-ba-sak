@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
@@ -11,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåB
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
@@ -86,10 +86,7 @@ class OppgaveService(
                 fristFerdigstillelse = fristForFerdigstillelse,
                 beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
                 enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
-                behandlingstema = when (behandling.underkategori) {
-                    BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET, BehandlingUnderkategori.INSTITUSJON ->
-                        behandling.underkategori.tilOppgaveBehandlingTema().value
-                },
+                behandlingstema = behandling.tilOppgaveBehandlingTema().value,
                 behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
                 tilordnetRessurs = tilordnetNavIdent,
                 behandlesAvApplikasjon = when {
@@ -321,9 +318,7 @@ class OppgaveService(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private val oppgavetyperSomBehandlesAvBaSak = listOf(
             Oppgavetype.BehandleSak,
             Oppgavetype.GodkjenneVedtak,

@@ -10,22 +10,23 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonIkkeInnvilget
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonInnvilget
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.sammenlignUtenFomOgTom
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VedtaksperiodeGrunnlagForPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VedtaksperiodeGrunnlagForPersonVilkårInnvilget
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.erLikUtenFomOgTom
 import java.time.LocalDate
 
 fun utledEndringstidspunkt(
-    grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
-    grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
+    behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
+    behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
 ): LocalDate {
     val grunnlagTidslinjePerPerson =
-        grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson().mapValues { it.value.grunnlagForPerson }
+        behandlingsGrunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson()
+            .mapValues { it.value.vedtaksperiodeGrunnlagForPerson }
     val grunnlagTidslinjePerPersonForrigeBehandling =
-        grunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson()
-            ?.mapValues { it.value.grunnlagForPerson } ?: emptyMap()
+        behandlingsGrunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson()
+            ?.mapValues { it.value.vedtaksperiodeGrunnlagForPerson } ?: emptyMap()
 
     val erPeriodeLikSammePeriodeIForrigeBehandlingTidslinjer =
         grunnlagTidslinjePerPerson.outerJoin(grunnlagTidslinjePerPersonForrigeBehandling) { grunnlagForVedtaksperiode, grunnlagForVedtaksperiodeForrigeBehandling ->
@@ -46,8 +47,8 @@ fun utledEndringstidspunkt(
 }
 
 private fun loggEndringstidspunktOgEndringer(
-    grunnlagTidslinjePerPerson: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<GrunnlagForPerson, Måned>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<GrunnlagForPerson, Måned>>,
+    grunnlagTidslinjePerPerson: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned>>,
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned>>,
     aktørMedFørsteForandring: AktørOgRolleBegrunnelseGrunnlag?,
     datoTidligsteForskjell: LocalDate,
 ) {
@@ -64,24 +65,24 @@ private fun loggEndringstidspunktOgEndringer(
     val endringer = mutableListOf<String>()
 
     when (grunnlagIPeriodeMedEndring) {
-        is GrunnlagForPersonInnvilget -> {
-            if (grunnlagIPeriodeMedEndringForrigeBehanlding is GrunnlagForPersonInnvilget) {
-                if (grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.sammenlignUtenFomOgTom(
+        is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> {
+            if (grunnlagIPeriodeMedEndringForrigeBehanlding is VedtaksperiodeGrunnlagForPersonVilkårInnvilget) {
+                if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
                         grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode,
                     )
                 ) {
                     endringer.add("Endring i vilkårene")
                 }
-                if (grunnlagIPeriodeMedEndring.kompetanse == grunnlagIPeriodeMedEndringForrigeBehanlding.kompetanse) {
+                if (grunnlagIPeriodeMedEndring.kompetanse != grunnlagIPeriodeMedEndringForrigeBehanlding.kompetanse) {
                     endringer.add("Endring i kompetansen")
                 }
-                if (grunnlagIPeriodeMedEndring.endretUtbetalingAndel == grunnlagIPeriodeMedEndringForrigeBehanlding.endretUtbetalingAndel) {
+                if (grunnlagIPeriodeMedEndring.endretUtbetalingAndel != grunnlagIPeriodeMedEndringForrigeBehanlding.endretUtbetalingAndel) {
                     endringer.add("Endring i de endrede utbetalingene")
                 }
-                if (grunnlagIPeriodeMedEndring.overgangsstønad == grunnlagIPeriodeMedEndringForrigeBehanlding.overgangsstønad) {
+                if (grunnlagIPeriodeMedEndring.overgangsstønad != grunnlagIPeriodeMedEndringForrigeBehanlding.overgangsstønad) {
                     endringer.add("Endring i overgangsstønaden")
                 }
-                if (grunnlagIPeriodeMedEndring.andeler.toSet() == grunnlagIPeriodeMedEndringForrigeBehanlding.andeler.toSet()) {
+                if (grunnlagIPeriodeMedEndring.andeler.toSet() != grunnlagIPeriodeMedEndringForrigeBehanlding.andeler.toSet()) {
                     endringer.add("Endring i andelene")
                 }
             } else {
@@ -89,9 +90,9 @@ private fun loggEndringstidspunktOgEndringer(
             }
         }
 
-        is GrunnlagForPersonIkkeInnvilget ->
-            if (grunnlagIPeriodeMedEndringForrigeBehanlding is GrunnlagForPersonIkkeInnvilget) {
-                if (grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.sammenlignUtenFomOgTom(
+        is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
+            if (grunnlagIPeriodeMedEndringForrigeBehanlding is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget) {
+                if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
                         grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode,
                     )
                 ) {
@@ -121,12 +122,12 @@ private fun Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<Boolean, Måned>>.fi
         aktørOgRolleForVedtaksgrunnlag to førsteEndringForAktør
     }.minByOrNull { it.second }
 
-private fun GrunnlagForPerson?.erLik(
-    grunnlagForVedtaksperiodeForrigeBehandling: GrunnlagForPerson?,
+private fun VedtaksperiodeGrunnlagForPerson?.erLik(
+    grunnlagForVedtaksperiodeForrigeBehandling: VedtaksperiodeGrunnlagForPerson?,
 ): Boolean = when (this) {
-    is GrunnlagForPersonInnvilget ->
-        grunnlagForVedtaksperiodeForrigeBehandling is GrunnlagForPersonInnvilget &&
-            this.vilkårResultaterForVedtaksperiode.sammenlignUtenFomOgTom(
+    is VedtaksperiodeGrunnlagForPersonVilkårInnvilget ->
+        grunnlagForVedtaksperiodeForrigeBehandling is VedtaksperiodeGrunnlagForPersonVilkårInnvilget &&
+            this.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
                 grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode,
             ) &&
             this.kompetanse == grunnlagForVedtaksperiodeForrigeBehandling.kompetanse &&
@@ -134,8 +135,8 @@ private fun GrunnlagForPerson?.erLik(
             this.overgangsstønad == grunnlagForVedtaksperiodeForrigeBehandling.overgangsstønad &&
             this.andeler.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.andeler.toSet()
 
-    is GrunnlagForPersonIkkeInnvilget ->
-        grunnlagForVedtaksperiodeForrigeBehandling is GrunnlagForPersonIkkeInnvilget &&
+    is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
+        grunnlagForVedtaksperiodeForrigeBehandling is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget &&
             this.vilkårResultaterForVedtaksperiode.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode.toSet()
 
     null -> grunnlagForVedtaksperiodeForrigeBehandling == null

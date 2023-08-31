@@ -45,6 +45,7 @@ class KompetanseController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdaterer kompetanse",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         val barnAktører = restKompetanse.barnIdenter.map { personidentService.hentAktør(it) }
         val kompetanse = restKompetanse.tilKompetanse(barnAktører = barnAktører)
@@ -66,8 +67,9 @@ class KompetanseController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sletter kompetanse",
         )
-        kompetanseService.slettKompetanse(kompetanseId)
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
+        kompetanseService.slettKompetanse(BehandlingId(behandlingId), kompetanseId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 

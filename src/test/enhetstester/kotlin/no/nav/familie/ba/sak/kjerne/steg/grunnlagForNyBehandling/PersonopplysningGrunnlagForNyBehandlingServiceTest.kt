@@ -51,7 +51,6 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
             personidentService = personidentService,
             beregningService = beregningService,
             persongrunnlagService = persongrunnlagService,
-            featureToggleService = featureToggleService,
         ),
     )
 

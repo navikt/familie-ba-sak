@@ -99,6 +99,7 @@ class BehandlingController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "endre behandlingstema",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         val behandling = behandlingstemaService.oppdaterBehandlingstema(
             behandling = behandlingHentOgPersisterService.hent(behandlingId),

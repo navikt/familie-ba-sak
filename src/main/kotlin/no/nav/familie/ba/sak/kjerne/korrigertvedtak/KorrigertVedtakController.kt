@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.korrigertvedtak
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -41,6 +42,8 @@ class KorrigertVedtakController(
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
+
         val korrigertVedtak = korrigerVedtakRequest.tilKorrigerVedtak(behandling)
 
         korrigertVedtakService.lagreKorrigertVedtak(korrigertVedtak)
@@ -59,6 +62,8 @@ class KorrigertVedtakController(
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
+
         korrigertVedtakService.settKorrigertVedtakPåBehandlingTilInaktiv(behandling)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))

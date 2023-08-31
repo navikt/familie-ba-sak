@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
@@ -11,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -21,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -31,9 +35,11 @@ class FiltreringsreglerService(
     private val personopplysningerService: PersonopplysningerService,
     private val personidentService: PersonidentService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val localDateService: LocalDateService,
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
     private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
 ) {
 
@@ -94,6 +100,7 @@ class FiltreringsreglerService(
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
+
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasAktørId.contains(it.aktør) }
 
         val migreringsdatoPåFagsak = behandlingService.hentMigreringsdatoPåFagsak(behandling.fagsak.id)
@@ -101,6 +108,10 @@ class FiltreringsreglerService(
         val fakta = FiltreringsreglerFakta(
             mor = personopplysningGrunnlag.søker,
             morMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
+            morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato(
+                behandling,
+                barnaFraHendelse,
+            ),
             morMottarEøsBarnetrygd = behandling.kategori == BehandlingKategori.EØS,
             barnaFraHendelse = barnaFraHendelse,
             restenAvBarna = finnRestenAvBarnasPersonInfo(morsAktørId, barnaFraHendelse),
@@ -117,7 +128,7 @@ class FiltreringsreglerService(
                 barna = barnaFraHendelse,
             ),
         )
-        val evalueringer = evaluerFiltreringsregler(fakta)
+        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(fakta)
         oppdaterMetrikker(evalueringer)
 
         logger.info("Resultater fra filtreringsregler på behandling $behandling: ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")
@@ -161,9 +172,26 @@ class FiltreringsreglerService(
         }
     }
 
+    private fun morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato(
+        behandling: Behandling,
+        barnaFraHendelse: List<Person>,
+    ): Boolean {
+        val forrigeVedtatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+        return forrigeVedtatteBehandling?.let { vedtattBehandling ->
+            vilkårsvurderingRepository.findByBehandlingAndAktiv(vedtattBehandling.id)?.let { vilkårsvurdering ->
+                vilkårsvurdering.personResultater.single { personResultat -> personResultat.erSøkersResultater() }.vilkårResultater.any { vilkårResultat ->
+                    vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD && vilkårResultat.erOppfylt() && barnaFraHendelse.any { barnFraHendelse ->
+                        vilkårResultat.periodeTom?.isAfter(barnFraHendelse.fødselsdato) ?: true &&
+                            vilkårResultat.periodeFom!!.isBefore(barnFraHendelse.fødselsdato.plusYears(18))
+                    }
+                }
+            } ?: false
+        } ?: false
+    }
+
     companion object {
 
         val logger = LoggerFactory.getLogger(FiltreringsreglerService::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

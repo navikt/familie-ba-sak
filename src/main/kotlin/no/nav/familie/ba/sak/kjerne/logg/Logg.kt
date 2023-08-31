@@ -98,4 +98,5 @@ enum class LoggType(val visningsnavn: String, val tittel: String = visningsnavn)
     BREVMOTTAKER_LAGT_TIL_ELLER_FJERNET("Brevmottaker lagt til eller fjernet"),
     REFUSJON_EØS_LAGT_TIL("Refusjon EØS lagt til"),
     REFUSJON_EØS_FJERNET("Refusjon EØS fjernet"),
+    MANUELL_DØDSFALL_DATO_REGISTRERT("Manuell dødsfallsdato registrert"),
 }

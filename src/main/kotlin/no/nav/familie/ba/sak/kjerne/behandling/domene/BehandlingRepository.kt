@@ -95,12 +95,22 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     )
     fun finnBehandlingerSomHolderPåÅIverksettes(fagsakId: Long): List<Behandling>
 
+    /**
+     *  Finner behandlinger som ligger til godkjenning.
+     *  Dvs. behandlingen er på 'beslutte vedtak'-steget ('beslutte vedtak' er det siste steget på behandlingen) og dette steget er ikke utført enda
+     */
     @Query(
         """select b from Behandling b
-                           inner join BehandlingStegTilstand bst on b.id = bst.behandling.id
-                        where b.fagsak.id = :fagsakId AND bst.behandlingSteg = 'BESLUTTE_VEDTAK' AND bst.behandlingStegStatus = 'IKKE_UTFØRT'""",
+                inner join BehandlingStegTilstand bst on b.id = bst.behandling.id
+                where b.fagsak.id = :fagsakId AND bst.behandlingSteg = 'BESLUTTE_VEDTAK' AND bst.behandlingStegStatus = 'IKKE_UTFØRT' 
+                    AND bst.id = (
+                        select bst2.id
+                        from BehandlingStegTilstand bst2 
+                        where bst2.behandling.id = b.id 
+                        ORDER BY bst2.opprettetTidspunkt DESC LIMIT 1
+                    )""",
     )
-    fun finnBehandlingerSentTilGodkjenning(fagsakId: Long): List<Behandling>
+    fun finnBehandlingerSomLiggerTilGodkjenning(fagsakId: Long): List<Behandling>
 
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.status = 'AVSLUTTET' AND f.arkivert = false")
     fun findByFagsakAndAvsluttet(fagsakId: Long): List<Behandling>
@@ -142,4 +152,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
             "where b.id in (:behandlingIder) AND f.institusjon IS NOT NULL AND f.status = 'LØPENDE' ",
     )
     fun finnTssEksternIdForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
+
+    @Query(value = "SELECT b.status FROM Behandling b WHERE b.id = :behandlingId")
+    fun finnStatus(behandlingId: Long): BehandlingStatus
 }

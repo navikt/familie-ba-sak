@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -39,6 +40,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
+    @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val stegService: StegService,
     @Autowired private val efSakRestClient: EfSakRestClient,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
@@ -164,7 +166,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             lagToken = ::token,
             brevmalService = brevmalService,
-
+            vedtaksperiodeService = vedtaksperiodeService,
         )
     }
 
@@ -207,7 +209,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             lagToken = ::token,
             brevmalService = brevmalService,
-
+            vedtaksperiodeService = vedtaksperiodeService,
         )
     }
 

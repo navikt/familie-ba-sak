@@ -65,4 +65,43 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
         fom: LocalDateTime,
         tom: LocalDateTime,
     ): List<AndelTilkjentYtelsePeriode>
+
+    @Query(
+        """
+            SELECT DISTINCT p.foedselsnummer AS ident
+            FROM andel_tilkjent_ytelse aty
+                     INNER JOIN tilkjent_ytelse ty ON aty.fk_behandling_id = ty.fk_behandling_id
+                     INNER JOIN behandling b ON aty.fk_behandling_id = b.id
+                     INNER JOIN fagsak f ON b.fk_fagsak_id = f.id
+                     INNER JOIN personident p ON f.fk_aktoer_id = p.fk_aktoer_id
+            WHERE p.aktiv = true
+              AND ty.utbetalingsoppdrag is not null
+              AND EXTRACT('Year' FROM aty.stonad_fom) <= CAST(:år AS INTEGER )
+              AND EXTRACT('Year' FROM aty.stonad_tom) >= CAST(:år AS INTEGER );
+        """,
+        nativeQuery = true,
+    )
+    @Timed
+    fun finnIdenterMedLøpendeBarnetrygdForGittÅr(
+        år: Int,
+    ): List<String>
+
+    @Query(
+        """
+        WITH andeler AS (
+            SELECT
+             aty.id,
+             row_number() OVER (PARTITION BY aty.type, aty.fk_aktoer_id ORDER BY aty.periode_offset DESC) rn
+             FROM andel_tilkjent_ytelse aty
+              JOIN tilkjent_ytelse ty ON ty.id = aty.tilkjent_ytelse_id
+              JOIN Behandling b ON b.id = aty.fk_behandling_id
+             WHERE b.fk_fagsak_id = :fagsakId
+               AND ty.utbetalingsoppdrag IS NOT NULL
+               AND aty.periode_offset IS NOT NULL
+               AND b.status = 'AVSLUTTET')
+        SELECT aty.* FROM andel_tilkjent_ytelse aty WHERE id IN (SELECT id FROM andeler WHERE rn = 1)
+    """,
+        nativeQuery = true,
+    )
+    fun hentSisteAndelPerIdent(fagsakId: Long): List<AndelTilkjentYtelse>
 }

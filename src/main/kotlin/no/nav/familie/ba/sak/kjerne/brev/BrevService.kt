@@ -197,13 +197,13 @@ class BrevService(
         brevmal: Brevmal,
         vedtakFellesfelter: VedtakFellesfelter,
     ) {
-        if (listOf(
+        if (brevmal in listOf(
                 Brevmal.VEDTAK_OPPHØRT,
                 Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
-            ).contains(brevmal) && vedtakFellesfelter.perioder.size > 1
+            ) && vedtakFellesfelter.perioder.size > 1
         ) {
-            throw Feil(
-                "Brevtypen er \"opphørt\", men mer enn én periode ble sendt med. Brev av typen opphørt skal kun ha én " + "periode.",
+            throw FunksjonellFeil(
+                "Behandlingsstatusen er \"Opphørt\", men mer enn én periode er begrunnet. Du skal kun begrunne perioden uten utbetaling.",
             )
         }
     }

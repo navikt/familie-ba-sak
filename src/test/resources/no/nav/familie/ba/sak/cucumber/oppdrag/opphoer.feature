@@ -32,9 +32,7 @@ Egenskap: Vedtak for førstegangsbehandling
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
       | 2            | 03.2021  | 03.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    |
-# TODO denne burde være feil, den burde vel kanskje peke til 0?
-#      | 3            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
-      | 3            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 1          |                    |
+      | 3            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
 
   Scenario: Opphør en av 2 perioder
 
@@ -127,7 +125,5 @@ Egenskap: Vedtak for førstegangsbehandling
 
       | 2            | 05.2021  | 05.2021  | 05.2021     | 700   | ENDR         | Ja         | 2          | 1                  |
 
-# TODO denne er egentligen feil? Det burde være den kommenterte koden som er riktig. Den burde peke til sen siste i kjeden, men opphøre fom 04.2021
-#      | 3            | 05.2021  | 05.2021  | 04.2021     | 700   | ENDR         | Ja         | 2          | 1                  |
-      | 3            | 04.2021  | 04.2021  | 04.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
+      | 3            | 05.2021  | 05.2021  | 04.2021     | 700   | ENDR         | Ja         | 2          | 1                  |
 

@@ -1,6 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
+import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
+import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -27,6 +31,7 @@ data class RestSanityEØSBegrunnelse(
     val hjemlerEOSForordningen987: List<String>?,
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>?,
     val eosVilkaar: List<String>? = null,
+    val vedtakResultat: String?,
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
@@ -47,7 +52,10 @@ data class RestSanityEØSBegrunnelse(
             hjemlerEØSForordningen883 = hjemlerEOSForordningen883 ?: emptyList(),
             hjemlerEØSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
             hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
-            vilkår = eosVilkaar?.mapNotNull { konverterTilEnumverdi<Vilkår>(it) } ?: emptyList(),
+            vilkår = eosVilkaar?.mapNotNull { konverterTilEnumverdi<Vilkår>(it) }?.toSet() ?: emptySet(),
+            periodeResultat = vedtakResultat?.let {
+                finnEnumverdi(it, SanityPeriodeResultat.entries.toTypedArray(), apiNavn)
+            },
         )
     }
 
@@ -58,6 +66,8 @@ data class RestSanityEØSBegrunnelse(
 data class SanityEØSBegrunnelse(
     override val apiNavn: String,
     override val navnISystem: String,
+    override val periodeResultat: SanityPeriodeResultat? = null,
+    override val vilkår: Set<Vilkår>,
     val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
@@ -66,5 +76,10 @@ data class SanityEØSBegrunnelse(
     val hjemlerEØSForordningen883: List<String>,
     val hjemlerEØSForordningen987: List<String>,
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>,
-    val vilkår: List<Vilkår>,
-) : ISanityBegrunnelse
+) : ISanityBegrunnelse {
+    override val lovligOppholdTriggere: List<VilkårTrigger> = emptyList()
+    override val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger> = emptyList()
+    override val bosattIRiketTriggere: List<VilkårTrigger> = emptyList()
+    override val giftPartnerskapTriggere: List<VilkårTrigger> = emptyList()
+    override val borMedSokerTriggere: List<VilkårTrigger> = emptyList()
+}

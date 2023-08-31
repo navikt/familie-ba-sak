@@ -56,6 +56,7 @@ class ValutakursControllerTest {
         every { ecbService.hentValutakurs(any(), any()) } returns BigDecimal.valueOf(0.95)
         justRun { tilgangService.validerTilgangTilBehandling(any(), any()) }
         justRun { tilgangService.verifiserHarTilgangTilHandling(any(), any()) }
+        justRun { tilgangService.validerKanRedigereBehandling(any()) }
     }
 
     @Test

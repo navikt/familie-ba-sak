@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -39,7 +38,6 @@ class VedtaksperiodeServiceTest {
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService =
         mockk()
-    private val endringstidspunktService: EndringstidspunktService = mockk()
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository = mockk()
@@ -60,7 +58,6 @@ class VedtaksperiodeServiceTest {
             sanityService = mockk(),
             søknadGrunnlagService = mockk(relaxed = true),
             endretUtbetalingAndelRepository = mockk(),
-            endringstidspunktService = endringstidspunktService,
             utbetalingsperiodeMedBegrunnelserService = mockk(relaxed = true),
             kompetanseRepository = mockk(),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
@@ -96,7 +93,6 @@ class VedtaksperiodeServiceTest {
     @BeforeEach
     fun init() {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns forrigeBehandling
-        every { endringstidspunktService.finnEndringstidspunktForBehandling(vedtak.behandling.id) } returns endringstidspunkt
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(vedtak.behandling.id) } returns endringstidspunkt
         every { persongrunnlagService.hentAktiv(any()) } returns
             lagTestPersonopplysningGrunnlag(vedtak.behandling.id, person)
@@ -129,8 +125,6 @@ class VedtaksperiodeServiceTest {
 
     @Test
     fun `genererVedtaksperioderMedBegrunnelser skal slå sammen opphørsperioder fra og med endringstidspunkt`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUKE_TIDSLINJE_I_STEDET_FOR) } returns true
-
         val returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom = vedtaksperiodeService
             .genererVedtaksperioderMedBegrunnelserGammel(vedtak)
             .filter { it.type == Vedtaksperiodetype.OPPHØR }

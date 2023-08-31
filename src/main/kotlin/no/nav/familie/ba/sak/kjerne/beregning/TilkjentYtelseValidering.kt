@@ -2,7 +2,10 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -19,8 +22,15 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -159,7 +169,7 @@ object TilkjentYtelseValidering {
 
         val barnasAndeler = hentBarnasAndeler(behandlendeBehandlingTilkjentYtelse.andelerTilkjentYtelse.toList(), barna)
 
-        val barnMedUtbetalingsikkerhetFeil = mutableListOf<PersonEnkel>()
+        val barnMedUtbetalingsikkerhetFeil = mutableMapOf<PersonEnkel, List<MånedPeriode>>()
         barnasAndeler.forEach { (barn, andeler) ->
             val barnsAndelerFraAndreBehandlinger =
                 barnMedAndreRelevanteTilkjentYtelser.filter { it.first.aktør == barn.aktør }
@@ -167,25 +177,28 @@ object TilkjentYtelseValidering {
                     .flatMap { it.andelerTilkjentYtelse }
                     .filter { it.aktør == barn.aktør }
 
-            if (erOverlappAvAndeler(
-                    andeler = andeler,
-                    barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
-                )
-            ) {
-                barnMedUtbetalingsikkerhetFeil.add(barn)
+            val perioderMedOverlapp = finnPeriodeMedOverlappAvAndeler(
+                andeler = andeler,
+                barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
+            )
+            if (perioderMedOverlapp.isNotEmpty()) {
+                barnMedUtbetalingsikkerhetFeil.put(barn, perioderMedOverlapp)
             }
         }
         if (barnMedUtbetalingsikkerhetFeil.isNotEmpty()) {
             throw UtbetalingsikkerhetFeil(
                 melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${
-                    barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()
+                    barnMedUtbetalingsikkerhetFeil.tilFeilmeldingTekst()
                 }",
                 frontendFeilmelding = "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${
-                    barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()
+                    barnMedUtbetalingsikkerhetFeil.tilFeilmeldingTekst()
                 }. Reduksjonsvedtak til annen person må være sendt til godkjenning før du kan gå videre.",
             )
         }
     }
+
+    fun MutableMap<PersonEnkel, List<MånedPeriode>>.tilFeilmeldingTekst() =
+        Utils.slåSammen(this.map { "${it.key.fødselsdato.tilKortString()} i perioden ${it.value.joinToString(", ") { "${it.fom} til ${it.tom}" }}" })
 
     fun maksBeløp(personType: PersonType, fagsakType: FagsakType): Int {
         val satser = SatsService.hentAllesatser()
@@ -208,15 +221,38 @@ object TilkjentYtelseValidering {
         }
     }
 
-    private fun erOverlappAvAndeler(
+    fun finnPeriodeMedOverlappAvAndeler(
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
-    ): Boolean {
-        return andeler.any { andelTilkjentYtelse ->
-            barnsAndelerFraAndreBehandlinger.any {
-                andelTilkjentYtelse.overlapperMed(it) &&
-                    andelTilkjentYtelse.prosent + it.prosent > BigDecimal(100)
-            }
+    ): List<MånedPeriode> {
+        val kombinertOverlappTidslinje = YtelseType.values().map { ytelseType ->
+            finnPeriodeMedOverlappAvAndelerForYtelseType(
+                andeler = andeler.filter { it.type == ytelseType },
+                barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger.filter { it.type == ytelseType },
+            )
+        }.kombiner { it.minstEnYtelseHarOverlapp() }
+
+        return kombinertOverlappTidslinje.perioder().filter { it.innhold == true }
+            .map { MånedPeriode(it.fraOgMed.tilYearMonth(), it.tilOgMed.tilYearMonth()) }
+    }
+
+    internal fun Iterable<Boolean>.minstEnYtelseHarOverlapp(): Boolean {
+        return any { it }
+    }
+
+    fun finnPeriodeMedOverlappAvAndelerForYtelseType(
+        andeler: List<AndelTilkjentYtelse>,
+        barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
+    ): Tidslinje<Boolean, Måned> {
+        val andelerTidslinje = andeler.map {
+            Periode(fraOgMed = it.periode.fom.tilTidspunkt(), tilOgMed = it.periode.tom.tilTidspunkt(), innhold = it)
+        }.tilTidslinje()
+        val tidligereAndelerTidslinje = barnsAndelerFraAndreBehandlinger.map {
+            Periode(fraOgMed = it.periode.fom.tilTidspunkt(), tilOgMed = it.periode.tom.tilTidspunkt(), innhold = it)
+        }.tilTidslinje()
+
+        return andelerTidslinje.kombinerUtenNullMed(tidligereAndelerTidslinje) { andel, tidligereAndel ->
+            andel.overlapperMed(tidligereAndel) && andel.prosent + tidligereAndel.prosent > BigDecimal(100)
         }
     }
 }

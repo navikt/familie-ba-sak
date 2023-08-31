@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBost
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
@@ -193,6 +194,7 @@ fun tilfeldigPerson(
     kjønn: Kjønn = Kjønn.MANN,
     aktør: Aktør = randomAktør(),
     personId: Long = nestePersonId(),
+    dødsfall: Dødsfall? = null,
 ) =
     Person(
         id = personId,
@@ -203,6 +205,7 @@ fun tilfeldigPerson(
         navn = "",
         kjønn = kjønn,
         målform = Målform.NB,
+        dødsfall = dødsfall,
     ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun Person.tilPersonEnkel() =
@@ -1190,6 +1193,8 @@ fun lagRestSanityBegrunnelse(
     hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: String = "",
     endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
+    vedtakResultat: String? = null,
+
 ): RestSanityBegrunnelse = RestSanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1205,24 +1210,26 @@ fun lagRestSanityBegrunnelse(
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
+    vedtakResultat = vedtakResultat,
 )
 
 fun lagSanityBegrunnelse(
     apiNavn: String = "",
     navnISystem: String = "",
-    vilkaar: List<SanityVilkår>? = null,
+    vilkaar: List<SanityVilkår> = emptyList(),
     rolle: List<VilkårRolle> = emptyList(),
-    lovligOppholdTriggere: List<VilkårTrigger>? = null,
-    bosattIRiketTriggere: List<VilkårTrigger>? = null,
-    giftPartnerskapTriggere: List<VilkårTrigger>? = null,
-    borMedSokerTriggere: List<VilkårTrigger>? = null,
-    ovrigeTriggere: List<ØvrigTrigger>? = null,
-    endringsaarsaker: List<Årsak>? = null,
+    lovligOppholdTriggere: List<VilkårTrigger> = emptyList(),
+    bosattIRiketTriggere: List<VilkårTrigger> = emptyList(),
+    giftPartnerskapTriggere: List<VilkårTrigger> = emptyList(),
+    borMedSokerTriggere: List<VilkårTrigger> = emptyList(),
+    ovrigeTriggere: List<ØvrigTrigger> = emptyList(),
+    endringsaarsaker: List<Årsak> = emptyList(),
     hjemler: List<String> = emptyList(),
     hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
-    endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
+    endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
     valgbarhet: Valgbarhet? = null,
+    resultat: SanityPeriodeResultat? = null,
 ): SanityBegrunnelse = SanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1238,7 +1245,7 @@ fun lagSanityBegrunnelse(
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
-    valgbarhet = valgbarhet,
+    periodeResultat = resultat,
 )
 
 fun lagSanityEøsBegrunnelse(
@@ -1264,7 +1271,7 @@ fun lagSanityEøsBegrunnelse(
     hjemlerEØSForordningen883 = hjemlerEØSForordningen883,
     hjemlerEØSForordningen987 = hjemlerEØSForordningen987,
     hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina,
-    vilkår = vilkår,
+    vilkår = vilkår.toSet(),
 )
 
 fun lagTriggesAv(
