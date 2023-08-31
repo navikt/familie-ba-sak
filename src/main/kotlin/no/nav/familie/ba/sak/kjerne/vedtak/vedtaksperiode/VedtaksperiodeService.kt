@@ -332,13 +332,7 @@ class VedtaksperiodeService(
                 ),
             )
         } else {
-            vedtaksperiodeHentOgPersisterService.lagre(
-                if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
-                    finnVedtaksperioderForBehandling(vedtak.behandling.id)
-                } else {
-                    genererVedtaksperioderMedBegrunnelserGammel(vedtak)
-                },
-            )
+            vedtaksperiodeHentOgPersisterService.lagre(finnVedtaksperioderForBehandling(vedtak.behandling.id))
         }
     }
 
@@ -490,7 +484,6 @@ class VedtaksperiodeService(
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 personopplysningGrunnlag = persongrunnlag,
-                skalBrukeNyVedtaksperiodeLøsning = featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY),
             )
         }
 

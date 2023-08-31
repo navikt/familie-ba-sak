@@ -31,19 +31,11 @@ fun List<UtvidetVedtaksperiodeMedBegrunnelser>.sorter(): List<UtvidetVedtaksperi
 fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    skalBrukeNyVedtaksperiodeLøsning: Boolean,
 ): UtvidetVedtaksperiodeMedBegrunnelser {
-    val utbetalingsperiodeDetaljer = if (skalBrukeNyVedtaksperiodeLøsning) {
-        this.hentUtbetalingsperiodeDetaljerNy(
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-        )
-    } else {
-        hentUtbetalingsperiodeDetaljer(
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-        )
-    }
+    val utbetalingsperiodeDetaljer = this.hentUtbetalingsperiodeDetaljerNy(
+        andelerTilkjentYtelse = andelerTilkjentYtelse,
+        personopplysningGrunnlag = personopplysningGrunnlag,
+    )
 
     return UtvidetVedtaksperiodeMedBegrunnelser(
         id = this.id,

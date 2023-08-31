@@ -64,7 +64,6 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
 
     @Test
     fun `Skal lage reduksjon fra sist iverksatte behandling-periode når småbarnstillegg blir borte`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY) } returns false
         every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
 
         val personScenario: RestScenario = lagScenario(barnFødselsdato)
