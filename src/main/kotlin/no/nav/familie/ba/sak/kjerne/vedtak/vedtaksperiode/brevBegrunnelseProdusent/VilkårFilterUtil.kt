@@ -1,5 +1,6 @@
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilUtdypendeVilkårsvurderinger
@@ -14,6 +15,7 @@ fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
     if (this.vilkår.isEmpty()) return false
     val utgjørendeVilkårResultater = finnUtgjørendeVilkår(
         begrunnelseGrunnlag = begrunnelseGrunnlag,
+        sanityBegrunnelse = this,
     )
 
     return this.erLikVilkårOgUtdypendeVilkårIPeriode(
@@ -54,6 +56,7 @@ private fun Collection<UtdypendeVilkårsvurdering>.erLik(
 }
 
 private fun finnUtgjørendeVilkår(
+    sanityBegrunnelse: ISanityBegrunnelse,
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
 ): Set<VilkårResultatForVedtaksperiode> {
     val oppfylteVilkårResultaterDennePerioden =
@@ -62,33 +65,43 @@ private fun finnUtgjørendeVilkår(
         begrunnelseGrunnlag.forrigePeriode?.vilkårResultater?.filter { it.resultat == Resultat.OPPFYLT }
             ?: emptyList()
 
-    return if (begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget()) {
-        val vilkårTjentEllerEndretUtdypende = hentVilkårTjent(
-            oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
-            oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
-        ) + hentOppfylteVilkårMedEndretUtdypende(
-            oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
-            oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
-        )
+    val vilkårTjent = hentVilkårTjent(
+        oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
+        oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
+    )
+    val vilkårEndret = hentOppfylteVilkårMedEndretUtdypende(
+        oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
+        oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
+    )
+    val vilkårTapt = hentVilkårTapt(
+        oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
+        oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
+    )
 
-        val vilkårTapt = hentVilkårTapt(
-            oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
-            oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
-        )
-
-        val vilkårResultaterTjentEllerEndret = begrunnelseGrunnlag.dennePerioden.vilkårResultater
-            .filter { it.vilkårType in vilkårTjentEllerEndretUtdypende }
-        val vilkårResultaterTapt =
-            begrunnelseGrunnlag.forrigePeriode?.vilkårResultater?.filter { it.vilkårType in vilkårTapt } ?: emptySet()
-
-        vilkårResultaterTjentEllerEndret + vilkårResultaterTapt
-    } else {
-        val vilkårTapt = hentVilkårTapt(
-            oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
-            oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
-        )
-
+    val vilkårResultaterTjent: List<VilkårResultatForVedtaksperiode> =
+        oppfylteVilkårResultaterDennePerioden.filter { it.vilkårType in vilkårTjent }
+    val vilkårResultaterEndret: List<VilkårResultatForVedtaksperiode> =
+        oppfylteVilkårResultaterDennePerioden.filter { it.vilkårType in vilkårEndret }
+    val vilkårResultaterTapt: List<VilkårResultatForVedtaksperiode> =
         oppfylteVilkårResultaterForrigePeriode.filter { it.vilkårType in vilkårTapt }
+
+    return if (begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget()) {
+        when (sanityBegrunnelse.periodeResultat) {
+            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING -> vilkårResultaterTjent + vilkårResultaterEndret
+            SanityPeriodeResultat.INGEN_ENDRING -> vilkårResultaterEndret
+            SanityPeriodeResultat.IKKE_INNVILGET,
+            SanityPeriodeResultat.REDUKSJON,
+            -> vilkårResultaterTapt + vilkårResultaterEndret
+
+            null -> emptyList()
+        }
+    } else {
+        vilkårResultaterTapt.takeIf {
+            sanityBegrunnelse.periodeResultat in listOf(
+                SanityPeriodeResultat.IKKE_INNVILGET,
+                SanityPeriodeResultat.REDUKSJON,
+            )
+        } ?: emptyList()
     }.toSet()
 }
 
