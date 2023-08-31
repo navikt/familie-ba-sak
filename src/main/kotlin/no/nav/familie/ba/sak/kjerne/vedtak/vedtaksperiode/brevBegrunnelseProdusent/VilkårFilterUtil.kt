@@ -18,9 +18,7 @@ fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
         sanityBegrunnelse = this,
     )
 
-    return this.erLikVilkårOgUtdypendeVilkårIPeriode(
-        utgjørendeVilkårResultater,
-    )
+    return this.erLikVilkårOgUtdypendeVilkårIPeriode(utgjørendeVilkårResultater)
 }
 
 private fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
