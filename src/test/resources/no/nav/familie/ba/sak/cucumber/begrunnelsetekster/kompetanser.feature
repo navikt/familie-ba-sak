@@ -40,7 +40,7 @@ Egenskap: Kompetanse-begrunnelser
       | 01.05.2021 | 31.03.2038 | Utbetaling         | EØS_FORORDNINGEN | INNVILGET_SEKUNDÆRLAND_STANDARD                    | INNVILGET_SEKUNDÆRLAND_TO_ARBEIDSLAND_NORGE_UTBETALER |
       | 01.04.2038 |            | Opphør             |                  |                                                    |                                                       |
 
-  Scenario: Vis innvilgetbegrunnelser når kompetanse endrer seg
+  Scenario: Ikke vis kompetansebegrunnelser dersom kompetansen ikke endrer seg
     Gitt følgende behandling
       | BehandlingId | FagsakId  | ForrigeBehandlingId |
       | 100173206    | 200055603 |                     |
