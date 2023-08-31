@@ -28,7 +28,7 @@ class TilpassKompetanserTilRegelverkTest {
         val kompetanser: List<Kompetanse> = emptyList()
 
         val eøsPerioder = mapOf(
-            barn1.aktør to "EEENNEEEE".tilRegelverkResultatTidslinje(jan2020).kombinertSøkersTidslinjeResultat(),
+            barn1.aktør to "EEENNEEEE".tilRegelverkResultatTidslinje(jan2020).kombinertSøkersResultatTidslinje(),
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
@@ -62,7 +62,7 @@ class TilpassKompetanserTilRegelverkTest {
             .byggKompetanser()
 
         val barnasRegelverkResultatTidslinjer = mapOf(
-            barn1.aktør to "EEENNEEEE".tilRegelverkResultatTidslinje(jan2020).kombinertSøkersTidslinjeResultat(),
+            barn1.aktør to "EEENNEEEE".tilRegelverkResultatTidslinje(jan2020).kombinertSøkersResultatTidslinje(),
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
@@ -97,7 +97,7 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
             kompetanser,
-            barnasEgneRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersTidslinjeResultat() },
+            barnasEgneRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
             emptyMap(),
         ).sortedBy { it.fom }
 
@@ -137,7 +137,7 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
             kompetanser,
-            barnasEgneRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersTidslinjeResultat() },
+            barnasEgneRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
             emptyMap(),
         ).sortedBy { it.fom }
 
@@ -160,7 +160,7 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
             kompetanser,
-            barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersTidslinjeResultat() },
+            barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
             emptyMap(),
         ).sortedBy { it.fom }
 
@@ -197,7 +197,7 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
             kompetanser,
-            barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersTidslinjeResultat() },
+            barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
             emptyMap(),
         ).sortedBy { it.fom }
 
@@ -227,7 +227,7 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
             kompetanser,
-            barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersTidslinjeResultat() },
+            barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
             barnasHarEtterbetaling3År,
         ).sortedBy { it.fom }
 
@@ -235,7 +235,7 @@ class TilpassKompetanserTilRegelverkTest {
     }
 }
 
-private fun Tidslinje<RegelverkResultat, Måned>.kombinertSøkersTidslinjeResultat(
+private fun Tidslinje<RegelverkResultat, Måned>.kombinertSøkersResultatTidslinje(
     søkersTidslinje: Tidslinje<RegelverkResultat, Måned>? = null
 ): Tidslinje<KombinertRegelverkResultat, Måned> {
     return this.kombinerMed(søkersTidslinje ?: this) {barnetsResultat: RegelverkResultat?, søkersResultat: RegelverkResultat? ->
