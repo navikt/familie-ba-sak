@@ -156,7 +156,7 @@ fun hentTekstForEndretUtbetaling(
     """
 
     Og med endrede utbetalinger for begrunnelse
-      | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak             | Prosent |""" +
+      | AktørId  | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |""" +
         hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
         hentEndretUtbetalingRader(endredeUtbetalinger)
 
