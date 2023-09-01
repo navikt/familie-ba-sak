@@ -106,8 +106,9 @@ private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.fjernOverfl�
     val sortertePerioder = this.perioder()
         .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
 
-    val perioderTilOgMedSisteInnvilgede = sortertePerioder
-        .dropLastWhile { it.innhold?.erOrdinæreVilkårInnvilget() != true }
+    val perioderTilOgMedSisteInnvilgede = sortertePerioder.dropLastWhile { periode ->
+        periode.innhold == null || !periode.innhold.erOrdinæreVilkårInnvilget() || !periode.innhold.erInnvilgetEtterEndretUtbetaling()
+    }
 
     val førstePeriodeEtterSisteInnvilgedePeriode =
         sortertePerioder.subList(perioderTilOgMedSisteInnvilgede.size, sortertePerioder.size).firstOrNull()
