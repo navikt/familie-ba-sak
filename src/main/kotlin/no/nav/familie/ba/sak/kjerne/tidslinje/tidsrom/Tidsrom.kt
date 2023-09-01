@@ -13,10 +13,22 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.fraOgMed() =
-    this.perioder().firstOrNull()?.fraOgMed
+    this.perioder().firstOrNull()?.let {
+        if (it.fraOgMed.erEndelig()) {
+            it.fraOgMed
+        } else {
+            minOf(it.fraOgMed.somEndelig(), it.tilOgMed.somEndelig()).somUendeligLengeSiden()
+        }
+    }
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.tilOgMed() =
-    this.perioder().lastOrNull()?.tilOgMed
+    this.perioder().lastOrNull()?.let {
+        if (it.tilOgMed.erEndelig()) {
+            it.tilOgMed
+        } else {
+            maxOf(it.fraOgMed.somEndelig(), it.tilOgMed.somEndelig()).somUendeligLengeTil()
+        }
+    }
 
 fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.fraOgMed() = this
     .map { it.fraOgMed() }
@@ -33,9 +45,10 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.tidsrom(): Collection<Tidspunkt<T>> = whe
     else -> (perioder().first().fraOgMed.rangeTo(perioder().last().tilOgMed)).toList()
 }
 
-fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tidsrom(): Collection<Tidspunkt<T>> = when {
-    fraOgMed() == null || tilOgMed() == null -> emptyList()
-    else -> (fraOgMed()!!..tilOgMed()!!).toList()
+fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tidsrom(): Collection<Tidspunkt<T>> {
+    val fraOgMed = fraOgMed() ?: return emptyList()
+    val tilOgMed = tilOgMed() ?: return emptyList()
+    return (fraOgMed..tilOgMed).toList()
 }
 
 fun <T : Tidsenhet> tidsrom(vararg tidslinjer: Tidslinje<*, T>) = tidslinjer.toList().tidsrom()
