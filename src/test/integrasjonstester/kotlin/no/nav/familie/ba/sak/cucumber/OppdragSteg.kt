@@ -159,10 +159,10 @@ class OppdragSteg {
         )
     }
 
-    @Så("forvent at en exception kastes for behandling {int}")
-    fun `forvent at en exception kastes for behandling`(behandlingId: Int) {
+    @Så("forvent at en exception kastes for behandling {long}")
+    fun `forvent at en exception kastes for behandling`(behandlingId: Long) {
         assertThat(kastedeFeil).isNotEmpty
-        assertThat(kastedeFeil[behandlingId.toLong()]).isNotNull
+        assertThat(kastedeFeil[behandlingId]).isNotNull
     }
 
     @Så("forvent følgende utbetalingsoppdrag")
