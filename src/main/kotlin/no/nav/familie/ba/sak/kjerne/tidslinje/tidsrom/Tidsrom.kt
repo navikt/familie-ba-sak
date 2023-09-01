@@ -31,13 +31,11 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.tilOgMed() =
     }
 
 fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.fraOgMed() = this
-    .map { it.fraOgMed() }
-    .filterNotNull()
+    .mapNotNull { it.fraOgMed() }
     .minsteEllerNull()
 
 fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tilOgMed() = this
-    .map { it.tilOgMed() }
-    .filterNotNull()
+    .mapNotNull { it.tilOgMed() }
     .størsteEllerNull()
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.tidsrom(): Collection<Tidspunkt<T>> = when {
