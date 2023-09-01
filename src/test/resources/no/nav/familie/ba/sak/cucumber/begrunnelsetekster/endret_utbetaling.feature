@@ -66,7 +66,7 @@ Egenskap: Begrunnelse etter endret utbetaling
       | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                    |                          |
 
 
-  Scenario: Plassholdertekst for scenario - rP9NXDIghi
+  Scenario: Skal ikke krasje dersom siste periode er endret til null prosent
 
     Gitt følgende behandling
       | BehandlingId | FagsakId  | ForrigeBehandlingId |
