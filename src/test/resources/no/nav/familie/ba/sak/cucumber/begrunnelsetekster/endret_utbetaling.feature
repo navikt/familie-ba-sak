@@ -66,4 +66,42 @@ Egenskap: Begrunnelse etter endret utbetaling
       | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                    |                          |
 
 
+  Scenario: Skal ikke krasje dersom siste periode er endret til null prosent
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId  | ForrigeBehandlingId |
+      | 100173451    | 200055851 |                     |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId       | Persontype | Fødselsdato |
+      | 100173451    | 2801053239878 | BARN       | 03.08.2017  |
+      | 100173451    | 2204441081804 | SØKER      | 05.06.1988  |
+
+    Og lag personresultater for begrunnelse for behandling 100173451
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 100173451
+      | AktørId       | Vilkår                                         | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 2204441081804 | BOSATT_I_RIKET,LOVLIG_OPPHOLD                  |                  | 05.06.1988 |            | OPPFYLT  | Nei                  |
+
+      | 2801053239878 | GIFT_PARTNERSKAP,BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 03.08.2017 |            | OPPFYLT  | Nei                  |
+      | 2801053239878 | UNDER_18_ÅR                                    |                  | 03.08.2017 | 02.08.2035 | OPPFYLT  | Nei                  |
+      | 2801053239878 | BOR_MED_SØKER                                  |                  | 19.07.2023 |            | OPPFYLT  | Nei                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId       | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent |
+      | 2801053239878 | 100173451    | 01.08.2023 | 31.08.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     |
+      | 2801053239878 | 100173451    | 01.09.2023 | 31.07.2035 | 0     | ORDINÆR_BARNETRYGD | 0       |
+
+    Og med endrede utbetalinger for begrunnelse
+      | AktørId       | BehandlingId | Fra dato   | Til dato   | Årsak          | Prosent |
+      | 2801053239878 | 100173451    | 01.09.2023 | 01.07.2035 | ENDRE_MOTTAKER | 0       |
+
+    Når begrunnelsetekster genereres for behandling 100173451
+
+    Så forvent følgende standardBegrunnelser
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
+      | 01.08.2023 | 31.08.2023 | UTBETALING         |           |                         |                          |
+      | 01.09.2023 | 31.07.2035 | OPPHØR             |           |                         |                          |
+      | 01.08.2035 |            | OPPHØR             |           |                         |                          |
+
 
