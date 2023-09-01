@@ -107,12 +107,12 @@ class BehandleFødselshendelseTask(
                     manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE
                 )
             } else {
-                val task = OpprettVurderKonsekvensForYtelseOppgave.opprettTask(
+                taskRepositoryWrapper.save(OpprettVurderKonsekvensForYtelseOppgave.opprettTask(
+                    ident = aktør.aktørId,
                     oppgavetype = Oppgavetype.VurderLivshendelse,
                     fristForFerdigstillelse = LocalDate.now().plusDays(5),
                     beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk"
-                )
-                taskRepositoryWrapper.save(task)
+                ))
             }
         }
     }

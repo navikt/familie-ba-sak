@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
+import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.AktørId
 import no.nav.familie.ba.sak.task.dto.OpprettVurderKonsekvensForYtelseOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -22,7 +23,8 @@ class OpprettVurderKonsekvensForYtelseOppgave(
 
     override fun doTask(task: Task) {
         val opprettVurderKonsekvensForYtelseOppgaveTaskDTO = objectMapper.readValue(task.payload, OpprettVurderKonsekvensForYtelseOppgaveTaskDTO::class.java)
-        task.metadata["oppgaveId"] = oppgaveService.opprettOppgave(
+        task.metadata["oppgaveId"] = oppgaveService.opprettOppgaveForFødselshendelseUtenBehandling(
+            ident = opprettVurderKonsekvensForYtelseOppgaveTaskDTO.ident,
             oppgavetype = opprettVurderKonsekvensForYtelseOppgaveTaskDTO.oppgavetype,
             fristForFerdigstillelse = opprettVurderKonsekvensForYtelseOppgaveTaskDTO.fristForFerdigstillelse,
             beskrivelse = opprettVurderKonsekvensForYtelseOppgaveTaskDTO.beskrivelse,
@@ -34,14 +36,16 @@ class OpprettVurderKonsekvensForYtelseOppgave(
         const val TASK_STEP_TYPE = "opprettVurderKonsekvensForYtelseOppgave"
 
         fun opprettTask(
+            ident: AktørId,
             oppgavetype: Oppgavetype,
             fristForFerdigstillelse: LocalDate,
-            beskrivelse: String? = null,
+            beskrivelse: String,
         ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     OpprettVurderKonsekvensForYtelseOppgaveTaskDTO(
+                        ident,
                         oppgavetype,
                         fristForFerdigstillelse,
                         beskrivelse,

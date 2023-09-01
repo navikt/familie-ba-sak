@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåB
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.AktørId
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
@@ -128,6 +129,29 @@ class OppgaveService(
         }
 
         return begrunnelse
+    }
+
+    fun opprettOppgaveForFødselshendelseUtenBehandling(
+        ident: AktørId,
+        oppgavetype: Oppgavetype,
+        fristForFerdigstillelse: LocalDate,
+        beskrivelse: String,
+    ): String {
+            val opprettOppgave = OpprettOppgaveRequest(
+                ident = OppgaveIdentV2(ident = ident, gruppe = IdentGruppe.AKTOERID),
+                tema = Tema.BAR,
+                oppgavetype = oppgavetype,
+                fristFerdigstillelse = fristForFerdigstillelse,
+                beskrivelse = beskrivelse,
+                saksId = null,
+                behandlingstema = null,
+                enhetsnummer = null
+            )
+            val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave).oppgaveId.toString()
+
+            økTellerForAntallOppgaveTyper(oppgavetype)
+
+        return opprettetOppgaveId
     }
 
     private fun økTellerForAntallOppgaveTyper(oppgavetype: Oppgavetype) {
