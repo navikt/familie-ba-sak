@@ -199,7 +199,7 @@ fun hentTekstForKompetanse(
     } else {
         """
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med kompetanser for begrunnelse
       | AktørId | Fra dato | Til dato | Resultat | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |""" +
             rader
     }
@@ -212,7 +212,7 @@ private fun hentKompetanseRader(kompetanser: Collection<Kompetanse>?): String =
         ?.joinToString("") { kompetanse ->
             """
       | ${
-                kompetanse.barnAktører.joinToString("")
+                kompetanse.barnAktører.joinToString("") { it.aktørId }
             } |${
                 kompetanse.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
             }|${
