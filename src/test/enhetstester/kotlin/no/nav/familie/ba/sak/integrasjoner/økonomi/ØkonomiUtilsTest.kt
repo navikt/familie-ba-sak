@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOppr
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningTestUtil.sisteAndelPerIdent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG
@@ -237,6 +238,8 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = person,
                     aktør = person.aktør,
+                    periodeIdOffset = 0,
+                    forrigeperiodeIdOffset = null,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd(datoSomSkalOppdateres),
@@ -245,6 +248,8 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = person,
                     aktør = person.aktør,
+                    periodeIdOffset = 1,
+                    forrigeperiodeIdOffset = 0,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2025-04"),
@@ -253,6 +258,8 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = person,
                     aktør = person.aktør,
+                    periodeIdOffset = 2,
+                    forrigeperiodeIdOffset = 1,
                 ),
             ).forIverksetting(),
         )
@@ -299,6 +306,7 @@ internal class ØkonomiUtilsTest {
             andelerTilOpphørMedDato(
                 forrigeKjeder = kjederBehandling1,
                 sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede,
+                sisteAndelPerIdent = sisteAndelPerIdent(kjederBehandling1.values.flatten()),
             )
 
         assertEquals(1, andelerTilOpprettelse.size)
@@ -321,6 +329,8 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = førsteBarn,
                     aktør = førsteBarn.aktør,
+                    periodeIdOffset = 0,
+                    forrigeperiodeIdOffset = null,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2020-02"),
@@ -329,6 +339,8 @@ internal class ØkonomiUtilsTest {
                     1345,
                     person = førsteBarn,
                     aktør = førsteBarn.aktør,
+                    periodeIdOffset = 1,
+                    forrigeperiodeIdOffset = 0,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2023-02"),
@@ -337,6 +349,8 @@ internal class ØkonomiUtilsTest {
                     1654,
                     person = førsteBarn,
                     aktør = førsteBarn.aktør,
+                    periodeIdOffset = 2,
+                    forrigeperiodeIdOffset = 1,
                 ),
             ).forIverksetting(),
         )
@@ -383,6 +397,7 @@ internal class ØkonomiUtilsTest {
             andelerTilOpphørMedDato(
                 forrigeKjeder = kjederBehandling1,
                 sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede,
+                sisteAndelPerIdent = sisteAndelPerIdent(kjederBehandling1.values.flatten()),
             )
 
         assertEquals(1, andelerTilOpphørMedDato.size)
@@ -450,6 +465,7 @@ internal class ØkonomiUtilsTest {
             andelerTilOpphørMedDato(
                 forrigeKjeder = kjederBehandling1,
                 sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede,
+                sisteAndelPerIdent = sisteAndelPerIdent(kjederBehandling1.values.flatten()),
             )
 
         assertEquals(2, andelerTilOpprettelse.size)

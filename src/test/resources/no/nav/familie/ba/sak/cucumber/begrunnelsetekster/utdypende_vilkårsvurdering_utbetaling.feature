@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtaksperioder med utdypende vilkår og utbetaling
+Egenskap: Begrunnelser for utdypende vilkårsvurdering med utbetaling
 
   Bakgrunn:
     Gitt følgende behandling
@@ -26,7 +26,8 @@ Egenskap: Vedtaksperioder med utdypende vilkår og utbetaling
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456    | 01.05.2020 | 31.05.2022 | 1354  | 1            |
+      | 3456    | 01.05.2020 | 31.03.2021 | 500   | 1            |
+      | 3456    | 01.04.2021 | 31.05.2022 | 1354  | 1            |
 
     Når begrunnelsetekster genereres for behandling 1
 
@@ -53,9 +54,32 @@ Egenskap: Vedtaksperioder med utdypende vilkår og utbetaling
     Når begrunnelsetekster genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                                                  | Ekskluderte Begrunnelser |
-      | 01.05.2020 | 31.03.2021 | UTBETALING         | INNVILGET_LOVLIG_OPPHOLD_SKJØNNSMESSIG_VURDERING_TREDJELANDSBORGER_SØKER |                          |
-      | 01.04.2021 |            | OPPHØR             | OPPHØR_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER                        |                          |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                           | Ekskluderte Begrunnelser                    |
+      | 01.05.2020 | 31.03.2021 | UTBETALING         | INNVILGET_BOSATT_I_RIKTET                         | INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE |
+      | 01.04.2021 |            | OPPHØR             | OPPHØR_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                                             |
+
+  Scenario: Skal detektere endring i utdypende vilkår
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                          | Fra dato   | Til dato   | Resultat | Utdypende vilkår         |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                  | 11.01.1970 |            | Oppfylt  |                          |
+      | 3456    | UNDER_18_ÅR                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |                          |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, BOR_MED_SØKER | 13.04.2020 |            | Oppfylt  |                          |
+      | 3456    | LOVLIG_OPPHOLD                                  | 13.04.2020 | 10.03.2021 | Oppfylt  | VURDERING_ANNET_GRUNNLAG |
+      | 3456    | LOVLIG_OPPHOLD                                  | 11.03.2021 | 10.03.2022 | Oppfylt  |                          |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | 3456    | 01.05.2020 | 31.03.2022 | 1354  | 1            |
+
+    Når begrunnelsetekster genereres for behandling 1
+
+    Så forvent følgende standardBegrunnelser
+      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                                            | Ekskluderte Begrunnelser                                               |
+      | 01.05.2020 | 31.03.2021 | UTBETALING         | INNVILGET_BOSATT_I_RIKTET                                          | INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE                            |
+      | 01.04.2021 | 31.03.2022 | UTBETALING         | FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE | INNVILGET_BOSATT_I_RIKTET, INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE |
+      | 01.04.2022 |            | OPPHØR             | OPPHØR_HAR_IKKE_OPPHOLDSTILLATELSE                                 | OPPHØR_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER                      |
 
 
 

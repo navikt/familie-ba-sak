@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfallFraPdl
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
@@ -353,7 +353,7 @@ internal class StandardbegrunnelseTest {
     fun `Dersom dødsfalldato ligger i forrige ytelse-periode skal begrunnelsen begrunnelser med trigger BARN_DØD trigges`() {
         val fnr = "12345678910"
         val dødtBarn = lagPerson(personIdent = PersonIdent(fnr), type = PersonType.BARN)
-        dødtBarn.dødsfall = lagDødsfall(
+        dødtBarn.dødsfall = lagDødsfallFraPdl(
             dødtBarn,
             dødsfallDatoFraPdl = LocalDate.now().minusMonths(1).withDayOfMonth(15).toString(),
             dødsfallAdresseFraPdl = null,
@@ -401,7 +401,7 @@ internal class StandardbegrunnelseTest {
         val dødtBarn = lagPerson(personIdent = PersonIdent(fnr), type = PersonType.BARN)
         val dødsfallDato = LocalDate.now().minusMonths(1).withDayOfMonth(15)
         dødtBarn.dødsfall =
-            lagDødsfall(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
+            lagDødsfallFraPdl(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
 
         val reduksjonBarnDødBegrunnelse = mapOf(
@@ -445,7 +445,7 @@ internal class StandardbegrunnelseTest {
         val dødtBarn = lagPerson(personIdent = PersonIdent(fnr), type = PersonType.BARN)
         val dødsfallDato = LocalDate.now().minusMonths(1).withDayOfMonth(15)
         dødtBarn.dødsfall =
-            lagDødsfall(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
+            lagDødsfallFraPdl(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
 
         val reduksjonBarnDødBegrunnelse = mapOf(

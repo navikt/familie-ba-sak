@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -33,6 +34,7 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Objects
 
@@ -258,6 +260,23 @@ enum class YtelseType(val klassifisering: String) {
         ORDINÆR_BARNETRYGD -> listOf(SatsType.ORBA, SatsType.TILLEGG_ORBA)
         UTVIDET_BARNETRYGD -> listOf(SatsType.UTVIDET_BARNETRYGD)
         SMÅBARNSTILLEGG -> listOf(SatsType.SMA)
+    }
+
+    fun tilYtelseType(): no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType = when (this) {
+        ORDINÆR_BARNETRYGD -> no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType.ORDINÆR_BARNETRYGD
+        UTVIDET_BARNETRYGD -> no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType.UTVIDET_BARNETRYGD
+        SMÅBARNSTILLEGG -> no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType.SMÅBARNSTILLEGG
+    }
+
+    fun tilSatsType(person: Person, ytelseDato: LocalDate) = when (this) {
+        ORDINÆR_BARNETRYGD -> if (ytelseDato.toYearMonth() < person.hentSeksårsdag().toYearMonth()) {
+            SatsType.TILLEGG_ORBA
+        } else {
+            SatsType.ORBA
+        }
+
+        UTVIDET_BARNETRYGD -> SatsType.UTVIDET_BARNETRYGD
+        SMÅBARNSTILLEGG -> SatsType.SMA
     }
 }
 

@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUKE_TIDSLINJE_I_STEDET_FOR
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
@@ -62,9 +61,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.sorter
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utbetalingsperiodemedbegrunnelser.UtbetalingsperiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -127,8 +129,8 @@ class VedtaksperiodeService(
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
 
         return utledEndringstidspunkt(
-            grunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
-            grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
+            behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
+            behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
         )
     }
 
@@ -351,8 +353,8 @@ class VedtaksperiodeService(
         )
     }
 
-    fun Behandling.hentGrunnlagForVedtaksperioder(): GrunnlagForVedtaksperioder =
-        GrunnlagForVedtaksperioder(
+    fun Behandling.hentGrunnlagForVedtaksperioder(): BehandlingsGrunnlagForVedtaksperioder =
+        BehandlingsGrunnlagForVedtaksperioder(
             persongrunnlag = persongrunnlagService.hentAktivThrows(this.id),
             personResultater = vilkårsvurderingService.hentAktivForBehandling(this.id)?.personResultater ?: emptySet(),
             fagsakType = fagsak.type,
@@ -454,6 +456,32 @@ class VedtaksperiodeService(
         return vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }
 
+    fun hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId: Long): List<RestUtvidetVedtaksperiodeMedBegrunnelser> {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+
+        val vedtaksperioder = if (behandling.status != BehandlingStatus.AVSLUTTET) {
+            val utvidetVedtaksperiodeMedBegrunnelser = hentUtvidetVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId),
+                personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId),
+            )
+            utvidetVedtaksperiodeMedBegrunnelser
+                .sorter()
+                .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }
+        } else {
+            emptyList()
+        }
+
+        val skalMinimeres = behandling.status != BehandlingStatus.UTREDES
+
+        return if (skalMinimeres) {
+            vedtaksperioder
+                .filter { it.begrunnelser.isNotEmpty() }
+                .map { it.copy(gyldigeBegrunnelser = emptyList()) }
+        } else {
+            vedtaksperioder
+        }
+    }
+
     fun hentUtvidetVedtaksperiodeMedBegrunnelser(
         vedtak: Vedtak,
         personopplysningGrunnlag: PersonopplysningGrunnlag? = null,
@@ -504,6 +532,10 @@ class VedtaksperiodeService(
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
         val kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id)
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+
+        val behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder()
+        val behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder()
 
         return utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
             val kompetanserIPeriode = kompetanser.hentIPeriode(
@@ -521,14 +553,11 @@ class VedtaksperiodeService(
 
             utvidetVedtaksperiodeMedBegrunnelser.copy(
                 gyldigeBegrunnelser = if (featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)) {
-                    val forrigeBehandling =
-                        behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-
                     utvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
-                        grunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
-                        grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
+                        behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
+                        behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
                         sanityBegrunnelser = sanityBegrunnelser,
-                        behandlingUnderkategori = behandling.underkategori,
+                        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
                     ).toList()
                 } else {
                     hentGyldigeBegrunnelserForPeriodeGammel(
@@ -604,13 +633,7 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
-        return if (featureToggleService.isEnabled(BRUKE_TIDSLINJE_I_STEDET_FOR)) {
-            andelerTilkjentYtelse.mapTilUtbetalingsperioder(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-            )
-        } else {
-            mapTilUtbetalingsperioderGammel(personopplysningGrunnlag, andelerTilkjentYtelse)
-        }
+        return andelerTilkjentYtelse.mapTilUtbetalingsperioder(personopplysningGrunnlag = personopplysningGrunnlag)
     }
 
     fun hentOpphørsperioder(
@@ -642,31 +665,17 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
-        return if (featureToggleService.isEnabled(BRUKE_TIDSLINJE_I_STEDET_FOR)) {
-            val alleOpphørsperioder = mapTilOpphørsperioder(
-                forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
-                forrigeAndelerTilkjentYtelse = forrigeAndelerMedEndringer,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-            )
+        val alleOpphørsperioder = mapTilOpphørsperioder(
+            forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
+            forrigeAndelerTilkjentYtelse = forrigeAndelerMedEndringer,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+        )
 
-            val (perioderFørEndringstidspunkt, fraEndringstidspunktOgUtover) =
-                alleOpphørsperioder.partition { it.periodeFom.isBefore(endringstidspunkt) }
+        val (perioderFørEndringstidspunkt, fraEndringstidspunktOgUtover) =
+            alleOpphørsperioder.partition { it.periodeFom.isBefore(endringstidspunkt) }
 
-            perioderFørEndringstidspunkt + slåSammenOpphørsperioder(fraEndringstidspunktOgUtover)
-        } else {
-            val alleOpphørsperioder = mapTilOpphørsperioderGammel(
-                forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
-                forrigeAndelerTilkjentYtelse = forrigeAndelerMedEndringer,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-            )
-
-            val (perioderFørEndringstidspunkt, fraEndringstidspunktOgUtover) =
-                alleOpphørsperioder.partition { it.periodeFom.isBefore(endringstidspunkt) }
-
-            perioderFørEndringstidspunkt + slåSammenOpphørsperioderGammel(fraEndringstidspunktOgUtover)
-        }
+        return perioderFørEndringstidspunkt + slåSammenOpphørsperioder(fraEndringstidspunktOgUtover)
     }
 
     private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {

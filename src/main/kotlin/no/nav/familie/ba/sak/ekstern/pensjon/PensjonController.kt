@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.lang.IllegalArgumentException
 import java.time.LocalDate
-import java.util.UUID
 
 @RestController
 @RequestMapping("/api/ekstern/pensjon")
@@ -116,7 +115,7 @@ class PensjonController(private val pensjonService: PensjonService) {
                 """,
                 content = [
                     Content(
-                        mediaType = "application/json",
+                        mediaType = MediaType.TEXT_PLAIN_VALUE,
                     ),
                 ],
             ),
@@ -130,7 +129,7 @@ class PensjonController(private val pensjonService: PensjonService) {
                 description = "Uventet feil",
                 content = [
                     Content(
-                        mediaType = "application/json",
+                        mediaType = MediaType.TEXT_PLAIN_VALUE,
                     ),
                 ],
             ),
@@ -138,12 +137,12 @@ class PensjonController(private val pensjonService: PensjonService) {
     )
     @GetMapping(
         path = ["/bestill-personer-med-barnetrygd/{år}"],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.TEXT_PLAIN_VALUE],
     )
     fun bestillPersonerMedBarnetrygdForGittÅrPåKafka(
         @PathVariable
         år: Int,
-    ): ResponseEntity<UUID> {
+    ): ResponseEntity<String> {
         val minÅr: Long = 1970
         val maxÅr: Long = 2300
         if (år in minÅr..maxÅr) {

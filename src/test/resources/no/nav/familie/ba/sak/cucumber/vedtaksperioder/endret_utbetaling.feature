@@ -28,9 +28,8 @@ Egenskap: Endringstidspunkt påvirker periodene
       | 3456    | 01.01.2017 | 30.11.2034 | 1234  | 1            | 0       |
 
     Og med endrede utbetalinger
-      | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak             | prosent |
+      | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak             | Prosent |
       | 3456    | 01.01.2017 | 30.11.2034 | 1            | ETTERBETALING_3ÅR | 0       |
-
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 

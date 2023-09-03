@@ -9,18 +9,97 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
+import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
+import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
+import no.nav.familie.felles.utbetalingsgenerator.domain.Behandlingsinformasjon
+import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
+import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Component
 class UtbetalingsoppdragGenerator(
     private val beregningService: BeregningService,
 ) {
+
+    fun lagUtbetalingsoppdrag(
+        saksbehandlerId: String,
+        vedtak: Vedtak,
+        forrigeTilkjentYtelse: TilkjentYtelse?,
+        nyTilkjentYtelse: TilkjentYtelse,
+        sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
+        erSimulering: Boolean,
+        endretMigreringsDato: YearMonth? = null,
+    ): BeregnetUtbetalingsoppdragLongId {
+        return Utbetalingsgenerator().lagUtbetalingsoppdrag(
+            behandlingsinformasjon = Behandlingsinformasjon(
+                saksbehandlerId = saksbehandlerId,
+                behandlingId = vedtak.behandling.id.toString(),
+                eksternBehandlingId = vedtak.behandling.id,
+                eksternFagsakId = vedtak.behandling.fagsak.id,
+                ytelse = Ytelsestype.BARNETRYGD,
+                personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
+                vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
+                opphørFra = opphørFra(forrigeTilkjentYtelse, erSimulering, endretMigreringsDato),
+                utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
+            ),
+            forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.map {
+                it.tilAndelDataLongId()
+            } ?: emptyList(),
+            nyeAndeler = nyTilkjentYtelse.andelerTilkjentYtelse.map {
+                it.tilAndelDataLongId()
+            },
+            sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
+        )
+    }
+
+    private fun AndelTilkjentYtelse.tilAndelDataLongId(): AndelDataLongId =
+        AndelDataLongId(
+            id = id,
+            fom = periode.fom,
+            tom = periode.tom,
+            beløp = kalkulertUtbetalingsbeløp,
+            personIdent = aktør.aktivFødselsnummer(),
+            type = type.tilYtelseType(),
+            periodeId = periodeOffset,
+            forrigePeriodeId = forrigePeriodeOffset,
+            kildeBehandlingId = kildeBehandlingId,
+        )
+
+    private fun opphørFra(
+        forrigeTilkjentYtelse: TilkjentYtelse?,
+        erSimulering: Boolean,
+        endretMigreringsDato: YearMonth?,
+    ): YearMonth? {
+        if (forrigeTilkjentYtelse == null) return null
+        if (endretMigreringsDato != null) return endretMigreringsDato
+        if (erSimulering) {
+            return forrigeTilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.periode.fom }
+        }
+        return null
+    }
+
+    private fun hentUtebetalesTil(fagsak: Fagsak): String {
+        return when (fagsak.type) {
+            FagsakType.INSTITUSJON -> {
+                fagsak.institusjon?.tssEksternId
+                    ?: error("Fagsak ${fagsak.id} er av type institusjon og mangler informasjon om institusjonen")
+            }
+
+            else -> {
+                fagsak.aktør.aktivFødselsnummer()
+            }
+        }
+    }
 
     /**
      * Lager utbetalingsoppdrag med kjedede perioder av andeler.
@@ -30,7 +109,7 @@ class UtbetalingsoppdragGenerator(
      * @param[vedtak] for å hente fagsakid, behandlingid, vedtaksdato, ident, og evt opphørsdato
      * @param[erFørsteBehandlingPåFagsak] for å sette aksjonskode på oppdragsnivå og bestemme om vi skal telle fra start
      * @param[forrigeKjeder] Et sett med kjeder som var gjeldende for forrige behandling på fagsaken
-     * @param[sisteOffsetPerIdent] Siste iverksatte offset mot økonomi per ident.
+     * @param[sisteAndelPerIdent] Siste iverksatte andel mot økonomi per ident.
      * @param[oppdaterteKjeder] Et sett med andeler knyttet til en person (dvs en kjede), hvor andeler er helt nye,
      * @param[erSimulering] flag for om beregnet er en simulering, da skal komplett nytt betlaingsoppdrag generes
      *                      og ny tilkjentytelse skal ikke persisteres,
@@ -46,8 +125,7 @@ class UtbetalingsoppdragGenerator(
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
         forrigeKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> = emptyMap(),
-        sisteOffsetPerIdent: Map<IdentOgYtelse, Int> = emptyMap(),
-        sisteOffsetPåFagsak: Int? = null,
+        sisteAndelPerIdent: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag> = emptyMap(),
         oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> = emptyMap(),
         erSimulering: Boolean = false,
         endretMigreringsDato: YearMonth? = null,
@@ -75,17 +153,24 @@ class UtbetalingsoppdragGenerator(
         }
 
         val andelerTilOpphør =
-            andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato)
+            andelerTilOpphørMedDato(
+                forrigeKjeder,
+                sisteBeståenAndelIHverKjede,
+                endretMigreringsDato,
+                sisteAndelPerIdent,
+            )
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelseForUtbetalingsoppdrag>> =
             andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
         val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty()) {
+            val sisteOffsetIKjedeOversikt =
+                sisteAndelPerIdent.map { it.key to it.value.periodeOffset!!.toInt() }.toMap()
             lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(
                 andeler = andelerTilOpprettelse,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                 vedtak = vedtak,
-                sisteOffsetIKjedeOversikt = sisteOffsetPerIdent,
-                sisteOffsetPåFagsak = sisteOffsetPåFagsak,
+                sisteOffsetIKjedeOversikt = sisteOffsetIKjedeOversikt,
+                sisteOffsetPåFagsak = sisteOffsetIKjedeOversikt.maxOfOrNull { it.value },
                 skalOppdatereTilkjentYtelse = !erSimulering,
             )
         } else {

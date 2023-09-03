@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -33,14 +33,15 @@ import java.time.LocalDate
 @Service
 class SimuleringService(
     private val økonomiKlient: ØkonomiKlient,
-    private val økonomiService: ØkonomiService,
     private val beregningService: BeregningService,
     private val økonomiSimuleringMottakerRepository: ØkonomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
     private val vedtakRepository: VedtakRepository,
+    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService,
 ) {
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
@@ -55,7 +56,7 @@ class SimuleringService(
          * Denne verdien brukes ikke til noe i simulering.
          */
 
-        val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+        val utbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak = vedtak,
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
@@ -65,8 +66,17 @@ class SimuleringService(
         // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
         if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
 
+        val detaljertSimuleringResultat = økonomiKlient.hentSimulering(utbetalingsoppdrag)
+
+        kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+            vedtak = vedtak,
+            gammeltSimuleringResultat = detaljertSimuleringResultat,
+            gammeltUtbetalingsoppdrag = utbetalingsoppdrag,
+            erSimulering = true,
+        )
+
         simulert.increment()
-        return økonomiKlient.hentSimulering(utbetalingsoppdrag)
+        return detaljertSimuleringResultat
     }
 
     @Transactional
