@@ -54,6 +54,7 @@ internal class KompetanseServiceTest {
     @BeforeEach
     fun init() {
         mockKompetanseRepository.deleteAll()
+        every { unleashService.isEnabled(any()) } returns true
     }
 
     @Test
