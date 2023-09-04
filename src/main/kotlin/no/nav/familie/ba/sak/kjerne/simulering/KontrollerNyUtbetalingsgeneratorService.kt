@@ -67,11 +67,12 @@ class KontrollerNyUtbetalingsgeneratorService(
 
         val behandling = vedtak.behandling
 
-        val beregnetUtbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(
-            vedtak = vedtak,
-            saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-            erSimulering = erSimulering,
-        )
+        val beregnetUtbetalingsoppdrag =
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = vedtak,
+                saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                erSimulering = erSimulering,
+            )
 
         if (!beregnetUtbetalingsoppdrag.utbetalingsoppdrag.skalIverksettesMotOppdrag()) return emptyList()
 

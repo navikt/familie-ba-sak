@@ -73,10 +73,10 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
         every { beregnetUtbetalingsoppdragMock.andeler } returns mockk()
 
         every {
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(
-                any(),
-                any(),
-                any(),
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = any(),
+                saksbehandlerId = any(),
+                erSimulering = any(),
             )
         } returns beregnetUtbetalingsoppdragMock
     }
@@ -256,9 +256,9 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     fun `kontrollerNyUtbetalingsgenerator - skal ikke kjøre sammenligning dersom det ikke finnes noen utbetalingsperioder i utbetalingsoppdraget fra gammel`() {
         every {
             utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                any(),
-                any(),
-                any(),
+                vedtak = any(),
+                saksbehandlerId = any(),
+                andelTilkjentYtelseForUtbetalingsoppdragFactory = any(),
             )
         } returns lagUtbetalingsoppdrag(emptyList())
 
@@ -273,10 +273,10 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     @Test
     fun `kontrollerNyUtbetalingsgenerator - skal ikke kjøre sammenligning dersom det ikke finnes noen utbetalingsperioder i utbetalingsoppdraget fra ny`() {
         every {
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(
-                any(),
-                any(),
-                any(),
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = any(),
+                saksbehandlerId = any(),
+                erSimulering = any(),
             )
         } returns BeregnetUtbetalingsoppdragLongId(lagUtbetalingsoppdrag(emptyList()), emptyList())
 

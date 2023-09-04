@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -24,6 +26,7 @@ class ØkonomiService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService,
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
+    private val featureToggleService: FeatureToggleService,
 
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
@@ -40,13 +43,24 @@ class ØkonomiService(
             saksbehandlerId = saksbehandlerId,
         )
 
-        val utbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-            vedtak,
-            saksbehandlerId,
-            andelTilkjentYtelseForUtbetalingsoppdragFactory,
-        )
+        val utbetalingsoppdrag: Utbetalingsoppdrag =
+            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR, false)) {
+                logger.info("Bruker ny utbetalingsgenerator for behandling ${vedtak.behandling.id}")
+                utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                    vedtak,
+                    saksbehandlerId,
+                ).utbetalingsoppdrag
+            } else {
+                val utbetalingsoppdrag =
+                    utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                        vedtak,
+                        saksbehandlerId,
+                        andelTilkjentYtelseForUtbetalingsoppdragFactory,
+                    )
 
-        beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
+                beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
+                utbetalingsoppdrag
+            }
 
         tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId = vedtak.behandling.id)
 

@@ -94,7 +94,10 @@ class UtbetalingsoppdragGeneratorServiceTest {
         )
 
         val beregnetUtbetalingsoppdrag =
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(vedtak = vedtak, "abc123")
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = vedtak,
+                "abc123",
+            )
 
         val lagredeAndeler = tilkjentYtelseSlot.captured.andelerTilkjentYtelse
 
@@ -172,7 +175,10 @@ class UtbetalingsoppdragGeneratorServiceTest {
         )
 
         val beregnetUtbetalingsoppdrag =
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(vedtak = vedtak, "abc123")
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = vedtak,
+                "abc123",
+            )
 
         val lagredeAndeler = tilkjentYtelseSlot.captured.andelerTilkjentYtelse
 
@@ -241,7 +247,10 @@ class UtbetalingsoppdragGeneratorServiceTest {
         )
 
         val beregnetUtbetalingsoppdrag =
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(vedtak = vedtak, "abc123")
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = vedtak,
+                "abc123",
+            )
 
         val lagredeAndeler = tilkjentYtelseSlot.captured.andelerTilkjentYtelse
 
@@ -344,7 +353,10 @@ class UtbetalingsoppdragGeneratorServiceTest {
         )
 
         val beregnetUtbetalingsoppdrag =
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(vedtak = vedtak, "abc123")
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = vedtak,
+                "abc123",
+            )
 
         val lagredeAndeler = tilkjentYtelseSlot.captured.andelerTilkjentYtelse
 
@@ -400,7 +412,10 @@ class UtbetalingsoppdragGeneratorServiceTest {
         )
 
         val beregnetUtbetalingsoppdrag =
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(vedtak = vedtak, "abc123")
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = vedtak,
+                "abc123",
+            )
 
         verify(exactly = 0) { tilkjentYtelseRepository.save(any()) }
 

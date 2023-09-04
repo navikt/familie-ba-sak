@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import org.springframework.stereotype.Service
@@ -55,13 +56,21 @@ class SimuleringService(
          * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
          * Denne verdien brukes ikke til noe i simulering.
          */
-
-        val utbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-            vedtak = vedtak,
-            saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-            andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
-            erSimulering = true,
-        )
+        val utbetalingsoppdrag: Utbetalingsoppdrag =
+            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR, false)) {
+                utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                    vedtak = vedtak,
+                    saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                    erSimulering = true,
+                ).utbetalingsoppdrag
+            } else {
+                utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                    vedtak = vedtak,
+                    saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                    andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
+                    erSimulering = true,
+                )
+            }
 
         // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
         if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
