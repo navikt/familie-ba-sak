@@ -236,9 +236,9 @@ class TilpassKompetanserTilRegelverkTest {
 }
 
 private fun Tidslinje<RegelverkResultat, Måned>.kombinertSøkersResultatTidslinje(
-    søkersTidslinje: Tidslinje<RegelverkResultat, Måned>? = null
+    søkersTidslinje: Tidslinje<RegelverkResultat, Måned>? = null,
 ): Tidslinje<KombinertRegelverkResultat, Måned> {
-    return this.kombinerMed(søkersTidslinje ?: this) {barnetsResultat: RegelverkResultat?, søkersResultat: RegelverkResultat? ->
+    return this.kombinerMed(søkersTidslinje ?: this) { barnetsResultat: RegelverkResultat?, søkersResultat: RegelverkResultat? ->
         KombinertRegelverkResultat(barnetsResultat, søkersResultat)
     }
 }

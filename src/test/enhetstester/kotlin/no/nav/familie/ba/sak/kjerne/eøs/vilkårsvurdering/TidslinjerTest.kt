@@ -358,6 +358,5 @@ internal class TidslinjerTest {
 fun VilkårsvurderingTidslinjer.barnasRegelverkResultatTidslinjer() = this.barnasTidslinjer()
     .mapValues { (_, barnetsTidslinjer) -> barnetsTidslinjer.regelverkResultatTidslinje }
 
-
 private val Tidslinje<KombinertRegelverkResultat, Måned>.kombinertResultat: Tidslinje<RegelverkResultat, Måned>
     get() = map { it?.kombinertResultat }

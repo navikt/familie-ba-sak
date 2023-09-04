@@ -254,7 +254,11 @@
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>leader</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>unleash</artifactId>
+            <version>${felles.version}</version>
+        </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>http-client</artifactId>

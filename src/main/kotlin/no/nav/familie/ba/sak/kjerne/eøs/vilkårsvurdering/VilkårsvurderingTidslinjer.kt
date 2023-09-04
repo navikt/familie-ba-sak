@@ -115,7 +115,7 @@ class VilkårsvurderingTidslinjer(
             .kombinerMed(søkersTidslinje.regelverkResultatTidslinje) { barnetsResultat, søkersResultat ->
                 KombinertRegelverkResultat(
                     barnetsResultat = barnetsResultat,
-                    søkersResultat = søkersResultat
+                    søkersResultat = søkersResultat,
                 )
             }
             // Barnets egne tidslinjer kan på dette tidspunktet strekke seg 18 år frem i tid,
