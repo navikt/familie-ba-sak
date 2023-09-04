@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -79,7 +80,7 @@ class UtbetalingsoppdragGeneratorService(
         )
         oppdaterAndelerMedPeriodeOffset(
             tilkjentYtelse = tilkjentYtelse,
-            beregnetUtbetalingsoppdrag = beregnetUtbetalingsoppdrag,
+            andelerMedPeriodeId = beregnetUtbetalingsoppdrag.andeler,
         )
         tilkjentYtelseRepository.save(tilkjentYtelse)
     }
@@ -219,28 +220,26 @@ class UtbetalingsoppdragGeneratorService(
     private fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
         tilkjentYtelse: TilkjentYtelse,
         utbetalingsoppdrag: Utbetalingsoppdrag,
-    ): TilkjentYtelse {
+    ) {
         val opphør = utledOpphør(utbetalingsoppdrag, tilkjentYtelse.behandling)
 
-        return tilkjentYtelse.apply {
-            this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-            this.stønadTom = tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
-            this.stønadFom =
-                if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
-            this.endretDato = LocalDate.now()
-            this.opphørFom = opphør.opphørsdato?.toYearMonth()
-        }
+        tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
+        tilkjentYtelse.stønadTom = tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
+        tilkjentYtelse.stønadFom =
+            if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
+        tilkjentYtelse.endretDato = LocalDate.now()
+        tilkjentYtelse.opphørFom = opphør.opphørsdato?.toYearMonth()
     }
 
     private fun oppdaterAndelerMedPeriodeOffset(
         tilkjentYtelse: TilkjentYtelse,
-        beregnetUtbetalingsoppdrag: BeregnetUtbetalingsoppdragLongId,
+        andelerMedPeriodeId: List<AndelMedPeriodeIdLongId>,
     ) {
-        val andelerPåId = beregnetUtbetalingsoppdrag.andeler.associateBy { it.id }
+        val andelerPåId = andelerMedPeriodeId.associateBy { it.id }
         val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
         val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
-        if (beregnetUtbetalingsoppdrag.andeler.size != andelerSomSkalSendesTilOppdrag.size) {
-            error("Antallet andeler med oppdatert periodeOffset, forrigePeriodeOffset og kildeBehandlingId fra ny generator skal være likt antallet andeler med kalkulertUtbetalingsbeløp != 0. Generator gir ${beregnetUtbetalingsoppdrag.andeler.size} andeler men det er ${andelerSomSkalSendesTilOppdrag.size} andeler med kalkulertUtbetalingsbeløp != 0")
+        if (andelerMedPeriodeId.size != andelerSomSkalSendesTilOppdrag.size) {
+            error("Antallet andeler med oppdatert periodeOffset, forrigePeriodeOffset og kildeBehandlingId fra ny generator skal være likt antallet andeler med kalkulertUtbetalingsbeløp != 0. Generator gir ${andelerMedPeriodeId.size} andeler men det er ${andelerSomSkalSendesTilOppdrag.size} andeler med kalkulertUtbetalingsbeløp != 0")
         }
         andelerSomSkalSendesTilOppdrag.forEach { andel ->
             val andelMedOffset = andelerPåId[andel.id]
