@@ -492,7 +492,14 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
                 person,
             )
 
-        grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder().mapNotNull { it.innhold }.single()
+        val begrunnelseperioderIVedtaksperiode =
+            grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder().mapNotNull { it.innhold }
+
+        if (this.type == Vedtaksperiodetype.OPPHØR) {
+            begrunnelseperioderIVedtaksperiode.first()
+        } else {
+            begrunnelseperioderIVedtaksperiode.single()
+        }
     }
 }
 
@@ -552,8 +559,8 @@ private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOg
             månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + grunnlagPerioderSplittetPåVedtaksperiode
         ).zipWithNext { forrige, denne ->
-        periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
-    }.tilTidslinje()
+            periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
+        }.tilTidslinje()
 }
 
 private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(

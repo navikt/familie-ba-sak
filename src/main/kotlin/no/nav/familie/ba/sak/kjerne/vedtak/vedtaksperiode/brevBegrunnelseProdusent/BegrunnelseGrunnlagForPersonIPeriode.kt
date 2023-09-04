@@ -10,8 +10,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedNullable
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AndelForVedtaksperiode
@@ -81,7 +79,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
         this.perioderOvergangsstønad.filtrerPåAktør(person.aktør)
             .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(andelerTilkjentYtelseTidslinje.hentErUtbetalingSmåbarnstilleggTidslinje())
 
-    val begrunnelseGrunnlagForPersonIPeriode = forskjøvedeVilkårResultaterForPerson
+    return forskjøvedeVilkårResultaterForPerson
         .kombinerMed(
             andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForVedtaksPeriodeTidslinje(),
         ) { vilkårResultater, andeler ->
@@ -99,21 +97,4 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
         }.kombinerMedNullable(overgangsstønadTidslinje) { grunnlagForPerson, overgangsstønad ->
             grunnlagForPerson?.let { grunnlagForPerson.copy(overgangsstønad = overgangsstønad) }
         }
-    return begrunnelseGrunnlagForPersonIPeriode.fjernOverflødigePerioderPåSlutten()
-}
-
-private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.fjernOverflødigePerioderPåSlutten(): Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned> {
-    val sortertePerioder = this.perioder()
-        .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
-
-    val perioderTilOgMedSisteInnvilgede = sortertePerioder.dropLastWhile { periode ->
-        periode.innhold == null || !periode.innhold.erOrdinæreVilkårInnvilget() || !periode.innhold.erInnvilgetEtterEndretUtbetaling()
-    }
-
-    val førstePeriodeEtterSisteInnvilgedePeriode =
-        sortertePerioder.subList(perioderTilOgMedSisteInnvilgede.size, sortertePerioder.size).firstOrNull()
-            ?.copy(tilOgMed = MånedTidspunkt.uendeligLengeTil())
-
-    return (perioderTilOgMedSisteInnvilgede + førstePeriodeEtterSisteInnvilgedePeriode).filterNotNull()
-        .tilTidslinje()
 }
