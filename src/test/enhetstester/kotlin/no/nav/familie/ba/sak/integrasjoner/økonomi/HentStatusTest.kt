@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.årMnd
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -45,6 +47,8 @@ class HentStatusTest {
 
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
 
+    private val featureToggleService: FeatureToggleService = mockk()
+
     @BeforeEach
     fun setUp() {
         val økonomiService = ØkonomiService(
@@ -55,11 +59,14 @@ class HentStatusTest {
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             kontrollerNyUtbetalingsgeneratorService = kontrollerNyUtbetalingsgeneratorService,
             utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
+            featureToggleService = featureToggleService,
         )
         statusFraOppdrag = StatusFraOppdrag(
             økonomiService = økonomiService,
             taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() },
         )
+
+        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR, false) } returns false
     }
 
     @Test
