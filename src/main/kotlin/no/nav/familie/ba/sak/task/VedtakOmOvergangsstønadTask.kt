@@ -30,7 +30,7 @@ class VedtakOmOvergangsstønadTask(
 
         val responseFraService = autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = aktør,
-            behandlingsdata = aktør,
+            aktør = aktør,
         )
         secureLogger.info("Håndterte vedtak om overgangsstønad for person $personIdent:\n$responseFraService")
     }
