@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -68,6 +69,7 @@ class UtbetalingsoppdragGeneratorService(
         tilkjentYtelse: TilkjentYtelse,
         beregnetUtbetalingsoppdrag: BeregnetUtbetalingsoppdragLongId,
     ) {
+        secureLogger.info("Oppdaterer TilkjentYtelse med utbetalingsoppdrag og offsets på andeler for behandling ${tilkjentYtelse.behandling.id}")
         tilkjentYtelse.utbetalingsoppdrag =
             objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag.utbetalingsoppdrag)
         val andelerPåId = beregnetUtbetalingsoppdrag.andeler.associateBy { it.id }
