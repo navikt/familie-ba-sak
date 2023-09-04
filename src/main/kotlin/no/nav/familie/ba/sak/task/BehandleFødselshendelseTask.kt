@@ -92,7 +92,6 @@ class BehandleFødselshendelseTask(
                 }
             }
         } catch (e: FunksjonellFeil) {
-            // else opprett task
             val aktør = personidentService.hentAktør(nyBehandling.morsIdent)
             val fagsak = fagsakService.hentNormalFagsak(aktør)
             val behandling = if (fagsak != null) { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } else { null }
