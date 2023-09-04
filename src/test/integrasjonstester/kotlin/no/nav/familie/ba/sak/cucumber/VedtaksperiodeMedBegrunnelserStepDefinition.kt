@@ -130,7 +130,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
      */
     @Og("med overgangsstønad")
     fun `med overgangsstønad`(dataTable: DataTable) {
-        overgangsstønad = lagOvergangsstønad(dataTable, persongrunnlag)
+        overgangsstønad = lagOvergangsstønad(dataTable, persongrunnlag, behandlingTilForrigeBehandling, LocalDate.now())
     }
 
     @Og("med uregistrerte barn")

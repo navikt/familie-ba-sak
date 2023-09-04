@@ -99,12 +99,6 @@ fun AndelTilkjentYtelse.tilpassTilTidslinje() =
         differanseberegnetPeriodebeløp = this.differanseberegnetPeriodebeløp,
     )
 
-fun AndelTilkjentYtelse.tilpassTilTidslinjeOgBevarFomOgTom() =
-    tilpassTilTidslinje().copy(
-        stønadFom = this.stønadFom,
-        stønadTom = this.stønadTom,
-    )
-
 fun Tidslinje<AndelTilkjentYtelseForTidslinje, Måned>.tilAndelerTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) =
     perioder()
         .filter { it.innhold != null }
@@ -137,7 +131,7 @@ fun Iterable<AndelTilkjentYtelse>.tilTryggTidslinjeForSøkersYtelse(ytelseType: 
                 Periode(
                     it.stønadFom.tilTidspunkt(),
                     it.stønadTom.tilTidspunkt(),
-                    it.tilpassTilTidslinjeOgBevarFomOgTom(),
+                    it.tilpassTilTidslinje(),
                 )
             }
         }

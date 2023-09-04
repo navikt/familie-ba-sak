@@ -29,6 +29,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
+import no.nav.familie.ba.sak.kjerne.beregning.splittOgSlåSammen
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
@@ -277,17 +279,34 @@ fun lagAndelerTilkjentYtelse(
 fun lagOvergangsstønad(
     dataTable: DataTable,
     persongrunnlag: Map<Long, PersonopplysningGrunnlag>,
-): Map<Long, List<InternPeriodeOvergangsstønad>> = dataTable.asMaps()
-    .groupBy({ rad -> parseLong(Domenebegrep.BEHANDLING_ID, rad) }, { rad ->
-        val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
-        val aktørId = VedtaksperiodeMedBegrunnelserParser.parseAktørId(rad)
+    tidligereBehandlinger: Map<Long, Long?>,
+    dagensDato: LocalDate,
+): Map<Long, List<InternPeriodeOvergangsstønad>> {
+    val skalBrukeNyBegrunnelseLogikk = true
 
-        InternPeriodeOvergangsstønad(
-            fomDato = parseDato(Domenebegrep.FRA_DATO, rad),
-            tomDato = parseDato(Domenebegrep.TIL_DATO, rad),
-            personIdent = persongrunnlag[behandlingId]!!.personer.single { it.aktør.aktørId == aktørId }.aktør.aktivFødselsnummer(),
+    val overgangsstønadPeriodePåBehandlinger = dataTable.asMaps()
+        .groupBy({ rad -> parseLong(Domenebegrep.BEHANDLING_ID, rad) }, { rad ->
+            val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+            val aktørId = VedtaksperiodeMedBegrunnelserParser.parseAktørId(rad)
+
+            InternPeriodeOvergangsstønad(
+                fomDato = parseDato(Domenebegrep.FRA_DATO, rad),
+                tomDato = parseDato(Domenebegrep.TIL_DATO, rad),
+                personIdent = persongrunnlag[behandlingId]!!.personer.single { it.aktør.aktørId == aktørId }.aktør.aktivFødselsnummer(),
+            )
+        })
+
+    return overgangsstønadPeriodePåBehandlinger.mapValues { (behandlingId, overgangsstønad) ->
+        overgangsstønad.splittOgSlåSammen(
+            overgangsstønadPeriodePåBehandlinger[tidligereBehandlinger[behandlingId]]?.slåSammenTidligerePerioder(
+                dagensDato,
+                skalBrukeNyBegrunnelseLogikk,
+            ) ?: emptyList(),
+            dagensDato,
+            skalBrukeNyBegrunnelseLogikk,
         )
-    })
+    }
+}
 
 fun lagVedtaksPerioder(
     behandlingId: Long,
