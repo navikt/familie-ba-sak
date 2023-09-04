@@ -56,6 +56,10 @@ internal class BehandleFødselshendelseTaskTest {
     fun `skal kaste rekjør senere exception hvis det opprettes satsendring task`() {
         assertThrows<RekjørSenereException> {
             BehandleFødselshendelseTask(
+                behandlingHentOgPersisterService = mockk(),
+                fagsakService = mockk(),
+                oppgaveService = mockk(),
+                taskRepositoryWrapper = mockk(),
                 autovedtakStegService = mockk<AutovedtakStegService>().apply {
                     every {
                         kjørBehandlingFødselshendelse(
@@ -96,6 +100,10 @@ internal class BehandleFødselshendelseTaskTest {
         autovedtakStegService: AutovedtakStegService,
     ): BehandleFødselshendelseTask =
         BehandleFødselshendelseTask(
+            behandlingHentOgPersisterService = mockk(),
+            fagsakService = mockk(),
+            oppgaveService = mockk(),
+            taskRepositoryWrapper = mockk(),
             autovedtakStegService = autovedtakStegService,
             velgFagsystemService = mockk<VelgFagSystemService>().apply {
                 every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
