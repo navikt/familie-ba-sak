@@ -14,5 +14,5 @@ if [ -z "$AZURE_APP_CLIENT_ID" ]
 then
       return 1
 else
-      printf "%s;%s;%s;%s" "$AZURE_APP_CLIENT_ID" "$AZURE_APP_CLIENT_SECRET" "$UNLEASH_SERVER_API_URL" "$UNLEASH_SERVER_API_TOKEN" #| pbcopy
+      printf "%s;%s;%s;%s" "$AZURE_APP_CLIENT_ID" "$AZURE_APP_CLIENT_SECRET" "$UNLEASH_SERVER_API_URL" "$UNLEASH_SERVER_API_TOKEN"
 fi
