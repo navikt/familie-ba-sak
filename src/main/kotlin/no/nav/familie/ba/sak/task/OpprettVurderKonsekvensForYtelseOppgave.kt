@@ -26,7 +26,7 @@ class OpprettVurderKonsekvensForYtelseOppgave(
         task.metadata["oppgaveId"] = oppgaveService.opprettOppgaveForFødselshendelseUtenBehandling(
             ident = opprettVurderKonsekvensForYtelseOppgaveTaskDTO.ident,
             oppgavetype = opprettVurderKonsekvensForYtelseOppgaveTaskDTO.oppgavetype,
-            fristForFerdigstillelse = opprettVurderKonsekvensForYtelseOppgaveTaskDTO.fristForFerdigstillelse,
+            fristForFerdigstillelse = LocalDate.now(),
             beskrivelse = opprettVurderKonsekvensForYtelseOppgaveTaskDTO.beskrivelse,
         )
     }
@@ -38,7 +38,6 @@ class OpprettVurderKonsekvensForYtelseOppgave(
         fun opprettTask(
             ident: AktørId,
             oppgavetype: Oppgavetype,
-            fristForFerdigstillelse: LocalDate,
             beskrivelse: String,
         ): Task {
             return Task(
@@ -47,7 +46,6 @@ class OpprettVurderKonsekvensForYtelseOppgave(
                     OpprettVurderKonsekvensForYtelseOppgaveTaskDTO(
                         ident,
                         oppgavetype,
-                        fristForFerdigstillelse,
                         beskrivelse,
                     ),
                 ),

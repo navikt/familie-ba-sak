@@ -25,7 +25,6 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.Properties
@@ -111,7 +110,6 @@ class BehandleFødselshendelseTask(
                     OpprettVurderKonsekvensForYtelseOppgave.opprettTask(
                         ident = aktør.aktørId,
                         oppgavetype = Oppgavetype.VurderLivshendelse,
-                        fristForFerdigstillelse = LocalDate.now(),
                         beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
                     ),
                 )

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.randomAktør
@@ -20,7 +21,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 
 internal class BehandleFødselshendelseTaskTest {
 
@@ -106,6 +106,7 @@ internal class BehandleFødselshendelseTaskTest {
     fun `skal opprette oppggavetask dersom det oppstår en funksjonell feil ved fødselshendelse`() {
         val taskRepositoryWrapper = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() }
         val randomAktør = randomAktør()
+        mockkObject(OpprettVurderKonsekvensForYtelseOppgave)
 
         BehandleFødselshendelseTask(
             behandlingHentOgPersisterService = mockk(),
@@ -139,14 +140,11 @@ internal class BehandleFødselshendelseTaskTest {
             ),
         )
         verify(exactly = 1) {
-            taskRepositoryWrapper.save(
-                OpprettVurderKonsekvensForYtelseOppgave.opprettTask(
+            OpprettVurderKonsekvensForYtelseOppgave.opprettTask(
                     ident = randomAktør.aktørId,
                     oppgavetype = Oppgavetype.VurderLivshendelse,
-                    fristForFerdigstillelse = LocalDate.now(),
                     beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
-                ),
-            )
+                )
         }
     }
 
