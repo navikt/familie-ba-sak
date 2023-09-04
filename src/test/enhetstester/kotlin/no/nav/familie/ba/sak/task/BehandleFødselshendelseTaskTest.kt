@@ -3,18 +3,24 @@ package no.nav.familie.ba.sak.task
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 internal class BehandleFødselshendelseTaskTest {
 
@@ -94,6 +100,50 @@ internal class BehandleFødselshendelseTaskTest {
                 ),
             )
         }
+    }
+
+    @Test
+    fun `skal opprette oppggavetask dersom det oppstår en funksjonell feil ved fødselshendelse`() {
+        val taskRepositoryWrapper = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() }
+        val randomAktør = randomAktør()
+
+        BehandleFødselshendelseTask(
+            behandlingHentOgPersisterService = mockk(),
+            fagsakService = mockk<FagsakService>().apply { every { hentNormalFagsak(any()) } returns null },
+            oppgaveService = mockk(),
+            taskRepositoryWrapper = taskRepositoryWrapper,
+            personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns randomAktør},
+            autovedtakStegService = mockk(),
+            velgFagsystemService = mockk<VelgFagSystemService>().apply {
+                every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
+                    FagsystemRegelVurdering.SEND_TIL_BA,
+                    FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
+                )
+            },
+            infotrygdFeedService = mockk(),
+            startSatsendring = mockk<StartSatsendring>().apply {
+                every {
+                    sjekkOgOpprettSatsendringVedGammelSats(
+                        any<String>(),
+                    )
+                }.throws(FunksjonellFeil("funksjonell feil"))
+            },
+        ).doTask(
+            BehandleFødselshendelseTask.opprettTask(
+                BehandleFødselshendelseTaskDTO(
+                    nyBehandling = NyBehandlingHendelse(
+                        morsIdent = randomFnr(),
+                        barnasIdenter = listOf("31018721832"),
+                    ),
+                ),
+            ),
+        )
+        verify(exactly = 1) { taskRepositoryWrapper.save(OpprettVurderKonsekvensForYtelseOppgave.opprettTask(
+            ident = randomAktør.aktørId,
+            oppgavetype = Oppgavetype.VurderLivshendelse,
+            fristForFerdigstillelse = LocalDate.now(),
+            beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk"
+        ))}
     }
 
     private fun settOppBehandleFødselshendelseTask(
