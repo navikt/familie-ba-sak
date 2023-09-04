@@ -112,7 +112,7 @@ internal class BehandleFødselshendelseTaskTest {
             fagsakService = mockk<FagsakService>().apply { every { hentNormalFagsak(any()) } returns null },
             oppgaveService = mockk(),
             taskRepositoryWrapper = taskRepositoryWrapper,
-            personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns randomAktør},
+            personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns randomAktør },
             autovedtakStegService = mockk(),
             velgFagsystemService = mockk<VelgFagSystemService>().apply {
                 every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
@@ -138,12 +138,16 @@ internal class BehandleFødselshendelseTaskTest {
                 ),
             ),
         )
-        verify(exactly = 1) { taskRepositoryWrapper.save(OpprettVurderKonsekvensForYtelseOppgave.opprettTask(
-            ident = randomAktør.aktørId,
-            oppgavetype = Oppgavetype.VurderLivshendelse,
-            fristForFerdigstillelse = LocalDate.now(),
-            beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk"
-        ))}
+        verify(exactly = 1) {
+            taskRepositoryWrapper.save(
+                OpprettVurderKonsekvensForYtelseOppgave.opprettTask(
+                    ident = randomAktør.aktørId,
+                    oppgavetype = Oppgavetype.VurderLivshendelse,
+                    fristForFerdigstillelse = LocalDate.now(),
+                    beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
+                ),
+            )
+        }
     }
 
     private fun settOppBehandleFødselshendelseTask(

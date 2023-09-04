@@ -137,19 +137,19 @@ class OppgaveService(
         fristForFerdigstillelse: LocalDate,
         beskrivelse: String,
     ): String {
-            val opprettOppgave = OpprettOppgaveRequest(
-                ident = OppgaveIdentV2(ident = ident, gruppe = IdentGruppe.AKTOERID),
-                tema = Tema.BAR,
-                oppgavetype = oppgavetype,
-                fristFerdigstillelse = fristForFerdigstillelse,
-                beskrivelse = beskrivelse,
-                saksId = null,
-                behandlingstema = null,
-                enhetsnummer = null
-            )
-            val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave).oppgaveId.toString()
+        val opprettOppgave = OpprettOppgaveRequest(
+            ident = OppgaveIdentV2(ident = ident, gruppe = IdentGruppe.AKTOERID),
+            tema = Tema.BAR,
+            oppgavetype = oppgavetype,
+            fristFerdigstillelse = fristForFerdigstillelse,
+            beskrivelse = beskrivelse,
+            saksId = null,
+            behandlingstema = null,
+            enhetsnummer = null,
+        )
+        val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave).oppgaveId.toString()
 
-            økTellerForAntallOppgaveTyper(oppgavetype)
+        økTellerForAntallOppgaveTyper(oppgavetype)
 
         return opprettetOppgaveId
     }
