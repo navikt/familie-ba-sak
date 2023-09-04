@@ -209,6 +209,13 @@ class ClientMocks {
             } answers {
                 System.getProperty(featureSlot.captured)?.toBoolean() ?: mockFeatureToggleServiceAnswer
             }
+
+            every {
+                mockFeatureToggleService.isEnabled(
+                    FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+                    false,
+                )
+            } returns false
         }
 
         fun clearPdlIdentRestClient(
