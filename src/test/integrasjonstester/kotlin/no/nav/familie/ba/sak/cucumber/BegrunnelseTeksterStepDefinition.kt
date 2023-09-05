@@ -205,7 +205,6 @@ class BegrunnelseTeksterStepDefinition {
                         endredeUtbetalinger[behandlingId] ?: emptySet(),
                     )
                 } ?: emptyList(),
-                skalBrukeNyVedtaksperiodeLøsning = true,
             )
         }
 
