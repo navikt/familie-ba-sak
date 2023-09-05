@@ -587,23 +587,29 @@ private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
     val erSmåbarnstilleggDennePerioden =
         begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.SMÅBARNSTILLEGG }
 
+    val erSmåbarnstilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.erSmåbarnstilleggIForrigeBehandlingPeriode
+
     val begrunnelseGjelderSmåbarnstillegg =
         UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG in utvidetBarnetrygdTriggere
 
+    val erEndringISmåbarnstilleggFraForrigeBehandling =
+        erSmåbarnstilleggIForrigeBehandlingPeriode != erSmåbarnstilleggDennePerioden
+
     val begrunnelseMatcherPeriodeResultat =
-        this.matcherPerioderesultat(erSmåbarnstilleggForrigePeriode, erSmåbarnstilleggDennePerioden)
+        this.matcherPerioderesultat(erSmåbarnstilleggForrigePeriode, erSmåbarnstilleggDennePerioden, erSmåbarnstilleggIForrigeBehandlingPeriode)
 
     val erEndringISmåbarnstillegg = erSmåbarnstilleggForrigePeriode != erSmåbarnstilleggDennePerioden
 
-    return begrunnelseGjelderSmåbarnstillegg && begrunnelseMatcherPeriodeResultat && erEndringISmåbarnstillegg
+    return begrunnelseGjelderSmåbarnstillegg && begrunnelseMatcherPeriodeResultat && (erEndringISmåbarnstillegg || erEndringISmåbarnstilleggFraForrigeBehandling)
 }
 
 private fun SanityBegrunnelse.matcherPerioderesultat(
     erSmåbarnstilleggForrigePeriode: Boolean,
     erSmåbarnstilleggDennePerioden: Boolean,
+    erSmåbarnstilleggIForrigeBehandlingPeriode: Boolean,
 ): Boolean {
-    val erReduksjon = erSmåbarnstilleggForrigePeriode && !erSmåbarnstilleggDennePerioden
-    val erØkning = !erSmåbarnstilleggForrigePeriode && erSmåbarnstilleggDennePerioden
+    val erReduksjon = !erSmåbarnstilleggDennePerioden && (erSmåbarnstilleggForrigePeriode || erSmåbarnstilleggIForrigeBehandlingPeriode)
+    val erØkning = erSmåbarnstilleggDennePerioden && (!erSmåbarnstilleggForrigePeriode || !erSmåbarnstilleggIForrigeBehandlingPeriode)
 
     val erBegrunnelseReduksjon = periodeResultat == SanityPeriodeResultat.REDUKSJON
     val erBegrunnelseØkning = periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING

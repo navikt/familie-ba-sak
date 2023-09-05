@@ -25,6 +25,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         utvidetAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
+        skalBrukeNyBegrunnelseLogikk: Boolean,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         if (perioderMedFullOvergangsstønad.isEmpty() || utvidetAndeler.isEmpty() || barnasAndeler.isEmpty()) return emptyList()
 
@@ -50,21 +51,26 @@ data class SmåbarnstilleggBarnetrygdGenerator(
 
         return kombinertProsentTidslinje.filtrerIkkeNull().lagSmåbarnstilleggAndeler(
             søkerAktør = søkerAktør,
+            skalBrukeNyBegrunnelseLogikk = skalBrukeNyBegrunnelseLogikk,
         )
     }
 
     private fun Tidslinje<SmåbarnstilleggPeriode, Måned>.lagSmåbarnstilleggAndeler(
         søkerAktør: Aktør,
+        skalBrukeNyBegrunnelseLogikk: Boolean,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         return this.kombinerUtenNullMed(satstypeTidslinje(SatsType.SMA)) { småbarnstilleggPeriode, sats ->
             val prosentIPeriode = småbarnstilleggPeriode.prosent
             val beløpIPeriode = sats.avrundetHeltallAvProsent(prosent = prosentIPeriode)
 
+            val stønadFom = if (skalBrukeNyBegrunnelseLogikk) null else småbarnstilleggPeriode.overgangsstønadPeriode.fomDato.toYearMonth()
+            val stønadTom = if (skalBrukeNyBegrunnelseLogikk) null else småbarnstilleggPeriode.overgangsstønadPeriode.tomDato.toYearMonth()
+
             AndelTilkjentYtelseForTidslinje(
                 aktør = søkerAktør,
                 // Tar vare på overgangsstøandperiodene
-                stønadFom = småbarnstilleggPeriode.overgangsstønadPeriode.fomDato.toYearMonth(),
-                stønadTom = småbarnstilleggPeriode.overgangsstønadPeriode.tomDato.toYearMonth(),
+                stønadFom = stønadFom,
+                stønadTom = stønadTom,
                 beløp = beløpIPeriode,
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 sats = sats,
