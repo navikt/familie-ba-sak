@@ -319,7 +319,7 @@ class BehandleSmåbarnstilleggTest(
         val søkersAktør = personidentService.hentAktør(søkersIdent)
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
-            behandlingsdata = søkersAktør,
+            aktør = søkersAktør,
         )
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
@@ -348,7 +348,7 @@ class BehandleSmåbarnstilleggTest(
         )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
-            behandlingsdata = søkersAktør,
+            aktør = søkersAktør,
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
@@ -404,7 +404,7 @@ class BehandleSmåbarnstilleggTest(
         )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
-            behandlingsdata = søkersAktør,
+            aktør = søkersAktør,
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
@@ -469,7 +469,7 @@ class BehandleSmåbarnstilleggTest(
         )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
-            behandlingsdata = søkersAktør,
+            aktør = søkersAktør,
         )
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
@@ -535,7 +535,7 @@ class BehandleSmåbarnstilleggTest(
         )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
-            behandlingsdata = søkersAktør,
+            aktør = søkersAktør,
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
