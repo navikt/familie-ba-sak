@@ -242,10 +242,12 @@ fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
         SanityPeriodeResultat.INNVILGET_ELLER_ØKNING -> begrunnelseGrunnlag.dennePerioden.kompetanse ?: return false
 
         SanityPeriodeResultat.IKKE_INNVILGET,
-        SanityPeriodeResultat.REDUKSJON -> begrunnelseGrunnlag.forrigePeriode?.kompetanse ?: return false
+        SanityPeriodeResultat.REDUKSJON,
+        -> begrunnelseGrunnlag.forrigePeriode?.kompetanse ?: return false
 
         SanityPeriodeResultat.INGEN_ENDRING,
-        null -> return false
+        null,
+        -> return false
     }
 
     return this.annenForeldersAktivitet.contains(kompetanse.annenForeldersAktivitet) &&
@@ -573,8 +575,8 @@ private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOg
             månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + grunnlagPerioderSplittetPåVedtaksperiode
         ).zipWithNext { forrige, denne ->
-            periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
-        }.tilTidslinje()
+        periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
+    }.tilTidslinje()
 }
 
 private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
