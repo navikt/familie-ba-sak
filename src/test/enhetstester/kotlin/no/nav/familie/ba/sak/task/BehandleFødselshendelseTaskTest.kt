@@ -110,7 +110,7 @@ internal class BehandleFødselshendelseTaskTest {
     fun `skal opprette oppggavetask dersom det oppstår en funksjonell feil ved fødselshendelse uten eksisterende behandling`() {
         val taskRepositoryWrapper = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() }
         val randomAktør = randomAktør()
-        mockkObject(OpprettVurderKonsekvensForYtelseOppgave)
+        mockkObject(OpprettVurderFødselshendelseKonsekvensForYtelseOppgave)
 
         BehandleFødselshendelseTask(
             behandlingHentOgPersisterService = mockk(),
@@ -144,7 +144,7 @@ internal class BehandleFødselshendelseTaskTest {
             ),
         )
         verify(exactly = 1) {
-            OpprettVurderKonsekvensForYtelseOppgave.opprettTask(
+            OpprettVurderFødselshendelseKonsekvensForYtelseOppgave.opprettTask(
                 ident = randomAktør.aktørId,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
@@ -158,7 +158,7 @@ internal class BehandleFødselshendelseTaskTest {
         val oppgaveService = mockk<OppgaveService>().apply { every { opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns "Begrunnelse for oppgave" }
         val randomAktør = randomAktør()
         val behandling = lagBehandling()
-        mockkObject(OpprettVurderKonsekvensForYtelseOppgave)
+        mockkObject(OpprettVurderFødselshendelseKonsekvensForYtelseOppgave)
 
         BehandleFødselshendelseTask(
             fagsakService = mockk<FagsakService>().apply { every { hentNormalFagsak(any()) } returns behandling.fagsak },
