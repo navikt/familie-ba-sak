@@ -145,10 +145,10 @@ internal class BehandleFødselshendelseTaskTest {
         )
         verify(exactly = 1) {
             OpprettVurderKonsekvensForYtelseOppgave.opprettTask(
-                    ident = randomAktør.aktørId,
-                    oppgavetype = Oppgavetype.VurderLivshendelse,
-                    beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
-                )
+                ident = randomAktør.aktørId,
+                oppgavetype = Oppgavetype.VurderLivshendelse,
+                beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
+            )
         }
     }
 
