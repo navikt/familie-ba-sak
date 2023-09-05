@@ -19,14 +19,12 @@ class SatsendringService(
 ) {
     private val logger = LoggerFactory.getLogger(SatsendringService::class.java)
     fun erFagsakOppdatertMedSisteSatser(fagsakId: Long): Boolean {
-        // Må se på siste iverksatte og ikke siste vedtatte siden vi ønsker å se på
-        // den forrige behandlingen som sendte noe til økonomi
-        val sisteIverksatteEllerVedtatteBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId) ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)
+        val sisteVedtatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)
 
-        return sisteIverksatteEllerVedtatteBehandling == null ||
+        return sisteVedtatteBehandling == null ||
             andelerTilkjentYtelseOgEndreteUtbetalingerService
-                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteIverksatteEllerVedtatteBehandling.id)
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteVedtatteBehandling.id)
                 .erOppdatertMedSisteSatser()
     }
 
