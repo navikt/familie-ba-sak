@@ -12,7 +12,6 @@ class FeatureToggleConfig {
         // Release
         const val EØS_INFORMASJON_OM_ÅRLIG_KONTROLL = "familie-ba-sak.eos-informasjon-om-aarlig-kontroll"
         const val ER_MANUEL_POSTERING_TOGGLE_PÅ = "familie-ba-sak.manuell-postering"
-        const val VEDTAKSPERIODE_NY = "familie-ba-sak.vedtaksperiode-ny"
         const val FEILUTBETALT_VALUTA_PR_MND = "familie-ba-sak.feilutbetalt-valuta-pr-mnd"
         const val BEGRUNNELSER_NY = "familie-ba-sak.begrunnelser-ny"
 

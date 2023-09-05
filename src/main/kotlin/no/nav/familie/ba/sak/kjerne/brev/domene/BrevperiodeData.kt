@@ -33,12 +33,11 @@ data class BrevperiodeData(
         featureToggleService = featureToggleService,
     )
 
-    fun hentBegrunnelserOgFritekster(skalBrukeNyVedtaksperiodeLøsning: Boolean): List<Begrunnelse> {
+    fun hentBegrunnelserOgFritekster(): List<Begrunnelse> {
         val brevPeriodeGenerator = this.tilBrevPeriodeGenerator()
         return brevPeriodeGenerator.byggBegrunnelserOgFritekster(
             begrunnelserGrunnlagMedPersoner = brevPeriodeGenerator.hentBegrunnelsegrunnlagMedPersoner(),
             eøsBegrunnelserMedKompetanser = brevPeriodeGenerator.hentEøsBegrunnelserMedKompetanser(),
-            skalBrukeNyVedtaksperiodeLøsning,
         )
     }
 
