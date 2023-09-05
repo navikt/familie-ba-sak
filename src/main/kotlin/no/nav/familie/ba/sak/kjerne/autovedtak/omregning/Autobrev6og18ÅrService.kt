@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.autovedtak.OmregningBrevData
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -90,7 +91,7 @@ class Autobrev6og18ÅrService(
 
         autovedtakStegService.kjørBehandlingOmregning(
             mottakersAktør = behandling.fagsak.aktør,
-            behandlingsdata = AutovedtakBrevBehandlingsdata(
+            behandlingsdata = OmregningBrevData(
                 aktør = behandling.fagsak.aktør,
                 behandlingsårsak = behandlingsårsak,
                 standardbegrunnelse = AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(
