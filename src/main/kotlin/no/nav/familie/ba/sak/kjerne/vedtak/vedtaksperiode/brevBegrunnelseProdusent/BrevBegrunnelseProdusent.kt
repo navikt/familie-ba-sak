@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent
 
 import erGjeldendeForUtgjørendeVilkår
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -238,11 +239,13 @@ private fun SanityBegrunnelse.erGjeldendeForRolle(
 fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
 ): Boolean {
-    val kompetanseIPeriode = begrunnelseGrunnlag.dennePerioden.kompetanse ?: return false
+    val kompetanse = begrunnelseGrunnlag.dennePerioden.kompetanse
+        ?: begrunnelseGrunnlag.forrigePeriode?.kompetanse
+        ?: throw Feil("Ingen kompetanse i denne eller forrige periode")
 
-    return this.annenForeldersAktivitet.contains(kompetanseIPeriode.annenForeldersAktivitet) &&
-        this.barnetsBostedsland.contains(landkodeTilBarnetsBostedsland(kompetanseIPeriode.barnetsBostedsland)) &&
-        this.kompetanseResultat.contains(kompetanseIPeriode.resultat)
+    return this.annenForeldersAktivitet.contains(kompetanse.annenForeldersAktivitet) &&
+        this.barnetsBostedsland.contains(landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland)) &&
+        this.kompetanseResultat.contains(kompetanse.resultat)
 }
 
 fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåHendelser(
@@ -323,34 +326,40 @@ private fun hentResultaterForForrigePeriode(
 }
 
 private fun hentResultaterForPeriode(
-    begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode?,
+    begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode,
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
-) = if (begrunnelseGrunnlagForPeriode?.erOrdinæreVilkårInnvilget() == true &&
-    begrunnelseGrunnlagForPeriode.erInnvilgetEtterEndretUtbetaling()
-) {
-    val erReduksjonIAndel = erReduksjonIAndelMellomPerioder(
-        begrunnelseGrunnlagForPeriode,
-        begrunnelseGrunnlagForrigePeriode,
-    )
-    val erØkingIAndel = erØkningIAndelMellomPerioder(
-        begrunnelseGrunnlagForPeriode,
-        begrunnelseGrunnlagForrigePeriode,
-    )
+): List<SanityPeriodeResultat> {
+    val erAndelerPåPersonHvisBarn = begrunnelseGrunnlagForPeriode.person.type != PersonType.BARN ||
+        begrunnelseGrunnlagForPeriode.andeler.toList().isNotEmpty()
 
-    val erSøker = begrunnelseGrunnlagForPeriode.person.type == PersonType.SØKER
-    val erOrdinæreVilkårOppfyltIForrigePeriode =
-        begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true
+    val erInnvilgetEtterVilkårOgEndretUtbetaling =
+        begrunnelseGrunnlagForPeriode.erOrdinæreVilkårInnvilget() && begrunnelseGrunnlagForPeriode.erInnvilgetEtterEndretUtbetaling()
 
-    listOfNotNull(
-        if (erØkingIAndel || erSøker) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
-        if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
-        if (!erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode) SanityPeriodeResultat.INGEN_ENDRING else null,
-    )
-} else {
-    listOf(
-        SanityPeriodeResultat.REDUKSJON,
-        SanityPeriodeResultat.IKKE_INNVILGET,
-    )
+    return if (erInnvilgetEtterVilkårOgEndretUtbetaling && erAndelerPåPersonHvisBarn) {
+        val erReduksjonIAndel = erReduksjonIAndelMellomPerioder(
+            begrunnelseGrunnlagForPeriode,
+            begrunnelseGrunnlagForrigePeriode,
+        )
+        val erØkingIAndel = erØkningIAndelMellomPerioder(
+            begrunnelseGrunnlagForPeriode,
+            begrunnelseGrunnlagForrigePeriode,
+        )
+
+        val erSøker = begrunnelseGrunnlagForPeriode.person.type == PersonType.SØKER
+        val erOrdinæreVilkårOppfyltIForrigePeriode =
+            begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true
+
+        listOfNotNull(
+            if (erØkingIAndel || erSøker) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
+            if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
+            if (!erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode) SanityPeriodeResultat.INGEN_ENDRING else null,
+        )
+    } else {
+        listOf(
+            SanityPeriodeResultat.REDUKSJON,
+            SanityPeriodeResultat.IKKE_INNVILGET,
+        )
+    }
 }
 
 private fun erReduksjonIAndelMellomPerioder(
@@ -559,8 +568,8 @@ private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOg
             månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + grunnlagPerioderSplittetPåVedtaksperiode
         ).zipWithNext { forrige, denne ->
-        periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
-    }.tilTidslinje()
+            periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
+        }.tilTidslinje()
 }
 
 private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
