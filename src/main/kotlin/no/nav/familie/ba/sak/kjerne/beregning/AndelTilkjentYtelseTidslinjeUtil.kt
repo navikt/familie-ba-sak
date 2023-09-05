@@ -120,7 +120,6 @@ fun Tidslinje<AndelTilkjentYtelseForTidslinje, Måned>.tilAndelerTilkjentYtelse(
 
 /**
  * Lager tidslinje med AndelTilkjentYtelseForTidslinje-objekter, som derfor er "trygg" mtp DB-endringer
- * Ivaretar fom og tom i objektene, slik at ellers like andeler ikke blir slått sammen
  */
 fun Iterable<AndelTilkjentYtelse>.tilTryggTidslinjeForSøkersYtelse(ytelseType: YtelseType) = this
     .filter { it.erSøkersAndel() }

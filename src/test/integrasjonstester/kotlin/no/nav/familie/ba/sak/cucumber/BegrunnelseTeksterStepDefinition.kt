@@ -88,9 +88,6 @@ class BegrunnelseTeksterStepDefinition {
         persongrunnlag.putAll(lagPersonGrunnlag(dataTable))
     }
 
-    /**
-     * Mulige verdier: | Dato |
-     */
     @Og("følgende dagens dato {}")
     fun `følgende dagens dato`(dagensDatoString: String) {
         dagensDato = parseDato(dagensDatoString)
