@@ -23,7 +23,7 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>4.0.0</spring.cloud.version>
         <prosessering.version>2.20230807154047_d770f01</prosessering.version>
-        <felles.version>2.20230825095715_3bcaf53</felles.version>
+        <felles.version>2.20230905101454_06fa3d7</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20230808083340_ced4750</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
@@ -257,7 +257,6 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>unleash</artifactId>
-            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
