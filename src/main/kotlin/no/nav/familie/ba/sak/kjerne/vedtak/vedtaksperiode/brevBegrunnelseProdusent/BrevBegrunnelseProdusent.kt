@@ -136,7 +136,7 @@ private fun hentStandardBegrunnelser(
     }
 
     val filtrertPåVilkår = filtrertPåRolleOgPeriodetype.filterValues {
-        ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT !in it.ovrigeTriggere &&
+        !it.begrunnelseGjelderReduksjonFraForrigeBehandling() &&
             it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag)
     }
 
@@ -193,12 +193,14 @@ private fun SanityBegrunnelse.erGjeldendeForReduksjonFraForrigeBehandling(begrun
             ?: emptySet()
 
     val vilkårMistetSidenForrigeBehandling = vilkårForrigeBehandling - vilkårDenneBehandlingen
-    val begrunnelseGjelderReduksjonPåTversAvBehandlinger =
-        ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT in this.ovrigeTriggere
+
     val begrunnelseGjelderMistedeVilkår = this.vilkår.all { it in vilkårMistetSidenForrigeBehandling }
 
-    return begrunnelseGjelderReduksjonPåTversAvBehandlinger && begrunnelseGjelderMistedeVilkår
+    return begrunnelseGjelderReduksjonFraForrigeBehandling() && begrunnelseGjelderMistedeVilkår
 }
+
+private fun SanityBegrunnelse.begrunnelseGjelderReduksjonFraForrigeBehandling() =
+    ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT in this.ovrigeTriggere || ØvrigTrigger.REDUKSJON_FRA_FORRIGE_BEHANDLING in this.ovrigeTriggere
 
 private fun hentEØSStandardBegrunnelser(
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
