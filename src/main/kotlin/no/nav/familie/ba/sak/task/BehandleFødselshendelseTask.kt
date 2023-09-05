@@ -83,7 +83,7 @@ class BehandleFødselshendelseTask(
                         mottakersAktør = personidentService.hentAktør(
                             nyBehandling.morsIdent,
                         ),
-                        behandlingsdata = nyBehandling,
+                        nyBehandlingHendelse = nyBehandling,
                     )
                 }
 
