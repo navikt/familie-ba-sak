@@ -29,6 +29,7 @@ import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import no.nav.familie.unleash.UnleashContextFields
 import no.nav.familie.unleash.UnleashService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -65,6 +66,7 @@ class SimuleringService(
                     mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
                 )
             ) {
+                logger.info("Bruker ny utbetalingsgenerator for simulering for behandling ${vedtak.behandling.id}")
                 utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                     vedtak = vedtak,
                     saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
@@ -261,5 +263,6 @@ class SimuleringService(
 
     companion object {
         const val MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK = 100
+        val logger = LoggerFactory.getLogger(SimuleringService::class.java)
     }
 }
