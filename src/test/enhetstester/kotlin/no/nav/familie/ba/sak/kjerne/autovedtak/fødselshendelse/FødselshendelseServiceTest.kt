@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.FødselshendelseData
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -235,7 +236,7 @@ class FødselshendelseServiceTest {
             ),
         )
 
-        autovedtakFødselshendelseService.kjørBehandling(nyBehandlingHendelse)
+        autovedtakFødselshendelseService.kjørBehandling(FødselshendelseData(nyBehandlingHendelse))
         verify(exactly = 0) {
             opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = any(),

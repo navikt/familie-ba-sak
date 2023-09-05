@@ -93,6 +93,7 @@ class VilkårTilTilkjentYtelseTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
 
         Assertions.assertEquals(
@@ -156,6 +157,7 @@ class VilkårTilTilkjentYtelseTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         ) { aktør ->
             if (småbarnstilleggTestPeriode != null) {
                 listOf(
@@ -233,6 +235,7 @@ class VilkårTilTilkjentYtelseTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
 
         Assertions.assertEquals(
