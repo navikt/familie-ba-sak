@@ -13,13 +13,13 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.simulering.KontrollerNyUtbetalingsgeneratorService
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
+import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
@@ -46,7 +46,7 @@ internal class ØkonomiServiceTest {
     private lateinit var utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService
 
     @MockK
-    private lateinit var featureToggleService: FeatureToggleService
+    private lateinit var unleashService: UnleashService
 
     @InjectMockKs
     private lateinit var økonomiService: ØkonomiService
@@ -131,9 +131,9 @@ internal class ØkonomiServiceTest {
             )
         } returns emptyList()
         every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-                false,
+            unleashService.isEnabled(
+                toggleId = FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+                properties = any(),
             )
         } returns toggelPå
 

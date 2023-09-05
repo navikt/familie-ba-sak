@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -22,6 +21,8 @@ import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppd
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.unleash.UnleashContextFields
+import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -35,7 +36,7 @@ class UtbetalingsoppdragGeneratorService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
     private val beregningService: BeregningService,
-    private val featureToggleService: FeatureToggleService,
+    private val unleashService: UnleashService,
 ) {
 
     @Transactional
@@ -61,7 +62,11 @@ class UtbetalingsoppdragGeneratorService(
             endretMigreringsDato = endretMigreringsDato,
         )
 
-        if (!erSimulering && featureToggleService.isEnabled(FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR, false)) {
+        if (!erSimulering && unleashService.isEnabled(
+                FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+                mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
+            )
+        ) {
             oppdaterTilkjentYtelse(nyTilkjentYtelse, beregnetUtbetalingsoppdrag)
         }
 

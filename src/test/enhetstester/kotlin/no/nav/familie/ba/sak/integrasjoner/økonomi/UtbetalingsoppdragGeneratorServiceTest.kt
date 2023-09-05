@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -24,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
+import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -48,7 +48,7 @@ class UtbetalingsoppdragGeneratorServiceTest {
     private lateinit var beregningService: BeregningService
 
     @MockK
-    private lateinit var featureToggleService: FeatureToggleService
+    private lateinit var unleashService: UnleashService
 
     @InjectMockKs
     private lateinit var utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
@@ -483,9 +483,9 @@ class UtbetalingsoppdragGeneratorServiceTest {
         every { behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id) } returns listOf(behandling)
 
         every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-                false,
+            unleashService.isEnabled(
+                toggleId = FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+                properties = any(),
             )
         } returns brukNyUtbetalingsgeneratorToggleErPå
 

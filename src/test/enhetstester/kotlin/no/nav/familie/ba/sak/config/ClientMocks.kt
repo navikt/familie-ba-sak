@@ -40,6 +40,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.leader.LeaderClient
+import no.nav.familie.unleash.UnleashService
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -209,11 +210,33 @@ class ClientMocks {
             } answers {
                 System.getProperty(featureSlot.captured)?.toBoolean() ?: mockFeatureToggleServiceAnswer
             }
+        }
+
+        fun clearUnleashServiceMocks(mockUnleashService: UnleashService) {
+            val mockUnleashServiceAnswer = System.getProperty("mockFeatureToggleAnswer")?.toBoolean() ?: true
+
+            val featureSlot = slot<String>()
+            every {
+                mockUnleashService.isEnabled(toggleId = capture(featureSlot))
+            } answers {
+                System.getProperty(featureSlot.captured)?.toBoolean() ?: mockUnleashServiceAnswer
+            }
+            every {
+                mockUnleashService.isEnabled(toggleId = capture(featureSlot), defaultValue = any())
+            } answers {
+                System.getProperty(featureSlot.captured)?.toBoolean() ?: mockUnleashServiceAnswer
+            }
 
             every {
-                mockFeatureToggleService.isEnabled(
-                    FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-                    false,
+                mockUnleashService.isEnabled(toggleId = capture(featureSlot), properties = any())
+            } answers {
+                System.getProperty(featureSlot.captured)?.toBoolean() ?: mockUnleashServiceAnswer
+            }
+
+            every {
+                mockUnleashService.isEnabled(
+                    toggleId = FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+                    properties = any(),
                 )
             } returns false
         }

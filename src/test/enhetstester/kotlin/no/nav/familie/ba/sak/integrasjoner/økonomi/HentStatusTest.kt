@@ -8,8 +8,6 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.årMnd
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -26,6 +24,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -47,7 +46,7 @@ class HentStatusTest {
 
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
 
-    private val featureToggleService: FeatureToggleService = mockk()
+    private val unleashService: UnleashService = mockk()
 
     @BeforeEach
     fun setUp() {
@@ -59,14 +58,14 @@ class HentStatusTest {
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             kontrollerNyUtbetalingsgeneratorService = kontrollerNyUtbetalingsgeneratorService,
             utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
-            featureToggleService = featureToggleService,
+            unleashService = unleashService,
         )
         statusFraOppdrag = StatusFraOppdrag(
             økonomiService = økonomiService,
             taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() },
         )
 
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR, false) } returns false
+        every { unleashService.isEnabled(toggleId = any(), properties = any()) } returns false
     }
 
     @Test

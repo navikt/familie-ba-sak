@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -14,6 +13,8 @@ import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.unleash.UnleashContextFields
+import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -26,7 +27,7 @@ class ØkonomiService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService,
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
-    private val featureToggleService: FeatureToggleService,
+    private val unleashService: UnleashService,
 
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
@@ -44,7 +45,11 @@ class ØkonomiService(
         )
 
         val utbetalingsoppdrag: Utbetalingsoppdrag =
-            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR, false)) {
+            if (unleashService.isEnabled(
+                    FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+                    mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
+                )
+            ) {
                 logger.info("Bruker ny utbetalingsgenerator for behandling ${vedtak.behandling.id}")
                 utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                     vedtak,

@@ -27,6 +27,8 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
+import no.nav.familie.unleash.UnleashContextFields
+import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -38,6 +40,7 @@ class SimuleringService(
     private val økonomiSimuleringMottakerRepository: ØkonomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
+    private val unleashService: UnleashService,
     private val vedtakRepository: VedtakRepository,
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -57,7 +60,11 @@ class SimuleringService(
          * Denne verdien brukes ikke til noe i simulering.
          */
         val utbetalingsoppdrag: Utbetalingsoppdrag =
-            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR, false)) {
+            if (unleashService.isEnabled(
+                    FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+                    mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
+                )
+            ) {
                 utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                     vedtak = vedtak,
                     saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),

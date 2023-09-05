@@ -36,6 +36,7 @@ import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
+import no.nav.familie.unleash.UnleashService
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -58,6 +59,7 @@ internal class SimuleringServiceEnhetTest {
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService = mockk()
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
+    private val unleashService: UnleashService = mockk()
 
     private val simuleringService: SimuleringService = SimuleringService(
         økonomiKlient,
@@ -65,6 +67,7 @@ internal class SimuleringServiceEnhetTest {
         økonomiSimuleringMottakerRepository,
         tilgangService,
         featureToggleService,
+        unleashService,
         vedtakRepository,
         utbetalingsoppdragGeneratorService,
         behandlingHentOgPersisterService,
@@ -348,9 +351,9 @@ internal class SimuleringServiceEnhetTest {
         every { beregningService.erEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(any()) } returns true
 
         every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-                false,
+            unleashService.isEnabled(
+                toggleId = any(),
+                properties = any(),
             )
         } returns togglePå
 
