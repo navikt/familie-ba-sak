@@ -4,7 +4,7 @@
   "tom": "2021-12-31",
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
-    "Standardbegrunnelse$ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY"
+    "Standardbegrunnelse$ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING"
   ],
   "fritekster": [],
   "uregistrerteBarn": [],
@@ -73,7 +73,7 @@
         "antallBarnOppfyllerTriggereOgHarNullutbetaling": 1,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",
-        "apiNavn": "endretUtbetalingDeltBostedIngenUtbetaling",
+        "apiNavn": "endretUtbetalingDeltBostedIngenUtbetalingForSoknad",
         "belop": 0,
         "soknadstidspunkt": "31.01.21"
       }
