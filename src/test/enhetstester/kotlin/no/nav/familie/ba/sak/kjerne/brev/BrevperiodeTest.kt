@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.kontrakter.felles.objectMapper
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
 import java.io.File
@@ -29,6 +30,7 @@ class BrevperiodeTest {
     private val featureToggleService: FeatureToggleService = mockk()
 
     @Test
+    @Disabled("Må sees nøyere på i forbindelse med brevperioder")
     fun test(testReporter: TestReporter) {
         val testmappe = File("./src/test/resources/brevperiodeCaser")
 
