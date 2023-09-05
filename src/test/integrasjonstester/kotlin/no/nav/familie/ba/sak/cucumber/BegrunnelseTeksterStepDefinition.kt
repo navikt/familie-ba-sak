@@ -150,10 +150,10 @@ class BegrunnelseTeksterStepDefinition {
     @Og("med overgangsstønad for begrunnelse")
     fun `med overgangsstønad for begrunnelse`(dataTable: DataTable) {
         overgangsstønadForVedtaksperiode = lagOvergangsstønad(
-            dataTable,
-            persongrunnlag,
-            behandlingTilForrigeBehandling,
-            dagensDato,
+            dataTable = dataTable,
+            persongrunnlag = persongrunnlag,
+            tidligereBehandlinger = behandlingTilForrigeBehandling,
+            dagensDato = dagensDato,
         )
     }
 
