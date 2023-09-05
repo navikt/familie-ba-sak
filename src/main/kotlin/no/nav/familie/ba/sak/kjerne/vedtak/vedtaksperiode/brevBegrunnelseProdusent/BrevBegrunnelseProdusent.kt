@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent
 
 import erGjeldendeForUtgjørendeVilkår
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -239,9 +238,15 @@ private fun SanityBegrunnelse.erGjeldendeForRolle(
 fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
 ): Boolean {
-    val kompetanse = begrunnelseGrunnlag.dennePerioden.kompetanse
-        ?: begrunnelseGrunnlag.forrigePeriode?.kompetanse
-        ?: throw Feil("Ingen kompetanse i denne eller forrige periode")
+    val kompetanse = when (this.periodeResultat) {
+        SanityPeriodeResultat.INNVILGET_ELLER_ØKNING -> begrunnelseGrunnlag.dennePerioden.kompetanse ?: return false
+
+        SanityPeriodeResultat.IKKE_INNVILGET,
+        SanityPeriodeResultat.REDUKSJON -> begrunnelseGrunnlag.forrigePeriode?.kompetanse ?: return false
+
+        SanityPeriodeResultat.INGEN_ENDRING,
+        null -> return false
+    }
 
     return this.annenForeldersAktivitet.contains(kompetanse.annenForeldersAktivitet) &&
         this.barnetsBostedsland.contains(landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland)) &&
