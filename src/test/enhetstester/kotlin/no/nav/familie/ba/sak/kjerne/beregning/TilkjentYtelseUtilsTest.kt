@@ -81,6 +81,7 @@ internal class TilkjentYtelseUtilsTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
 
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -114,6 +115,7 @@ internal class TilkjentYtelseUtilsTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -151,6 +153,7 @@ internal class TilkjentYtelseUtilsTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -183,6 +186,7 @@ internal class TilkjentYtelseUtilsTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -212,6 +216,7 @@ internal class TilkjentYtelseUtilsTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
             .andelerTilkjentYtelse
             .toList()
@@ -273,6 +278,7 @@ internal class TilkjentYtelseUtilsTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
             .andelerTilkjentYtelse.toList()
             .sortedBy { it.stønadFom }
@@ -314,6 +320,7 @@ internal class TilkjentYtelseUtilsTest {
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
             .andelerTilkjentYtelse.toList()
             .sortedBy { it.stønadFom }
@@ -346,6 +353,7 @@ internal class TilkjentYtelseUtilsTest {
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
             .andelerTilkjentYtelse.toList()
             .sortedBy { it.stønadFom }
@@ -1258,6 +1266,7 @@ internal class TilkjentYtelseUtilsTest {
             ),
             endretUtbetalingAndeler = endretUtbetalingAndeler,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         ) { (_) ->
             lagOvergangsstønadPerioder(
                 perioder = overgangsstønadPerioder,

@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstøn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.domene.splitFramtidigePerioderFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
-import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
@@ -36,11 +35,13 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-fun List<PeriodeOvergangsstønadGrunnlag>.splittOgSlåSammen(
+fun List<InternPeriodeOvergangsstønad>.splittOgSlåSammen(
     overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>,
-) = map { InternPeriodeOvergangsstønad(it) }
-    .slåSammenTidligerePerioder()
-    .splitFramtidigePerioderFraForrigeBehandling(overgangsstønadPerioderFraForrigeBehandling)
+    dagensDato: LocalDate,
+    skalBrukeNyBegrunnelseLogikk: Boolean,
+) = this
+    .slåSammenTidligerePerioder(dagensDato, skalBrukeNyBegrunnelseLogikk)
+    .splitFramtidigePerioderFraForrigeBehandling(overgangsstønadPerioderFraForrigeBehandling, LocalDate.now())
 
 class VedtaksperiodefinnerSmåbarnstilleggFeil(
     melding: String,
@@ -59,6 +60,7 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     nyePerioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
+    skalBrukeNyBegrunnelseLogikk: Boolean,
 ): Boolean {
     val (forrigeSmåbarnstilleggAndeler, forrigeAndelerIkkeSmåbarnstillegg) = forrigeAndelerTilkjentYtelse.partition { it.erSmåbarnstillegg() }
 
@@ -69,6 +71,7 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
         barnasAndeler = forrigeBarnasAndeler,
         utvidetAndeler = forrigeUtvidetAndeler,
         barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer,
+        skalBrukeNyBegrunnelseLogikk = skalBrukeNyBegrunnelseLogikk,
     )
 
     return nyeSmåbarnstilleggAndeler.førerTilEndringIUtbetalingFraForrigeBehandling(
