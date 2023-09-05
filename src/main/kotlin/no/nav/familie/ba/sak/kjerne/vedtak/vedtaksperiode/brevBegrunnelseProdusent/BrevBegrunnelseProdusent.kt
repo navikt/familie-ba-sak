@@ -492,7 +492,14 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
                 person,
             )
 
-        grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder().mapNotNull { it.innhold }.single()
+        val begrunnelseperioderIVedtaksperiode =
+            grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder().mapNotNull { it.innhold }
+
+        if (this.type == Vedtaksperiodetype.OPPHØR) {
+            begrunnelseperioderIVedtaksperiode.first()
+        } else {
+            begrunnelseperioderIVedtaksperiode.single()
+        }
     }
 }
 
