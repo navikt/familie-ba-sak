@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdus
 import erGjeldendeForUtgjørendeVilkår
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
@@ -186,12 +187,15 @@ private fun SanityBegrunnelse.erGjeldendeForReduksjonFraForrigeBehandling(begrun
         return false
     }
 
-    val vilkårDenneBehandlingen = begrunnelseGrunnlag.dennePerioden.vilkårResultater.map { it.vilkårType }.toSet()
-    val vilkårForrigeBehandling =
-        begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.vilkårResultater?.map { it.vilkårType }?.toSet()
+    val oppfylteVilkårDenneBehandlingen =
+        begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
+            .map { it.vilkårType }.toSet()
+    val oppfylteVilkårForrigeBehandling =
+        begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.vilkårResultater?.filter { it.resultat == Resultat.OPPFYLT }
+            ?.map { it.vilkårType }?.toSet()
             ?: emptySet()
 
-    val vilkårMistetSidenForrigeBehandling = vilkårForrigeBehandling - vilkårDenneBehandlingen
+    val vilkårMistetSidenForrigeBehandling = oppfylteVilkårForrigeBehandling - oppfylteVilkårDenneBehandlingen
 
     val begrunnelseGjelderMistedeVilkår = this.vilkår.all { it in vilkårMistetSidenForrigeBehandling }
 
