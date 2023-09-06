@@ -202,11 +202,15 @@ enum class ØvrigTrigger {
     ALLTID_AUTOMATISK,
     ETTER_ENDRET_UTBETALING,
     ENDRET_UTBETALING,
-    GJELDER_FØRSTE_PERIODE,
-    GJELDER_FRA_INNVILGELSESTIDSPUNKT,
     OPPHØR_FRA_FORRIGE_BEHANDLING,
     REDUKSJON_FRA_FORRIGE_BEHANDLING,
     BARN_DØD,
+
+    @Deprecated("Skal erstattes med OPPHØR_FRA_FORRIGE_BEHANDLING, må endres i sanity")
+    GJELDER_FØRSTE_PERIODE,
+
+    @Deprecated("Skal erstattes med REDUKSJON_FRA_FORRIGE_BEHANDLING, må endres i sanity")
+    GJELDER_FRA_INNVILGELSESTIDSPUNKT,
 }
 
 enum class EndretUtbetalingsperiodeTrigger {
