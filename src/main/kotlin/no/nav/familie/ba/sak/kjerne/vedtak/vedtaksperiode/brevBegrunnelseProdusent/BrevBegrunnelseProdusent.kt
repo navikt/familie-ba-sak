@@ -127,12 +127,11 @@ private fun hentStandardBegrunnelser(
     val relevantePeriodeResultaterForrigePeriode =
         hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode)
 
-    val begrunnelserFiltrertPåPerioderesultat = sanityBegrunnelser.filterValues {
-        it.periodeResultat in relevantePeriodeResultater
-    }
-
-    val filtrertPåRolleOgPeriodetype = begrunnelserFiltrertPåPerioderesultat.filterValues { begrunnelse ->
+    val filtrertPåRolle = sanityBegrunnelser.filterValues { begrunnelse ->
         begrunnelse.erGjeldendeForRolle(person, fagsakType)
+    }
+    val filtrertPåRolleOgPeriodetype = filtrertPåRolle.filterValues {
+        it.periodeResultat in relevantePeriodeResultater
     }
 
     val filtrertPåVilkår = filtrertPåRolleOgPeriodetype.filterValues {
@@ -140,7 +139,7 @@ private fun hentStandardBegrunnelser(
             it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag)
     }
 
-    val filtrertPåReduksjonFraForrigeBehandling = filtrertPåRolleOgPeriodetype.filterValues {
+    val filtrertPåReduksjonFraForrigeBehandling = filtrertPåRolle.filterValues {
         it.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag)
     }
 
