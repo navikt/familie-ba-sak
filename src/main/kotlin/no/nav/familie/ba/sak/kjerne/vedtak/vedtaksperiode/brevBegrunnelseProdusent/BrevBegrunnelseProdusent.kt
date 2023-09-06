@@ -135,9 +135,15 @@ private fun hentStandardBegrunnelser(
         it.periodeResultat in relevantePeriodeResultater
     }
 
-    val filtrertPåVilkår = filtrertPåRolleOgPeriodetype.filterValues {
-        !it.begrunnelseGjelderReduksjonFraForrigeBehandling() &&
-            it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag)
+    val filtrertPåVilkårOgEndretUtbetaling = filtrertPåRolleOgPeriodetype.filterValues {
+        val begrunnelseErGjeldendeForUtgjørendeVilkår = it.vilkår.isNotEmpty()
+        val begrunnelseErGjeldendeForEndretUtbetaling = it.endringsaarsaker.isNotEmpty()
+
+        when {
+            begrunnelseErGjeldendeForUtgjørendeVilkår && begrunnelseErGjeldendeForEndretUtbetaling -> filtrerPåVilkår(it, begrunnelseGrunnlag) && filtrerPåEndretUtbetaling(it, endretUtbetalingDennePerioden)
+            begrunnelseErGjeldendeForUtgjørendeVilkår -> filtrerPåVilkår(it, begrunnelseGrunnlag)
+            else -> it.erEndretUtbetaling(endretUtbetalingDennePerioden)
+        }
     }
 
     val filtrertPåReduksjonFraForrigeBehandling = filtrertPåRolle.filterValues {
@@ -157,10 +163,6 @@ private fun hentStandardBegrunnelser(
             begrunnelse.erGjeldendeForRolle(person, fagsakType)
         }
 
-    val filtrertPåEndretUtbetaling = filtrertPåRolleOgPeriodetype.filterValues {
-        it.erEndretUtbetaling(endretUtbetaling = endretUtbetalingDennePerioden)
-    }
-
     val filtrertPåEtterEndretUtbetaling =
         filtrertPåRolleOgPeriodetypeForrigePeriode.filterValues {
             it.erEtterEndretUtbetaling(
@@ -174,13 +176,23 @@ private fun hentStandardBegrunnelser(
         vedtaksperiode.fom,
     )
 
-    return filtrertPåVilkår.keys.toSet() +
+    return filtrertPåVilkårOgEndretUtbetaling.keys.toSet() +
         filtrertPåReduksjonFraForrigeBehandling.keys.toSet() +
         filtrertPåSmåbarnstillegg.keys.toSet() +
-        filtrertPåEndretUtbetaling.keys.toSet() +
         filtrertPåEtterEndretUtbetaling.keys.toSet() +
         filtrertPåHendelser.keys.toSet()
 }
+
+private fun filtrerPåEndretUtbetaling(
+    it: SanityBegrunnelse,
+    endretUtbetalingDennePerioden: EndretUtbetalingAndelForVedtaksperiode?,
+) = it.erEndretUtbetaling(endretUtbetalingDennePerioden)
+
+private fun filtrerPåVilkår(
+    it: SanityBegrunnelse,
+    begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
+) = !it.begrunnelseGjelderReduksjonFraForrigeBehandling() &&
+    it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag)
 
 private fun SanityBegrunnelse.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
     if (begrunnelseGrunnlag !is BegrunnelseGrunnlagForPeriodeMedReduksjonPåTversAvBehandlinger) {
