@@ -367,7 +367,6 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
     val utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiode.tilUtvidetVedtaksperiodeMedBegrunnelser(
         personopplysningGrunnlag = personopplysningGrunnlag,
         andelerTilkjentYtelse = andelerTilkjentYtelse,
-        skalBrukeNyVedtaksperiodeLøsning = false,
     )
 
     val aktørerMedUtbetaling =

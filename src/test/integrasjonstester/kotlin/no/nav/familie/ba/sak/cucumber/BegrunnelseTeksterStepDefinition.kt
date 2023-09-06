@@ -8,9 +8,11 @@ import io.cucumber.java.no.Så
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapStandardBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -48,6 +50,8 @@ class BegrunnelseTeksterStepDefinition {
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
     private var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
+    private var overgangsstønadForVedtaksperiode = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
+    private var dagensDato: LocalDate = LocalDate.now()
 
     private var gjeldendeBehandlingId: Long? = null
 
@@ -82,6 +86,11 @@ class BegrunnelseTeksterStepDefinition {
     @Og("følgende persongrunnlag for begrunnelse")
     fun `følgende persongrunnlag for begrunnelse`(dataTable: DataTable) {
         persongrunnlag.putAll(lagPersonGrunnlag(dataTable))
+    }
+
+    @Og("følgende dagens dato {}")
+    fun `følgende dagens dato`(dagensDatoString: String) {
+        dagensDato = parseDato(dagensDatoString)
     }
 
     @Og("lag personresultater for begrunnelse for behandling {}")
@@ -132,6 +141,19 @@ class BegrunnelseTeksterStepDefinition {
         andelerTilkjentYtelse = lagAndelerTilkjentYtelse(dataTable, behandlinger, persongrunnlag)
     }
 
+    /**
+     * Mulige verdier: | BehandlingId | AktørId | Fra dato | Til dato |
+     */
+    @Og("med overgangsstønad for begrunnelse")
+    fun `med overgangsstønad for begrunnelse`(dataTable: DataTable) {
+        overgangsstønadForVedtaksperiode = lagOvergangsstønad(
+            dataTable = dataTable,
+            persongrunnlag = persongrunnlag,
+            tidligereBehandlinger = behandlingTilForrigeBehandling,
+            dagensDato = dagensDato,
+        )
+    }
+
     @Når("begrunnelsetekster genereres for behandling {}")
     fun `generer begrunnelsetekst for `(behandlingId: Long) {
         gjeldendeBehandlingId = behandlingId
@@ -148,7 +170,7 @@ class BegrunnelseTeksterStepDefinition {
             kompetanser = kompetanser[behandlingId] ?: emptyList(),
             endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
             andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
-            perioderOvergangsstønad = emptyList(),
+            perioderOvergangsstønad = overgangsstønadForVedtaksperiode[behandlingId] ?: emptyList(),
             uregistrerteBarn = emptyList(),
         )
         val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
@@ -183,7 +205,6 @@ class BegrunnelseTeksterStepDefinition {
                         endredeUtbetalinger[behandlingId] ?: emptySet(),
                     )
                 } ?: emptyList(),
-                skalBrukeNyVedtaksperiodeLøsning = true,
             )
         }
 
