@@ -25,12 +25,13 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -244,18 +245,34 @@ object TilkjentYtelseValidering {
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
     ): Tidslinje<Boolean, Måned> {
-        val andelerTidslinje = andeler.map {
-            Periode(fraOgMed = it.periode.fom.tilTidspunkt(), tilOgMed = it.periode.tom.tilTidspunkt(), innhold = it)
-        }.tilTidslinje()
-        val tidligereAndelerTidslinje = barnsAndelerFraAndreBehandlinger.map {
-            Periode(fraOgMed = it.periode.fom.tilTidspunkt(), tilOgMed = it.periode.tom.tilTidspunkt(), innhold = it)
-        }.tilTidslinje()
-
-        return andelerTidslinje.kombinerUtenNullMed(tidligereAndelerTidslinje) { andel, tidligereAndel ->
-            andel.overlapperMed(tidligereAndel) && andel.prosent + tidligereAndel.prosent > BigDecimal(100)
+        if (barnsAndelerFraAndreBehandlinger.isEmpty()) {
+            return emptyList<Periode<Boolean, Måned>>().tilTidslinje()
         }
+        val tidslinjePerBehandling = (andeler + barnsAndelerFraAndreBehandlinger).groupBy { it.behandlingId }.values
+            .map { it.tilAndelTilkjentYtelseTidslinje() }
+
+        val prosenttidslinjerPerBehandling =
+            tidslinjePerBehandling.map { tidslinje -> tidslinje.map { it?.prosent } }
+
+        val erOver100ProsentTidslinje =
+            prosenttidslinjerPerBehandling.fold(emptyList<Periode<BigDecimal, Måned>>().tilTidslinje()) { acc, neste ->
+                acc.kombinerMed(neste) { pAcc, pNeste ->
+                    (pAcc ?: BigDecimal.ZERO) + (pNeste ?: BigDecimal.ZERO)
+                }
+            }.map { (it ?: BigDecimal.ZERO) > BigDecimal.valueOf(100) }
+
+        return erOver100ProsentTidslinje
     }
 }
+
+private fun List<AndelTilkjentYtelse>.tilAndelTilkjentYtelseTidslinje() =
+    this.map {
+        Periode(
+            fraOgMed = it.periode.fom.tilTidspunkt(),
+            tilOgMed = it.periode.tom.tilTidspunkt(),
+            innhold = it,
+        )
+    }.tilTidslinje()
 
 private fun validerAtBeløpForPartStemmerMedSatser(
     person: PersonEnkel,
