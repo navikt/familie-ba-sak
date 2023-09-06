@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -62,12 +63,26 @@ fun genererVedtaksperioder(
 private fun List<VedtaksperiodeMedBegrunnelser>.leggTilPeriodeForUregistrerteBarn(
     vedtak: Vedtak,
 ): List<VedtaksperiodeMedBegrunnelser> {
-    fun VedtaksperiodeMedBegrunnelser.leggTilAvslagUregistrertBarnBegrunnelse() = this.begrunnelser.add(
-        Vedtaksbegrunnelse(
-            vedtaksperiodeMedBegrunnelser = this,
-            standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
-        ),
-    )
+    fun VedtaksperiodeMedBegrunnelser.leggTilAvslagUregistrertBarnBegrunnelse() =
+        when (vedtak.behandling.kategori) {
+            BehandlingKategori.EØS -> {
+                this.eøsBegrunnelser.add(
+                    EØSBegrunnelse(
+                        vedtaksperiodeMedBegrunnelser = this,
+                        begrunnelse = EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN,
+                    ),
+                )
+            }
+
+            BehandlingKategori.NASJONAL -> {
+                this.begrunnelser.add(
+                    Vedtaksbegrunnelse(
+                        vedtaksperiodeMedBegrunnelser = this,
+                        standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
+                    ),
+                )
+            }
+        }
 
     val avslagsperiodeUtenDatoer = this.find { it.fom == null && it.tom == null }
 
