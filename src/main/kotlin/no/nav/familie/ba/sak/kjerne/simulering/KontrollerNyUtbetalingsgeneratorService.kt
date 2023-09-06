@@ -61,70 +61,78 @@ class KontrollerNyUtbetalingsgeneratorService(
         gammeltUtbetalingsoppdrag: Utbetalingsoppdrag,
         erSimulering: Boolean = false,
     ): List<DiffFeilType> {
-        if (!skalKontrollereOppMotNyUtbetalingsgenerator()) return emptyList()
+        try {
+            if (!skalKontrollereOppMotNyUtbetalingsgenerator()) return emptyList()
 
-        val diffFeilTyper = mutableListOf<DiffFeilType>()
+            val diffFeilTyper = mutableListOf<DiffFeilType>()
 
-        val behandling = vedtak.behandling
+            val behandling = vedtak.behandling
 
-        val beregnetUtbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(
-            vedtak = vedtak,
-            saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-            erSimulering = erSimulering,
-        )
-
-        if (!beregnetUtbetalingsoppdrag.utbetalingsoppdrag.skalIverksettesMotOppdrag()) return emptyList()
-
-        secureLogger.info("Behandling ${behandling.id} har følgende oppdaterte andeler: ${beregnetUtbetalingsoppdrag.andeler}")
-
-        secureLogger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med gammel generator: $gammeltUtbetalingsoppdrag")
-        secureLogger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med ny generator: ${beregnetUtbetalingsoppdrag.utbetalingsoppdrag}")
-
-        val nyttSimuleringResultat =
-            økonomiKlient.hentSimulering(beregnetUtbetalingsoppdrag.utbetalingsoppdrag)
-
-        if (nyttSimuleringResultat.simuleringMottaker.isEmpty() && gammeltSimuleringResultat.simuleringMottaker.isEmpty()) return emptyList()
-
-        if (!bådeNyOgGammelGirEtResultat(
-                nyttSimuleringResultat = nyttSimuleringResultat,
-                gammeltSimuleringResultat = gammeltSimuleringResultat,
-                behandling = behandling,
+            val beregnetUtbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(
+                vedtak = vedtak,
+                saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                erSimulering = erSimulering,
             )
-        ) {
-            diffFeilTyper.add(DiffFeilType.DetEneSimuleringsresultatetErTomt)
+
+            if (!beregnetUtbetalingsoppdrag.utbetalingsoppdrag.skalIverksettesMotOppdrag()) return emptyList()
+
+            secureLogger.info("Behandling ${behandling.id} har følgende oppdaterte andeler: ${beregnetUtbetalingsoppdrag.andeler}")
+
+            secureLogger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med gammel generator: $gammeltUtbetalingsoppdrag")
+            secureLogger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med ny generator: ${beregnetUtbetalingsoppdrag.utbetalingsoppdrag}")
+
+            val nyttSimuleringResultat =
+                økonomiKlient.hentSimulering(beregnetUtbetalingsoppdrag.utbetalingsoppdrag)
+
+            if (nyttSimuleringResultat.simuleringMottaker.isEmpty() && gammeltSimuleringResultat.simuleringMottaker.isEmpty()) return emptyList()
+
+            if (!bådeNyOgGammelGirEtResultat(
+                    nyttSimuleringResultat = nyttSimuleringResultat,
+                    gammeltSimuleringResultat = gammeltSimuleringResultat,
+                    behandling = behandling,
+                )
+            ) {
+                diffFeilTyper.add(DiffFeilType.DetEneSimuleringsresultatetErTomt)
+                return diffFeilTyper
+            }
+
+            val simuleringsPerioderGammel = gammeltSimuleringResultat.tilSorterteSimuleringsPerioder(behandling)
+
+            val simuleringsPerioderNy = nyttSimuleringResultat.tilSorterteSimuleringsPerioder(behandling)
+
+            val simuleringsPerioderGammelTidslinje: Tidslinje<SimuleringsPeriode, Måned> =
+                simuleringsPerioderGammel.tilTidslinje()
+
+            val simuleringsPerioderNyTidslinje: Tidslinje<SimuleringsPeriode, Måned> =
+                simuleringsPerioderNy.tilTidslinje()
+
+            validerAtSimuleringsPerioderGammelHarResultatLik0ForPerioderFørSimuleringsPerioderNy(
+                simuleringsPerioderGammelTidslinje = simuleringsPerioderGammelTidslinje,
+                simuleringsPerioderNyTidslinje = simuleringsPerioderNyTidslinje,
+                behandling = behandling,
+            )?.let {
+                diffFeilTyper.add(it)
+            }
+            validerAtSimuleringsPerioderGammelHarResultatLikSimuleringsPerioderNyEtterFomTilNy(
+                simuleringsPerioderGammelTidslinje = simuleringsPerioderGammelTidslinje,
+                simuleringsPerioderNyTidslinje = simuleringsPerioderNyTidslinje,
+                behandling = behandling,
+            )?.let {
+                diffFeilTyper.add(it)
+            }
+
+            if (diffFeilTyper.isNotEmpty()) {
+                loggSimuleringsPerioderMedDiff(simuleringsPerioderGammel, simuleringsPerioderNy)
+            }
+
             return diffFeilTyper
+        } catch (e: Exception) {
+            secureLogger.warn(
+                "En uventet feil har oppstått ved kontroll av ny utbetalingsoppdrag-generator for behandling ${vedtak.behandling.id}",
+                e,
+            )
+            return listOf(DiffFeilType.UventetFeil)
         }
-
-        val simuleringsPerioderGammel = gammeltSimuleringResultat.tilSorterteSimuleringsPerioder(behandling)
-
-        val simuleringsPerioderNy = nyttSimuleringResultat.tilSorterteSimuleringsPerioder(behandling)
-
-        val simuleringsPerioderGammelTidslinje: Tidslinje<SimuleringsPeriode, Måned> =
-            simuleringsPerioderGammel.tilTidslinje()
-
-        val simuleringsPerioderNyTidslinje: Tidslinje<SimuleringsPeriode, Måned> =
-            simuleringsPerioderNy.tilTidslinje()
-
-        validerAtSimuleringsPerioderGammelHarResultatLik0ForPerioderFørSimuleringsPerioderNy(
-            simuleringsPerioderGammelTidslinje = simuleringsPerioderGammelTidslinje,
-            simuleringsPerioderNyTidslinje = simuleringsPerioderNyTidslinje,
-            behandling = behandling,
-        )?.let {
-            diffFeilTyper.add(it)
-        }
-        validerAtSimuleringsPerioderGammelHarResultatLikSimuleringsPerioderNyEtterFomTilNy(
-            simuleringsPerioderGammelTidslinje = simuleringsPerioderGammelTidslinje,
-            simuleringsPerioderNyTidslinje = simuleringsPerioderNyTidslinje,
-            behandling = behandling,
-        )?.let {
-            diffFeilTyper.add(it)
-        }
-
-        if (diffFeilTyper.isNotEmpty()) {
-            loggSimuleringsPerioderMedDiff(simuleringsPerioderGammel, simuleringsPerioderNy)
-        }
-
-        return diffFeilTyper
     }
 
     private fun bådeNyOgGammelGirEtResultat(
@@ -223,4 +231,5 @@ enum class DiffFeilType {
     TidligerePerioderIGammelUlik0,
     UliktResultatISammePeriode,
     DetEneSimuleringsresultatetErTomt,
+    UventetFeil,
 }

@@ -334,6 +334,24 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(0)
     }
 
+    @Test
+    fun `kontrollerNyUtbetalingsgenerator - skal fange opp feil som kastes`() {
+        every {
+            økonomiKlient.hentSimulering(any())
+        } throws Exception("Test")
+
+        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+            vedtak = lagVedtak(),
+            gammeltSimuleringResultat = mockk(),
+            gammeltUtbetalingsoppdrag = mockk(),
+        )
+
+        assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(1)
+        assertThat(
+            simuleringsPeriodeDiffFeil.first(),
+        ).isEqualTo(DiffFeilType.UventetFeil)
+    }
+
     fun lagDetaljertSimuleringsResultat(perioder: List<Periode<Int, Måned>>) =
         if (perioder.isEmpty()) {
             DetaljertSimuleringResultat(emptyList())
