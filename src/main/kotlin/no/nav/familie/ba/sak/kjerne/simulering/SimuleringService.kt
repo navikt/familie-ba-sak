@@ -55,16 +55,18 @@ class SimuleringService(
             return null
         }
 
+        val brukNyUtbetalingsoppdragGenerator = unleashService.isEnabled(
+            FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+            mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
+        )
+
         /**
          * SOAP integrasjonen støtter ikke full epost som MQ,
          * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
          * Denne verdien brukes ikke til noe i simulering.
          */
         val utbetalingsoppdrag: Utbetalingsoppdrag =
-            if (unleashService.isEnabled(
-                    FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-                    mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
-                )
+            if (brukNyUtbetalingsoppdragGenerator
             ) {
                 logger.info("Bruker ny utbetalingsgenerator for simulering for behandling ${vedtak.behandling.id}")
                 utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -86,12 +88,14 @@ class SimuleringService(
 
         val detaljertSimuleringResultat = økonomiKlient.hentSimulering(utbetalingsoppdrag)
 
-        kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = vedtak,
-            gammeltSimuleringResultat = detaljertSimuleringResultat,
-            gammeltUtbetalingsoppdrag = utbetalingsoppdrag,
-            erSimulering = true,
-        )
+        if (!brukNyUtbetalingsoppdragGenerator) {
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = vedtak,
+                gammeltSimuleringResultat = detaljertSimuleringResultat,
+                gammeltUtbetalingsoppdrag = utbetalingsoppdrag,
+                erSimulering = true,
+            )
+        }
 
         simulert.increment()
         return detaljertSimuleringResultat

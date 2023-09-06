@@ -39,17 +39,20 @@ class ØkonomiService(
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
 
-        kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = vedtak,
-            saksbehandlerId = saksbehandlerId,
+        val brukNyUtbetalingsoppdragGenerator = unleashService.isEnabled(
+            FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+            mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
         )
 
+        if (!brukNyUtbetalingsoppdragGenerator) {
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = vedtak,
+                saksbehandlerId = saksbehandlerId,
+            )
+        }
+
         val utbetalingsoppdrag: Utbetalingsoppdrag =
-            if (unleashService.isEnabled(
-                    FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-                    mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
-                )
-            ) {
+            if (brukNyUtbetalingsoppdragGenerator) {
                 logger.info("Bruker ny utbetalingsgenerator for behandling ${vedtak.behandling.id}")
                 utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                     vedtak,
