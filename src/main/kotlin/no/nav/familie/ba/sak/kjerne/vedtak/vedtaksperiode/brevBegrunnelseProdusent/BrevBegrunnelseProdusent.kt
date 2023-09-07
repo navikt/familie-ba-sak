@@ -255,11 +255,21 @@ private fun SanityBegrunnelse.erGjeldendeForRolle(
 fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
 ): Boolean {
-    val kompetanseIPeriode = begrunnelseGrunnlag.dennePerioden.kompetanse ?: return false
+    val kompetanse = when (this.periodeResultat) {
+        SanityPeriodeResultat.INNVILGET_ELLER_ØKNING -> begrunnelseGrunnlag.dennePerioden.kompetanse ?: return false
 
-    return this.annenForeldersAktivitet.contains(kompetanseIPeriode.annenForeldersAktivitet) &&
-        this.barnetsBostedsland.contains(landkodeTilBarnetsBostedsland(kompetanseIPeriode.barnetsBostedsland)) &&
-        this.kompetanseResultat.contains(kompetanseIPeriode.resultat)
+        SanityPeriodeResultat.IKKE_INNVILGET,
+        SanityPeriodeResultat.REDUKSJON,
+        -> begrunnelseGrunnlag.forrigePeriode?.kompetanse ?: return false
+
+        SanityPeriodeResultat.INGEN_ENDRING,
+        null,
+        -> return false
+    }
+
+    return this.annenForeldersAktivitet.contains(kompetanse.annenForeldersAktivitet) &&
+        this.barnetsBostedsland.contains(landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland)) &&
+        this.kompetanseResultat.contains(kompetanse.resultat)
 }
 
 fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåHendelser(
@@ -340,34 +350,40 @@ private fun hentResultaterForForrigePeriode(
 }
 
 private fun hentResultaterForPeriode(
-    begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode?,
+    begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode,
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
-) = if (begrunnelseGrunnlagForPeriode?.erOrdinæreVilkårInnvilget() == true &&
-    begrunnelseGrunnlagForPeriode.erInnvilgetEtterEndretUtbetaling()
-) {
-    val erReduksjonIAndel = erReduksjonIAndelMellomPerioder(
-        begrunnelseGrunnlagForPeriode,
-        begrunnelseGrunnlagForrigePeriode,
-    )
-    val erØkingIAndel = erØkningIAndelMellomPerioder(
-        begrunnelseGrunnlagForPeriode,
-        begrunnelseGrunnlagForrigePeriode,
-    )
+): List<SanityPeriodeResultat> {
+    val erAndelerPåPersonHvisBarn = begrunnelseGrunnlagForPeriode.person.type != PersonType.BARN ||
+        begrunnelseGrunnlagForPeriode.andeler.toList().isNotEmpty()
 
-    val erSøker = begrunnelseGrunnlagForPeriode.person.type == PersonType.SØKER
-    val erOrdinæreVilkårOppfyltIForrigePeriode =
-        begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true
+    val erInnvilgetEtterVilkårOgEndretUtbetaling =
+        begrunnelseGrunnlagForPeriode.erOrdinæreVilkårInnvilget() && begrunnelseGrunnlagForPeriode.erInnvilgetEtterEndretUtbetaling()
 
-    listOfNotNull(
-        if (erØkingIAndel || erSøker) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
-        if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
-        if (!erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode) SanityPeriodeResultat.INGEN_ENDRING else null,
-    )
-} else {
-    listOf(
-        SanityPeriodeResultat.REDUKSJON,
-        SanityPeriodeResultat.IKKE_INNVILGET,
-    )
+    return if (erInnvilgetEtterVilkårOgEndretUtbetaling && erAndelerPåPersonHvisBarn) {
+        val erReduksjonIAndel = erReduksjonIAndelMellomPerioder(
+            begrunnelseGrunnlagForPeriode,
+            begrunnelseGrunnlagForrigePeriode,
+        )
+        val erØkingIAndel = erØkningIAndelMellomPerioder(
+            begrunnelseGrunnlagForPeriode,
+            begrunnelseGrunnlagForrigePeriode,
+        )
+
+        val erSøker = begrunnelseGrunnlagForPeriode.person.type == PersonType.SØKER
+        val erOrdinæreVilkårOppfyltIForrigePeriode =
+            begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true
+
+        listOfNotNull(
+            if (erØkingIAndel || erSøker) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
+            if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
+            if (!erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode) SanityPeriodeResultat.INGEN_ENDRING else null,
+        )
+    } else {
+        listOf(
+            SanityPeriodeResultat.REDUKSJON,
+            SanityPeriodeResultat.IKKE_INNVILGET,
+        )
+    }
 }
 
 private fun erReduksjonIAndelMellomPerioder(
