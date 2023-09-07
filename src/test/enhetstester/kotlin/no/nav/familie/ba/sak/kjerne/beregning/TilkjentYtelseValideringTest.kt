@@ -268,6 +268,61 @@ class TilkjentYtelseValideringTest {
         )
     }
 
+    @Test
+    fun `Skal håndtere overlappende tidligere andeler fra flere enn 1 behandling`() {
+        val barn = tilfeldigPerson()
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 2108,
+                person = barn,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().plusMonths(1),
+                tom = inneværendeMåned().plusYears(1),
+                beløp = 2108,
+                person = barn,
+            ),
+        )
+
+        // 3 Behandlinger med identiske perioder.
+        val andelerFraTidligere = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1).plusMonths(1),
+                tom = inneværendeMåned().plusMonths(2),
+                beløp = 2108,
+                person = barn,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1).plusMonths(1),
+                tom = inneværendeMåned().plusMonths(2),
+                beløp = 2108,
+                person = barn,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1).plusMonths(1),
+                tom = inneværendeMåned().plusMonths(2),
+                beløp = 2108,
+                person = barn,
+            ),
+        )
+
+        Assertions.assertEquals(
+            listOf(
+                MånedPeriode(
+                    inneværendeMåned().minusYears(1).plusMonths(1),
+                    inneværendeMåned().plusMonths(2),
+                ),
+            ),
+            TilkjentYtelseValidering.finnPeriodeMedOverlappAvAndeler(andeler, andelerFraTidligere),
+        )
+        Assertions.assertEquals(
+            TilkjentYtelseValidering.finnPeriodeMedOverlappAvAndeler(andeler, emptyList()),
+            emptyList<MånedPeriode>(),
+        )
+    }
+
     @Nested
     inner class `Valider at satsendring kun oppdaterer sats på eksisterende perioder` {
         @Test
