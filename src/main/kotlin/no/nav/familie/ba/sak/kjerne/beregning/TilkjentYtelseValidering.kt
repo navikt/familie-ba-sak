@@ -27,8 +27,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
@@ -227,7 +227,7 @@ object TilkjentYtelseValidering {
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
     ): List<MånedPeriode> {
         val kombinertOverlappTidslinje = YtelseType.values().map { ytelseType ->
-            finnPeriodeMedOverlappAvAndelerForYtelseType(
+            lagErOver100ProsentUtbetalingPåYtelseTidslinje(
                 andeler = andeler.filter { it.type == ytelseType },
                 barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger.filter { it.type == ytelseType },
             )
@@ -241,18 +241,16 @@ object TilkjentYtelseValidering {
         return any { it }
     }
 
-    fun finnPeriodeMedOverlappAvAndelerForYtelseType(
+    fun lagErOver100ProsentUtbetalingPåYtelseTidslinje(
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
     ): Tidslinje<Boolean, Måned> {
         if (barnsAndelerFraAndreBehandlinger.isEmpty()) {
             return emptyList<Periode<Boolean, Måned>>().tilTidslinje()
         }
-        val tidslinjePerBehandling = (andeler + barnsAndelerFraAndreBehandlinger).groupBy { it.behandlingId }.values
-            .map { it.tilAndelTilkjentYtelseTidslinje() }
-
         val prosenttidslinjerPerBehandling =
-            tidslinjePerBehandling.map { tidslinje -> tidslinje.map { it?.prosent } }
+            (andeler + barnsAndelerFraAndreBehandlinger).groupBy { it.behandlingId }.values
+                .map { it.tilProsentAvYtelseUtbetaltTidslinje() }
 
         val erOver100ProsentTidslinje =
             prosenttidslinjerPerBehandling.fold(emptyList<Periode<BigDecimal, Måned>>().tilTidslinje()) { summertProsentTidslinje, prosentTidslinje ->
@@ -265,12 +263,12 @@ object TilkjentYtelseValidering {
     }
 }
 
-private fun List<AndelTilkjentYtelse>.tilAndelTilkjentYtelseTidslinje() =
+private fun List<AndelTilkjentYtelse>.tilProsentAvYtelseUtbetaltTidslinje() =
     this.map {
-        Periode(
-            fraOgMed = it.periode.fom.tilTidspunkt(),
-            tilOgMed = it.periode.tom.tilTidspunkt(),
-            innhold = it,
+        månedPeriodeAv(
+            fraOgMed = it.periode.fom,
+            tilOgMed = it.periode.tom,
+            innhold = it.prosent,
         )
     }.tilTidslinje()
 
