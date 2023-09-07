@@ -154,12 +154,12 @@ class KontrollerNyUtbetalingsgeneratorService(
         val andelerMedUtbetaling = tilkjentYtelse.andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
 
         if (andeler.size != andelerMedUtbetaling.size) {
-            secureLogger.warn("Antallet andeler fra ny generator matcher ikke antallet andeler med utbetaling i behandling ${behandling.id}.")
+            secureLogger.warn("Antallet andeler fra ny generator matcher ikke antallet andeler med utbetaling i behandling ${behandling.id}. Andeler fra ny generator: ${andeler.map { it.id }}, andeler med utbetaling: ${andelerMedUtbetaling.map { it.id }}.")
             return DiffFeilType.FeilAntallAndeler
         }
 
         if (!andelerMedUtbetaling.all { andelerMedUtbetaling -> andeler.any { it.id == andelerMedUtbetaling.id } }) {
-            secureLogger.warn("Finner ikke match for alle andeler med utbetaling i behandling ${behandling.id} blandt andelene returnert fra ny generator.")
+            secureLogger.warn("Finner ikke match for alle andeler med utbetaling i behandling ${behandling.id} blandt andelene returnert fra ny generator. Andeler fra ny generator: ${andeler.map { it.id }}, andeler med utbetaling: ${andelerMedUtbetaling.map { it.id }}.")
             return DiffFeilType.AndelerMatcherIkke
         }
 
