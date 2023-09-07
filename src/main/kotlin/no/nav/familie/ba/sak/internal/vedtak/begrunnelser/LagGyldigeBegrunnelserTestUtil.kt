@@ -41,6 +41,7 @@ fun lagGyldigeBegrunnelserTest(
 Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric(10)}
 
   Bakgrunn:""" +
+    hentTekstForFagsak(behandling) +
     hentTekstForBehandlinger(behandling, forrigeBehandling) +
     hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
     """
@@ -64,8 +65,15 @@ private fun lagPersonresultaterTekst(behandling: Behandling?) = behandling?.let 
     Og lag personresultater for begrunnelse for behandling ${it.id}"""
 } ?: ""
 
+fun hentTekstForFagsak(behandling: Behandling) =
+    """
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | ${behandling.fagsak.id} | ${behandling.fagsak.type} |"""
+
 fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: Behandling?) =
     """
+
     Gitt følgende behandling
       | BehandlingId | FagsakId | ForrigeBehandlingId |${
         forrigeBehandling?.let {
