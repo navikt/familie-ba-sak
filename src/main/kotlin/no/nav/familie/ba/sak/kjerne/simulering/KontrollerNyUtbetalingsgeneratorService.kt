@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorS
 import no.nav.familie.ba.sak.integrasjoner.økonomi.skalIverksettesMotOppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
 import no.nav.familie.ba.sak.kjerne.simulering.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -19,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.stereotype.Service
@@ -29,6 +31,7 @@ class KontrollerNyUtbetalingsgeneratorService(
     private val featureToggleService: FeatureToggleService,
     private val økonomiKlient: ØkonomiKlient,
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
 
     fun kontrollerNyUtbetalingsgenerator(
@@ -81,10 +84,17 @@ class KontrollerNyUtbetalingsgeneratorService(
             secureLogger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med gammel generator: $gammeltUtbetalingsoppdrag")
             secureLogger.info("Behandling ${behandling.id} får følgende utbetalingsoppdrag med ny generator: ${beregnetUtbetalingsoppdrag.utbetalingsoppdrag}")
 
+            validerAtAndelerIBeregnetUtbetalingsoppdragMatcherAndelerMedUtbetaling(
+                beregnetUtbetalingsoppdrag.andeler,
+                behandling,
+            )?.let {
+                diffFeilTyper.add(it)
+            }
+
             val nyttSimuleringResultat =
                 økonomiKlient.hentSimulering(beregnetUtbetalingsoppdrag.utbetalingsoppdrag)
 
-            if (nyttSimuleringResultat.simuleringMottaker.isEmpty() && gammeltSimuleringResultat.simuleringMottaker.isEmpty()) return emptyList()
+            if (nyttSimuleringResultat.simuleringMottaker.isEmpty() && gammeltSimuleringResultat.simuleringMottaker.isEmpty()) return diffFeilTyper
 
             if (!bådeNyOgGammelGirEtResultat(
                     nyttSimuleringResultat = nyttSimuleringResultat,
@@ -133,6 +143,27 @@ class KontrollerNyUtbetalingsgeneratorService(
             )
             return listOf(DiffFeilType.UventetFeil)
         }
+    }
+
+    private fun validerAtAndelerIBeregnetUtbetalingsoppdragMatcherAndelerMedUtbetaling(
+        andeler: List<AndelMedPeriodeIdLongId>,
+        behandling: Behandling,
+    ): DiffFeilType? {
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
+
+        val andelerMedUtbetaling = tilkjentYtelse.andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
+
+        if (andeler.size != andelerMedUtbetaling.size) {
+            secureLogger.warn("Antallet andeler fra ny generator matcher ikke antallet andeler med utbetaling i behandling ${behandling.id}.")
+            return DiffFeilType.FeilAntallAndeler
+        }
+
+        if (!andelerMedUtbetaling.all { andelerMedUtbetaling -> andeler.any { it.id == andelerMedUtbetaling.id } }) {
+            secureLogger.warn("Finner ikke match for alle andeler med utbetaling i behandling ${behandling.id} blandt andelene returnert fra ny generator.")
+            return DiffFeilType.AndelerMatcherIkke
+        }
+
+        return null
     }
 
     private fun bådeNyOgGammelGirEtResultat(
@@ -231,5 +262,7 @@ enum class DiffFeilType {
     TidligerePerioderIGammelUlik0,
     UliktResultatISammePeriode,
     DetEneSimuleringsresultatetErTomt,
+    FeilAntallAndeler,
+    AndelerMatcherIkke,
     UventetFeil,
 }
