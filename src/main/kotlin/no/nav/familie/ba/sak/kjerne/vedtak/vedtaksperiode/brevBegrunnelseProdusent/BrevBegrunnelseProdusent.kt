@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBost
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
+import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilPersonType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -131,11 +132,14 @@ private fun hentStandardBegrunnelser(
     val filtrertPåRolle = sanityBegrunnelser.filterValues { begrunnelse ->
         begrunnelse.erGjeldendeForRolle(person, fagsakType)
     }
-    val filtrertPåRolleOgPeriodetype = filtrertPåRolle.filterValues {
+    val filtrertPåRolleOgFagsaktype = filtrertPåRolle.filterValues {
+        it.erGjeldendeForFagsakType(fagsakType)
+    }
+    val filtrertPåRolleFagsaktypeOgPeriodetype = filtrertPåRolleOgFagsaktype.filterValues {
         it.periodeResultat in relevantePeriodeResultater
     }
 
-    val filtrertPåVilkårOgEndretUtbetaling = filtrertPåRolleOgPeriodetype.filterValues {
+    val filtrertPåVilkårOgEndretUtbetaling = filtrertPåRolleFagsaktypeOgPeriodetype.filterValues {
         val begrunnelseErGjeldendeForUtgjørendeVilkår = it.vilkår.isNotEmpty()
         val begrunnelseErGjeldendeForEndretUtbetaling = it.endringsaarsaker.isNotEmpty()
 
@@ -150,7 +154,7 @@ private fun hentStandardBegrunnelser(
         it.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag)
     }
 
-    val filtrertPåSmåbarnstillegg = filtrertPåRolleOgPeriodetype.filterValues { begrunnelse ->
+    val filtrertPåSmåbarnstillegg = filtrertPåRolleFagsaktypeOgPeriodetype.filterValues { begrunnelse ->
         begrunnelse.erGjeldendeForSmåbarnstillegg(begrunnelseGrunnlag)
     }
 
@@ -171,7 +175,7 @@ private fun hentStandardBegrunnelser(
             )
         }
 
-    val filtrertPåHendelser = filtrertPåRolleOgPeriodetype.filtrerPåHendelser(
+    val filtrertPåHendelser = filtrertPåRolleFagsaktypeOgPeriodetype.filtrerPåHendelser(
         begrunnelseGrunnlag,
         vedtaksperiode.fom,
     )
@@ -181,6 +185,14 @@ private fun hentStandardBegrunnelser(
         filtrertPåSmåbarnstillegg.keys.toSet() +
         filtrertPåEtterEndretUtbetaling.keys.toSet() +
         filtrertPåHendelser.keys.toSet()
+}
+
+private fun SanityBegrunnelse.erGjeldendeForFagsakType(
+    fagsakType: FagsakType
+) = if (valgbarhet == Valgbarhet.SAKSPESIFIKK) {
+    fagsakType == this.fagsakType
+} else {
+    true
 }
 
 private fun filtrerPåEndretUtbetaling(
@@ -613,7 +625,11 @@ private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
         erSmåbarnstilleggIForrigeBehandlingPeriode != erSmåbarnstilleggDennePerioden
 
     val begrunnelseMatcherPeriodeResultat =
-        this.matcherPerioderesultat(erSmåbarnstilleggForrigePeriode, erSmåbarnstilleggDennePerioden, erSmåbarnstilleggIForrigeBehandlingPeriode)
+        this.matcherPerioderesultat(
+            erSmåbarnstilleggForrigePeriode,
+            erSmåbarnstilleggDennePerioden,
+            erSmåbarnstilleggIForrigeBehandlingPeriode
+        )
 
     val erEndringISmåbarnstillegg = erSmåbarnstilleggForrigePeriode != erSmåbarnstilleggDennePerioden
 
@@ -625,8 +641,10 @@ private fun SanityBegrunnelse.matcherPerioderesultat(
     erSmåbarnstilleggDennePerioden: Boolean,
     erSmåbarnstilleggIForrigeBehandlingPeriode: Boolean,
 ): Boolean {
-    val erReduksjon = !erSmåbarnstilleggDennePerioden && (erSmåbarnstilleggForrigePeriode || erSmåbarnstilleggIForrigeBehandlingPeriode)
-    val erØkning = erSmåbarnstilleggDennePerioden && (!erSmåbarnstilleggForrigePeriode || !erSmåbarnstilleggIForrigeBehandlingPeriode)
+    val erReduksjon =
+        !erSmåbarnstilleggDennePerioden && (erSmåbarnstilleggForrigePeriode || erSmåbarnstilleggIForrigeBehandlingPeriode)
+    val erØkning =
+        erSmåbarnstilleggDennePerioden && (!erSmåbarnstilleggForrigePeriode || !erSmåbarnstilleggIForrigeBehandlingPeriode)
 
     val erBegrunnelseReduksjon = periodeResultat == SanityPeriodeResultat.REDUKSJON
     val erBegrunnelseØkning = periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING
