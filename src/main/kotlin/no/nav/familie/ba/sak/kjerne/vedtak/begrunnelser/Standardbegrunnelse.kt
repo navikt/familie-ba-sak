@@ -1396,7 +1396,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     },
     ENDRET_UTBETALING_ALLEREDE_UTBETALT_FORELDRE_BOR_SAMMEN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingAlleredeUtbetaltForeldreBorSammen"
+        override val sanityApiNavn = "endretUtbetalingAlleredeUtbetalt"
     },
     ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
