@@ -81,5 +81,38 @@ Egenskap: Begrunnelser for utdypende vilkårsvurdering med utbetaling
       | 01.04.2021 | 31.03.2022 | UTBETALING         | FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE | INNVILGET_BOSATT_I_RIKTET, INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE |
       | 01.04.2022 |            | OPPHØR             | OPPHØR_HAR_IKKE_OPPHOLDSTILLATELSE                                 | OPPHØR_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER                      |
 
+  Scenario: Skal passende begrunnelse selv om det ikke er noen endring i utbetaling
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId |
+      | 1            | 1        |                     |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | BARN       | 02.02.2015  |
+      | 1            | 2       | SØKER      | 11.02.1985  |
+
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                          | Utdypende vilkår            | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD                   |                             | 01.02.2022 |            | OPPFYLT  | Nei                  |
+
+      | 1       | UNDER_18_ÅR                                     |                             | 02.02.2015 | 01.02.2033 | OPPFYLT  | Nei                  |
+      | 1       | BOR_MED_SØKER                                   |                             | 01.02.2022 | 08.05.2022 | OPPFYLT  | Nei                  |
+      | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD, GIFT_PARTNERSKAP |                             | 01.02.2022 |            | OPPFYLT  | Nei                  |
+      | 1       | BOR_MED_SØKER                                   | DELT_BOSTED_SKAL_IKKE_DELES | 09.05.2022 | 08.02.2023 | OPPFYLT  | Nei                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent |
+      | 1       | 1            | 01.03.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     |
+
+    Når begrunnelsetekster genereres for behandling 1
+
+    Så forvent følgende standardBegrunnelser
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                                       | Ekskluderte Begrunnelser |
+      | 01.03.2022 | 31.05.2022 | UTBETALING         |           |                                                               |                          |
+      | 01.06.2022 | 28.02.2023 | UTBETALING         |           | INNVILGET_ANNEN_FORELDER_IKKE_SØKT_DELT_BARNETRYGD_ALLE_BARNA |                          |
+      | 01.03.2023 |            | OPPHØR             |           |                                                               |                          |
+
 
 
