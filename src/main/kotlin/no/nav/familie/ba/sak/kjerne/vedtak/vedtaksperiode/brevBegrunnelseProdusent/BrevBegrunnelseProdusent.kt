@@ -188,7 +188,7 @@ private fun hentStandardBegrunnelser(
 }
 
 private fun SanityBegrunnelse.erGjeldendeForFagsakType(
-    fagsakType: FagsakType
+    fagsakType: FagsakType,
 ) = if (valgbarhet == Valgbarhet.SAKSPESIFIKK) {
     fagsakType == this.fagsakType
 } else {
@@ -628,7 +628,7 @@ private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
         this.matcherPerioderesultat(
             erSmåbarnstilleggForrigePeriode,
             erSmåbarnstilleggDennePerioden,
-            erSmåbarnstilleggIForrigeBehandlingPeriode
+            erSmåbarnstilleggIForrigeBehandlingPeriode,
         )
 
     val erEndringISmåbarnstillegg = erSmåbarnstilleggForrigePeriode != erSmåbarnstilleggDennePerioden
