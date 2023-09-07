@@ -255,11 +255,11 @@ object TilkjentYtelseValidering {
             tidslinjePerBehandling.map { tidslinje -> tidslinje.map { it?.prosent } }
 
         val erOver100ProsentTidslinje =
-            prosenttidslinjerPerBehandling.fold(emptyList<Periode<BigDecimal, Måned>>().tilTidslinje()) { acc, neste ->
-                acc.kombinerMed(neste) { pAcc, pNeste ->
-                    (pAcc ?: BigDecimal.ZERO) + (pNeste ?: BigDecimal.ZERO)
+            prosenttidslinjerPerBehandling.fold(emptyList<Periode<BigDecimal, Måned>>().tilTidslinje()) { summertProsentTidslinje, prosentTidslinje ->
+                summertProsentTidslinje.kombinerMed(prosentTidslinje) { sumProsentForPeriode, prosentForAndel ->
+                    (sumProsentForPeriode ?: BigDecimal.ZERO) + (prosentForAndel ?: BigDecimal.ZERO)
                 }
-            }.map { (it ?: BigDecimal.ZERO) > BigDecimal.valueOf(100) }
+            }.map { sumProsentForPeriode -> (sumProsentForPeriode ?: BigDecimal.ZERO) > BigDecimal.valueOf(100) }
 
         return erOver100ProsentTidslinje
     }
