@@ -176,56 +176,32 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
-            val oppfylteVilkårForPerson = forrigeBehandlingVilkårsvurdering.personResultater
+            val oppfylteVilkårResultaterForPerson = forrigeBehandlingVilkårsvurdering.personResultater
                 .single { it.aktør == person.aktør }.vilkårResultater
                 .filter { it.erOppfylt() }
 
-            val vilkårTyperForPerson = oppfylteVilkårForPerson
-                .map { it.vilkårType }
-
-            val vilkårResultaterMedNyPeriode = vilkårTyperForPerson.map { vilkår ->
-                val fom = VilkårsvurderingMigreringUtils.utledPeriodeFom(
-                    forrigeBehandlingVilkårsvurdering,
-                    vilkår,
+            val vilkårResultaterMedNyPeriode =
+                VilkårsvurderingMigreringUtils.finnVilkårResultaterMedNyPeriodePgaNyMigreringsdato(
+                    oppfylteVilkårResultaterForPerson,
                     person,
                     nyMigreringsdato,
                 )
 
-                val tom: LocalDate? =
-                    VilkårsvurderingMigreringUtils.utledPeriodeTom(
-                        forrigeBehandlingVilkårsvurdering,
-                        vilkår,
-                        person,
-                        fom,
-                    )
-
-                // Når vi endrer migreringsdato flyttes den alltid bakover. Vilkårresultatet som forskyves vil derfor alltid være det med lavest periodeFom
-                val eksisterendeVilkårSomSkalForskyves =
-                    oppfylteVilkårForPerson.filter { it.vilkårType == vilkår }.minBy { it.periodeFom!! }
-                VilkårResultatMedNyPeriode(eksisterendeVilkårSomSkalForskyves, fom, tom)
-            }
-
-            // Sørger for at justerer periodeFom og periodeTom etter at øvrige felter er kopiert fra forrige vilkårresultat.
-            val kopierteVilkårResultaterMedNyPeriode = vilkårResultaterMedNyPeriode.map {
-                it.vilkårResultat.tilKopiForNyttPersonResultat(personResultat)
-                    .also { vilkårResultat ->
-                        vilkårResultat.periodeFom = it.fom
-                        vilkårResultat.periodeTom = it.tom
-                        if (vilkårResultat.begrunnelse.isEmpty()) {
-                            vilkårResultat.begrunnelse = "Migrering"
+            val kopierteVilkårResultater = oppfylteVilkårResultaterForPerson.map { oppfyltVilkårResultat ->
+                val vilkårResultatMedNyPeriode =
+                    vilkårResultaterMedNyPeriode.find { it.vilkårResultat.id == oppfyltVilkårResultat.id }
+                oppfyltVilkårResultat.tilKopiForNyttPersonResultat(personResultat).also { kopiertVilkårResultat ->
+                    if (vilkårResultatMedNyPeriode != null) {
+                        kopiertVilkårResultat.periodeFom = vilkårResultatMedNyPeriode.fom
+                        kopiertVilkårResultat.periodeTom = vilkårResultatMedNyPeriode.tom
+                        if (kopiertVilkårResultat.begrunnelse.isEmpty()) {
+                            kopiertVilkårResultat.begrunnelse = "Migrering"
                         }
                     }
-            }.toMutableSet()
+                }
+            }.toSet()
 
-            val kopierteManglendeOppfylteVilkårResultater =
-                VilkårsvurderingMigreringUtils.finnManglendeOppfylteVilkårResultaterFraForrigeVilkårsvurdering(
-                    vilkårResultaterMedNyPeriode.map { it.vilkårResultat },
-                    oppfylteVilkårForPerson,
-                ).map { it.tilKopiForNyttPersonResultat(personResultat) }
-
-            kopierteVilkårResultaterMedNyPeriode.addAll(kopierteManglendeOppfylteVilkårResultater)
-
-            personResultat.setSortedVilkårResultater(kopierteVilkårResultaterMedNyPeriode)
+            personResultat.setSortedVilkårResultater(kopierteVilkårResultater)
 
             personResultat
         }.toSet()
