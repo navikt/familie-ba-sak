@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårResultatMedNyPeriode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.time.LocalDate
@@ -71,8 +70,10 @@ object VilkårsvurderingMigreringUtils {
 
             // Når vi endrer migreringsdato flyttes den alltid bakover. Vilkårresultatet som forskyves vil derfor alltid være det med lavest periodeFom
             val vilkårResultatSomForskyves =
-                oppfylteVilkårResultaterForPerson.filter { it.vilkårType == vilkår }.minBy { it.periodeFom!! }
+                oppfylteVilkårResultaterForType.minBy { it.periodeFom!! }
             VilkårResultatMedNyPeriode(vilkårResultatSomForskyves, fom, tom)
         }
     }
 }
+
+data class VilkårResultatMedNyPeriode(val vilkårResultat: VilkårResultat, val fom: LocalDate, val tom: LocalDate?)

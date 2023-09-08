@@ -261,5 +261,3 @@ fun førstegangskjøringAvVilkårsvurdering(aktivVilkårsvurdering: Vilkårsvurd
 fun finnAktørerMedUtvidetFraAndeler(andeler: List<AndelTilkjentYtelse>): List<Aktør> {
     return andeler.filter { it.erUtvidet() }.map { it.aktør }
 }
-
-data class VilkårResultatMedNyPeriode(val vilkårResultat: VilkårResultat, val fom: LocalDate, val tom: LocalDate?)
