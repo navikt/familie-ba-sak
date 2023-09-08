@@ -176,12 +176,14 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
-            val vilkårTyperForPerson = forrigeBehandlingVilkårsvurdering.personResultater
+            val oppfylteVilkårForPerson = forrigeBehandlingVilkårsvurdering.personResultater
                 .single { it.aktør == person.aktør }.vilkårResultater
-                .filter { it.resultat == Resultat.OPPFYLT }
+                .filter { it.erOppfylt() }
+
+            val vilkårTyperForPerson = oppfylteVilkårForPerson
                 .map { it.vilkårType }
 
-            val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
+            val vilkårResultaterMedNyPeriode = vilkårTyperForPerson.map { vilkår ->
                 val fom = VilkårsvurderingMigreringUtils.utledPeriodeFom(
                     forrigeBehandlingVilkårsvurdering,
                     vilkår,
@@ -197,36 +199,33 @@ data class VilkårsvurderingForNyBehandlingUtils(
                         fom,
                     )
 
-                val eksisterendeVilkårSomErForlengetEllerForkortet =
-                    VilkårsvurderingMigreringUtils.finnEksisterendeVilkårResultatSomBlirForskjøvet(
-                        forrigeBehandlingVilkårsvurdering,
-                        vilkår,
-                        person,
-                        fom,
-                        tom,
-                    )
+                // Når vi endrer migreringsdato flyttes den alltid bakover. Vilkårresultatet som forskyves vil derfor alltid være det med lavest periodeFom
+                val eksisterendeVilkårSomSkalForskyves =
+                    oppfylteVilkårForPerson.filter { it.vilkårType == vilkår }.minBy { it.periodeFom!! }
+                VilkårResultatMedNyPeriode(eksisterendeVilkårSomSkalForskyves, fom, tom)
+            }
 
-                // Sørger for at vi kopierer over alle felter fra VilkårResultat som blir forsøvet pga ny migreringsdato
-                eksisterendeVilkårSomErForlengetEllerForkortet.tilKopiForNyttPersonResultat(personResultat)
+            // Sørger for at justerer periodeFom og periodeTom etter at øvrige felter er kopiert fra forrige vilkårresultat.
+            val kopierteVilkårResultaterMedNyPeriode = vilkårResultaterMedNyPeriode.map {
+                it.vilkårResultat.tilKopiForNyttPersonResultat(personResultat)
                     .also { vilkårResultat ->
-                        vilkårResultat.periodeFom = fom
-                        vilkårResultat.periodeTom = tom
+                        vilkårResultat.periodeFom = it.fom
+                        vilkårResultat.periodeTom = it.tom
                         if (vilkårResultat.begrunnelse.isEmpty()) {
                             vilkårResultat.begrunnelse = "Migrering"
                         }
                     }
-            }.toSortedSet(VilkårResultat.VilkårResultatComparator)
+            }.toMutableSet()
 
-            val manglendePerioder = VilkårsvurderingMigreringUtils.kopiManglendePerioderFraForrigeVilkårsvurdering(
-                vilkårResultater,
-                forrigeBehandlingVilkårsvurdering,
-                person,
-                personResultat,
-            )
+            val kopierteManglendeOppfylteVilkårResultater =
+                VilkårsvurderingMigreringUtils.finnManglendeOppfylteVilkårResultaterFraForrigeVilkårsvurdering(
+                    vilkårResultaterMedNyPeriode.map { it.vilkårResultat },
+                    oppfylteVilkårForPerson,
+                ).map { it.tilKopiForNyttPersonResultat(personResultat) }
 
-            vilkårResultater.addAll(manglendePerioder)
+            kopierteVilkårResultaterMedNyPeriode.addAll(kopierteManglendeOppfylteVilkårResultater)
 
-            personResultat.setSortedVilkårResultater(vilkårResultater)
+            personResultat.setSortedVilkårResultater(kopierteVilkårResultaterMedNyPeriode)
 
             personResultat
         }.toSet()
@@ -286,3 +285,5 @@ fun førstegangskjøringAvVilkårsvurdering(aktivVilkårsvurdering: Vilkårsvurd
 fun finnAktørerMedUtvidetFraAndeler(andeler: List<AndelTilkjentYtelse>): List<Aktør> {
     return andeler.filter { it.erUtvidet() }.map { it.aktør }
 }
+
+data class VilkårResultatMedNyPeriode(val vilkårResultat: VilkårResultat, val fom: LocalDate, val tom: LocalDate?)
