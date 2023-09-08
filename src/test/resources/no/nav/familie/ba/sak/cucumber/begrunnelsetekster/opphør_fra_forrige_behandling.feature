@@ -16,7 +16,7 @@ Egenskap: Opphør fra forrige behandling
       | 2            | 1234          | SØKER      | 16.09.1984  |
       | 2            | 3456          | BARN       | 07.09.2019  |
 
-  Scenario: Skal gi opphør fra forrige behandling-begrunnelser knyttet til bor med søker, men ikke delt bosted
+  Scenario: Skal gi opphør fra forrige behandling-begrunnelser knyttet til bor med søker
     Og lag personresultater for begrunnelse for behandling 1
     Og lag personresultater for begrunnelse for behandling 2
 
@@ -54,12 +54,12 @@ Egenskap: Opphør fra forrige behandling
     Når begrunnelsetekster genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser          | Ekskluderte Begrunnelser              |
-      | 01.10.2019 | 30.09.2020 | OPPHØR             |           | OPPHØR_BARN_BODDE_IKKE_MED_SØKER | OPPHØR_AVTALE_DELT_BOSTED_IKKE_GYLDIG |
-      | 01.10.2020 | 31.08.2021 | UTBETALING         |           |                                  |                                       |
-      | 01.09.2021 | 31.12.2021 | UTBETALING         |           |                                  |                                       |
-      | 01.01.2022 | 28.02.2023 | UTBETALING         |           |                                  |                                       |
-      | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                                  |                                       |
-      | 01.07.2023 | 31.08.2025 | UTBETALING         |           |                                  |                                       |
-      | 01.09.2025 | 31.08.2037 | UTBETALING         |           |                                  |                                       |
-      | 01.09.2037 |            | OPPHØR             |           |                                  |                                       |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser          | Ekskluderte Begrunnelser |
+      | 01.10.2019 | 30.09.2020 | OPPHØR             |           | OPPHØR_BARN_BODDE_IKKE_MED_SØKER |                          |
+      | 01.10.2020 | 31.08.2021 | UTBETALING         |           |                                  |                          |
+      | 01.09.2021 | 31.12.2021 | UTBETALING         |           |                                  |                          |
+      | 01.01.2022 | 28.02.2023 | UTBETALING         |           |                                  |                          |
+      | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                                  |                          |
+      | 01.07.2023 | 31.08.2025 | UTBETALING         |           |                                  |                          |
+      | 01.09.2025 | 31.08.2037 | UTBETALING         |           |                                  |                          |
+      | 01.09.2037 |            | OPPHØR             |           |                                  |                          |

@@ -144,6 +144,12 @@ private fun hentStandardBegrunnelser(
         it.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag)
     }
 
+    val filtrertPåOpphørFraForrigeBehandling = filtrertPåRolle.filterValues {
+        vedtaksperiode.type == Vedtaksperiodetype.OPPHØR && it.erGjeldendeForOpphørFraForrigeBehandling(
+            begrunnelseGrunnlag,
+        )
+    }
+
     val filtrertPåSmåbarnstillegg = filtrertPåRolleOgPeriodetype.filterValues { begrunnelse ->
         begrunnelse.erGjeldendeForSmåbarnstillegg(begrunnelseGrunnlag)
     }
@@ -176,6 +182,7 @@ private fun hentStandardBegrunnelser(
 
     return filtrertPåVilkår.keys.toSet() +
         filtrertPåReduksjonFraForrigeBehandling.keys.toSet() +
+        filtrertPåOpphørFraForrigeBehandling.keys.toSet() +
         filtrertPåSmåbarnstillegg.keys.toSet() +
         filtrertPåEndretUtbetaling.keys.toSet() +
         filtrertPåEtterEndretUtbetaling.keys.toSet() +
@@ -204,6 +211,31 @@ private fun SanityBegrunnelse.erGjeldendeForReduksjonFraForrigeBehandling(begrun
 
 private fun SanityBegrunnelse.begrunnelseGjelderReduksjonFraForrigeBehandling() =
     ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT in this.ovrigeTriggere || ØvrigTrigger.REDUKSJON_FRA_FORRIGE_BEHANDLING in this.ovrigeTriggere
+
+private fun SanityBegrunnelse.erGjeldendeForOpphørFraForrigeBehandling(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
+    if (begrunnelseGrunnlag !is BegrunnelseGrunnlagForPeriodeMedOpphør || !begrunnelseGjelderOpphørFraForrigeBehandling()) {
+        return false
+    }
+
+    val oppfylteVilkårDenneBehandlingen =
+        begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
+            .map { it.vilkårType }.toSet()
+    val oppfylteVilkårForrigeBehandling =
+        begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.vilkårResultater?.filter { it.resultat == Resultat.OPPFYLT }
+            ?.map { it.vilkårType }?.toSet()
+            ?: emptySet()
+
+    val vilkårMistetSidenForrigeBehandling = oppfylteVilkårForrigeBehandling - oppfylteVilkårDenneBehandlingen
+
+    val begrunnelseGjelderMistedeVilkår = this.vilkår.all { it in vilkårMistetSidenForrigeBehandling }
+
+    val dennePeriodenErFørsteVedtaksperiodePåFagsak = begrunnelseGrunnlag.forrigePeriode == null
+
+    return begrunnelseGjelderMistedeVilkår && dennePeriodenErFørsteVedtaksperiodePåFagsak
+}
+
+private fun SanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling() =
+    ØvrigTrigger.GJELDER_FØRSTE_PERIODE in this.ovrigeTriggere || ØvrigTrigger.OPPHØR_FRA_FORRIGE_BEHANDLING in this.ovrigeTriggere
 
 private fun hentEØSStandardBegrunnelser(
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
