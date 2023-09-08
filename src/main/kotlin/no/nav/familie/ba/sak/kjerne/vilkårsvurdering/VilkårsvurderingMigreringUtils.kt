@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -83,17 +84,40 @@ object VilkårsvurderingMigreringUtils {
         nyFom: LocalDate,
         nyTom: LocalDate?,
     ) =
-        hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(forrigeBehandlingVilkårsvurdering, vilkår, person)
-            .single { it.periodeFom == nyFom || it.periodeTom == nyTom || (nyFom.isBefore(it.periodeFom!!) && nyTom == null) }
+        hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
+            forrigeBehandlingVilkårsvurdering,
+            vilkår,
+            person,
+        ).runCatching {
+            if (this.isEmpty()) throw IllegalStateException("Finnes ingen vilkår av typen $vilkår for aktør ${person.aktør} blandt personresultatene: ${forrigeBehandlingVilkårsvurdering.personResultater}")
+            this.single { it.periodeFom == nyFom || it.periodeTom == nyTom || (nyFom.isBefore(it.periodeFom!!) && nyTom == null) }
+        }.fold(
+            onSuccess = { it },
+            onFailure = {
+                secureLogger.warn(
+                    "Feiler ved henting av vilkårresultatet som blir forskjøvet. nyFom = $nyFom, nyTom = $nyTom",
+                    it,
+                )
+                throw it
+            },
+        )
 
     private fun hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
         forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
         vilkår: Vilkår,
         person: Person,
     ): List<VilkårResultat> {
-        val personResultat = forrigeBehandlingsvilkårsvurdering.personResultater
-            .first { it.aktør == person.aktør }
-        return personResultat.vilkårResultater
-            .filter { it.vilkårType == vilkår && it.erOppfylt() }
+        try {
+            val personResultat = forrigeBehandlingsvilkårsvurdering.personResultater
+                .first { it.aktør == person.aktør }
+            return personResultat.vilkårResultater
+                .filter { it.vilkårType == vilkår && it.erOppfylt() }
+        } catch (e: Exception) {
+            secureLogger.warn(
+                "Finner ingen personresultater for aktør ${person.aktør}",
+                e,
+            )
+            throw e
+        }
     }
 }

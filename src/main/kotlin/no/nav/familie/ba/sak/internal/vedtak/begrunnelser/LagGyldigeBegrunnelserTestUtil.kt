@@ -34,6 +34,7 @@ fun lagGyldigeBegrunnelserTest(
     kompetanse: Collection<Kompetanse>,
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
 ) = """
+<pre>
 # language: no
 # encoding: UTF-8
 
@@ -54,7 +55,9 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
     Når begrunnelsetekster genereres for behandling ${behandling.id}""" +
-    hentTekstForVedtaksperioder(vedtaksperioder)
+    hentTekstForVedtaksperioder(vedtaksperioder) + """
+</pre> 
+    """
 
 private fun lagPersonresultaterTekst(behandling: Behandling?) = behandling?.let {
     """

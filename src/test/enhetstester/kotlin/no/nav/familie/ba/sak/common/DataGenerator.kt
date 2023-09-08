@@ -1112,7 +1112,6 @@ fun lagEndretUtbetalingAndel(
         avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
         søknadstidspunkt = søknadstidspunkt,
         begrunnelse = "Test",
-        standardbegrunnelser = standardbegrunnelser,
     )
 
 fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
@@ -1140,7 +1139,6 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     årsak: Årsak = Årsak.DELT_BOSTED,
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
-    standardbegrunnelser: List<Standardbegrunnelse> = emptyList(),
     andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf(),
 ): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
     val eua = EndretUtbetalingAndel(
@@ -1154,7 +1152,6 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
         avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
         søknadstidspunkt = søknadstidspunkt,
         begrunnelse = "Test",
-        standardbegrunnelser = standardbegrunnelser,
     )
 
     return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua, andelTilkjentYtelser)
@@ -1230,7 +1227,6 @@ fun lagSanityBegrunnelse(
     hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
-    valgbarhet: Valgbarhet? = null,
     resultat: SanityPeriodeResultat? = null,
 ): SanityBegrunnelse = SanityBegrunnelse(
     apiNavn = apiNavn,
