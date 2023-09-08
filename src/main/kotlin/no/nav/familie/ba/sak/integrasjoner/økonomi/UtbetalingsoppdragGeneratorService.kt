@@ -216,7 +216,7 @@ class UtbetalingsoppdragGeneratorService(
         if (behandling.type == BehandlingType.REVURDERING) {
             val opphørPåRevurdering = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
             if (opphørPåRevurdering.isNotEmpty()) {
-                opphørsdato = opphørPåRevurdering.maxByOrNull { it.opphør!!.opphørDatoFom }!!.opphør!!.opphørDatoFom
+                opphørsdato = opphørPåRevurdering.maxOfOrNull { it.opphør!!.opphørDatoFom }
             }
         }
         return Opphør(erRentOpphør = erRentOpphør, opphørsdato = opphørsdato)
