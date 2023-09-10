@@ -3,7 +3,7 @@
 
 Egenskap: Reduksjon fra forrige behandling
 
-  Bakgrunn:
+  Scenario: Skal gi reduksjon fra forrige behandling-begrunnelser knyttet til bor med søker når bor med søker er innvilget en måned senere i revurdering
     Gitt følgende behandling
       | BehandlingId | FagsakId | ForrigeBehandlingId |
       | 1            | 1        |                     |
@@ -18,7 +18,6 @@ Egenskap: Reduksjon fra forrige behandling
       | 2            | 2       | BARN       | 15.03.2023  |
       | 2            | 3       | BARN       | 15.03.2023  |
 
-  Scenario: Skal gi reduksjon fra forrige behandling-begrunnelser knyttet til bor med søker når bor med søker er innvilget en måned senere i revurdering
     Og lag personresultater for begrunnelse for behandling 1
     Og lag personresultater for begrunnelse for behandling 2
 
@@ -59,3 +58,59 @@ Egenskap: Reduksjon fra forrige behandling
       | 01.04.2023 | 30.04.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_BARN_BOR_IKKE_MED_SØKER | REDUKSJON_IKKE_OPPHOLDSTILLATELSE |
       | 01.05.2023 | 30.06.2023 | UTBETALING                                              |           |                                   |                                   |
       | 01.07.2023 |            | OPPHØR                                                  |           |                                   |                                   |
+
+  Scenario: Skal gi reduksjon fra forrige behandling-begrunnelser knyttet til utvidet når utvidet ikke lenger er oppfylt
+    Gitt følgende behandling
+      | BehandlingId | FagsakId  | ForrigeBehandlingId |
+      | 1            | 200056155 |                     |
+      | 2            | 200056155 | 1                   |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId       | Persontype | Fødselsdato |
+      | 1            | 1234    | BARN       | 22.08.2022  |
+      | 1            | 3456    | SØKER      | 07.05.1985  |
+      | 2            | 1234    | BARN       | 22.08.2022  |
+      | 2            | 3456    | SØKER      | 07.05.1985  |
+
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 3456    | BOSATT_I_RIKET,LOVLIG_OPPHOLD                                |                  | 07.05.1985 |            | OPPFYLT  | Nei                  |
+      | 3456    | UTVIDET_BARNETRYGD                                           |                  | 19.01.2023 |            | OPPFYLT  | Nei                  |
+
+      | 1234    | BOSATT_I_RIKET,LOVLIG_OPPHOLD,GIFT_PARTNERSKAP,BOR_MED_SØKER |                  | 22.08.2022 |            | OPPFYLT  | Nei                  |
+      | 1234    | UNDER_18_ÅR                                                  |                  | 22.08.2022 | 21.08.2040 | OPPFYLT  | Nei                  |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
+      | 3456    | BOSATT_I_RIKET,LOVLIG_OPPHOLD                                |                  | 07.05.1985 |            | OPPFYLT      | Nei                  |
+      | 3456    | UTVIDET_BARNETRYGD                                           |                  | 19.01.2023 |            | IKKE_OPPFYLT | Nei                  |
+
+      | 1234    | BOR_MED_SØKER,LOVLIG_OPPHOLD,BOSATT_I_RIKET,GIFT_PARTNERSKAP |                  | 22.08.2022 |            | OPPFYLT      | Nei                  |
+      | 1234    | UNDER_18_ÅR                                                  |                  | 22.08.2022 | 21.08.2040 | OPPFYLT      | Nei                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent |
+      | 1234    | 1            | 01.09.2022 | 28.02.2023 | 1676  | ORDINÆR_BARNETRYGD | 100     |
+      | 1234    | 1            | 01.03.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     |
+      | 1234    | 1            | 01.07.2023 | 31.07.2028 | 1766  | ORDINÆR_BARNETRYGD | 100     |
+      | 1234    | 1            | 01.08.2028 | 31.07.2040 | 1310  | ORDINÆR_BARNETRYGD | 100     |
+      | 3456    | 1            | 01.02.2023 | 28.02.2023 | 1054  | UTVIDET_BARNETRYGD | 100     |
+      | 3456    | 1            | 01.03.2023 | 30.06.2023 | 2489  | UTVIDET_BARNETRYGD | 100     |
+      | 3456    | 1            | 01.07.2023 | 31.07.2040 | 2516  | UTVIDET_BARNETRYGD | 100     |
+      | 1234    | 2            | 01.09.2022 | 28.02.2023 | 1676  | ORDINÆR_BARNETRYGD | 100     |
+      | 1234    | 2            | 01.03.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     |
+      | 1234    | 2            | 01.07.2023 | 31.07.2028 | 1766  | ORDINÆR_BARNETRYGD | 100     |
+      | 1234    | 2            | 01.08.2028 | 31.07.2040 | 1310  | ORDINÆR_BARNETRYGD | 100     |
+
+    Når begrunnelsetekster genereres for behandling 2
+
+    Så forvent følgende standardBegrunnelser
+      | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
+      | 01.02.2023 | 28.02.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
+      | 01.03.2023 | 30.06.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
+      | 01.07.2023 | 31.07.2028 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
+      | 01.08.2028 | 31.07.2040 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
+      | 01.08.2040 |            | OPPHØR                                                  |           |                         |                          |

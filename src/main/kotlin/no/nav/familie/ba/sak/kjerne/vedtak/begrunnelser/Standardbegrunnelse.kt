@@ -1349,22 +1349,6 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetGenerellBorSammenMedBarn"
     },
-    ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingDeltBostedFullUtbetalingForSoknad"
-    },
-    ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingDeltBostedIngenUtbetalingForSoknad"
-    },
-    ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALING_UTVIDET {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingDeltBostedKunEtterbetalingUtvidet"
-    },
-    ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_ORDINÆR_OG_ETTERBETALING_UTVIDET {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingDeltBostedFullOrdinarOgEtterbetalingUtvidet"
-    },
     ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingDeltBostedIngenUtbetaling"
@@ -1396,7 +1380,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     },
     ENDRET_UTBETALING_ALLEREDE_UTBETALT_FORELDRE_BOR_SAMMEN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingAlleredeUtbetaltForeldreBorSammen"
+        override val sanityApiNavn = "endretUtbetalingAlleredeUtbetalt"
     },
     ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
