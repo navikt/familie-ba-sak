@@ -56,6 +56,11 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         "varselOmRevurderingFraNasjonalTilEOS",
         "Varsel om revurdering fra nasjonal til EØS",
     ),
+    VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT(
+        false,
+        "varselAnnenForelderMedSelvstendigRettSoekt",
+        "Varsel annen forelder med selvstendig rett søkt",
+    ),
     VARSEL_OM_ÅRLIG_REVURDERING_EØS(
         false,
         "varselOmAarligRevurderingEos",
@@ -148,6 +153,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
             VARSEL_OM_ÅRLIG_REVURDERING_EØS,
             VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
+            VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT,
             -> true
 
             INFORMASJONSBREV_DELT_BOSTED,
@@ -212,6 +218,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER_INSTITUSJON -> Dokumenttype.BARNETRYGD_INNHENTE_OPPLYSNINGER_INSTITUSJON
             SVARTIDSBREV_INSTITUSJON -> Dokumenttype.BARNETRYGD_SVARTIDSBREV_INSTITUSJON
             FORLENGET_SVARTIDSBREV_INSTITUSJON -> Dokumenttype.BARNETRYGD_FORLENGET_SVARTIDSBREV_INSTITUSJON
+            VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT -> Dokumenttype.VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT
 
             VEDTAK_ENDRING,
             VEDTAK_OPPHØRT,
@@ -248,6 +255,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS -> Distribusjonstype.VIKTIG
             VARSEL_OM_ÅRLIG_REVURDERING_EØS -> Distribusjonstype.VIKTIG
             VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER -> Distribusjonstype.VIKTIG
+            VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT -> Distribusjonstype.VIKTIG
             SVARTIDSBREV, SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
             FORLENGET_SVARTIDSBREV, FORLENGET_SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Distribusjonstype.ANNET
