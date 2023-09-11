@@ -1193,6 +1193,7 @@ fun lagRestSanityBegrunnelse(
     endretUtbetalingsperiodeDeltBostedTriggere: String = "",
     endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     vedtakResultat: String? = null,
+    fagsakType: String? = null,
 
 ): RestSanityBegrunnelse = RestSanityBegrunnelse(
     apiNavn = apiNavn,
@@ -1210,6 +1211,7 @@ fun lagRestSanityBegrunnelse(
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
     vedtakResultat = vedtakResultat,
+    fagsakType = fagsakType,
 )
 
 fun lagSanityBegrunnelse(
@@ -1228,6 +1230,7 @@ fun lagSanityBegrunnelse(
     endretUtbetalingsperiodeDeltBostedTriggere: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
     resultat: SanityPeriodeResultat? = null,
+    fagsakType: FagsakType? = null,
 ): SanityBegrunnelse = SanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1244,6 +1247,7 @@ fun lagSanityBegrunnelse(
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
     periodeResultat = resultat,
+    fagsakType = fagsakType,
 )
 
 fun lagSanityEøsBegrunnelse(
@@ -1258,6 +1262,7 @@ fun lagSanityEøsBegrunnelse(
     hjemlerEØSForordningen987: List<String> = emptyList(),
     hjemlerSeperasjonsavtalenStorbritannina: List<String> = emptyList(),
     vilkår: List<Vilkår> = emptyList(),
+    fagsakType: FagsakType? = null,
 ): SanityEØSBegrunnelse = SanityEØSBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1270,6 +1275,7 @@ fun lagSanityEøsBegrunnelse(
     hjemlerEØSForordningen987 = hjemlerEØSForordningen987,
     hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina,
     vilkår = vilkår.toSet(),
+    fagsakType = fagsakType,
 )
 
 fun lagTriggesAv(
