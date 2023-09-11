@@ -244,6 +244,17 @@ fun ManueltBrevRequest.tilBrev(saksbehandlerNavn: String, hentLandkoder: (() -> 
                 )
             }
 
+        Brevmal.VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT ->
+            VarselbrevMedÅrsakerOgBarn(
+                mal = Brevmal.VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT,
+                navn = this.mottakerNavn,
+                fødselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+                varselÅrsaker = this.multiselectVerdier,
+                barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager(),
+                enhet = this.enhetNavn(),
+                saksbehandlerNavn = saksbehandlerNavn,
+            )
+
         Brevmal.SVARTIDSBREV ->
             Svartidsbrev(
                 navn = this.mottakerNavn,
