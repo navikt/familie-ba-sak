@@ -11,21 +11,23 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMåned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
 
 @Service
 class VilkårsvurderingTidslinjeService(
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
 
     fun hentTidslinjerThrows(behandlingId: BehandlingId): VilkårsvurderingTidslinjer {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId.id)!!
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId.id)!!
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandlingId.id)!!
+        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandlingId = behandlingId.id)
 
         return VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurdering,
-            personopplysningGrunnlag,
+            søkerOgBarn = søkerOgBarn,
         )
     }
 

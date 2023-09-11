@@ -78,6 +78,10 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
       | 5678    | 01.05.2021 | 31.03.2039 | 1354  | 1            |
       | 5678    | 01.02.2022 | 31.03.2039 | 1354  | 2            |
 
+    Og med overstyrt endringstidspunkt
+      | Endringstidspunkt | BehandlingId |
+      | 01.01.2021        | 2            |
+
     Når vedtaksperioder med begrunnelser genereres for behandling 2
 
     Så forvent følgende vedtaksperioder med begrunnelser

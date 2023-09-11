@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.statistikk.producer
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.ekstern.pensjon.HentAlleIdenterTilPsysResponseDTO
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
@@ -36,6 +38,10 @@ interface KafkaProducer {
     fun sendBarnetrygdBisysMelding(
         behandlingId: String,
         barnetrygdBisysMelding: BarnetrygdBisysMelding,
+    )
+
+    fun sendIdentTilPSys(
+        hentAlleIdenterTilPsysResponseDTO: HentAlleIdenterTilPsysResponseDTO,
     )
 }
 
@@ -125,6 +131,19 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
             }
     }
 
+    override fun sendIdentTilPSys(
+        hentAlleIdenterTilPsysResponseDTO: HentAlleIdenterTilPsysResponseDTO,
+    ) {
+        kafkaAivenTemplate.send(BARNETRYGD_PENSJON_TOPIC, objectMapper.writeValueAsString(hentAlleIdenterTilPsysResponseDTO))
+            .exceptionally {
+                val feilmelding =
+                    "Melding på topic $BARNETRYGD_PENSJON_TOPIC kan ikke sendes for " +
+                        "RequestId: ${hentAlleIdenterTilPsysResponseDTO.requestId}. Feiler med ${it.message}"
+                logger.warn(feilmelding)
+                throw Feil(message = feilmelding)
+            }
+    }
+
     override fun sendBarnetrygdBisysMelding(
         behandlingId: String,
         barnetrygdBisysMelding: BarnetrygdBisysMelding,
@@ -153,7 +172,6 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     companion object {
 
         private val logger = LoggerFactory.getLogger(DefaultKafkaProducer::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private const val VEDTAKV2_TOPIC = "teamfamilie.aapen-barnetrygd-vedtak-v2"
         private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "teamfamilie.aapen-barnetrygd-saksstatistikk-behandling-v1"
         private const val SAKSSTATISTIKK_SAK_TOPIC = "teamfamilie.aapen-barnetrygd-saksstatistikk-sak-v1"
@@ -161,6 +179,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
         private const val FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC =
             "teamfamilie.privat-tbk-hentfagsystemsbehandling-respons-topic"
         const val OPPHOER_BARNETRYGD_BISYS_TOPIC = "teamfamilie.aapen-familie-ba-sak-opphoer-barnetrygd"
+        const val BARNETRYGD_PENSJON_TOPIC = "teamfamilie.aapen-familie-ba-sak-identer-med-barnetrygd"
     }
 }
 
@@ -201,6 +220,11 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
         behandlingId: String,
     ) {
         logger.info("Skipper sending av fagsystemsbehandling respons for $behandlingId fordi kafka ikke er enablet")
+    }
+    override fun sendIdentTilPSys(
+        hentAlleIdenterTilPsysResponseDTO: HentAlleIdenterTilPsysResponseDTO,
+    ) {
+        logger.info("Skipper sending av sendBarnetrygdBisysMelding respons for $hentAlleIdenterTilPsysResponseDTO.requestId fordi kafka ikke er enablet")
     }
 
     override fun sendBarnetrygdBisysMelding(

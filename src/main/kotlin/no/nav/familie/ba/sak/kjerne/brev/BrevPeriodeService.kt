@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -40,7 +40,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.ytelseErFraForrigePeri
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -131,7 +130,6 @@ class BrevPeriodeService(
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = personopplysningGrunnlag,
             andelerTilkjentYtelse = andelerTilkjentYtelse,
-            skalBrukeNyVedtaksperiodeLøsning = featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY),
         )
 
         val ytelserForrigePeriode =
@@ -237,12 +235,6 @@ class BrevPeriodeService(
                 vedtaksperioder = listOf(vedtaksperiodeMedBegrunnelser),
                 behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling,
             ).single()
-        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster(
-            skalBrukeNyVedtaksperiodeLøsning = featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY),
-        )
-    }
-
-    companion object {
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
+        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
     }
 }

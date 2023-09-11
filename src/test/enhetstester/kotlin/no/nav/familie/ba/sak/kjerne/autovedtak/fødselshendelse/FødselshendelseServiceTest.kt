@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
@@ -20,6 +21,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.FødselshendelseData
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -193,6 +195,12 @@ class FødselshendelseServiceTest {
         every { persongrunnlagService.hentSøker(nyBehandling.id) } returns søkerPerson
         every { persongrunnlagService.hentBarna(nyBehandling) } returns listOf(barn1Person, barn2Person)
 
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(nyBehandling.id) } returns listOf(
+            barn1Person.tilPersonEnkel(),
+            barn2Person.tilPersonEnkel(),
+            søkerPerson.tilPersonEnkel(),
+        )
+
         every { personidentService.hentAktør(søker) } returns søkerAktør
         every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerAktør) } returns PersonInfo(
             fødselsdato = LocalDate.of(1990, Month.JANUARY, 5),
@@ -205,6 +213,9 @@ class FødselshendelseServiceTest {
         )
         every { persongrunnlagService.hentBarna(forrigeBehandling) } returns listOf(
             barn1Person,
+        )
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(forrigeBehandling.id) } returns listOf(
+            barn1Person.tilPersonEnkel(),
         )
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(nyBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
             søkerPerson,
@@ -225,7 +236,7 @@ class FødselshendelseServiceTest {
             ),
         )
 
-        autovedtakFødselshendelseService.kjørBehandling(nyBehandlingHendelse)
+        autovedtakFødselshendelseService.kjørBehandling(FødselshendelseData(nyBehandlingHendelse))
         verify(exactly = 0) {
             opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = any(),

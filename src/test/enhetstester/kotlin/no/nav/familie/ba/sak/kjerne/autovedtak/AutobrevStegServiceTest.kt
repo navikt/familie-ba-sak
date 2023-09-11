@@ -42,14 +42,14 @@ class AutobrevStegServiceTest {
             it.status = BehandlingStatus.UTREDES
         }
 
-        every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
+        every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(SmåbarnstilleggData(aktør)) } returns true
         every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
         every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
 
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = aktør,
-            behandlingsdata = aktør,
+            aktør = aktør,
         )
 
         verify(exactly = 1) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) }
@@ -63,14 +63,14 @@ class AutobrevStegServiceTest {
             it.status = BehandlingStatus.FATTER_VEDTAK
         }
 
-        every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
+        every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(SmåbarnstilleggData(aktør)) } returns true
         every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
         every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
 
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = aktør,
-            behandlingsdata = aktør,
+            aktør = aktør,
         )
 
         verify(exactly = 1) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) }
@@ -84,7 +84,7 @@ class AutobrevStegServiceTest {
             it.status = BehandlingStatus.IVERKSETTER_VEDTAK
         }
 
-        every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
+        every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(SmåbarnstilleggData(aktør)) } returns true
         every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
         every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
@@ -92,7 +92,7 @@ class AutobrevStegServiceTest {
         assertThrows<RekjørSenereException> {
             autovedtakStegService.kjørBehandlingSmåbarnstillegg(
                 mottakersAktør = aktør,
-                behandlingsdata = aktør,
+                aktør = aktør,
             )
         }
     }

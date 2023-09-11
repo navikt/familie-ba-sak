@@ -9,8 +9,10 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår.UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle.BARN
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle.SOKER
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -18,29 +20,43 @@ import org.slf4j.LoggerFactory
 interface ISanityBegrunnelse {
     val apiNavn: String
     val navnISystem: String
+    val periodeResultat: SanityPeriodeResultat?
+    val vilkår: Set<Vilkår>
+    val borMedSokerTriggere: List<VilkårTrigger>
+    val giftPartnerskapTriggere: List<VilkårTrigger>
+    val bosattIRiketTriggere: List<VilkårTrigger>
+    val lovligOppholdTriggere: List<VilkårTrigger>
+    val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>
+    val fagsakType: FagsakType?
 }
 
 data class SanityBegrunnelse(
     override val apiNavn: String,
     override val navnISystem: String,
-    val vilkaar: List<SanityVilkår>? = null,
-    val vilkår: Set<Vilkår> = emptySet(),
+    override val periodeResultat: SanityPeriodeResultat? = null,
+    override val vilkår: Set<Vilkår> = emptySet(),
+    override val lovligOppholdTriggere: List<VilkårTrigger> = emptyList(),
+    override val bosattIRiketTriggere: List<VilkårTrigger> = emptyList(),
+    override val giftPartnerskapTriggere: List<VilkårTrigger> = emptyList(),
+    override val borMedSokerTriggere: List<VilkårTrigger> = emptyList(),
+    override val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger> = emptyList(),
+    override val fagsakType: FagsakType? = null,
+    @Deprecated("Bruk vilkår")
+    val vilkaar: List<SanityVilkår> = emptyList(),
     val rolle: List<VilkårRolle> = emptyList(),
-    val lovligOppholdTriggere: List<VilkårTrigger>? = null,
-    val bosattIRiketTriggere: List<VilkårTrigger>? = null,
-    val giftPartnerskapTriggere: List<VilkårTrigger>? = null,
-    val borMedSokerTriggere: List<VilkårTrigger>? = null,
-    val ovrigeTriggere: List<ØvrigTrigger>? = null,
-    val endringsaarsaker: List<Årsak>? = null,
+    val ovrigeTriggere: List<ØvrigTrigger> = emptyList(),
     val hjemler: List<String> = emptyList(),
     val hjemlerFolketrygdloven: List<String> = emptyList(),
+    val endringsaarsaker: List<Årsak> = emptyList(),
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
-    val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
-    val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null,
+    val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
     val valgbarhet: Valgbarhet? = null,
 ) : ISanityBegrunnelse {
 
     val triggesAv: TriggesAv by lazy { this.tilTriggesAv() }
+
+    fun gjelderEtterEndretUtbetaling() =
+        this.endretUtbetalingsperiodeTriggere.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE)
 }
 
 data class RestSanityBegrunnelse(
@@ -60,6 +76,8 @@ data class RestSanityBegrunnelse(
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
     val valgbarhet: String? = null,
+    val vedtakResultat: String?,
+    val fagsakType: String?,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
         if (apiNavn == null) return null
@@ -67,49 +85,55 @@ data class RestSanityBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
             vilkaar = vilkaar?.mapNotNull {
-                finnEnumverdi(it, SanityVilkår.values(), apiNavn)
-            },
+                finnEnumverdi(it, SanityVilkår.entries.toTypedArray(), apiNavn)
+            } ?: emptyList(),
             vilkår = vilkaar?.mapNotNull {
-                finnEnumverdi(it, SanityVilkår.values(), apiNavn)
+                finnEnumverdi(it, SanityVilkår.entries.toTypedArray(), apiNavn)
             }?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
-            rolle = rolle?.mapNotNull { finnEnumverdi(it, VilkårRolle.values(), apiNavn) } ?: emptyList(),
+            rolle = rolle?.mapNotNull { finnEnumverdi(it, VilkårRolle.entries.toTypedArray(), apiNavn) } ?: emptyList(),
             lovligOppholdTriggere = lovligOppholdTriggere?.mapNotNull {
-                finnEnumverdi(it, VilkårTrigger.values(), apiNavn)
-            },
+                finnEnumverdi(it, VilkårTrigger.entries.toTypedArray(), apiNavn)
+            } ?: emptyList(),
             bosattIRiketTriggere = bosattIRiketTriggere?.mapNotNull {
-                finnEnumverdi(it, VilkårTrigger.values(), apiNavn)
-            },
+                finnEnumverdi(it, VilkårTrigger.entries.toTypedArray(), apiNavn)
+            } ?: emptyList(),
             giftPartnerskapTriggere = giftPartnerskapTriggere?.mapNotNull {
-                finnEnumverdi(it, VilkårTrigger.values(), apiNavn)
-            },
+                finnEnumverdi(it, VilkårTrigger.entries.toTypedArray(), apiNavn)
+            } ?: emptyList(),
             borMedSokerTriggere = borMedSokerTriggere?.mapNotNull {
-                finnEnumverdi(it, VilkårTrigger.values(), apiNavn)
-            },
+                finnEnumverdi(it, VilkårTrigger.entries.toTypedArray(), apiNavn)
+            } ?: emptyList(),
             ovrigeTriggere = ovrigeTriggere?.mapNotNull {
-                finnEnumverdi(it, ØvrigTrigger.values(), apiNavn)
-            },
+                finnEnumverdi(it, ØvrigTrigger.entries.toTypedArray(), apiNavn)
+            } ?: emptyList(),
             endringsaarsaker = endringsaarsaker?.mapNotNull {
-                finnEnumverdi(it, Årsak.values(), apiNavn)
-            },
+                finnEnumverdi(it, Årsak.entries.toTypedArray(), apiNavn)
+            } ?: emptyList(),
             hjemler = hjemler ?: emptyList(),
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
             endretUtbetalingsperiodeDeltBostedUtbetalingTrigger =
             if (endretUtbetalingsperiodeDeltBostedUtbetalingTrigger != null) {
                 finnEnumverdi(
                     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger,
-                    EndretUtbetalingsperiodeDeltBostedTriggere.values(),
+                    EndretUtbetalingsperiodeDeltBostedTriggere.entries.toTypedArray(),
                     apiNavn,
                 )
             } else {
                 null
             },
             endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere?.mapNotNull {
-                finnEnumverdi(it, EndretUtbetalingsperiodeTrigger.values(), apiNavn)
-            },
+                finnEnumverdi(it, EndretUtbetalingsperiodeTrigger.entries.toTypedArray(), apiNavn)
+            } ?: emptyList(),
             utvidetBarnetrygdTriggere = utvidetBarnetrygdTriggere?.mapNotNull {
-                finnEnumverdi(it, UtvidetBarnetrygdTrigger.values(), apiNavn)
+                finnEnumverdi(it, UtvidetBarnetrygdTrigger.entries.toTypedArray(), apiNavn)
+            } ?: emptyList(),
+            valgbarhet = valgbarhet?.let { finnEnumverdi(valgbarhet, Valgbarhet.entries.toTypedArray(), apiNavn) },
+            periodeResultat = vedtakResultat?.let {
+                finnEnumverdi(it, SanityPeriodeResultat.entries.toTypedArray(), apiNavn)
             },
-            valgbarhet = valgbarhet?.let { finnEnumverdi(valgbarhet, Valgbarhet.values(), apiNavn) },
+            fagsakType = fagsakType?.let {
+                finnEnumverdi(it, FagsakType.entries.toTypedArray(), apiNavn)
+            },
         )
     }
 }
@@ -162,6 +186,22 @@ enum class VilkårTrigger {
     DELT_BOSTED_SKAL_IKKE_DELES,
 }
 
+fun List<VilkårTrigger>.tilUtdypendeVilkårsvurderinger() = this.map {
+    when (it) {
+        VilkårTrigger.VURDERING_ANNET_GRUNNLAG -> UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
+        VilkårTrigger.MEDLEMSKAP -> UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+        VilkårTrigger.DELT_BOSTED -> UtdypendeVilkårsvurdering.DELT_BOSTED
+        VilkårTrigger.DELT_BOSTED_SKAL_IKKE_DELES -> UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
+    }
+}
+
+enum class SanityPeriodeResultat {
+    INNVILGET_ELLER_ØKNING,
+    INGEN_ENDRING,
+    IKKE_INNVILGET,
+    REDUKSJON,
+}
+
 enum class ØvrigTrigger {
     MANGLER_OPPLYSNINGER,
     SATSENDRING,
@@ -169,9 +209,15 @@ enum class ØvrigTrigger {
     ALLTID_AUTOMATISK,
     ETTER_ENDRET_UTBETALING,
     ENDRET_UTBETALING,
-    GJELDER_FØRSTE_PERIODE,
-    GJELDER_FRA_INNVILGELSESTIDSPUNKT,
+    OPPHØR_FRA_FORRIGE_BEHANDLING,
+    REDUKSJON_FRA_FORRIGE_BEHANDLING,
     BARN_DØD,
+
+    @Deprecated("Skal erstattes med OPPHØR_FRA_FORRIGE_BEHANDLING, må endres i sanity")
+    GJELDER_FØRSTE_PERIODE,
+
+    @Deprecated("Skal erstattes med REDUKSJON_FRA_FORRIGE_BEHANDLING, må endres i sanity")
+    GJELDER_FRA_INNVILGELSESTIDSPUNKT,
 }
 
 enum class EndretUtbetalingsperiodeTrigger {
@@ -197,7 +243,7 @@ enum class Valgbarhet {
 
 private fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
     return TriggesAv(
-        vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
+        vilkår = this.vilkaar.map { it.tilVilkår() }.toSet(),
         personTyper = if (this.rolle.isEmpty()) {
             when {
                 this.inneholderVilkår(BOSATT_I_RIKET) -> setOf(PersonType.BARN, PersonType.SØKER)
@@ -225,10 +271,10 @@ private fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
         valgbarhet = this.valgbarhet,
         etterEndretUtbetaling = this.endretUtbetalingsperiodeTriggere
-            ?.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) ?: false,
+            .contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) ?: false,
         endretUtbetalingSkalUtbetales = this.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger
             ?: EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
-        endringsaarsaker = this.endringsaarsaker?.toSet() ?: emptySet(),
+        endringsaarsaker = this.endringsaarsaker.toSet(),
         småbarnstillegg = this.inneholderUtvidetBarnetrygdTrigger(UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG),
         gjelderFørstePeriode = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FØRSTE_PERIODE),
         gjelderFraInnvilgelsestidspunkt = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT),
@@ -237,22 +283,22 @@ private fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
 }
 
 fun SanityBegrunnelse.inneholderVilkår(vilkår: SanityVilkår) =
-    this.vilkaar?.contains(vilkår) ?: false
+    this.vilkaar.contains(vilkår)
 
 fun SanityBegrunnelse.inneholderØvrigTrigger(øvrigTrigger: ØvrigTrigger) =
-    this.ovrigeTriggere?.contains(øvrigTrigger) ?: false
+    this.ovrigeTriggere.contains(øvrigTrigger)
 
 fun SanityBegrunnelse.inneholderLovligOppholdTrigger(vilkårTrigger: VilkårTrigger) =
-    this.lovligOppholdTriggere?.contains(vilkårTrigger) ?: false
+    this.lovligOppholdTriggere.contains(vilkårTrigger)
 
 fun SanityBegrunnelse.inneholderBosattIRiketTrigger(vilkårTrigger: VilkårTrigger) =
-    this.bosattIRiketTriggere?.contains(vilkårTrigger) ?: false
+    this.bosattIRiketTriggere.contains(vilkårTrigger)
 
 fun SanityBegrunnelse.inneholderGiftPartnerskapTrigger(vilkårTrigger: VilkårTrigger) =
-    this.giftPartnerskapTriggere?.contains(vilkårTrigger) ?: false
+    this.giftPartnerskapTriggere.contains(vilkårTrigger)
 
 fun SanityBegrunnelse.inneholderBorMedSøkerTrigger(vilkårTrigger: VilkårTrigger) =
-    this.borMedSokerTriggere?.contains(vilkårTrigger) ?: false
+    this.borMedSokerTriggere.contains(vilkårTrigger)
 
 fun SanityBegrunnelse.inneholderUtvidetBarnetrygdTrigger(utvidetBarnetrygdTrigger: UtvidetBarnetrygdTrigger) =
-    this.utvidetBarnetrygdTriggere?.contains(utvidetBarnetrygdTrigger) ?: false
+    this.utvidetBarnetrygdTriggere.contains(utvidetBarnetrygdTrigger)

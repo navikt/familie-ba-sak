@@ -171,7 +171,6 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     uregistrerteBarn: List<MinimertUregistrertBarn>,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
     minimerteRestEndredeAndeler: List<MinimertRestEndretAndel>,
-    skalBrukeNyVedtaksperiodeLøsning: Boolean,
 ): Begrunnelse {
     val personerPåBegrunnelse =
         personerIPersongrunnlag.filter { person -> this.personIdenter.contains(person.personIdent) }
@@ -208,7 +207,6 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
                     fom = vedtaksperiode.fom,
                     tom = vedtaksperiode.tom ?: TIDENES_ENDE,
                 ),
-                skalBrukeNyVedtaksperiodeLøsning,
             )
         }
 

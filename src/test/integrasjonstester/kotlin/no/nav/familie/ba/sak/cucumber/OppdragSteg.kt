@@ -20,10 +20,10 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbeta
 import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningTestUtil.sisteAndelPerIdent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
@@ -75,31 +75,19 @@ class OppdragSteg {
         val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
         val forrigeKjeder = tilKjeder(forrigeTilkjentYtelse, erSimulering)
         val oppdaterteKjeder = tilKjeder(tilkjentYtelse, erSimulering)
-        val sisteOffsetPåFagsak = maxOffsetPåFagsak(acc)
-        val sisteOffsetPerIdent = gjeldendeForrigeOffsetForKjede(forrigeKjeder)
+        val sisteAndelPerIdent = sisteAndelPerIdent(acc)
         oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder, forrigeKjeder)
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
             erFørsteBehandlingPåFagsak = forrigeTilkjentYtelse == null,
             forrigeKjeder = forrigeKjeder,
-            sisteOffsetPerIdent = sisteOffsetPerIdent,
-            sisteOffsetPåFagsak = sisteOffsetPåFagsak?.toInt(),
+            sisteAndelPerIdent = sisteAndelPerIdent,
             oppdaterteKjeder = oppdaterteKjeder,
             erSimulering = erSimulering,
             endretMigreringsDato = null,
         )
     }
-
-    private fun maxOffsetPåFagsak(acc: List<TilkjentYtelse>) =
-        acc.maxOfOrNull { ty ->
-            ty.andelerTilkjentYtelse.maxOfOrNull {
-                it.periodeOffset ?: error(
-                    "Mangler offset for behandling=${it.behandlingId} " +
-                        "andel=${it.id} fom=${it.stønadFom} tom=${it.stønadTom}",
-                )
-            } ?: 0
-        }
 
     @Så("forvent følgende utbetalingsoppdrag")
     fun `forvent følgende utbetalingsoppdrag`(dataTable: DataTable) {

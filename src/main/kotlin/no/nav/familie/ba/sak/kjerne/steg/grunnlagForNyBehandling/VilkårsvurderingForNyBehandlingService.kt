@@ -2,17 +2,17 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
@@ -29,7 +29,7 @@ class VilkårsvurderingForNyBehandlingService(
     private val behandlingstemaService: BehandlingstemaService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
-    private val featureToggleService: FeatureToggleService,
+    private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
     fun opprettVilkårsvurderingUtenomHovedflyt(
@@ -127,30 +127,22 @@ class VilkårsvurderingForNyBehandlingService(
         forrigeBehandlingSomErVedtatt: Behandling,
         inneværendeBehandling: Behandling,
     ): Vilkårsvurdering {
-        return if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_KOPIER_GRUNNLAG_FRA_FORRIGE_BEHANDLING)) {
-            val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(inneværendeBehandling.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(inneværendeBehandling.id)
 
-            val forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
+        val forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
 
-            val nyVilkårsvurdering =
-                forrigeBehandlingVilkårsvurdering.tilKopiForNyBehandling(
-                    nyBehandling = inneværendeBehandling,
-                    personopplysningGrunnlag,
-                )
-
-            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
-                behandling = inneværendeBehandling,
-                forrigeBehandling = forrigeBehandlingSomErVedtatt,
+        val nyVilkårsvurdering =
+            forrigeBehandlingVilkårsvurdering.tilKopiForNyBehandling(
+                nyBehandling = inneværendeBehandling,
+                personopplysningGrunnlag,
             )
 
-            return vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
-        } else {
-            initierVilkårsvurderingForBehandling(
-                behandling = inneværendeBehandling,
-                bekreftEndringerViaFrontend = true,
-                forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
-            )
-        }
+        endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+            behandling = inneværendeBehandling,
+            forrigeBehandling = forrigeBehandlingSomErVedtatt,
+        )
+
+        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
     }
 
     fun initierVilkårsvurderingForBehandling(
@@ -216,13 +208,7 @@ class VilkårsvurderingForNyBehandlingService(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             aktivVilkårsvurdering = aktivVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
-            forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) {
-                hentVilkårsvurdering(
-                    forrigeBehandlingSomErVedtatt.id,
-                )
-            } else {
-                null
-            },
+            aktørerMedUtvidetAndelerIForrigeBehandling = finnAktørerMedUtvidetBarnetrygdIForrigeBehandling(forrigeBehandlingSomErVedtatt),
         )
 
         if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
@@ -233,6 +219,17 @@ class VilkårsvurderingForNyBehandlingService(
         }
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
     }
+
+    /***
+     * Utvidet vilkår kan kun kopieres med fra forrige behandling hvis det finnes utbetaling av utvidet barnetrygd i forrige behandling
+     */
+    private fun finnAktørerMedUtvidetBarnetrygdIForrigeBehandling(forrigeBehandlingSomErVedtatt: Behandling?): List<Aktør> =
+        forrigeBehandlingSomErVedtatt?.let {
+            val forrigeAndeler =
+                andelerTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandlingSomErVedtatt.id)
+
+            finnAktørerMedUtvidetFraAndeler(andeler = forrigeAndeler)
+        } ?: emptyList()
 
     private fun tellMetrikkerForFødselshendelse(
         aktivVilkårsvurdering: Vilkårsvurdering?,
@@ -267,6 +264,7 @@ class VilkårsvurderingForNyBehandlingService(
             forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id),
             behandling = behandling,
             løpendeUnderkategori = løpendeUnderkategori,
+            aktørerMedUtvidetAndelerIForrigeBehandling = finnAktørerMedUtvidetBarnetrygdIForrigeBehandling(forrigeBehandlingSomErVedtatt),
         )
         endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
             behandling,
@@ -275,7 +273,7 @@ class VilkårsvurderingForNyBehandlingService(
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
     }
 
-    fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
+    private fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
         behandlingId = behandlingId,
     )
 

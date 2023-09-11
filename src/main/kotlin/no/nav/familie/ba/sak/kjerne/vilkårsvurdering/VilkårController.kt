@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -32,7 +31,6 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VilkårController(
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårService: VilkårService,
     private val annenVurderingService: AnnenVurderingService,
     private val personidentService: PersonidentService,
@@ -53,14 +51,14 @@ class VilkårController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "endre vilkår",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         vilkårService.endreVilkår(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             vilkårId = vilkaarId,
             restPersonResultat = restPersonResultat,
         )
-        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id)
+        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
@@ -75,8 +73,10 @@ class VilkårController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Annen vurdering",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         annenVurderingService.endreAnnenVurdering(
+            behandlingId = behandlingId,
             annenVurderingId = annenVurderingId,
             restAnnenVurdering = restAnnenVurdering,
         )
@@ -95,16 +95,17 @@ class VilkårController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "slette vilkårsperiode",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         val aktør = personidentService.hentAktør(personIdent)
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+
         vilkårService.deleteVilkårsperiode(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             vilkårId = vilkaarId,
             aktør = aktør,
         )
 
-        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id)
+        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
@@ -118,6 +119,7 @@ class VilkårController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "slette vilkår",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         vilkårService.deleteVilkår(behandlingId, restSlettVilkår)
 
@@ -132,6 +134,7 @@ class VilkårController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legge til vilkår",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         vilkårService.postVilkår(behandlingId, restNyttVilkår)
 

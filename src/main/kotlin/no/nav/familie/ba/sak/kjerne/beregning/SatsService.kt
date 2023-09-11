@@ -64,6 +64,8 @@ object SatsService {
         return gjeldendeSatsForPeriode.beløp
     }
 
+    fun finnSisteSatsendringsDato(): LocalDate = hentAllesatser().maxBy { it.gyldigFom }.gyldigFom
+
     fun finnSatsendring(startDato: LocalDate): List<Sats> = hentAllesatser()
         .filter { it.gyldigFom == startDato }
         .filter { it.gyldigFom != LocalDate.MIN }

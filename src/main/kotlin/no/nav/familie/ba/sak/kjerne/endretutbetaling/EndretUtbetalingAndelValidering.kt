@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetalingFom
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -312,7 +313,7 @@ fun finnDeltBostedPerioder(
     )
 }
 
-fun validerBarnasVilkår(barna: List<Person>, vilkårsvurdering: Vilkårsvurdering) {
+fun validerBarnasVilkår(barna: List<PersonEnkel>, vilkårsvurdering: Vilkårsvurdering) {
     val listeAvFeil = mutableListOf<String>()
 
     barna.map { barn ->

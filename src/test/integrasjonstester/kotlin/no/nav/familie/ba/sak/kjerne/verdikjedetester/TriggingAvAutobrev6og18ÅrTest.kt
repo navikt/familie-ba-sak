@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
@@ -38,6 +39,7 @@ class TriggingAvAutobrev6og18ÅrTest(
     @Autowired private val stegService: StegService,
     @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
     @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -137,11 +139,13 @@ class TriggingAvAutobrev6og18ÅrTest(
                 RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
 
-        val førsteVedtaksperiodeId =
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
-                .first()
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+        )
+
+        val førsteVedtaksperiode = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
-            vedtaksperiodeId = førsteVedtaksperiodeId.id,
+            vedtaksperiodeId = førsteVedtaksperiode.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
                     Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
@@ -149,8 +153,10 @@ class TriggingAvAutobrev6og18ÅrTest(
             ),
         )
         val reduksjonVedtaksperiodeId =
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.single {
-                it.fom!!.isEqual(LocalDate.now().førsteDagIInneværendeMåned()) && it.type == Vedtaksperiodetype.UTBETALING
+            vedtaksperioderMedBegrunnelser.single {
+                it.fom!!.isEqual(
+                    LocalDate.now().førsteDagIInneværendeMåned(),
+                ) && it.type == Vedtaksperiodetype.UTBETALING
             }
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = reduksjonVedtaksperiodeId.id,

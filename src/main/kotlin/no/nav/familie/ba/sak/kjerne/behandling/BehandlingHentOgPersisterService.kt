@@ -41,12 +41,15 @@ class BehandlingHentOgPersisterService(
             ?: throw Feil("Finner ikke behandling med id $behandlingId")
     }
 
+    fun hentStatus(behandlingId: Long): BehandlingStatus {
+        return behandlingRepository.finnStatus(behandlingId)
+    }
+
     /**
      * Henter siste iverksatte behandling på fagsak
      */
     fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
-        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
-        return Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
+        return behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
     }
 
     /**

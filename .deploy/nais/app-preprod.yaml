@@ -10,6 +10,7 @@ metadata:
 spec:
   envFrom:
     - secret: familie-ba-sak
+    - secret: familie-ba-sak-unleash-api-token
   image: {{image}}
   port: 8089
   leaderElection: true
@@ -26,7 +27,7 @@ spec:
     path: /internal/prometheus
   gcp: # Database
     sqlInstances:
-      - type: POSTGRES_12 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
+      - type: POSTGRES_15 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
         tier: db-custom-1-3840
         name: familie-ba-sak
         autoBackupTime: "02:00"
@@ -78,7 +79,7 @@ spec:
         - application: bidrag-grunnlag
           namespace: bidrag
           cluster: dev-gcp
-        - application: popp
+        - application: omsorgsopptjening-start-innlesning
           namespace: pensjonopptjening
           cluster: dev-gcp
     outbound:
@@ -111,10 +112,10 @@ spec:
         - host: sdw-wsrest.ecb.europa.eu
         - host: sentry.gc.nav.no
         - host: data-api.ecb.europa.eu
+        - host: teamfamilie-unleash-api.nav.cloud.nais.io
   replicas:
     min: 2
     max: 2
-    cpuThresholdPercentage: 50
   resources:
     limits:
       memory: 1024Mi

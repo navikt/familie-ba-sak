@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
@@ -15,11 +16,12 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.GENERELL_SAK
-import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.Søknadsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -28,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
+import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
@@ -49,6 +52,7 @@ class InnkommendeJournalføringService(
     private val loggService: LoggService,
     private val stegService: StegService,
     private val journalføringMetrikk: JournalføringMetrikk,
+    private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
 ) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
@@ -123,6 +127,7 @@ class InnkommendeJournalføringService(
         kategori: BehandlingKategori? = null,
         underkategori: BehandlingUnderkategori? = null,
         søknadMottattDato: LocalDate? = null,
+        søknadsinfo: Søknadsinfo? = null,
         fagsakType: FagsakType = FagsakType.NORMAL,
         institusjon: InstitusjonInfo? = null,
     ): Behandling {
@@ -136,6 +141,7 @@ class InnkommendeJournalføringService(
                 behandlingÅrsak = årsak,
                 navIdent = navIdent,
                 søknadMottattDato = søknadMottattDato,
+                søknadsinfo = søknadsinfo,
                 fagsakId = fagsak.id,
             ),
         )
@@ -149,6 +155,8 @@ class InnkommendeJournalføringService(
         oppgaveId: String,
     ): String {
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
+        val journalpost = integrasjonClient.hentJournalpost(journalpostId)
+        val brevkode = journalpost.dokumenter?.firstNotNullOfOrNull { it.brevkode }
 
         if (request.opprettOgKnyttTilNyBehandling) {
             val nyBehandling =
@@ -160,6 +168,13 @@ class InnkommendeJournalføringService(
                     kategori = request.kategori,
                     underkategori = request.underkategori,
                     søknadMottattDato = request.datoMottatt?.toLocalDate(),
+                    søknadsinfo = brevkode?.let {
+                        Søknadsinfo(
+                            journalpostId = journalpost.journalpostId,
+                            brevkode = it,
+                            erDigital = journalpost.kanal == NAV_NO,
+                        )
+                    },
                     fagsakType = request.fagsakType,
                     institusjon = request.institusjon,
                 )
@@ -168,9 +183,16 @@ class InnkommendeJournalføringService(
 
         val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder, journalpostId)
 
+        val erSøknad = brevkode == Søknadstype.ORDINÆR.søknadskode || brevkode == Søknadstype.UTVIDET.søknadskode
+
+        if (erSøknad && !request.opprettOgKnyttTilNyBehandling) {
+            behandlinger.forEach { tidligereBehandling ->
+                lagreNedSøknadsinfoKnyttetTilBehandling(journalpost, brevkode!!, tidligereBehandling)
+            }
+        }
+
         oppdaterLogiskeVedlegg(request)
 
-        val journalpost = integrasjonClient.hentJournalpost(journalpostId)
         oppdaterOgFerdigstill(
             request = request.oppdaterMedDokumentOgSak(sak),
             journalpostId = journalpostId,
@@ -193,6 +215,7 @@ class InnkommendeJournalføringService(
         journalpost.sak?.fagsakId
 
         if (request.opprettOgKnyttTilNyBehandling) {
+            val brevkode = journalpost.dokumenter?.firstNotNullOfOrNull { it.brevkode }
             val nyBehandling =
                 opprettBehandlingOgEvtFagsakForJournalføring(
                     personIdent = request.bruker.id,
@@ -202,6 +225,13 @@ class InnkommendeJournalføringService(
                     kategori = request.kategori,
                     underkategori = request.underkategori,
                     søknadMottattDato = request.datoMottatt?.toLocalDate(),
+                    søknadsinfo = brevkode?.let {
+                        Søknadsinfo(
+                            journalpostId = journalpost.journalpostId,
+                            brevkode = it,
+                            erDigital = journalpost.kanal == NAV_NO,
+                        )
+                    },
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
@@ -336,8 +366,25 @@ class InnkommendeJournalføringService(
         }
     }
 
+    private fun lagreNedSøknadsinfoKnyttetTilBehandling(
+        journalpost: Journalpost,
+        brevkode: String,
+        behandling: Behandling,
+    ) {
+        behandlingSøknadsinfoService.lagreNedSøknadsinfo(
+            mottattDato = journalpost.datoMottatt?.toLocalDate() ?: LocalDate.now(),
+            søknadsinfo = Søknadsinfo(
+                journalpostId = journalpost.journalpostId,
+                brevkode = brevkode,
+                erDigital = journalpost.kanal == NAV_NO,
+            ),
+            behandling = behandling,
+        )
+    }
+
     companion object {
 
         private val logger = LoggerFactory.getLogger(InnkommendeJournalføringService::class.java)
+        const val NAV_NO = "NAV_NO"
     }
 }

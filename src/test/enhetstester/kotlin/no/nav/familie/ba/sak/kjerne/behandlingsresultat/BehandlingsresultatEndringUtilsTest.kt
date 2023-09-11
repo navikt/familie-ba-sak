@@ -61,6 +61,8 @@ class BehandlingsresultatEndringUtilsTest {
             forrigePersonResultat = emptySet(),
             nåværendeEndretAndeler = emptyList(),
             forrigeEndretAndeler = emptyList(),
+            personerIBehandling = emptySet(),
+            personerIForrigeBehandling = emptySet(),
         )
 
         assertThat(endringsresultat, Is(Endringsresultat.INGEN_ENDRING))
@@ -86,6 +88,8 @@ class BehandlingsresultatEndringUtilsTest {
             forrigePersonResultat = emptySet(),
             nåværendeEndretAndeler = emptyList(),
             forrigeEndretAndeler = emptyList(),
+            personerIBehandling = emptySet(),
+            personerIForrigeBehandling = emptySet(),
         )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -93,6 +97,8 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i vilkårsvurderingen`() {
+        val fødselsdato = LocalDate.of(2015, 1, 1)
+        val barn = lagPerson(aktør = barn1Aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
         val forrigeAndeler = listOf(
             lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2015, 2),
@@ -112,7 +118,7 @@ class BehandlingsresultatEndringUtilsTest {
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
                 behandlingId = 0,
@@ -129,7 +135,7 @@ class BehandlingsresultatEndringUtilsTest {
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
                 behandlingId = 0,
@@ -166,6 +172,8 @@ class BehandlingsresultatEndringUtilsTest {
             nåværendePersonResultat = setOf(nåværendePersonResultat),
             nåværendeEndretAndeler = emptyList(),
             forrigeEndretAndeler = emptyList(),
+            personerIBehandling = setOf(barn),
+            personerIForrigeBehandling = setOf(barn),
         )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -202,6 +210,8 @@ class BehandlingsresultatEndringUtilsTest {
             forrigePersonResultat = emptySet(),
             nåværendeEndretAndeler = emptyList(),
             forrigeEndretAndeler = emptyList(),
+            personerIBehandling = emptySet(),
+            personerIForrigeBehandling = emptySet(),
         )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -229,6 +239,8 @@ class BehandlingsresultatEndringUtilsTest {
             forrigePersonResultat = emptySet(),
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
             nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT)),
+            personerIBehandling = emptySet(),
+            personerIForrigeBehandling = emptySet(),
         )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -939,12 +951,13 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i vilkårsvurdering - skal returnere false dersom vilkårresultatene er helt like`() {
+        val fødselsdato = LocalDate.of(2015, 1, 1)
         val nåværendeVilkårResultat = setOf(
             VilkårResultat(
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
                 behandlingId = 0,
@@ -975,7 +988,7 @@ class BehandlingsresultatEndringUtilsTest {
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
                 behandlingId = 0,
@@ -1002,10 +1015,13 @@ class BehandlingsresultatEndringUtilsTest {
         )
 
         val aktør = randomAktør()
+        val barn = lagPerson(aktør = aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
             forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+            personerIBehandling = setOf(barn),
+            personerIForrigeBehandling = setOf(barn),
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(false))
@@ -1013,12 +1029,13 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i vilkårsvurdering - skal returnere true dersom det har vært endringer i regelverk`() {
+        val fødselsdato = LocalDate.of(2015, 1, 1)
         val nåværendeVilkårResultat = setOf(
             VilkårResultat(
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
                 behandlingId = 0,
@@ -1035,7 +1052,7 @@ class BehandlingsresultatEndringUtilsTest {
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
                 behandlingId = 0,
@@ -1048,10 +1065,13 @@ class BehandlingsresultatEndringUtilsTest {
         )
 
         val aktør = randomAktør()
+        val barn = lagPerson(aktør = aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
             forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+            personerIBehandling = setOf(barn),
+            personerIForrigeBehandling = setOf(barn),
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1059,12 +1079,13 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i vilkårsvurdering - skal returnere true dersom det har vært endringer i utdypendevilkårsvurdering`() {
+        val fødselsdato = LocalDate.of(2015, 1, 1)
         val nåværendeVilkårResultat = setOf(
             VilkårResultat(
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
                 behandlingId = 0,
@@ -1080,7 +1101,7 @@ class BehandlingsresultatEndringUtilsTest {
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
                 behandlingId = 0,
@@ -1093,10 +1114,13 @@ class BehandlingsresultatEndringUtilsTest {
         )
 
         val aktør = randomAktør()
+        val barn = lagPerson(aktør = aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
             forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+            personerIBehandling = setOf(barn),
+            personerIForrigeBehandling = setOf(barn),
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1104,12 +1128,13 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i vilkårsvurdering - skal returnere true dersom det har oppstått splitt i vilkårsvurderingen`() {
+        val fødselsdato = jan22.førsteDagIInneværendeMåned()
         val forrigeVilkårResultat = setOf(
             VilkårResultat(
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = jan22.førsteDagIInneværendeMåned(),
+                periodeFom = fødselsdato,
                 periodeTom = null,
                 begrunnelse = "",
                 behandlingId = 0,
@@ -1123,7 +1148,7 @@ class BehandlingsresultatEndringUtilsTest {
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = jan22.førsteDagIInneværendeMåned(),
+                periodeFom = fødselsdato,
                 periodeTom = mai22.atDay(7),
                 begrunnelse = "",
                 behandlingId = 0,
@@ -1144,10 +1169,13 @@ class BehandlingsresultatEndringUtilsTest {
         )
 
         val aktør = randomAktør()
+        val barn = lagPerson(aktør = aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
             forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+            personerIBehandling = setOf(barn),
+            personerIForrigeBehandling = setOf(barn),
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1155,12 +1183,13 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i vilkårsvurdering - skal returnere false hvis det kun er opphørt`() {
+        val fødselsdato = LocalDate.of(2015, 1, 1)
         val nåværendeVilkårResultat = setOf(
             VilkårResultat(
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
                 behandlingId = 0,
@@ -1177,7 +1206,7 @@ class BehandlingsresultatEndringUtilsTest {
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeFom = fødselsdato,
                 periodeTom = null,
                 begrunnelse = "begrunnelse",
                 behandlingId = 0,
@@ -1190,10 +1219,13 @@ class BehandlingsresultatEndringUtilsTest {
         )
 
         val aktør = randomAktør()
+        val barn = lagPerson(aktør = aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
             forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+            personerIBehandling = setOf(barn),
+            personerIForrigeBehandling = setOf(barn),
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(false))

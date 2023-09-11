@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.sikkerhet
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -62,10 +63,9 @@ class TilgangService(
 
     fun validerTilgangTilBehandling(behandlingId: Long, event: AuditLoggerEvent) {
         val harTilgang = harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
-            val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-            val personIdenter =
-                persongrunnlagService.hentAktiv(behandlingId = behandlingId)?.søkerOgBarn?.map { it.aktør.aktivFødselsnummer() }
-                    ?: listOf(behandling.fagsak.aktør.aktivFødselsnummer())
+            val personIdenter = persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
+                ?.map { it.aktør.aktivFødselsnummer() }
+                ?: listOf(behandlingHentOgPersisterService.hent(behandlingId).fagsak.aktør.aktivFødselsnummer())
             personIdenter.forEach {
                 auditLogger.log(
                     Sporingsdata(
@@ -94,14 +94,12 @@ class TilgangService(
                 custom1 = CustomKeyValue("fagsak", fagsakId.toString()),
             )
         }
-        val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
-        val personIdenterIFagsak = behandlinger.flatMap { behandling ->
-            val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
-            when {
-                personopplysningGrunnlag != null -> personopplysningGrunnlag.søkerOgBarn.map { person -> person.aktør.aktivFødselsnummer() }
-                else -> emptyList()
-            }
-        }.distinct().ifEmpty { listOf(aktør.aktivFødselsnummer()) }
+        val personIdenterIFagsak = (
+            persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId)
+                ?.map { it.aktør.aktivFødselsnummer() }
+                ?: emptyList()
+            )
+            .ifEmpty { listOf(aktør.aktivFødselsnummer()) }
         val harTilgang = harTilgangTilPersoner(personIdenterIFagsak)
         if (!harTilgang) {
             throw RolleTilgangskontrollFeil(
@@ -128,6 +126,10 @@ class TilgangService(
     ) {
         verifiserHarTilgangTilHandling(minimumBehandlerRolle, handling)
         validerTilgangTilFagsak(fagsakId, event)
+    }
+
+    fun validerKanRedigereBehandling(behandlingId: Long) {
+        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
     }
 
     /**

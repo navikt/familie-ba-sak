@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.kontrakter.ba.infotrygd.Barn
 import no.nav.familie.kontrakter.ba.infotrygd.Delytelse
@@ -101,6 +102,7 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
     vedtakService: VedtakService,
     stegService: StegService,
     brevmalService: BrevmalService,
+    vedtaksperiodeService: VedtaksperiodeService,
 ): Behandling {
     settAlleVilkårTilOppfylt(
         restUtvidetBehandling = restUtvidetBehandling,
@@ -123,9 +125,12 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
             RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
         )
 
+    val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+        restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+    )
+
     val utvidetVedtaksperiodeMedBegrunnelser =
-        restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
-            .first()
+        vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
 
     familieBaSakKlient.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,

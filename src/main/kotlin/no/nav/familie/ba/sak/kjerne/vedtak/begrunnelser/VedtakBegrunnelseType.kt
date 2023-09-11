@@ -48,14 +48,10 @@ enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
     }
 }
 
-fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode, skalBrukeNyVedtaksperiodeLøsning: Boolean) =
+fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) =
     when (this) {
         VedtakBegrunnelseType.AVSLAG, VedtakBegrunnelseType.INSTITUSJON_AVSLAG -> {
-            val fomTekst = if (skalBrukeNyVedtaksperiodeLøsning) {
-                periode.fom.forrigeMåned().tilMånedÅr()
-            } else {
-                periode.fom.tilMånedÅr()
-            }
+            val fomTekst = periode.fom.forrigeMåned().tilMånedÅr()
 
             if (periode.fom == TIDENES_MORGEN && periode.tom == TIDENES_ENDE) {
                 ""

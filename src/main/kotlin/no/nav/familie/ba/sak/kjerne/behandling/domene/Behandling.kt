@@ -20,8 +20,8 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.SISTE_STEG
@@ -288,16 +288,18 @@ data class Behandling(
 
     private fun erFødselshendelse() = this.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
 
-    fun hentYtelseTypeTilVilkår(): YtelseType = when (underkategori) {
-        BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
-        BehandlingUnderkategori.ORDINÆR -> YtelseType.ORDINÆR_BARNETRYGD
-        BehandlingUnderkategori.INSTITUSJON -> YtelseType.ORDINÆR_BARNETRYGD
-    }
-
     fun harUtførtSteg(steg: StegType) =
         this.behandlingStegTilstand.any {
             it.behandlingSteg == steg && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
         }
+
+    fun tilOppgaveBehandlingTema(): OppgaveBehandlingTema {
+        return when {
+            this.fagsak.type == FagsakType.INSTITUSJON -> OppgaveBehandlingTema.NasjonalInstitusjon
+            this.underkategori == BehandlingUnderkategori.UTVIDET -> OppgaveBehandlingTema.UtvidetBarnetrygd
+            else -> OppgaveBehandlingTema.OrdinærBarnetrygd
+        }
+    }
 
     companion object {
 
@@ -438,18 +440,8 @@ enum class BehandlingKategori(val visningsnavn: String, val nivå: Int) {
 fun List<BehandlingKategori>.finnHøyesteKategori(): BehandlingKategori? = this.maxByOrNull { it.nivå }
 
 enum class BehandlingUnderkategori(val visningsnavn: String, val nivå: Int) {
-    INSTITUSJON("Institusjon", 3),
     UTVIDET("Utvidet", 2),
     ORDINÆR("Ordinær", 1),
-    ;
-
-    fun tilOppgaveBehandlingTema(): OppgaveBehandlingTema {
-        return when (this) {
-            INSTITUSJON -> OppgaveBehandlingTema.NasjonalInstitusjon
-            UTVIDET -> OppgaveBehandlingTema.UtvidetBarnetrygd
-            ORDINÆR -> OppgaveBehandlingTema.OrdinærBarnetrygd
-        }
-    }
 }
 
 fun initStatus(): BehandlingStatus {
@@ -463,6 +455,10 @@ enum class BehandlingStatus {
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
     AVSLUTTET,
+    ;
+
+    fun erLåstMenIkkeAvsluttet() = this == FATTER_VEDTAK || this == IVERKSETTER_VEDTAK
+    fun erLåstForVidereRedigering() = this != UTREDES
 }
 
 class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {

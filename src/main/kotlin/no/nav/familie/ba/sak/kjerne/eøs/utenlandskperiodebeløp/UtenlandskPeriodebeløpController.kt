@@ -44,6 +44,7 @@ class UtenlandskPeriodebeløpController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdaterer utenlandsk periodebeløp",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         val barnAktører = restUtenlandskPeriodebeløp.barnIdenter.map { personidentService.hentAktør(it) }
 
@@ -68,8 +69,9 @@ class UtenlandskPeriodebeløpController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sletter utenlandsk periodebeløp",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(utenlandskPeriodebeløpId)
+        utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløpId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

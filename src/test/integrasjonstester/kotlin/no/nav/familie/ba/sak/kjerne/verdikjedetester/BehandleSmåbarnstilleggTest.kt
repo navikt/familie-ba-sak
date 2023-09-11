@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.EfSakRestClientMock
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
@@ -124,6 +125,7 @@ class BehandleSmåbarnstilleggTest(
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
+        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
     }
 
     @AfterEach
@@ -250,11 +252,13 @@ class BehandleSmåbarnstilleggTest(
             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
         )
 
-        val vedtaksperiodeId =
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
-                .first()
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+        )
+
+        val vedtaksperiode = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
-            vedtaksperiodeId = vedtaksperiodeId.id,
+            vedtaksperiodeId = vedtaksperiode.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
                     Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
@@ -315,7 +319,7 @@ class BehandleSmåbarnstilleggTest(
         val søkersAktør = personidentService.hentAktør(søkersIdent)
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
-            behandlingsdata = søkersAktør,
+            aktør = søkersAktør,
         )
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
@@ -344,7 +348,7 @@ class BehandleSmåbarnstilleggTest(
         )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
-            behandlingsdata = søkersAktør,
+            aktør = søkersAktør,
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
@@ -400,7 +404,7 @@ class BehandleSmåbarnstilleggTest(
         )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
-            behandlingsdata = søkersAktør,
+            aktør = søkersAktør,
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
@@ -465,7 +469,7 @@ class BehandleSmåbarnstilleggTest(
         )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
-            behandlingsdata = søkersAktør,
+            aktør = søkersAktør,
         )
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
@@ -531,7 +535,7 @@ class BehandleSmåbarnstilleggTest(
         )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
-            behandlingsdata = søkersAktør,
+            aktør = søkersAktør,
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)

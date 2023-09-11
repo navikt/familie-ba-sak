@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.common
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
+import org.slf4j.LoggerFactory
 import org.springframework.core.io.ClassPathResource
 import java.io.File
 import java.io.FileReader
@@ -15,6 +16,7 @@ import java.util.Properties
 
 val nbLocale = Locale("nb", "Norway")
 
+val secureLogger = LoggerFactory.getLogger("secureLogger")
 object Utils {
 
     fun slåSammen(values: List<String>): String = Regex("(.*),").replace(values.joinToString(", "), "$1 og")

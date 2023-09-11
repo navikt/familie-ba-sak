@@ -8,20 +8,19 @@ class FeatureToggleConfig {
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
         const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
-        const val BRUKE_TIDSLINJE_I_STEDET_FOR = "familie-ba-sak.tidslinje-opphorsperiode"
 
         // Release
         const val EØS_INFORMASJON_OM_ÅRLIG_KONTROLL = "familie-ba-sak.eos-informasjon-om-aarlig-kontroll"
         const val ER_MANUEL_POSTERING_TOGGLE_PÅ = "familie-ba-sak.manuell-postering"
-        const val VEDTAKSPERIODE_NY = "familie-ba-sak.vedtaksperiode-ny"
         const val FEILUTBETALT_VALUTA_PR_MND = "familie-ba-sak.feilutbetalt-valuta-pr-mnd"
-        const val SATSENDRING_KOPIER_GRUNNLAG_FRA_FORRIGE_BEHANDLING = "familie-ba-sak.satsendring.kopier-grunnlag-fra-forrige-behandling"
         const val BEGRUNNELSER_NY = "familie-ba-sak.begrunnelser-ny"
-        const val ENDRINGSTIDSPUNKT = "familie-ba-sak.endringstidspunkt"
 
         // unleash toggles for satsendring, kan slettes etter at satsendring er skrudd på for alle satstyper
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
         const val SATSENDRING_SNIKE_I_KØEN = "familie-ba-sak.satsendring-snike-i-koen"
+
+        // Ny utbetalingsgenerator
+        const val KONTROLLER_NY_UTBETALINGSGENERATOR = "familie.ba.sak.kontroller-ny-utbetalingsgenerator"
     }
 }
 
