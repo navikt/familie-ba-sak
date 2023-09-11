@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -18,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class SmåbarnstilleggService(
@@ -27,6 +30,7 @@ class SmåbarnstilleggService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val persongrunnlagService: PersongrunnlagService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     @Transactional
@@ -88,11 +92,14 @@ class SmåbarnstilleggService(
     fun hentPerioderMedFullOvergangsstønad(
         behandling: Behandling,
     ): List<InternPeriodeOvergangsstønad> {
-        val perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId = behandling.id)
-        val overgangsstønadPerioderFraForrigeBehandling =
-            hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandling).map { it.tilInternPeriodeOvergangsstønad() }
+        val dagensDato = LocalDate.now()
+        val skalBrukeNyBegrunnelseLogikk = featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)
 
-        return perioderOvergangsstønad.splittOgSlåSammen(overgangsstønadPerioderFraForrigeBehandling)
+        val perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId = behandling.id).map { it.tilInternPeriodeOvergangsstønad() }
+        val overgangsstønadPerioderFraForrigeBehandling =
+            hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandling).map { it.tilInternPeriodeOvergangsstønad() }.slåSammenTidligerePerioder(dagensDato, skalBrukeNyBegrunnelseLogikk)
+
+        return perioderOvergangsstønad.splittOgSlåSammen(overgangsstønadPerioderFraForrigeBehandling, dagensDato, skalBrukeNyBegrunnelseLogikk)
     }
 
     private fun hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandling: Behandling): List<PeriodeOvergangsstønadGrunnlag> {
@@ -109,6 +116,8 @@ class SmåbarnstilleggService(
     }
 
     fun vedtakOmOvergangsstønadPåvirkerFagsak(fagsak: Fagsak): Boolean {
+        val skalBrukeNyBegrunnelseLogikk = featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)
+
         val sistIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id)
                 ?: return false
@@ -119,9 +128,11 @@ class SmåbarnstilleggService(
         val persongrunnlagFraSistIverksatteBehandling =
             persongrunnlagService.hentAktivThrows(behandlingId = sistIverksatteBehandling.id)
 
+        val dagensDato = LocalDate.now()
+
         val nyePerioderMedFullOvergangsstønad =
             hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør).map { it.tilInternPeriodeOvergangsstønad() }
-                .slåSammenTidligerePerioder()
+                .slåSammenTidligerePerioder(dagensDato, skalBrukeNyBegrunnelseLogikk)
 
         val andelerMedEndringerFraSistIverksatteBehandling = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sistIverksatteBehandling.id)
@@ -141,6 +152,7 @@ class SmåbarnstilleggService(
                     it.fødselsdato,
                 )
             },
+            skalBrukeNyBegrunnelseLogikk = skalBrukeNyBegrunnelseLogikk,
         )
     }
 

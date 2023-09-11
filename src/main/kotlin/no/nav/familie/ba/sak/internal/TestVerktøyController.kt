@@ -76,7 +76,7 @@ class TestVerktøyController(
             val aktør = personidentService.hentAktør(personIdent.ident)
             val melding = autovedtakStegService.kjørBehandlingSmåbarnstillegg(
                 mottakersAktør = aktør,
-                behandlingsdata = aktør,
+                aktør = aktør,
             )
             ResponseEntity.ok(Ressurs.success(melding))
         } else {

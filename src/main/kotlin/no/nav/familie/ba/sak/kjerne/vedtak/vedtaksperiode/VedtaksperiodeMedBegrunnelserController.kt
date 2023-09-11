@@ -84,7 +84,7 @@ class VedtaksperiodeMedBegrunnelserController(
         vedtaksperiodeId: Long,
         @RequestBody
         restPutVedtaksperiodeMedFritekster: RestPutVedtaksperiodeMedFritekster,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> {
         val behandlingId = vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId)
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -92,12 +92,18 @@ class VedtaksperiodeMedBegrunnelserController(
             handling = OPPDATERE_BEGRUNNELSER_HANDLING,
         )
 
-        val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedFritekster(
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedFritekster(
             vedtaksperiodeId,
             restPutVedtaksperiodeMedFritekster,
         )
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+                    behandlingId,
+                ),
+            ),
+        )
     }
 
     @PutMapping("/endringstidspunkt")

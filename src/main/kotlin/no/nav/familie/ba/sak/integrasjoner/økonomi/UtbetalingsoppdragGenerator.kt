@@ -52,15 +52,14 @@ class UtbetalingsoppdragGenerator(
                 opphørFra = opphørFra(forrigeTilkjentYtelse, erSimulering, endretMigreringsDato),
                 utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
             ),
-            forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.map {
-                it.tilAndelDataLongId()
-            } ?: emptyList(),
-            nyeAndeler = nyTilkjentYtelse.andelerTilkjentYtelse.map {
-                it.tilAndelDataLongId()
-            },
+            forrigeAndeler = forrigeTilkjentYtelse?.tilAndelDataMedUtbetaling() ?: emptyList(),
+            nyeAndeler = nyTilkjentYtelse.tilAndelDataMedUtbetaling(),
             sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
         )
     }
+
+    private fun TilkjentYtelse.tilAndelDataMedUtbetaling(): List<AndelDataLongId> =
+        this.andelerTilkjentYtelse.map { it.tilAndelDataLongId() }.filter { it.beløp > 0 }
 
     private fun AndelTilkjentYtelse.tilAndelDataLongId(): AndelDataLongId =
         AndelDataLongId(

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.autovedtak.SmåbarnstilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -19,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstille
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
@@ -45,7 +45,7 @@ class AutovedtakSmåbarnstilleggService(
     private val autovedtakService: AutovedtakService,
     private val oppgaveService: OppgaveService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
-) : AutovedtakBehandlingService<Aktør> {
+) : AutovedtakBehandlingService<SmåbarnstilleggData> {
 
     private val antallVedtakOmOvergangsstønad: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "antall")
@@ -74,8 +74,8 @@ class AutovedtakSmåbarnstilleggService(
             )
         }
 
-    override fun skalAutovedtakBehandles(behandlingsdata: Aktør): Boolean {
-        val fagsak = fagsakService.hentNormalFagsak(aktør = behandlingsdata) ?: return false
+    override fun skalAutovedtakBehandles(behandlingsdata: SmåbarnstilleggData): Boolean {
+        val fagsak = fagsakService.hentNormalFagsak(aktør = behandlingsdata.aktør) ?: return false
         val påvirkerFagsak = småbarnstilleggService.vedtakOmOvergangsstønadPåvirkerFagsak(fagsak)
         return if (!påvirkerFagsak) {
             antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak.increment()
@@ -89,8 +89,9 @@ class AutovedtakSmåbarnstilleggService(
     }
 
     @Transactional
-    override fun kjørBehandling(aktør: Aktør): String {
+    override fun kjørBehandling(behandlingsdata: SmåbarnstilleggData): String {
         antallVedtakOmOvergangsstønad.increment()
+        val aktør = behandlingsdata.aktør
         val fagsak = fagsakService.hentNormalFagsak(aktør)
             ?: throw Feil(message = "Fant ikke fagsak av typen NORMAL for aktør ${aktør.aktørId}")
         val behandlingEtterBehandlingsresultat =

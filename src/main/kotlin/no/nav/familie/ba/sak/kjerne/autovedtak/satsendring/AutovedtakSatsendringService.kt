@@ -64,11 +64,7 @@ class AutovedtakSatsendringService(
             satskjøringRepository.findByFagsakIdAndSatsTidspunkt(fagsakId, behandlingsdata.satstidspunkt)
                 ?: satskjøringRepository.save(Satskjøring(fagsakId = fagsakId, satsTidspunkt = behandlingsdata.satstidspunkt))
 
-        val sisteIverksatteEllerVedtatteBehandling = (
-            behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
-                ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)
-            )
-            ?: error("Fant ikke siste iverksette eller vedtatte behandling for $fagsakId")
+        val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId) ?: error("Fant ikke siste vedtatte behandling for $fagsakId")
 
         if (satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)) {
             satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
@@ -79,12 +75,12 @@ class AutovedtakSatsendringService(
         }
 
         val aktivOgÅpenBehandling =
-            behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = sisteIverksatteEllerVedtatteBehandling.fagsak.id)
-        val søkerAktør = sisteIverksatteEllerVedtatteBehandling.fagsak.aktør
+            behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = sisteVedtatteBehandling.fagsak.id)
+        val søkerAktør = sisteVedtatteBehandling.fagsak.aktør
 
-        logger.info("Kjører satsendring på $sisteIverksatteEllerVedtatteBehandling")
-        secureLogger.info("Kjører satsendring på $sisteIverksatteEllerVedtatteBehandling for ${søkerAktør.aktivFødselsnummer()}")
-        if (sisteIverksatteEllerVedtatteBehandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${sisteIverksatteEllerVedtatteBehandling.fagsak.id}")
+        logger.info("Kjører satsendring på $sisteVedtatteBehandling")
+        secureLogger.info("Kjører satsendring på $sisteVedtatteBehandling for ${søkerAktør.aktivFødselsnummer()}")
+        if (sisteVedtatteBehandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${sisteVedtatteBehandling.fagsak.id}")
 
         if (aktivOgÅpenBehandling != null) {
             val brukerHarÅpenBehandlingSvar = hentBrukerHarÅpenBehandlingSvar(aktivOgÅpenBehandling)
@@ -106,8 +102,8 @@ class AutovedtakSatsendringService(
             }
         }
 
-        if (harUtbetalingerSomOverstiger100Prosent(sisteIverksatteEllerVedtatteBehandling)) {
-            logger.warn("Det løper over 100 prosent utbetaling på fagsak=${sisteIverksatteEllerVedtatteBehandling.fagsak.id}")
+        if (harUtbetalingerSomOverstiger100Prosent(sisteVedtatteBehandling)) {
+            logger.warn("Det løper over 100 prosent utbetaling på fagsak=${sisteVedtatteBehandling.fagsak.id}")
         }
 
         val behandlingEtterBehandlingsresultat =
@@ -115,7 +111,7 @@ class AutovedtakSatsendringService(
                 aktør = søkerAktør,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.SATSENDRING,
-                fagsakId = sisteIverksatteEllerVedtatteBehandling.fagsak.id,
+                fagsakId = sisteVedtatteBehandling.fagsak.id,
             )
 
         val opprettetVedtak =

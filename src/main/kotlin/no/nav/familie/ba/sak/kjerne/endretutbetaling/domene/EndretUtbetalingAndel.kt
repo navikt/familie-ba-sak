@@ -27,8 +27,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelseListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -77,10 +75,6 @@ data class EndretUtbetalingAndel(
 
     @Column(name = "begrunnelse")
     var begrunnelse: String? = null,
-
-    @Column(name = "vedtak_begrunnelse_spesifikasjoner")
-    @Convert(converter = IVedtakBegrunnelseListConverter::class)
-    var standardbegrunnelser: List<IVedtakBegrunnelse> = emptyList(),
 ) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode)
@@ -187,7 +181,6 @@ sealed interface IUtfyltEndretUtbetalingAndel : IEndretUtbetalingAndel {
     val årsak: Årsak
     val søknadstidspunkt: LocalDate
     val begrunnelse: String
-    val standardbegrunnelser: List<IVedtakBegrunnelse>
 }
 
 data class UtfyltEndretUtbetalingAndel(
@@ -200,7 +193,6 @@ data class UtfyltEndretUtbetalingAndel(
     override val årsak: Årsak,
     override val søknadstidspunkt: LocalDate,
     override val begrunnelse: String,
-    override val standardbegrunnelser: List<IVedtakBegrunnelse>,
 ) : IUtfyltEndretUtbetalingAndel
 
 data class UtfyltEndretUtbetalingAndelDeltBosted(
@@ -213,7 +205,6 @@ data class UtfyltEndretUtbetalingAndelDeltBosted(
     override val årsak: Årsak,
     override val søknadstidspunkt: LocalDate,
     override val begrunnelse: String,
-    override val standardbegrunnelser: List<IVedtakBegrunnelse>,
 
     val avtaletidspunktDeltBosted: LocalDate,
 ) : IUtfyltEndretUtbetalingAndel
@@ -237,7 +228,6 @@ fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel {
                 avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted!!,
                 søknadstidspunkt = this.søknadstidspunkt!!,
                 begrunnelse = this.begrunnelse!!,
-                standardbegrunnelser = this.standardbegrunnelser,
             )
         }
 
@@ -251,7 +241,6 @@ fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel {
             årsak = this.årsak!!,
             søknadstidspunkt = this.søknadstidspunkt!!,
             begrunnelse = this.begrunnelse!!,
-            standardbegrunnelser = this.standardbegrunnelser,
         )
     }
 }

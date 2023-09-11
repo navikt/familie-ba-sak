@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
@@ -93,8 +92,13 @@ class VedtaksperiodeServiceTest {
     @BeforeEach
     fun init() {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns forrigeBehandling
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } returns forrigeBehandling
+        every { behandlingHentOgPersisterService.hent(forrigeBehandling.id) } returns forrigeBehandling
+        every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(vedtak.behandling.id) } returns endringstidspunkt
         every { persongrunnlagService.hentAktiv(any()) } returns
+            lagTestPersonopplysningGrunnlag(vedtak.behandling.id, person)
+        every { persongrunnlagService.hentAktivThrows(any()) } returns
             lagTestPersonopplysningGrunnlag(vedtak.behandling.id, person)
         every {
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
@@ -121,40 +125,6 @@ class VedtaksperiodeServiceTest {
         every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any()) } returns emptyList()
         every { refusjonEøsRepository.finnRefusjonEøsForBehandling(any()) } returns emptyList()
         every { integrasjonClient.hentLandkoderISO2() } returns mapOf(Pair("NO", "NORGE"))
-    }
-
-    @Test
-    fun `genererVedtaksperioderMedBegrunnelser skal slå sammen opphørsperioder fra og med endringstidspunkt`() {
-        val returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom = vedtaksperiodeService
-            .genererVedtaksperioderMedBegrunnelserGammel(vedtak)
-            .filter { it.type == Vedtaksperiodetype.OPPHØR }
-
-        val førsteOpphørFomDato =
-            returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom.minOf { it.fom!! }
-        val senesteOpphørTomDato =
-            returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom.sortedBy { it.tom ?: TIDENES_ENDE }
-                .last().tom
-
-        val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørsteOpphørFom = vedtaksperiodeService
-            .genererVedtaksperioderMedBegrunnelserGammel(
-                vedtak,
-                manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato,
-            )
-            .filter { it.type == Vedtaksperiodetype.OPPHØR }
-        val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørFørsteOpphør = vedtaksperiodeService
-            .genererVedtaksperioderMedBegrunnelserGammel(
-                vedtak,
-                manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato.minusMonths(1),
-            )
-            .filter { it.type == Vedtaksperiodetype.OPPHØR }
-
-        assertThat(returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom).hasSize(2).last()
-            .hasFieldOrPropertyWithValue("fom", endringstidspunkt)
-        assertThat(returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørFørsteOpphør).hasSize(1).first()
-            .hasFieldOrPropertyWithValue("fom", førsteOpphørFomDato)
-            .hasFieldOrPropertyWithValue("tom", senesteOpphørTomDato)
-        assertThat(returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørFørsteOpphør)
-            .isEqualTo(returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørsteOpphørFom)
     }
 
     @Test

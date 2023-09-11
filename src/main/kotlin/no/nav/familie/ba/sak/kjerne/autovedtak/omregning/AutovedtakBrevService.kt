@@ -7,12 +7,12 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.autovedtak.OmregningBrevData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -24,13 +24,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 
-data class AutovedtakBrevBehandlingsdata(
-    val aktør: Aktør,
-    val behandlingsårsak: BehandlingÅrsak,
-    val standardbegrunnelse: Standardbegrunnelse,
-    val fagsakId: Long,
-)
-
 @Service
 class AutovedtakBrevService(
     private val fagsakService: FagsakService,
@@ -41,10 +34,10 @@ class AutovedtakBrevService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val taskRepository: TaskRepositoryWrapper,
     private val infotrygdService: InfotrygdService,
-) : AutovedtakBehandlingService<AutovedtakBrevBehandlingsdata> {
+) : AutovedtakBehandlingService<OmregningBrevData> {
 
     override fun kjørBehandling(
-        behandlingsdata: AutovedtakBrevBehandlingsdata,
+        behandlingsdata: OmregningBrevData,
     ): String {
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
@@ -148,6 +141,8 @@ class AutovedtakBrevService(
     companion object {
         val logger = LoggerFactory.getLogger(AutovedtakBrevService::class.java)
     }
+
+    override fun skalAutovedtakBehandles(behandlingsdata: OmregningBrevData): Boolean = true
 }
 
 private fun BehandlingÅrsak.tilBrevkoder(): List<InfotrygdBrevkode> {
