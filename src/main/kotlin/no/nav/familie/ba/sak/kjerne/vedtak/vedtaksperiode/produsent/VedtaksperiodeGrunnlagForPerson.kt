@@ -98,12 +98,10 @@ fun List<VilkårResultatForVedtaksperiode>.erLikUtenFomOgTom(other: List<Vilkår
 data class EndretUtbetalingAndelForVedtaksperiode(
     val prosent: BigDecimal,
     val årsak: Årsak,
-    val standardbegrunnelse: List<IVedtakBegrunnelse>,
 ) {
     constructor(endretUtbetalingAndel: IUtfyltEndretUtbetalingAndel) : this(
         prosent = endretUtbetalingAndel.prosent,
         årsak = endretUtbetalingAndel.årsak,
-        standardbegrunnelse = endretUtbetalingAndel.standardbegrunnelser,
     )
 }
 
