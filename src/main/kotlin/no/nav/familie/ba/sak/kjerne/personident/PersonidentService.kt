@@ -24,22 +24,27 @@ class PersonidentService(
     }
 
     fun identSkalLeggesTil(nyIdent: PersonIdent): Boolean {
-        val identerFraPdl = hentIdenter(nyIdent.ident, false)
-        val aktørId = filtrerAktørId(identerFraPdl)
+        val identerFraPdl = hentIdenter(nyIdent.ident, true)
+        val aktører = identerFraPdl
+            .filter { it.gruppe == "AKTORID" }
+            .map { it.ident }
+            .mapNotNull { aktørIdRepository.findByAktørIdOrNull(it) }
 
-        val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
-
-        return aktør?.harIdent(fødselsnummer = nyIdent.ident) == false
+        if (aktører.isNotEmpty()) {
+            return aktører.firstOrNull { it.harIdent(nyIdent.ident) } == null
+        }
+        return false
     }
 
     @Transactional
     fun håndterNyIdent(nyIdent: PersonIdent): Aktør? {
         logger.info("Håndterer ny ident")
         secureLogger.info("Håndterer ny ident ${nyIdent.ident}")
-        val identerFraPdl = hentIdenter(nyIdent.ident, false)
-        val aktørId = filtrerAktørId(identerFraPdl)
+        val identerFraPdl = hentIdenter(nyIdent.ident, true)
 
-        validerOmAktørIdErMerget(nyIdent.ident, aktørId)
+        val aktørId = filtrerAktivtAktørId(identerFraPdl)
+
+        validerOmAktørIdErMerget(identerFraPdl)
 
         val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
 
@@ -98,7 +103,7 @@ class PersonidentService(
 
         val identerFraPdl = hentIdenter(ident, false)
         val fødselsnummerAktiv = filtrerAktivtFødselsnummer(identerFraPdl)
-        val aktørIdStr = filtrerAktørId(identerFraPdl)
+        val aktørIdStr = filtrerAktivtAktørId(identerFraPdl)
 
         val personidentPersistert = personidentRepository.findByFødselsnummerOrNull(fødselsnummerAktiv)
         if (personidentPersistert != null) {
@@ -121,23 +126,23 @@ class PersonidentService(
         return barnasFødselsnummer.map { hentAktør(it) }
     }
 
-    private fun validerOmAktørIdErMerget(ident: String, aktørId: String) {
-        /*
-        Lokikken i denne metoden skal håndtere fallet når to aktørider blir merget.
-        En viktig antakelse er at aktør iden til (som etter merge blir) den gjeldende identen
-        er den aktøriden som blir fjernet. En melding blir da sent med kvarvarende aktørid
-        og den gjeldende identen.
-        Fagsaken må arkiveres og personidenterne fjernes til aktøriden som er fjernet og
-        En ny revurderingsbehandling må opprettes på fagsak til kvarvarende aktørid hvor
-        barne fra den arkiverte fagsaken bli behandlet.
-         */
-        val persistertAktør = personidentRepository.findByFødselsnummerOrNull(ident)?.aktør
+    /*
+    Ved merge vil èn av de to gjeldende aktør-IDene videreføres som gjeldende. Vi trenger dermed å sjekke
+    om det finnes en aktiv personident rad for den gamle aktørId
 
-        if (persistertAktør != null && persistertAktør.aktørId != aktørId) {
+     */
+
+    private fun validerOmAktørIdErMerget(alleHistoriskeIdenterFraPdl: List<IdentInformasjon>) {
+        val alleHistoriskeAktørIder = alleHistoriskeIdenterFraPdl.filter { it.gruppe == "AKTORID" && it.historisk == true }.map { it.ident }
+
+        val aktiveAktørerForHistoriskAktørIder = alleHistoriskeAktørIder
+            .mapNotNull { aktørId -> aktørIdRepository.findByAktørIdOrNull(aktørId) }
+            .filter { aktør -> aktør.personidenter.any { personident -> personident.aktiv } }
+
+        if (aktiveAktørerForHistoriskAktørIder.isNotEmpty()) {
+            secureLogger.warn("Potensielt merget ident for $alleHistoriskeIdenterFraPdl")
             throw Feil(
-                message = "Aktør med id $aktørId er merget med Aktør med id $persistertAktør. " +
-                    "Arkiver fagsak og fjern personidenter til $aktørId. Revurder behandling for $persistertAktør" +
-                    " og legg til barna fra fagsak til $aktørId.",
+                message = "Mottok potensielt en hendelse på en merget ident for aktørId=${filtrerAktivtAktørId(alleHistoriskeIdenterFraPdl)}. Sjekk securelogger for liste med identer. Sjekk om identen har flere saker. Disse må løses manuelt",
             )
         }
     }
@@ -183,8 +188,8 @@ class PersonidentService(
                 ?: throw Error("Finner ikke aktiv ident i Pdl")
             )
 
-    private fun filtrerAktørId(identerFraPdl: List<IdentInformasjon>): String =
-        identerFraPdl.singleOrNull { it.gruppe == "AKTORID" }?.ident
+    private fun filtrerAktivtAktørId(identerFraPdl: List<IdentInformasjon>): String =
+        identerFraPdl.singleOrNull { it.gruppe == "AKTORID" && it.historisk == false }?.ident
             ?: throw Error("Finner ikke aktørId i Pdl")
 
     companion object {
