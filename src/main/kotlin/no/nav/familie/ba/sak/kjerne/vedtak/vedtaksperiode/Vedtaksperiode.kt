@@ -64,6 +64,7 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: Set<VedtakBegrunnel
     OPPHØR(
         setOf(
             VedtakBegrunnelseType.OPPHØR,
+            VedtakBegrunnelseType.ENDRET_UTBETALING,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
             VedtakBegrunnelseType.INSTITUSJON_OPPHØR,
             VedtakBegrunnelseType.EØS_OPPHØR,
