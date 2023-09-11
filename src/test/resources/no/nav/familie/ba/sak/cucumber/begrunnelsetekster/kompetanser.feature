@@ -82,3 +82,42 @@ Egenskap: Kompetanse-begrunnelser
       | 01.08.2023 | 31.01.2033 | UTBETALING         |                  |                         |                               |
       | 01.02.2033 |            | OPPHØR             |                  |                         |                               |
 
+  Scenario: Skal gi riktig begrunnelse ved opphør av EØS-sak
+    Gitt følgende behandling
+      | BehandlingId | FagsakId  | ForrigeBehandlingId |
+      | 100173207    | 200055651 |                     |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId       | Persontype | Fødselsdato |
+      | 100173207    | 2005858678161 | BARN       | 02.02.2015  |
+      | 100173207    | 2305793738737 | SØKER      | 12.11.1984  |
+
+    Og lag personresultater for begrunnelse for behandling 100173207
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 100173207
+      | AktørId       | Vilkår                          | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 2005858678161 | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP |                              | 02.02.2015 |            | OPPFYLT  | Nei                  |
+      | 2005858678161 | BOSATT_I_RIKET                  | BARN_BOR_I_NORGE             | 02.02.2015 |            | OPPFYLT  | Nei                  |
+      | 2005858678161 | BOR_MED_SØKER                   | BARN_BOR_I_EØS_MED_SØKER     | 02.02.2015 |            | OPPFYLT  | Nei                  |
+      | 2005858678161 | UNDER_18_ÅR                     |                              | 02.02.2015 | 01.02.2033 | OPPFYLT  | Nei                  |
+
+      | 2305793738737 | LOVLIG_OPPHOLD                  |                              | 12.11.1984 |            | OPPFYLT  | Nei                  |
+      | 2305793738737 | BOSATT_I_RIKET                  | OMFATTET_AV_NORSK_LOVGIVNING | 15.03.2023 | 15.08.2023 | OPPFYLT  | Nei                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId       | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent |
+      | 2005858678161 | 100173207    | 01.04.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     |
+      | 2005858678161 | 100173207    | 01.07.2023 | 31.08.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     |
+
+    Og med kompetanser for begrunnelse
+      | AktørId       | Fra dato   | Til dato   | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
+      | 2005858678161 | 01.04.2023 | 31.08.2023 | NORGE_ER_PRIMÆRLAND | 100173207    | ARBEIDER         | MOTTAR_PENSJON            | NO                    | BE                             | NO                  |
+
+    Når begrunnelsetekster genereres for behandling 100173207
+
+    Så forvent følgende standardBegrunnelser
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk        | Inkluderte Begrunnelser            | Ekskluderte Begrunnelser |
+      | 01.04.2023 | 30.06.2023 | UTBETALING         |                  |                                    |                          |
+      | 01.07.2023 | 31.08.2023 | UTBETALING         |                  |                                    |                          |
+      | 01.09.2023 |            | OPPHØR             | EØS_FORORDNINGEN | OPPHØR_IKKE_STATSBORGER_I_EØS_LAND |                          |
+
