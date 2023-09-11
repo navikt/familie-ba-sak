@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent
 
 import erGjeldendeForUtgjørendeVilkår
+import erLikVilkårOgUtdypendeVilkårIPeriode
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -220,18 +221,27 @@ private fun SanityBegrunnelse.erGjeldendeForOpphørFraForrigeBehandling(begrunne
     val oppfylteVilkårDenneBehandlingen =
         begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
             .map { it.vilkårType }.toSet()
-    val oppfylteVilkårForrigeBehandling =
+
+    val oppfylteVilkårsresultaterForrigeBehandling =
         begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.vilkårResultater?.filter { it.resultat == Resultat.OPPFYLT }
+    val oppfylteVilkårForrigeBehandling =
+        oppfylteVilkårsresultaterForrigeBehandling
             ?.map { it.vilkårType }?.toSet()
             ?: emptySet()
 
     val vilkårMistetSidenForrigeBehandling = oppfylteVilkårForrigeBehandling - oppfylteVilkårDenneBehandlingen
 
+    val mistedeVilkårHarLikeVilkårsresultaterSomBegrunnelse =
+        this.erLikVilkårOgUtdypendeVilkårIPeriode(
+            oppfylteVilkårsresultaterForrigeBehandling?.filter { it.vilkårType in vilkårMistetSidenForrigeBehandling }
+                ?: emptyList(),
+        )
+
     val begrunnelseGjelderMistedeVilkår = this.vilkår.all { it in vilkårMistetSidenForrigeBehandling }
 
     val dennePeriodenErFørsteVedtaksperiodePåFagsak = begrunnelseGrunnlag.forrigePeriode == null
 
-    return begrunnelseGjelderMistedeVilkår && dennePeriodenErFørsteVedtaksperiodePåFagsak
+    return mistedeVilkårHarLikeVilkårsresultaterSomBegrunnelse && begrunnelseGjelderMistedeVilkår && dennePeriodenErFørsteVedtaksperiodePåFagsak
 }
 
 private fun SanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling() =
