@@ -33,7 +33,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 
 object EndretUtbetalingAndelValidering {
@@ -108,21 +107,22 @@ object EndretUtbetalingAndelValidering {
         } else if (årsak == Årsak.ETTERBETALING_3ÅR) {
             validerEtterbetaling3År(
                 endretUtbetalingAndel = endretUtbetalingAndel,
-                kravDato = vilkårsvurdering?.behandling?.opprettetTidspunkt ?: LocalDateTime.now(),
+                behandlingOpprettetTidspunkt = vilkårsvurdering?.behandling?.opprettetTidspunkt?.toLocalDate(),
             )
         }
     }
 
     private fun validerEtterbetaling3År(
         endretUtbetalingAndel: EndretUtbetalingAndel,
-        kravDato: LocalDateTime,
+        behandlingOpprettetTidspunkt: LocalDate?,
     ) {
+        val kravDato = endretUtbetalingAndel.søknadstidspunkt ?: behandlingOpprettetTidspunkt
         if (endretUtbetalingAndel.prosent != BigDecimal.ZERO) {
             throw FunksjonellFeil(
                 "Du kan ikke sette årsak etterbetaling 3 år når du har valgt at perioden skal utbetales.",
             )
         } else if (
-            endretUtbetalingAndel.tom?.isAfter(hentGyldigEtterbetalingFom(kravDato = kravDato)) == true
+            endretUtbetalingAndel.tom?.isAfter(hentGyldigEtterbetalingFom(kravDato = kravDato ?: LocalDate.now())) == true
         ) {
             throw FunksjonellFeil(
                 "Du kan ikke stoppe etterbetaling for en periode som ikke strekker seg mer enn 3 år tilbake i tid.",
