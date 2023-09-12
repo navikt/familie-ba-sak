@@ -486,6 +486,7 @@ class VedtaksperiodeService(
                         behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+                        nåDato = LocalDate.now(),
                     ).toList()
                 } else {
                     hentGyldigeBegrunnelserForPeriodeGammel(

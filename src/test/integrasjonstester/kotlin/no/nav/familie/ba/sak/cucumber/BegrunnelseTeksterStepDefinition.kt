@@ -212,10 +212,11 @@ class BegrunnelseTeksterStepDefinition {
         utvidetVedtaksperiodeMedBegrunnelser = utvidedeVedtaksperioderMedBegrunnelser.map {
             it.copy(
                 gyldigeBegrunnelser = it.hentGyldigeBegrunnelserForPeriode(
-                    grunnlagForVedtaksperiode,
-                    grunnlagForVedtaksperiodeForrigeBehandling,
-                    mockHentSanityBegrunnelser(),
-                    mockHentSanityEØSBegrunnelser(),
+                    behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtaksperiode,
+                    behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
+                    sanityBegrunnelser = mockHentSanityBegrunnelser(),
+                    sanityEØSBegrunnelser = mockHentSanityEØSBegrunnelser(),
+                    nåDato = dagensDato,
                 ).toList(),
             )
         }.toMutableList()
