@@ -67,7 +67,7 @@ class BegrunnelseTeksterStepDefinition {
 
     /**
      * Mulige felter:
-     * | BehandlingId | FagsakId | ForrigeBehandlingId |
+     * | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
      */
     @Gitt("følgende behandling")
     fun `følgende behandling`(dataTable: DataTable) {
@@ -194,6 +194,7 @@ class BegrunnelseTeksterStepDefinition {
             vedtak = vedtak,
             grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
             grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
+            nåDato = dagensDato,
         )
 
         val utvidedeVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {
