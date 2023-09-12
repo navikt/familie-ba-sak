@@ -44,7 +44,7 @@ fun genererVedtaksperioder(
     nåDato: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
     if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || vedtak.behandling.opprettetÅrsak.erOmregningsårsak()) {
-        return lagForsattInnvilgetPeriode(
+        return lagFortsattInnvilgetPeriode(
             vedtak = vedtak,
             andelTilkjentYtelseer = grunnlagForVedtakPerioder.andelerTilkjentYtelse,
             nåDato = nåDato,
@@ -345,7 +345,7 @@ private fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>
         )
     }
 
-fun lagForsattInnvilgetPeriode(
+fun lagFortsattInnvilgetPeriode(
     vedtak: Vedtak,
     andelTilkjentYtelseer: List<AndelTilkjentYtelse>,
     nåDato: LocalDate,
