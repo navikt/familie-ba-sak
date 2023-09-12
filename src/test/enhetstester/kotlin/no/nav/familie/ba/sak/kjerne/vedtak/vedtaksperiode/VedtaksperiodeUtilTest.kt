@@ -5,10 +5,9 @@ import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.testSanityKlient
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -265,11 +264,11 @@ class VedtaksperiodeUtilTest {
         val kompetanserIPeriode: List<Kompetanse> =
             listOf(
                 lagKompetanse(
-                    annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                    annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                     barnetsBostedsland = "SE",
                     kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                     søkersAktivitetsland = "NO",
-                    søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                    søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                     annenForeldersAktivitetsland = "SE",
                     barnAktører = setOf(Aktør("1234567891011", mutableSetOf())),
 
@@ -301,11 +300,11 @@ class VedtaksperiodeUtilTest {
         val kompetanserIPeriode: List<Kompetanse> =
             listOf(
                 lagKompetanse(
-                    annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
+                    annenForeldersAktivitet = KompetanseAktivitet.I_ARBEID,
                     barnetsBostedsland = "NO",
                     kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                     søkersAktivitetsland = "NO",
-                    søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                    søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                     annenForeldersAktivitetsland = "SE",
                     barnAktører = setOf(Aktør("1234567891011", mutableSetOf())),
 

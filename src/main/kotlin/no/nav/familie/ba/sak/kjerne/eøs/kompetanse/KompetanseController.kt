@@ -83,5 +83,24 @@ class KompetanseController(
         if (oppdatertKompetanse.barnAktører.isEmpty()) {
             throw FunksjonellFeil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
         }
+
+        if (
+            (oppdatertKompetanse.erAnnenForelderOmfattetAvNorskLovgivning == true && oppdatertKompetanse.søkersAktivitet?.gyldigForAnnenForelder == false) ||
+            (oppdatertKompetanse.erAnnenForelderOmfattetAvNorskLovgivning == false && oppdatertKompetanse.søkersAktivitet?.gyldigForSøker == false)
+        ) {
+            throw FunksjonellFeil(
+                "Valgt verdi for søkers aktivitet er ikke gyldig ${if (oppdatertKompetanse.erAnnenForelderOmfattetAvNorskLovgivning) "når annen forelder er omfattet av norsk lovgivning" else ""}"
+                    .trim(),
+            )
+        }
+        if (
+            (oppdatertKompetanse.erAnnenForelderOmfattetAvNorskLovgivning == true && oppdatertKompetanse.annenForeldersAktivitet?.gyldigForSøker == false) ||
+            (oppdatertKompetanse.erAnnenForelderOmfattetAvNorskLovgivning == false && oppdatertKompetanse.annenForeldersAktivitet?.gyldigForAnnenForelder == false)
+        ) {
+            throw FunksjonellFeil(
+                "Valgt verdi for annen forelders aktivitet er ikke gyldig ${if (oppdatertKompetanse.erAnnenForelderOmfattetAvNorskLovgivning) "når annen forelder er omfattet av norsk lovgivning" else ""}"
+                    .trim(),
+            )
+        }
     }
 }

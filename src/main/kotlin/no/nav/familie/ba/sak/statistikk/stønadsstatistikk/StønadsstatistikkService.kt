@@ -19,15 +19,14 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.filtrerGjeldendeNå
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.eksterne.kontrakter.AnnenForeldersAktivitet
 import no.nav.familie.eksterne.kontrakter.BehandlingTypeV2
 import no.nav.familie.eksterne.kontrakter.BehandlingÅrsakV2
 import no.nav.familie.eksterne.kontrakter.FagsakType
 import no.nav.familie.eksterne.kontrakter.KategoriV2
 import no.nav.familie.eksterne.kontrakter.Kompetanse
+import no.nav.familie.eksterne.kontrakter.KompetanseAktivitet
 import no.nav.familie.eksterne.kontrakter.KompetanseResultat
 import no.nav.familie.eksterne.kontrakter.PersonDVHV2
-import no.nav.familie.eksterne.kontrakter.SøkersAktivitet
 import no.nav.familie.eksterne.kontrakter.UnderkategoriV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVHV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
@@ -94,7 +93,7 @@ class StønadsstatistikkService(
             Kompetanse(
                 barnsIdenter = kompetanse.barnAktører.map { aktør -> aktør.aktivFødselsnummer() },
                 annenForeldersAktivitet = if (kompetanse.annenForeldersAktivitet != null) {
-                    AnnenForeldersAktivitet.valueOf(
+                    KompetanseAktivitet.valueOf(
                         kompetanse.annenForeldersAktivitet.name,
                     )
                 } else {
@@ -105,7 +104,7 @@ class StønadsstatistikkService(
                 fom = kompetanse.fom!!,
                 tom = kompetanse.tom,
                 resultat = KompetanseResultat.valueOf(kompetanse.resultat!!.name),
-                sokersaktivitet = if (kompetanse.søkersAktivitet != null) SøkersAktivitet.valueOf(kompetanse.søkersAktivitet.name) else null,
+                sokersaktivitet = if (kompetanse.søkersAktivitet != null) KompetanseAktivitet.valueOf(kompetanse.søkersAktivitet.name) else null,
                 sokersAktivitetsland = kompetanse.søkersAktivitetsland,
             )
         }
