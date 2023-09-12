@@ -26,8 +26,10 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilFørsteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
@@ -162,7 +164,6 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
 
     return when (this.type) {
         Vedtaksperiodetype.AVSLAG,
-        Vedtaksperiodetype.OPPHØR,
         -> emptyList()
 
         Vedtaksperiodetype.FORTSATT_INNVILGET -> {
@@ -179,19 +180,24 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
         Vedtaksperiodetype.ENDRET_UTBETALING,
         -> {
             val utbetalingsperioderRelevantForVedtaksperiode =
-                utbetalingsperiodeDetaljer.perioder().find { andelerVertikal ->
-                    andelerVertikal.fraOgMed.tilFørsteDagIMåneden().tilLocalDate()
-                        .isSameOrBefore(this.fom ?: TIDENES_MORGEN) &&
-                        andelerVertikal.tilOgMed.tilSisteDagIMåneden().tilLocalDate()
-                            .isSameOrAfter(this.tom ?: TIDENES_ENDE)
-                }?.innhold ?: throw Feil(
+                finnUtbetalingsperioderRelevantForVedtaksperiode(utbetalingsperiodeDetaljer) ?: throw Feil(
                     "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}",
                 )
 
             utbetalingsperioderRelevantForVedtaksperiode.toList()
         }
+
+        Vedtaksperiodetype.OPPHØR -> finnUtbetalingsperioderRelevantForVedtaksperiode(utbetalingsperiodeDetaljer)?.toList() ?: emptyList()
     }
 }
+private fun VedtaksperiodeMedBegrunnelser.finnUtbetalingsperioderRelevantForVedtaksperiode(
+    utbetalingsperiodeDetaljer: Tidslinje<Iterable<UtbetalingsperiodeDetalj>, Måned>,
+) = utbetalingsperiodeDetaljer.perioder().find { andelerVertikal ->
+    andelerVertikal.fraOgMed.tilFørsteDagIMåneden().tilLocalDate()
+        .isSameOrBefore(this.fom ?: TIDENES_MORGEN) &&
+        andelerVertikal.tilOgMed.tilSisteDagIMåneden().tilLocalDate()
+            .isSameOrAfter(this.tom ?: TIDENES_ENDE)
+}?.innhold
 
 private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidslinje(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
