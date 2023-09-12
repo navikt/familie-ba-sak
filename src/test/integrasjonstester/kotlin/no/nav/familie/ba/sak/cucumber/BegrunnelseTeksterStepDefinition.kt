@@ -287,7 +287,7 @@ class BegrunnelseTeksterStepDefinition {
             )
                 .toList()
 
-        val enumPåApiNavn = EØSStandardbegrunnelse.values().associateBy { it.sanityApiNavn }
+        val enumPåApiNavn = EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
         val sanityEØSBegrunnelser = restSanityEØSBegrunnelser.mapNotNull { it.tilSanityEØSBegrunnelse() }
 
         return sanityEØSBegrunnelser
