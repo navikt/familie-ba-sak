@@ -174,8 +174,8 @@ internal class StønadsstatistikkServiceTest(
                 fom = YearMonth.now(),
                 tom = null,
                 barnsIdenter = listOf(barn1.aktør.aktivFødselsnummer()),
-                sokersaktivitet = no.nav.familie.eksterne.kontrakter.SøkersAktivitet.ARBEIDER,
-                annenForeldersAktivitet = no.nav.familie.eksterne.kontrakter.AnnenForeldersAktivitet.I_ARBEID,
+                sokersaktivitet = no.nav.familie.eksterne.kontrakter.KompetanseAktivitet.ARBEIDER,
+                annenForeldersAktivitet = no.nav.familie.eksterne.kontrakter.KompetanseAktivitet.I_ARBEID,
                 annenForeldersAktivitetsland = "PL",
                 barnetsBostedsland = "PL",
                 resultat = no.nav.familie.eksterne.kontrakter.KompetanseResultat.NORGE_ER_PRIMÆRLAND,
@@ -214,19 +214,19 @@ internal class StønadsstatistikkServiceTest(
     }
 
     /**
-     * Nye AnnenForeldersAktivitet må legges til VedtakDVHV2 i familie-eksterne-kontrakter når det legges til i Behandling
+     * Nye annenForeldersAktivitet må legges til VedtakDVHV2 i familie-eksterne-kontrakter når det legges til i Behandling
      *
-     * Endringenen MÅ være BAKOVERKOMPATIBEL. Hvis man f.eks. endrer navn på en AnnenForeldersAktivitet, så må man være sikker på at det ikke er sendt
+     * Endringenen MÅ være BAKOVERKOMPATIBEL. Hvis man f.eks. endrer navn på en KompetanseAktivitet, så må man være sikker på at det ikke er sendt
      * et slik vedtak til stønaddstatistikk. Den nye kontrakten skal kunne brukes til å lese ALLE meldinger på topic
      *
      * Hvis det er sendt et slik vedtak, så legger man heller til den nye verdien i VedtakDVHV2 og ikke slette gamle
      *
      */
     @Test
-    fun `Skal gi feil hvis det kommer en ny AnnenForeldersAktivitet som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
+    fun `Skal gi feil hvis det kommer en ny KompetanseAktivitet for annenForelder som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
         val annenForeldersAktivitet = enumValues<KompetanseAktivitet>().map { it.name }
         val annenForeldersAktivitetFraEksternKontrakt =
-            ikkeAvvikleteEnumverdier<no.nav.familie.eksterne.kontrakter.AnnenForeldersAktivitet>()
+            ikkeAvvikleteEnumverdier<no.nav.familie.eksterne.kontrakter.KompetanseAktivitet>()
 
         assertThat(annenForeldersAktivitet)
             .hasSize(annenForeldersAktivitetFraEksternKontrakt.size)
@@ -236,17 +236,17 @@ internal class StønadsstatistikkServiceTest(
     /**
      * Nye søkersAktivitet må legges til VedtakDVHV2 i familie-eksterne-kontrakter når det legges til i Behandling
      *
-     * Endringenen MÅ være BAKOVERKOMPATIBEL. Hvis man f.eks. endrer navn på en SøkersAktivitet, så må man være sikker på at det ikke er sendt
+     * Endringenen MÅ være BAKOVERKOMPATIBEL. Hvis man f.eks. endrer navn på en KompetanseAktivitet, så må man være sikker på at det ikke er sendt
      * et slik vedtak til stønaddstatistikk. Den nye kontrakten skal kunne brukes til å lese ALLE meldinger på topic
      *
      * Hvis det er sendt et slik vedtak, så legger man heller til den nye verdien i VedtakDVHV2 og ikke slette gamle
      *
      */
     @Test
-    fun `Skal gi feil hvis det kommer en ny søkersAktivitet som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
+    fun `Skal gi feil hvis det kommer en ny KompetanseAktivitet for søkersAktivitet som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
         val søkersAktivitet = enumValues<KompetanseAktivitet>().map { it.name }
         val søkersAktivitetFraEksternKontrakt =
-            ikkeAvvikleteEnumverdier<no.nav.familie.eksterne.kontrakter.SøkersAktivitet>()
+            ikkeAvvikleteEnumverdier<no.nav.familie.eksterne.kontrakter.KompetanseAktivitet>()
 
         assertThat(søkersAktivitetFraEksternKontrakt)
             .hasSize(søkersAktivitet.size)
