@@ -91,13 +91,13 @@ object EndretUtbetalingAndelValidering {
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
         vilkårsvurdering: Vilkårsvurdering?,
     ) =
-        endretUtbetalingAndeler.forEach { validerÅrsak(it.årsak, it, vilkårsvurdering) }
+        endretUtbetalingAndeler.forEach { validerÅrsak(it, vilkårsvurdering) }
 
     fun validerÅrsak(
-        årsak: Årsak?,
         endretUtbetalingAndel: EndretUtbetalingAndel,
         vilkårsvurdering: Vilkårsvurdering?,
     ) {
+        val årsak = endretUtbetalingAndel.årsak
         if (årsak == Årsak.DELT_BOSTED) {
             val deltBostedPerioder = finnDeltBostedPerioder(
                 person = endretUtbetalingAndel.person,

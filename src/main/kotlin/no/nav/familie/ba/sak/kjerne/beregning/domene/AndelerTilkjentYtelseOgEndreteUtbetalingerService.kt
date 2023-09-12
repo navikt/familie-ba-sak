@@ -39,7 +39,6 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
                     )
                 }.utenAndelerVedValideringsfeil {
                     validerÅrsak(
-                        it.årsak,
                         it.endretUtbetalingAndel,
                         vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId),
                     )
