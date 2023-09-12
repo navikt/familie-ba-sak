@@ -156,9 +156,7 @@ private fun hentStandardBegrunnelser(
     }
 
     val filtrertPåOpphørFraForrigeBehandling = filtrertPåRolle.filterValues {
-        vedtaksperiode.type == Vedtaksperiodetype.OPPHØR && it.erGjeldendeForOpphørFraForrigeBehandling(
-            begrunnelseGrunnlag,
-        )
+        it.erGjeldendeForOpphørFraForrigeBehandling(begrunnelseGrunnlag)
     }
 
     val filtrertPåSmåbarnstillegg = filtrertPåRolleFagsaktypeOgPeriodetype.filterValues { begrunnelse ->
