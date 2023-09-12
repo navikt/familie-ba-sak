@@ -2,9 +2,8 @@ package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import org.junit.jupiter.api.Assertions
@@ -26,9 +25,9 @@ class EndringIKompetanseUtilTest {
                 behandlingId = forrigeBehandling.id,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                 søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = jan22,
@@ -61,16 +60,17 @@ class EndringIKompetanseUtilTest {
                 behandlingId = forrigeBehandling.id,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                 søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = jan22,
                 tom = mai22,
             )
 
-        val nåværendeKompetanse = forrigeKompetanse.copy(søkersAktivitetsland = "DK").apply { behandlingId = nåværendeBehandling.id }
+        val nåværendeKompetanse =
+            forrigeKompetanse.copy(søkersAktivitetsland = "DK").apply { behandlingId = nåværendeBehandling.id }
 
         val perioderMedEndring = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
             nåværendeKompetanser = listOf(
@@ -102,9 +102,9 @@ class EndringIKompetanseUtilTest {
                 behandlingId = forrigeBehandling.id,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                 søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),
@@ -156,9 +156,9 @@ class EndringIKompetanseUtilTest {
                 behandlingId = nåværendeBehandling.id,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                 søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),

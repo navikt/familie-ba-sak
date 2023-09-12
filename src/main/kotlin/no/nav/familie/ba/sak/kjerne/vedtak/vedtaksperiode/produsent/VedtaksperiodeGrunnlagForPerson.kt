@@ -7,9 +7,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstøn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -120,8 +119,8 @@ data class AndelForVedtaksperiode(
 }
 
 data class KompetanseForVedtaksperiode(
-    val søkersAktivitet: SøkersAktivitet,
-    val annenForeldersAktivitet: AnnenForeldersAktivitet,
+    val søkersAktivitet: KompetanseAktivitet,
+    val annenForeldersAktivitet: KompetanseAktivitet,
     val annenForeldersAktivitetsland: String?,
     val søkersAktivitetsland: String,
     val barnetsBostedsland: String,
