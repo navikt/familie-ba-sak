@@ -2,12 +2,22 @@ package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMåned
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
 
 @Service
 class VilkårsvurderingTidslinjeService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
 
@@ -27,5 +37,26 @@ class VilkårsvurderingTidslinjeService(
         } catch (exception: NullPointerException) {
             return null
         }
+    }
+
+    fun hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId: BehandlingId): Tidslinje<Boolean, Måned> {
+        val søker = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId.id).søker
+        val søkerPersonresultater = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandlingId.id)
+            .personResultater.single { it.aktør == søker.aktør }
+
+        val erAnnenForelderOmfattetAvNorskLovgivingTidslinje = søkerPersonresultater.vilkårResultater
+            .filter { it.vilkårType === Vilkår.BOSATT_I_RIKET }
+            .map {
+                periodeAv(
+                    it.periodeFom,
+                    it.periodeTom,
+                    it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING),
+                )
+            }
+            .tilTidslinje()
+
+        val månedsbasertTidslinje =
+            erAnnenForelderOmfattetAvNorskLovgivingTidslinje.tilMåned { it.contains(element = true) }
+        return månedsbasertTidslinje.forskyv(1)
     }
 }
