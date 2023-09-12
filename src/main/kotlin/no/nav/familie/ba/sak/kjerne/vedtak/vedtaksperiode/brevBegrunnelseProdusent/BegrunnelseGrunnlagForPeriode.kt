@@ -45,10 +45,7 @@ data class BegrunnelseGrunnlagForPeriodeMedReduksjonPåTversAvBehandlinger(
     override val forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
     val sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?,
 ) : IBegrunnelseGrunnlagForPeriode {
-    override val erSmåbarnstilleggIForrigeBehandlingPeriode: Boolean
-        get() = haddeSmåbarnstilleggISammePeriodeForrigeBehandling()
-
-    private fun haddeSmåbarnstilleggISammePeriodeForrigeBehandling() =
+    override val erSmåbarnstilleggIForrigeBehandlingPeriode =
         sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
 }
 
@@ -57,9 +54,6 @@ data class BegrunnelseGrunnlagForPeriodeMedOpphør(
     override val forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
     val sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?,
 ) : IBegrunnelseGrunnlagForPeriode {
-    override val erSmåbarnstilleggIForrigeBehandlingPeriode: Boolean
-        get() = haddeSmåbarnstilleggISammePeriodeForrigeBehandling()
-
-    private fun haddeSmåbarnstilleggISammePeriodeForrigeBehandling() =
+    override val erSmåbarnstilleggIForrigeBehandlingPeriode =
         sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
 }
