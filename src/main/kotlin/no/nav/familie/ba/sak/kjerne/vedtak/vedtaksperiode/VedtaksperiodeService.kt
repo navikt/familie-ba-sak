@@ -8,9 +8,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -30,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndre
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.hentIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentKompetanserSomStopperRettFørPeriode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -298,49 +295,23 @@ class VedtaksperiodeService(
     @Transactional
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
-        val behandling = vedtak.behandling
 
-        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || behandling.opprettetÅrsak.erOmregningsårsak()) {
-            val vedtaksbrevmal = brevmalService.hentVedtaksbrevmal(
-                behandling,
-            )
-
-            val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
-                vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
-
-            val fom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
-                YearMonth.now().førsteDagIInneværendeMåned()
-            } else {
-                null
-            }
-
-            val tom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
-                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandling.id)
-            } else {
-                null
-            }
-
-            vedtaksperiodeHentOgPersisterService.lagre(
-                VedtaksperiodeMedBegrunnelser(
-                    fom = fom,
-                    tom = tom,
-                    vedtak = vedtak,
-                    type = Vedtaksperiodetype.FORTSATT_INNVILGET,
-                ),
-            )
-        } else {
-            vedtaksperiodeHentOgPersisterService.lagre(finnVedtaksperioderForBehandling(vedtak.behandling.id))
-        }
+        val vedtaksperioderForBehandling = finnVedtaksperioderForBehandling(vedtak)
+        vedtaksperiodeHentOgPersisterService.lagre(vedtaksperioderForBehandling)
     }
 
-    fun finnVedtaksperioderForBehandling(behandlingId: Long): List<VedtaksperiodeMedBegrunnelser> {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+    fun finnVedtaksperioderForBehandling(behandlingId: Long): List<VedtaksperiodeMedBegrunnelser> =
+        finnVedtaksperioderForBehandling(vedtakRepository.findByBehandlingAndAktiv(behandlingId))
+
+    fun finnVedtaksperioderForBehandling(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
+        val behandling = vedtak.behandling
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
         return genererVedtaksperioder(
             grunnlagForVedtakPerioder = behandling.hentGrunnlagForVedtaksperioder(),
             grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
-            vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId),
+            vedtak = vedtak,
+            nåDato = LocalDate.now(),
         )
     }
 
@@ -515,6 +486,7 @@ class VedtaksperiodeService(
                         behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+                        nåDato = LocalDate.now(),
                     ).toList()
                 } else {
                     hentGyldigeBegrunnelserForPeriodeGammel(
@@ -567,12 +539,6 @@ class VedtaksperiodeService(
 
         vedtaksperiodeHentOgPersisterService.lagre(fortsattInnvilgetPeriode)
     }
-
-    private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
-            .filter { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now() }
-            .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
-            ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
 
     fun hentUtbetalingsperioder(
         behandling: Behandling,
