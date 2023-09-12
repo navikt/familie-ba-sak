@@ -1406,10 +1406,6 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingEtterbetalingTreAarTilbakeITid"
     },
-    ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_KUN_UTVIDET_DEL {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingEtterbetalingTreAarTilbakeITidKunUtvidetDel"
-    },
     ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_SED {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingEtterbetalingTreAarTilbakeITidSED"
