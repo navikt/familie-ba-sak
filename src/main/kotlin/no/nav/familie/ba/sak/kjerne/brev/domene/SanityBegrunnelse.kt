@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår.UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle.BARN
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle.SOKER
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -26,6 +27,7 @@ interface ISanityBegrunnelse {
     val bosattIRiketTriggere: List<VilkårTrigger>
     val lovligOppholdTriggere: List<VilkårTrigger>
     val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>
+    val fagsakType: FagsakType?
 }
 
 data class SanityBegrunnelse(
@@ -38,6 +40,7 @@ data class SanityBegrunnelse(
     override val giftPartnerskapTriggere: List<VilkårTrigger> = emptyList(),
     override val borMedSokerTriggere: List<VilkårTrigger> = emptyList(),
     override val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger> = emptyList(),
+    override val fagsakType: FagsakType? = null,
     @Deprecated("Bruk vilkår")
     val vilkaar: List<SanityVilkår> = emptyList(),
     val rolle: List<VilkårRolle> = emptyList(),
@@ -74,6 +77,7 @@ data class RestSanityBegrunnelse(
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
     val valgbarhet: String? = null,
     val vedtakResultat: String?,
+    val fagsakType: String?,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
         if (apiNavn == null) return null
@@ -126,6 +130,9 @@ data class RestSanityBegrunnelse(
             valgbarhet = valgbarhet?.let { finnEnumverdi(valgbarhet, Valgbarhet.entries.toTypedArray(), apiNavn) },
             periodeResultat = vedtakResultat?.let {
                 finnEnumverdi(it, SanityPeriodeResultat.entries.toTypedArray(), apiNavn)
+            },
+            fagsakType = fagsakType?.let {
+                finnEnumverdi(it, FagsakType.entries.toTypedArray(), apiNavn)
             },
         )
     }
