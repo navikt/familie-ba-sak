@@ -178,18 +178,15 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
         Vedtaksperiodetype.UTBETALING,
         Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
         Vedtaksperiodetype.ENDRET_UTBETALING,
-        -> {
-            val utbetalingsperioderRelevantForVedtaksperiode =
-                finnUtbetalingsperioderRelevantForVedtaksperiode(utbetalingsperiodeDetaljer) ?: throw Feil(
-                    "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}",
-                )
+        -> finnUtbetalingsperioderRelevantForVedtaksperiode(utbetalingsperiodeDetaljer)?.toList() ?: throw Feil(
+            "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}",
+        )
 
-            utbetalingsperioderRelevantForVedtaksperiode.toList()
-        }
-
-        Vedtaksperiodetype.OPPHØR -> finnUtbetalingsperioderRelevantForVedtaksperiode(utbetalingsperiodeDetaljer)?.toList() ?: emptyList()
+        Vedtaksperiodetype.OPPHØR -> finnUtbetalingsperioderRelevantForVedtaksperiode(utbetalingsperiodeDetaljer)?.toList()
+            ?: emptyList()
     }
 }
+
 private fun VedtaksperiodeMedBegrunnelser.finnUtbetalingsperioderRelevantForVedtaksperiode(
     utbetalingsperiodeDetaljer: Tidslinje<Iterable<UtbetalingsperiodeDetalj>, Måned>,
 ) = utbetalingsperiodeDetaljer.perioder().find { andelerVertikal ->
