@@ -255,17 +255,15 @@ private fun SanityBegrunnelse.erGjeldendeForOpphørFraForrigeBehandling(begrunne
 
     val vilkårMistetSidenForrigeBehandling = oppfylteVilkårForrigeBehandling - oppfylteVilkårDenneBehandlingen
 
-    val mistedeVilkårHarLikeVilkårsresultaterSomBegrunnelse =
+    val begrunnelseGjelderMistedeVilkår =
         this.erLikVilkårOgUtdypendeVilkårIPeriode(
             oppfylteVilkårsresultaterForrigeBehandling?.filter { it.vilkårType in vilkårMistetSidenForrigeBehandling }
                 ?: emptyList(),
         )
 
-    val begrunnelseGjelderMistedeVilkår = this.vilkår.all { it in vilkårMistetSidenForrigeBehandling }
-
     val dennePeriodenErFørsteVedtaksperiodePåFagsak = begrunnelseGrunnlag.forrigePeriode == null
 
-    return mistedeVilkårHarLikeVilkårsresultaterSomBegrunnelse && begrunnelseGjelderMistedeVilkår && dennePeriodenErFørsteVedtaksperiodePåFagsak
+    return begrunnelseGjelderMistedeVilkår && dennePeriodenErFørsteVedtaksperiodePåFagsak
 }
 
 private fun SanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling() =
