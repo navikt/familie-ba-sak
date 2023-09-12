@@ -162,13 +162,13 @@ private fun Map<Aktør, Tidslinje<KombinertRegelverkResultat, Måned>>.tilBarnas
     }
 
 private fun Tidslinje<KombinertRegelverkResultat, Måned>.mapTilRegelverk(brukBarnetsRegelverkVedBlandetResultat: Boolean) =
-        map {
-            if (it?.kombinertResultat == OPPFYLT_BLANDET_REGELVERK && brukBarnetsRegelverkVedBlandetResultat) {
-                it.barnetsResultat?.regelverk
-            } else {
-                it?.kombinertResultat?.regelverk
-            }
+    map {
+        if (it?.kombinertResultat == OPPFYLT_BLANDET_REGELVERK && brukBarnetsRegelverkVedBlandetResultat) {
+            it.barnetsResultat?.regelverk
+        } else {
+            it?.kombinertResultat?.regelverk
         }
+    }
 
 private fun <I, T : Tidsenhet> Tidslinje<I, T>.forlengFremtidTilUendelig(nå: Tidspunkt<T>): Tidslinje<I, T> {
     val tilOgMed = this.tilOgMed()
