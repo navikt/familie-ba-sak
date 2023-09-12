@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -8,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.autovedtak.FødselshendelseData
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
@@ -59,7 +61,7 @@ class AutovedtakFødselshendelseService(
     private val statsborgerskapService: StatsborgerskapService,
     private val opprettTaskService: OpprettTaskService,
     private val oppgaveService: OppgaveService,
-) : AutovedtakBehandlingService<NyBehandlingHendelse> {
+) : AutovedtakBehandlingService<FødselshendelseData> {
 
     val stansetIAutomatiskFiltreringCounter =
         Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
@@ -67,10 +69,11 @@ class AutovedtakFødselshendelseService(
         Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "vilkaarsvurdering")
     val passertFiltreringOgVilkårsvurderingCounter = Metrics.counter("familie.ba.sak.henvendelse.passert")
 
-    override fun skalAutovedtakBehandles(behandlingsdata: NyBehandlingHendelse): Boolean {
-        val morsAktør = personidentService.hentAktør(behandlingsdata.morsIdent)
+    override fun skalAutovedtakBehandles(behandlingsdata: FødselshendelseData): Boolean {
+        val nyBehandlingHendelse = behandlingsdata.nyBehandlingHendelse
+        val morsAktør = personidentService.hentAktør(nyBehandlingHendelse.morsIdent)
         val morsÅpneBehandling = hentÅpenNormalBehandling(aktør = morsAktør)
-        val barnsAktører = personidentService.hentAktørIder(behandlingsdata.barnasIdenter)
+        val barnsAktører = personidentService.hentAktørIder(nyBehandlingHendelse.barnasIdenter)
 
         if (morsÅpneBehandling != null) {
             val barnaPåÅpenBehandling =
@@ -84,7 +87,7 @@ class AutovedtakFødselshendelseService(
                 logger.info("Ignorerer fødselshendelse fordi åpen behandling inneholder alle barna i hendelsen.")
                 secureLogger.info(
                     "Ignorerer fødselshendelse fordi åpen behandling inneholder alle barna i hendelsen." +
-                        "Barn på hendelse=${behandlingsdata.barnasIdenter}, barn på åpen behandling=$barnaPåÅpenBehandling",
+                        "Barn på hendelse=${nyBehandlingHendelse.barnasIdenter}, barn på åpen behandling=$barnaPåÅpenBehandling",
                 )
                 return false
             }
@@ -92,7 +95,7 @@ class AutovedtakFødselshendelseService(
 
         val (barnSomSkalBehandlesForMor, alleBarnSomKanBehandles) = finnBarnSomSkalBehandlesForMor(
             fagsak = fagsakService.hentNormalFagsak(aktør = morsAktør),
-            nyBehandlingHendelse = behandlingsdata,
+            nyBehandlingHendelse = nyBehandlingHendelse,
         )
 
         if (barnSomSkalBehandlesForMor.isEmpty()) {
@@ -107,7 +110,8 @@ class AutovedtakFødselshendelseService(
         return true
     }
 
-    override fun kjørBehandling(nyBehandling: NyBehandlingHendelse): String {
+    override fun kjørBehandling(behandlingsdata: FødselshendelseData): String {
+        val nyBehandling = behandlingsdata.nyBehandlingHendelse
         val morsAktør = personidentService.hentAktør(nyBehandling.morsIdent)
 
         val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
@@ -296,8 +300,6 @@ class AutovedtakFødselshendelseService(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(BehandleFødselshendelseTask::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

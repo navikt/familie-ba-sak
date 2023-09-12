@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -588,8 +589,6 @@ class StegService(
     companion object {
 
         private val logger = LoggerFactory.getLogger(StegService::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
-
         private fun hentUkjentBehandlingTypeOgÅrsakFeilMelding(nyBehandling: NyBehandling) =
             "Ukjent oppførsel ved opprettelse av ny behandling med årsak " +
                 "${nyBehandling.behandlingÅrsak.visningsnavn} og " +

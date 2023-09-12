@@ -2,14 +2,14 @@ name: Build-Deploy-Prod-GCP
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
 
 jobs:
   integrasjonstester:
     name: Kjører enhetstester og integrasjonstester
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-java@v3
@@ -26,7 +26,7 @@ jobs:
     name: Kjører verdikjedetester
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-java@v3
@@ -46,7 +46,7 @@ jobs:
       contents: "read"
       id-token: "write"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-java@v3
@@ -82,7 +82,7 @@ jobs:
       id-token: "write"
     needs: [ bygg ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Deploy til dev-gcp
@@ -102,7 +102,7 @@ jobs:
       id-token: "write"
     needs: [ integrasjonstester,verdikjedetester,deploy-preprod ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Deploy til prod-gcp

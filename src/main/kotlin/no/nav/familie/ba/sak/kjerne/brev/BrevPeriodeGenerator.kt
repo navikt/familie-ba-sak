@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
@@ -48,7 +47,7 @@ class BrevPeriodeGenerator(
     private val featureToggleService: FeatureToggleService,
 ) {
 
-    fun genererBrevPeriode(skalBrukeNyVedtaksperiodeLøsning: Boolean): BrevPeriode? {
+    fun genererBrevPeriode(): BrevPeriode? {
         val begrunnelseGrunnlagMedPersoner = hentBegrunnelsegrunnlagMedPersoner()
         val eøsBegrunnelserMedKompetanser = hentEøsBegrunnelserMedKompetanser()
 
@@ -56,7 +55,6 @@ class BrevPeriodeGenerator(
             byggBegrunnelserOgFritekster(
                 begrunnelserGrunnlagMedPersoner = begrunnelseGrunnlagMedPersoner,
                 eøsBegrunnelserMedKompetanser = eøsBegrunnelserMedKompetanser,
-                skalBrukeNyVedtaksperiodeLøsning,
             )
 
         if (begrunnelserOgFritekster.isEmpty()) return null
@@ -87,15 +85,9 @@ class BrevPeriodeGenerator(
                 val minimertePersonResultater =
                     restBehandlingsgrunnlagForBrev.minimertePersonResultater.filter { personResultat ->
                         personResultat.minimerteVilkårResultater.any {
-                            if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
-                                it.erEksplisittAvslagPåSøknad == true && it.periodeFom?.førsteDagINesteMåned() == minimertVedtaksperiode.fom && it.standardbegrunnelser.contains(
-                                    begrunnelse,
-                                )
-                            } else {
-                                it.erEksplisittAvslagPåSøknad == true && it.periodeFom == minimertVedtaksperiode.fom && it.standardbegrunnelser.contains(
-                                    begrunnelse,
-                                )
-                            }
+                            it.erEksplisittAvslagPåSøknad == true &&
+                                it.periodeFom?.førsteDagINesteMåned() == minimertVedtaksperiode.fom &&
+                                it.standardbegrunnelser.contains(begrunnelse)
                         }
                     }
 
@@ -189,7 +181,6 @@ class BrevPeriodeGenerator(
     fun byggBegrunnelserOgFritekster(
         begrunnelserGrunnlagMedPersoner: List<BrevBegrunnelseGrunnlagMedPersoner>,
         eøsBegrunnelserMedKompetanser: List<EØSBegrunnelseMedKompetanser>,
-        skalBrukeNyVedtaksperiodeLøsning: Boolean,
     ): List<Begrunnelse> {
         val brevBegrunnelser = begrunnelserGrunnlagMedPersoner
             .map {
@@ -200,7 +191,6 @@ class BrevPeriodeGenerator(
                     uregistrerteBarn = uregistrerteBarn,
                     minimerteUtbetalingsperiodeDetaljer = minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer,
                     minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
-                    skalBrukeNyVedtaksperiodeLøsning,
                 )
             }
 

@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdragFactory
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
-import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -46,6 +47,7 @@ class BeregningService(
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList(),
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
@@ -77,19 +79,10 @@ class BeregningService(
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
-    fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
-        val avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak =
-            behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(
-                fagsakId = fagsakId,
-            ).filter { !it.erHenlagt() }
-
-        return avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak.mapNotNull {
-            tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
-                it.id,
-            )?.takeIf { tilkjentYtelse ->
-                tilkjentYtelse.andelerTilkjentYtelse.any { aty -> aty.erAndelSomSkalSendesTilOppdrag() }
-            }
-        }
+    fun hentSisteAndelPerIdent(fagsakId: Long): Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag> {
+        return andelTilkjentYtelseRepository.hentSisteAndelPerIdent(fagsakId)
+            .groupBy { IdentOgYtelse(it.aktør.aktivFødselsnummer(), it.type) }
+            .mapValues { AndelTilkjentYtelseForSimuleringFactory().pakkInnForUtbetaling(it.value).single() }
     }
 
     /**
@@ -198,12 +191,15 @@ class BeregningService(
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
+        val skalBrukeNyBegrunnelseLogikk = featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)
+
         val tilkjentYtelse =
             TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
                 fagsakType = behandling.fagsak.type,
+                skalBrukeNyBegrunnelseLogikk = skalBrukeNyBegrunnelseLogikk,
             ) { søkerAktør ->
                 småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
                     søkerAktør = søkerAktør,
@@ -291,32 +287,6 @@ class BeregningService(
                 andelerTilkjentYtelse.any { aty -> aty.aktør == it }
             } ?: emptyList()
     }
-
-    fun hentSisteOffsetPerIdent(
-        fagsakId: Long,
-        andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
-    ): Map<IdentOgYtelse, Int> {
-        val alleAndelerTilkjentYtelserIverksattMotØkonomi =
-            hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
-                .flatMap { it.andelerTilkjentYtelse }
-                .filter { it.erAndelSomSkalSendesTilOppdrag() }
-                .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
-
-        val alleTideligereKjederIverksattMotØkonomi =
-            ØkonomiUtils.grupperAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
-
-        return ØkonomiUtils.gjeldendeForrigeOffsetForKjede(alleTideligereKjederIverksattMotØkonomi)
-    }
-
-    fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
-        behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
-            .mapNotNull { iverksattBehandling ->
-                hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { andelerTilkjentYtelse ->
-                        andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
-                    }
-            }.maxByOrNull { it }
 
     fun populerTilkjentYtelse(
         behandling: Behandling,

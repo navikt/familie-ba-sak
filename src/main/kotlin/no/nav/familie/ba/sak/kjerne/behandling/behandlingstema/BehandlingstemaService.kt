@@ -66,11 +66,11 @@ class BehandlingstemaService(
             behandlingHentOgPersisterService.lagreEllerOppdater(behandling).also { lagretBehandling ->
                 oppgaveService.patchOppgaverForBehandling(lagretBehandling) {
                     val lagretUnderkategori = lagretBehandling.underkategori
-                    if (it.behandlingstema != lagretUnderkategori.tilOppgaveBehandlingTema().value || it.behandlingstype != lagretBehandling.kategori.tilOppgavebehandlingType().value) {
+                    if (it.behandlingstema != lagretBehandling.tilOppgaveBehandlingTema().value || it.behandlingstype != lagretBehandling.kategori.tilOppgavebehandlingType().value) {
                         it.copy(
                             behandlingstema = when (lagretUnderkategori) {
-                                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET, BehandlingUnderkategori.INSTITUSJON ->
-                                    behandling.underkategori.tilOppgaveBehandlingTema().value
+                                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET ->
+                                    behandling.tilOppgaveBehandlingTema().value
                             },
                             behandlingstype = lagretBehandling.kategori.tilOppgavebehandlingType().value,
                         )
@@ -79,7 +79,7 @@ class BehandlingstemaService(
                     }
                 }
 
-                if (manueltOppdatert && skalOppdatereKategoriEllerUnderkategori) {
+                if (manueltOppdatert) {
                     loggService.opprettEndretBehandlingstema(
                         behandling = lagretBehandling,
                         forrigeKategori = forrigeKategori,
@@ -95,12 +95,12 @@ class BehandlingstemaService(
     }
 
     fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori {
-        val forrigeIverksattBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
+        val forrigeVedtatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
                 ?: return BehandlingKategori.NASJONAL
 
         val barnasTidslinjer =
-            vilkårsvurderingTidslinjeService.hentTidslinjer(behandlingId = BehandlingId(forrigeIverksattBehandling.id))
+            vilkårsvurderingTidslinjeService.hentTidslinjer(behandlingId = BehandlingId(forrigeVedtatteBehandling.id))
                 ?.barnasTidslinjer()
         return utledLøpendeKategori(barnasTidslinjer)
     }
@@ -149,8 +149,8 @@ class BehandlingstemaService(
     }
 
     private fun hentForrigeAndeler(fagsakId: Long): List<AndelTilkjentYtelse>? {
-        val forrigeIverksattBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId) ?: return null
-        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeIverksattBehandling.id)
+        val forrigeVedtatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId) ?: return null
+        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeVedtatteBehandling.id)
     }
 }

@@ -36,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.endretUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentUtbetalingsperiodeDetaljer
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -247,7 +248,7 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
     kompetanserIPeriode: List<Kompetanse>,
     kompetanserSomStopperRettFørPeriode: List<Kompetanse>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
-) = EØSStandardbegrunnelse.values()
+) = EØSStandardbegrunnelse.entries
     .filter { minimertVedtaksperiode.type.tillatteBegrunnelsestyper.contains(it.vedtakBegrunnelseType) }
     .mapNotNull { it.tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser) }.filter { begrunnelse ->
         when (begrunnelse.eøsBegrunnelse.vedtakBegrunnelseType) {
@@ -289,7 +290,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     ytelserForrigePerioder: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     featureToggleService: FeatureToggleService,
 ): List<Standardbegrunnelse> {
-    val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.values().filter {
+    val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.entries.filter {
         minimertVedtaksperiode.type.tillatteBegrunnelsestyper.contains(it.vedtakBegrunnelseType)
     }.filter {
         if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
@@ -354,7 +355,7 @@ private fun velgRedusertBegrunnelser(
     }
     if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
         val utbetalingsbegrunnelser = velgUtbetalingsbegrunnelser(
-            Standardbegrunnelse.values().toList(),
+            Standardbegrunnelse.entries,
             sanityBegrunnelser,
             minimertVedtaksperiode,
             minimertePersonresultater,

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -29,7 +30,7 @@ class VedtakOmOvergangsstønadTask(
 
         val responseFraService = autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = aktør,
-            behandlingsdata = aktør,
+            aktør = aktør,
         )
         secureLogger.info("Håndterte vedtak om overgangsstønad for person $personIdent:\n$responseFraService")
     }
@@ -38,7 +39,6 @@ class VedtakOmOvergangsstønadTask(
 
         const val TASK_STEP_TYPE = "vedtakOmOvergangsstønadTask"
         private val logger = LoggerFactory.getLogger(VedtakOmOvergangsstønadTask::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(personIdent: String): Task {
             return Task(

@@ -43,6 +43,7 @@ object VedtaksperiodeMedBegrunnelserParser {
     enum class DomenebegrepPersongrunnlag(override val nøkkel: String) : Domenenøkkel {
         PERSON_TYPE("Persontype"),
         FØDSELSDATO("Fødselsdato"),
+        DØDSFALLDATO("Dødsfalldato"),
         AKTØR_ID("AktørId"),
     }
 

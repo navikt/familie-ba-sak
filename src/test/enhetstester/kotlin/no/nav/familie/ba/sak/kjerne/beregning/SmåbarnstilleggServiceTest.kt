@@ -53,7 +53,7 @@ class SmåbarnstilleggServiceTest {
         )
 
         every { periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(any()) } just Runs
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_KOPIER_GRUNNLAG_FRA_FORRIGE_BEHANDLING) } returns true
+        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
     }
 
     @Test

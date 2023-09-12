@@ -3,12 +3,14 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SATSENDRING_SNIKE_I_KØEN
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
@@ -42,6 +44,7 @@ class AutovedtakSatsendringService(
     private val featureToggleService: FeatureToggleService,
     private val snikeIKøenService: SnikeIKøenService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
 
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
@@ -61,8 +64,7 @@ class AutovedtakSatsendringService(
             satskjøringRepository.findByFagsakIdAndSatsTidspunkt(fagsakId, behandlingsdata.satstidspunkt)
                 ?: satskjøringRepository.save(Satskjøring(fagsakId = fagsakId, satsTidspunkt = behandlingsdata.satstidspunkt))
 
-        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
-            ?: error("Fant ikke siste iverksette behandling for $fagsakId")
+        val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId) ?: error("Fant ikke siste vedtatte behandling for $fagsakId")
 
         if (satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)) {
             satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
@@ -73,12 +75,12 @@ class AutovedtakSatsendringService(
         }
 
         val aktivOgÅpenBehandling =
-            behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = sisteIverksatteBehandling.fagsak.id)
-        val søkerAktør = sisteIverksatteBehandling.fagsak.aktør
+            behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = sisteVedtatteBehandling.fagsak.id)
+        val søkerAktør = sisteVedtatteBehandling.fagsak.aktør
 
-        logger.info("Kjører satsendring på $sisteIverksatteBehandling")
-        secureLogger.info("Kjører satsendring på $sisteIverksatteBehandling for ${søkerAktør.aktivFødselsnummer()}")
-        if (sisteIverksatteBehandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${sisteIverksatteBehandling.fagsak.id}")
+        logger.info("Kjører satsendring på $sisteVedtatteBehandling")
+        secureLogger.info("Kjører satsendring på $sisteVedtatteBehandling for ${søkerAktør.aktivFødselsnummer()}")
+        if (sisteVedtatteBehandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${sisteVedtatteBehandling.fagsak.id}")
 
         if (aktivOgÅpenBehandling != null) {
             val brukerHarÅpenBehandlingSvar = hentBrukerHarÅpenBehandlingSvar(aktivOgÅpenBehandling)
@@ -100,8 +102,8 @@ class AutovedtakSatsendringService(
             }
         }
 
-        if (harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling)) {
-            logger.warn("Det løper over 100 prosent utbetaling på fagsak=${sisteIverksatteBehandling.fagsak.id}")
+        if (harUtbetalingerSomOverstiger100Prosent(sisteVedtatteBehandling)) {
+            logger.warn("Det løper over 100 prosent utbetaling på fagsak=${sisteVedtatteBehandling.fagsak.id}")
         }
 
         val behandlingEtterBehandlingsresultat =
@@ -109,7 +111,7 @@ class AutovedtakSatsendringService(
                 aktør = søkerAktør,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.SATSENDRING,
-                fagsakId = sisteIverksatteBehandling.fagsak.id,
+                fagsakId = sisteVedtatteBehandling.fagsak.id,
             )
 
         val opprettetVedtak =
@@ -199,7 +201,6 @@ class AutovedtakSatsendringService(
 
     companion object {
         val logger = LoggerFactory.getLogger(AutovedtakSatsendringService::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 

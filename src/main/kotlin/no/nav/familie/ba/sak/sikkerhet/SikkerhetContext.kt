@@ -1,16 +1,14 @@
 package no.nav.familie.ba.sak.sikkerhet
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
-import org.slf4j.LoggerFactory
 
 object SikkerhetContext {
 
     const val SYSTEM_FORKORTELSE = "VL"
     const val SYSTEM_NAVN = "System"
-
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun erSystemKontekst() = hentSaksbehandler() == SYSTEM_FORKORTELSE
 

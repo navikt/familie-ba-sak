@@ -25,7 +25,7 @@ import java.time.temporal.ChronoUnit
 
 @SpringBootConfiguration
 @EntityScan("no.nav.familie.prosessering", ApplicationConfig.PAKKENAVN)
-@ComponentScan("no.nav.familie.prosessering", ApplicationConfig.PAKKENAVN)
+@ComponentScan("no.nav.familie.prosessering", "no.nav.familie.unleash", ApplicationConfig.PAKKENAVN)
 @EnableRetry
 @ConfigurationPropertiesScan
 @EnableJwtTokenValidation(ignore = ["org.springdoc"])

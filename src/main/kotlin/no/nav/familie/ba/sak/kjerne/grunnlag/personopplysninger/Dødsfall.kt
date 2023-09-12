@@ -35,13 +35,16 @@ data class Dødsfall(
     val dødsfallDato: LocalDate,
 
     @Column(name = "doedsfall_adresse", nullable = true)
-    val dødsfallAdresse: String?,
+    val dødsfallAdresse: String? = null,
 
     @Column(name = "doedsfall_postnummer", nullable = true)
-    val dødsfallPostnummer: String?,
+    val dødsfallPostnummer: String? = null,
 
     @Column(name = "doedsfall_poststed", nullable = true)
-    val dødsfallPoststed: String?,
+    val dødsfallPoststed: String? = null,
+
+    @Column(name = "manuell_registrert", nullable = false)
+    val manuellRegistrert: Boolean = false,
 ) : BaseEntitet() {
 
     fun tilKopiForNyPerson(nyPerson: Person): Dødsfall =
@@ -58,12 +61,12 @@ data class Dødsfall(
     )
 }
 
-fun lagDødsfall(
+fun lagDødsfallFraPdl(
     person: Person,
     dødsfallDatoFraPdl: String?,
     dødsfallAdresseFraPdl: PdlKontaktinformasjonForDødsboAdresse?,
 ): Dødsfall? {
-    if (dødsfallDatoFraPdl == null || dødsfallDatoFraPdl == "") {
+    if (dødsfallDatoFraPdl.isNullOrBlank()) {
         return null
     }
     return Dødsfall(
@@ -72,5 +75,23 @@ fun lagDødsfall(
         dødsfallAdresse = dødsfallAdresseFraPdl?.adresselinje1,
         dødsfallPostnummer = dødsfallAdresseFraPdl?.postnummer,
         dødsfallPoststed = dødsfallAdresseFraPdl?.poststedsnavn,
+        manuellRegistrert = false,
+    )
+}
+
+fun lagDødsfall(
+    person: Person,
+    dødsfallDato: LocalDate,
+    dødsfallAdresse: String? = null,
+    dødsfallPostnummer: String? = null,
+    dødsfallPoststed: String? = null,
+
+): Dødsfall {
+    return Dødsfall(
+        person = person,
+        dødsfallDato = dødsfallDato,
+        dødsfallAdresse = dødsfallAdresse,
+        dødsfallPostnummer = dødsfallPostnummer,
+        dødsfallPoststed = dødsfallPoststed,
     )
 }

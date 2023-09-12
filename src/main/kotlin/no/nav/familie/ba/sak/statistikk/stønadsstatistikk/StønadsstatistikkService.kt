@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -77,7 +78,6 @@ class StønadsstatistikkService(
             underkategoriV2 = when (behandling.underkategori) {
                 BehandlingUnderkategori.ORDINÆR -> UnderkategoriV2.ORDINÆR
                 BehandlingUnderkategori.UTVIDET -> UnderkategoriV2.UTVIDET
-                BehandlingUnderkategori.INSTITUSJON -> UnderkategoriV2.ORDINÆR // Institusjon er ordinær og ligger under fagsakType på stønadsstatistikk
             },
             behandlingTypeV2 = BehandlingTypeV2.valueOf(behandling.type.name),
             utbetalingsperioderV2 = hentUtbetalingsperioderV2(behandling, persongrunnlag),
@@ -226,7 +226,6 @@ class StønadsstatistikkService(
     companion object {
 
         private val logger = LoggerFactory.getLogger(StønadsstatistikkService::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private val TIMEZONE = ZoneId.of("Europe/Paris")
     }
 }
