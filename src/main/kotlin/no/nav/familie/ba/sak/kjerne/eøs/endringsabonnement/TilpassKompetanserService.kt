@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
@@ -56,10 +57,14 @@ class TilpassKompetanserTilRegelverkService(
         val barnasHarEtterbetaling3ÅrTidslinjer =
             endretUtbetalingAndelTidslinjeService.hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId)
 
+        val annenForelderOmfattetAvNorskLovgivningTidslinje =
+            vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = behandlingId)
+
         val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
             gjeldendeKompetanser,
             barnasRegelverkResultatTidslinjer,
             barnasHarEtterbetaling3ÅrTidslinjer,
+            annenForelderOmfattetAvNorskLovgivningTidslinje,
         ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
@@ -90,10 +95,14 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
         val barnasHarEtterbetaling3ÅrTidslinjer = endretUtbetalingAndeler
             .tilBarnasHarEtterbetaling3ÅrTidslinjer()
 
+        val annenForelderOmfattetAvNorskLovgivningTidslinje =
+            vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = behandlingId)
+
         val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
             gjeldendeKompetanser,
             barnasRegelverkResultatTidslinjer,
             barnasHarEtterbetaling3ÅrTidslinjer,
+            annenForelderOmfattetAvNorskLovgivningTidslinje,
         ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
@@ -104,6 +113,7 @@ fun tilpassKompetanserTilRegelverk(
     gjeldendeKompetanser: Collection<Kompetanse>,
     barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat, Måned>>,
     barnasHarEtterbetaling3ÅrTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
+    annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean, Måned> = TomTidslinje<Boolean, Måned>(),
 ): Collection<Kompetanse> {
     val barnasEøsRegelverkTidslinjer = barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer()
         .leftJoin(barnasHarEtterbetaling3ÅrTidslinjer) { regelverk, harEtterbetaling3År ->
@@ -116,6 +126,11 @@ fun tilpassKompetanserTilRegelverk(
     return gjeldendeKompetanser.tilSeparateTidslinjerForBarna()
         .outerJoin(barnasEøsRegelverkTidslinjer) { kompetanse, regelverk ->
             regelverk?.let { kompetanse ?: Kompetanse.NULL }
+        }
+        .mapValues { (_, value) ->
+            value.kombinerMed(annenForelderOmfattetAvNorskLovgivningTidslinje) { kompetanse, annenForelderOmfattet ->
+                kompetanse?.copy(erAnnenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet ?: false)
+            }
         }
         .tilSkjemaer()
 }

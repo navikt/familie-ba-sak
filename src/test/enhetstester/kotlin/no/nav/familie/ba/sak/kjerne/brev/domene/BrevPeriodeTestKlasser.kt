@@ -16,9 +16,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -63,9 +62,9 @@ data class BrevPeriodeTestConfig(
 
 data class BrevPeriodeTestKompetanse(
     val id: String,
-    val søkersAktivitet: SøkersAktivitet,
+    val søkersAktivitet: KompetanseAktivitet,
     val søkersAktivitetsland: String?,
-    val annenForeldersAktivitet: AnnenForeldersAktivitet,
+    val annenForeldersAktivitet: KompetanseAktivitet,
     val annenForeldersAktivitetsland: String,
     val barnetsBostedsland: String,
     val resultat: KompetanseResultat,
@@ -220,13 +219,13 @@ data class BegrunnelseDataTestConfig(
 
 data class EØSBegrunnelseTestConfig(
     val apiNavn: String,
-    val annenForeldersAktivitet: AnnenForeldersAktivitet,
+    val annenForeldersAktivitet: KompetanseAktivitet,
     val annenForeldersAktivitetsland: String,
     val barnetsBostedsland: String,
     val barnasFodselsdatoer: String,
     val antallBarn: Int,
     val maalform: String,
-    val sokersAktivitet: SøkersAktivitet,
+    val sokersAktivitet: KompetanseAktivitet,
     val sokersAktivitetsland: String?,
 ) : TestBegrunnelse {
     fun tilEØSBegrunnelseData(): EØSBegrunnelseDataMedKompetanse = EØSBegrunnelseDataMedKompetanse(

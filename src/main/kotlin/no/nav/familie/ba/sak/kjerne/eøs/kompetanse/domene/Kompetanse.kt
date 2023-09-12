@@ -48,11 +48,11 @@ data class Kompetanse(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "soekers_aktivitet")
-    val søkersAktivitet: SøkersAktivitet? = null,
+    val søkersAktivitet: KompetanseAktivitet? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "annen_forelderes_aktivitet")
-    val annenForeldersAktivitet: AnnenForeldersAktivitet? = null,
+    val annenForeldersAktivitet: KompetanseAktivitet? = null,
 
     @Column(name = "annen_forelderes_aktivitetsland")
     val annenForeldersAktivitetsland: String? = null,
@@ -66,6 +66,9 @@ data class Kompetanse(
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat")
     val resultat: KompetanseResultat? = null,
+
+    @Column(name = "er_annen_forelder_omfattet_av_norsk_lovgivning")
+    val erAnnenForelderOmfattetAvNorskLovgivning: Boolean? = false,
 ) : PeriodeOgBarnSkjemaEntitet<Kompetanse>() {
 
     @Id
@@ -119,31 +122,30 @@ data class Kompetanse(
     }
 }
 
-enum class SøkersAktivitet {
-    ARBEIDER,
-    SELVSTENDIG_NÆRINGSDRIVENDE,
-    MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
-    UTSENDT_ARBEIDSTAKER_FRA_NORGE,
-    MOTTAR_UFØRETRYGD,
-    MOTTAR_PENSJON,
-    ARBEIDER_PÅ_NORSKREGISTRERT_SKIP,
-    ARBEIDER_PÅ_NORSK_SOKKEL,
-    ARBEIDER_FOR_ET_NORSK_FLYSELSKAP,
-    ARBEIDER_VED_UTENLANDSK_UTENRIKSSTASJON,
-    MOTTAR_UTBETALING_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET,
-    MOTTAR_UFØRETRYGD_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET,
-    MOTTAR_PENSJON_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET,
-    INAKTIV,
-}
+enum class KompetanseAktivitet(
+    val gyldigForSøker: Boolean,
+    val gyldigForAnnenForelder: Boolean,
+) {
+    ARBEIDER(true, false),
+    SELVSTENDIG_NÆRINGSDRIVENDE(true, false),
+    UTSENDT_ARBEIDSTAKER_FRA_NORGE(true, false),
+    MOTTAR_UFØRETRYGD(true, false),
+    ARBEIDER_PÅ_NORSKREGISTRERT_SKIP(true, false),
+    ARBEIDER_PÅ_NORSK_SOKKEL(true, false),
+    ARBEIDER_FOR_ET_NORSK_FLYSELSKAP(true, false),
+    ARBEIDER_VED_UTENLANDSK_UTENRIKSSTASJON(true, false),
+    MOTTAR_UTBETALING_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET(true, false),
+    MOTTAR_UFØRETRYGD_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET(true, false),
+    MOTTAR_PENSJON_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET(true, false),
 
-enum class AnnenForeldersAktivitet {
-    I_ARBEID,
-    MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
-    FORSIKRET_I_BOSTEDSLAND,
-    MOTTAR_PENSJON,
-    INAKTIV,
-    IKKE_AKTUELT,
-    UTSENDT_ARBEIDSTAKER,
+    MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN(true, true),
+    MOTTAR_PENSJON(true, true),
+    INAKTIV(true, true),
+
+    I_ARBEID(false, true),
+    FORSIKRET_I_BOSTEDSLAND(false, true),
+    IKKE_AKTUELT(false, true),
+    UTSENDT_ARBEIDSTAKER(false, true),
 }
 
 enum class KompetanseResultat {
@@ -168,8 +170,8 @@ data class UtfyltKompetanse(
     val fom: YearMonth,
     val tom: YearMonth?,
     val barnAktører: Set<Aktør>,
-    val søkersAktivitet: SøkersAktivitet,
-    val annenForeldersAktivitet: AnnenForeldersAktivitet,
+    val søkersAktivitet: KompetanseAktivitet,
+    val annenForeldersAktivitet: KompetanseAktivitet,
     val annenForeldersAktivitetsland: String?,
     val søkersAktivitetsland: String,
     val barnetsBostedsland: String,
