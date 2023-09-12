@@ -251,10 +251,10 @@ class BegrunnelseTeksterStepDefinition {
 
     // For å laste ned begrunnelsene på nytt anbefales https://familie-brev.sanity.studio/ba-test/vision med query fra SanityQueries.kt .
     // Kopier URL fra resultatet og kjør
-    // curl -XGET <URL> | jq '.result' > <Path-til-familie-ba-sak>/familie-ba-sak/src/test/resources/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityTestBegrunnelser.json
+    // curl -XGET <URL> | jq '.result' > <Path-til-familie-ba-sak>/familie-ba-sak/src/test/resources/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityTestBegrunnelser
     private fun mockHentSanityBegrunnelser(): Map<Standardbegrunnelse, SanityBegrunnelse> {
         val restSanityBegrunnelserJson =
-            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityBegrunnelser.json")!!
+            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityBegrunnelser")!!
 
         val restSanityBegrunnelser =
             objectMapper.readValue(restSanityBegrunnelserJson.readText(), Array<RestSanityBegrunnelse>::class.java)
@@ -276,7 +276,7 @@ class BegrunnelseTeksterStepDefinition {
 
     private fun mockHentSanityEØSBegrunnelser(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
         val restSanityEØSBegrunnelserJson =
-            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityEØSBegrunnelser.json")!!
+            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityEØSBegrunnelser")!!
 
         val restSanityEØSBegrunnelser =
             objectMapper.readValue(

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 enum class BarnetsBostedsland {
@@ -32,6 +33,7 @@ data class RestSanityEØSBegrunnelse(
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>?,
     val eosVilkaar: List<String>? = null,
     val vedtakResultat: String?,
+    val fagsakType: String?,
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
@@ -56,6 +58,9 @@ data class RestSanityEØSBegrunnelse(
             periodeResultat = vedtakResultat?.let {
                 finnEnumverdi(it, SanityPeriodeResultat.entries.toTypedArray(), apiNavn)
             },
+            fagsakType = fagsakType?.let {
+                finnEnumverdi(it, FagsakType.entries.toTypedArray(), apiNavn)
+            },
         )
     }
 
@@ -68,6 +73,7 @@ data class SanityEØSBegrunnelse(
     override val navnISystem: String,
     override val periodeResultat: SanityPeriodeResultat? = null,
     override val vilkår: Set<Vilkår>,
+    override val fagsakType: FagsakType?,
     val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
