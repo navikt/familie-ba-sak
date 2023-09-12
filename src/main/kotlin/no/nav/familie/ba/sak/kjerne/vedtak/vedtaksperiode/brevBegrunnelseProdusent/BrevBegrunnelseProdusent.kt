@@ -25,6 +25,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.mapInnhold
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFramtid
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -540,10 +542,16 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
         val begrunnelseperioderIVedtaksperiode =
             grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder().mapNotNull { it.innhold }
 
-        if (this.type == Vedtaksperiodetype.OPPHØR) {
-            begrunnelseperioderIVedtaksperiode.first()
-        } else {
-            begrunnelseperioderIVedtaksperiode.single()
+        when (this.type) {
+            Vedtaksperiodetype.OPPHØR -> begrunnelseperioderIVedtaksperiode.first()
+            Vedtaksperiodetype.FORTSATT_INNVILGET -> if (this.fom == null && this.tom == null) {
+                val perioder = grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder()
+                perioder.single { YearMonth.now() in it.fraOgMed.tilYearMonthEllerUendeligFortid()..it.tilOgMed.tilYearMonthEllerUendeligFramtid() }.innhold!!
+            } else {
+                begrunnelseperioderIVedtaksperiode.single()
+            }
+
+            else -> begrunnelseperioderIVedtaksperiode.single()
         }
     }
 }
