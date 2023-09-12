@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.util.replaceLast
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.EndretUtbetalingAndelTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.KombinertRegelverkResultat
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPPFYLT_BLANDET_REGELVERK
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.tilBarnasHarEtterbetaling3ÅrTidslinjer
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -68,7 +69,7 @@ class TilpassKompetanserTilRegelverkService(
             barnasRegelverkResultatTidslinjer,
             barnasHarEtterbetaling3ÅrTidslinjer,
             annenForelderOmfattetAvNorskLovgivningTidslinje,
-            filtrerBarnasEøsTidslinjerEtterBarnasRegelverkResultat = unleashNext.isEnabled(ENDRET_EØS_REGELVERKFILTER_FOR_BARN),
+            brukBarnetsRegelverkVedBlandetResultat = unleashNext.isEnabled(ENDRET_EØS_REGELVERKFILTER_FOR_BARN),
         ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
@@ -108,7 +109,7 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
             barnasRegelverkResultatTidslinjer,
             barnasHarEtterbetaling3ÅrTidslinjer,
             annenForelderOmfattetAvNorskLovgivningTidslinje,
-            filtrerBarnasEøsTidslinjerEtterBarnasRegelverkResultat = unleashNext.isEnabled(ENDRET_EØS_REGELVERKFILTER_FOR_BARN),
+            brukBarnetsRegelverkVedBlandetResultat = unleashNext.isEnabled(ENDRET_EØS_REGELVERKFILTER_FOR_BARN),
         ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
@@ -120,10 +121,10 @@ fun tilpassKompetanserTilRegelverk(
     barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<KombinertRegelverkResultat, Måned>>,
     barnasHarEtterbetaling3ÅrTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
     annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean, Måned> = TomTidslinje<Boolean, Måned>(),
-    filtrerBarnasEøsTidslinjerEtterBarnasRegelverkResultat: Boolean = true,
+    brukBarnetsRegelverkVedBlandetResultat: Boolean = true,
 ): Collection<Kompetanse> {
     val barnasEøsRegelverkTidslinjer = barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer(
-        filtrerBarnasEøsTidslinjerEtterBarnasRegelverkResultat,
+        brukBarnetsRegelverkVedBlandetResultat,
     )
         .leftJoin(barnasHarEtterbetaling3ÅrTidslinjer) { regelverk, harEtterbetaling3År ->
             when (harEtterbetaling3År) {
@@ -151,14 +152,23 @@ fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(beha
         }
 
 private fun Map<Aktør, Tidslinje<KombinertRegelverkResultat, Måned>>.tilBarnasEøsRegelverkTidslinjer(
-    brukBarnasRegelverkResultat: Boolean,
+    brukBarnetsRegelverkVedBlandetResultat: Boolean,
 ) =
     this.mapValues { (_, tidslinjer) ->
-        tidslinjer.map { if (brukBarnasRegelverkResultat) it?.barnetsResultat?.regelverk else it?.kombinertResultat?.regelverk }
+        tidslinjer.mapTilRegelverk(brukBarnetsRegelverkVedBlandetResultat)
             .filtrer { it == Regelverk.EØS_FORORDNINGEN }
             .filtrerIkkeNull()
             .forlengFremtidTilUendelig(MånedTidspunkt.nå())
     }
+
+private fun Tidslinje<KombinertRegelverkResultat, Måned>.mapTilRegelverk(brukBarnetsRegelverkVedBlandetResultat: Boolean) =
+        map {
+            if (it?.kombinertResultat == OPPFYLT_BLANDET_REGELVERK && brukBarnetsRegelverkVedBlandetResultat) {
+                it.barnetsResultat?.regelverk
+            } else {
+                it?.kombinertResultat?.regelverk
+            }
+        }
 
 private fun <I, T : Tidsenhet> Tidslinje<I, T>.forlengFremtidTilUendelig(nå: Tidspunkt<T>): Tidslinje<I, T> {
     val tilOgMed = this.tilOgMed()
