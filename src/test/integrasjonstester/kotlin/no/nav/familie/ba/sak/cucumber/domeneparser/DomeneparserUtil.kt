@@ -13,6 +13,8 @@ enum class Domenebegrep(override val nøkkel: String) : Domenenøkkel {
     FORRIGE_BEHANDLING_ID("ForrigeBehandlingId"),
     FRA_DATO("Fra dato"),
     TIL_DATO("Til dato"),
+    BEHANDLINGSÅRSAK("Behandlingsårsak"),
+    BEHANDLINGSRESULTAT("Behandlingsresultat"),
 }
 
 object DomeneparserUtil {
