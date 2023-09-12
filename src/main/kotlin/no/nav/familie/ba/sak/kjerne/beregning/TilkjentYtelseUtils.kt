@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -43,11 +44,12 @@ object TilkjentYtelseUtils {
 
         val (endretUtbetalingAndelerSøker, endretUtbetalingAndelerBarna) = endretUtbetalingAndeler.partition { it.person?.type == PersonType.SØKER }
 
-        val andelerTilkjentYtelseBarnaUtenEndringer = OrdinærBarnetrygdUtil.beregnAndelerTilkjentYtelseForBarna(
+        val beregnedeAndelerBarna = OrdinærBarnetrygdUtil.beregnAndelerTilkjentYtelseForBarna(
             personopplysningGrunnlag = personopplysningGrunnlag,
             personResultater = vilkårsvurdering.personResultater,
             fagsakType = fagsakType,
         )
+        val andelerTilkjentYtelseBarnaUtenEndringer = beregnedeAndelerBarna
             .map {
                 if (it.person.type != PersonType.BARN) throw Feil("Prøver å generere ordinær andel for person av typen ${it.person.type}")
 
@@ -75,6 +77,12 @@ object TilkjentYtelseUtils {
             tilkjentYtelse = tilkjentYtelse,
             andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer = barnasAndelerInkludertEtterbetaling3ÅrEndringer,
             endretUtbetalingAndelerSøker = endretUtbetalingAndelerSøker,
+            regelverkAssosiertBarnasAndeler =
+            if (endretUtbetalingAndeler.isEmpty()) { // true ved initiell beregning av andeler fra vilkårsresultater
+                beregnedeAndelerBarna.map { it.regelverk }
+            } else {
+                emptyList() // Ikke lenger 1-til-1 mapping. Må løses på annet vis dersom det også må være med regelverkfilter etter initiell beregning.
+            }
         )
 
         val småbarnstilleggErMulig = erSmåbarnstilleggMulig(
@@ -301,4 +309,5 @@ internal data class BeregnetAndel(
     val beløp: Int,
     val sats: Int,
     val prosent: BigDecimal,
+    val regelverk: Regelverk? = null
 )

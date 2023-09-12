@@ -225,10 +225,10 @@ class OrdinærBarnetrygdUtilTest {
         forventetFom: YearMonth,
         forventetTom: YearMonth,
         forventetProsent: BigDecimal,
-        faktisk: Periode<BigDecimal, Måned>,
+        faktisk: Periode<OrdinærBarnetrygdUtil.RettTilProsent, Måned>,
     ) {
         assertEquals(forventetFom, faktisk.fraOgMed.tilYearMonth())
         assertEquals(forventetTom, faktisk.tilOgMed.tilYearMonth())
-        assertEquals(forventetProsent, faktisk.innhold)
+        assertEquals(forventetProsent, faktisk.innhold?.prosent)
     }
 }

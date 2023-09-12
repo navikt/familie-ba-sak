@@ -16,7 +16,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.alleOrdinæreVilkårErOppfylt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjerForHvertOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.math.BigDecimal
 
@@ -44,13 +46,14 @@ object OrdinærBarnetrygdUtil {
                     beløp = innholdIPeriode.sats.avrundetHeltallAvProsent(innholdIPeriode.prosent),
                     sats = innholdIPeriode.sats,
                     prosent = innholdIPeriode.prosent,
+                    regelverk = innholdIPeriode.rettTilProsent.regelverk
                 )
             }
         }
     }
 
     private fun kombinerProsentOgSatsTidslinjer(
-        tidslinjeMedRettTilProsentForBarn: Tidslinje<BigDecimal, Måned>,
+        tidslinjeMedRettTilProsentForBarn: Tidslinje<RettTilProsent, Måned>,
         satsTidslinje: Tidslinje<Int, Måned>,
     ) = tidslinjeMedRettTilProsentForBarn.kombinerMed(satsTidslinje) { rettTilProsent, sats ->
         when {
@@ -62,10 +65,17 @@ object OrdinærBarnetrygdUtil {
 
     private data class SatsProsent(
         val sats: Int,
+        val rettTilProsent: RettTilProsent,
+    ) {
+        val prosent: BigDecimal get() = rettTilProsent.prosent
+    }
+
+    data class RettTilProsent(
         val prosent: BigDecimal,
+        val regelverk: Regelverk?,
     )
 
-    private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag: PersonopplysningGrunnlag, fagsakType: FagsakType): Map<Person, Tidslinje<BigDecimal, Måned>> {
+    private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag: PersonopplysningGrunnlag, fagsakType: FagsakType): Map<Person, Tidslinje<RettTilProsent, Måned>> {
         val tidslinjerPerPerson = lagTidslinjerMedRettTilProsentPerPerson(personopplysningGrunnlag, fagsakType)
 
         if (tidslinjerPerPerson.isEmpty()) return emptyMap()
@@ -77,8 +87,8 @@ object OrdinærBarnetrygdUtil {
     }
 
     private fun kombinerSøkerMedHvertBarnSinTidslinje(
-        barnasTidslinjer: Map<Person, Tidslinje<BigDecimal, Måned>>,
-        søkerTidslinje: Tidslinje<BigDecimal, Måned>,
+        barnasTidslinjer: Map<Person, Tidslinje<RettTilProsent, Måned>>,
+        søkerTidslinje: Tidslinje<RettTilProsent, Måned>
     ) = barnasTidslinjer.mapValues { (_, barnTidslinje) ->
         barnTidslinje.kombinerMed(søkerTidslinje) { barnProsent, søkerProsent ->
             when {
@@ -103,18 +113,24 @@ object OrdinærBarnetrygdUtil {
     internal fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(
         person: Person,
         fagsakType: FagsakType,
-    ): Tidslinje<BigDecimal, Måned> {
+    ): Tidslinje<RettTilProsent, Måned> {
         val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(person.fødselsdato)
 
         return tidslinjer.kombiner { it.mapTilProsentEllerNull(person.type, fagsakType) }.slåSammenLike().filtrerIkkeNull()
     }
 
-    internal fun Iterable<VilkårResultat>.mapTilProsentEllerNull(personType: PersonType, fagsakType: FagsakType): BigDecimal? {
+    internal fun Iterable<VilkårResultat>.mapTilProsentEllerNull(personType: PersonType, fagsakType: FagsakType): RettTilProsent? {
         return if (alleOrdinæreVilkårErOppfylt(personType, fagsakType)) {
             if (any { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) }) {
-                BigDecimal(50)
+                RettTilProsent(
+                    prosent = BigDecimal(50),
+                    regelverk = find { it.vilkårType == Vilkår.BOR_MED_SØKER }?.vurderesEtter
+                )
             } else {
-                BigDecimal(100)
+                RettTilProsent(
+                    prosent = BigDecimal(100),
+                    regelverk = find { it.vilkårType == Vilkår.BOR_MED_SØKER }?.vurderesEtter
+                )
             }
         } else {
             null

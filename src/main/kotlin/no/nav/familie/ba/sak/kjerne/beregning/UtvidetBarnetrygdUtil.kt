@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -19,14 +20,24 @@ object UtvidetBarnetrygdUtil {
         andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         tilkjentYtelse: TilkjentYtelse,
         endretUtbetalingAndelerSøker: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
+        regelverkAssosiertBarnasAndeler: List<Regelverk?>
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
+        val andelerBarna = when (Regelverk.NASJONALE_REGLER) {
+            in regelverkAssosiertBarnasAndeler -> {
+                andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer.filterIndexed { index, _ ->
+                    regelverkAssosiertBarnasAndeler[index] != Regelverk.EØS_FORORDNINGEN
+                }
+            }
+            else -> andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer
+        }.map { it.andel }
+
         val andelerTilkjentYtelseUtvidet = UtvidetBarnetrygdGenerator(
             behandlingId = tilkjentYtelse.behandling.id,
             tilkjentYtelse = tilkjentYtelse,
         )
             .lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = utvidetVilkår,
-                andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer.map { it.andel },
+                andelerBarna = andelerBarna,
             )
 
         return TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
