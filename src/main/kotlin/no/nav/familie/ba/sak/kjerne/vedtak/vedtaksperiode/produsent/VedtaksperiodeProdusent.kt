@@ -1,8 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.OMREGNING_18ÅR
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.OMREGNING_6ÅR
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SMÅBARNSTILLEGG
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -32,7 +41,16 @@ fun genererVedtaksperioder(
     grunnlagForVedtakPerioder: BehandlingsGrunnlagForVedtaksperioder,
     grunnlagForVedtakPerioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
     vedtak: Vedtak,
+    nåDato: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
+    if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || vedtak.behandling.opprettetÅrsak.erOmregningsårsak()) {
+        return lagForsattInnvilgetPeriode(
+            vedtak = vedtak,
+            andelTilkjentYtelseer = grunnlagForVedtakPerioder.andelerTilkjentYtelse,
+            nåDato = nåDato,
+        )
+    }
+
     val grunnlagTidslinjePerPerson = grunnlagForVedtakPerioder.utledGrunnlagTidslinjePerPerson()
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
@@ -326,3 +344,45 @@ private fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>
             innhold = verdi.mapNotNull { periode -> periode.innhold }.flatten(),
         )
     }
+
+fun lagForsattInnvilgetPeriode(
+    vedtak: Vedtak,
+    andelTilkjentYtelseer: List<AndelTilkjentYtelse>,
+    nåDato: LocalDate,
+): List<VedtaksperiodeMedBegrunnelser> {
+    val behandling = vedtak.behandling
+    val erAutobrevFor6År18ÅrEllerSmåbarnstillegg = behandling.opprettetÅrsak in listOf(
+        OMREGNING_6ÅR,
+        OMREGNING_18ÅR,
+        SMÅBARNSTILLEGG,
+        OMREGNING_SMÅBARNSTILLEGG,
+    )
+
+    val (fom, tom) = if (erAutobrevFor6År18ÅrEllerSmåbarnstillegg) {
+        Pair(
+            nåDato.førsteDagIInneværendeMåned(),
+            finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandling.id, andelTilkjentYtelseer, nåDato),
+        )
+    } else {
+        Pair(null, null)
+    }
+
+    return listOf(
+        VedtaksperiodeMedBegrunnelser(
+            fom = fom,
+            tom = tom,
+            vedtak = vedtak,
+            type = Vedtaksperiodetype.FORTSATT_INNVILGET,
+        ),
+    )
+}
+
+private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(
+    behandlingId: Long,
+    andelTilkjentYtelses: List<AndelTilkjentYtelse>,
+    nåDato: LocalDate,
+): LocalDate =
+    andelTilkjentYtelses
+        .filter { it.stønadFom <= nåDato.toYearMonth() && it.stønadTom >= nåDato.toYearMonth() }
+        .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
+        ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
