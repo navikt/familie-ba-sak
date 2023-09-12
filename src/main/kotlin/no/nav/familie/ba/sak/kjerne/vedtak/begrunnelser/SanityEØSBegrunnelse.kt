@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -41,7 +41,7 @@ data class RestSanityEØSBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
             annenForeldersAktivitet = annenForeldersAktivitet?.mapNotNull {
-                konverterTilEnumverdi<AnnenForeldersAktivitet>(it)
+                konverterTilEnumverdi<KompetanseAktivitet>(it)
             } ?: emptyList(),
             barnetsBostedsland = barnetsBostedsland?.mapNotNull {
                 konverterTilEnumverdi<BarnetsBostedsland>(it)
@@ -74,7 +74,7 @@ data class SanityEØSBegrunnelse(
     override val periodeResultat: SanityPeriodeResultat? = null,
     override val vilkår: Set<Vilkår>,
     override val fagsakType: FagsakType?,
-    val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
+    val annenForeldersAktivitet: List<KompetanseAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
     val hjemler: List<String>,

@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -96,14 +96,14 @@ class BrevPeriodeUtilTest {
                 fom = periode2.fom,
                 tom = periode2.tom,
                 barnAktører = setOf(barnAktør1),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
             )
         val kompetanse3 =
             lagKompetanse(
                 fom = periode2.fom,
                 tom = periode3.tom,
                 barnAktører = setOf(barnAktør2),
-                søkersAktivitet = SøkersAktivitet.INAKTIV,
+                søkersAktivitet = KompetanseAktivitet.INAKTIV,
             )
         val kompetanse4 =
             lagKompetanse(fom = periode3.fom, tom = periode3.tom, barnAktører = setOf(barnAktør1))
@@ -171,7 +171,12 @@ class BrevPeriodeUtilTest {
     }
 }
 
-private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtaksperiodetype, featureToggleService: FeatureToggleService): BrevperiodeData {
+private fun lagBrevperiodeData(
+    fom: LocalDate?,
+    tom: LocalDate?,
+    type: Vedtaksperiodetype,
+    featureToggleService: FeatureToggleService,
+): BrevperiodeData {
     val restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
         personerPåBehandling = emptyList(),
         minimertePersonResultater = emptyList(),

@@ -36,3 +36,12 @@ fun <T : Tidsenhet> String.tilUtdypendeVilkårRegelverkResultatTidslinje(vilkår
             else -> null
         }
     }
+
+fun <T : Tidsenhet> String.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(start: Tidspunkt<T>) =
+    this.tilCharTidslinje(start).map {
+        when (it?.lowercaseChar()) {
+            '+' -> true
+            '-' -> false
+            else -> null
+        }
+    }

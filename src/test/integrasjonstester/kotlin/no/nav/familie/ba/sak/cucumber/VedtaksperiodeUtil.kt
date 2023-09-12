@@ -26,6 +26,8 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -33,10 +35,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.splittOgSlåSammen
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -78,8 +79,14 @@ fun lagVedtak(
             val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
             val fagsakId = parseValgfriLong(Domenebegrep.FAGSAK_ID, rad)
             val fagsak = fagsaker[fagsakId] ?: defaultFagsak()
+            val behandlingÅrsak = parseValgfriEnum<BehandlingÅrsak>(Domenebegrep.BEHANDLINGSÅRSAK, rad)
+            val behandlingResultat = parseValgfriEnum<Behandlingsresultat>(Domenebegrep.BEHANDLINGSRESULTAT, rad)
 
-            lagBehandling(fagsak = fagsak).copy(id = behandlingId)
+            lagBehandling(
+                fagsak = fagsak,
+                årsak = behandlingÅrsak ?: BehandlingÅrsak.SØKNAD,
+                resultat = behandlingResultat ?: Behandlingsresultat.IKKE_VURDERT,
+            ).copy(id = behandlingId)
         }.associateBy { it.id },
     )
     behandlingTilForrigeBehandling.putAll(
@@ -164,17 +171,17 @@ fun lagKompetanser(
                 .filter { aktørerForKompetanse.contains(it.aktør.aktørId) }
                 .map { it.aktør }
                 .toSet(),
-            søkersAktivitet = parseValgfriEnum<SøkersAktivitet>(
+            søkersAktivitet = parseValgfriEnum<KompetanseAktivitet>(
                 VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITET,
                 rad,
             )
-                ?: SøkersAktivitet.ARBEIDER,
+                ?: KompetanseAktivitet.ARBEIDER,
             annenForeldersAktivitet =
-            parseValgfriEnum<AnnenForeldersAktivitet>(
+            parseValgfriEnum<KompetanseAktivitet>(
                 VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITET,
                 rad,
             )
-                ?: AnnenForeldersAktivitet.I_ARBEID,
+                ?: KompetanseAktivitet.I_ARBEID,
             søkersAktivitetsland = parseValgfriString(
                 VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITETSLAND,
                 rad,
@@ -320,6 +327,7 @@ fun lagVedtaksPerioder(
     overstyrteEndringstidspunkt: Map<Long, LocalDate?>,
     overgangsstønad: Map<Long, List<InternPeriodeOvergangsstønad>?>,
     uregistrerteBarn: List<BarnMedOpplysninger>,
+    nåDato: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val vedtak = vedtaksListe.find { it.behandling.id == behandlingId && it.aktiv }
         ?: error("Finner ikke vedtak")
@@ -357,5 +365,6 @@ fun lagVedtaksPerioder(
         vedtak = vedtak,
         grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
         grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
+        nåDato = nåDato,
     )
 }

@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTids
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
@@ -267,6 +268,7 @@ internal class KompetanseServiceTest {
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
+        every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
         every { endretUtbetalingAndelTidslinjeService.hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId) } returns emptyMap()
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
@@ -315,6 +317,7 @@ internal class KompetanseServiceTest {
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { endretUtbetalingAndelTidslinjeService.hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId) } returns emptyMap()
+        every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 
@@ -358,6 +361,7 @@ internal class KompetanseServiceTest {
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
+        every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
         every { endretUtbetalingAndelTidslinjeService.hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId) } returns emptyMap()
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
@@ -382,9 +386,25 @@ internal class KompetanseServiceTest {
         val barn3 = tilfeldigPerson(personType = PersonType.BARN)
 
         val kompetanser = KompetanseBuilder(jan(2020), behandlingId1)
-            .medKompetanse("SSS", barn1)
-            .medKompetanse("---------", barn2, barn3)
-            .medKompetanse("   SSSS", barn1)
+            .medKompetanse(
+                "SSS",
+                barn1,
+                annenForeldersAktivitetsland = null,
+                erAnnenForelderOmfattetAvNorskLovgivning = true,
+            )
+            .medKompetanse(
+                "---------",
+                barn2,
+                barn3,
+                annenForeldersAktivitetsland = null,
+                erAnnenForelderOmfattetAvNorskLovgivning = false,
+            )
+            .medKompetanse(
+                "   SSSS",
+                barn1,
+                annenForeldersAktivitetsland = null,
+                erAnnenForelderOmfattetAvNorskLovgivning = true,
+            )
             .lagreTil(mockKompetanseRepository)
 
         kompetanseService.kopierOgErstattKompetanser(behandlingId1, behandlingId2)
