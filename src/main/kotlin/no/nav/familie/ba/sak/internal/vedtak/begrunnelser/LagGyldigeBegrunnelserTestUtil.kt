@@ -153,7 +153,7 @@ fun hentTekstForTilkjentYtelse(
     """
 
     Og med andeler tilkjent ytelse for begrunnelse
-      | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent |""" +
+      | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats | """ +
         hentAndelRader(andelerForrigeBehandling) +
         hentAndelRader(andeler)
 
@@ -164,7 +164,7 @@ private fun hentAndelRader(andeler: List<AndelTilkjentYtelse>?): String =
             it.stønadFom.førsteDagIInneværendeMåned().tilddMMyyyy()
         }|${
             it.stønadTom.sisteDagIInneværendeMåned().tilddMMyyyy()
-        }|${it.kalkulertUtbetalingsbeløp}| ${it.type} | ${it.prosent} |"""
+        }|${it.kalkulertUtbetalingsbeløp}| ${it.type} | ${it.prosent} | ${it.sats} | """
     } ?: ""
 
 fun hentTekstForEndretUtbetaling(

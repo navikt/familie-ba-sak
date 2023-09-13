@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerForVedtaksperioderPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetalingAndel
@@ -445,9 +445,9 @@ private fun Tidslinje<List<VilkårResultat>, Måned>.tilHarRettPåUtbetalingTids
 }
 
 fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje() =
-    tilTidslinjerPerAktørOgType()
+    tilTidslinjerForVedtaksperioderPerAktørOgType()
         .values
-        .map { tidslinje -> tidslinje.mapIkkeNull { AndelForVedtaksperiode(it) } }
+        .map { tidslinje -> tidslinje.mapIkkeNull { it } }
         .kombiner { it }
 
 // Vi trenger dette for å kunne begrunne nye perioder med småbarnstillegg som vi ikke hadde i forrige behandling
