@@ -179,3 +179,6 @@ NAIS_APP_NAME: familie-ba-sak
 CRON_FAGSAKSTATUS_SCHEDULER: "0 0/10 * ? * *"
 
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+
+UNLEASH_SERVER_API_URL: http://dummy/api/
+UNLEASH_SERVER_API_TOKEN: dummy

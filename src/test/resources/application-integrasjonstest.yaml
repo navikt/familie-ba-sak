@@ -4,3 +4,5 @@ spring:
 
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 AZURE_APP_CLIENT_ID: dummy
+
+UNLEASH_SERVER_API_URL: http://dummy/api/
