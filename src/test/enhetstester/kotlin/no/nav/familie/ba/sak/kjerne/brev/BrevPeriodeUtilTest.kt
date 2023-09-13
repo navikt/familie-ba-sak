@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.brev.lagMinimertPerson
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
@@ -9,12 +10,16 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -168,6 +173,44 @@ class BrevPeriodeUtilTest {
             ),
             "04.04.21, 05.05.21 og 06.06.21",
         )
+    }
+
+    @Test
+    fun `Skal kun gi kompetanser som er aktive for dagens dato om vedtaksperioden er uendelig`() {
+        val barnAktør =
+            Aktør("1234567891234").also { it.personidenter.add(Personident("12345678910", it, true)) }
+        val utfyltKompetanse = lagKompetanse(
+            søkersAktivitet = KompetanseAktivitet.ARBEIDER,
+            annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER,
+            søkersAktivitetsland = "NO",
+            barnetsBostedsland = "NO",
+            kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+            barnAktører = setOf(barnAktør),
+        )
+
+        val kompetanser = listOf(
+            utfyltKompetanse.copy(fom = YearMonth.now().minusMonths(2), tom = YearMonth.now().minusMonths(2)),
+            utfyltKompetanse.copy(fom = YearMonth.now().minusMonths(1), tom = null),
+        )
+
+        kompetanser.forEach { it.validerFelterErSatt() }
+
+        val personopplysningGrunnlag =
+            PersonopplysningGrunnlag(
+                behandlingId = 0,
+                personer = mutableSetOf(lagPerson(aktør = barnAktør, type = PersonType.BARN)),
+            )
+
+        val minimerteKompetanserForPeriode =
+            hentMinimerteKompetanserForPeriode(
+                kompetanser,
+                null,
+                null,
+                personopplysningGrunnlag,
+                mapOf(Pair("NO", "Norge")),
+            )
+
+        assertThat(minimerteKompetanserForPeriode.size).isEqualTo(1)
     }
 }
 
