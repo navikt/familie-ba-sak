@@ -21,6 +21,9 @@ class FeatureToggleConfig {
 
         // Ny utbetalingsgenerator
         const val KONTROLLER_NY_UTBETALINGSGENERATOR = "familie.ba.sak.kontroller-ny-utbetalingsgenerator"
+
+        // Unleash Next toggles
+        const val ENDRET_EØS_REGELVERKFILTER_FOR_BARN = "familie-ba-sak.endret-eos-regelverkfilter-for-barn"
     }
 }
 
