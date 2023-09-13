@@ -147,19 +147,15 @@ fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.slåSam
     val sortertePerioder = this
         .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
 
-    return sortertePerioder.fold(mutableListOf()) { acc: MutableList<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>, periode ->
+    return sortertePerioder.fold(emptyList()) { acc: List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>, periode ->
         val sistePeriode = acc.lastOrNull()
 
         if (sistePeriode?.periodeErIkkeInnvilget() == true && periode.periodeErIkkeInnvilget()) {
-            val nyPeriode = sistePeriode.copy(tilOgMed = periode.tilOgMed)
-            acc.remove(sistePeriode)
-            acc.add(nyPeriode)
+            acc.dropLast(1) + sistePeriode.copy(tilOgMed = periode.tilOgMed)
         } else {
-            acc.add(periode)
+            acc + periode
         }
-
-        acc
-    }.toList()
+    }
 }
 
 fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.leggTilUendelighetPåSisteOpphørsPeriode(): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
@@ -175,7 +171,7 @@ fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.leggTil
 }
 
 private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.periodeErIkkeInnvilget() =
-    innhold == null || innhold.none { it.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårInnvilget }
+    innhold == null || innhold.none { it.gjeldende?.erInnvilget() ?: false }
 
 private fun Map<AktørOgRolleBegrunnelseGrunnlag, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag>.lagOverlappendeGenerelleAvslagsPerioder() =
     map {
