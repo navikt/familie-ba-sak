@@ -46,7 +46,8 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
     """
       
-  Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}""" +
+  Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
+    Og følgende dagens dato ${LocalDate.now()}""" +
     lagPersonresultaterTekst(forrigeBehandling) +
     lagPersonresultaterTekst(behandling) +
     hentTekstForVilkårresultater(personResultaterForrigeBehandling, forrigeBehandling?.id) +
@@ -223,7 +224,7 @@ private fun hentKompetanseRader(kompetanser: Collection<Kompetanse>?): String =
         ?.joinToString("") { kompetanse ->
             """
       | ${
-                kompetanse.barnAktører.joinToString("") { it.aktørId }
+                kompetanse.barnAktører.joinToString(", ") { it.aktørId }
             } |${
                 kompetanse.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
             }|${

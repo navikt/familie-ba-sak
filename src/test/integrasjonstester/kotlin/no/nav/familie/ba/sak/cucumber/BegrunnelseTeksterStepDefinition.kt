@@ -67,7 +67,7 @@ class BegrunnelseTeksterStepDefinition {
 
     /**
      * Mulige felter:
-     * | BehandlingId | FagsakId | ForrigeBehandlingId |
+     * | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
      */
     @Gitt("følgende behandling")
     fun `følgende behandling`(dataTable: DataTable) {
@@ -194,6 +194,7 @@ class BegrunnelseTeksterStepDefinition {
             vedtak = vedtak,
             grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
             grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
+            nåDato = dagensDato,
         )
 
         val utvidedeVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {
@@ -211,10 +212,11 @@ class BegrunnelseTeksterStepDefinition {
         utvidetVedtaksperiodeMedBegrunnelser = utvidedeVedtaksperioderMedBegrunnelser.map {
             it.copy(
                 gyldigeBegrunnelser = it.hentGyldigeBegrunnelserForPeriode(
-                    grunnlagForVedtaksperiode,
-                    grunnlagForVedtaksperiodeForrigeBehandling,
-                    mockHentSanityBegrunnelser(),
-                    mockHentSanityEØSBegrunnelser(),
+                    behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtaksperiode,
+                    behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
+                    sanityBegrunnelser = mockHentSanityBegrunnelser(),
+                    sanityEØSBegrunnelser = mockHentSanityEØSBegrunnelser(),
+                    nåDato = dagensDato,
                 ).toList(),
             )
         }.toMutableList()
@@ -285,7 +287,7 @@ class BegrunnelseTeksterStepDefinition {
             )
                 .toList()
 
-        val enumPåApiNavn = EØSStandardbegrunnelse.values().associateBy { it.sanityApiNavn }
+        val enumPåApiNavn = EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
         val sanityEØSBegrunnelser = restSanityEØSBegrunnelser.mapNotNull { it.tilSanityEØSBegrunnelse() }
 
         return sanityEØSBegrunnelser

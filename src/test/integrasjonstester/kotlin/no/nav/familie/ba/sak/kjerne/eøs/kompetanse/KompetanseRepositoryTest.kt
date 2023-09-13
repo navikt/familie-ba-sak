@@ -4,8 +4,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -60,8 +59,8 @@ class KompetanseRepositoryTest(
                 barnAktører = setOf(barn1),
                 fom = YearMonth.of(2020, 1),
                 tom = YearMonth.of(2021, 12),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
-                annenForeldersAktivitet = AnnenForeldersAktivitet.MOTTAR_PENSJON,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
+                annenForeldersAktivitet = KompetanseAktivitet.MOTTAR_PENSJON,
                 annenForeldersAktivitetsland = "pl",
                 barnetsBostedsland = "sl",
             ),

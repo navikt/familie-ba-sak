@@ -2,18 +2,17 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 
 data class MinimertKompetanse(
-    val søkersAktivitet: SøkersAktivitet,
+    val søkersAktivitet: KompetanseAktivitet,
     val søkersAktivitetsland: LandNavn?,
-    val annenForeldersAktivitet: AnnenForeldersAktivitet,
+    val annenForeldersAktivitet: KompetanseAktivitet,
     val annenForeldersAktivitetslandNavn: LandNavn?,
     val barnetsBostedslandNavn: LandNavn,
     val resultat: KompetanseResultat,

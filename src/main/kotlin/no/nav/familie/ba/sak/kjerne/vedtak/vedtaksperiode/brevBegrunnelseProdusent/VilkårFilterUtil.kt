@@ -21,7 +21,7 @@ fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
     return this.erLikVilkårOgUtdypendeVilkårIPeriode(utgjørendeVilkårResultater)
 }
 
-private fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
+fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
     vilkårResultaterForPerson: Collection<VilkårResultatForVedtaksperiode>,
 ): Boolean {
     return this.vilkår.all { vilkårISanityBegrunnelse ->

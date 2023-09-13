@@ -6,6 +6,6 @@ AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/navq.onmic
 AZURE_APP_CLIENT_ID: dummy
 
 # Kreves for at unleash mock skal fungere:
-UNLEASH_SERVER_API_URL: https://unleash-dummy.com
+UNLEASH_SERVER_API_URL: http://dummy/api/
 UNLEASH_SERVER_API_TOKEN: dummy-token
 NAIS_APP_NAME: familie-ba-sak
