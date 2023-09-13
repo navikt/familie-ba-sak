@@ -589,8 +589,8 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
         when (this.type) {
             Vedtaksperiodetype.OPPHØR -> begrunnelseperioderIVedtaksperiode.first()
             Vedtaksperiodetype.FORTSATT_INNVILGET -> if (this.fom == null && this.tom == null) {
-                val perioder = grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder()
-                perioder.single { nåDato.toYearMonth() in it.fraOgMed.tilYearMonthEllerUendeligFortid()..it.tilOgMed.tilYearMonthEllerUendeligFramtid() }.innhold!!
+                grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder()
+                    .single { it.gjelderNesteMåned(nåDato) }.innhold!!
             } else {
                 begrunnelseperioderIVedtaksperiode.single()
             }
@@ -599,6 +599,11 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
         }
     }
 }
+
+private fun Periode<IBegrunnelseGrunnlagForPeriode, Måned>.gjelderNesteMåned(
+    nåDato: LocalDate,
+) = nåDato.toYearMonth()
+    .plusMonths(1) in fraOgMed.tilYearMonthEllerUendeligFortid()..tilOgMed.tilYearMonthEllerUendeligFramtid()
 
 private fun Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned>.lagTidslinjeGrunnlagDennePeriodenForrigePeriodeOgPeriodeForrigeBehandling(
     grunnlagTidslinje: Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>,
