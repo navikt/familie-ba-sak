@@ -16,12 +16,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
-import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.YearMonth
 
 class TilkjentYtelseValideringTest {
 
-    val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now())
+    val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDate.now())
 
     @Test
     fun `Skal returnere true når person har etterbetaling som er mer enn 3 år tilbake i tid`() {
@@ -192,7 +192,7 @@ class TilkjentYtelseValideringTest {
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = forrigeAndeler,
                 andelerForPerson = andeler,
-                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
+                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDate.now().minusYears(2)),
             ),
         )
 
@@ -200,7 +200,7 @@ class TilkjentYtelseValideringTest {
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = emptyList(),
                 andelerForPerson = andeler,
-                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
+                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDate.now().minusYears(2)),
             ),
         )
 
@@ -208,7 +208,7 @@ class TilkjentYtelseValideringTest {
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = emptyList(),
                 andelerForPerson = andeler,
-                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
+                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDate.now().minusYears(2)),
             ),
         )
 
@@ -216,7 +216,7 @@ class TilkjentYtelseValideringTest {
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = forrigeAndeler,
                 andelerForPerson = emptyList(),
-                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
+                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDate.now().minusYears(2)),
             ),
         )
     }
