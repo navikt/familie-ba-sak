@@ -67,7 +67,6 @@ class EndretUtbetalingAndelService(
             endretUtbetalingAndel.tom = gyldigTomEtterDagensDato
         }
         validerÅrsak(
-            årsak = endretUtbetalingAndel.årsak,
             endretUtbetalingAndel = endretUtbetalingAndel,
             vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id),
         )
