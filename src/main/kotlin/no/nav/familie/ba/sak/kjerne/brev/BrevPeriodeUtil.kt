@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
@@ -81,7 +84,13 @@ fun hentMinimerteKompetanserForPeriode(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     landkoderISO2: Map<String, String>,
 ): List<MinimertKompetanse> {
-    val minimerteKompetanser = kompetanser.hentIPeriode(fom, tom)
+    val relevanteKompetanser = if (fom == null && tom == null) {
+        kompetanser.hentGjeldendeForDagensDato()
+    } else {
+        kompetanser.hentIPeriode(fom, tom)
+    }
+
+    val minimerteKompetanser = relevanteKompetanser
         .filter { it.erObligatoriskeFelterSatt() }
         .map {
             it.tilMinimertKompetanse(
@@ -91,6 +100,13 @@ fun hentMinimerteKompetanserForPeriode(
         }
 
     return minimerteKompetanser
+}
+
+private fun List<Kompetanse>.hentGjeldendeForDagensDato(): List<Kompetanse> = this.filter { kompetanse ->
+    val fomIkkeNull = kompetanse.fom ?: TIDENES_MORGEN.toYearMonth()
+    val tomIkkeNull = kompetanse.tom ?: TIDENES_ENDE.toYearMonth()
+
+    YearMonth.now() in fomIkkeNull..tomIkkeNull
 }
 
 fun hentKompetanserSomStopperRettFørPeriode(
