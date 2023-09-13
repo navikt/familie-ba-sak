@@ -57,13 +57,13 @@ class UtbetalingsoppdragGenerator(
                 ),
                 utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
             ),
-            forrigeAndeler = forrigeTilkjentYtelse?.tilAndelDataMedUtbetaling() ?: emptyList(),
-            nyeAndeler = nyTilkjentYtelse.tilAndelDataMedUtbetaling(),
+            forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData()?.filter { it.beløp > 0 } ?: emptyList(),
+            nyeAndeler = nyTilkjentYtelse.tilAndelData(),
             sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
         )
     }
 
-    private fun TilkjentYtelse.tilAndelDataMedUtbetaling(): List<AndelDataLongId> =
+    private fun TilkjentYtelse.tilAndelData(): List<AndelDataLongId> =
         this.andelerTilkjentYtelse.map { it.tilAndelDataLongId() }
 
     private fun AndelTilkjentYtelse.tilAndelDataLongId(): AndelDataLongId =
