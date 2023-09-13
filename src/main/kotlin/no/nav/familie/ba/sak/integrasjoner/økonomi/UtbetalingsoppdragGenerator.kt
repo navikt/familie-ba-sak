@@ -49,7 +49,12 @@ class UtbetalingsoppdragGenerator(
                 ytelse = Ytelsestype.BARNETRYGD,
                 personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
                 vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
-                opphørFra = opphørFra(forrigeTilkjentYtelse, erSimulering, endretMigreringsDato),
+                opphørFra = opphørFra(
+                    forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                    sisteAndelPerKjede = sisteAndelPerKjede,
+                    erSimulering = erSimulering,
+                    endretMigreringsDato = endretMigreringsDato,
+                ),
                 utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
             ),
             forrigeAndeler = forrigeTilkjentYtelse?.tilAndelDataMedUtbetaling() ?: emptyList(),
@@ -59,7 +64,7 @@ class UtbetalingsoppdragGenerator(
     }
 
     private fun TilkjentYtelse.tilAndelDataMedUtbetaling(): List<AndelDataLongId> =
-        this.andelerTilkjentYtelse.map { it.tilAndelDataLongId() }.filter { it.beløp > 0 }
+        this.andelerTilkjentYtelse.map { it.tilAndelDataLongId() }
 
     private fun AndelTilkjentYtelse.tilAndelDataLongId(): AndelDataLongId =
         AndelDataLongId(
@@ -76,10 +81,11 @@ class UtbetalingsoppdragGenerator(
 
     private fun opphørFra(
         forrigeTilkjentYtelse: TilkjentYtelse?,
+        sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         erSimulering: Boolean,
         endretMigreringsDato: YearMonth?,
     ): YearMonth? {
-        if (forrigeTilkjentYtelse == null) return null
+        if (forrigeTilkjentYtelse == null || sisteAndelPerKjede.isEmpty()) return null
         if (endretMigreringsDato != null) return endretMigreringsDato
         if (erSimulering) {
             return forrigeTilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.periode.fom }
