@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
-import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -267,12 +266,13 @@ fun lagAndelerTilkjentYtelse(
 ) = dataTable.asMaps().map { rad ->
     val aktørId = VedtaksperiodeMedBegrunnelserParser.parseAktørId(rad)
     val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+    val beløp = parseInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad)
     lagAndelTilkjentYtelse(
         fom = parseDato(Domenebegrep.FRA_DATO, rad).toYearMonth(),
         tom = parseDato(Domenebegrep.TIL_DATO, rad).toYearMonth(),
         behandling = behandlinger.finnBehandling(behandlingId),
         person = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId }!!,
-        beløp = parseInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad),
+        beløp = beløp,
         ytelseType = parseValgfriEnum<YtelseType>(
             VedtaksperiodeMedBegrunnelserParser.DomenebegrepAndelTilkjentYtelse.YTELSE_TYPE,
             rad,
@@ -284,7 +284,7 @@ fun lagAndelerTilkjentYtelse(
         sats = parseValgfriInt(
             VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.SATS,
             rad,
-        ) ?: sats(YtelseType.ORDINÆR_BARNETRYGD),
+        ) ?: beløp,
     )
 }.groupBy { it.behandlingId }
     .toMutableMap()

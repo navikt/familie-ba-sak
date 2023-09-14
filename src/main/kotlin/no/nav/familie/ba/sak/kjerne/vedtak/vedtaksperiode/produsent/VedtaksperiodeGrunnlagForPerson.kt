@@ -119,13 +119,13 @@ data class AndelForVedtaksperiode(
     )
 
     override fun equals(other: Any?): Boolean {
-        if (other == null || javaClass != other.javaClass) {
+        if (other !is AndelForVedtaksperiode) {
             return false
         } else if (this === other) {
             return true
         }
 
-        val annen = other as AndelForVedtaksperiode
+        val annen = other
         return Objects.equals(kalkulertUtbetalingsbeløp, annen.kalkulertUtbetalingsbeløp) &&
             Objects.equals(type, annen.type) &&
             Objects.equals(prosent, annen.prosent) &&
