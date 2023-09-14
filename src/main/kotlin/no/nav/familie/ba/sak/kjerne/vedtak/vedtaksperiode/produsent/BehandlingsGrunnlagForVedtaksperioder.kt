@@ -445,14 +445,17 @@ private fun Tidslinje<List<VilkårResultat>, Måned>.tilHarRettPåUtbetalingTids
 }
 
 fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje(): Tidslinje<Iterable<AndelForVedtaksperiode>, Måned> =
+    tilTidslinjerPerAktørOgType()
+        .values
+        .map { tidslinje -> tidslinje.slåSammenLike() }
+        .kombiner { it }
+
+private fun List<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgType() =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         AndelTilkjentYtelseForVedtaksperioderTidslinje(
             andelerTilkjentYtelsePåPerson,
         )
     }
-        .values
-        .map { tidslinje -> tidslinje.slåSammenLike() }
-        .kombiner { it }
 
 // Vi trenger dette for å kunne begrunne nye perioder med småbarnstillegg som vi ikke hadde i forrige behandling
 fun List<InternPeriodeOvergangsstønad>.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(
