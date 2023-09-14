@@ -107,12 +107,14 @@ data class EndretUtbetalingAndelForVedtaksperiode(
 
 data class AndelForVedtaksperiode(
     val kalkulertUtbetalingsbeløp: Int,
+    val nasjonaltPeriodebeløp: Int?,
     val type: YtelseType,
     val prosent: BigDecimal,
     val sats: Int,
 ) {
     constructor(andelTilkjentYtelse: AndelTilkjentYtelse) : this(
         kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
+        nasjonaltPeriodebeløp = andelTilkjentYtelse.nasjonaltPeriodebeløp,
         type = andelTilkjentYtelse.type,
         prosent = andelTilkjentYtelse.prosent,
         sats = andelTilkjentYtelse.sats,

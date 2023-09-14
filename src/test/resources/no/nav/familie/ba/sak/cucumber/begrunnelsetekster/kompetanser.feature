@@ -35,10 +35,10 @@ Egenskap: Begrunnelser for kompetanser
     Når begrunnelsetekster genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk        | Inkluderte Begrunnelser                            | Ekskluderte Begrunnelser                              |
-      | 01.05.2020 | 30.04.2021 | Utbetaling         | EØS_FORORDNINGEN | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_JOBBER_I_NORGE    |
-      | 01.05.2021 | 31.03.2038 | Utbetaling         | EØS_FORORDNINGEN | INNVILGET_SEKUNDÆRLAND_STANDARD                    | INNVILGET_SEKUNDÆRLAND_TO_ARBEIDSLAND_NORGE_UTBETALER |
-      | 01.04.2038 |            | Opphør             |                  |                                                    |                                                       |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                            | Ekskluderte Begrunnelser                              |
+      | 01.05.2020 | 30.04.2021 | Utbetaling         | EØS_FORORDNINGEN                  | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_JOBBER_I_NORGE    |
+      | 01.05.2021 | 31.03.2038 | Utbetaling         | EØS_FORORDNINGEN                  | INNVILGET_SEKUNDÆRLAND_STANDARD                    | INNVILGET_SEKUNDÆRLAND_TO_ARBEIDSLAND_NORGE_UTBETALER |
+      | 01.04.2038 |            | Opphør             |                                   |                                                    |                                                       |
 
   Scenario: Ikke vis kompetansebegrunnelser dersom kompetansen ikke endrer seg
     Gitt følgende behandling
@@ -76,11 +76,11 @@ Egenskap: Begrunnelser for kompetanser
     Når begrunnelsetekster genereres for behandling 100173206
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk        | Inkluderte Begrunnelser | Ekskluderte Begrunnelser      |
-      | 01.04.2023 | 30.06.2023 | UTBETALING         |                  |                         |                               |
-      | 01.07.2023 | 31.07.2023 | UTBETALING         | EØS_FORORDNINGEN |                         | INNVILGET_PRIMÆRLAND_STANDARD |
-      | 01.08.2023 | 31.01.2033 | UTBETALING         |                  |                         |                               |
-      | 01.02.2033 |            | OPPHØR             |                  |                         |                               |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser | Ekskluderte Begrunnelser      |
+      | 01.04.2023 | 30.06.2023 | UTBETALING         |                                   |                         |                               |
+      | 01.07.2023 | 31.07.2023 | UTBETALING         | EØS_FORORDNINGEN                  |                         | INNVILGET_PRIMÆRLAND_STANDARD |
+      | 01.08.2023 | 31.01.2033 | UTBETALING         |                                   |                         |                               |
+      | 01.02.2033 |            | OPPHØR             |                                   |                         |                               |
 
   Scenario: Skal gi riktig begrunnelse ved opphør av EØS-sak
     Gitt følgende behandling
@@ -116,10 +116,10 @@ Egenskap: Begrunnelser for kompetanser
     Når begrunnelsetekster genereres for behandling 100173207
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk        | Inkluderte Begrunnelser            | Ekskluderte Begrunnelser |
-      | 01.04.2023 | 30.06.2023 | UTBETALING         |                  |                                    |                          |
-      | 01.07.2023 | 31.08.2023 | UTBETALING         |                  |                                    |                          |
-      | 01.09.2023 |            | OPPHØR             | EØS_FORORDNINGEN | OPPHØR_IKKE_STATSBORGER_I_EØS_LAND |                          |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser            | Ekskluderte Begrunnelser |
+      | 01.04.2023 | 30.06.2023 | UTBETALING         |                                   |                                    |                          |
+      | 01.07.2023 | 31.08.2023 | UTBETALING         |                                   |                                    |                          |
+      | 01.09.2023 |            | OPPHØR             | EØS_FORORDNINGEN                  | OPPHØR_IKKE_STATSBORGER_I_EØS_LAND |                          |
 
   Scenario: Skal begrunne endring i kompetanse, når resultat er fortsatt innvilget
     Gitt følgende fagsaker for begrunnelse
@@ -180,8 +180,8 @@ Egenskap: Begrunnelser for kompetanser
     Når begrunnelsetekster genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk        | Inkluderte Begrunnelser                | Ekskluderte Begrunnelser                              |
-      | 01.05.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN | FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD | REDUKSJON_BARN_DØD_EØS,REDUKSJON_IKKE_ANSVAR_FOR_BARN |
-      | 01.07.2023 | 31.01.2033 | UTBETALING         |                  |                                        |                                                       |
-      | 01.02.2033 |            | OPPHØR             |                  |                                        |                                                       |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                | Ekskluderte Begrunnelser                              |
+      | 01.05.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN                  | FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD | REDUKSJON_BARN_DØD_EØS,REDUKSJON_IKKE_ANSVAR_FOR_BARN |
+      | 01.07.2023 | 31.01.2033 | UTBETALING         |                                   |                                        |                                                       |
+      | 01.02.2033 |            | OPPHØR             |                                   |                                        |                                                       |
 
