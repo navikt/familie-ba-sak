@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Flettefelt
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BrevBegrunnelse
 
 data class BrevPeriode(
     val fom: Flettefelt,
@@ -24,7 +24,7 @@ data class BrevPeriode(
         fom: String,
         tom: String,
         belop: String,
-        begrunnelser: List<Begrunnelse>,
+        begrunnelser: List<BrevBegrunnelse>,
         brevPeriodeType: BrevPeriodeType,
         antallBarn: String,
         barnasFodselsdager: String,

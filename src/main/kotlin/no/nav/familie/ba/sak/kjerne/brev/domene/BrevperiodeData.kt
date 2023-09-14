@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeGenerator
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BrevBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 
 data class BrevperiodeData(
@@ -33,7 +33,7 @@ data class BrevperiodeData(
         featureToggleService = featureToggleService,
     )
 
-    fun hentBegrunnelserOgFritekster(): List<Begrunnelse> {
+    fun hentBegrunnelserOgFritekster(): List<BrevBegrunnelse> {
         val brevPeriodeGenerator = this.tilBrevPeriodeGenerator()
         return brevPeriodeGenerator.byggBegrunnelserOgFritekster(
             begrunnelserGrunnlagMedPersoner = brevPeriodeGenerator.hentBegrunnelsegrunnlagMedPersoner(),
