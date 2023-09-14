@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
+package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
