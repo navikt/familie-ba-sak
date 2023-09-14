@@ -232,13 +232,6 @@ class ClientMocks {
             } answers {
                 System.getProperty(featureSlot.captured)?.toBoolean() ?: mockUnleashServiceAnswer
             }
-
-            every {
-                mockUnleashService.isEnabled(
-                    toggleId = FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-                    properties = any(),
-                )
-            } returns false
         }
 
         fun clearPdlIdentRestClient(

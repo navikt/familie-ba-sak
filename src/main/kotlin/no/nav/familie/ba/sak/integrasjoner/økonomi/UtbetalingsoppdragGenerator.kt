@@ -57,7 +57,7 @@ class UtbetalingsoppdragGenerator(
                 ),
                 utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
             ),
-            forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData()?.filter { it.beløp > 0 } ?: emptyList(),
+            forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData() ?: emptyList(),
             nyeAndeler = nyTilkjentYtelse.tilAndelData(),
             sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
         )

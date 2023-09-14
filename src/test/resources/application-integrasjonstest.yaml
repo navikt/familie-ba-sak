@@ -9,3 +9,7 @@ AZURE_APP_CLIENT_ID: dummy
 UNLEASH_SERVER_API_URL: http://dummy/api/
 UNLEASH_SERVER_API_TOKEN: dummy-token
 NAIS_APP_NAME: familie-ba-sak
+
+# Disabler unleash her for å unngå feilmeldinger tilknyttet oppkobling når vi uansett mocker alle unleash-kall i testene.
+unleash:
+  enabled: false
