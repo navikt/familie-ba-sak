@@ -251,6 +251,7 @@ fun lagAndelTilkjentYtelse(
     kildeBehandlingId: Long? = behandling.id,
     differanseberegnetPeriodebeløp: Int? = null,
     id: Long = 0,
+    sats: Int = sats(ytelseType),
 ): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
         id = id,
@@ -264,7 +265,7 @@ fun lagAndelTilkjentYtelse(
         type = ytelseType,
         periodeOffset = periodeIdOffset,
         forrigePeriodeOffset = forrigeperiodeIdOffset,
-        sats = beløp,
+        sats = sats,
         prosent = prosent,
         kildeBehandlingId = kildeBehandlingId,
         differanseberegnetPeriodebeløp = differanseberegnetPeriodebeløp,

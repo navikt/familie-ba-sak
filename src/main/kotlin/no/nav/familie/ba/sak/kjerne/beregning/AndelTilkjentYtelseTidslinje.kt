@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AndelForVedtaksperiode
 
 class AndelTilkjentYtelseTidslinje(
     private val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
@@ -16,6 +17,20 @@ class AndelTilkjentYtelseTidslinje(
                 fraOgMed = it.stønadFom.tilTidspunkt(),
                 tilOgMed = it.stønadTom.tilTidspunkt(),
                 innhold = it,
+            )
+        }
+    }
+}
+
+class AndelTilkjentYtelseForVedtaksperioderTidslinje(
+    private val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+) : Tidslinje<AndelForVedtaksperiode, Måned>() {
+    override fun lagPerioder(): List<Periode<AndelForVedtaksperiode, Måned>> {
+        return andelerTilkjentYtelse.map {
+            Periode(
+                fraOgMed = it.stønadFom.tilTidspunkt(),
+                tilOgMed = it.stønadTom.tilTidspunkt(),
+                innhold = AndelForVedtaksperiode(it),
             )
         }
     }
