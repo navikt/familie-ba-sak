@@ -23,11 +23,11 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>4.0.0</spring.cloud.version>
         <prosessering.version>2.20230807154047_d770f01</prosessering.version>
-        <felles.version>2.20230825095715_3bcaf53</felles.version>
+        <felles.version>2.20230905101454_06fa3d7</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20230911102049_85cefe7</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20230223155122_2e81c44</familie.kontrakter.stønadsstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20230912090318_2267c05</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20230816154126_e551e82</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
         <cucumber.version>7.13.0</cucumber.version>
@@ -254,7 +254,10 @@
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>leader</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>unleash</artifactId>
+        </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>http-client</artifactId>

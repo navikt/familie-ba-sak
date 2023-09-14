@@ -78,7 +78,6 @@ class BeregningServiceTest {
         andelTilkjentYtelseRepository,
         endretUtbetalingAndelRepository,
         vilkårsvurderingRepository,
-        featureToggleService,
     )
 
     private lateinit var beregningService: BeregningService

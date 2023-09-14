@@ -22,6 +22,12 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                     forrigePeriode = forrigePeriode,
                     sammePeriodeForrigeBehandling = sammePeriodeForrigeBehandling,
                 )
+            } else if (periodetype == Vedtaksperiodetype.OPPHØR) {
+                BegrunnelseGrunnlagForPeriodeMedOpphør(
+                    dennePerioden = dennePerioden,
+                    forrigePeriode = forrigePeriode,
+                    sammePeriodeForrigeBehandling = sammePeriodeForrigeBehandling,
+                )
             } else {
                 BegrunnelseGrunnlagForPeriode(dennePerioden, forrigePeriode, sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true)
             }
@@ -39,8 +45,15 @@ data class BegrunnelseGrunnlagForPeriodeMedReduksjonPåTversAvBehandlinger(
     override val forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
     val sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?,
 ) : IBegrunnelseGrunnlagForPeriode {
-    override val erSmåbarnstilleggIForrigeBehandlingPeriode: Boolean
-        get() = harPeriodeSmåbarnstillegg()
+    override val erSmåbarnstilleggIForrigeBehandlingPeriode =
+        sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
+}
 
-    private fun harPeriodeSmåbarnstillegg() = sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
+data class BegrunnelseGrunnlagForPeriodeMedOpphør(
+    override val dennePerioden: BegrunnelseGrunnlagForPersonIPeriode,
+    override val forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
+    val sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?,
+) : IBegrunnelseGrunnlagForPeriode {
+    override val erSmåbarnstilleggIForrigeBehandlingPeriode =
+        sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
 }
