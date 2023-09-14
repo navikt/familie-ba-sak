@@ -82,7 +82,7 @@ object VilkårsvurderingForskyvningUtils {
         return this.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår)
     }
 
-    private fun Collection<VilkårResultat>.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> {
+    fun Collection<VilkårResultat>.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> {
         return this
             .filter { it.vilkårType == vilkår && it.erOppfylt() }
             .tilTidslinje()
