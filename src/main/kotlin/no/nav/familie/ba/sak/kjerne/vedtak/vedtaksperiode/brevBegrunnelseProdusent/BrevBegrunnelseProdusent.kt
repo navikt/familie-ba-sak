@@ -312,13 +312,14 @@ fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
 ): Boolean {
     val kompetanse = when (this.periodeResultat) {
-        SanityPeriodeResultat.INNVILGET_ELLER_ØKNING -> begrunnelseGrunnlag.dennePerioden.kompetanse ?: return false
+        SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING ->
+            begrunnelseGrunnlag.dennePerioden.kompetanse
+                ?: return false
 
         SanityPeriodeResultat.IKKE_INNVILGET,
         SanityPeriodeResultat.REDUKSJON,
         -> begrunnelseGrunnlag.forrigePeriode?.kompetanse ?: return false
 
-        SanityPeriodeResultat.INGEN_ENDRING,
         null,
         -> return false
     }
