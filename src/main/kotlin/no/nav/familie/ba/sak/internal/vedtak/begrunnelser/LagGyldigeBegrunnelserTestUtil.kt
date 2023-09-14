@@ -47,7 +47,7 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     """
       
   Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
-    Og følgende dagens dato ${LocalDate.now()}""" +
+    Og følgende dagens dato ${LocalDate.now().tilddMMyyyy()}""" +
     lagPersonresultaterTekst(forrigeBehandling) +
     lagPersonresultaterTekst(behandling) +
     hentTekstForVilkårresultater(personResultaterForrigeBehandling, forrigeBehandling?.id) +
@@ -76,13 +76,13 @@ fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: Behandli
     """
 
     Gitt følgende behandling
-      | BehandlingId | FagsakId | ForrigeBehandlingId |${
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |${
         forrigeBehandling?.let {
             """ 
-      | ${forrigeBehandling.id} | ${forrigeBehandling.fagsak.id} |           |"""
+      | ${it.id} | ${it.fagsak.id} |           | ${it.resultat} | ${it.opprettetÅrsak} |"""
         } ?: ""
     }
-      | ${behandling.id} | ${behandling.fagsak.id} | ${forrigeBehandling?.id ?: ""} |"""
+      | ${behandling.id} | ${behandling.fagsak.id} | ${forrigeBehandling?.id ?: ""} |${behandling.resultat} | ${behandling.opprettetÅrsak} |"""
 
 fun hentTekstForPersongrunnlag(
     persongrunnlag: PersonopplysningGrunnlag,
