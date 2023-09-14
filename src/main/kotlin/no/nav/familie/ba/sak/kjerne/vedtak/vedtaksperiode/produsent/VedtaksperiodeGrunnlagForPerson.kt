@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.Objects
 
 sealed interface VedtaksperiodeGrunnlagForPerson {
     val person: Person
@@ -118,6 +119,45 @@ data class AndelForVedtaksperiode(
         prosent = andelTilkjentYtelse.prosent,
         sats = andelTilkjentYtelse.sats,
     )
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is AndelForVedtaksperiode) {
+            return false
+        } else if (this === other) {
+            return true
+        }
+
+        val annen = other
+        return Objects.equals(kalkulertUtbetalingsbeløp, annen.kalkulertUtbetalingsbeløp) &&
+            Objects.equals(type, annen.type) &&
+            Objects.equals(prosent, annen.prosent) &&
+            satsErlik(annen.sats)
+    }
+
+    private fun satsErlik(annen: Int): Boolean {
+        return if (kalkulertUtbetalingsbeløp == 0) {
+            true
+        } else {
+            Objects.equals(sats, annen)
+        }
+    }
+
+    override fun hashCode(): Int {
+        return if (kalkulertUtbetalingsbeløp == 0) {
+            Objects.hash(
+                kalkulertUtbetalingsbeløp,
+                type,
+                prosent,
+            )
+        } else {
+            Objects.hash(
+                kalkulertUtbetalingsbeløp,
+                type,
+                prosent,
+                sats,
+            )
+        }
+    }
 }
 
 data class KompetanseForVedtaksperiode(
