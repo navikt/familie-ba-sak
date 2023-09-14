@@ -34,9 +34,8 @@ Egenskap: Endringstidspunkt påvirker periodene
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
     Så forvent følgende vedtaksperioder med begrunnelser
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar            |
-      | 01.01.2017 | 30.11.2034 | Opphør             | Endret utbetaling 0% |
-      | 01.12.2034 |            | Opphør             | Barn over 18         |
+      | Fra dato   | Til dato | Vedtaksperiodetype | Kommentar            |
+      | 01.01.2017 |          | Opphør             | Endret utbetaling 0% |
 
   Scenario:  Skal lage utbetalingsperiode når andelene er endret til 0% og det er delt bosted
 
