@@ -451,7 +451,7 @@ fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje(): Tidslinje<
         )
     }
         .values
-        .map { tidslinje -> tidslinje.mapIkkeNull { it } }
+        .map { tidslinje -> tidslinje.slåSammenLike() }
         .kombiner { it }
 
 // Vi trenger dette for å kunne begrunne nye perioder med småbarnstillegg som vi ikke hadde i forrige behandling
