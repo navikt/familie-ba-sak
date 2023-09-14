@@ -211,7 +211,7 @@ class BegrunnelseTeksterStepDefinition {
 
         utvidetVedtaksperiodeMedBegrunnelser = utvidedeVedtaksperioderMedBegrunnelser.map {
             it.copy(
-                gyldigeBegrunnelser = it.hentGyldigeBegrunnelserForPeriode(
+                gyldigeBegrunnelser = it.tilVedtaksperiodeMedBegrunnelser(vedtak).hentGyldigeBegrunnelserForPeriode(
                     behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtaksperiode,
                     behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
                     sanityBegrunnelser = mockHentSanityBegrunnelser(),

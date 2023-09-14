@@ -60,6 +60,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksp
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.sorter
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utbetalingsperiodemedbegrunnelser.UtbetalingsperiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
@@ -439,6 +440,7 @@ class VedtaksperiodeService(
             hentUtvidetVedtaksperioderMedBegrunnelserOgGyldigeBegrunnelser(
                 behandling = behandling,
                 utvidedeVedtaksperioderMedBegrunnelser = utvidetVedtaksperioderMedBegrunnelser,
+                vedtak = vedtak,
                 persongrunnlag = persongrunnlag,
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 endretUtbetalingAndeler = endreteUtbetalinger,
@@ -451,6 +453,7 @@ class VedtaksperiodeService(
     private fun hentUtvidetVedtaksperioderMedBegrunnelserOgGyldigeBegrunnelser(
         behandling: Behandling,
         utvidedeVedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
+        vedtak: Vedtak,
         persongrunnlag: PersonopplysningGrunnlag,
         andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
@@ -481,13 +484,14 @@ class VedtaksperiodeService(
 
             utvidetVedtaksperiodeMedBegrunnelser.copy(
                 gyldigeBegrunnelser = if (featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)) {
-                    utvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
-                        behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
-                        behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-                        sanityBegrunnelser = sanityBegrunnelser,
-                        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-                        nåDato = LocalDate.now(),
-                    ).toList()
+                    utvidetVedtaksperiodeMedBegrunnelser.tilVedtaksperiodeMedBegrunnelser(vedtak)
+                        .hentGyldigeBegrunnelserForPeriode(
+                            behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
+                            behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
+                            sanityBegrunnelser = sanityBegrunnelser,
+                            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+                            nåDato = LocalDate.now(),
+                        ).toList()
                 } else {
                     hentGyldigeBegrunnelserForPeriodeGammel(
                         utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
