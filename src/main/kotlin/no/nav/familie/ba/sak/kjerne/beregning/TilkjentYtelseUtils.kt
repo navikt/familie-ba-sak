@@ -76,7 +76,7 @@ object TilkjentYtelseUtils {
             tilkjentYtelse = tilkjentYtelse,
             andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer = barnasAndelerInkludertEtterbetaling3ÅrEndringer,
             endretUtbetalingAndelerSøker = endretUtbetalingAndelerSøker,
-            personResultater = vilkårsvurdering.personResultater
+            personResultater = vilkårsvurdering.personResultater,
         )
 
         val småbarnstilleggErMulig = erSmåbarnstilleggMulig(

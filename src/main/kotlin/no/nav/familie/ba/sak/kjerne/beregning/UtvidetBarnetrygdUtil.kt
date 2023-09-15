@@ -34,7 +34,7 @@ object UtvidetBarnetrygdUtil {
             .lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = utvidetVilkår,
                 andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer.map { it.andel },
-                tidslinjerMedPerioderBarnaBorMedSøker = tidslinjerMedPerioderBarnaBorMedSøker
+                tidslinjerMedPerioderBarnaBorMedSøker = tidslinjerMedPerioderBarnaBorMedSøker,
             )
 
         return TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
@@ -51,7 +51,7 @@ object UtvidetBarnetrygdUtil {
                     vilkårResultat?.utdypendeVilkårsvurderinger?.none {
                         it in listOf(
                             UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER,
-                            UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER
+                            UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER,
                         )
                     }
                 }

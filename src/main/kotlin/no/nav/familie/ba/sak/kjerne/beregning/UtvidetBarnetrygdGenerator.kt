@@ -23,7 +23,7 @@ data class UtvidetBarnetrygdGenerator(
     fun lagUtvidetBarnetrygdAndeler(
         utvidetVilkår: List<VilkårResultat>,
         andelerBarna: List<AndelTilkjentYtelse>,
-        tidslinjerMedPerioderBarnaBorMedSøker: Map<Aktør, Tidslinje<Boolean, Måned>>
+        tidslinjerMedPerioderBarnaBorMedSøker: Map<Aktør, Tidslinje<Boolean, Måned>>,
     ): List<AndelTilkjentYtelse> {
         if (utvidetVilkår.isEmpty() || andelerBarna.isEmpty()) return emptyList()
 

@@ -258,7 +258,6 @@ internal class UtvidetBarnetrygdTest {
             ),
         )
 
-
         val utvidetAndelerNårBarnMed100ProsentBorMedSøker = UtvidetBarnetrygdGenerator(
             behandlingId = behandling.id,
             tilkjentYtelse = tilkjentYtelse,
@@ -266,7 +265,7 @@ internal class UtvidetBarnetrygdTest {
             utvidetVilkår = listOf(utvidetVilkår),
             andelerBarna = barnasAndeler,
             tidslinjerMedPerioderBarnaBorMedSøker = barnasAndeler
-                .tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } }
+                .tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } },
         )
 
         val utvidetAndelerNårKunBarnMed50ProsentBorMedSøker = UtvidetBarnetrygdGenerator(
@@ -276,7 +275,7 @@ internal class UtvidetBarnetrygdTest {
             utvidetVilkår = listOf(utvidetVilkår),
             andelerBarna = barnasAndeler,
             tidslinjerMedPerioderBarnaBorMedSøker = barnasAndeler
-                .tilSeparateTidslinjerForBarna().mapValues { it.value.map { andel -> andel?.prosent == BigDecimal(50) } }
+                .tilSeparateTidslinjerForBarna().mapValues { it.value.map { andel -> andel?.prosent == BigDecimal(50) } },
         )
 
         assertEquals(BigDecimal(100), utvidetAndelerNårBarnMed100ProsentBorMedSøker.minOf { it.prosent })
@@ -1013,7 +1012,7 @@ internal class UtvidetBarnetrygdTest {
                 utvidetVilkår = listOf(utvidetVilkår),
                 andelerBarna = barnasAndeler,
                 tidslinjerMedPerioderBarnaBorMedSøker =
-                barnasAndeler.tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } }
+                barnasAndeler.tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } },
             )
         }
     }
@@ -1056,7 +1055,7 @@ internal class UtvidetBarnetrygdTest {
             utvidetVilkår = listOf(utvidetVilkår),
             andelerBarna = barnasAndeler,
             tidslinjerMedPerioderBarnaBorMedSøker = barnasAndeler
-                .tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } }
+                .tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } },
         ).sortedBy { it.stønadFom }
 
         assertEquals(2, utvidetAndeler.size)

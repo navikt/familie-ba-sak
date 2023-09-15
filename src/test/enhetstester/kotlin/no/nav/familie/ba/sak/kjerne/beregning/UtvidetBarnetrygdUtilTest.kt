@@ -7,16 +7,16 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.validerUtvidetVilkårsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.beregnTilkjentYtelseUtvidet
+import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.validerUtvidetVilkårsresultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.Assertions.assertTrue
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -34,11 +34,10 @@ class UtvidetBarnetrygdUtilTest {
         assertThrows<FunksjonellFeil> {
             validerUtvidetVilkårsresultat(
                 vilkårResultat = vilkårResultat,
-                utvidetVilkårResultater = listOf(vilkårResultat)
+                utvidetVilkårResultater = listOf(vilkårResultat),
             )
         }
     }
-
 
     @Test
     fun `Valider utvidet vilkår - skal ikke kaste feil hvis fom og tom er i samme kalendermåned og har etterfølgende periode`() {
@@ -61,8 +60,8 @@ class UtvidetBarnetrygdUtilTest {
                 vilkårResultat = vilkårResultat,
                 utvidetVilkårResultater = listOf(
                     vilkårResultat,
-                    etterfølgendeVilkårResultat
-                )
+                    etterfølgendeVilkårResultat,
+                ),
             )
         }
     }
@@ -106,7 +105,7 @@ class UtvidetBarnetrygdUtilTest {
             resultat = Resultat.OPPFYLT,
             periodeFom = LocalDate.of(2021, 10, 1),
             periodeTom = LocalDate.of(2022, 2, 28),
-            vilkårType = Vilkår.BOR_MED_SØKER
+            vilkårType = Vilkår.BOR_MED_SØKER,
         )
 
         val utvidetVilkår = lagVilkårResultat(
@@ -114,8 +113,9 @@ class UtvidetBarnetrygdUtilTest {
             periodeFom = LocalDate.of(2021, 10, 1),
             periodeTom = LocalDate.of(2022, 2, 28),
             resultat = Resultat.OPPFYLT,
-            personResultat = personResultatSøker
+            personResultat = personResultatSøker,
         )
+
         fun med(utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering) = utdypendeVilkårsvurdering.let {
             personResultatBarn.vilkårResultater.first().utdypendeVilkårsvurderinger = listOf(utdypendeVilkårsvurdering)
 
@@ -126,11 +126,11 @@ class UtvidetBarnetrygdUtilTest {
                     lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                         person = barn,
                         fom = YearMonth.of(2021, 10),
-                        tom = YearMonth.of(2022, 2)
-                    )
+                        tom = YearMonth.of(2022, 2),
+                    ),
                 ),
                 endretUtbetalingAndelerSøker = emptyList(),
-                personResultater = setOf(personResultatBarn)
+                personResultater = setOf(personResultatBarn),
             )
         }
     }
