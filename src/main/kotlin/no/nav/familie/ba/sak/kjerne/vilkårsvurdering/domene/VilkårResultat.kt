@@ -67,7 +67,7 @@ class VilkårResultat(
     var begrunnelse: String,
 
     @Column(name = "fk_behandling_id", nullable = false)
-    var behandlingId: Long,
+    var sistEndretIBehandlingId: Long,
 
     @Column(name = "er_automatisk_vurdert", nullable = false)
     var erAutomatiskVurdert: Boolean = false,
@@ -139,7 +139,7 @@ class VilkårResultat(
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             begrunnelse = begrunnelse,
-            behandlingId = behandlingId,
+            sistEndretIBehandlingId = sistEndretIBehandlingId,
             regelInput = regelInput,
             regelOutput = regelOutput,
             erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
@@ -161,7 +161,7 @@ class VilkårResultat(
             begrunnelse = begrunnelse,
             regelInput = regelInput,
             regelOutput = regelOutput,
-            behandlingId = behandlingId,
+            sistEndretIBehandlingId = behandlingId,
             erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
             vurderesEtter = vurderesEtter,
             utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
@@ -178,7 +178,7 @@ class VilkårResultat(
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             begrunnelse = begrunnelse,
-            behandlingId = nyttPersonResultat.vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = nyttPersonResultat.vilkårsvurdering.behandling.id,
             regelInput = regelInput,
             regelOutput = regelOutput,
             erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
@@ -189,7 +189,7 @@ class VilkårResultat(
     }
 
     fun oppdaterPekerTilBehandling() {
-        behandlingId = personResultat!!.vilkårsvurdering.behandling.id
+        sistEndretIBehandlingId = personResultat!!.vilkårsvurdering.behandling.id
     }
 
     fun erAvslagUtenPeriode() =

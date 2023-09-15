@@ -380,7 +380,7 @@ internal class TilkjentYtelseUtilsTest {
                         periodeFom = barnFødselsdato,
                         periodeTom = backToBackTom,
                         begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id,
+                        sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                     ),
                     VilkårResultat(
                         personResultat = personResultat,
@@ -389,7 +389,7 @@ internal class TilkjentYtelseUtilsTest {
                         periodeFom = backToBackFom,
                         periodeTom = null,
                         begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id,
+                        sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                     ),
                 ),
         )
@@ -436,7 +436,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = vilkårOppfyltFom,
                     periodeTom = vilkårOppfyltTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id,
+                    sistEndretIBehandlingId = behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = barnResultat,
@@ -445,7 +445,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = barnFødselsdato,
                     periodeTom = under18ÅrVilkårOppfyltTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id,
+                    sistEndretIBehandlingId = behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = barnResultat,
@@ -454,7 +454,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = barnFødselsdato,
                     periodeTom = null,
                     begrunnelse = "",
-                    behandlingId = behandling.id,
+                    sistEndretIBehandlingId = behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = barnResultat,
@@ -463,7 +463,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = barnFødselsdato,
                     periodeTom = null,
                     begrunnelse = "",
-                    behandlingId = behandling.id,
+                    sistEndretIBehandlingId = behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = barnResultat,
@@ -472,7 +472,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = barnFødselsdato,
                     periodeTom = null,
                     begrunnelse = "",
-                    behandlingId = behandling.id,
+                    sistEndretIBehandlingId = behandling.id,
                     utdypendeVilkårsvurderinger = listOfNotNull(
                         if (erDeltBosted) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
                     ),
@@ -1321,7 +1321,7 @@ internal class TilkjentYtelseUtilsTest {
             periodeFom = fom,
             periodeTom = tom,
             begrunnelse = "",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
         )
     }
