@@ -34,11 +34,9 @@ object VilkårsvurderingMigreringUtils {
     ): LocalDate? {
         val forrigeVilkårsPeriodeTom: LocalDate? =
             oppfylteVilkårResultaterForType.minWithOrNull(VilkårResultat.VilkårResultatComparator)?.periodeTom
-        return when {
-            vilkår == Vilkår.UNDER_18_ÅR -> periodeFom.til18ÅrsVilkårsdato()
-            vilkår == Vilkår.GIFT_PARTNERSKAP -> null
-            forrigeVilkårsPeriodeTom != null -> forrigeVilkårsPeriodeTom
-            else -> null
+        return when (vilkår) {
+            Vilkår.UNDER_18_ÅR -> periodeFom.til18ÅrsVilkårsdato()
+            else -> forrigeVilkårsPeriodeTom
         }
     }
 
