@@ -11,7 +11,7 @@ data class BrevPeriode(
     val belop: Flettefelt,
     val antallBarn: Flettefelt,
     val barnasFodselsdager: Flettefelt,
-    val begrunnelser: List<Any>,
+    val begrunnelser: List<BrevBegrunnelse>,
     val type: Flettefelt,
 
     val antallBarnMedUtbetaling: Flettefelt,
