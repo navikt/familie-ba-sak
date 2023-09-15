@@ -26,8 +26,8 @@ Egenskap: Gyldige begrunnelser ved ingen endring
       | 2       | UNDER_18_ÅR                                 |                              | 07.09.2019 | 06.09.2037 | OPPFYLT  | Nei                  |
       | 2       | GIFT_PARTNERSKAP                            |                              | 07.09.2019 |            | OPPFYLT  | Nei                  |
       | 2       | LOVLIG_OPPHOLD                              |                              | 07.09.2019 | 14.07.2023 | OPPFYLT  | Nei                  |
-      | 2       | BOSATT_I_RIKET                              | BARN_BOR_I_NORGE             | 07.06.2023 | 14.07.2023 | OPPFYLT  | Nei                  |
-      | 2       | BOR_MED_SØKER                               | BARN_BOR_I_EØS_MED_SØKER     | 07.09.2019 | 14.07.2023 | OPPFYLT  | Nei                  |
+      | 2       | BOSATT_I_RIKET                              | BARN_BOR_I_NORGE             | 07.09.2019 | 14.07.2023 | OPPFYLT  | Nei                  |
+      | 2       | BOR_MED_SØKER                               | BARN_BOR_I_EØS_MED_SØKER     | 07.06.2023 | 14.07.2023 | OPPFYLT  | Nei                  |
       | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD,BOR_MED_SØKER |                              | 15.07.2023 | 15.08.2023 | OPPFYLT  | Nei                  |
 
       | 1       | LOVLIG_OPPHOLD                              |                              | 06.11.1984 |            | OPPFYLT  | Nei                  |
@@ -35,11 +35,11 @@ Egenskap: Gyldige begrunnelser ved ingen endring
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
-      | 2       | 1            | 01.07.2023 | 31.08.2023 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.07.2023 | 31.08.2025 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
 
     Og med kompetanser for begrunnelse
       | AktørId | Fra dato   | Til dato   | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
-      | 2       | 01.07.2023 | 31.08.2023 | NORGE_ER_PRIMÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | BE                             | BE                  |
+      | 2       | 01.07.2023 | 31.07.2023 | NORGE_ER_PRIMÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | BE                             | BE                  |
 
     Når begrunnelsetekster genereres for behandling 1
 
