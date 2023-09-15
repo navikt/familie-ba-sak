@@ -9,6 +9,10 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetTidslinjeForOppfylteVilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -19,7 +23,10 @@ object UtvidetBarnetrygdUtil {
         andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         tilkjentYtelse: TilkjentYtelse,
         endretUtbetalingAndelerSøker: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
+        personResultater: Set<PersonResultat>,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
+        val tidslinjerMedPerioderBarnaBorMedSøker = finnPerioderBarnaBorMedSøker(personResultater)
+
         val andelerTilkjentYtelseUtvidet = UtvidetBarnetrygdGenerator(
             behandlingId = tilkjentYtelse.behandling.id,
             tilkjentYtelse = tilkjentYtelse,
@@ -27,6 +34,7 @@ object UtvidetBarnetrygdUtil {
             .lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = utvidetVilkår,
                 andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer.map { it.andel },
+                tidslinjerMedPerioderBarnaBorMedSøker = tidslinjerMedPerioderBarnaBorMedSøker,
             )
 
         return TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
@@ -34,6 +42,20 @@ object UtvidetBarnetrygdUtil {
             endretUtbetalingAndeler = endretUtbetalingAndelerSøker,
         )
     }
+
+    private fun finnPerioderBarnaBorMedSøker(personResultater: Set<PersonResultat>) =
+        personResultater.associate { personResultat ->
+            personResultat.aktør to personResultat.vilkårResultater
+                .lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOR_MED_SØKER)
+                .map { vilkårResultat ->
+                    vilkårResultat?.utdypendeVilkårsvurderinger?.none {
+                        it in listOf(
+                            UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER,
+                            UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER,
+                        )
+                    }
+                }
+        }
 
     internal fun finnUtvidetVilkår(vilkårsvurdering: Vilkårsvurdering): List<VilkårResultat> {
         val utvidetVilkårResultater = vilkårsvurdering.personResultater
