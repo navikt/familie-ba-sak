@@ -198,7 +198,7 @@ class KontrollerNyUtbetalingsgeneratorService(
             simuleringsPerioderTidslinjeGammelFraNy
                 .kombinerMed(simuleringsPerioderNyTidslinje) { gammel, ny ->
                     KombinertSimuleringsResultat(
-                        erLike = gammel?.resultat == ny?.resultat,
+                        erLike = (gammel?.resultat ?: BigDecimal.ZERO) == (ny?.resultat ?: BigDecimal.ZERO),
                         gammel = gammel,
                         ny = ny,
                     )
