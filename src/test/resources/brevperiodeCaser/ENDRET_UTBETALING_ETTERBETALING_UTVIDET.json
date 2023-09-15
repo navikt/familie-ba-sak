@@ -1,0 +1,238 @@
+{
+  "beskrivelse": "Innvilget utvidet for 2 barn fra mai 2020 etter endret utbetaling med etterbetaling tre år tilbake i tid",
+  "fom": "2020-06-01",
+  "tom": "2022-06-30",
+  "vedtaksperiodetype": "UTBETALING",
+  "begrunnelser": [
+    {
+      "standardbegrunnelse": "Standardbegrunnelse$INNVILGET_BOR_ALENE_MED_BARN"
+    },
+    {
+      "standardbegrunnelse": "Standardbegrunnelse$ETTER_ENDRET_UTBETALING_ETTERBETALING"
+    }
+  ],
+  "fritekster": [],
+  "uregistrerteBarn": [],
+  "erFørsteVedtaksperiodePåFagsak": false,
+  "brevMålform": "NB",
+  "personerPåBehandling": [
+    {
+      "fødselsdato": "1986-08-29",
+      "type": "SØKER",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "LOVLIG_OPPHOLD",
+          "periodeFom": "2020-01-01",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": null,
+          "standardbegrunnelser": []
+        },
+        {
+          "vilkårType": "UTVIDET_BARNETRYGD",
+          "periodeFom": "2020-01-01",
+          "periodeTom": "2022-06-20",
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
+        },
+        {
+          "vilkårType": "BOSATT_I_RIKET",
+          "periodeFom": "2020-01-01",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": null,
+          "standardbegrunnelser": []
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [
+        {
+          "periode": {
+            "fom": "2020-02",
+            "tom": "2020-05"
+          },
+          "årsak": "ETTERBETALING_3ÅR"
+        }
+      ],
+      "utbetalinger": [
+        {
+          "ytelseType": "UTVIDET_BARNETRYGD",
+          "utbetaltPerMnd": 1054,
+          "erPåvirketAvEndring": false,
+          "prosent": 100
+        }
+      ],
+      "harReduksjonFraForrigeBehandling": false
+    },
+    {
+      "fødselsdato": "2010-11-03",
+      "type": "BARN",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "BOSATT_I_RIKET",
+          "periodeFom": "2020-01-01",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": null,
+          "standardbegrunnelser": []
+        },
+        {
+          "vilkårType": "LOVLIG_OPPHOLD",
+          "periodeFom": "2020-01-01",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": null,
+          "standardbegrunnelser": []
+        },
+        {
+          "vilkårType": "GIFT_PARTNERSKAP",
+          "periodeFom": "2010-11-03",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": null,
+          "standardbegrunnelser": []
+        },
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "periodeFom": "2020-01-01",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [
+            "DELT_BOSTED"
+          ],
+          "erEksplisittAvslagPåSøknad": null,
+          "standardbegrunnelser": []
+        },
+        {
+          "vilkårType": "UNDER_18_ÅR",
+          "periodeFom": "2010-11-03",
+          "periodeTom": "2028-11-02",
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": null,
+          "standardbegrunnelser": []
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": [
+        {
+          "ytelseType": "ORDINÆR_BARNETRYGD",
+          "utbetaltPerMnd": 527,
+          "erPåvirketAvEndring": false,
+          "prosent": 50
+        }
+      ],
+      "harReduksjonFraForrigeBehandling": false
+    },
+    {
+      "fødselsdato": "2005-02-05",
+      "type": "BARN",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "UNDER_18_ÅR",
+          "periodeFom": "2005-02-05",
+          "periodeTom": "2023-02-04",
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": null,
+          "standardbegrunnelser": []
+        },
+        {
+          "vilkårType": "GIFT_PARTNERSKAP",
+          "periodeFom": "2005-02-05",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": null,
+          "standardbegrunnelser": []
+        },
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "periodeFom": "2020-01-01",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
+        },
+        {
+          "vilkårType": "LOVLIG_OPPHOLD",
+          "periodeFom": "2020-01-01",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
+        },
+        {
+          "vilkårType": "BOSATT_I_RIKET",
+          "periodeFom": "2020-01-01",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": [
+        {
+          "ytelseType": "ORDINÆR_BARNETRYGD",
+          "utbetaltPerMnd": 1054,
+          "erPåvirketAvEndring": false,
+          "prosent": 100
+        }
+      ],
+      "harReduksjonFraForrigeBehandling": false
+    }
+  ],
+  "forventetOutput": {
+    "fom": "Du får:",
+    "tom": "",
+    "belop": 2635,
+    "antallBarn": 2,
+    "barnasFodselsdager": "05.02.05 og 03.11.10",
+    "begrunnelser": [
+      {
+        "gjelderSoker": true,
+        "barnasFodselsdatoer": "05.02.05 og 03.11.10",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "05.02.05 og 03.11.10",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
+        "antallBarn": 2,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 2,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
+        "maanedOgAarBegrunnelsenGjelderFor": "mai 2020",
+        "maalform": "bokmaal",
+        "apiNavn": "innvilgetBorAleneMedBarn",
+        "belop": 2635,
+        "sokersRettTilUtvidet": "sokerFaarUtvidet",
+        "soknadstidspunkt": "30.06.23"
+      },
+      {
+        "gjelderSoker": true,
+        "barnasFodselsdatoer": "05.02.05 og 03.11.10",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "05.02.05 og 03.11.10",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
+        "antallBarn": 2,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 2,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
+        "maanedOgAarBegrunnelsenGjelderFor": "mai 2020",
+        "maalform": "bokmaal",
+        "apiNavn": "etterEndretUtbetalingEtterbetalingTreAarTilbakeITid",
+        "belop": 2635,
+        "sokersRettTilUtvidet": "sokerFaarUtvidet",
+        "soknadstidspunkt": "30.06.23"
+      }
+    ],
+    "type": "innvilgelse"
+  }
+}
