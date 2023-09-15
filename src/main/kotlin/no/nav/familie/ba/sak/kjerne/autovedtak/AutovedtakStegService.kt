@@ -18,6 +18,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 interface AutovedtakBehandlingService<Behandlingsdata : AutomatiskBehandlingData> {
@@ -74,6 +76,7 @@ class AutovedtakStegService(
         Metrics.counter("behandling.saksbehandling.autovedtak.aapen_behandling", "type", it.name)
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun kjørBehandlingFødselshendelse(mottakersAktør: Aktør, nyBehandlingHendelse: NyBehandlingHendelse): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,

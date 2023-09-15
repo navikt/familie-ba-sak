@@ -39,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
+import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
@@ -251,6 +252,7 @@ fun lagAndelTilkjentYtelse(
     kildeBehandlingId: Long? = behandling.id,
     differanseberegnetPeriodebeløp: Int? = null,
     id: Long = 0,
+    sats: Int = sats(ytelseType),
 ): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
         id = id,
@@ -264,7 +266,7 @@ fun lagAndelTilkjentYtelse(
         type = ytelseType,
         periodeOffset = periodeIdOffset,
         forrigePeriodeOffset = forrigeperiodeIdOffset,
-        sats = beløp,
+        sats = sats,
         prosent = prosent,
         kildeBehandlingId = kildeBehandlingId,
         differanseberegnetPeriodebeløp = differanseberegnetPeriodebeløp,
@@ -1194,6 +1196,7 @@ fun lagRestSanityBegrunnelse(
     endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     vedtakResultat: String? = null,
     fagsakType: String? = null,
+    tema: String? = null,
 
 ): RestSanityBegrunnelse = RestSanityBegrunnelse(
     apiNavn = apiNavn,
@@ -1212,6 +1215,7 @@ fun lagRestSanityBegrunnelse(
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
     vedtakResultat = vedtakResultat,
     fagsakType = fagsakType,
+    tema = tema,
 )
 
 fun lagSanityBegrunnelse(
@@ -1263,6 +1267,7 @@ fun lagSanityEøsBegrunnelse(
     hjemlerSeperasjonsavtalenStorbritannina: List<String> = emptyList(),
     vilkår: List<Vilkår> = emptyList(),
     fagsakType: FagsakType? = null,
+    tema: Tema? = null,
 ): SanityEØSBegrunnelse = SanityEØSBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1276,6 +1281,7 @@ fun lagSanityEøsBegrunnelse(
     hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina,
     vilkår = vilkår.toSet(),
     fagsakType = fagsakType,
+    tema = tema,
 )
 
 fun lagTriggesAv(

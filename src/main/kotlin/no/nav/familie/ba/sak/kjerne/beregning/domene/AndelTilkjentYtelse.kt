@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForVedtaksperioderTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -306,9 +307,9 @@ fun List<AndelTilkjentYtelse>.tilTidslinjerPerPersonOgType(): Map<Pair<Aktør, Y
         )
     }
 
-fun List<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
+fun List<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgType() =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
-        AndelTilkjentYtelseTidslinje(
+        AndelTilkjentYtelseForVedtaksperioderTidslinje(
             andelerTilkjentYtelsePåPerson,
         )
     }
