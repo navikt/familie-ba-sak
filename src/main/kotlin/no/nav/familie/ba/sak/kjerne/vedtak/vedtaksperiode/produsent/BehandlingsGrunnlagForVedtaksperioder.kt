@@ -444,10 +444,10 @@ private fun Tidslinje<List<VilkårResultat>, Måned>.tilHarRettPåUtbetalingTids
     }
 }
 
-fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje() =
-    tilTidslinjerPerAktørOgType()
+fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje(): Tidslinje<Iterable<AndelForVedtaksperiode>, Måned> =
+    this.tilTidslinjerPerAktørOgType()
         .values
-        .map { tidslinje -> tidslinje.mapIkkeNull { AndelForVedtaksperiode(it) } }
+        .map { tidslinje -> tidslinje.mapIkkeNull { it }.slåSammenLike() }
         .kombiner { it }
 
 // Vi trenger dette for å kunne begrunne nye perioder med småbarnstillegg som vi ikke hadde i forrige behandling
