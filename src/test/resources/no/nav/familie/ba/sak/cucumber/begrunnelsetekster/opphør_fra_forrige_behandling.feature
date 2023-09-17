@@ -91,7 +91,7 @@ Egenskap: Opphør fra forrige behandling
       | 01.09.2021 | 31.12.2021 | UTBETALING         |           |                                       |                                  |
       | 01.01.2022 |            | OPPHØR             |           |                                       |                                  |
 
-  Scenario: Plassholdertekst for scenario - 0XmcQbhEIH
+  Scenario: Skal gi opphør fra forrige behandling-begrunnelser knyttet til bosatt i riket
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
