@@ -114,3 +114,68 @@ Egenskap: Reduksjon fra forrige behandling
       | 01.07.2023 | 31.07.2028 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
       | 01.08.2028 | 31.07.2040 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
       | 01.08.2040 |            | OPPHØR                                                  |           |                         |                          |
+
+
+  Scenario: Skal få reduksjon fra forrige behandling-begrunnelse knyttet til småbarnstillegg når overgangsstønad forsvinner
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
+      | 1            | 1        |                     | INNVILGET           | SØKNAD           |
+      | 2            | 1        | 1                   | ENDRET_UTBETALING   | SMÅBARNSTILLEGG  |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 3456    | BARN       | 26.08.2022  |
+      | 1            | 1234    | SØKER      | 19.11.1984  |
+      | 2            | 3456    | BARN       | 26.08.2022  |
+      | 2            | 1234    | SØKER      | 19.11.1984  |
+
+    Og følgende dagens dato 17.09.2023
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1234    | LOVLIG_OPPHOLD,BOSATT_I_RIKET                 |                  | 19.11.1984 |            | OPPFYLT  | Nei                  |
+      | 1234    | UTVIDET_BARNETRYGD                            |                  | 26.08.2019 |            | OPPFYLT  | Nei                  |
+
+      | 3456    | LOVLIG_OPPHOLD,BOR_MED_SØKER,GIFT_PARTNERSKAP |                  | 26.08.2019 |            | OPPFYLT  | Nei                  |
+      | 3456    | BOSATT_I_RIKET                                |                  | 26.08.2019 | 31.12.2021 | OPPFYLT  | Nei                  |
+      | 3456    | UNDER_18_ÅR                                   |                  | 26.08.2019 | 25.08.2037 | OPPFYLT  | Nei                  |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår                                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1234    | LOVLIG_OPPHOLD,BOSATT_I_RIKET                 |                  | 19.11.1984 |            | OPPFYLT  | Nei                  |
+      | 1234    | UTVIDET_BARNETRYGD                            |                  | 26.08.2019 |            | OPPFYLT  | Nei                  |
+
+      | 3456    | LOVLIG_OPPHOLD,BOR_MED_SØKER,GIFT_PARTNERSKAP |                  | 26.08.2019 |            | OPPFYLT  | Nei                  |
+      | 3456    | BOSATT_I_RIKET                                |                  | 26.08.2019 | 31.12.2021 | OPPFYLT  | Nei                  |
+      | 3456    | UNDER_18_ÅR                                   |                  | 26.08.2019 | 25.08.2037 | OPPFYLT  | Nei                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 3456    | 1            | 01.09.2019 | 28.02.2020 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 3456    | 1            | 01.03.2020 | 30.06.2020 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
+      | 3456    | 1            | 01.07.2020 | 31.12.2021 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 1234    | 1            | 01.09.2019 | 28.02.2020 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
+      | 1234    | 1            | 01.03.2020 | 30.06.2020 | 2489  | UTVIDET_BARNETRYGD | 100     | 2489 |
+      | 1234    | 1            | 01.07.2020 | 31.12.2021 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 1234    | 1            | 01.04.2020 | 30.06.2020 | 678   | SMÅBARNSTILLEGG    | 100     | 678  |
+      | 1234    | 1            | 01.07.2020 | 31.12.2021 | 696   | SMÅBARNSTILLEGG    | 100     | 696  |
+      | 3456    | 2            | 01.09.2019 | 28.02.2020 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 3456    | 2            | 01.03.2020 | 30.06.2020 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
+      | 3456    | 2            | 01.07.2020 | 31.12.2021 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 1234    | 2            | 01.09.2019 | 28.02.2020 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
+      | 1234    | 2            | 01.03.2020 | 30.06.2020 | 2489  | UTVIDET_BARNETRYGD | 100     | 2489 |
+      | 1234    | 2            | 01.07.2020 | 31.12.2021 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
+
+    Når begrunnelsetekster genereres for behandling 2
+
+    Så forvent følgende standardBegrunnelser
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                         | Ekskluderte Begrunnelser |
+      | 01.03.2020 | 30.06.2020 | UTBETALING         |           |                                                 |                          |
+      | 01.07.2020 | 31.12.2021 | UTBETALING         |           |                                                 |                          |
+      | 01.01.2022 |            | OPPHØR             |           | SMÅBARNSTILLEGG_HADDE_IKKE_FULL_OVERGANGSSTØNAD |                          |
