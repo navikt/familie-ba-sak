@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTids
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
@@ -26,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -35,6 +37,7 @@ internal class KompetanseServiceTest {
     val mockKompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse> = mockPeriodeBarnSkjemaRepository()
     val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService = mockk()
     val endretUtbetalingAndelTidslinjeService: EndretUtbetalingAndelTidslinjeService = mockk()
+    val unleashService: UnleashService = mockk()
 
     val kompetanseService = KompetanseService(
         mockKompetanseRepository,
@@ -44,6 +47,7 @@ internal class KompetanseServiceTest {
     val tilpassKompetanserTilRegelverkService = TilpassKompetanserTilRegelverkService(
         vilkårsvurderingTidslinjeService,
         endretUtbetalingAndelTidslinjeService,
+        unleashService,
         mockKompetanseRepository,
         emptyList(),
     )
@@ -51,6 +55,7 @@ internal class KompetanseServiceTest {
     @BeforeEach
     fun init() {
         mockKompetanseRepository.deleteAll()
+        every { unleashService.isEnabled(any()) } returns true
     }
 
     @Test
@@ -263,6 +268,7 @@ internal class KompetanseServiceTest {
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
+        every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
         every { endretUtbetalingAndelTidslinjeService.hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId) } returns emptyMap()
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
@@ -311,6 +317,7 @@ internal class KompetanseServiceTest {
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { endretUtbetalingAndelTidslinjeService.hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId) } returns emptyMap()
+        every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 
@@ -354,6 +361,7 @@ internal class KompetanseServiceTest {
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
+        every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
         every { endretUtbetalingAndelTidslinjeService.hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId) } returns emptyMap()
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
@@ -378,9 +386,25 @@ internal class KompetanseServiceTest {
         val barn3 = tilfeldigPerson(personType = PersonType.BARN)
 
         val kompetanser = KompetanseBuilder(jan(2020), behandlingId1)
-            .medKompetanse("SSS", barn1)
-            .medKompetanse("---------", barn2, barn3)
-            .medKompetanse("   SSSS", barn1)
+            .medKompetanse(
+                "SSS",
+                barn1,
+                annenForeldersAktivitetsland = null,
+                erAnnenForelderOmfattetAvNorskLovgivning = true,
+            )
+            .medKompetanse(
+                "---------",
+                barn2,
+                barn3,
+                annenForeldersAktivitetsland = null,
+                erAnnenForelderOmfattetAvNorskLovgivning = false,
+            )
+            .medKompetanse(
+                "   SSSS",
+                barn1,
+                annenForeldersAktivitetsland = null,
+                erAnnenForelderOmfattetAvNorskLovgivning = true,
+            )
             .lagreTil(mockKompetanseRepository)
 
         kompetanseService.kopierOgErstattKompetanser(behandlingId1, behandlingId2)

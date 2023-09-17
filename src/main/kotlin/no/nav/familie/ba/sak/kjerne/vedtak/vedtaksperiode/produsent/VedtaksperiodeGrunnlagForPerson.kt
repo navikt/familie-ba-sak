@@ -7,9 +7,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstøn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -19,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.Objects
 
 sealed interface VedtaksperiodeGrunnlagForPerson {
     val person: Person
@@ -98,32 +98,71 @@ fun List<VilkårResultatForVedtaksperiode>.erLikUtenFomOgTom(other: List<Vilkår
 data class EndretUtbetalingAndelForVedtaksperiode(
     val prosent: BigDecimal,
     val årsak: Årsak,
-    val standardbegrunnelse: List<IVedtakBegrunnelse>,
 ) {
     constructor(endretUtbetalingAndel: IUtfyltEndretUtbetalingAndel) : this(
         prosent = endretUtbetalingAndel.prosent,
         årsak = endretUtbetalingAndel.årsak,
-        standardbegrunnelse = endretUtbetalingAndel.standardbegrunnelser,
     )
 }
 
 data class AndelForVedtaksperiode(
     val kalkulertUtbetalingsbeløp: Int,
+    val nasjonaltPeriodebeløp: Int?,
     val type: YtelseType,
     val prosent: BigDecimal,
     val sats: Int,
 ) {
     constructor(andelTilkjentYtelse: AndelTilkjentYtelse) : this(
         kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
+        nasjonaltPeriodebeløp = andelTilkjentYtelse.nasjonaltPeriodebeløp,
         type = andelTilkjentYtelse.type,
         prosent = andelTilkjentYtelse.prosent,
         sats = andelTilkjentYtelse.sats,
     )
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is AndelForVedtaksperiode) {
+            return false
+        } else if (this === other) {
+            return true
+        }
+
+        val annen = other
+        return Objects.equals(kalkulertUtbetalingsbeløp, annen.kalkulertUtbetalingsbeløp) &&
+            Objects.equals(type, annen.type) &&
+            Objects.equals(prosent, annen.prosent) &&
+            satsErlik(annen.sats)
+    }
+
+    private fun satsErlik(annen: Int): Boolean {
+        return if (kalkulertUtbetalingsbeløp == 0) {
+            true
+        } else {
+            Objects.equals(sats, annen)
+        }
+    }
+
+    override fun hashCode(): Int {
+        return if (kalkulertUtbetalingsbeløp == 0) {
+            Objects.hash(
+                kalkulertUtbetalingsbeløp,
+                type,
+                prosent,
+            )
+        } else {
+            Objects.hash(
+                kalkulertUtbetalingsbeløp,
+                type,
+                prosent,
+                sats,
+            )
+        }
+    }
 }
 
 data class KompetanseForVedtaksperiode(
-    val søkersAktivitet: SøkersAktivitet,
-    val annenForeldersAktivitet: AnnenForeldersAktivitet,
+    val søkersAktivitet: KompetanseAktivitet,
+    val annenForeldersAktivitet: KompetanseAktivitet,
     val annenForeldersAktivitetsland: String?,
     val søkersAktivitetsland: String,
     val barnetsBostedsland: String,

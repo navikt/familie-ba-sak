@@ -4,13 +4,16 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.KombinertRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBoolskTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilRegelverkResultatTidslinje
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -26,14 +29,28 @@ class TilpassKompetanserTilRegelverkTest {
         val kompetanser: List<Kompetanse> = emptyList()
 
         val eøsPerioder = mapOf(
-            barn1.aktør to "EEENNEEEE".tilRegelverkResultatTidslinje(jan2020),
+            barn1.aktør to "EEENNEEEE".tilRegelverkResultatTidslinje(jan2020).kombinertSøkersResultatTidslinje(),
         )
+        val annenForelderOmfattetTidslinje =
+            "++++-----++++++".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(jan2020)
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("---  ----", barn1)
+            .medKompetanse(
+                "---      ",
+                barn1,
+                annenForeldersAktivitetsland = null,
+                erAnnenForelderOmfattetAvNorskLovgivning = true,
+            )
+            .medKompetanse(
+                "     ----",
+                barn1,
+                annenForeldersAktivitetsland = null,
+                erAnnenForelderOmfattetAvNorskLovgivning = false,
+            )
             .byggKompetanser()
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder, emptyMap())
+        val faktiskeKompetanser =
+            tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder, emptyMap(), annenForelderOmfattetTidslinje)
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
@@ -44,7 +61,7 @@ class TilpassKompetanserTilRegelverkTest {
             .medKompetanse("SSSSSSS", barn1)
             .byggKompetanser()
 
-        val eøsPerioder = emptyMap<Aktør, Tidslinje<RegelverkResultat, Måned>>()
+        val eøsPerioder = emptyMap<Aktør, Tidslinje<KombinertRegelverkResultat, Måned>>()
 
         val forventedeKompetanser = emptyList<Kompetanse>()
 
@@ -60,7 +77,7 @@ class TilpassKompetanserTilRegelverkTest {
             .byggKompetanser()
 
         val barnasRegelverkResultatTidslinjer = mapOf(
-            barn1.aktør to "EEENNEEEE".tilRegelverkResultatTidslinje(jan2020),
+            barn1.aktør to "EEENNEEEE".tilRegelverkResultatTidslinje(jan2020).kombinertSøkersResultatTidslinje(),
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
@@ -82,7 +99,7 @@ class TilpassKompetanserTilRegelverkTest {
             .medKompetanse("SS--SSSS", barn1, barn2)
             .byggKompetanser()
 
-        val barnasRegelverkResultatTidslinjer = mapOf(
+        val barnasEgneRegelverkResultatTidslinjer = mapOf(
             barn1.aktør to "EEENNEEEE".tilRegelverkResultatTidslinje(jan2020),
             barn2.aktør to "EEEENNEEE".tilRegelverkResultatTidslinje(jan2020),
         )
@@ -95,7 +112,7 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
             kompetanser,
-            barnasRegelverkResultatTidslinjer,
+            barnasEgneRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
             emptyMap(),
         ).sortedBy { it.fom }
 
@@ -116,7 +133,7 @@ class TilpassKompetanserTilRegelverkTest {
             .medKompetanse("-      ", barn3)
             .byggKompetanser()
 
-        val barnasRegelverkResultatTidslinjer = mapOf(
+        val barnasEgneRegelverkResultatTidslinjer = mapOf(
             barn1.aktør to "EEENNEEEE".tilRegelverkResultatTidslinje(jan2020),
             barn2.aktør to "EEE--NNNN".tilRegelverkResultatTidslinje(jan2020),
             barn3.aktør to "EEEEEEEEE".tilRegelverkResultatTidslinje(jan2020),
@@ -135,7 +152,7 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
             kompetanser,
-            barnasRegelverkResultatTidslinjer,
+            barnasEgneRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
             emptyMap(),
         ).sortedBy { it.fom }
 
@@ -158,7 +175,7 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
             kompetanser,
-            barnasRegelverkResultatTidslinjer,
+            barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
             emptyMap(),
         ).sortedBy { it.fom }
 
@@ -195,7 +212,7 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
             kompetanser,
-            barnasRegelverkResultatTidslinjer,
+            barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
             emptyMap(),
         ).sortedBy { it.fom }
 
@@ -225,10 +242,18 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
             kompetanser,
-            barnasRegelverkResultatTidslinjer,
+            barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
             barnasHarEtterbetaling3År,
         ).sortedBy { it.fom }
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+}
+
+private fun Tidslinje<RegelverkResultat, Måned>.kombinertSøkersResultatTidslinje(
+    søkersTidslinje: Tidslinje<RegelverkResultat, Måned>? = null,
+): Tidslinje<KombinertRegelverkResultat, Måned> {
+    return this.kombinerMed(søkersTidslinje ?: this) { barnetsResultat: RegelverkResultat?, søkersResultat: RegelverkResultat? ->
+        KombinertRegelverkResultat(barnetsResultat, søkersResultat)
     }
 }

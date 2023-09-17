@@ -2,11 +2,13 @@ package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 enum class BarnetsBostedsland {
@@ -32,6 +34,8 @@ data class RestSanityEØSBegrunnelse(
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>?,
     val eosVilkaar: List<String>? = null,
     val vedtakResultat: String?,
+    val fagsakType: String?,
+    val tema: String?,
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
@@ -39,7 +43,7 @@ data class RestSanityEØSBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
             annenForeldersAktivitet = annenForeldersAktivitet?.mapNotNull {
-                konverterTilEnumverdi<AnnenForeldersAktivitet>(it)
+                konverterTilEnumverdi<KompetanseAktivitet>(it)
             } ?: emptyList(),
             barnetsBostedsland = barnetsBostedsland?.mapNotNull {
                 konverterTilEnumverdi<BarnetsBostedsland>(it)
@@ -56,6 +60,12 @@ data class RestSanityEØSBegrunnelse(
             periodeResultat = vedtakResultat?.let {
                 finnEnumverdi(it, SanityPeriodeResultat.entries.toTypedArray(), apiNavn)
             },
+            fagsakType = fagsakType?.let {
+                finnEnumverdi(it, FagsakType.entries.toTypedArray(), apiNavn)
+            },
+            tema = tema?.let {
+                finnEnumverdi(it, Tema.entries.toTypedArray(), apiNavn)
+            },
         )
     }
 
@@ -68,7 +78,9 @@ data class SanityEØSBegrunnelse(
     override val navnISystem: String,
     override val periodeResultat: SanityPeriodeResultat? = null,
     override val vilkår: Set<Vilkår>,
-    val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
+    override val fagsakType: FagsakType?,
+    override val tema: Tema?,
+    val annenForeldersAktivitet: List<KompetanseAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
     val hjemler: List<String>,

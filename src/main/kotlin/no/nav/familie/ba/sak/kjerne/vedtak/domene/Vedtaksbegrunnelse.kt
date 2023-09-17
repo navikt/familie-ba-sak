@@ -28,8 +28,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.beløpUtbetaltFor
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -141,10 +140,10 @@ data class EØSBegrunnelseDataMedKompetanse(
     override val vedtakBegrunnelseType: VedtakBegrunnelseType,
     override val apiNavn: String,
 
-    val annenForeldersAktivitet: AnnenForeldersAktivitet,
+    val annenForeldersAktivitet: KompetanseAktivitet,
     val annenForeldersAktivitetsland: String?,
     val barnetsBostedsland: String,
-    val sokersAktivitet: SøkersAktivitet,
+    val sokersAktivitet: KompetanseAktivitet,
     val sokersAktivitetsland: String?,
     val barnasFodselsdatoer: String,
     val antallBarn: Int,
@@ -172,7 +171,6 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     uregistrerteBarn: List<MinimertUregistrertBarn>,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
     minimerteRestEndredeAndeler: List<MinimertRestEndretAndel>,
-    skalBrukeNyVedtaksperiodeLøsning: Boolean,
 ): Begrunnelse {
     val personerPåBegrunnelse =
         personerIPersongrunnlag.filter { person -> this.personIdenter.contains(person.personIdent) }
@@ -209,7 +207,6 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
                     fom = vedtaksperiode.fom,
                     tom = vedtaksperiode.tom ?: TIDENES_ENDE,
                 ),
-                skalBrukeNyVedtaksperiodeLøsning,
             )
         }
 

@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentUtbetalingsperiodeDetaljerNy
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentUtbetalingsperiodeDetaljer
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import java.time.LocalDate
@@ -31,19 +31,11 @@ fun List<UtvidetVedtaksperiodeMedBegrunnelser>.sorter(): List<UtvidetVedtaksperi
 fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    skalBrukeNyVedtaksperiodeLøsning: Boolean,
 ): UtvidetVedtaksperiodeMedBegrunnelser {
-    val utbetalingsperiodeDetaljer = if (skalBrukeNyVedtaksperiodeLøsning) {
-        this.hentUtbetalingsperiodeDetaljerNy(
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-        )
-    } else {
-        hentUtbetalingsperiodeDetaljer(
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-        )
-    }
+    val utbetalingsperiodeDetaljer = this.hentUtbetalingsperiodeDetaljer(
+        andelerTilkjentYtelse = andelerTilkjentYtelse,
+        personopplysningGrunnlag = personopplysningGrunnlag,
+    )
 
     return UtvidetVedtaksperiodeMedBegrunnelser(
         id = this.id,

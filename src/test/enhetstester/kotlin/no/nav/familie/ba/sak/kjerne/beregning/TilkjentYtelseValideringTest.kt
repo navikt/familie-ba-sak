@@ -16,12 +16,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
-import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.YearMonth
 
 class TilkjentYtelseValideringTest {
 
-    val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now())
+    val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDate.now())
 
     @Test
     fun `Skal returnere true når person har etterbetaling som er mer enn 3 år tilbake i tid`() {
@@ -192,7 +192,7 @@ class TilkjentYtelseValideringTest {
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = forrigeAndeler,
                 andelerForPerson = andeler,
-                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
+                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDate.now().minusYears(2)),
             ),
         )
 
@@ -200,7 +200,7 @@ class TilkjentYtelseValideringTest {
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = emptyList(),
                 andelerForPerson = andeler,
-                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
+                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDate.now().minusYears(2)),
             ),
         )
 
@@ -208,7 +208,7 @@ class TilkjentYtelseValideringTest {
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = emptyList(),
                 andelerForPerson = andeler,
-                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
+                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDate.now().minusYears(2)),
             ),
         )
 
@@ -216,7 +216,7 @@ class TilkjentYtelseValideringTest {
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = forrigeAndeler,
                 andelerForPerson = emptyList(),
-                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
+                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDate.now().minusYears(2)),
             ),
         )
     }
@@ -258,6 +258,61 @@ class TilkjentYtelseValideringTest {
                 MånedPeriode(
                     inneværendeMåned().minusYears(1).plusMonths(1),
                     inneværendeMåned().plusYears(1).minusMonths(1),
+                ),
+            ),
+            TilkjentYtelseValidering.finnPeriodeMedOverlappAvAndeler(andeler, andelerFraTidligere),
+        )
+        Assertions.assertEquals(
+            TilkjentYtelseValidering.finnPeriodeMedOverlappAvAndeler(andeler, emptyList()),
+            emptyList<MånedPeriode>(),
+        )
+    }
+
+    @Test
+    fun `Skal håndtere overlappende tidligere andeler fra flere enn 1 behandling`() {
+        val barn = tilfeldigPerson()
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 2108,
+                person = barn,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().plusMonths(1),
+                tom = inneværendeMåned().plusYears(1),
+                beløp = 2108,
+                person = barn,
+            ),
+        )
+
+        // 3 Behandlinger med identiske perioder.
+        val andelerFraTidligere = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1).plusMonths(1),
+                tom = inneværendeMåned().plusMonths(2),
+                beløp = 2108,
+                person = barn,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1).plusMonths(1),
+                tom = inneværendeMåned().plusMonths(2),
+                beløp = 2108,
+                person = barn,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1).plusMonths(1),
+                tom = inneværendeMåned().plusMonths(2),
+                beløp = 2108,
+                person = barn,
+            ),
+        )
+
+        Assertions.assertEquals(
+            listOf(
+                MånedPeriode(
+                    inneværendeMåned().minusYears(1).plusMonths(1),
+                    inneværendeMåned().plusMonths(2),
                 ),
             ),
             TilkjentYtelseValidering.finnPeriodeMedOverlappAvAndeler(andeler, andelerFraTidligere),

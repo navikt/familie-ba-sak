@@ -6,21 +6,24 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
-import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevBehandlingsdata
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
-interface AutovedtakBehandlingService<Behandlingsdata> {
-    fun skalAutovedtakBehandles(behandlingsdata: Behandlingsdata): Boolean = true
+interface AutovedtakBehandlingService<Behandlingsdata : AutomatiskBehandlingData> {
+    fun skalAutovedtakBehandles(behandlingsdata: Behandlingsdata): Boolean
 
     fun kjørBehandling(behandlingsdata: Behandlingsdata): String
 }
@@ -29,6 +32,31 @@ enum class Autovedtaktype(val displayName: String) {
     FØDSELSHENDELSE("Fødselshendelse"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     OMREGNING_BREV("Omregning"),
+}
+
+sealed interface AutomatiskBehandlingData {
+    val type: Autovedtaktype
+}
+
+data class FødselshendelseData(
+    val nyBehandlingHendelse: NyBehandlingHendelse,
+) : AutomatiskBehandlingData {
+    override val type = Autovedtaktype.FØDSELSHENDELSE
+}
+
+data class SmåbarnstilleggData(
+    val aktør: Aktør,
+) : AutomatiskBehandlingData {
+    override val type = Autovedtaktype.SMÅBARNSTILLEGG
+}
+
+data class OmregningBrevData(
+    val aktør: Aktør,
+    val behandlingsårsak: BehandlingÅrsak,
+    val standardbegrunnelse: Standardbegrunnelse,
+    val fagsakId: Long,
+) : AutomatiskBehandlingData {
+    override val type = Autovedtaktype.OMREGNING_BREV
 }
 
 @Service
@@ -48,91 +76,72 @@ class AutovedtakStegService(
         Metrics.counter("behandling.saksbehandling.autovedtak.aapen_behandling", "type", it.name)
     }
 
-    fun kjørBehandlingFødselshendelse(mottakersAktør: Aktør, behandlingsdata: NyBehandlingHendelse): String {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun kjørBehandlingFødselshendelse(mottakersAktør: Aktør, nyBehandlingHendelse: NyBehandlingHendelse): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
-            autovedtaktype = Autovedtaktype.FØDSELSHENDELSE,
-            behandlingsdata = behandlingsdata,
+            automatiskBehandlingData = FødselshendelseData(nyBehandlingHendelse),
         )
     }
 
-    fun kjørBehandlingOmregning(mottakersAktør: Aktør, behandlingsdata: AutovedtakBrevBehandlingsdata): String {
+    fun kjørBehandlingOmregning(mottakersAktør: Aktør, behandlingsdata: OmregningBrevData): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
-            autovedtaktype = Autovedtaktype.OMREGNING_BREV,
-            behandlingsdata = behandlingsdata,
+            automatiskBehandlingData = behandlingsdata,
         )
     }
 
-    fun kjørBehandlingSmåbarnstillegg(mottakersAktør: Aktør, behandlingsdata: Aktør): String {
+    fun kjørBehandlingSmåbarnstillegg(mottakersAktør: Aktør, aktør: Aktør): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
-            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
-            behandlingsdata = behandlingsdata,
+            automatiskBehandlingData = SmåbarnstilleggData(aktør),
         )
     }
 
-    private fun <Behandlingsdata> kjørBehandling(
+    private fun kjørBehandling(
+        automatiskBehandlingData: AutomatiskBehandlingData,
         mottakersAktør: Aktør,
-        autovedtaktype: Autovedtaktype,
-        behandlingsdata: Behandlingsdata,
     ): String {
-        secureLoggAutovedtakBehandling(autovedtaktype, mottakersAktør, BEHANDLING_STARTER)
-        antallAutovedtak[autovedtaktype]?.increment()
+        secureLoggAutovedtakBehandling(automatiskBehandlingData.type, mottakersAktør, BEHANDLING_STARTER)
+        antallAutovedtak[automatiskBehandlingData.type]?.increment()
 
-        val skalAutovedtakBehandles = when (autovedtaktype) {
-            Autovedtaktype.FØDSELSHENDELSE -> {
-                autovedtakFødselshendelseService.skalAutovedtakBehandles(behandlingsdata as NyBehandlingHendelse)
-            }
-
-            Autovedtaktype.OMREGNING_BREV -> {
-                autovedtakBrevService.skalAutovedtakBehandles(behandlingsdata as AutovedtakBrevBehandlingsdata)
-            }
-
-            Autovedtaktype.SMÅBARNSTILLEGG -> {
-                autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(behandlingsdata as Aktør)
-            }
+        val skalAutovedtakBehandles = when (automatiskBehandlingData) {
+            is FødselshendelseData -> autovedtakFødselshendelseService.skalAutovedtakBehandles(automatiskBehandlingData)
+            is OmregningBrevData -> autovedtakBrevService.skalAutovedtakBehandles(automatiskBehandlingData)
+            is SmåbarnstilleggData -> autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(automatiskBehandlingData)
         }
 
         if (!skalAutovedtakBehandles) {
             secureLoggAutovedtakBehandling(
-                autovedtaktype,
+                automatiskBehandlingData.type,
                 mottakersAktør,
                 "Skal ikke behandles",
             )
-            return "${autovedtaktype.displayName}: Skal ikke behandles"
+            return "${automatiskBehandlingData.type.displayName}: Skal ikke behandles"
         }
 
         if (håndterÅpenBehandlingOgAvbrytAutovedtak(
                 aktør = mottakersAktør,
-                autovedtaktype = autovedtaktype,
-                fagsakId = hentFagsakIdFraBehandlingsdata(autovedtaktype, behandlingsdata),
+                autovedtaktype = automatiskBehandlingData.type,
+                fagsakId = hentFagsakIdFraBehandlingsdata(automatiskBehandlingData),
             )
         ) {
             secureLoggAutovedtakBehandling(
-                autovedtaktype,
+                automatiskBehandlingData.type,
                 mottakersAktør,
                 "Bruker har åpen behandling",
             )
-            return "${autovedtaktype.displayName}: Bruker har åpen behandling"
+            return "${automatiskBehandlingData.type.displayName}: Bruker har åpen behandling"
         }
 
-        val resultatAvKjøring = when (autovedtaktype) {
-            Autovedtaktype.FØDSELSHENDELSE -> {
-                autovedtakFødselshendelseService.kjørBehandling(behandlingsdata as NyBehandlingHendelse)
-            }
-
-            Autovedtaktype.OMREGNING_BREV -> {
-                autovedtakBrevService.kjørBehandling(behandlingsdata as AutovedtakBrevBehandlingsdata)
-            }
-
-            Autovedtaktype.SMÅBARNSTILLEGG -> {
-                autovedtakSmåbarnstilleggService.kjørBehandling(behandlingsdata as Aktør)
-            }
+        val resultatAvKjøring = when (automatiskBehandlingData) {
+            is FødselshendelseData -> autovedtakFødselshendelseService.kjørBehandling(automatiskBehandlingData)
+            is OmregningBrevData -> autovedtakBrevService.kjørBehandling(automatiskBehandlingData)
+            is SmåbarnstilleggData -> autovedtakSmåbarnstilleggService.kjørBehandling(automatiskBehandlingData)
         }
 
         secureLoggAutovedtakBehandling(
-            autovedtaktype,
+            automatiskBehandlingData.type,
             mottakersAktør,
             resultatAvKjøring,
         )
@@ -140,15 +149,13 @@ class AutovedtakStegService(
         return resultatAvKjøring
     }
 
-    private fun <Behandlingsdata> hentFagsakIdFraBehandlingsdata(
-        autovedtaktype: Autovedtaktype,
-        behandlingsdata: Behandlingsdata,
-    ): Long? {
-        return if (autovedtaktype == Autovedtaktype.OMREGNING_BREV) {
-            (behandlingsdata as AutovedtakBrevBehandlingsdata).fagsakId
-        } else {
-            null
-        }
+    private fun hentFagsakIdFraBehandlingsdata(
+        behandlingsdata: AutomatiskBehandlingData,
+    ): Long? = when (behandlingsdata) {
+        is OmregningBrevData -> behandlingsdata.fagsakId
+        is FødselshendelseData,
+        is SmåbarnstilleggData,
+        -> null
     }
 
     private fun håndterÅpenBehandlingOgAvbrytAutovedtak(

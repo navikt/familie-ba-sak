@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -131,7 +130,6 @@ class BrevPeriodeService(
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = personopplysningGrunnlag,
             andelerTilkjentYtelse = andelerTilkjentYtelse,
-            skalBrukeNyVedtaksperiodeLøsning = featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY),
         )
 
         val ytelserForrigePeriode =
@@ -237,8 +235,6 @@ class BrevPeriodeService(
                 vedtaksperioder = listOf(vedtaksperiodeMedBegrunnelser),
                 behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling,
             ).single()
-        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster(
-            skalBrukeNyVedtaksperiodeLøsning = featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY),
-        )
+        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
     }
 }

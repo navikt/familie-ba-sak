@@ -977,6 +977,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagBorIkkeFastMedBarnet"
     },
+    AVSLAG_ENSLIG_MINDREÅRIG_FLYKTNING_BOR_I_INSTITUSJON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagEnsligMindreaarigFlyktningBorIInstitusjon"
+    },
     OPPHØR_BARN_FLYTTET_FRA_SØKER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBarnBorIkkeMedSoker"
@@ -1173,6 +1177,14 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBarnetBorIInstitusjon"
     },
+    OPPHØR_BARN_BOR_IKKE_MED_SØKER_ETTER_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorBarnBorIkkeMedSokerEtterDeltBosted"
+    },
+    OPPHØR_VURDERING_IKKE_BOSATT_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorVurderingIkkeBosattINorge"
+    },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetSokerOgBarnBosattIRiket"
@@ -1349,22 +1361,6 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetGenerellBorSammenMedBarn"
     },
-    ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingDeltBostedFullUtbetalingForSoknad"
-    },
-    ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingDeltBostedIngenUtbetalingForSoknad"
-    },
-    ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALING_UTVIDET {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingDeltBostedKunEtterbetalingUtvidet"
-    },
-    ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_ORDINÆR_OG_ETTERBETALING_UTVIDET {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingDeltBostedFullOrdinarOgEtterbetalingUtvidet"
-    },
     ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingDeltBostedIngenUtbetaling"
@@ -1396,7 +1392,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     },
     ENDRET_UTBETALING_ALLEREDE_UTBETALT_FORELDRE_BOR_SAMMEN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingAlleredeUtbetaltForeldreBorSammen"
+        override val sanityApiNavn = "endretUtbetalingAlleredeUtbetalt"
     },
     ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
@@ -1405,6 +1401,26 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     ENDRET_UTBETALING_OPPHØR_ENDRE_MOTTAKER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingOpphorEndreMottaker"
+    },
+    ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingTreAarTilbakeITid"
+    },
+    ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_SED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingTreAarTilbakeITidSED"
+    },
+    ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_KUN_UTVIDET_DEL_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingTreAarTilbakeITidKunUtvidetDelUtbetaling"
+    },
+    ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_SED_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingTreAarTilbakeITidSedUtbetaling"
+    },
+    ENDRET_UTBETALING_TRE_ÅR_TILBAKE_I_TID_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingTreAarTilbakeITidUtbetaling"
     },
     ETTER_ENDRET_UTBETALING_RETTSAVGJØRELSE_DELT_BOSTED {
         override val sanityApiNavn = "etterEndretUtbetalingRettsavgjorelseDeltBosted"

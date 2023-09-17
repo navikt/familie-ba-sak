@@ -25,20 +25,21 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 
 // 3 år (krav i loven)
-fun hentGyldigEtterbetalingFom(kravDato: LocalDateTime) =
+fun hentGyldigEtterbetalingFom(kravDato: LocalDate) =
     kravDato.minusYears(3)
-        .toLocalDate()
         .toYearMonth()
 
 fun hentSøkersAndeler(
@@ -87,7 +88,7 @@ object TilkjentYtelseValidering {
         andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
         kravDato: LocalDateTime,
     ): List<Aktør> {
-        val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato)
+        val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato.toLocalDate())
 
         val aktører = unikeAntører(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
 
@@ -226,7 +227,7 @@ object TilkjentYtelseValidering {
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
     ): List<MånedPeriode> {
         val kombinertOverlappTidslinje = YtelseType.values().map { ytelseType ->
-            finnPeriodeMedOverlappAvAndelerForYtelseType(
+            lagErOver100ProsentUtbetalingPåYtelseTidslinje(
                 andeler = andeler.filter { it.type == ytelseType },
                 barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger.filter { it.type == ytelseType },
             )
@@ -240,22 +241,36 @@ object TilkjentYtelseValidering {
         return any { it }
     }
 
-    fun finnPeriodeMedOverlappAvAndelerForYtelseType(
+    fun lagErOver100ProsentUtbetalingPåYtelseTidslinje(
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
     ): Tidslinje<Boolean, Måned> {
-        val andelerTidslinje = andeler.map {
-            Periode(fraOgMed = it.periode.fom.tilTidspunkt(), tilOgMed = it.periode.tom.tilTidspunkt(), innhold = it)
-        }.tilTidslinje()
-        val tidligereAndelerTidslinje = barnsAndelerFraAndreBehandlinger.map {
-            Periode(fraOgMed = it.periode.fom.tilTidspunkt(), tilOgMed = it.periode.tom.tilTidspunkt(), innhold = it)
-        }.tilTidslinje()
-
-        return andelerTidslinje.kombinerUtenNullMed(tidligereAndelerTidslinje) { andel, tidligereAndel ->
-            andel.overlapperMed(tidligereAndel) && andel.prosent + tidligereAndel.prosent > BigDecimal(100)
+        if (barnsAndelerFraAndreBehandlinger.isEmpty()) {
+            return emptyList<Periode<Boolean, Måned>>().tilTidslinje()
         }
+        val prosenttidslinjerPerBehandling =
+            (andeler + barnsAndelerFraAndreBehandlinger).groupBy { it.behandlingId }.values
+                .map { it.tilProsentAvYtelseUtbetaltTidslinje() }
+
+        val erOver100ProsentTidslinje =
+            prosenttidslinjerPerBehandling.fold(emptyList<Periode<BigDecimal, Måned>>().tilTidslinje()) { summertProsentTidslinje, prosentTidslinje ->
+                summertProsentTidslinje.kombinerMed(prosentTidslinje) { sumProsentForPeriode, prosentForAndel ->
+                    (sumProsentForPeriode ?: BigDecimal.ZERO) + (prosentForAndel ?: BigDecimal.ZERO)
+                }
+            }.map { sumProsentForPeriode -> (sumProsentForPeriode ?: BigDecimal.ZERO) > BigDecimal.valueOf(100) }
+
+        return erOver100ProsentTidslinje
     }
 }
+
+private fun List<AndelTilkjentYtelse>.tilProsentAvYtelseUtbetaltTidslinje() =
+    this.map {
+        månedPeriodeAv(
+            fraOgMed = it.periode.fom,
+            tilOgMed = it.periode.tom,
+            innhold = it.prosent,
+        )
+    }.tilTidslinje()
 
 private fun validerAtBeløpForPartStemmerMedSatser(
     person: PersonEnkel,

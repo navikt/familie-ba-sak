@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår.UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle.BARN
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle.SOKER
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -26,6 +27,8 @@ interface ISanityBegrunnelse {
     val bosattIRiketTriggere: List<VilkårTrigger>
     val lovligOppholdTriggere: List<VilkårTrigger>
     val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>
+    val fagsakType: FagsakType?
+    val tema: Tema?
 }
 
 data class SanityBegrunnelse(
@@ -38,6 +41,8 @@ data class SanityBegrunnelse(
     override val giftPartnerskapTriggere: List<VilkårTrigger> = emptyList(),
     override val borMedSokerTriggere: List<VilkårTrigger> = emptyList(),
     override val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger> = emptyList(),
+    override val fagsakType: FagsakType? = null,
+    override val tema: Tema? = null,
     @Deprecated("Bruk vilkår")
     val vilkaar: List<SanityVilkår> = emptyList(),
     val rolle: List<VilkårRolle> = emptyList(),
@@ -74,6 +79,8 @@ data class RestSanityBegrunnelse(
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
     val valgbarhet: String? = null,
     val vedtakResultat: String?,
+    val fagsakType: String?,
+    val tema: String?,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
         if (apiNavn == null) return null
@@ -127,6 +134,13 @@ data class RestSanityBegrunnelse(
             periodeResultat = vedtakResultat?.let {
                 finnEnumverdi(it, SanityPeriodeResultat.entries.toTypedArray(), apiNavn)
             },
+            fagsakType = fagsakType?.let {
+                finnEnumverdi(it, FagsakType.entries.toTypedArray(), apiNavn)
+            },
+            tema = tema?.let {
+                finnEnumverdi(it, Tema.entries.toTypedArray(), apiNavn)
+            },
+
         )
     }
 }
@@ -202,9 +216,15 @@ enum class ØvrigTrigger {
     ALLTID_AUTOMATISK,
     ETTER_ENDRET_UTBETALING,
     ENDRET_UTBETALING,
-    GJELDER_FØRSTE_PERIODE,
-    GJELDER_FRA_INNVILGELSESTIDSPUNKT,
+    OPPHØR_FRA_FORRIGE_BEHANDLING,
+    REDUKSJON_FRA_FORRIGE_BEHANDLING,
     BARN_DØD,
+
+    @Deprecated("Skal erstattes med OPPHØR_FRA_FORRIGE_BEHANDLING, må endres i sanity")
+    GJELDER_FØRSTE_PERIODE,
+
+    @Deprecated("Skal erstattes med REDUKSJON_FRA_FORRIGE_BEHANDLING, må endres i sanity")
+    GJELDER_FRA_INNVILGELSESTIDSPUNKT,
 }
 
 enum class EndretUtbetalingsperiodeTrigger {
@@ -226,6 +246,12 @@ enum class Valgbarhet {
     AUTOMATISK,
     TILLEGGSTEKST,
     SAKSPESIFIKK,
+}
+
+enum class Tema {
+    NASJONAL,
+    EØS,
+    FELLES,
 }
 
 private fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {

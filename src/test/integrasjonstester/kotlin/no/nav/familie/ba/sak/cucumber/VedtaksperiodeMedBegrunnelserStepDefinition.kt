@@ -41,6 +41,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var overstyrteEndringstidspunkt = mapOf<Long, LocalDate>()
     private var overgangsstønad = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
     private var uregistrerteBarn = listOf<BarnMedOpplysninger>()
+    private var dagensDato: LocalDate = LocalDate.now()
 
     private var gjeldendeBehandlingId: Long? = null
 
@@ -53,11 +54,17 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     }
 
     /**
-     * Mulige verdier: | BehandlingId | ForrigeBehandlingId | FagsakId |
+     * Mulige verdier:
+     * | BehandlingId | ForrigeBehandlingId | FagsakId | Behandlingsresultat | Behandlingsårsak |
      */
     @Gitt("følgende vedtak")
     fun `følgende vedtak`(dataTable: DataTable) {
         lagVedtak(dataTable, behandlinger, behandlingTilForrigeBehandling, vedtaksliste, fagsaker)
+    }
+
+    @Og("dagens dato er {}")
+    fun `dagens dato er`(dagensDatoString: String) {
+        dagensDato = parseDato(dagensDatoString)
     }
 
     /**
@@ -118,7 +125,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     }
 
     /**
-     * Mulige verdier: | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent |
+     * Mulige verdier: | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
      */
     @Og("med andeler tilkjent ytelse")
     fun `med andeler tilkjent ytelse`(dataTable: DataTable) {
@@ -130,7 +137,12 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
      */
     @Og("med overgangsstønad")
     fun `med overgangsstønad`(dataTable: DataTable) {
-        overgangsstønad = lagOvergangsstønad(dataTable, persongrunnlag)
+        overgangsstønad = lagOvergangsstønad(
+            dataTable = dataTable,
+            persongrunnlag = persongrunnlag,
+            tidligereBehandlinger = behandlingTilForrigeBehandling,
+            dagensDato = LocalDate.now(),
+        )
     }
 
     @Og("med uregistrerte barn")
@@ -154,6 +166,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             overstyrteEndringstidspunkt = overstyrteEndringstidspunkt,
             overgangsstønad = overgangsstønad,
             uregistrerteBarn = uregistrerteBarn,
+            nåDato = dagensDato,
         )
     }
 

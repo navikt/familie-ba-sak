@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -106,6 +107,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
             .andelerTilkjentYtelse.toList()
             .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
@@ -196,6 +198,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
             .andelerTilkjentYtelse.toList()
             .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
@@ -214,6 +217,69 @@ internal class UtvidetBarnetrygdTest {
         assertEquals(søker.fom.nesteMåned(), andelUtvidet.stønadFom)
         assertEquals(søker.tom.toYearMonth(), andelUtvidet.stønadTom)
         assertEquals(1054, andelUtvidet.kalkulertUtbetalingsbeløp)
+    }
+
+    @Test
+    fun `Utvidet andeler får største prosent funnet blant andelene til barna som bor med søker`() {
+        val behandling = lagBehandling()
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+        val søkerAktør = randomAktør()
+
+        val utvidetVilkår = lagVilkårResultat(
+            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+            periodeFom = LocalDate.of(2021, 10, 1),
+            periodeTom = LocalDate.of(2022, 2, 28),
+            personResultat = PersonResultat(
+                aktør = søkerAktør,
+                vilkårsvurdering = lagVilkårsvurdering(
+                    søkerAktør = søkerAktør,
+                    behandling = behandling,
+                    resultat = Resultat.OPPFYLT,
+                ),
+            ),
+        )
+
+        val barnasAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2021, 10),
+                tom = YearMonth.of(2022, 2),
+                person = tilfeldigPerson(personType = PersonType.BARN),
+                prosent = BigDecimal(50),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                tilkjentYtelse = tilkjentYtelse,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2021, 10),
+                tom = YearMonth.of(2022, 2),
+                person = tilfeldigPerson(personType = PersonType.BARN),
+                prosent = BigDecimal(100),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                tilkjentYtelse = tilkjentYtelse,
+            ),
+        )
+
+        val utvidetAndelerNårBarnMed100ProsentBorMedSøker = UtvidetBarnetrygdGenerator(
+            behandlingId = behandling.id,
+            tilkjentYtelse = tilkjentYtelse,
+        ).lagUtvidetBarnetrygdAndeler(
+            utvidetVilkår = listOf(utvidetVilkår),
+            andelerBarna = barnasAndeler,
+            tidslinjerMedPerioderBarnaBorMedSøker = barnasAndeler
+                .tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } },
+        )
+
+        val utvidetAndelerNårKunBarnMed50ProsentBorMedSøker = UtvidetBarnetrygdGenerator(
+            behandlingId = behandling.id,
+            tilkjentYtelse = tilkjentYtelse,
+        ).lagUtvidetBarnetrygdAndeler(
+            utvidetVilkår = listOf(utvidetVilkår),
+            andelerBarna = barnasAndeler,
+            tidslinjerMedPerioderBarnaBorMedSøker = barnasAndeler
+                .tilSeparateTidslinjerForBarna().mapValues { it.value.map { andel -> andel?.prosent == BigDecimal(50) } },
+        )
+
+        assertEquals(BigDecimal(100), utvidetAndelerNårBarnMed100ProsentBorMedSøker.minOf { it.prosent })
+        assertEquals(BigDecimal(50), utvidetAndelerNårKunBarnMed50ProsentBorMedSøker.maxOf { it.prosent })
     }
 
     @Test
@@ -278,6 +344,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
@@ -357,6 +424,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
@@ -436,6 +504,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
@@ -524,6 +593,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         ).andelerTilkjentYtelse.toList().sortedBy { it.type }
 
         val vedtaksperioderMedBegrunnelser = hentPerioderMedUtbetaling(
@@ -654,6 +724,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
@@ -764,6 +835,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
@@ -873,6 +945,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
+            skalBrukeNyBegrunnelseLogikk = false,
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
@@ -938,6 +1011,8 @@ internal class UtvidetBarnetrygdTest {
             ).lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = listOf(utvidetVilkår),
                 andelerBarna = barnasAndeler,
+                tidslinjerMedPerioderBarnaBorMedSøker =
+                barnasAndeler.tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } },
             )
         }
     }
@@ -979,6 +1054,8 @@ internal class UtvidetBarnetrygdTest {
         ).lagUtvidetBarnetrygdAndeler(
             utvidetVilkår = listOf(utvidetVilkår),
             andelerBarna = barnasAndeler,
+            tidslinjerMedPerioderBarnaBorMedSøker = barnasAndeler
+                .tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } },
         ).sortedBy { it.stønadFom }
 
         assertEquals(2, utvidetAndeler.size)

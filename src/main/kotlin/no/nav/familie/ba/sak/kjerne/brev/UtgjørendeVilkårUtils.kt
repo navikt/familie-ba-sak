@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
@@ -162,7 +161,6 @@ private fun erVilkårResultatUtgjørende(
                 minimertVilkårResultat = minimertVilkårResultat,
                 vedtaksperiode = vedtaksperiode,
                 begrunnelse = begrunnelse,
-                featureToggleService = featureToggleService,
             )
 
         else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
@@ -236,7 +234,6 @@ private fun vilkårResultatPasserForAvslagsperiode(
     minimertVilkårResultat: MinimertVilkårResultat,
     vedtaksperiode: Periode,
     begrunnelse: IVedtakBegrunnelse,
-    featureToggleService: FeatureToggleService,
 ): Boolean {
     val erAvslagUtenFomDato = minimertVilkårResultat.periodeFom == null
 
@@ -244,11 +241,7 @@ private fun vilkårResultatPasserForAvslagsperiode(
         if (erAvslagUtenFomDato) {
             TIDENES_MORGEN.toYearMonth()
         } else {
-            if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
-                minimertVilkårResultat.periodeFom!!.toYearMonth().plusMonths(1)
-            } else {
-                minimertVilkårResultat.periodeFom!!.toYearMonth()
-            }
+            minimertVilkårResultat.periodeFom!!.toYearMonth().plusMonths(1)
         }
 
     return fomVilkår == vedtaksperiode.fom.toYearMonth() &&

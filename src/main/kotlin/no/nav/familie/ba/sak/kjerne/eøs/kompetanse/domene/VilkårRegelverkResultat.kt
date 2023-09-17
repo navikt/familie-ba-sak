@@ -8,12 +8,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPP
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPPFYLT_NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 data class VilkårRegelverkResultat(
     val vilkår: Vilkår,
     val regelverkResultat: RegelverkResultat,
+    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
 ) {
     val resultat get() = regelverkResultat.resultat
     val regelverk get() = regelverkResultat.regelverk
@@ -23,6 +25,7 @@ fun VilkårRegelverkResultat.medRegelverk(regelverk: Regelverk) =
     VilkårRegelverkResultat(
         this.vilkår,
         RegelverkResultat.values().first { it.regelverk == regelverk && it.resultat == this.resultat },
+        this.utdypendeVilkårsvurderinger,
     )
 
 enum class RegelverkResultat(val regelverk: Regelverk?, val resultat: Resultat?) {
@@ -49,6 +52,7 @@ fun RegelverkResultat?.kombinerMed(resultat: RegelverkResultat?) = when (this) {
         null -> null
         else -> IKKE_FULLT_VURDERT
     }
+
     OPPFYLT_EØS_FORORDNINGEN -> when (resultat) {
         null -> IKKE_FULLT_VURDERT
         OPPFYLT_EØS_FORORDNINGEN -> OPPFYLT_EØS_FORORDNINGEN
@@ -67,6 +71,7 @@ fun RegelverkResultat?.kombinerMed(resultat: RegelverkResultat?) = when (this) {
         IKKE_FULLT_VURDERT -> IKKE_FULLT_VURDERT
         IKKE_OPPFYLT -> IKKE_OPPFYLT
     }
+
     OPPFYLT_BLANDET_REGELVERK -> when (resultat) {
         null -> IKKE_FULLT_VURDERT
         OPPFYLT_EØS_FORORDNINGEN -> OPPFYLT_BLANDET_REGELVERK
@@ -76,6 +81,7 @@ fun RegelverkResultat?.kombinerMed(resultat: RegelverkResultat?) = when (this) {
         IKKE_FULLT_VURDERT -> IKKE_FULLT_VURDERT
         IKKE_OPPFYLT -> IKKE_OPPFYLT
     }
+
     OPPFYLT_REGELVERK_IKKE_SATT -> when (resultat) {
         null -> IKKE_FULLT_VURDERT
         OPPFYLT_EØS_FORORDNINGEN -> OPPFYLT_BLANDET_REGELVERK
@@ -85,8 +91,20 @@ fun RegelverkResultat?.kombinerMed(resultat: RegelverkResultat?) = when (this) {
         IKKE_FULLT_VURDERT -> IKKE_FULLT_VURDERT
         IKKE_OPPFYLT -> IKKE_OPPFYLT
     }
+
     IKKE_OPPFYLT -> IKKE_OPPFYLT
     IKKE_FULLT_VURDERT -> IKKE_FULLT_VURDERT
 }
 
 fun VilkårRegelverkResultat?.erOppfylt() = this?.resultat == Resultat.OPPFYLT
+
+data class KombinertRegelverkResultat(
+    val barnetsResultat: RegelverkResultat?,
+    val søkersResultat: RegelverkResultat?,
+) {
+    val kombinertResultat get() = barnetsResultat.kombinerMed(søkersResultat)
+
+    override fun toString(): String {
+        return kombinertResultat.toString()
+    }
+}
