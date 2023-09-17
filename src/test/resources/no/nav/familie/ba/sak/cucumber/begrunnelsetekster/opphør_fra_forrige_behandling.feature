@@ -90,3 +90,75 @@ Egenskap: Opphør fra forrige behandling
       | 01.10.2020 | 31.08.2021 | UTBETALING         |           |                                       |                                  |
       | 01.09.2021 | 31.12.2021 | UTBETALING         |           |                                       |                                  |
       | 01.01.2022 |            | OPPHØR             |           |                                       |                                  |
+
+  Scenario: Plassholdertekst for scenario - 0XmcQbhEIH
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
+      | 1            | 1        |                     | INNVILGET           | SØKNAD           |
+      | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1234    | SØKER      | 29.05.1988  |
+      | 1            | 3456    | BARN       | 28.04.2006  |
+      | 1            | 5678    | BARN       | 01.05.2010  |
+      | 2            | 1234    | SØKER      | 29.05.1988  |
+      | 2            | 3456    | BARN       | 28.04.2006  |
+      | 2            | 5678    | BARN       | 01.05.2010  |
+
+    Og følgende dagens dato 15.09.2023
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1234    | LOVLIG_OPPHOLD                                               |                  | 29.05.1988 |            | OPPFYLT  | Nei                  |
+      | 1234    | BOSATT_I_RIKET                                               |                  | 11.11.2021 |            | OPPFYLT  | Nei                  |
+
+      | 3456    | GIFT_PARTNERSKAP,LOVLIG_OPPHOLD,BOR_MED_SØKER,BOSATT_I_RIKET |                  | 28.04.2006 |            | OPPFYLT  | Nei                  |
+      | 3456    | UNDER_18_ÅR                                                  |                  | 28.04.2006 | 27.04.2024 | OPPFYLT  | Nei                  |
+
+      | 5678    | GIFT_PARTNERSKAP,BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.05.2010 |            | OPPFYLT  | Nei                  |
+      | 5678    | UNDER_18_ÅR                                                  |                  | 01.05.2010 | 30.04.2028 | OPPFYLT  | Nei                  |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1234    | LOVLIG_OPPHOLD                                               |                  | 29.05.1988 |            | OPPFYLT  | Nei                  |
+      | 1234    | BOSATT_I_RIKET                                               |                  | 19.01.2022 |            | OPPFYLT  | Nei                  |
+
+      | 3456    | BOSATT_I_RIKET,GIFT_PARTNERSKAP,BOR_MED_SØKER,LOVLIG_OPPHOLD |                  | 28.04.2006 |            | OPPFYLT  | Nei                  |
+      | 3456    | UNDER_18_ÅR                                                  |                  | 28.04.2006 | 27.04.2024 | OPPFYLT  | Nei                  |
+
+      | 5678    | BOSATT_I_RIKET,LOVLIG_OPPHOLD,GIFT_PARTNERSKAP,BOR_MED_SØKER |                  | 01.05.2010 |            | OPPFYLT  | Nei                  |
+      | 5678    | UNDER_18_ÅR                                                  |                  | 01.05.2010 | 30.04.2028 | OPPFYLT  | Nei                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 3456    | 1            | 01.12.2021 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3456    | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 3456    | 1            | 01.07.2023 | 31.03.2024 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 5678    | 1            | 01.12.2021 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 5678    | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 5678    | 1            | 01.07.2023 | 30.04.2028 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+
+      | 3456    | 2            | 01.02.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3456    | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 3456    | 2            | 01.07.2023 | 31.03.2024 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 5678    | 2            | 01.02.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 5678    | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 5678    | 2            | 01.07.2023 | 30.04.2028 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+
+    Når begrunnelsetekster genereres for behandling 2
+
+    Så forvent følgende standardBegrunnelser
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser    | Ekskluderte Begrunnelser |
+      | 01.12.2021 | 31.01.2022 | OPPHØR             |           | OPPHØR_IKKE_BOSATT_I_NORGE |                          |
+      | 01.02.2022 | 28.02.2023 | UTBETALING         |           |                            |                          |
+      | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                            |                          |
+      | 01.07.2023 | 31.03.2024 | UTBETALING         |           |                            |                          |
+      | 01.04.2024 | 30.04.2028 | UTBETALING         |           |                            |                          |
+      | 01.05.2028 |            | OPPHØR             |           |                            |                          |
