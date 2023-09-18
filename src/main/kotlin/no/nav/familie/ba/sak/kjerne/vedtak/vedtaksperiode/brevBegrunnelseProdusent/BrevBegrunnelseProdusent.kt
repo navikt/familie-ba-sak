@@ -179,7 +179,11 @@ private fun hentStandardBegrunnelser(
         it.periodeResultat in relevantePeriodeResultater
     }
 
-    val filtrertPåVilkårOgEndretUtbetaling = filtrertPåRolleFagsaktypeOgPeriodetype.filterValues {
+    val filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser = filtrertPåRolleFagsaktypeOgPeriodetype.filterValues {
+        it.erManuellBegrunnelse()
+    }
+
+    val filtrertPåVilkårOgEndretUtbetaling = filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser.filterValues {
         val begrunnelseErGjeldendeForUtgjørendeVilkår = it.vilkår.isNotEmpty()
         val begrunnelseErGjeldendeForEndretUtbetaling = it.endringsaarsaker.isNotEmpty()
 
@@ -202,7 +206,7 @@ private fun hentStandardBegrunnelser(
         it.erGjeldendeForOpphørFraForrigeBehandling(begrunnelseGrunnlag)
     }
 
-    val filtrertPåSmåbarnstillegg = filtrertPåRolleFagsaktypeOgPeriodetype.filterValues { begrunnelse ->
+    val filtrertPåSmåbarnstillegg = filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser.filterValues { begrunnelse ->
         begrunnelse.erGjeldendeForSmåbarnstillegg(begrunnelseGrunnlag)
     }
 
@@ -222,13 +226,15 @@ private fun hentStandardBegrunnelser(
         )
     }
 
-    val filtrertPåHendelser = filtrertPåRolleFagsaktypeOgPeriodetype.filtrerPåHendelser(
+    val filtrertPåHendelser = filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser.filtrerPåHendelser(
         begrunnelseGrunnlag,
         vedtaksperiode.fom,
     )
 
     return filtrertPåVilkårOgEndretUtbetaling + filtrertPåReduksjonFraForrigeBehandling + filtrertPåOpphørFraForrigeBehandling + filtrertPåSmåbarnstillegg + filtrertPåEtterEndretUtbetaling + filtrertPåHendelser
 }
+
+private fun SanityBegrunnelse.erManuellBegrunnelse() = valgbarhet != Valgbarhet.AUTOMATISK
 
 private fun SanityBegrunnelse.erGjeldendeForFagsakType(
     fagsakType: FagsakType,
