@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.randomAktør
@@ -23,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -44,6 +47,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 class FiltreringsregelForFlereBarnTest {
 
@@ -60,6 +64,7 @@ class FiltreringsregelForFlereBarnTest {
     val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     val tilkjentYtelseValideringServiceMock = mockk<TilkjentYtelseValideringService>()
+    val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     val filtreringsreglerService = FiltreringsreglerService(
         personopplysningerService = personopplysningerServiceMock,
         personidentService = personidentService,
@@ -70,6 +75,7 @@ class FiltreringsregelForFlereBarnTest {
         behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
         vilkårsvurderingRepository = vilkårsvurderingRepository,
+        andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
     )
 
     init {
@@ -141,6 +147,15 @@ class FiltreringsregelForFlereBarnTest {
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
 
         every { personidentService.hentAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
+
+        val andelTilkjentytelse = listOf(
+            MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
+        )
+            .map {
+                lagAndelTilkjentYtelse(it.fom, it.tom)
+            }
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
+
         every {
             personidentService.hentAktørIder(
                 listOf(
@@ -239,6 +254,14 @@ class FiltreringsregelForFlereBarnTest {
         } returns listOf(barnAktør0, barnAktør1)
 
         every { tilkjentYtelseValideringServiceMock.barnetrygdLøperForAnnenForelder(any(), any()) } returns false
+
+        val andelTilkjentytelse = listOf(
+            MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
+        )
+            .map {
+                lagAndelTilkjentYtelse(it.fom, it.tom)
+            }
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
 
         val sisteVedtatteBehandling = lagBehandling()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns sisteVedtatteBehandling
@@ -360,6 +383,7 @@ class FiltreringsregelForFlereBarnTest {
             erFagsakenMigrertEtterBarnFødt = false,
             løperBarnetrygdForBarnetPåAnnenForelder = false,
             morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+            morHarIkkeOpphørtBarnetrygd = true
         )
     }
 }
