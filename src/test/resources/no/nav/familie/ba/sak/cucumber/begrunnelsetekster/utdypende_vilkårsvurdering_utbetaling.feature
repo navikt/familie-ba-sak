@@ -76,10 +76,10 @@ Egenskap: Begrunnelser for utdypende vilkårsvurdering med utbetaling
     Når begrunnelsetekster genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                                            | Ekskluderte Begrunnelser                                               |
-      | 01.05.2020 | 31.03.2021 | UTBETALING         | INNVILGET_BOSATT_I_RIKTET                                          | INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE                            |
-      | 01.04.2021 | 31.03.2022 | UTBETALING         | FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE | INNVILGET_BOSATT_I_RIKTET, INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE |
-      | 01.04.2022 |            | OPPHØR             | OPPHØR_HAR_IKKE_OPPHOLDSTILLATELSE                                 | OPPHØR_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER                      |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                                            | Ekskluderte Begrunnelser                          |
+      | 01.05.2020 | 31.03.2021 | UTBETALING         | INNVILGET_BOSATT_I_RIKTET                                          | INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE       |
+      | 01.04.2021 | 31.03.2022 | UTBETALING         | FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE | INNVILGET_BOSATT_I_RIKTET                         |
+      | 01.04.2022 |            | OPPHØR             | OPPHØR_HAR_IKKE_OPPHOLDSTILLATELSE                                 | OPPHØR_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |
 
 
 

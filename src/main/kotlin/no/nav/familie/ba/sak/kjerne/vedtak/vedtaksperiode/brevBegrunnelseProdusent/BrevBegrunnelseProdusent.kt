@@ -463,10 +463,11 @@ private fun hentResultaterForPeriode(
         val erOrdinæreVilkårOppfyltIForrigePeriode =
             begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true
 
+        val erIngenEndring = !erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode
         listOfNotNull(
-            if (erØkingIAndel || erSøker) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
+            if (erØkingIAndel || erSøker || erIngenEndring) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
             if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
-            if (!erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode) SanityPeriodeResultat.INGEN_ENDRING else null,
+            if (erIngenEndring) SanityPeriodeResultat.INGEN_ENDRING else null,
         )
     } else {
         listOfNotNull(
