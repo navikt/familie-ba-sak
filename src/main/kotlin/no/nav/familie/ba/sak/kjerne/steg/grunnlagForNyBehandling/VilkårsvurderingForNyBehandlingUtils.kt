@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultatMedNyPeriode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultatUtils.genererVilkårResultatForEtVilkårPåEnPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
@@ -176,61 +177,42 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
-            val vilkårTyperForPerson = forrigeBehandlingVilkårsvurdering.personResultater
+            val oppfylteVilkårResultaterForPerson = forrigeBehandlingVilkårsvurdering.personResultater
                 .single { it.aktør == person.aktør }.vilkårResultater
-                .filter { it.resultat == Resultat.OPPFYLT }
-                .map { it.vilkårType }
+                .filter { it.erOppfylt() }
 
-            val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
-                val fom = VilkårsvurderingMigreringUtils.utledPeriodeFom(
-                    forrigeBehandlingVilkårsvurdering,
-                    vilkår,
+            val vilkårResultaterMedNyPeriode =
+                VilkårsvurderingMigreringUtils.finnVilkårResultaterMedNyPeriodePgaNyMigreringsdato(
+                    oppfylteVilkårResultaterForPerson,
                     person,
                     nyMigreringsdato,
                 )
 
-                val tom: LocalDate? =
-                    VilkårsvurderingMigreringUtils.utledPeriodeTom(
-                        forrigeBehandlingVilkårsvurdering,
-                        vilkår,
-                        person,
-                        fom,
-                    )
-
-                val eksisterendeVilkårSomErForlengetEllerForkortet =
-                    VilkårsvurderingMigreringUtils.finnEksisterendeVilkårResultatSomBlirForskjøvet(
-                        forrigeBehandlingVilkårsvurdering,
-                        vilkår,
-                        person,
-                        fom,
-                        tom,
-                    )
-
-                // Sørger for at vi kopierer over alle felter fra VilkårResultat som blir forsøvet pga ny migreringsdato
-                eksisterendeVilkårSomErForlengetEllerForkortet.tilKopiForNyttPersonResultat(personResultat)
-                    .also { vilkårResultat ->
-                        vilkårResultat.periodeFom = fom
-                        vilkårResultat.periodeTom = tom
-                        if (vilkårResultat.begrunnelse.isEmpty()) {
-                            vilkårResultat.begrunnelse = "Migrering"
+            val kopierteVilkårResultater = oppfylteVilkårResultaterForPerson.map { oppfyltVilkårResultat ->
+                val vilkårResultatMedNyPeriode =
+                    vilkårResultaterMedNyPeriode.find { it.vilkårResultat.id == oppfyltVilkårResultat.id }
+                oppfyltVilkårResultat.kopierMedParent(personResultat).also { kopiertVilkårResultat ->
+                    if (vilkårResultatMedNyPeriode != null) {
+                        kopiertVilkårResultat.behandlingId =
+                            if (vilkårResultatMedNyPeriode.harNyPeriode()) vilkårsvurdering.behandling.id else kopiertVilkårResultat.behandlingId
+                        kopiertVilkårResultat.periodeFom = vilkårResultatMedNyPeriode.fom
+                        kopiertVilkårResultat.periodeTom = vilkårResultatMedNyPeriode.tom
+                        if (kopiertVilkårResultat.begrunnelse.isEmpty()) {
+                            kopiertVilkårResultat.begrunnelse = "Migrering"
                         }
                     }
-            }.toSortedSet(VilkårResultat.VilkårResultatComparator)
+                }
+            }.toSet()
 
-            val manglendePerioder = VilkårsvurderingMigreringUtils.kopiManglendePerioderFraForrigeVilkårsvurdering(
-                vilkårResultater,
-                forrigeBehandlingVilkårsvurdering,
-                person,
-                personResultat,
-            )
-
-            vilkårResultater.addAll(manglendePerioder)
-
-            personResultat.setSortedVilkårResultater(vilkårResultater)
+            personResultat.setSortedVilkårResultater(kopierteVilkårResultater)
 
             personResultat
         }.toSet()
     }
+
+    // Det kan hende UNDER_18 vilkåret ikke har fått endret fom og tom
+    private fun VilkårResultatMedNyPeriode.harNyPeriode() =
+        this.vilkårResultat.periodeFom != this.fom || this.vilkårResultat.periodeTom != this.tom
 
     fun lagPersonResultaterForHelmanuellMigrering(
         vilkårsvurdering: Vilkårsvurdering,

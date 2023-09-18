@@ -182,7 +182,7 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
             "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}",
         )
 
-        Vedtaksperiodetype.OPPHØR -> finnUtbetalingsperioderRelevantForVedtaksperiode(utbetalingsperiodeDetaljer)?.toList()
+        Vedtaksperiodetype.OPPHØR -> finnUtbetalingsperioderRelevantForOpphørVedtaksperiode(utbetalingsperiodeDetaljer)?.toList()
             ?: emptyList()
     }
 }
@@ -195,6 +195,16 @@ private fun VedtaksperiodeMedBegrunnelser.finnUtbetalingsperioderRelevantForVedt
         andelerVertikal.tilOgMed.tilSisteDagIMåneden().tilLocalDate()
             .isSameOrAfter(this.tom ?: TIDENES_ENDE)
 }?.innhold
+
+private fun VedtaksperiodeMedBegrunnelser.finnUtbetalingsperioderRelevantForOpphørVedtaksperiode(
+    utbetalingsperiodeDetaljer: Tidslinje<Iterable<UtbetalingsperiodeDetalj>, Måned>,
+): Iterable<UtbetalingsperiodeDetalj>? {
+    val innhold = utbetalingsperiodeDetaljer.perioder().find { andelerVertikal ->
+        andelerVertikal.fraOgMed.tilFørsteDagIMåneden().tilLocalDate() == this.fom
+    }?.innhold
+
+    return innhold
+}
 
 private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidslinje(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
