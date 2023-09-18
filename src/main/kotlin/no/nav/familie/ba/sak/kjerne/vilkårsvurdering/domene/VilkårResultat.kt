@@ -66,7 +66,7 @@ class VilkårResultat(
     @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
     var begrunnelse: String,
 
-    @Column(name = "fk_behandling_id", nullable = false)
+    @Column(name = "sist_endret_i_behandling_id", nullable = false)
     var sistEndretIBehandlingId: Long,
 
     @Column(name = "er_automatisk_vurdert", nullable = false)
