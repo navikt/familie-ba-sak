@@ -198,11 +198,11 @@ private fun hentStandardBegrunnelser(
         }
     }
 
-    val filtrertPåReduksjonFraForrigeBehandling = filtrertPåRolle.filterValues {
+    val filtrertPåReduksjonFraForrigeBehandling = filtrertPåRolleOgFagsaktype.filterValues {
         it.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag)
     }
 
-    val filtrertPåOpphørFraForrigeBehandling = filtrertPåRolle.filterValues {
+    val filtrertPåOpphørFraForrigeBehandling = filtrertPåRolleOgFagsaktype.filterValues {
         it.erGjeldendeForOpphørFraForrigeBehandling(begrunnelseGrunnlag)
     }
 
