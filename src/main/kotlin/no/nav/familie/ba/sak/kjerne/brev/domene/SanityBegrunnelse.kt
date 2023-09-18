@@ -28,6 +28,18 @@ interface ISanityBegrunnelse {
     val lovligOppholdTriggere: List<VilkårTrigger>
     val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>
     val fagsakType: FagsakType?
+
+    val gjelderEtterEndretUtbetaling
+        get() = this is SanityBegrunnelse &&
+            this.endretUtbetalingsperiodeTriggere.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE)
+
+    val gjelderEndretutbetaling
+        get() = this is SanityBegrunnelse &&
+            this.endringsaarsaker.isNotEmpty() && !gjelderEtterEndretUtbetaling()
+
+    val gjelderSatsendring
+        get() = this is SanityBegrunnelse &&
+            ØvrigTrigger.SATSENDRING in this.ovrigeTriggere
 }
 
 data class SanityBegrunnelse(
