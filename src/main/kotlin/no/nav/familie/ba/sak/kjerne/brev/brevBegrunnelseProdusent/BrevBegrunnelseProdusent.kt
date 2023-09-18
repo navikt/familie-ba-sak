@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -36,8 +35,6 @@ data class GrunnlagForBegrunnelse(
     val sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     val sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
     val nåDato: LocalDate,
-    val målform: Målform,
-    val søknadstidspunkt: LocalDate?,
 )
 
 fun Standardbegrunnelse.lagBrevBegrunnelse(
@@ -46,19 +43,10 @@ fun Standardbegrunnelse.lagBrevBegrunnelse(
 ): BegrunnelseData {
     val sanityBegrunnelse = hentSanityBegrunnelse(grunnlag)
 
-    val personerGjeldeneForBegrunnelse = vedtaksperiode.hentGyldigeBegrunnelserPerPerson(
-        behandlingsGrunnlagForVedtaksperioder = grunnlag.behandlingsGrunnlagForVedtaksperioder,
-        behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlag.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-        sanityBegrunnelser = grunnlag.sanityBegrunnelser,
-        sanityEØSBegrunnelser = grunnlag.sanityEØSBegrunnelser,
-        nåDato = grunnlag.nåDato,
-    ).mapNotNull { (person, begrunnelserPåPerson) -> person.takeIf { this in begrunnelserPåPerson } }
+    val personerGjeldeneForBegrunnelse = vedtaksperiode.hentGyldigeBegrunnelserPerPerson(grunnlag)
+        .mapNotNull { (person, begrunnelserPåPerson) -> person.takeIf { this in begrunnelserPåPerson } }
 
-    val begrunnelsesGrunnlagPerPerson = vedtaksperiode.finnBegrunnelseGrunnlagPerPerson(
-        behandlingsGrunnlagForVedtaksperioder = grunnlag.behandlingsGrunnlagForVedtaksperioder,
-        behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlag.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-        nåDato = grunnlag.nåDato,
-    )
+    val begrunnelsesGrunnlagPerPerson = vedtaksperiode.finnBegrunnelseGrunnlagPerPerson(grunnlag)
 
     val gjelderSøker = gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse)
     val barnasFødselsdatoer = sanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
@@ -111,7 +99,7 @@ fun Standardbegrunnelse.lagBrevBegrunnelse(
         antallBarnOppfyllerTriggereOgHarUtbetaling = 0, // TODO Kan dette fjernes?
         antallBarnOppfyllerTriggereOgHarNullutbetaling = 0, // TODO Kan dette fjernes?
         maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
-        maalform = grunnlag.målform.tilSanityFormat(),
+        maalform = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform.tilSanityFormat(),
         apiNavn = this.sanityApiNavn,
         belop = Utils.formaterBeløp(beløp),
         soknadstidspunkt = søknadstidspunktEndretUtbetaling?.tilKortString() ?: "",

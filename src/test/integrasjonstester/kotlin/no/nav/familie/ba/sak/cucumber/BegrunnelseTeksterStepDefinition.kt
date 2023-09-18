@@ -191,12 +191,12 @@ class BegrunnelseTeksterStepDefinition {
 
         val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
 
-        val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelse(behandlingId, vedtak, forrigeBehandlingId)
+        val grunnlagForBegrunnelser = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
 
         vedtaksperioderMedBegrunnelser = genererVedtaksperioder(
             vedtak = vedtak,
-            grunnlagForVedtakPerioder = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioder,
-            grunnlagForVedtakPerioderForrigeBehandling = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
+            grunnlagForVedtakPerioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
+            grunnlagForVedtakPerioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
             nåDato = dagensDato,
         )
 
@@ -214,20 +214,15 @@ class BegrunnelseTeksterStepDefinition {
 
         utvidetVedtaksperiodeMedBegrunnelser = utvidedeVedtaksperioderMedBegrunnelser.map {
             it.copy(
-                gyldigeBegrunnelser = it.tilVedtaksperiodeMedBegrunnelser(vedtak).hentGyldigeBegrunnelserForPeriode(
-                    behandlingsGrunnlagForVedtaksperioder = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioder,
-                    behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-                    sanityBegrunnelser = grunnlagForBegrunnelse.sanityBegrunnelser,
-                    sanityEØSBegrunnelser = grunnlagForBegrunnelse.sanityEØSBegrunnelser,
-                    nåDato = grunnlagForBegrunnelse.nåDato,
-                ).toList(),
+                gyldigeBegrunnelser = it.tilVedtaksperiodeMedBegrunnelser(vedtak)
+                    .hentGyldigeBegrunnelserForPeriode(grunnlagForBegrunnelser).toList(),
             )
         }
 
         return utvidedeVedtaksperioderMedBegrunnelser
     }
 
-    private fun hentGrunnlagForBegrunnelse(
+    private fun hentGrunnlagForBegrunnelser(
         behandlingId: Long,
         vedtak: Vedtak,
         forrigeBehandlingId: Long?,
@@ -264,8 +259,6 @@ class BegrunnelseTeksterStepDefinition {
             sanityBegrunnelser = mockHentSanityBegrunnelser(),
             sanityEØSBegrunnelser = mockHentSanityEØSBegrunnelser(),
             nåDato = dagensDato,
-            målform = målform,
-            søknadstidspunkt = søknadstidspunkt,
         )
         return grunnlagForBegrunnelse
     }
@@ -311,7 +304,7 @@ class BegrunnelseTeksterStepDefinition {
     ) {
         val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
         val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
-        val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelse(behandlingId, vedtak, forrigeBehandlingId)
+        val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
 
         val faktiskeBegrunnelser: List<BegrunnelseData> =
             vedtaksperioderMedBegrunnelser.single {

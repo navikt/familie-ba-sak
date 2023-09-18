@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndre
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
+import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.hentIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentKompetanserSomStopperRettFørPeriode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -463,10 +464,7 @@ class VedtaksperiodeService(
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
         val kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id)
-        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-
-        val behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder()
-        val behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder()
+        val grunnlagForBegrunnelser = hentGrunnlagForBegrunnelse(behandling)
 
         return utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
             val kompetanserIPeriode = kompetanser.hentIPeriode(
@@ -485,13 +483,7 @@ class VedtaksperiodeService(
             utvidetVedtaksperiodeMedBegrunnelser.copy(
                 gyldigeBegrunnelser = if (featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)) {
                     utvidetVedtaksperiodeMedBegrunnelser.tilVedtaksperiodeMedBegrunnelser(vedtak)
-                        .hentGyldigeBegrunnelserForPeriode(
-                            behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
-                            behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-                            sanityBegrunnelser = sanityBegrunnelser,
-                            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-                            nåDato = LocalDate.now(),
-                        ).toList()
+                        .hentGyldigeBegrunnelserForPeriode(grunnlagForBegrunnelser).toList()
                 } else {
                     hentGyldigeBegrunnelserForPeriodeGammel(
                         utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
@@ -509,6 +501,24 @@ class VedtaksperiodeService(
                 },
             )
         }
+    }
+
+    fun hentGrunnlagForBegrunnelse(behandling: Behandling): GrunnlagForBegrunnelse {
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+
+        val behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder()
+        val behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder()
+
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
+
+        return GrunnlagForBegrunnelse(
+            behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
+            behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
+            sanityBegrunnelser = sanityBegrunnelser,
+            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+            nåDato = LocalDate.now(),
+        )
     }
 
     private fun hentAktørerMedUtbetaling(

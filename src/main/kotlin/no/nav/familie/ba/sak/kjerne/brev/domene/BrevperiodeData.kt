@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BrevBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 
+@Deprecated("Skal bort. Bruk GrunnlagForBegrunnelse i stedet")
 data class BrevperiodeData(
     val restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     val erFørsteVedtaksperiodePåFagsak: Boolean,
