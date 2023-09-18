@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -61,7 +62,6 @@ fun Standardbegrunnelse.lagBrevBegrunnelse(
 
     val gjelderSøker = gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse)
     val barnasFødselsdatoer = sanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
-        begrunnelse = this,
         grunnlag = grunnlag,
         gjelderSøker = gjelderSøker,
         personerIBegrunnelse = personerGjeldeneForBegrunnelse,
@@ -143,7 +143,6 @@ private fun gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse: List<Person
     personerGjeldeneForBegrunnelse.any { it.type == PersonType.SØKER }
 
 fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
-    begrunnelse: IVedtakBegrunnelse,
     grunnlag: GrunnlagForBegrunnelse,
     gjelderSøker: Boolean,
     personerIBegrunnelse: List<Person>,
@@ -157,17 +156,11 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         this.erAvslagUregistrerteBarnBegrunnelse() -> grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn.mapNotNull { it.fødselsdato }
 
         gjelderSøker && !this.gjelderEtterEndretUtbetaling && !this.gjelderEndretutbetaling -> {
-            // TODO bytte ut med er avslag eller ikke utbetaling.
-            when (begrunnelse.vedtakBegrunnelseType) {
-                VedtakBegrunnelseType.AVSLAG,
-                VedtakBegrunnelseType.OPPHØR,
-                -> {
+            when (this.periodeResultat) {
+                SanityPeriodeResultat.IKKE_INNVILGET ->
                     barnPåBehandlingen.map { it.fødselsdato } + uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
-                }
 
-                else -> {
-                    (barnMedUtbetaling + barnPåBegrunnelse).toSet().map { it.fødselsdato }
-                }
+                else -> (barnMedUtbetaling + barnPåBegrunnelse).toSet().map { it.fødselsdato }
             }
         }
 
