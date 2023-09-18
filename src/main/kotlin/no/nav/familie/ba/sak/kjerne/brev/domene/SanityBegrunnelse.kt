@@ -28,6 +28,7 @@ interface ISanityBegrunnelse {
     val lovligOppholdTriggere: List<VilkårTrigger>
     val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>
     val fagsakType: FagsakType?
+    val tema: Tema?
 
     val gjelderEtterEndretUtbetaling
         get() = this is SanityBegrunnelse &&
@@ -53,6 +54,7 @@ data class SanityBegrunnelse(
     override val borMedSokerTriggere: List<VilkårTrigger> = emptyList(),
     override val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger> = emptyList(),
     override val fagsakType: FagsakType? = null,
+    override val tema: Tema? = null,
     @Deprecated("Bruk vilkår")
     val vilkaar: List<SanityVilkår> = emptyList(),
     val rolle: List<VilkårRolle> = emptyList(),
@@ -90,6 +92,7 @@ data class RestSanityBegrunnelse(
     val valgbarhet: String? = null,
     val vedtakResultat: String?,
     val fagsakType: String?,
+    val tema: String?,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
         if (apiNavn == null) return null
@@ -146,6 +149,10 @@ data class RestSanityBegrunnelse(
             fagsakType = fagsakType?.let {
                 finnEnumverdi(it, FagsakType.entries.toTypedArray(), apiNavn)
             },
+            tema = tema?.let {
+                finnEnumverdi(it, Tema.entries.toTypedArray(), apiNavn)
+            },
+
         )
     }
 }
@@ -251,6 +258,12 @@ enum class Valgbarhet {
     AUTOMATISK,
     TILLEGGSTEKST,
     SAKSPESIFIKK,
+}
+
+enum class Tema {
+    NASJONAL,
+    EØS,
+    FELLES,
 }
 
 private fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {

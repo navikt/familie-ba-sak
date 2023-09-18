@@ -11,20 +11,25 @@ object BrevBegrunnelseParser {
 
     fun mapBegrunnelser(dataTable: DataTable): List<SammenlignbarBegrunnelse> {
         return dataTable.asMaps().map { rad ->
-            val vurderesEtter: Regelverk =
-                parseValgfriEnum<Regelverk>(DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser.REGELVERK, rad)
+            val regelverkForInkluderteBegrunnelser =
+                parseValgfriEnum<Regelverk>(DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser.REGELVERK_INKLUDERTE_BEGRUNNELSER, rad)
                     ?: Regelverk.NASJONALE_REGLER
 
+            val regelverkForEkskluderteBegrunnelser =
+                parseValgfriEnum<Regelverk>(DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser.REGELVERK_EKSKLUDERTE_BEGRUNNELSER, rad)
+                    ?: regelverkForInkluderteBegrunnelser
+
             val inkluderteStandardBegrunnelser = hentForventedeBegrunnelser(
-                vurderesEtter,
+                regelverkForInkluderteBegrunnelser,
                 DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser.INKLUDERTE_BEGRUNNELSER,
                 rad,
             )
             val ekskluderteStandardBegrunnelser = hentForventedeBegrunnelser(
-                vurderesEtter,
+                regelverkForEkskluderteBegrunnelser,
                 DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser.EKSKLUDERTE_BEGRUNNELSER,
                 rad,
             )
+
             SammenlignbarBegrunnelse(
                 fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad),
                 tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad),
@@ -61,6 +66,7 @@ object BrevBegrunnelseParser {
         VEDTAKSPERIODE_TYPE("VedtaksperiodeType"),
         INKLUDERTE_BEGRUNNELSER("Inkluderte Begrunnelser"),
         EKSKLUDERTE_BEGRUNNELSER("Ekskluderte Begrunnelser"),
-        REGELVERK("Regelverk"),
+        REGELVERK_INKLUDERTE_BEGRUNNELSER("Regelverk Inkluderte Begrunnelser"),
+        REGELVERK_EKSKLUDERTE_BEGRUNNELSER("Regelverk Ekskluderte Begrunnelser"),
     }
 }

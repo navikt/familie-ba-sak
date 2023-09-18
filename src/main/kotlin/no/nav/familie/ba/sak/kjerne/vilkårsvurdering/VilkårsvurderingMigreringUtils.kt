@@ -1,27 +1,21 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
 object VilkårsvurderingMigreringUtils {
 
     fun utledPeriodeFom(
-        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
+        oppfylteVilkårResultaterForType: List<VilkårResultat>,
         vilkår: Vilkår,
         person: Person,
         nyMigreringsdato: LocalDate,
     ): LocalDate {
-        val forrigeVilkårsPeriodeFom = hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
-            forrigeBehandlingsvilkårsvurdering,
-            vilkår,
-            person,
-        ).minWithOrNull(VilkårResultat.VilkårResultatComparator)?.periodeFom
+        val forrigeVilkårsPeriodeFom =
+            oppfylteVilkårResultaterForType.minWithOrNull(VilkårResultat.VilkårResultatComparator)?.periodeFom
         return when {
             person.fødselsdato.isAfter(nyMigreringsdato) ||
                 vilkår.gjelderAlltidFraBarnetsFødselsdato() -> person.fødselsdato
@@ -34,90 +28,50 @@ object VilkårsvurderingMigreringUtils {
     }
 
     fun utledPeriodeTom(
-        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
+        oppfylteVilkårResultaterForType: List<VilkårResultat>,
         vilkår: Vilkår,
-        person: Person,
         periodeFom: LocalDate,
     ): LocalDate? {
-        val forrigeVilkårsPeriodeTom: LocalDate? = hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
-            forrigeBehandlingsvilkårsvurdering,
-            vilkår,
-            person,
-        ).minWithOrNull(VilkårResultat.VilkårResultatComparator)?.periodeTom
-        return when {
-            vilkår == Vilkår.UNDER_18_ÅR -> periodeFom.til18ÅrsVilkårsdato()
-            vilkår == Vilkår.GIFT_PARTNERSKAP -> null
-            forrigeVilkårsPeriodeTom != null -> forrigeVilkårsPeriodeTom
-            else -> null
+        val forrigeVilkårsPeriodeTom: LocalDate? =
+            oppfylteVilkårResultaterForType.minWithOrNull(VilkårResultat.VilkårResultatComparator)?.periodeTom
+        return when (vilkår) {
+            Vilkår.UNDER_18_ÅR -> periodeFom.til18ÅrsVilkårsdato()
+            else -> forrigeVilkårsPeriodeTom
         }
     }
 
-    fun kopiManglendePerioderFraForrigeVilkårsvurdering(
-        vilkårResulater: Set<VilkårResultat>,
-        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
+    fun finnVilkårResultaterMedNyPeriodePgaNyMigreringsdato(
+        oppfylteVilkårResultaterForPerson: List<VilkårResultat>,
         person: Person,
-        personResultat: PersonResultat,
-    ): List<VilkårResultat> {
-        val manglendeVilkårResultater = mutableListOf<VilkårResultat>()
-        vilkårResulater.forEach {
-            val forrigeVilkårResultater =
-                hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
-                    forrigeBehandlingsvilkårsvurdering,
-                    it.vilkårType,
-                    person,
-                )
-            manglendeVilkårResultater.addAll(
-                forrigeVilkårResultater.filter { forrigeVilkårResultat ->
-                    forrigeVilkårResultat.periodeFom != it.periodeFom &&
-                        forrigeVilkårResultat.periodeTom != it.periodeTom
-                }.map { vilkårResultat -> vilkårResultat.kopierMedParent(personResultat) }
-                    .toSet(), // Mulig vi her burde bruke vilkårResultat.tilKopiForNyttPersonResultat slik at behandlingsId blir oppdatert.
-            )
-        }
-        return manglendeVilkårResultater
-    }
+        nyMigreringsdato: LocalDate,
+    ): List<VilkårResultatMedNyPeriode> {
+        val vilkårTyperForPerson = oppfylteVilkårResultaterForPerson
+            .map { it.vilkårType }
 
-    fun finnEksisterendeVilkårResultatSomBlirForskjøvet(
-        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering,
-        vilkår: Vilkår,
-        person: Person,
-        nyFom: LocalDate,
-        nyTom: LocalDate?,
-    ) =
-        hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
-            forrigeBehandlingVilkårsvurdering,
-            vilkår,
-            person,
-        ).runCatching {
-            if (this.isEmpty()) throw IllegalStateException("Finnes ingen vilkår av typen $vilkår for aktør ${person.aktør} blandt personresultatene: ${forrigeBehandlingVilkårsvurdering.personResultater}")
-            this.single { it.periodeFom == nyFom || it.periodeTom == nyTom || (nyFom.isBefore(it.periodeFom!!) && nyTom == null) }
-        }.fold(
-            onSuccess = { it },
-            onFailure = {
-                secureLogger.warn(
-                    "Feiler ved henting av vilkårresultatet som blir forskjøvet. nyFom = $nyFom, nyTom = $nyTom",
-                    it,
-                )
-                throw it
-            },
-        )
+        return vilkårTyperForPerson.map { vilkår ->
 
-    private fun hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
-        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
-        vilkår: Vilkår,
-        person: Person,
-    ): List<VilkårResultat> {
-        try {
-            val personResultat = forrigeBehandlingsvilkårsvurdering.personResultater
-                .first { it.aktør == person.aktør }
-            return personResultat.vilkårResultater
-                .filter { it.vilkårType == vilkår && it.erOppfylt() }
-        } catch (e: Exception) {
-            secureLogger.warn(
-                "Finner ingen personresultater for aktør ${person.aktør}",
-                e,
+            val oppfylteVilkårResultaterForType = oppfylteVilkårResultaterForPerson.filter { it.vilkårType == vilkår }
+
+            val fom = utledPeriodeFom(
+                oppfylteVilkårResultaterForType = oppfylteVilkårResultaterForType,
+                vilkår = vilkår,
+                person = person,
+                nyMigreringsdato = nyMigreringsdato,
             )
-            throw e
+
+            val tom: LocalDate? =
+                utledPeriodeTom(
+                    oppfylteVilkårResultaterForType,
+                    vilkår,
+                    fom,
+                )
+
+            // Når vi endrer migreringsdato flyttes den alltid bakover. Vilkårresultatet som forskyves vil derfor alltid være det med lavest periodeFom
+            val vilkårResultatSomForskyves =
+                oppfylteVilkårResultaterForType.minBy { it.periodeFom!! }
+            VilkårResultatMedNyPeriode(vilkårResultatSomForskyves, fom, tom)
         }
     }
 }
+
+data class VilkårResultatMedNyPeriode(val vilkårResultat: VilkårResultat, val fom: LocalDate, val tom: LocalDate?)
