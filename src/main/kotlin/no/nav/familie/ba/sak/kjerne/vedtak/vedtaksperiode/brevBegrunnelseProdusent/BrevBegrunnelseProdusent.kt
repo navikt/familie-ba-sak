@@ -179,7 +179,11 @@ private fun hentStandardBegrunnelser(
         it.periodeResultat in relevantePeriodeResultater
     }
 
-    val filtrertPåVilkårOgEndretUtbetaling = filtrertPåRolleFagsaktypeOgPeriodetype.filterValues {
+    val filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser = filtrertPåRolleFagsaktypeOgPeriodetype.filterValues {
+        it.erManuellBegrunnelse()
+    }
+
+    val filtrertPåVilkårOgEndretUtbetaling = filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser.filterValues {
         val begrunnelseErGjeldendeForUtgjørendeVilkår = it.vilkår.isNotEmpty()
         val begrunnelseErGjeldendeForEndretUtbetaling = it.endringsaarsaker.isNotEmpty()
 
@@ -194,15 +198,15 @@ private fun hentStandardBegrunnelser(
         }
     }
 
-    val filtrertPåReduksjonFraForrigeBehandling = filtrertPåRolle.filterValues {
+    val filtrertPåReduksjonFraForrigeBehandling = filtrertPåRolleOgFagsaktype.filterValues {
         it.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag)
     }
 
-    val filtrertPåOpphørFraForrigeBehandling = filtrertPåRolle.filterValues {
+    val filtrertPåOpphørFraForrigeBehandling = filtrertPåRolleOgFagsaktype.filterValues {
         it.erGjeldendeForOpphørFraForrigeBehandling(begrunnelseGrunnlag)
     }
 
-    val filtrertPåSmåbarnstillegg = filtrertPåRolleFagsaktypeOgPeriodetype.filterValues { begrunnelse ->
+    val filtrertPåSmåbarnstillegg = filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser.filterValues { begrunnelse ->
         begrunnelse.erGjeldendeForSmåbarnstillegg(begrunnelseGrunnlag)
     }
 
@@ -222,13 +226,15 @@ private fun hentStandardBegrunnelser(
         )
     }
 
-    val filtrertPåHendelser = filtrertPåRolleFagsaktypeOgPeriodetype.filtrerPåHendelser(
+    val filtrertPåHendelser = filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser.filtrerPåHendelser(
         begrunnelseGrunnlag,
         vedtaksperiode.fom,
     )
 
     return filtrertPåVilkårOgEndretUtbetaling + filtrertPåReduksjonFraForrigeBehandling + filtrertPåOpphørFraForrigeBehandling + filtrertPåSmåbarnstillegg + filtrertPåEtterEndretUtbetaling + filtrertPåHendelser
 }
+
+private fun SanityBegrunnelse.erManuellBegrunnelse() = ØvrigTrigger.ALLTID_AUTOMATISK !in ovrigeTriggere
 
 private fun SanityBegrunnelse.erGjeldendeForFagsakType(
     fagsakType: FagsakType,
@@ -291,7 +297,8 @@ private fun SanityBegrunnelse.erGjeldendeForOpphørFraForrigeBehandling(begrunne
             ?: emptyList(),
     )
 
-    val dennePeriodenErFørsteVedtaksperiodePåFagsak = begrunnelseGrunnlag.forrigePeriode == null
+    val dennePeriodenErFørsteVedtaksperiodePåFagsak =
+        begrunnelseGrunnlag.forrigePeriode == null || begrunnelseGrunnlag.forrigePeriode!!.andeler.firstOrNull() == null
 
     return begrunnelseGjelderMistedeVilkår && dennePeriodenErFørsteVedtaksperiodePåFagsak
 }
@@ -456,10 +463,11 @@ private fun hentResultaterForPeriode(
         val erOrdinæreVilkårOppfyltIForrigePeriode =
             begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true
 
+        val erIngenEndring = !erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode
         listOfNotNull(
-            if (erØkingIAndel || erSøker) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
+            if (erØkingIAndel || erSøker || erIngenEndring) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
             if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
-            if (!erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode) SanityPeriodeResultat.INGEN_ENDRING else null,
+            if (erIngenEndring) SanityPeriodeResultat.INGEN_ENDRING else null,
         )
     } else {
         listOfNotNull(
