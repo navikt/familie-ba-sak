@@ -18,7 +18,7 @@ Egenskap: Automatiske begrunnelser
       | 1            | 4567    | BARN       | 17.10.2005  |
       | 1            | 5678    | BARN       | 16.06.2010  |
 
-  Scenario: Automatiske begrunnelser skal ikke inkludert
+  Scenario: Begrunnelser med øvrig trigger automatisk skal ikke være inkludert
     Og følgende dagens dato 18.09.2023
     Og lag personresultater for begrunnelse for behandling 1
 

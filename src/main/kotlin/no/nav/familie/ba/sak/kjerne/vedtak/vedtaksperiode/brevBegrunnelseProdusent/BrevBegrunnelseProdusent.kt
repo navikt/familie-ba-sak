@@ -234,7 +234,7 @@ private fun hentStandardBegrunnelser(
     return filtrertPåVilkårOgEndretUtbetaling + filtrertPåReduksjonFraForrigeBehandling + filtrertPåOpphørFraForrigeBehandling + filtrertPåSmåbarnstillegg + filtrertPåEtterEndretUtbetaling + filtrertPåHendelser
 }
 
-private fun SanityBegrunnelse.erManuellBegrunnelse() = valgbarhet != Valgbarhet.AUTOMATISK
+private fun SanityBegrunnelse.erManuellBegrunnelse() = ØvrigTrigger.ALLTID_AUTOMATISK !in ovrigeTriggere
 
 private fun SanityBegrunnelse.erGjeldendeForFagsakType(
     fagsakType: FagsakType,
