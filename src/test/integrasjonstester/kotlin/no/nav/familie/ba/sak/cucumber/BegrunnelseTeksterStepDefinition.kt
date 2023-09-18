@@ -156,6 +156,10 @@ class BegrunnelseTeksterStepDefinition {
 
     @Når("begrunnelsetekster genereres for behandling {}")
     fun `generer begrunnelsetekst for `(behandlingId: Long) {
+        utvidetVedtaksperiodeMedBegrunnelser = genererVedtaksperioderForBehandling(behandlingId)
+    }
+
+    private fun genererVedtaksperioderForBehandling(behandlingId: Long): List<UtvidetVedtaksperiodeMedBegrunnelser> {
         gjeldendeBehandlingId = behandlingId
         val behandling = behandlinger.finnBehandling(behandlingId)
 
@@ -163,37 +167,14 @@ class BegrunnelseTeksterStepDefinition {
 
         vedtak.behandling.overstyrtEndringstidspunkt = overstyrteEndringstidspunkt[behandlingId]
 
-        val grunnlagForVedtaksperiode = BehandlingsGrunnlagForVedtaksperioder(
-            persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
-            personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
-            fagsakType = vedtak.behandling.fagsak.type,
-            kompetanser = kompetanser[behandlingId] ?: emptyList(),
-            endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
-            andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
-            perioderOvergangsstønad = overgangsstønadForVedtaksperiode[behandlingId] ?: emptyList(),
-            uregistrerteBarn = emptyList(),
-        )
         val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
 
-        val grunnlagForVedtaksperiodeForrigeBehandling = forrigeBehandlingId?.let {
-            val forrigeVedtak =
-                vedtaksliste.find { it.behandling.id == forrigeBehandlingId && it.aktiv } ?: error("Finner ikke vedtak")
-            BehandlingsGrunnlagForVedtaksperioder(
-                persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
-                personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
-                fagsakType = forrigeVedtak.behandling.fagsak.type,
-                kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
-                endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
-                andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
-                perioderOvergangsstønad = emptyList(),
-                uregistrerteBarn = emptyList(),
-            )
-        }
+        val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelse(behandlingId, vedtak, forrigeBehandlingId)
 
         vedtaksperioderMedBegrunnelser = genererVedtaksperioder(
             vedtak = vedtak,
-            grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
-            grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
+            grunnlagForVedtakPerioder = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioder,
+            grunnlagForVedtakPerioderForrigeBehandling = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
             nåDato = dagensDato,
         )
 
@@ -212,14 +193,59 @@ class BegrunnelseTeksterStepDefinition {
         utvidetVedtaksperiodeMedBegrunnelser = utvidedeVedtaksperioderMedBegrunnelser.map {
             it.copy(
                 gyldigeBegrunnelser = it.tilVedtaksperiodeMedBegrunnelser(vedtak).hentGyldigeBegrunnelserForPeriode(
-                    behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtaksperiode,
-                    behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
-                    sanityBegrunnelser = mockHentSanityBegrunnelser(),
-                    sanityEØSBegrunnelser = mockHentSanityEØSBegrunnelser(),
-                    nåDato = dagensDato,
+                    behandlingsGrunnlagForVedtaksperioder = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioder,
+                    behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
+                    sanityBegrunnelser = grunnlagForBegrunnelse.sanityBegrunnelser,
+                    sanityEØSBegrunnelser = grunnlagForBegrunnelse.sanityEØSBegrunnelser,
+                    nåDato = grunnlagForBegrunnelse.nåDato,
                 ).toList(),
             )
-        }.toMutableList()
+        }
+
+        return utvidedeVedtaksperioderMedBegrunnelser
+    }
+
+    private fun hentGrunnlagForBegrunnelse(
+        behandlingId: Long,
+        vedtak: Vedtak,
+        forrigeBehandlingId: Long?,
+    ): GrunnlagForBegrunnelse {
+        val grunnlagForVedtaksperiode = BehandlingsGrunnlagForVedtaksperioder(
+            persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
+            personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
+            fagsakType = vedtak.behandling.fagsak.type,
+            kompetanser = kompetanser[behandlingId] ?: emptyList(),
+            endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
+            andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
+            perioderOvergangsstønad = overgangsstønadForVedtaksperiode[behandlingId] ?: emptyList(),
+            uregistrerteBarn = emptyList(),
+        )
+
+        val grunnlagForVedtaksperiodeForrigeBehandling = forrigeBehandlingId?.let {
+            val forrigeVedtak =
+                vedtaksliste.find { it.behandling.id == forrigeBehandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+            BehandlingsGrunnlagForVedtaksperioder(
+                persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
+                personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
+                fagsakType = forrigeVedtak.behandling.fagsak.type,
+                kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
+                endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
+                andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
+                perioderOvergangsstønad = emptyList(),
+                uregistrerteBarn = emptyList(),
+            )
+        }
+
+        val grunnlagForBegrunnelse = GrunnlagForBegrunnelse(
+            behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtaksperiode,
+            behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
+            sanityBegrunnelser = mockHentSanityBegrunnelser(),
+            sanityEØSBegrunnelser = mockHentSanityEØSBegrunnelser(),
+            nåDato = dagensDato,
+            målform = målform,
+            søknadstidspunkt = søknadstidspunkt,
+        )
+        return grunnlagForBegrunnelse
     }
 
     /**
