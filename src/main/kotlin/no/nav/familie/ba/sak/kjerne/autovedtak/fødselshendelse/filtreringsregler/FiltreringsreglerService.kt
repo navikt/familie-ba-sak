@@ -43,7 +43,7 @@ class FiltreringsreglerService(
     private val behandlingService: BehandlingService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
@@ -138,7 +138,7 @@ class FiltreringsreglerService(
                 behandling = behandling,
                 barna = barnaFraHendelse,
             ),
-            morHarIkkeOpphørtBarnetrygd = andelerPåSisteBehandling.isEmpty() || harAndelerFremoverITid
+            morHarIkkeOpphørtBarnetrygd = andelerPåSisteBehandling.isEmpty() || harAndelerFremoverITid,
         )
         val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(fakta)
         oppdaterMetrikker(evalueringer)

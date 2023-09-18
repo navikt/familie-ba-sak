@@ -35,7 +35,7 @@ internal class FiltreringsregelTest {
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
                 morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                morHarIkkeOpphørtBarnetrygd = true
+                morHarIkkeOpphørtBarnetrygd = true,
             ),
         )
 
@@ -60,7 +60,7 @@ internal class FiltreringsregelTest {
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
                 morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                morHarIkkeOpphørtBarnetrygd = true
+                morHarIkkeOpphørtBarnetrygd = true,
 
             ),
         )
@@ -88,7 +88,7 @@ internal class FiltreringsregelTest {
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
                 morMottarEøsBarnetrygd = true,
                 morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                morHarIkkeOpphørtBarnetrygd = true
+                morHarIkkeOpphørtBarnetrygd = true,
             ),
         )
 
@@ -113,7 +113,7 @@ internal class FiltreringsregelTest {
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
                 morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                morHarIkkeOpphørtBarnetrygd = true
+                morHarIkkeOpphørtBarnetrygd = true,
             ),
         )
 
@@ -142,7 +142,7 @@ internal class FiltreringsregelTest {
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
                 erFagsakenMigrertEtterBarnFødt = false,
                 morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                morHarIkkeOpphørtBarnetrygd = true
+                morHarIkkeOpphørtBarnetrygd = true,
 
             ),
         )
@@ -170,7 +170,7 @@ internal class FiltreringsregelTest {
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
                 morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                morHarIkkeOpphørtBarnetrygd = true
+                morHarIkkeOpphørtBarnetrygd = true,
             ),
         )
 
@@ -194,7 +194,7 @@ internal class FiltreringsregelTest {
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
                 morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                morHarIkkeOpphørtBarnetrygd = true
+                morHarIkkeOpphørtBarnetrygd = true,
             ),
         )
 
@@ -219,7 +219,7 @@ internal class FiltreringsregelTest {
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
                 morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                morHarIkkeOpphørtBarnetrygd = true
+                morHarIkkeOpphørtBarnetrygd = true,
             ),
         )
 
@@ -244,7 +244,7 @@ internal class FiltreringsregelTest {
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
                 morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                morHarIkkeOpphørtBarnetrygd = true
+                morHarIkkeOpphørtBarnetrygd = true,
             ),
         )
 
@@ -283,7 +283,7 @@ internal class FiltreringsregelTest {
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_ER_OVER_18_ÅR)
@@ -309,7 +309,7 @@ internal class FiltreringsregelTest {
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
@@ -334,7 +334,7 @@ internal class FiltreringsregelTest {
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
                 morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                morHarIkkeOpphørtBarnetrygd = true
+                morHarIkkeOpphørtBarnetrygd = true,
             ),
         )
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
@@ -360,7 +360,7 @@ internal class FiltreringsregelTest {
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
@@ -386,7 +386,7 @@ internal class FiltreringsregelTest {
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_LEVER)
@@ -412,7 +412,7 @@ internal class FiltreringsregelTest {
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_HAR_IKKE_VERGE)
@@ -438,7 +438,7 @@ internal class FiltreringsregelTest {
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
@@ -467,7 +467,7 @@ internal class FiltreringsregelTest {
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         Assertions.assertTrue(evalueringer.erOppfylt())
@@ -493,7 +493,7 @@ internal class FiltreringsregelTest {
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_GYLDIG_FNR)
@@ -520,7 +520,7 @@ internal class FiltreringsregelTest {
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_GYLDIG_FNR)
@@ -546,7 +546,7 @@ internal class FiltreringsregelTest {
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     dagensDato = LocalDate.parse("2020-10-23"),
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(
@@ -576,7 +576,7 @@ internal class FiltreringsregelTest {
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         Assertions.assertTrue(evalueringer.erOppfylt())
@@ -601,7 +601,7 @@ internal class FiltreringsregelTest {
                     løperBarnetrygdForBarnetPåAnnenForelder = true,
                     erFagsakenMigrertEtterBarnFødt = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         Assertions.assertTrue(!evalueringer.erOppfylt())
@@ -626,7 +626,7 @@ internal class FiltreringsregelTest {
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = true,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         assertThat(evalueringer.erOppfylt()).isFalse
@@ -651,7 +651,7 @@ internal class FiltreringsregelTest {
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true
+                    morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         assertThat(evalueringer.erOppfylt()).isTrue
@@ -676,7 +676,7 @@ internal class FiltreringsregelTest {
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = false
+                    morHarIkkeOpphørtBarnetrygd = false,
                 ),
             )
         assertThat(evalueringer.erOppfylt()).isFalse
@@ -703,7 +703,7 @@ internal class FiltreringsregelTest {
             Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
             Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET,
             Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
-            Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD
+            Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
         )
         assertThat(Filtreringsregel.values().size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
         assertThat(

@@ -75,7 +75,7 @@ class FiltreringsregelForFlereBarnTest {
         behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
         vilkårsvurderingRepository = vilkårsvurderingRepository,
-        andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+        andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
     )
 
     init {
@@ -383,7 +383,7 @@ class FiltreringsregelForFlereBarnTest {
             erFagsakenMigrertEtterBarnFødt = false,
             løperBarnetrygdForBarnetPåAnnenForelder = false,
             morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-            morHarIkkeOpphørtBarnetrygd = true
+            morHarIkkeOpphørtBarnetrygd = true,
         )
     }
 }

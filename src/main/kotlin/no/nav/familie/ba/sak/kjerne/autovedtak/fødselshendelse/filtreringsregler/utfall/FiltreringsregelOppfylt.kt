@@ -37,9 +37,9 @@ enum class FiltreringsregelOppfylt(val beskrivelse: String, private val filtreri
         Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
     ),
     MOR_HAR_IKKE_OPPHØRT_BARNETRYGD(
-        "Mor har ikke opphørt barnetrygd", Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD
-    )
-
+        "Mor har ikke opphørt barnetrygd",
+        Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
+    ),
     ;
 
     override fun hentBeskrivelse(): String {
