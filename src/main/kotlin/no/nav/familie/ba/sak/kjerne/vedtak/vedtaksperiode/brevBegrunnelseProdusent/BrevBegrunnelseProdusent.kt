@@ -297,7 +297,8 @@ private fun SanityBegrunnelse.erGjeldendeForOpphørFraForrigeBehandling(begrunne
             ?: emptyList(),
     )
 
-    val dennePeriodenErFørsteVedtaksperiodePåFagsak = begrunnelseGrunnlag.forrigePeriode == null
+    val dennePeriodenErFørsteVedtaksperiodePåFagsak =
+        begrunnelseGrunnlag.forrigePeriode == null || begrunnelseGrunnlag.forrigePeriode!!.andeler.firstOrNull() == null
 
     return begrunnelseGjelderMistedeVilkår && dennePeriodenErFørsteVedtaksperiodePåFagsak
 }
