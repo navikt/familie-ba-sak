@@ -6,18 +6,21 @@ import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapStandardBegrunnelser
+import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -25,10 +28,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.RestSanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.genererVedtaksperioder
@@ -55,7 +60,10 @@ class BegrunnelseTeksterStepDefinition {
 
     private var gjeldendeBehandlingId: Long? = null
 
-    private var utvidetVedtaksperiodeMedBegrunnelser = mutableListOf<UtvidetVedtaksperiodeMedBegrunnelser>()
+    private var utvidetVedtaksperiodeMedBegrunnelser = listOf<UtvidetVedtaksperiodeMedBegrunnelser>()
+
+    private var målform: Målform = Målform.NB
+    private var søknadstidspunkt: LocalDate? = null
 
     /**
      * Mulige verdier: | FagsakId | Fagsaktype |
@@ -151,6 +159,20 @@ class BegrunnelseTeksterStepDefinition {
             persongrunnlag = persongrunnlag,
             tidligereBehandlinger = behandlingTilForrigeBehandling,
             dagensDato = dagensDato,
+        )
+    }
+
+    /**
+     * Mulige verdier: | Fra dato | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |
+     */
+    @Og("med vedtaksperioder for behandling {}")
+    fun `med vedtaksperioder`(behandlingId: Long, dataTable: DataTable) {
+        val vedtaksperioder = genererVedtaksperioderForBehandling(behandlingId)
+
+        vedtaksperioderMedBegrunnelser = leggBegrunnelserIVedtaksperiodene(
+            dataTable,
+            vedtaksperioder,
+            vedtaksliste.single { it.behandling.id == behandlingId },
         )
     }
 
@@ -253,7 +275,7 @@ class BegrunnelseTeksterStepDefinition {
      */
     @Så("forvent følgende standardBegrunnelser")
     fun `forvent følgende standardBegrunnelser`(dataTable: DataTable) {
-        val forventedeStandardBegrunnelser = mapStandardBegrunnelser(dataTable).toSet()
+        val forventedeStandardBegrunnelser = mapBegrunnelser(dataTable).toSet()
 
         forventedeStandardBegrunnelser.forEach { forventet ->
             val faktisk =
@@ -275,6 +297,34 @@ class BegrunnelseTeksterStepDefinition {
                 assertThat(faktisk.gyldigeBegrunnelser).doesNotContainAnyElementsOf(forventet.ekskluderteStandardBegrunnelser)
             }
         }
+    }
+
+    /**
+     * Mulige verdier: | Begrunnelse | Gjelder søker | Barnas fødselsdager | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Avtale tidspunkt delt bosted | Søkers rett til utvidet |
+     */
+    @Så("forvent følgende brevbegrunnelser for behandling {} i periode {} til {}")
+    fun `forvent følgende brevbegrunnelser for behandling i periode`(
+        behandlingId: Long,
+        periodeFom: String,
+        periodeTom: String,
+        dataTable: DataTable,
+    ) {
+        val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
+        val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+        val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelse(behandlingId, vedtak, forrigeBehandlingId)
+
+        val faktiskeBegrunnelser: List<BegrunnelseData> =
+            vedtaksperioderMedBegrunnelser.single {
+                it.fom == parseNullableDato(periodeFom) && it.tom == parseNullableDato(periodeTom)
+            }.lagBrevPeriode(grunnlagForBegrunnelse)!!
+                .begrunnelser
+                .filterIsInstance<BegrunnelseData>()
+
+        val forvendtedeBegrunnelser = parseStandardBegrunnelser(dataTable)
+
+        assertThat(faktiskeBegrunnelser.sortedBy { it.apiNavn })
+            .usingRecursiveComparison()
+            .isEqualTo(forvendtedeBegrunnelser.sortedBy { it.apiNavn })
     }
 
     // For å laste ned begrunnelsene på nytt anbefales https://familie-brev.sanity.studio/ba-test/vision med query fra SanityQueries.kt .
