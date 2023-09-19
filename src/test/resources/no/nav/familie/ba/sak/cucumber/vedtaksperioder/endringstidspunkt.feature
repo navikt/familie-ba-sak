@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 
-Egenskap: Endringstidspunkt påvirker periodene
+Egenskap: Vedtaksperioder - Endringstidspunkt
 
   Bakgrunn:
     Gitt følgende vedtak
@@ -95,3 +95,86 @@ Egenskap: Endringstidspunkt påvirker periodene
       | 01.07.2021 | 31.07.2021 | Utbetaling         | Sekundærland EØS |
       | 01.08.2021 | 30.11.2034 | Utbetaling         |                  |
       | 01.12.2034 |            | Opphør             | Barn er over 18  |
+
+  Scenario: Skal ikke se på endring i avslåtte vilkår fra forrige behandling når vi beregner endringstidspunktet
+    Gitt følgende fagsaker
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende vedtak
+      | BehandlingId | FagsakId | ForrigeBehandlingId |
+      | 1            | 1        |                     |
+      | 2            | 1        | 1                   |
+
+    Og følgende persongrunnlag
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 16.02.1985  |
+      | 1            | 2       | BARN       | 23.04.2017  |
+      | 1            | 3       | BARN       | 22.03.2015  |
+      | 2            | 1       | SØKER      | 16.02.1985  |
+      | 2            | 2       | BARN       | 23.04.2017  |
+      | 2            | 3       | BARN       | 22.03.2015  |
+
+    Og følgende dagens dato 19.09.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
+
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
+      | 1       | UTVIDET_BARNETRYGD                                           |                  |            |            | IKKE_OPPFYLT | Ja                   |
+      | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD                                |                  | 16.02.1985 | 15.02.2023 | OPPFYLT      | Nei                  |
+
+      | 3       | LOVLIG_OPPHOLD,BOR_MED_SØKER,BOSATT_I_RIKET,GIFT_PARTNERSKAP |                  | 22.03.2015 |            | OPPFYLT      | Nei                  |
+      | 3       | UNDER_18_ÅR                                                  |                  | 22.03.2015 | 21.03.2033 | OPPFYLT      | Nei                  |
+
+      | 2       | GIFT_PARTNERSKAP,LOVLIG_OPPHOLD,BOSATT_I_RIKET,BOR_MED_SØKER |                  | 23.04.2017 |            | OPPFYLT      | Nei                  |
+      | 2       | UNDER_18_ÅR                                                  |                  | 23.04.2017 | 22.04.2035 | OPPFYLT      | Nei                  |
+
+    Og legg til nye vilkårresultater for behandling 2
+      | AktørId | Vilkår                                         | Utdypende vilkår            | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD                  |                             | 16.02.1985 | 15.02.2023 | OPPFYLT  | Nei                  |
+
+      | 2       | BOSATT_I_RIKET,GIFT_PARTNERSKAP,LOVLIG_OPPHOLD |                             | 23.04.2017 |            | OPPFYLT  | Nei                  |
+      | 2       | BOR_MED_SØKER                                  |                             | 23.04.2017 | 08.01.2023 | OPPFYLT  | Nei                  |
+      | 2       | UNDER_18_ÅR                                    |                             | 23.04.2017 | 22.04.2035 | OPPFYLT  | Nei                  |
+      | 2       | BOR_MED_SØKER                                  | DELT_BOSTED_SKAL_IKKE_DELES | 09.01.2023 |            | OPPFYLT  | Nei                  |
+
+      | 3       | LOVLIG_OPPHOLD,BOSATT_I_RIKET,GIFT_PARTNERSKAP |                             | 22.03.2015 |            | OPPFYLT  | Nei                  |
+      | 3       | BOR_MED_SØKER                                  |                             | 22.03.2015 | 08.01.2023 | OPPFYLT  | Nei                  |
+      | 3       | UNDER_18_ÅR                                    |                             | 22.03.2015 | 21.03.2033 | OPPFYLT  | Nei                  |
+      | 3       | BOR_MED_SØKER                                  | DELT_BOSTED                 | 09.01.2023 |            | OPPFYLT  | Nei                  |
+
+    Og med andeler tilkjent ytelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.05.2017 | 28.02.2019 | 970   | ORDINÆR_BARNETRYGD | 100     | 970  |
+      | 2       | 1            | 01.03.2019 | 31.08.2020 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 1            | 01.09.2020 | 31.08.2021 | 1354  | ORDINÆR_BARNETRYGD | 100     | 1354 |
+      | 2       | 1            | 01.09.2021 | 31.12.2021 | 1654  | ORDINÆR_BARNETRYGD | 100     | 1654 |
+      | 2       | 1            | 01.01.2022 | 28.02.2023 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+
+      | 3       | 1            | 01.04.2015 | 28.02.2019 | 970   | ORDINÆR_BARNETRYGD | 100     | 970  |
+      | 3       | 1            | 01.03.2019 | 31.08.2020 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 1            | 01.09.2020 | 28.02.2021 | 1354  | ORDINÆR_BARNETRYGD | 100     | 1354 |
+      | 3       | 1            | 01.03.2021 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+
+      | 3       | 2            | 01.04.2015 | 28.02.2019 | 970   | ORDINÆR_BARNETRYGD | 100     | 970  |
+      | 3       | 2            | 01.03.2019 | 31.08.2020 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 2            | 01.09.2020 | 28.02.2021 | 1354  | ORDINÆR_BARNETRYGD | 100     | 1354 |
+      | 3       | 2            | 01.03.2021 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+
+      | 2       | 2            | 01.05.2017 | 28.02.2019 | 970   | ORDINÆR_BARNETRYGD | 100     | 970  |
+      | 2       | 2            | 01.03.2019 | 31.08.2020 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 2            | 01.09.2020 | 31.08.2021 | 1354  | ORDINÆR_BARNETRYGD | 100     | 1354 |
+      | 2       | 2            | 01.09.2021 | 31.12.2021 | 1654  | ORDINÆR_BARNETRYGD | 100     | 1654 |
+      | 2       | 2            | 01.01.2022 | 28.02.2023 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+
+    Og med endrede utbetalinger
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent |
+      | 3       | 2            | 01.02.2023 | 28.02.2023 | DELT_BOSTED | 100     |
+
+    Når vedtaksperioder med begrunnelser genereres for behandling 2
+
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato   | Vedtaksperiodetype |
+      | 2023-02-01 | 2023-02-28 | UTBETALING         |
+      | 2023-03-01 |            | OPPHØR             |
