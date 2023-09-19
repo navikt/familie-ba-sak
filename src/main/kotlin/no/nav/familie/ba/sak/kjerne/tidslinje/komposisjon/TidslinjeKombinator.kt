@@ -151,6 +151,28 @@ fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMed(
     ).tilInnhold()
 }
 
+/**
+ * Extension-metode for å kombinere tre tidslinjer
+ * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
+ * fra minste <fraOgMed()> til største <tilOgMed()> fra alle tidslinjene
+ * Tidsenhet (T) må være av samme type
+ * Hver av tidslinjene kan ha ulik innholdstype, hhv A, B og C
+ * Kombintor-funksjonen tar inn (nullable) av A, B og C og returner (nullable) R
+ * Resultatet er en tidslinje med tidsenhet T og innhold R
+ */
+fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMedDatert(
+    tidslinjeB: Tidslinje<B, T>,
+    tidslinjeC: Tidslinje<C, T>,
+    kombinator: (A?, B?, C?, Tidspunkt<T>) -> R?,
+): Tidslinje<R, T> = tidsrom(this, tidslinjeB, tidslinjeC).tidslinjeFraTidspunkt { tidspunkt ->
+    kombinator(
+        this.innholdForTidspunkt(tidspunkt).innhold,
+        tidslinjeB.innholdForTidspunkt(tidspunkt).innhold,
+        tidslinjeC.innholdForTidspunkt(tidspunkt).innhold,
+        tidspunkt,
+    ).tilInnhold()
+}
+
 fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMedKunVerdi(
     tidslinjeB: Tidslinje<B, T>,
     tidslinjeC: Tidslinje<C, T>,
