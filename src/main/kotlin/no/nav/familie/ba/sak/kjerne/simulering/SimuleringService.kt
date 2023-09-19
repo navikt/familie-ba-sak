@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -73,7 +74,7 @@ class SimuleringService(
                     vedtak = vedtak,
                     saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
                     erSimulering = true,
-                ).utbetalingsoppdrag
+                ).utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
             } else {
                 utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                     vedtak = vedtak,

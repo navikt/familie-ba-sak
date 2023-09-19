@@ -22,3 +22,14 @@ fun lagUtbetalingsoppdrag(utbetalingsperiode: List<Utbetalingsperiode>) = Utbeta
     avstemmingTidspunkt = LocalDateTime.now(),
     utbetalingsperiode = utbetalingsperiode,
 )
+
+fun lagUtbetalingsoppdrag(utbetalingsperiode: List<no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode>) =
+    no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag(
+        kodeEndring = no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag.KodeEndring.NY,
+        fagSystem = "BA",
+        saksnummer = "",
+        aktoer = UUID.randomUUID().toString(),
+        saksbehandlerId = "",
+        avstemmingTidspunkt = LocalDateTime.now(),
+        utbetalingsperiode = utbetalingsperiode,
+    )

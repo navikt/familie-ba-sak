@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.simulering.KontrollerNyUtbetalingsgeneratorService
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
+import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode
 import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -143,7 +143,7 @@ internal class ØkonomiServiceTest {
                 saksbehandlerId = any(),
                 andelTilkjentYtelseForUtbetalingsoppdragFactory = any(),
             )
-        } returns utbetalingsoppdrag
+        } returns utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
         every {
             utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 vedtak = any(),

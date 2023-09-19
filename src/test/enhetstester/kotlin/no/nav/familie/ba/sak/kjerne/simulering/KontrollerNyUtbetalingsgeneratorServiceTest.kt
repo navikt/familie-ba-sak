@@ -31,7 +31,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
@@ -248,7 +248,7 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
                 saksbehandlerId = any(),
                 andelTilkjentYtelseForUtbetalingsoppdragFactory = any(),
             )
-        } returns lagUtbetalingsoppdrag(emptyList())
+        } returns lagUtbetalingsoppdrag(emptyList<Utbetalingsperiode>())
 
         val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
             vedtak = lagVedtak(),
@@ -267,7 +267,10 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
                 saksbehandlerId = any(),
                 erSimulering = any(),
             )
-        } returns BeregnetUtbetalingsoppdragLongId(lagUtbetalingsoppdrag(emptyList()), emptyList())
+        } returns BeregnetUtbetalingsoppdragLongId(
+            lagUtbetalingsoppdrag(emptyList<no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode>()),
+            emptyList(),
+        )
 
         val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
             vedtak = lagVedtak(),
@@ -487,7 +490,7 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
         } returns true
 
         val beregnetUtbetalingsoppdragMock = mockk<BeregnetUtbetalingsoppdragLongId>()
-        val utbetalingsoppdrag = mockk<Utbetalingsoppdrag>()
+        val utbetalingsoppdrag = mockk<no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag>()
 
         every { utbetalingsoppdrag.utbetalingsperiode } returns listOf(mockk())
 

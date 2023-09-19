@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbeta
 import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
+import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -86,8 +87,7 @@ class OppdragSteg {
         tilkjenteYtelserNy.fold(emptyList<TilkjentYtelse>()) { acc, tilkjentYtelse ->
             val behandlingId = tilkjentYtelse.behandling.id
             try {
-                beregnetUtbetalingsoppdragSimuleringNy[behandlingId] =
-                    beregnUtbetalingsoppdragNy(acc, tilkjentYtelse, erSimulering = true)
+                genererUtbetalingsoppdragForSimuleringNy(behandlingId, acc, tilkjentYtelse)
                 beregnetUtbetalingsoppdragNy[behandlingId] = beregnUtbetalingsoppdragNy(acc, tilkjentYtelse)
                 oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
                     beregnetUtbetalingsoppdragNy[behandlingId]!!,
@@ -98,6 +98,20 @@ class OppdragSteg {
                 kastedeFeil[behandlingId] = e
             }
             acc + tilkjentYtelse
+        }
+    }
+
+    private fun genererUtbetalingsoppdragForSimuleringNy(
+        behandlingId: Long,
+        tilkjenteYtelser: List<TilkjentYtelse>,
+        tilkjentYtelse: TilkjentYtelse,
+    ) {
+        try {
+            beregnetUtbetalingsoppdragSimuleringNy[behandlingId] =
+                beregnUtbetalingsoppdragNy(tilkjenteYtelser, tilkjentYtelse, erSimulering = true)
+        } catch (e: Exception) {
+            logger.error("Feilet beregning av oppdrag ved simulering for behandling=$behandlingId")
+            kastedeFeil[behandlingId] = e
         }
     }
 
@@ -175,11 +189,13 @@ class OppdragSteg {
     fun `forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator`(dataTable: DataTable) {
         validerForventetUtbetalingsoppdrag(
             dataTable,
-            beregnetUtbetalingsoppdragNy.mapValues { it.value.utbetalingsoppdrag }.toMutableMap(),
+            beregnetUtbetalingsoppdragNy.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+                .toMutableMap(),
         )
         assertSjekkBehandlingIder(
             dataTable,
-            beregnetUtbetalingsoppdragNy.mapValues { it.value.utbetalingsoppdrag }.toMutableMap(),
+            beregnetUtbetalingsoppdragNy.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+                .toMutableMap(),
         )
     }
 
@@ -193,11 +209,13 @@ class OppdragSteg {
     fun `forvent følgende simulering med ny utbetalingsgenerator`(dataTable: DataTable) {
         validerForventetUtbetalingsoppdrag(
             dataTable,
-            beregnetUtbetalingsoppdragSimuleringNy.mapValues { it.value.utbetalingsoppdrag }.toMutableMap(),
+            beregnetUtbetalingsoppdragSimuleringNy.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+                .toMutableMap(),
         )
         assertSjekkBehandlingIder(
             dataTable,
-            beregnetUtbetalingsoppdragSimuleringNy.mapValues { it.value.utbetalingsoppdrag }.toMutableMap(),
+            beregnetUtbetalingsoppdragSimuleringNy.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+                .toMutableMap(),
         )
     }
 

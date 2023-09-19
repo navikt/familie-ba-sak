@@ -18,10 +18,11 @@ import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.Behandlingsinformasjon
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
+import no.nav.familie.felles.utbetalingsgenerator.domain.Fagsystem
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
+import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.YearMonth
@@ -46,16 +47,16 @@ class UtbetalingsoppdragGenerator(
                 behandlingId = vedtak.behandling.id.toString(),
                 eksternBehandlingId = vedtak.behandling.id,
                 eksternFagsakId = vedtak.behandling.fagsak.id,
-                ytelse = Ytelsestype.BARNETRYGD,
+                fagsystem = FagsystemBA.BARNETRYGD,
                 personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
                 vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
                 opphørFra = opphørFra(
                     forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                     sisteAndelPerKjede = sisteAndelPerKjede,
-                    erSimulering = erSimulering,
                     endretMigreringsDato = endretMigreringsDato,
                 ),
                 utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
+                opphørKjederFraFørsteUtbetaling = erSimulering,
             ),
             forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData() ?: emptyList(),
             nyeAndeler = nyTilkjentYtelse.tilAndelData(),
@@ -82,14 +83,10 @@ class UtbetalingsoppdragGenerator(
     private fun opphørFra(
         forrigeTilkjentYtelse: TilkjentYtelse?,
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
-        erSimulering: Boolean,
         endretMigreringsDato: YearMonth?,
     ): YearMonth? {
         if (forrigeTilkjentYtelse == null || sisteAndelPerKjede.isEmpty()) return null
         if (endretMigreringsDato != null) return endretMigreringsDato
-        if (erSimulering) {
-            return forrigeTilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.periode.fom }
-        }
         return null
     }
 
@@ -344,3 +341,51 @@ class AndelTilkjentYtelseForIverksettingFactory : AndelTilkjentYtelseForUtbetali
 fun Collection<AndelTilkjentYtelse>.pakkInnForUtbetaling(
     andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
 ) = andelTilkjentYtelseForUtbetalingsoppdragFactory.pakkInnForUtbetaling(this)
+
+enum class YtelsetypeBA(
+    override val klassifisering: String,
+    override val satsType: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode.SatsType = no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode.SatsType.MND,
+) : no.nav.familie.felles.utbetalingsgenerator.domain.Ytelsestype {
+    ORDINÆR_BARNETRYGD("BATR"),
+    UTVIDET_BARNETRYGD("BATR"),
+    SMÅBARNSTILLEGG("BATRSMA"),
+}
+
+enum class FagsystemBA(
+    override val kode: String,
+    override val gyldigeSatstyper: Set<YtelsetypeBA>,
+) : Fagsystem {
+    BARNETRYGD(
+        "BA",
+        setOf(YtelsetypeBA.ORDINÆR_BARNETRYGD, YtelsetypeBA.UTVIDET_BARNETRYGD, YtelsetypeBA.SMÅBARNSTILLEGG),
+    ),
+}
+
+fun no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag.tilRestUtbetalingsoppdrag(): Utbetalingsoppdrag =
+    Utbetalingsoppdrag(
+        kodeEndring = Utbetalingsoppdrag.KodeEndring.valueOf(this.kodeEndring.name),
+        fagSystem = this.fagSystem,
+        saksnummer = this.saksnummer,
+        aktoer = this.aktoer,
+        saksbehandlerId = this.saksbehandlerId,
+        avstemmingTidspunkt = this.avstemmingTidspunkt,
+        utbetalingsperiode = this.utbetalingsperiode.map { it.tilRestUtbetalingsperiode() },
+        gOmregning = this.gOmregning,
+    )
+
+fun no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode.tilRestUtbetalingsperiode(): Utbetalingsperiode =
+    Utbetalingsperiode(
+        erEndringPåEksisterendePeriode = this.erEndringPåEksisterendePeriode,
+        opphør = this.opphør?.let { Opphør(it.opphørDatoFom) },
+        periodeId = this.periodeId,
+        forrigePeriodeId = this.forrigePeriodeId,
+        datoForVedtak = this.datoForVedtak,
+        klassifisering = this.klassifisering,
+        vedtakdatoFom = this.vedtakdatoFom,
+        vedtakdatoTom = this.vedtakdatoTom,
+        sats = this.sats,
+        satsType = Utbetalingsperiode.SatsType.valueOf(this.satsType.name),
+        utbetalesTil = this.utbetalesTil,
+        behandlingId = this.behandlingId,
+        utbetalingsgrad = this.utbetalingsgrad,
+    )

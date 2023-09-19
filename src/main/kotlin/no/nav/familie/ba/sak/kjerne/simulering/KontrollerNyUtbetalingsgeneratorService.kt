@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.skalIverksettesMotOppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -78,7 +79,11 @@ class KontrollerNyUtbetalingsgeneratorService(
                     erSimulering = erSimulering,
                 )
 
-            if (!beregnetUtbetalingsoppdrag.utbetalingsoppdrag.skalIverksettesMotOppdrag()) return emptyList()
+            if (!beregnetUtbetalingsoppdrag.utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
+                    .skalIverksettesMotOppdrag()
+            ) {
+                return emptyList()
+            }
 
             secureLogger.info("Behandling ${behandling.id} har følgende oppdaterte andeler: ${beregnetUtbetalingsoppdrag.andeler}")
 
@@ -93,7 +98,7 @@ class KontrollerNyUtbetalingsgeneratorService(
             }
 
             val nyttSimuleringResultat =
-                økonomiKlient.hentSimulering(beregnetUtbetalingsoppdrag.utbetalingsoppdrag)
+                økonomiKlient.hentSimulering(beregnetUtbetalingsoppdrag.utbetalingsoppdrag.tilRestUtbetalingsoppdrag())
 
             if (nyttSimuleringResultat.simuleringMottaker.isEmpty() && gammeltSimuleringResultat.simuleringMottaker.isEmpty()) return diffFeilTyper
 

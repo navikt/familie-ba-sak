@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.cucumber.domeneparser
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
+import no.nav.familie.ba.sak.integrasjoner.økonomi.YtelsetypeBA
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -82,7 +83,7 @@ object OppdragParser {
                 tom = parseÅrMåned(Domenebegrep.TIL_DATO, rad),
                 beløp = parseInt(DomenebegrepTilkjentYtelse.BELØP, rad),
                 personIdent = lagFødselsnummer("1"),
-                type = no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType.ORDINÆR_BARNETRYGD,
+                type = YtelsetypeBA.ORDINÆR_BARNETRYGD,
                 periodeId = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, rad),
                 forrigePeriodeId = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, rad),
                 kildeBehandlingId = parseValgfriLong(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, rad),

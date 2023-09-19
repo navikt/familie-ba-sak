@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.lagUtbetalingsoppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -31,7 +32,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
+import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.kontrakter.felles.simulering.MottakerType
@@ -383,7 +384,7 @@ internal class SimuleringServiceEnhetTest {
                 andelTilkjentYtelseForUtbetalingsoppdragFactory = any(),
                 erSimulering = any(),
             )
-        } returns utbetalingsoppdrag
+        } returns utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
 
         every {
             utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -393,7 +394,7 @@ internal class SimuleringServiceEnhetTest {
             )
         } returns BeregnetUtbetalingsoppdragLongId(utbetalingsoppdrag = utbetalingsoppdrag, andeler = emptyList())
 
-        every { økonomiKlient.hentSimulering(utbetalingsoppdrag) } returns mockk()
+        every { økonomiKlient.hentSimulering(utbetalingsoppdrag.tilRestUtbetalingsoppdrag()) } returns mockk()
 
         every {
             kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(

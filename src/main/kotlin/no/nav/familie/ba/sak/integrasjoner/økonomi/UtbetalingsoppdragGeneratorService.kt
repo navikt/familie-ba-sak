@@ -205,7 +205,10 @@ class UtbetalingsoppdragGeneratorService(
         }
     }
 
-    private fun utledOpphør(utbetalingsoppdrag: Utbetalingsoppdrag, behandling: Behandling): Opphør {
+    private fun utledOpphør(
+        utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
+        behandling: Behandling,
+    ): Opphør {
         val erRentOpphør =
             utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() && utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
         var opphørsdato: LocalDate? = null
@@ -224,7 +227,7 @@ class UtbetalingsoppdragGeneratorService(
 
     private fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
         tilkjentYtelse: TilkjentYtelse,
-        utbetalingsoppdrag: Utbetalingsoppdrag,
+        utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
     ) {
         val opphør = utledOpphør(utbetalingsoppdrag, tilkjentYtelse.behandling)
 

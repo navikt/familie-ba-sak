@@ -57,7 +57,7 @@ class ØkonomiService(
                 utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                     vedtak,
                     saksbehandlerId,
-                ).utbetalingsoppdrag
+                ).utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
             } else {
                 val utbetalingsoppdrag =
                     utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
