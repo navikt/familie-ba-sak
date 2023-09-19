@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 
-interface IVedtakBegrunnelse {
+sealed interface IVedtakBegrunnelse {
 
     val sanityApiNavn: String
     val vedtakBegrunnelseType: VedtakBegrunnelseType

@@ -520,7 +520,7 @@ class OppdaterVilkårsvurderingTest {
                         periodeFom = LocalDate.now(),
                         periodeTom = LocalDate.now(),
                         begrunnelse = "",
-                        behandlingId = behandling.id,
+                        sistEndretIBehandlingId = behandling.id,
                     ),
                     VilkårResultat(
                         personResultat = personResultat,
@@ -529,7 +529,7 @@ class OppdaterVilkårsvurderingTest {
                         periodeFom = LocalDate.now(),
                         periodeTom = LocalDate.now(),
                         begrunnelse = "",
-                        behandlingId = behandling.id,
+                        sistEndretIBehandlingId = behandling.id,
                     ),
                 ),
             )
@@ -560,7 +560,7 @@ class OppdaterVilkårsvurderingTest {
                         periodeFom = LocalDate.now(),
                         periodeTom = LocalDate.now(),
                         begrunnelse = "",
-                        behandlingId = behandling.id,
+                        sistEndretIBehandlingId = behandling.id,
                     ),
                     VilkårResultat(
                         personResultat = personResultat,
@@ -569,7 +569,7 @@ class OppdaterVilkårsvurderingTest {
                         periodeFom = LocalDate.now(),
                         periodeTom = LocalDate.now(),
                         begrunnelse = "",
-                        behandlingId = behandling.id,
+                        sistEndretIBehandlingId = behandling.id,
                     ),
                     VilkårResultat(
                         personResultat = personResultat,
@@ -578,7 +578,7 @@ class OppdaterVilkårsvurderingTest {
                         periodeFom = LocalDate.now(),
                         periodeTom = LocalDate.now(),
                         begrunnelse = "",
-                        behandlingId = behandling.id,
+                        sistEndretIBehandlingId = behandling.id,
                     ),
                 ),
             )
