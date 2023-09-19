@@ -68,7 +68,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 periodeFom = LocalDate.now().minusYears(2),
                 periodeTom = tomPåFørsteUtvidetVilkår,
                 begrunnelse = "",
-                behandlingId = vilkårsvurdering.behandling.id,
+                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                 utdypendeVilkårsvurderinger = emptyList(),
             ),
             VilkårResultat(
@@ -78,7 +78,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 periodeFom = tomPåFørsteUtvidetVilkår.plusMonths(1),
                 periodeTom = null,
                 begrunnelse = "",
-                behandlingId = vilkårsvurdering.behandling.id,
+                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                 utdypendeVilkårsvurderinger = emptyList(),
             ),
         )

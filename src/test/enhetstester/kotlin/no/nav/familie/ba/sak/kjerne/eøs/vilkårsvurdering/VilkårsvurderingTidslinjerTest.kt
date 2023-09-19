@@ -128,7 +128,7 @@ internal class VilkårsvurderingTidslinjerTest {
         periodeFom = periodeFom,
         periodeTom = periodeTom,
         begrunnelse = begrunnelse,
-        behandlingId = behandlingId,
+        sistEndretIBehandlingId = behandlingId,
         utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
     )
 }

@@ -1214,7 +1214,7 @@ class BeregningServiceTest {
                     periodeFom = generellFom,
                     periodeTom = generellTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id,
+                    sistEndretIBehandlingId = behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = søkerPersonResultat,
@@ -1223,7 +1223,7 @@ class BeregningServiceTest {
                     periodeFom = generellFom,
                     periodeTom = generellTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id,
+                    sistEndretIBehandlingId = behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = søkerPersonResultat,
@@ -1232,7 +1232,7 @@ class BeregningServiceTest {
                     periodeFom = utvidetFom,
                     periodeTom = utvidetTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id,
+                    sistEndretIBehandlingId = behandling.id,
                 ),
             ),
         )
@@ -1252,7 +1252,7 @@ class BeregningServiceTest {
                         periodeFom = generellFom,
                         periodeTom = generellTom,
                         begrunnelse = "",
-                        behandlingId = behandling.id,
+                        sistEndretIBehandlingId = behandling.id,
                     ),
                     VilkårResultat(
                         personResultat = barnPersonResultat,
@@ -1261,7 +1261,7 @@ class BeregningServiceTest {
                         periodeFom = generellFom,
                         periodeTom = generellTom,
                         begrunnelse = "",
-                        behandlingId = behandling.id,
+                        sistEndretIBehandlingId = behandling.id,
                     ),
                     VilkårResultat(
                         personResultat = barnPersonResultat,
@@ -1270,7 +1270,7 @@ class BeregningServiceTest {
                         periodeFom = generellFom,
                         periodeTom = generellTom,
                         begrunnelse = "",
-                        behandlingId = behandling.id,
+                        sistEndretIBehandlingId = behandling.id,
                         utdypendeVilkårsvurderinger = if (endretUtbetalingÅrsak == Årsak.DELT_BOSTED) {
                             listOf(
                                 UtdypendeVilkårsvurdering.DELT_BOSTED,
@@ -1286,7 +1286,7 @@ class BeregningServiceTest {
                         periodeFom = generellFom,
                         periodeTom = generellTom,
                         begrunnelse = "",
-                        behandlingId = behandling.id,
+                        sistEndretIBehandlingId = behandling.id,
                     ),
                     VilkårResultat(
                         personResultat = barnPersonResultat,
@@ -1295,7 +1295,7 @@ class BeregningServiceTest {
                         periodeFom = barn.fødselsdato,
                         periodeTom = barn.fødselsdato.plusYears(18),
                         begrunnelse = "",
-                        behandlingId = behandling.id,
+                        sistEndretIBehandlingId = behandling.id,
                     ),
                 ),
             )

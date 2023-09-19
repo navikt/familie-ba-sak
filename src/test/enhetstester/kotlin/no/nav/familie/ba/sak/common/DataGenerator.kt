@@ -567,7 +567,7 @@ fun lagPersonResultat(
                     vilkårType = it,
                     resultat = resultat,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                     utdypendeVilkårsvurderinger = listOfNotNull(
                         when {
                             erDeltBosted && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED
@@ -589,7 +589,7 @@ fun lagPersonResultat(
                     vilkårType = vilkårType,
                     resultat = resultat,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                     erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
                 ),
             ),
@@ -636,7 +636,7 @@ fun lagVilkårsvurdering(
                 periodeFom = søkerPeriodeFom,
                 periodeTom = søkerPeriodeTom,
                 begrunnelse = "",
-                behandlingId = behandling.id,
+                sistEndretIBehandlingId = behandling.id,
             ),
             VilkårResultat(
                 personResultat = personResultat,
@@ -645,7 +645,7 @@ fun lagVilkårsvurdering(
                 periodeFom = søkerPeriodeFom,
                 periodeTom = søkerPeriodeTom,
                 begrunnelse = "",
-                behandlingId = behandling.id,
+                sistEndretIBehandlingId = behandling.id,
             ),
         ),
     )
@@ -1052,7 +1052,7 @@ fun lagVilkårResultat(
     periodeFom = fom?.toLocalDate(),
     periodeTom = tom?.toLocalDate(),
     begrunnelse = "",
-    behandlingId = behandlingId,
+    sistEndretIBehandlingId = behandlingId,
     vurderesEtter = vilkårRegelverk,
 )
 
@@ -1074,7 +1074,7 @@ fun lagVilkårResultat(
     periodeFom = periodeFom,
     periodeTom = periodeTom,
     begrunnelse = begrunnelse,
-    behandlingId = behandlingId,
+    sistEndretIBehandlingId = behandlingId,
     utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
     erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
     standardbegrunnelser = standardbegrunnelser,

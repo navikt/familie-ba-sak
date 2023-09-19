@@ -159,7 +159,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     resultat = Resultat.IKKE_VURDERT,
                     vilkårType = vilkår,
                     begrunnelse = "",
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                 )
             }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
@@ -193,8 +193,8 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     vilkårResultaterMedNyPeriode.find { it.vilkårResultat.id == oppfyltVilkårResultat.id }
                 oppfyltVilkårResultat.kopierMedParent(personResultat).also { kopiertVilkårResultat ->
                     if (vilkårResultatMedNyPeriode != null) {
-                        kopiertVilkårResultat.behandlingId =
-                            if (vilkårResultatMedNyPeriode.harNyPeriode()) vilkårsvurdering.behandling.id else kopiertVilkårResultat.behandlingId
+                        kopiertVilkårResultat.sistEndretIBehandlingId =
+                            if (vilkårResultatMedNyPeriode.harNyPeriode()) vilkårsvurdering.behandling.id else kopiertVilkårResultat.sistEndretIBehandlingId
                         kopiertVilkårResultat.periodeFom = vilkårResultatMedNyPeriode.fom
                         kopiertVilkårResultat.periodeTom = vilkårResultatMedNyPeriode.tom
                         if (kopiertVilkårResultat.begrunnelse.isEmpty()) {
@@ -250,7 +250,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     periodeFom = fom,
                     periodeTom = tom,
                     begrunnelse = begrunnelse,
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                 )
             }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
