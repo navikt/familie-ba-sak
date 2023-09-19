@@ -15,9 +15,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVu
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
@@ -66,9 +64,6 @@ internal class BehandleFødselshendelseTaskTest {
     fun `skal kaste rekjør senere exception hvis det opprettes satsendring task`() {
         assertThrows<RekjørSenereException> {
             BehandleFødselshendelseTask(
-                behandlingHentOgPersisterService = mockk(),
-                fagsakService = mockk(),
-                oppgaveService = mockk(),
                 taskRepositoryWrapper = mockk(),
                 autovedtakStegService = mockk<AutovedtakStegService>().apply {
                     every {
@@ -113,9 +108,6 @@ internal class BehandleFødselshendelseTaskTest {
         mockkObject(OpprettVurderFødselshendelseKonsekvensForYtelseOppgave)
 
         BehandleFødselshendelseTask(
-            behandlingHentOgPersisterService = mockk(),
-            fagsakService = mockk<FagsakService>().apply { every { hentNormalFagsak(any()) } returns null },
-            oppgaveService = mockk(),
             taskRepositoryWrapper = taskRepositoryWrapper,
             personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns randomAktør },
             autovedtakStegService = mockk(),
@@ -161,9 +153,6 @@ internal class BehandleFødselshendelseTaskTest {
         mockkObject(OpprettVurderFødselshendelseKonsekvensForYtelseOppgave)
 
         BehandleFødselshendelseTask(
-            fagsakService = mockk<FagsakService>().apply { every { hentNormalFagsak(any()) } returns behandling.fagsak },
-            behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>().apply { every { finnAktivForFagsak(any()) } returns behandling },
-            oppgaveService = oppgaveService,
             taskRepositoryWrapper = taskRepositoryWrapper,
             personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns randomAktør },
             autovedtakStegService = mockk(),
@@ -205,9 +194,6 @@ internal class BehandleFødselshendelseTaskTest {
         autovedtakStegService: AutovedtakStegService,
     ): BehandleFødselshendelseTask =
         BehandleFødselshendelseTask(
-            behandlingHentOgPersisterService = mockk(),
-            fagsakService = mockk(),
-            oppgaveService = mockk(),
             taskRepositoryWrapper = mockk(),
             autovedtakStegService = autovedtakStegService,
             velgFagsystemService = mockk<VelgFagSystemService>().apply {
