@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.brev.LANDKODER
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
@@ -28,7 +29,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.RestSanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
@@ -291,7 +292,7 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     /**
-     * Mulige verdier: | Begrunnelse | Gjelder søker | Barnas fødselsdager | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Avtale tidspunkt delt bosted | Søkers rett til utvidet |
+     * Mulige verdier: | Begrunnelse | Type | Gjelder søker | Barnas fødselsdager | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Avtale tidspunkt delt bosted | Søkers rett til utvidet |
      */
     @Så("forvent følgende brevbegrunnelser for behandling {} i periode {} til {}")
     fun `forvent følgende brevbegrunnelser for behandling i periode`(
@@ -304,14 +305,14 @@ class BegrunnelseTeksterStepDefinition {
         val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
         val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
 
-        val faktiskeBegrunnelser: List<BegrunnelseData> =
+        val faktiskeBegrunnelser: List<BegrunnelseMedData> =
             vedtaksperioderMedBegrunnelser.single {
                 it.fom == parseNullableDato(periodeFom) && it.tom == parseNullableDato(periodeTom)
-            }.lagBrevPeriode(grunnlagForBegrunnelse)!!
+            }.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)!!
                 .begrunnelser
-                .filterIsInstance<BegrunnelseData>()
+                .filterIsInstance<BegrunnelseMedData>()
 
-        val forvendtedeBegrunnelser = parseStandardBegrunnelser(dataTable)
+        val forvendtedeBegrunnelser = parseBegrunnelser(dataTable)
 
         assertThat(faktiskeBegrunnelser.sortedBy { it.apiNavn })
             .usingRecursiveComparison()
