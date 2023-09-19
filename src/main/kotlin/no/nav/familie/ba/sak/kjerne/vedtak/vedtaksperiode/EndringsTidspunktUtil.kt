@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPersonVilkårInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.erLikUtenFomOgTom
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import java.time.LocalDate
 
 fun utledEndringstidspunkt(
@@ -25,7 +26,10 @@ fun utledEndringstidspunkt(
         behandlingsGrunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson()
             .mapValues { it.value.vedtaksperiodeGrunnlagForPerson }
     val grunnlagTidslinjePerPersonForrigeBehandling =
-        behandlingsGrunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson()
+        behandlingsGrunnlagForVedtaksperioderForrigeBehandling?.copy(
+            personResultater = behandlingsGrunnlagForVedtaksperioderForrigeBehandling
+                .personResultater.filtrerVilkårErKopiertTilNesteBehandling(),
+        )?.utledGrunnlagTidslinjePerPerson()
             ?.mapValues { it.value.vedtaksperiodeGrunnlagForPerson } ?: emptyMap()
 
     val erPeriodeLikSammePeriodeIForrigeBehandlingTidslinjer =
@@ -45,6 +49,10 @@ fun utledEndringstidspunkt(
 
     return datoTidligsteForskjell
 }
+
+private fun Set<PersonResultat>.filtrerVilkårErKopiertTilNesteBehandling(): Set<PersonResultat> = map {
+    it.tilKopiForNyVilkårsvurdering(it.vilkårsvurdering)
+}.toSet()
 
 private fun loggEndringstidspunktOgEndringer(
     grunnlagTidslinjePerPerson: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned>>,

@@ -343,7 +343,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                         ),
                         VilkårResultat(
@@ -353,7 +353,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                         ),
                     ),
@@ -366,7 +366,7 @@ class EndretUtbetalingAndelValideringTest {
                     vilkårType = it,
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                     utdypendeVilkårsvurderinger = emptyList(),
                 )
             }
@@ -421,7 +421,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                         ),
                         VilkårResultat(
@@ -431,7 +431,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                         ),
                     ),
@@ -444,7 +444,7 @@ class EndretUtbetalingAndelValideringTest {
                     vilkårType = it,
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                     utdypendeVilkårsvurderinger = emptyList(),
                 )
             }
@@ -506,7 +506,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                         ),
                         VilkårResultat(
@@ -516,7 +516,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                         ),
                     ),
@@ -529,7 +529,7 @@ class EndretUtbetalingAndelValideringTest {
                     vilkårType = it,
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                     utdypendeVilkårsvurderinger = emptyList(),
                 )
             }
@@ -585,7 +585,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                         ),
                         VilkårResultat(
@@ -595,7 +595,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                         ),
                     ),
@@ -608,7 +608,7 @@ class EndretUtbetalingAndelValideringTest {
                     vilkårType = it,
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                     utdypendeVilkårsvurderinger = emptyList(),
                 )
             }

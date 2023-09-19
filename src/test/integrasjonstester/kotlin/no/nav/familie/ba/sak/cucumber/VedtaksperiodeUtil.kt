@@ -145,7 +145,7 @@ fun leggTilVilkårResultatPåPersonResultat(
 
         val vilkårResultaterForÉnRad = vilkårForÉnRad.map { vilkår ->
             VilkårResultat(
-                behandlingId = behandlingId,
+                sistEndretIBehandlingId = behandlingId,
                 personResultat = personResultat,
                 vilkårType = vilkår,
                 resultat = parseEnum(

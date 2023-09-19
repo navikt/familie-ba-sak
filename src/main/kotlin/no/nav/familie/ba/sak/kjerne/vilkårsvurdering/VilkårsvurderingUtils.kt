@@ -50,7 +50,7 @@ object VilkårsvurderingUtils {
             vilkårType = vilkårType,
             resultat = Resultat.IKKE_VURDERT,
             begrunnelse = "",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
         )
         if (harUvurdertePerioder(personResultat, vilkårType)) {
             throw FunksjonellFeil(
@@ -453,7 +453,7 @@ fun genererPersonResultatForPerson(
             periodeFom = fom,
             periodeTom = tom,
             begrunnelse = utledBegrunnelse(vilkår, person),
-            behandlingId = personResultat.vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
         )
     }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 

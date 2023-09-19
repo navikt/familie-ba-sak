@@ -42,7 +42,7 @@ class VilkårsvurderingUtilsTest {
             vilkårType = Vilkår.LOVLIG_OPPHOLD,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = 0,
+            sistEndretIBehandlingId = 0,
         )
         personResultat.vilkårResultater.add(løpendeOppfylt)
 
@@ -80,7 +80,7 @@ class VilkårsvurderingUtilsTest {
             vilkårType = Vilkår.LOVLIG_OPPHOLD,
             resultat = Resultat.IKKE_OPPFYLT,
             begrunnelse = "",
-            behandlingId = 0,
+            sistEndretIBehandlingId = 0,
             erEksplisittAvslagPåSøknad = true,
         )
         personResultat.vilkårResultater.add(avslagUtenPeriode)
@@ -118,7 +118,7 @@ class VilkårsvurderingUtilsTest {
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = 0,
+            sistEndretIBehandlingId = 0,
         )
         personResultat.vilkårResultater.add(løpendeOppfylt)
 
@@ -156,7 +156,7 @@ class VilkårsvurderingUtilsTest {
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.IKKE_OPPFYLT,
             begrunnelse = "",
-            behandlingId = 0,
+            sistEndretIBehandlingId = 0,
             erEksplisittAvslagPåSøknad = true,
         )
         personResultat.vilkårResultater.add(avslagUtenPeriode)
