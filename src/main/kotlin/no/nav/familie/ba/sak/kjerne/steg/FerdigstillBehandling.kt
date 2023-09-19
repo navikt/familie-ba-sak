@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -24,6 +26,7 @@ class FerdigstillBehandling(
     private val behandlingMetrikker: BehandlingMetrikker,
     private val loggService: LoggService,
     private val snikeIKøenService: SnikeIKøenService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) : BehandlingSteg<String> {
 
     override fun utførStegOgAngiNeste(
@@ -59,8 +62,19 @@ class FerdigstillBehandling(
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandlingSomFerdigstilles = behandling)
 
+        if (!behandling.erHenlagt()) {
+            val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
+            if (skalOppdatereStønadFomOgTomForIkkeIverksatteBehandlinger(tilkjentYtelse)) {
+                tilkjentYtelse.stønadTom = tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
+                tilkjentYtelse.stønadFom = tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
+            }
+        }
+
         return hentNesteStegForNormalFlyt(behandling)
     }
+
+    private fun skalOppdatereStønadFomOgTomForIkkeIverksatteBehandlinger(tilkjentYtelse: TilkjentYtelse) =
+        tilkjentYtelse.stønadFom == null && tilkjentYtelse.stønadTom == null && tilkjentYtelse.utbetalingsoppdrag == null
 
     private fun oppdaterFagsakStatus(behandling: Behandling) {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
