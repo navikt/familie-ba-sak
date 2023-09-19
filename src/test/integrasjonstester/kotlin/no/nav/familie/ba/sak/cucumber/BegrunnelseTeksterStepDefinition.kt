@@ -134,7 +134,7 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     /**
-     * Mulige verdier: | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent |
+     * Mulige verdier: | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
      */
     @Og("med andeler tilkjent ytelse for begrunnelse")
     fun `med andeler tilkjent ytelse for begrunnelse`(dataTable: DataTable) {
@@ -223,7 +223,7 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     /**
-     * Mulige verdier: | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
+     * Mulige verdier: | Fra dato | Til dato | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser | Regelverk Ekskluderte Begrunnelser | Ekskluderte Begrunnelser |
      */
     @Så("forvent følgende standardBegrunnelser")
     fun `forvent følgende standardBegrunnelser`(dataTable: DataTable) {

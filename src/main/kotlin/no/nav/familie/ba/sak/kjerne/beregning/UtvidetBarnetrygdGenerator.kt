@@ -6,8 +6,12 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedKunVerdi
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullOgIkkeTom
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -19,6 +23,7 @@ data class UtvidetBarnetrygdGenerator(
     fun lagUtvidetBarnetrygdAndeler(
         utvidetVilkår: List<VilkårResultat>,
         andelerBarna: List<AndelTilkjentYtelse>,
+        tidslinjerMedPerioderBarnaBorMedSøker: Map<Aktør, Tidslinje<Boolean, Måned>>,
     ): List<AndelTilkjentYtelse> {
         if (utvidetVilkår.isEmpty() || andelerBarna.isEmpty()) return emptyList()
 
@@ -26,8 +31,14 @@ data class UtvidetBarnetrygdGenerator(
 
         val utvidetVilkårTidslinje = utvidetVilkår.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson(Vilkår.UTVIDET_BARNETRYGD)
 
-        val størsteProsentTidslinje = andelerBarna
-            .tilSeparateTidslinjerForBarna().values
+        val barnasAndelerFiltrertForPerioderBarnaBorMedSøker = andelerBarna.tilSeparateTidslinjerForBarna().leftJoin(tidslinjerMedPerioderBarnaBorMedSøker) { andelerBarna, barnBorMedSøker ->
+            when (barnBorMedSøker) {
+                true -> andelerBarna
+                else -> null
+            }
+        }
+
+        val størsteProsentTidslinje = barnasAndelerFiltrertForPerioderBarnaBorMedSøker.values
             .kombinerUtenNullOgIkkeTom { andeler -> andeler.maxOf { it.prosent } }
 
         val utvidetAndeler = utvidetVilkårTidslinje.kombinerMedKunVerdi(

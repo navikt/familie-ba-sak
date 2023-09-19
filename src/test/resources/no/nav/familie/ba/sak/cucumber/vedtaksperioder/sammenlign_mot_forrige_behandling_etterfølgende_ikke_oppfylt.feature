@@ -56,8 +56,7 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar     |
       | 01.05.2020 | 31.12.2020 | Utbetaling         |               |
-      | 01.01.2021 | 31.07.2021 | Opphør             | Kun søker     |
-      | 01.08.2021 | 31.01.2022 | Opphør             | Kun søker     |
+      | 01.01.2021 | 31.01.2022 | Opphør             | Kun søker     |
       | 01.02.2022 | 31.03.2038 | Utbetaling         | Barn og søker |
       | 01.04.2038 |            | Opphør             | Kun søker     |
 

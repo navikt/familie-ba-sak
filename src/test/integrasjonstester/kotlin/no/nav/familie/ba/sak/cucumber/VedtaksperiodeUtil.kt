@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -135,7 +136,7 @@ fun leggTilVilkårResultatPåPersonResultat(
 
         val vilkårResultaterForÉnRad = vilkårForÉnRad.map { vilkår ->
             VilkårResultat(
-                behandlingId = behandlingId,
+                sistEndretIBehandlingId = behandlingId,
                 personResultat = personResultat,
                 vilkårType = vilkår,
                 resultat = parseEnum(
@@ -265,12 +266,13 @@ fun lagAndelerTilkjentYtelse(
 ) = dataTable.asMaps().map { rad ->
     val aktørId = VedtaksperiodeMedBegrunnelserParser.parseAktørId(rad)
     val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+    val beløp = parseInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad)
     lagAndelTilkjentYtelse(
         fom = parseDato(Domenebegrep.FRA_DATO, rad).toYearMonth(),
         tom = parseDato(Domenebegrep.TIL_DATO, rad).toYearMonth(),
         behandling = behandlinger.finnBehandling(behandlingId),
         person = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId }!!,
-        beløp = parseInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad),
+        beløp = beløp,
         ytelseType = parseValgfriEnum<YtelseType>(
             VedtaksperiodeMedBegrunnelserParser.DomenebegrepAndelTilkjentYtelse.YTELSE_TYPE,
             rad,
@@ -279,6 +281,10 @@ fun lagAndelerTilkjentYtelse(
             VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT,
             rad,
         )?.toBigDecimal() ?: BigDecimal(100),
+        sats = parseValgfriInt(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.SATS,
+            rad,
+        ) ?: beløp,
     )
 }.groupBy { it.behandlingId }
     .toMutableMap()

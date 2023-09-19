@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
@@ -34,6 +35,7 @@ data class RestSanityEØSBegrunnelse(
     val eosVilkaar: List<String>? = null,
     val vedtakResultat: String?,
     val fagsakType: String?,
+    val tema: String?,
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
@@ -61,6 +63,9 @@ data class RestSanityEØSBegrunnelse(
             fagsakType = fagsakType?.let {
                 finnEnumverdi(it, FagsakType.entries.toTypedArray(), apiNavn)
             },
+            tema = tema?.let {
+                finnEnumverdi(it, Tema.entries.toTypedArray(), apiNavn)
+            },
         )
     }
 
@@ -74,6 +79,7 @@ data class SanityEØSBegrunnelse(
     override val periodeResultat: SanityPeriodeResultat? = null,
     override val vilkår: Set<Vilkår>,
     override val fagsakType: FagsakType?,
+    override val tema: Tema?,
     val annenForeldersAktivitet: List<KompetanseAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
