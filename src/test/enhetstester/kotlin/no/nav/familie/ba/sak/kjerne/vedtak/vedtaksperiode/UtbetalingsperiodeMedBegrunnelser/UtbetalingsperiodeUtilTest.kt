@@ -230,7 +230,7 @@ class UtbetalingsperiodeUtilTest {
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_SØKER),
         )
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
@@ -240,7 +240,7 @@ class UtbetalingsperiodeUtilTest {
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = emptyList(),
         )
 
@@ -269,7 +269,7 @@ class UtbetalingsperiodeUtilTest {
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = emptyList(),
         )
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn2 = VilkårResultat(
@@ -279,7 +279,7 @@ class UtbetalingsperiodeUtilTest {
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_SØKER),
         )
 
@@ -422,7 +422,7 @@ class UtbetalingsperiodeUtilTest {
             vilkårType = vilkårType,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = emptyList(),
             vurderesEtter = Regelverk.NASJONALE_REGLER,
         )
@@ -435,7 +435,7 @@ class UtbetalingsperiodeUtilTest {
                 vilkårType = vilkårType,
                 resultat = Resultat.OPPFYLT,
                 begrunnelse = "",
-                behandlingId = vilkårsvurdering.behandling.id,
+                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                 utdypendeVilkårsvurderinger = emptyList(),
                 vurderesEtter = Regelverk.EØS_FORORDNINGEN,
             )

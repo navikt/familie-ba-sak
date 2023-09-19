@@ -51,7 +51,7 @@ fun lagPersonResultatAvOverstyrteResultater(
                     vilkårType = vilkårType,
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                     utdypendeVilkårsvurderinger = emptyList(),
                 ),
             )

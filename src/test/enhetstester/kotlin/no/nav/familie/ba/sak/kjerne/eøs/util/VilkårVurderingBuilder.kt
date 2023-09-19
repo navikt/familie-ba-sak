@@ -109,7 +109,7 @@ internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVi
             periodeFom = this.fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDateEllerNull(),
             periodeTom = this.tilOgMed.tilDagEllerSisteDagIPerioden().tilLocalDateEllerNull(),
             begrunnelse = "En begrunnelse",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = this.innhold?.utdypendeVilkårsvurderinger ?: emptyList(),
         ),
     )

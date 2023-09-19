@@ -280,7 +280,7 @@ class TestVilkårsvurderingBuilder(sakType: String) {
                 periodeFom = testperiode.fraOgMed,
                 periodeTom = testperiode.tilOgMed,
                 begrunnelse = "",
-                behandlingId = vilkårsvurdering.behandling.id,
+                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                 utdypendeVilkårsvurderinger = listOfNotNull(
                     if (erDeltBosted == true) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
                 ),
