@@ -174,7 +174,7 @@ class VedtakServiceTest(
             periodeFom = LocalDate.of(2010, 1, 1),
             periodeTom = LocalDate.of(2010, 6, 1),
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
         )
         vilkårResultat2 = VilkårResultat(
             id = 2,
@@ -185,7 +185,7 @@ class VedtakServiceTest(
             periodeFom = LocalDate.of(2010, 6, 2),
             periodeTom = LocalDate.of(2010, 8, 1),
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
         )
         vilkårResultat3 = VilkårResultat(
             id = 3,
@@ -196,7 +196,7 @@ class VedtakServiceTest(
             periodeFom = LocalDate.of(2010, 8, 2),
             periodeTom = LocalDate.of(2010, 12, 1),
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
         )
         personResultat.setSortedVilkårResultater(
             setOf(

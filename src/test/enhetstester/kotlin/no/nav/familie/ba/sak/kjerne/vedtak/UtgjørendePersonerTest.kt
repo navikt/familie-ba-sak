@@ -58,7 +58,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2009, 12, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = søkerPersonResultat,
@@ -67,7 +67,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2008, 12, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                 ),
             ),
         )
@@ -84,7 +84,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2009, 12, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = barn1PersonResultat,
@@ -93,7 +93,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2009, 11, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = søkerPersonResultat,
@@ -102,7 +102,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2009, 12, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                 ),
             ),
         )
@@ -119,7 +119,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2010, 2, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = barn1PersonResultat,
@@ -128,7 +128,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2009, 11, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                 ),
             ),
         )
@@ -209,7 +209,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2010, 12, 24),
                     periodeTom = LocalDate.of(2021, 3, 31),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                 ),
             ),
         )
@@ -226,7 +226,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2010, 12, 24),
                     periodeTom = LocalDate.of(2021, 1, 31),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                 ),
             ),
         )
