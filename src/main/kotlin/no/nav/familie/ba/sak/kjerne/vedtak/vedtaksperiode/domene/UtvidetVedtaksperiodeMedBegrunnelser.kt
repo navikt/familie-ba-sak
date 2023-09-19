@@ -2,9 +2,11 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentUtbetalingsperiodeDetaljer
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
@@ -47,4 +49,27 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
         fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
         utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer,
     )
+}
+
+fun UtvidetVedtaksperiodeMedBegrunnelser.tilVedtaksperiodeMedBegrunnelser(
+    vedtak: Vedtak,
+): VedtaksperiodeMedBegrunnelser {
+    return VedtaksperiodeMedBegrunnelser(
+        id = this.id,
+        fom = this.fom,
+        tom = this.tom,
+        type = this.type,
+        begrunnelser = this.begrunnelser.toMutableSet(),
+        eøsBegrunnelser = this.eøsBegrunnelser.toMutableSet(),
+        vedtak = vedtak,
+    ).also { vedtaksperiode ->
+        vedtaksperiode.fritekster.addAll(
+            this.fritekster.map {
+                VedtaksbegrunnelseFritekst(
+                    fritekst = it,
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiode,
+                )
+            }.toMutableList(),
+        )
+    }
 }

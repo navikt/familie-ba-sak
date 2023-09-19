@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent
+package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent
 
 import erGjeldendeForUtgjørendeVilkår
 import erLikVilkårOgUtdypendeVilkårIPeriode
@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -36,51 +37,37 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBostedsland
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AndelForVedtaksperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.EndretUtbetalingAndelForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.EndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
-    behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
-    behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
-    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
-    sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
-    nåDato: LocalDate,
+fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
+    grunnlagForBegrunnelser: GrunnlagForBegrunnelse,
 ): Set<IVedtakBegrunnelse> {
     val gyldigeBegrunnelserPerPerson = hentGyldigeBegrunnelserPerPerson(
-        behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
-        behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-        sanityBegrunnelser = sanityBegrunnelser,
-        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-        nåDato,
+        grunnlagForBegrunnelser,
     )
 
     return gyldigeBegrunnelserPerPerson.values.flatten().toSet()
 }
 
-private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
-    behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
-    behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
-    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
-    sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
-    nåDato: LocalDate,
+fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
+    grunnlag: GrunnlagForBegrunnelse,
 ): Map<Person, Set<IVedtakBegrunnelse>> {
-    val avslagsbegrunnelserPerPerson = hentAvslagsbegrunnelserPerPerson(behandlingsGrunnlagForVedtaksperioder)
+    val avslagsbegrunnelserPerPerson = hentAvslagsbegrunnelserPerPerson(grunnlag.behandlingsGrunnlagForVedtaksperioder)
 
     if (this.type == Vedtaksperiodetype.AVSLAG) {
         return avslagsbegrunnelserPerPerson
     }
 
     val begrunnelseGrunnlagPerPerson = this.finnBegrunnelseGrunnlagPerPerson(
-        behandlingsGrunnlagForVedtaksperioder,
-        behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-        nåDato,
+        grunnlag,
     )
 
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
@@ -89,15 +76,15 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
 
         val standardBegrunnelser = hentStandardBegrunnelser(
             begrunnelseGrunnlag = begrunnelseGrunnlag,
-            sanityBegrunnelser = sanityBegrunnelser,
+            sanityBegrunnelser = grunnlag.sanityBegrunnelser,
             person = person,
             vedtaksperiode = this,
-            fagsakType = behandlingsGrunnlagForVedtaksperioder.fagsakType,
+            fagsakType = grunnlag.behandlingsGrunnlagForVedtaksperioder.fagsakType,
             relevantePeriodeResultater = relevantePeriodeResultater,
         )
 
         val eøsBegrunnelser = hentEØSStandardBegrunnelser(
-            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+            sanityEØSBegrunnelser = grunnlag.sanityEØSBegrunnelser,
             begrunnelseGrunnlag = begrunnelseGrunnlag,
             relevantePeriodeResultater = relevantePeriodeResultater,
         )
@@ -140,7 +127,7 @@ fun hentTemaSomPeriodeErVurdertEtter(
     }
 }
 
-private fun UtvidetVedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
+private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
 ): Map<Person, Set<IVedtakBegrunnelse>> {
     val tidslinjeMedVedtaksperioden = this.tilTidslinjeForAktuellPeriode()
@@ -161,7 +148,7 @@ private fun hentStandardBegrunnelser(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     person: Person,
-    vedtaksperiode: UtvidetVedtaksperiodeMedBegrunnelser,
+    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
     fagsakType: FagsakType,
     relevantePeriodeResultater: List<SanityPeriodeResultat>,
 ): Map<Standardbegrunnelse, SanityBegrunnelse> {
@@ -592,18 +579,16 @@ private fun hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag: IBegrunnelseG
 private fun hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) =
     begrunnelseGrunnlag.forrigePeriode?.endretUtbetalingAndel.takeIf { begrunnelseGrunnlag.forrigePeriode?.erOrdinæreVilkårInnvilget() == true }
 
-private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
-    behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
-    behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
-    nåDato: LocalDate,
+fun VedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
+    grunnlag: GrunnlagForBegrunnelse,
 ): Map<Person, IBegrunnelseGrunnlagForPeriode> {
     val tidslinjeMedVedtaksperioden = this.tilTidslinjeForAktuellPeriode()
 
     val begrunnelsegrunnlagTidslinjerPerPerson =
-        behandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagTidslinjer()
+        grunnlag.behandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagTidslinjer()
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
-        behandlingsGrunnlagForVedtaksperioderForrigeBehandling?.lagBegrunnelseGrunnlagTidslinjer()
+        grunnlag.behandlingsGrunnlagForVedtaksperioderForrigeBehandling?.lagBegrunnelseGrunnlagTidslinjer()
 
     return begrunnelsegrunnlagTidslinjerPerPerson.mapValues { (person, grunnlagTidslinje) ->
         val grunnlagMedForrigePeriodeOgBehandlingTidslinje =
@@ -620,7 +605,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
             Vedtaksperiodetype.OPPHØR -> begrunnelseperioderIVedtaksperiode.first()
             Vedtaksperiodetype.FORTSATT_INNVILGET -> if (this.fom == null && this.tom == null) {
                 val perioder = grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder()
-                perioder.single { nåDato.toYearMonth() in it.fraOgMed.tilYearMonthEllerUendeligFortid()..it.tilOgMed.tilYearMonthEllerUendeligFramtid() }.innhold!!
+                perioder.single { grunnlag.nåDato.toYearMonth() in it.fraOgMed.tilYearMonthEllerUendeligFortid()..it.tilOgMed.tilYearMonthEllerUendeligFramtid() }.innhold!!
             } else {
                 begrunnelseperioderIVedtaksperiode.single()
             }
@@ -630,7 +615,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
     }
 }
 
-private fun Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned>.lagTidslinjeGrunnlagDennePeriodenForrigePeriodeOgPeriodeForrigeBehandling(
+private fun Tidslinje<VedtaksperiodeMedBegrunnelser, Måned>.lagTidslinjeGrunnlagDennePeriodenForrigePeriodeOgPeriodeForrigeBehandling(
     grunnlagTidslinje: Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>,
     grunnlagTidslinjePerPersonForrigeBehandling: Map<Person, Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>>?,
     person: Person,
@@ -658,7 +643,7 @@ private fun Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned>.lagTidslinje
     }
 }
 
-private fun UtvidetVedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode(): Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned> {
+private fun VedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode(): Tidslinje<VedtaksperiodeMedBegrunnelser, Måned> {
     return listOf(
         månedPeriodeAv(
             fraOgMed = this.fom?.toYearMonth(),
@@ -674,7 +659,7 @@ data class ForrigeOgDennePerioden(
 )
 
 private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOgNåværendePeriodeTidslinje(
-    vedtaksperiodeTidslinje: Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned>,
+    vedtaksperiodeTidslinje: Tidslinje<VedtaksperiodeMedBegrunnelser, Måned>,
 ): Tidslinje<ForrigeOgDennePerioden, Måned> {
     val grunnlagPerioderSplittetPåVedtaksperiode = kombinerMed(vedtaksperiodeTidslinje) { grunnlag, periode ->
         Pair(grunnlag, periode)
