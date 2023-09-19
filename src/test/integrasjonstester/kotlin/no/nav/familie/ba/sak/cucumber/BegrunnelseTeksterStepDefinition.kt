@@ -212,14 +212,12 @@ class BegrunnelseTeksterStepDefinition {
             )
         }
 
-        utvidetVedtaksperiodeMedBegrunnelser = utvidedeVedtaksperioderMedBegrunnelser.map {
+        return utvidedeVedtaksperioderMedBegrunnelser.map {
             it.copy(
                 gyldigeBegrunnelser = it.tilVedtaksperiodeMedBegrunnelser(vedtak)
                     .hentGyldigeBegrunnelserForPeriode(grunnlagForBegrunnelser).toList(),
             )
         }
-
-        return utvidedeVedtaksperioderMedBegrunnelser
     }
 
     private fun hentGrunnlagForBegrunnelser(
