@@ -67,9 +67,17 @@ class KontrollerNyUtbetalingsgeneratorService(
         try {
             if (!skalKontrollereOppMotNyUtbetalingsgenerator()) return emptyList()
 
-            val diffFeilTyper = mutableListOf<DiffFeilType>()
-
             val behandling = vedtak.behandling
+
+            if (erSimulering) {
+                secureLogger.info("Simulerer utbetalingsoppdrag for simulering for behandling ${behandling.id}")
+            } else {
+                secureLogger.info(
+                    "Simulerer utbetalingsoppdrag for iverksettelse for behandling ${behandling.id}",
+                )
+            }
+
+            val diffFeilTyper = mutableListOf<DiffFeilType>()
 
             val beregnetUtbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(
                 vedtak = vedtak,
@@ -198,7 +206,7 @@ class KontrollerNyUtbetalingsgeneratorService(
             simuleringsPerioderTidslinjeGammelFraNy
                 .kombinerMed(simuleringsPerioderNyTidslinje) { gammel, ny ->
                     KombinertSimuleringsResultat(
-                        erLike = gammel?.resultat == ny?.resultat,
+                        erLike = gammel?.resultat == (ny?.resultat ?: BigDecimal.ZERO),
                         gammel = gammel,
                         ny = ny,
                     )
