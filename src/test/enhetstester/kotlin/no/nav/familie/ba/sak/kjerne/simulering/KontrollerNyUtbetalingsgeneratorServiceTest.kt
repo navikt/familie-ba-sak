@@ -490,9 +490,13 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
         } returns true
 
         val beregnetUtbetalingsoppdragMock = mockk<BeregnetUtbetalingsoppdragLongId>()
-        val utbetalingsoppdrag = mockk<no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag>()
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag()
 
-        every { utbetalingsoppdrag.utbetalingsperiode } returns listOf(mockk())
+        // every { utbetalingsoppdrag.kodeEndring } returns Utbetalingsoppdrag.KodeEndring.ENDR
+        //
+        // every { utbetalingsoppdrag.fagSystem } returns FagsystemBA.BARNETRYGD
+        //
+        // every { utbetalingsoppdrag.utbetalingsperiode } returns listOf(mockk())
 
         every { beregnetUtbetalingsoppdragMock.utbetalingsoppdrag } returns utbetalingsoppdrag
 
