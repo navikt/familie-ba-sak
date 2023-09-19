@@ -118,7 +118,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                         søker = søker,
                         erUtbetalingSmåbarnstilleggTidslinje = erUtbetalingSmåbarnstilleggTidslinje,
                         vilkårRolle = vilkårRolle,
-                    ),
+                    ).slåSammenSammenhengendeIkkeInnvilgedePerioder(),
                 )
         }
 

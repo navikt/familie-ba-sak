@@ -622,10 +622,10 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
                 val perioder = grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder()
                 perioder.single { nåDato.toYearMonth() in it.fraOgMed.tilYearMonthEllerUendeligFortid()..it.tilOgMed.tilYearMonthEllerUendeligFramtid() }.innhold!!
             } else {
-                begrunnelseperioderIVedtaksperiode.single()
+                begrunnelseperioderIVedtaksperiode.first()
             }
 
-            else -> begrunnelseperioderIVedtaksperiode.single()
+            else -> begrunnelseperioderIVedtaksperiode.first()
         }
     }
 }
