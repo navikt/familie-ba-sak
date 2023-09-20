@@ -24,7 +24,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BrevBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataUtenKompetanse
@@ -181,7 +181,7 @@ class BrevPeriodeGenerator(
     fun byggBegrunnelserOgFritekster(
         begrunnelserGrunnlagMedPersoner: List<BrevBegrunnelseGrunnlagMedPersoner>,
         eøsBegrunnelserMedKompetanser: List<EØSBegrunnelseMedKompetanser>,
-    ): List<Begrunnelse> {
+    ): List<BrevBegrunnelse> {
         val brevBegrunnelser = begrunnelserGrunnlagMedPersoner
             .map {
                 it.tilBrevBegrunnelse(
@@ -203,7 +203,7 @@ class BrevPeriodeGenerator(
 
     private fun byggBrevPeriode(
         tomDato: String?,
-        begrunnelserOgFritekster: List<Begrunnelse>,
+        begrunnelserOgFritekster: List<BrevBegrunnelse>,
         identerIBegrunnelene: List<String>,
     ): BrevPeriode {
         val (utbetalingerBarn, nullutbetalingerBarn) = minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer
