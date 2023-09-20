@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -290,15 +291,16 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     ytelserForrigePerioder: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     featureToggleService: FeatureToggleService,
 ): List<Standardbegrunnelse> {
-    val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.entries.filter {
-        minimertVedtaksperiode.type.tillatteBegrunnelsestyper.contains(it.vedtakBegrunnelseType)
-    }.filter {
-        if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
-            endretUtbetalingsperiodeBegrunnelser.contains(it)
-        } else {
-            true
+    val tillateBegrunnelserForVedtakstype = hentPåskruddeStandardbegrunnelser(featureToggleService)
+        .filter {
+            minimertVedtaksperiode.type.tillatteBegrunnelsestyper.contains(it.vedtakBegrunnelseType)
+        }.filter {
+            if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
+                endretUtbetalingsperiodeBegrunnelser.contains(it)
+            } else {
+                true
+            }
         }
-    }
 
     return when (minimertVedtaksperiode.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET,
@@ -337,6 +339,16 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     }
 }
 
+private fun hentPåskruddeStandardbegrunnelser(featureToggleService: FeatureToggleService) =
+    Standardbegrunnelse.entries
+        .filter {
+            if (it == Standardbegrunnelse.ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR) {
+                featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)
+            } else {
+                true
+            }
+        }
+
 private fun velgRedusertBegrunnelser(
     tillateBegrunnelserForVedtakstype: List<Standardbegrunnelse>,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
@@ -355,7 +367,7 @@ private fun velgRedusertBegrunnelser(
     }
     if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
         val utbetalingsbegrunnelser = velgUtbetalingsbegrunnelser(
-            Standardbegrunnelse.entries,
+            hentPåskruddeStandardbegrunnelser(featureToggleService),
             sanityBegrunnelser,
             minimertVedtaksperiode,
             minimertePersonresultater,
