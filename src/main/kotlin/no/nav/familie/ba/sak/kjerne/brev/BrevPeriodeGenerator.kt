@@ -233,7 +233,7 @@ class BrevPeriodeGenerator(
             hentPeriodeTypeGammel(utbetalingsbeløp, minimertVedtaksperiode.fom, barnMedUtbetaling)
         }
 
-        val duEllerInstitusjon = hentDuEllerInstitusjonTekst(brevPeriodeType)
+        val duEllerInstitusjonen = hentDuEllerInstitusjonenTekst(brevPeriodeType)
 
         return BrevPeriode(
 
@@ -254,7 +254,7 @@ class BrevPeriodeGenerator(
             antallBarnMedNullutbetaling = barnMedNullutbetaling.size.toString(),
             fodselsdagerBarnMedUtbetaling = barnMedUtbetaling.tilBarnasFødselsdatoer(),
             fodselsdagerBarnMedNullutbetaling = barnMedNullutbetaling.tilBarnasFødselsdatoer(),
-            duEllerInstitusjon = duEllerInstitusjon,
+            duEllerInstitusjonen = duEllerInstitusjonen,
         )
     }
 
@@ -275,12 +275,12 @@ class BrevPeriodeGenerator(
         Vedtaksperiodetype.ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
     }
 
-    private fun hentDuEllerInstitusjonTekst(brevPeriodeType: BrevPeriodeType): String =
+    private fun hentDuEllerInstitusjonenTekst(brevPeriodeType: BrevPeriodeType): String =
         when (restBehandlingsgrunnlagForBrev.fagsakType) {
             FagsakType.INSTITUSJON -> {
                 when (brevPeriodeType) {
-                    BrevPeriodeType.UTBETALING, BrevPeriodeType.INGEN_UTBETALING -> "institusjon"
-                    else -> "Institusjon"
+                    BrevPeriodeType.UTBETALING, BrevPeriodeType.INGEN_UTBETALING -> "institusjonen"
+                    else -> "Institusjonen"
                 }
             }
 
