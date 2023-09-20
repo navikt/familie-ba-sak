@@ -18,6 +18,7 @@ data class BrevPeriode(
     val antallBarnMedNullutbetaling: Flettefelt,
     val fodselsdagerBarnMedUtbetaling: Flettefelt,
     val fodselsdagerBarnMedNullutbetaling: Flettefelt,
+    val duEllerInstitusjon: Flettefelt,
 ) {
 
     constructor(
@@ -32,6 +33,7 @@ data class BrevPeriode(
         antallBarnMedNullutbetaling: String,
         fodselsdagerBarnMedUtbetaling: String,
         fodselsdagerBarnMedNullutbetaling: String,
+        duEllerInstitusjon: String,
     ) : this(
         fom = flettefelt(fom),
         tom = flettefelt(tom),
@@ -44,5 +46,6 @@ data class BrevPeriode(
         fodselsdagerBarnMedNullutbetaling = flettefelt(fodselsdagerBarnMedNullutbetaling),
         begrunnelser = begrunnelser,
         type = flettefelt(brevPeriodeType.apiNavn),
+        duEllerInstitusjon = flettefelt(duEllerInstitusjon),
     )
 }
