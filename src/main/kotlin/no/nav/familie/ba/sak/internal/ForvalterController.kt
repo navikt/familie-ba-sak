@@ -5,12 +5,15 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -28,6 +31,8 @@ class ForvalterController(
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
     private val behandlingsRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val fagsakService: FagsakService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -191,13 +196,24 @@ class ForvalterController(
     fun populerStønadFomTom(@PathVariable limit: Int): ResponseEntity<String> {
         behandlingsRepository.finnAktiveBehandlingerSomManglerStønadTom(limit).forEach { behandlingId ->
             try {
-                forvalterService.oppdaterStønadFomTomForBehandling(behandlingId)
+                val harOppdatertTom = forvalterService.oppdaterStønadFomTomForBehandling(behandlingId)
+                logger.info("oppdaterStønadFomTomForBehandling for behandlingId=$behandlingId resultat=$harOppdatertTom")
             } catch (e: Exception) {
-                secureLogger.warn("Fikk ikke satt stønadTom for behandling=$behandlingId", e)
+                logger.warn("Fikk ikke satt stønadTom for behandling=$behandlingId", e)
             }
         }
 
         return ResponseEntity.ok("ok")
+    }
+
+    @GetMapping("/finnFagsakerSomSkalAvsluttesNy")
+    fun populerStønadFomTom(): ResponseEntity<List<Long>> {
+        return ResponseEntity.ok(fagsakRepository.finnFagsakerSomSkalAvsluttesNy())
+    }
+
+    @PostMapping("oppdaterLøpendeStatusPåFagsaker")
+    fun oppdaterLøpendeStatusPåFagsaker() {
+        fagsakService.oppdaterLøpendeStatusPåFagsaker()
     }
 
     data class SendUtbetalingsoppdragPåNyttResponse(
