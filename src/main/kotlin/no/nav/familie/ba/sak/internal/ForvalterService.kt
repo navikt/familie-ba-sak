@@ -399,6 +399,18 @@ class ForvalterService(
             null
         }
     }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun oppdaterStønadFomTomForBehandling(behandlingId: Long): Boolean {
+        tilkjentYtelseRepository.findByBehandling(behandlingId).apply {
+            if (this.stønadFom == null && this.stønadTom == null && this.utbetalingsoppdrag == null) {
+                this.stønadTom = this.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
+                this.stønadFom = this.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
+                return true
+            }
+        }
+        return false
+    }
 }
 
 data class ValidertUtbetalingsoppdrag(
