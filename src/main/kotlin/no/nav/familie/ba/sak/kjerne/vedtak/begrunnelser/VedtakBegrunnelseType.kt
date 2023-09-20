@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 
+@Deprecated("Kan vi fjerne dette? Krever at vi kan se om det er avslag fra sanity og at vi ikke bruker det i familie-brev.")
 enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
     INNVILGET(2),
     EØS_INNVILGET(2),
