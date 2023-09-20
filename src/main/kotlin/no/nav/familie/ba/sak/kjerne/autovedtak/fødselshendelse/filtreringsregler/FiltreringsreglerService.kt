@@ -110,7 +110,7 @@ class FiltreringsreglerService(
 
         val sisteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
-        val andelerPåSisteBehandling = sisteBehandling?.let { it ->
+        val andelerPåSisteBehandling = sisteBehandling?.let {
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = it.id)
         } ?: emptyList()
         val sisteMånedMedBarnetrygd = andelerPåSisteBehandling.maxOfOrNull { it.stønadTom }
