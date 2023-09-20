@@ -178,3 +178,63 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | Fra dato   | Til dato   | Vedtaksperiodetype |
       | 2023-02-01 | 2023-02-28 | UTBETALING         |
       | 2023-03-01 |            | OPPHØR             |
+
+  Scenario: Avslag i denne behandlingen skal ikke påvirke endringstidspunktet
+    Gitt følgende fagsaker
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende vedtak
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat          | Behandlingsårsak |
+      | 1            | 1        |                     | ENDRET_OG_FORTSATT_INNVILGET | SØKNAD           |
+      | 2            | 1        | 1                   | AVSLÅTT                      | SØKNAD           |
+
+    Og følgende persongrunnlag
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 25.11.1987  |
+      | 1            | 2       | BARN       | 19.06.2017  |
+      | 2            | 1       | SØKER      | 25.11.1987  |
+      | 2            | 2       | BARN       | 19.06.2017  |
+
+    Og følgende dagens dato 20.09.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
+
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                                         | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET                  |                  | 01.09.2020 | 15.05.2035 | OPPFYLT  | Nei                  |
+
+      | 2       | UNDER_18_ÅR                                    |                  | 19.06.2017 | 18.06.2035 | OPPFYLT  | Nei                  |
+      | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD,GIFT_PARTNERSKAP |                  | 19.06.2017 |            | OPPFYLT  | Nei                  |
+      | 2       | BOR_MED_SØKER                                  |                  | 19.06.2017 | 31.08.2020 | OPPFYLT  | Nei                  |
+      | 2       | BOR_MED_SØKER                                  | DELT_BOSTED      | 01.09.2020 |            | OPPFYLT  | Nei                  |
+
+    Og legg til nye vilkårresultater for behandling 2
+      | AktørId | Vilkår                                         | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
+      | 1       | UTVIDET_BARNETRYGD                             |                  |            |            | IKKE_OPPFYLT | Ja                   |
+      | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET                  |                  | 01.09.2020 | 15.05.2035 | OPPFYLT      | Nei                  |
+
+      | 2       | BOR_MED_SØKER                                  |                  | 19.06.2017 | 31.08.2020 | OPPFYLT      | Nei                  |
+      | 2       | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP,BOSATT_I_RIKET |                  | 19.06.2017 |            | OPPFYLT      | Nei                  |
+      | 2       | UNDER_18_ÅR                                    |                  | 19.06.2017 | 18.06.2035 | OPPFYLT      | Nei                  |
+      | 2       | BOR_MED_SØKER                                  | DELT_BOSTED      | 01.09.2020 |            | OPPFYLT      | Nei                  |
+
+    Og med andeler tilkjent ytelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.09.2020 | 30.09.2020 | 1354  | ORDINÆR_BARNETRYGD | 100     | 1354 |
+      | 2       | 1            | 01.10.2020 | 31.05.2035 | 0     | ORDINÆR_BARNETRYGD | 0       | 1354 |
+
+      | 2       | 2            | 01.09.2020 | 30.09.2020 | 1354  | ORDINÆR_BARNETRYGD | 100     | 1354 |
+      | 2       | 2            | 01.10.2020 | 31.05.2035 | 0     | ORDINÆR_BARNETRYGD | 0       | 1354 |
+
+    Og med endrede utbetalinger
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent |
+      | 2       | 1            | 01.10.2020 | 01.05.2035 | DELT_BOSTED | 0       |
+      | 2       | 2            | 01.10.2020 | 01.05.2035 | DELT_BOSTED | 0       |
+
+    Når vedtaksperioder med begrunnelser genereres for behandling 2
+
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato | Vedtaksperiodetype |
+      | 01.06.2035 |          | OPPHØR             |
+      |            |          | AVSLAG             |
