@@ -179,7 +179,7 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | 2023-02-01 | 2023-02-28 | UTBETALING         |
       | 2023-03-01 |            | OPPHØR             |
 
-  Scenario: Avslag i denne behandlingen skal ikke påvirke endringstidspunktet
+  Scenario: Avslag i behandlingen skal ikke påvirke endringstidspunktet
     Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
