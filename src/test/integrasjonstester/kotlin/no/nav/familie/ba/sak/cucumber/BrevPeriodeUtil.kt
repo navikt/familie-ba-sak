@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.SøkersRettTilUtvidet
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -56,6 +57,10 @@ fun parseStandardBegrunnelser(dataTable: DataTable) = dataTable.asMaps().map { r
             BrevPeriodeParser.DomenebegrepBrevBegrunnelse.SØKERS_RETT_TIL_UTVIDET,
             rad,
         )?.tilSanityFormat() ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat(),
+        gjelderInstitusjon =  parseValgfriEnum<FagsakType>(
+            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.FAGSAKTYPE,
+            rad
+        ) == FagsakType.INSTITUSJON
     )
 }
 

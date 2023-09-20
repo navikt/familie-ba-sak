@@ -97,6 +97,7 @@ class BrevPeriodeGenerator(
                     restBehandlingsgrunnlagForBrev.personerPåBehandling.filter { it.type == PersonType.BARN }
                 val barnIBegrunnelse = personerIBegrunnelse.filter { it.type == PersonType.BARN }
                 val gjelderSøker = personerIBegrunnelse.any { it.type == PersonType.SØKER }
+                val gjelderInstitusjon = restBehandlingsgrunnlagForBrev.fagsakType == FagsakType.INSTITUSJON
 
                 val barnasFødselsdatoer = hentBarnasFødselsdatoerForAvslagsbegrunnelse(
                     barnIBegrunnelse = barnIBegrunnelse,
@@ -119,6 +120,7 @@ class BrevPeriodeGenerator(
                         antallBarn = antallBarn,
                         maalform = brevMålform.tilSanityFormat(),
                         gjelderSoker = gjelderSøker,
+                        gjelderInstitusjon = gjelderInstitusjon,
                     ),
                 )
             } else {
@@ -191,6 +193,7 @@ class BrevPeriodeGenerator(
                     uregistrerteBarn = uregistrerteBarn,
                     minimerteUtbetalingsperiodeDetaljer = minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer,
                     minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
+                    fagsakType = restBehandlingsgrunnlagForBrev.fagsakType
                 )
             }
 

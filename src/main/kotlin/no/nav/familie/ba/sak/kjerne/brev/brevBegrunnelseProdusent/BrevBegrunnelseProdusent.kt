@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -49,6 +50,7 @@ fun Standardbegrunnelse.lagBrevBegrunnelse(
     val begrunnelsesGrunnlagPerPerson = vedtaksperiode.finnBegrunnelseGrunnlagPerPerson(grunnlag)
 
     val gjelderSøker = gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse)
+    val gjelderInstitusjon = gjelderBegrunnelseInstitusjon(grunnlag.behandlingsGrunnlagForVedtaksperioder)
     val barnasFødselsdatoer = sanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         grunnlag = grunnlag,
         gjelderSøker = gjelderSøker,
@@ -92,6 +94,7 @@ fun Standardbegrunnelse.lagBrevBegrunnelse(
 
     return BegrunnelseData(
         gjelderSoker = gjelderSøker,
+        gjelderInstitusjon = gjelderInstitusjon,
         barnasFodselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
         fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = "", // TODO Kan dette fjernes?
         fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling = "", // TODO Kan dette fjernes?
@@ -129,6 +132,9 @@ private fun hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson: Map<Pers
 
 private fun gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse: List<Person>) =
     personerGjeldeneForBegrunnelse.any { it.type == PersonType.SØKER }
+
+private fun gjelderBegrunnelseInstitusjon(behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder) =
+    behandlingsGrunnlagForVedtaksperioder.fagsakType == FagsakType.INSTITUSJON
 
 fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     grunnlag: GrunnlagForBegrunnelse,

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.brev.lagBrevBegrunnelseGrunnlagMedPer
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertUregistrertBarn
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -49,6 +50,7 @@ class VedtaksbegrunnelseTest {
             uregistrerteBarn = emptyList(),
             minimerteUtbetalingsperiodeDetaljer = emptyList(),
             minimerteRestEndredeAndeler = emptyList(),
+            fagsakType = FagsakType.NORMAL,
         ) as BegrunnelseData
 
         Assertions.assertEquals(true, brevbegrunnelse.gjelderSoker)
@@ -86,6 +88,7 @@ class VedtaksbegrunnelseTest {
             uregistrerteBarn = uregistrerteBarn,
             minimerteUtbetalingsperiodeDetaljer = emptyList(),
             minimerteRestEndredeAndeler = emptyList(),
+            fagsakType = FagsakType.NORMAL,
         ) as BegrunnelseData
 
         Assertions.assertEquals(false, brevbegrunnelse.gjelderSoker)

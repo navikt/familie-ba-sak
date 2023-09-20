@@ -193,10 +193,14 @@ data class BegrunnelseDataTestConfig(
     val soknadstidspunkt: String?,
     val avtaletidspunktDeltBosted: String?,
     val sokersRettTilUtvidet: String?,
+    val gjelderInstitusjon: Boolean
 ) : TestBegrunnelse {
 
     fun tilBegrunnelseData() = BegrunnelseData(
-        belop = Utils.formaterBeløp(this.belop),
+        vedtakBegrunnelseType = Standardbegrunnelse.values()
+            .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
+            ?: throw Feil("Fant ikke Standardbegrunnelse med apiNavn ${this.apiNavn}"),
+        apiNavn = this.apiNavn,
         gjelderSoker = this.gjelderSoker,
         barnasFodselsdatoer = this.barnasFodselsdatoer,
         fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = this.fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling,
@@ -206,14 +210,12 @@ data class BegrunnelseDataTestConfig(
         antallBarnOppfyllerTriggereOgHarNullutbetaling = this.antallBarnOppfyllerTriggereOgHarNullutbetaling,
         maanedOgAarBegrunnelsenGjelderFor = this.maanedOgAarBegrunnelsenGjelderFor,
         maalform = this.maalform,
-        apiNavn = this.apiNavn,
+        belop = Utils.formaterBeløp(this.belop),
         soknadstidspunkt = this.soknadstidspunkt ?: "",
         avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: "",
         sokersRettTilUtvidet = this.sokersRettTilUtvidet
             ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat(),
-        vedtakBegrunnelseType = Standardbegrunnelse.values()
-            .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
-            ?: throw Feil("Fant ikke Standardbegrunnelse med apiNavn ${this.apiNavn}"),
+        gjelderInstitusjon = this.gjelderInstitusjon,
     )
 }
 

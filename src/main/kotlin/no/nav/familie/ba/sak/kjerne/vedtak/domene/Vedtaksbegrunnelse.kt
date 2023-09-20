@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.beløpUtbetaltFor
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -123,6 +124,7 @@ data class BegrunnelseData(
     val soknadstidspunkt: String,
     val avtaletidspunktDeltBosted: String,
     val sokersRettTilUtvidet: String,
+    val gjelderInstitusjon: Boolean,
 ) : BegrunnelseMedData {
     override val type: Begrunnelsetype = Begrunnelsetype.STANDARD_BEGRUNNELSE
 }
@@ -160,6 +162,7 @@ data class EØSBegrunnelseDataUtenKompetanse(
     val antallBarn: Int,
     val maalform: String,
     val gjelderSoker: Boolean,
+    val gjelderInstitusjon: Boolean,
 ) : EØSBegrunnelseData() {
     override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
 }
@@ -171,6 +174,7 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     uregistrerteBarn: List<MinimertUregistrertBarn>,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
     minimerteRestEndredeAndeler: List<MinimertRestEndretAndel>,
+    fagsakType: FagsakType,
 ): BrevBegrunnelse {
     val personerPåBegrunnelse =
         personerIPersongrunnlag.filter { person -> this.personIdenter.contains(person.personIdent) }
@@ -183,6 +187,7 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     }
 
     val gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER }
+    val gjelderInstitusjon = fagsakType == FagsakType.INSTITUSJON
 
     val barnasFødselsdatoer = this.hentBarnasFødselsdagerForBegrunnelse(
         uregistrerteBarn = uregistrerteBarn,
@@ -229,6 +234,8 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     )
 
     return BegrunnelseData(
+        vedtakBegrunnelseType = this.vedtakBegrunnelseType,
+        apiNavn = this.standardbegrunnelse.sanityApiNavn,
         gjelderSoker = gjelderSøker,
         barnasFodselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
         fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = barnSomOppfyllerTriggereOgHarUtbetaling.map { it.fødselsdato }
@@ -240,12 +247,11 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         antallBarnOppfyllerTriggereOgHarNullutbetaling = barnSomOppfyllerTriggereOgHarNullutbetaling.size,
         maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
         maalform = brevMålform.tilSanityFormat(),
-        apiNavn = this.standardbegrunnelse.sanityApiNavn,
         belop = Utils.formaterBeløp(beløp),
         soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: "",
         avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted?.tilKortString() ?: "",
         sokersRettTilUtvidet = søkersRettTilUtvidet.tilSanityFormat(),
-        vedtakBegrunnelseType = this.vedtakBegrunnelseType,
+        gjelderInstitusjon = gjelderInstitusjon,
     )
 }
 
