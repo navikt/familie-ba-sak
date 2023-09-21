@@ -5,4 +5,11 @@ spring:
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 AZURE_APP_CLIENT_ID: dummy
 
+# Kreves for at unleash mock skal fungere:
 UNLEASH_SERVER_API_URL: http://dummy/api/
+UNLEASH_SERVER_API_TOKEN: dummy-token
+NAIS_APP_NAME: familie-ba-sak
+
+# Disabler unleash her for å unngå feilmeldinger tilknyttet oppkobling når vi uansett mocker alle unleash-kall i testene.
+unleash:
+  enabled: false
