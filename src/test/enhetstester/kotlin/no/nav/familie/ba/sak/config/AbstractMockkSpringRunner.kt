@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaskRepositoryTestConfig
+import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,6 +46,9 @@ abstract class AbstractMockkSpringRunner {
 
     @Autowired
     private lateinit var mockFeatureToggleService: FeatureToggleService
+
+    @Autowired
+    private lateinit var mockUnleashService: UnleashService
 
     @Autowired
     private lateinit var mockTilbakekrevingKlient: TilbakekrevingKlient
@@ -95,10 +99,16 @@ abstract class AbstractMockkSpringRunner {
         }
 
         IntegrasjonClientMock.clearIntegrasjonMocks(mockIntegrasjonClient)
-        IntegrasjonClientMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(mockFamilieIntegrasjonerTilgangskontrollClient)
+        IntegrasjonClientMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
+            mockFamilieIntegrasjonerTilgangskontrollClient,
+        )
 
         if (isMockKMock(mockFeatureToggleService)) {
             ClientMocks.clearFeatureToggleMocks(mockFeatureToggleService)
+        }
+
+        if (isMockKMock(mockUnleashService)) {
+            ClientMocks.clearUnleashServiceMocks(mockUnleashService)
         }
 
         if (isMockKMock(mockEfSakRestClient)) {
