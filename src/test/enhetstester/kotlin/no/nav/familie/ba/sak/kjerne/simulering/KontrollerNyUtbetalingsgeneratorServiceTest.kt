@@ -31,7 +31,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
@@ -244,11 +244,11 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
         setupMocks()
         every {
             utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                any(),
-                any(),
-                any(),
+                vedtak = any(),
+                saksbehandlerId = any(),
+                andelTilkjentYtelseForUtbetalingsoppdragFactory = any(),
             )
-        } returns lagUtbetalingsoppdrag(emptyList())
+        } returns lagUtbetalingsoppdrag(emptyList<Utbetalingsperiode>())
 
         val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
             vedtak = lagVedtak(),
@@ -262,12 +262,15 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     fun `kontrollerNyUtbetalingsgenerator - skal ikke kjøre sammenligning dersom det ikke finnes noen utbetalingsperioder i utbetalingsoppdraget fra ny`() {
         setupMocks()
         every {
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(
-                any(),
-                any(),
-                any(),
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = any(),
+                saksbehandlerId = any(),
+                erSimulering = any(),
             )
-        } returns BeregnetUtbetalingsoppdragLongId(lagUtbetalingsoppdrag(emptyList()), emptyList())
+        } returns BeregnetUtbetalingsoppdragLongId(
+            lagUtbetalingsoppdrag(emptyList<no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode>()),
+            emptyList(),
+        )
 
         val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
             vedtak = lagVedtak(),
@@ -487,19 +490,23 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
         } returns true
 
         val beregnetUtbetalingsoppdragMock = mockk<BeregnetUtbetalingsoppdragLongId>()
-        val utbetalingsoppdrag = mockk<Utbetalingsoppdrag>()
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag()
 
-        every { utbetalingsoppdrag.utbetalingsperiode } returns listOf(mockk())
+        // every { utbetalingsoppdrag.kodeEndring } returns Utbetalingsoppdrag.KodeEndring.ENDR
+        //
+        // every { utbetalingsoppdrag.fagSystem } returns FagsystemBA.BARNETRYGD
+        //
+        // every { utbetalingsoppdrag.utbetalingsperiode } returns listOf(mockk())
 
         every { beregnetUtbetalingsoppdragMock.utbetalingsoppdrag } returns utbetalingsoppdrag
 
         every { beregnetUtbetalingsoppdragMock.andeler } returns (overstyrteAndelerFraGenerator ?: emptyList())
 
         every {
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(
-                any(),
-                any(),
-                any(),
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = any(),
+                saksbehandlerId = any(),
+                erSimulering = any(),
             )
         } returns beregnetUtbetalingsoppdragMock
 

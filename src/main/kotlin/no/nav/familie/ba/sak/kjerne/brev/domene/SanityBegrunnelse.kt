@@ -29,6 +29,7 @@ interface ISanityBegrunnelse {
     val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>
     val fagsakType: FagsakType?
     val tema: Tema?
+    val valgbarhet: Valgbarhet?
 
     val gjelderEtterEndretUtbetaling
         get() = this is SanityBegrunnelse &&
@@ -55,6 +56,7 @@ data class SanityBegrunnelse(
     override val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger> = emptyList(),
     override val fagsakType: FagsakType? = null,
     override val tema: Tema? = null,
+    override val valgbarhet: Valgbarhet? = null,
     @Deprecated("Bruk vilkår")
     val vilkaar: List<SanityVilkår> = emptyList(),
     val rolle: List<VilkårRolle> = emptyList(),
@@ -64,7 +66,6 @@ data class SanityBegrunnelse(
     val endringsaarsaker: List<Årsak> = emptyList(),
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
-    val valgbarhet: Valgbarhet? = null,
 ) : ISanityBegrunnelse {
 
     val triggesAv: TriggesAv by lazy { this.tilTriggesAv() }
