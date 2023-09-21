@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.RestSanityEØSBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.retry.annotation.Backoff

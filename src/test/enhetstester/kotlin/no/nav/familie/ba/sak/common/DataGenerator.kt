@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBost
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
@@ -79,7 +80,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse

@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 
 enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {

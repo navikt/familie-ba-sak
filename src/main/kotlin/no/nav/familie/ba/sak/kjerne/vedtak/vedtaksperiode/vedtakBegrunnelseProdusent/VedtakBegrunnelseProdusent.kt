@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBeg
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
@@ -34,7 +35,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeli
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
