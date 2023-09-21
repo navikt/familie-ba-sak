@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_GENERERING_AV_BREVOBJEKTER
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -73,6 +74,7 @@ class BrevService(
     private val brevmalService: BrevmalService,
     private val refusjonEøsRepository: RefusjonEøsRepository,
     private val unleashNext: UnleashService,
+    private val integrasjonClient: IntegrasjonClient,
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -274,7 +276,12 @@ class BrevService(
 
         val brevperioder = if (unleashNext.isEnabled(NY_GENERERING_AV_BREVOBJEKTER) && false) {
             val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
-            vedtaksperioder.mapNotNull { it.lagBrevPeriode(grunnlagForBegrunnelser) }
+            vedtaksperioder.mapNotNull {
+                it.lagBrevPeriode(
+                    grunnlagForBegrunnelse = grunnlagForBegrunnelser,
+                    landkoder = integrasjonClient.hentLandkoderISO2(),
+                )
+            }
         } else {
             brevPerioderData.sorted().mapNotNull {
                 it.tilBrevPeriodeGenerator().genererBrevPeriode()
