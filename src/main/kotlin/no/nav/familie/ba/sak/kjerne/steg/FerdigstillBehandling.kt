@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -64,6 +65,12 @@ class FerdigstillBehandling(
 
     private fun oppdaterFagsakStatus(behandling: Behandling) {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
+
+        if (skalOppdatereStønadFomOgTomForIverksatteBehandlingerIkkeSendtTilOppdrag(tilkjentYtelse)) { // 0-utbetalinger/omregning
+            tilkjentYtelse.stønadTom = tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
+            tilkjentYtelse.stønadFom = tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
+        }
+
         val erLøpende = tilkjentYtelse.andelerTilkjentYtelse.any { it.stønadTom >= inneværendeMåned() }
         if (erLøpende) {
             fagsakService.oppdaterStatus(behandling.fagsak, FagsakStatus.LØPENDE)
@@ -71,6 +78,9 @@ class FerdigstillBehandling(
             fagsakService.oppdaterStatus(behandling.fagsak, FagsakStatus.AVSLUTTET)
         }
     }
+
+    private fun skalOppdatereStønadFomOgTomForIverksatteBehandlingerIkkeSendtTilOppdrag(tilkjentYtelse: TilkjentYtelse) =
+        tilkjentYtelse.stønadFom == null && tilkjentYtelse.stønadTom == null && tilkjentYtelse.utbetalingsoppdrag == null
 
     override fun stegType(): StegType {
         return StegType.FERDIGSTILLE_BEHANDLING

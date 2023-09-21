@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -29,6 +30,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class FiltreringsreglerService(
@@ -41,6 +43,7 @@ class FiltreringsreglerService(
     private val behandlingService: BehandlingService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
@@ -105,6 +108,14 @@ class FiltreringsreglerService(
 
         val migreringsdatoPåFagsak = behandlingService.hentMigreringsdatoPåFagsak(behandling.fagsak.id)
 
+        val sisteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
+        val andelerPåSisteBehandling = sisteBehandling?.let {
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = it.id)
+        } ?: emptyList()
+        val sisteMånedMedBarnetrygd = andelerPåSisteBehandling.maxOfOrNull { it.stønadTom }
+        val harAndelerFremoverITid = sisteMånedMedBarnetrygd != null && sisteMånedMedBarnetrygd > YearMonth.now()
+
         val fakta = FiltreringsreglerFakta(
             mor = personopplysningGrunnlag.søker,
             morMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
@@ -127,6 +138,7 @@ class FiltreringsreglerService(
                 behandling = behandling,
                 barna = barnaFraHendelse,
             ),
+            morHarIkkeOpphørtBarnetrygd = andelerPåSisteBehandling.isEmpty() || harAndelerFremoverITid,
         )
         val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(fakta)
         oppdaterMetrikker(evalueringer)
