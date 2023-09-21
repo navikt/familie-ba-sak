@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -12,6 +13,8 @@ import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.unleash.UnleashContextFields
+import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -24,6 +27,7 @@ class ØkonomiService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService,
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
+    private val unleashService: UnleashService,
 
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
@@ -35,18 +39,36 @@ class ØkonomiService(
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
 
-        kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = vedtak,
-            saksbehandlerId = saksbehandlerId,
+        val brukNyUtbetalingsoppdragGenerator = unleashService.isEnabled(
+            FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+            mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
         )
 
-        val utbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-            vedtak,
-            saksbehandlerId,
-            andelTilkjentYtelseForUtbetalingsoppdragFactory,
-        )
+        if (!brukNyUtbetalingsoppdragGenerator) {
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = vedtak,
+                saksbehandlerId = saksbehandlerId,
+            )
+        }
 
-        beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
+        val utbetalingsoppdrag: Utbetalingsoppdrag =
+            if (brukNyUtbetalingsoppdragGenerator) {
+                logger.info("Bruker ny utbetalingsgenerator for behandling ${vedtak.behandling.id}")
+                utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                    vedtak,
+                    saksbehandlerId,
+                ).utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
+            } else {
+                val utbetalingsoppdrag =
+                    utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                        vedtak,
+                        saksbehandlerId,
+                        andelTilkjentYtelseForUtbetalingsoppdragFactory,
+                    )
+
+                beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
+                utbetalingsoppdrag
+            }
 
         tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId = vedtak.behandling.id)
 

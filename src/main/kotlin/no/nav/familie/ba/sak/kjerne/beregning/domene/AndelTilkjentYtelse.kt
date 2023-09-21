@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.integrasjoner.økonomi.YtelsetypeBA
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForVedtaksperioderTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -263,10 +264,10 @@ enum class YtelseType(val klassifisering: String) {
         SMÅBARNSTILLEGG -> listOf(SatsType.SMA)
     }
 
-    fun tilYtelseType(): no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType = when (this) {
-        ORDINÆR_BARNETRYGD -> no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType.ORDINÆR_BARNETRYGD
-        UTVIDET_BARNETRYGD -> no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType.UTVIDET_BARNETRYGD
-        SMÅBARNSTILLEGG -> no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType.SMÅBARNSTILLEGG
+    fun tilYtelseType(): YtelsetypeBA = when (this) {
+        ORDINÆR_BARNETRYGD -> YtelsetypeBA.ORDINÆR_BARNETRYGD
+        UTVIDET_BARNETRYGD -> YtelsetypeBA.UTVIDET_BARNETRYGD
+        SMÅBARNSTILLEGG -> YtelsetypeBA.SMÅBARNSTILLEGG
     }
 
     fun tilSatsType(person: Person, ytelseDato: LocalDate) = when (this) {
