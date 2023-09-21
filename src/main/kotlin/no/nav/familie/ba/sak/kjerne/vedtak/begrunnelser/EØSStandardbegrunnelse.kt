@@ -168,6 +168,34 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetPrimaerlandDenAndreForelderenUtsendtArbeidstaker"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD {
+        override val sanityApiNavn = "innvilgetSelvstendigRettPrimaerlandStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_STANDARD {
+        override val sanityApiNavn = "innvilgetSelvstendigRettPrimaerlandUkStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_OG_STANDARD {
+        override val sanityApiNavn = "innvilgetSelvstendigRettPrimaerlandUkOgStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UTSENDT_ARBEIDSTAKER {
+        override val sanityApiNavn = "innvilgetSelvstendigRettPrimaerlandUtsendtArbeidstaker"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_STANDARD {
+        override val sanityApiNavn = "innvilgetSelvstendigRettSekundaerlandStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_UK_STANDARD {
+        override val sanityApiNavn = "innvilgetSelvstendigRettSekundaerlandUkStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_UK_OG_UTLAND_STANDARD {
+        override val sanityApiNavn = "innvilgetSelvstendigRettSekundaerlandUkOgUtlandStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
@@ -227,6 +255,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     OPPHOR_FLERE_BARN_DØDE_EØS {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorFlereBarnErDodeEos"
+    },
+    OPPHØR_SELVSTENDIG_RETT_OPPHØR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSelvstendigRettOpphoer"
+    },
+    OPPHØR_SELVSTENDIG_RETT_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSelvstendigRettUtsendtArbedstakerFraAnnetEosLand"
     },
     AVSLAG_EØS_IKKE_EØS_BORGER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
@@ -291,6 +327,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     AVSLAG_EØS_UREGISTRERT_BARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosUregistrertBarn"
+    },
+    AVSLAG_SELVSTENDIG_RETT_STANDARD_AVSLAG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagSelvstendigRettStandardAvslag"
+    },
+    AVSLAG_SELVSTENDIG_RETT_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagSelvstendigRettUtsendtArbeidstakerFraAnnetEosLand"
     },
     FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD {
         override val sanityApiNavn = "fortsattInnvilgetPrimaerlandStandard"
@@ -399,6 +443,30 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     },
     FORTSATT_INNVILGET_TILLEGSTEKST_UK_FULL_UTBETALING {
         override val sanityApiNavn = "fortsattInnvilgetTilleggstekstUkFullUtbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD {
+        override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettPrimaerlandStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_STANDARD {
+        override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettPrimaerlandUkStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_OG_UTLAND_STANDARD {
+        override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettPrimaerlandUkOgUtlandStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_STANDARD {
+        override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettSekundaerlandStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_UK_STANDARD {
+        override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettSekundaerlandUkStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDAERLAND_UK_OG_UTLAND_STANDARD {
+        override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettSekundaerlandUkOgUtlandStandard"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
     },
     REDUKSJON_BARN_DØD_EØS {
