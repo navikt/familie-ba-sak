@@ -23,7 +23,7 @@ class OpprettVurderFødselshendelseKonsekvensForYtelseOppgave(
 
     override fun doTask(task: Task) {
         val opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO = objectMapper.readValue(task.payload, OpprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO::class.java)
-        task.metadata["oppgaveId"] = oppgaveService.opprettOppgaveForFødselshendelseUtenBehandling(
+        task.metadata["oppgaveId"] = oppgaveService.opprettOppgaveForFødselshendelse(
             ident = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.ident,
             oppgavetype = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.oppgavetype,
             fristForFerdigstillelse = LocalDate.now(),
