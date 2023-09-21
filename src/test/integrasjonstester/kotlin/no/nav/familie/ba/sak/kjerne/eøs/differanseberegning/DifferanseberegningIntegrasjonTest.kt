@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseTestController
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpTestController
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursTestController
@@ -13,8 +14,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingTestController
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -35,9 +36,10 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
     @Autowired
     lateinit var valutakursTestController: ValutakursTestController
 
-    // TODO: Fiks feilende test når toggelen ENDRET_EØS_REGELVERKFILTER_FOR_BARN er skrudd på.
+    @Autowired
+    lateinit var unleashService: UnleashService
+
     @Test
-    @Disabled
     fun `vilkårsvurdering med EØS-perioder + kompetanser med sekundærland fører til skjemaer med valutakurser`() {
         val søkerStartdato = 1.jan(2020).tilLocalDate()
         val barnStartdato = 2.jan(2020).tilLocalDate()
@@ -109,7 +111,12 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
                 Vilkår.GIFT_PARTNERSKAP to "++++++++++++++++",
                 Vilkår.BOSATT_I_RIKET to "EEEEEEEEEEEEEEEE",
                 Vilkår.LOVLIG_OPPHOLD to "EEEEEEEEEEEEEEEE",
-                Vilkår.BOR_MED_SØKER to "ÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉ",
+                // TODO: Fiks test slik at den fungerer når toggle er skrudd på og av uten dette hacket
+                if (unleashService.isEnabled(FeatureToggleConfig.ENDRET_EØS_REGELVERKFILTER_FOR_BARN)) {
+                    Vilkår.BOR_MED_SØKER to "DDDDDDDDDDDDDDDD"
+                } else {
+                    Vilkår.BOR_MED_SØKER to "ÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉ"
+                },
             ),
         )
 
