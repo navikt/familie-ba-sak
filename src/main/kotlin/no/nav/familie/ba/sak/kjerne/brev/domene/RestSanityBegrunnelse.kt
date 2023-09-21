@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår.UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår.UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle.BARN
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle.SOKER
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -36,6 +37,7 @@ data class RestSanityBegrunnelse(
     val vedtakResultat: String?,
     val fagsakType: String?,
     val tema: String?,
+    val periodeType: String?,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
         if (apiNavn == null) return null
@@ -83,6 +85,7 @@ data class RestSanityBegrunnelse(
             periodeResultat = vedtakResultat.finnEnumverdi<SanityPeriodeResultat>(apiNavn),
             fagsakType = fagsakType.finnEnumverdi<FagsakType>(apiNavn),
             tema = tema.finnEnumverdi<Tema>(apiNavn),
+            periodeType = periodeType.finnEnumverdi<BrevPeriodeType>(apiNavn),
         )
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -22,6 +23,7 @@ sealed interface ISanityBegrunnelse {
     val fagsakType: FagsakType?
     val tema: Tema?
     val valgbarhet: Valgbarhet?
+    val periodeType: BrevPeriodeType?
 
     val gjelderEtterEndretUtbetaling
         get() = this is SanityBegrunnelse &&
@@ -49,6 +51,7 @@ data class SanityBegrunnelse(
     override val fagsakType: FagsakType? = null,
     override val tema: Tema? = null,
     override val valgbarhet: Valgbarhet? = null,
+    override val periodeType: BrevPeriodeType?,
     @Deprecated("Bruk vilkår")
     val vilkaar: List<SanityVilkår> = emptyList(),
     val rolle: List<VilkårRolle> = emptyList(),
@@ -73,6 +76,7 @@ data class SanityEØSBegrunnelse(
     override val vilkår: Set<Vilkår>,
     override val fagsakType: FagsakType?,
     override val tema: Tema?,
+    override val periodeType: BrevPeriodeType?,
     val annenForeldersAktivitet: List<KompetanseAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,

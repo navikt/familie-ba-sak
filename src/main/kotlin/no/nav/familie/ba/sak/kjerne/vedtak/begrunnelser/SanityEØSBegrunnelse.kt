@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -34,6 +35,7 @@ data class RestSanityEØSBegrunnelse(
     val vedtakResultat: String?,
     val fagsakType: String?,
     val tema: String?,
+    val periodeType: String?,
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
@@ -58,6 +60,7 @@ data class RestSanityEØSBegrunnelse(
             periodeResultat = vedtakResultat.finnEnumverdi<SanityPeriodeResultat>(apiNavn),
             fagsakType = fagsakType.finnEnumverdi<FagsakType>(apiNavn),
             tema = tema.finnEnumverdi<Tema>(apiNavn),
+            periodeType = periodeType.finnEnumverdi<BrevPeriodeType>(apiNavn),
         )
     }
 
