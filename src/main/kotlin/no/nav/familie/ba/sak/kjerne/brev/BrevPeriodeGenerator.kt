@@ -258,7 +258,7 @@ class BrevPeriodeGenerator(
         )
     }
 
-    private fun hentFomTekst(): String = minimertVedtaksperiode.fom!!.tilMånedÅr()
+    private fun hentFomTekst(): String = if (minimertVedtaksperiode.fom != null) minimertVedtaksperiode.fom.tilMånedÅr() else ""
 
     @Deprecated("Erstattes av hentFomTekst når nye begrunnelse logikk går live")
     private fun hentFomTekstGammel(): String = when (minimertVedtaksperiode.type) {
