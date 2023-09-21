@@ -206,9 +206,9 @@ class ForvalterController(
         return ResponseEntity.ok("ok")
     }
 
-    @GetMapping("/finnFagsakerSomSkalAvsluttesNy")
-    fun finnFagsakerSomSkalAvsluttesNy(): ResponseEntity<List<Long>> {
-        return ResponseEntity.ok(fagsakRepository.finnFagsakerSomSkalAvsluttesNy())
+    @GetMapping("/finnFagsakerSomSkalAvsluttes")
+    fun finnFagsakerSomSkalAvsluttes(): ResponseEntity<List<Long>> {
+        return ResponseEntity.ok(fagsakRepository.finnFagsakerSomSkalAvsluttes())
     }
 
     @PostMapping("oppdaterLøpendeStatusPåFagsaker")
