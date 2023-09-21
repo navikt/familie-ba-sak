@@ -70,6 +70,13 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
         grunnlag,
     )
 
+    if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
+        return hentFortsattInnvilgetBegrunnelserPerPerson(
+            begrunnelseGrunnlagPerPerson = begrunnelseGrunnlagPerPerson,
+            grunnlag = grunnlag,
+        )
+    }
+
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
         val relevantePeriodeResultater =
             hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
@@ -166,9 +173,10 @@ private fun hentStandardBegrunnelser(
         it.periodeResultat in relevantePeriodeResultater
     }
 
-    val filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser = filtrertPåRolleFagsaktypeOgPeriodetype.filterValues {
-        it.erManuellBegrunnelse()
-    }
+    val filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser =
+        filtrertPåRolleFagsaktypeOgPeriodetype.filterValues {
+            it.erManuellBegrunnelse()
+        }
 
     val filtrertPåVilkårOgEndretUtbetaling = filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser.filterValues {
         val begrunnelseErGjeldendeForUtgjørendeVilkår = it.vilkår.isNotEmpty()
@@ -193,9 +201,10 @@ private fun hentStandardBegrunnelser(
         it.erGjeldendeForOpphørFraForrigeBehandling(begrunnelseGrunnlag)
     }
 
-    val filtrertPåSmåbarnstillegg = filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser.filterValues { begrunnelse ->
-        begrunnelse.erGjeldendeForSmåbarnstillegg(begrunnelseGrunnlag)
-    }
+    val filtrertPåSmåbarnstillegg =
+        filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser.filterValues { begrunnelse ->
+            begrunnelse.erGjeldendeForSmåbarnstillegg(begrunnelseGrunnlag)
+        }
 
     val begrunnelserFiltrertPåPeriodetypeForrigePeriode = sanityBegrunnelser.filterValues {
         it.periodeResultat in relevantePeriodeResultaterForrigePeriode
@@ -223,7 +232,7 @@ private fun hentStandardBegrunnelser(
 
 private fun SanityBegrunnelse.erManuellBegrunnelse() = ØvrigTrigger.ALLTID_AUTOMATISK !in ovrigeTriggere
 
-private fun SanityBegrunnelse.erGjeldendeForFagsakType(
+fun ISanityBegrunnelse.erGjeldendeForFagsakType(
     fagsakType: FagsakType,
 ) = if (valgbarhet == Valgbarhet.SAKSPESIFIKK) {
     fagsakType == this.fagsakType
@@ -313,7 +322,7 @@ private fun hentEØSStandardBegrunnelser(
     return filtrertPåVilkår + filtrertPåKompetanse
 }
 
-private fun SanityBegrunnelse.erGjeldendeForRolle(
+fun SanityBegrunnelse.erGjeldendeForRolle(
     person: Person,
     fagsakType: FagsakType,
 ): Boolean {
