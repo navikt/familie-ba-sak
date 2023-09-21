@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
 object BrevBegrunnelseParser {
 
-    fun mapStandardBegrunnelser(dataTable: DataTable): List<SammenlignbarBegrunnelse> {
+    fun mapBegrunnelser(dataTable: DataTable): List<SammenlignbarBegrunnelse> {
         return dataTable.asMaps().map { rad ->
             val regelverkForInkluderteBegrunnelser =
                 parseValgfriEnum<Regelverk>(DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser.REGELVERK_INKLUDERTE_BEGRUNNELSER, rad)

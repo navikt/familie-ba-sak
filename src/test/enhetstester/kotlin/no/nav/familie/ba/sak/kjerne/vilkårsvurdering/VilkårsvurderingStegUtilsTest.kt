@@ -59,7 +59,7 @@ class VilkårsvurderingStegUtilsTest {
             periodeFom = LocalDate.of(2010, 1, 1),
             periodeTom = LocalDate.of(2010, 6, 1),
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
         )
         vilkårResultat2 = VilkårResultat(
             id = 2,
@@ -70,7 +70,7 @@ class VilkårsvurderingStegUtilsTest {
             periodeFom = LocalDate.of(2010, 6, 2),
             periodeTom = LocalDate.of(2010, 8, 1),
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
         )
         vilkårResultat3 = VilkårResultat(
             id = 3,
@@ -81,7 +81,7 @@ class VilkårsvurderingStegUtilsTest {
             periodeFom = LocalDate.of(2010, 8, 2),
             periodeTom = LocalDate.of(2010, 12, 1),
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
         )
         personResultat.setSortedVilkårResultater(
             setOf(
@@ -342,7 +342,7 @@ class VilkårsvurderingStegUtilsTest {
             periodeFom = LocalDate.of(2010, 1, 1),
             periodeTom = LocalDate.of(2010, 6, 1),
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
         )
         mockPersonResultat.setSortedVilkårResultater(setOf(mockVilkårResultat))
 
@@ -378,7 +378,7 @@ class VilkårsvurderingStegUtilsTest {
             resultat = resultat,
             periodeFom = LocalDate.of(2020, 1, 1),
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
         )
         val restVilkårResultat = RestVilkårResultat(
             id = 1,
@@ -502,7 +502,7 @@ class VilkårsvurderingStegUtilsTest {
                     periodeFom = LocalDate.now().plusMonths(månedsteller++),
                     periodeTom = LocalDate.now().plusMonths(månedsteller++),
                     begrunnelse = "",
-                    behandlingId = behandling.id,
+                    sistEndretIBehandlingId = behandling.id,
                 )
             }.toSet(),
         )

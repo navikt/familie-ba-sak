@@ -5,11 +5,13 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_GENERERING_AV_BREVOBJEKTER
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
@@ -50,6 +52,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
+import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -69,6 +72,7 @@ class BrevService(
     private val saksbehandlerContext: SaksbehandlerContext,
     private val brevmalService: BrevmalService,
     private val refusjonEøsRepository: RefusjonEøsRepository,
+    private val unleashNext: UnleashService,
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -267,9 +271,16 @@ class BrevService(
             vedtaksperioder = vedtaksperioder,
             behandling = vedtak.behandling,
         )
-        val brevperioder = brevPerioderData.sorted().mapNotNull {
-            it.tilBrevPeriodeGenerator().genererBrevPeriode()
+
+        val brevperioder = if (unleashNext.isEnabled(NY_GENERERING_AV_BREVOBJEKTER) && false) {
+            val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
+            vedtaksperioder.mapNotNull { it.lagBrevPeriode(grunnlagForBegrunnelser) }
+        } else {
+            brevPerioderData.sorted().mapNotNull {
+                it.tilBrevPeriodeGenerator().genererBrevPeriode()
+            }
         }
+
         val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(vedtak.behandling.id)
         val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(vedtak.behandling.id)
 

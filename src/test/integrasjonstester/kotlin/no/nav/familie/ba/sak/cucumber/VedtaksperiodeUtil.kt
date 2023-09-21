@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.cucumber
 
 import io.cucumber.datatable.DataTable
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -24,6 +25,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriStringList
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -44,9 +46,16 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.genererVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -136,7 +145,7 @@ fun leggTilVilkårResultatPåPersonResultat(
 
         val vilkårResultaterForÉnRad = vilkårForÉnRad.map { vilkår ->
             VilkårResultat(
-                behandlingId = behandlingId,
+                sistEndretIBehandlingId = behandlingId,
                 personResultat = personResultat,
                 vilkårType = vilkår,
                 resultat = parseEnum(
@@ -373,4 +382,47 @@ fun lagVedtaksPerioder(
         grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
         nåDato = nåDato,
     )
+}
+
+fun leggBegrunnelserIVedtaksperiodene(
+    dataTable: DataTable,
+    vedtaksperioder: List<UtvidetVedtaksperiodeMedBegrunnelser>,
+    vedtak: Vedtak,
+) = dataTable.asMaps().map { rad ->
+    val fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)
+    val tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)
+
+    val vedtaksperiode =
+        vedtaksperioder.find { it.fom == fom && it.tom == tom }
+            ?: throw Feil("Ingen vedtaksperioder med Fom=$fom og Tom=$tom")
+    val vedtaksperiodeMedBegrunnelser = vedtaksperiode.tilVedtaksperiodeMedBegrunnelser(
+        vedtak,
+    )
+
+    val standardbegrunnelser = parseEnumListe<Standardbegrunnelse>(
+        VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.STANDARDBEGRUNNELSER,
+        rad,
+    ).map {
+        Vedtaksbegrunnelse(
+            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            standardbegrunnelse = it,
+        )
+    }.toMutableSet()
+    val eøsBegrunnelser = parseEnumListe<EØSStandardbegrunnelse>(
+        VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.EØSBEGRUNNELSER,
+        rad,
+    ).map { EØSBegrunnelse(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser, begrunnelse = it) }
+        .toMutableSet()
+    val fritekster = parseValgfriStringList(
+        VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.FRITEKSTER,
+        rad,
+    ).map {
+        VedtaksbegrunnelseFritekst(
+            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            fritekst = it,
+        )
+    }.toMutableList()
+
+    vedtaksperiodeMedBegrunnelser
+        .copy(begrunnelser = standardbegrunnelser, eøsBegrunnelser = eøsBegrunnelser, fritekster = fritekster)
 }

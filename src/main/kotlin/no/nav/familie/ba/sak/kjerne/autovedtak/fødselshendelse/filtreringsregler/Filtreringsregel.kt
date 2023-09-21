@@ -32,6 +32,7 @@ enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering)
             this,
         )
     }),
+    MOR_HAR_IKKE_OPPHØRT_BARNETRYGD(vurder = { FiltreringsregelEvaluering.morHarIkkeOpphørtBarnetrygd(this) }),
 }
 
 object FiltreringsregelEvaluering {
@@ -165,6 +166,12 @@ object FiltreringsregelEvaluering {
                 FiltreringsregelIkkeOppfylt.LØPER_ALLEREDE_FOR_ANNEN_FORELDER,
             )
         }
+
+    fun morHarIkkeOpphørtBarnetrygd(fakta: FiltreringsreglerFakta): Evaluering = if (fakta.morHarIkkeOpphørtBarnetrygd) {
+        Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD)
+    } else {
+        Evaluering.ikkeOppfylt(FiltreringsregelIkkeOppfylt.MOR_HAR_OPPHØRT_BARNETRYGD)
+    }
 
     fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFakta): Evaluering {
         return when (
