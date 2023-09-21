@@ -23,12 +23,15 @@ fun utledEndringstidspunkt(
     behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
 ): LocalDate {
     val grunnlagTidslinjePerPerson =
-        behandlingsGrunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson()
+        behandlingsGrunnlagForVedtaksperioder.copy(
+            personResultater = behandlingsGrunnlagForVedtaksperioder
+                .personResultater.beholdKunOppfylteVilkårResultater(),
+        ).utledGrunnlagTidslinjePerPerson()
             .mapValues { it.value.vedtaksperiodeGrunnlagForPerson }
     val grunnlagTidslinjePerPersonForrigeBehandling =
         behandlingsGrunnlagForVedtaksperioderForrigeBehandling?.copy(
             personResultater = behandlingsGrunnlagForVedtaksperioderForrigeBehandling
-                .personResultater.filtrerVilkårErKopiertTilNesteBehandling(),
+                .personResultater.beholdKunOppfylteVilkårResultater(),
         )?.utledGrunnlagTidslinjePerPerson()
             ?.mapValues { it.value.vedtaksperiodeGrunnlagForPerson } ?: emptyMap()
 
@@ -50,7 +53,7 @@ fun utledEndringstidspunkt(
     return datoTidligsteForskjell
 }
 
-private fun Set<PersonResultat>.filtrerVilkårErKopiertTilNesteBehandling(): Set<PersonResultat> = map {
+private fun Set<PersonResultat>.beholdKunOppfylteVilkårResultater(): Set<PersonResultat> = map {
     it.tilKopiForNyVilkårsvurdering(it.vilkårsvurdering)
 }.toSet()
 
