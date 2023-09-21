@@ -43,5 +43,6 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
         antallBarnMedNullutbetaling = "",
         fodselsdagerBarnMedUtbetaling = "",
         fodselsdagerBarnMedNullutbetaling = "",
+        duEllerInstitusjonen = "",
     )
 }
