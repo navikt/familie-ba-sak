@@ -274,7 +274,7 @@ class BrevService(
             behandling = vedtak.behandling,
         )
 
-        val brevperioder = if (unleashNext.isEnabled(NY_GENERERING_AV_BREVOBJEKTER)) {
+        val brevperioder = if (unleashNext.isEnabled(NY_GENERERING_AV_BREVOBJEKTER) && false) {
             val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
             vedtaksperioder.mapNotNull {
                 it.lagBrevPeriode(
