@@ -399,6 +399,22 @@ class ForvalterService(
             null
         }
     }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun oppdaterStønadFomTomForBehandling(behandlingId: Long): Boolean {
+        tilkjentYtelseRepository.findByBehandling(behandlingId).apply {
+            if (this.stønadFom == null && this.stønadTom == null && this.utbetalingsoppdrag == null && this.andelerTilkjentYtelse.isNotEmpty()) {
+                this.stønadTom = this.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
+                this.stønadFom = this.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
+                tilkjentYtelseRepository.save(this)
+                return true
+            } else if (this.stønadFom == null && this.stønadTom == null && this.utbetalingsoppdrag == null && this.andelerTilkjentYtelse.isEmpty()) {
+                logger.info("Skipper oppdatering av tilkjent ytelse for behandlingId=$behandlingId fordi aty er tom, så får ikke satt tom/fom")
+                return false
+            }
+        }
+        return false
+    }
 }
 
 data class ValidertUtbetalingsoppdrag(

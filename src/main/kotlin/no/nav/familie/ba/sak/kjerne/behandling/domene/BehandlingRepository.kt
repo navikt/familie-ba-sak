@@ -155,4 +155,18 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query(value = "SELECT b.status FROM Behandling b WHERE b.id = :behandlingId")
     fun finnStatus(behandlingId: Long): BehandlingStatus
+
+    @Query(
+        """select distinct(b.id) from behandling b
+            join fagsak f on f.id = b.fk_fagsak_id
+            join tilkjent_ytelse ty on b.id = ty.fk_behandling_id
+        where b.aktiv = true
+        AND f.status = 'LØPENDE'
+        AND b.status = 'AVSLUTTET'
+        AND ty.stonad_tom is null
+        AND ty.utbetalingsoppdrag is null
+        LIMIT :limit""",
+        nativeQuery = true,
+    )
+    fun finnAktiveBehandlingerSomManglerStønadTom(limit: Int): List<Long>
 }
