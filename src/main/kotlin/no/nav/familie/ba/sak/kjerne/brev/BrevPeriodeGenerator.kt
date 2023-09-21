@@ -239,7 +239,7 @@ class BrevPeriodeGenerator(
 
             fom = if (skalBrukeNyBegrunnelseLogikk) this.hentFomTekst() else this.hentFomTekstGammel(),
             tom = when {
-                minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG && skalBrukeNyBegrunnelseLogikk -> "til og med $tomDato"
+                minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG && skalBrukeNyBegrunnelseLogikk -> "til og med $tomDato "
                 minimertVedtaksperiode.type == Vedtaksperiodetype.FORTSATT_INNVILGET -> ""
                 tomDato.isNullOrBlank() -> ""
                 brevPeriodeType == BrevPeriodeType.INNVILGELSE_INGEN_UTBETALING -> " til $tomDato"
