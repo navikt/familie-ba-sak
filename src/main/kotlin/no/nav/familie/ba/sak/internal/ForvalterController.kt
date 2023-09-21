@@ -207,7 +207,7 @@ class ForvalterController(
     }
 
     @GetMapping("/finnFagsakerSomSkalAvsluttesNy")
-    fun populerStønadFomTom(): ResponseEntity<List<Long>> {
+    fun finnFagsakerSomSkalAvsluttesNy(): ResponseEntity<List<Long>> {
         return ResponseEntity.ok(fagsakRepository.finnFagsakerSomSkalAvsluttesNy())
     }
 
