@@ -131,7 +131,7 @@ class OppgaveService(
         return begrunnelse
     }
 
-    fun opprettOppgaveForFødselshendelseUtenBehandling(
+    fun opprettOppgaveForFødselshendelse(
         ident: AktørId,
         oppgavetype: Oppgavetype,
         fristForFerdigstillelse: LocalDate,
