@@ -40,7 +40,7 @@ internal class VilkårsvurderingTidslinjeServiceTest {
     }
 
     @Test
-    fun `skal forskyve tidslinje for erAnnenForelderOmfattetAvNorskLovgivning med 1 måned`() {
+    fun `skal forskyve fom med 1 mnd for periode med erAnnenForelderOmfattetAvNorskLovgivning`() {
         val søker = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
         val fagsak = Fagsak(aktør = søker.aktør)
@@ -74,7 +74,54 @@ internal class VilkårsvurderingTidslinjeServiceTest {
         val faktiskTidslinje = vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(
             behandlingId = BehandlingId(behandling.id),
         )
-        val forventetTidslinje = "+++".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(feb(2023))
+        val forventetTidslinje = "++".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(feb(2023))
+        assertEquals(forventetTidslinje, faktiskTidslinje)
+    }
+
+    @Test
+    fun `skal forskyve fom med 1 mnd for perioder med erAnnenForelderOmfattetAvNorskLovgivning`() {
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN)
+        val fagsak = Fagsak(aktør = søker.aktør)
+        val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+        val vilkårsvurdering = lagVilkårsvurderingMedOverstyrendeResultater(
+            søker = søker,
+            barna = listOf(barn),
+            overstyrendeVilkårResultater = mapOf(
+                Pair(
+                    søker.aktør.aktørId,
+                    listOf(
+                        lagVilkårResultat(
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.of(2023, 1, 2),
+                            periodeTom = LocalDate.of(2023, 3, 4),
+                            behandlingId = behandling.id,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING),
+                        ),
+                        lagVilkårResultat(
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.of(2023, 4, 30),
+                            periodeTom = LocalDate.of(2023, 7, 1),
+                            behandlingId = behandling.id,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns lagTestPersonopplysningGrunnlag(
+            behandlingId = behandling.id,
+            søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
+        )
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id) } returns vilkårsvurdering
+
+        val faktiskTidslinje = vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(
+            behandlingId = BehandlingId(behandling.id),
+        )
+        val forventetTidslinje = "++-+++".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(feb(2023))
         assertEquals(forventetTidslinje, faktiskTidslinje)
     }
 }
