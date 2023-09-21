@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -24,8 +25,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
+import no.nav.familie.unleash.UnleashContextFields
+import no.nav.familie.unleash.UnleashService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -37,6 +42,7 @@ class SimuleringService(
     private val økonomiSimuleringMottakerRepository: ØkonomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
+    private val unleashService: UnleashService,
     private val vedtakRepository: VedtakRepository,
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -50,30 +56,47 @@ class SimuleringService(
             return null
         }
 
+        val brukNyUtbetalingsoppdragGenerator = unleashService.isEnabled(
+            FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+            mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
+        )
+
         /**
          * SOAP integrasjonen støtter ikke full epost som MQ,
          * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
          * Denne verdien brukes ikke til noe i simulering.
          */
-
-        val utbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-            vedtak = vedtak,
-            saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-            andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
-            erSimulering = true,
-        )
+        val utbetalingsoppdrag: Utbetalingsoppdrag =
+            if (brukNyUtbetalingsoppdragGenerator
+            ) {
+                logger.info("Bruker ny utbetalingsgenerator for simulering for behandling ${vedtak.behandling.id}")
+                utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                    vedtak = vedtak,
+                    saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                    erSimulering = true,
+                ).utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
+            } else {
+                utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                    vedtak = vedtak,
+                    saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                    andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
+                    erSimulering = true,
+                )
+            }
 
         // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
         if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
 
         val detaljertSimuleringResultat = økonomiKlient.hentSimulering(utbetalingsoppdrag)
 
-        kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = vedtak,
-            gammeltSimuleringResultat = detaljertSimuleringResultat,
-            gammeltUtbetalingsoppdrag = utbetalingsoppdrag,
-            erSimulering = true,
-        )
+        if (!brukNyUtbetalingsoppdragGenerator) {
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = vedtak,
+                gammeltSimuleringResultat = detaljertSimuleringResultat,
+                gammeltUtbetalingsoppdrag = utbetalingsoppdrag,
+                erSimulering = true,
+            )
+        }
 
         simulert.increment()
         return detaljertSimuleringResultat
@@ -245,5 +268,6 @@ class SimuleringService(
 
     companion object {
         const val MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK = 100
+        val logger = LoggerFactory.getLogger(SimuleringService::class.java)
     }
 }

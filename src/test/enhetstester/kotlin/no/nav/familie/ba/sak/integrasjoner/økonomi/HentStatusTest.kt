@@ -24,6 +24,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -45,6 +46,8 @@ class HentStatusTest {
 
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
 
+    private val unleashService: UnleashService = mockk()
+
     @BeforeEach
     fun setUp() {
         val økonomiService = ØkonomiService(
@@ -55,11 +58,14 @@ class HentStatusTest {
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             kontrollerNyUtbetalingsgeneratorService = kontrollerNyUtbetalingsgeneratorService,
             utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
+            unleashService = unleashService,
         )
         statusFraOppdrag = StatusFraOppdrag(
             økonomiService = økonomiService,
             taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() },
         )
+
+        every { unleashService.isEnabled(toggleId = any(), properties = any()) } returns false
     }
 
     @Test
