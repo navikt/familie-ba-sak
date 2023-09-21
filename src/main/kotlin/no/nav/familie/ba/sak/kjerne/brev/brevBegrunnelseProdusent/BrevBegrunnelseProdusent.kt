@@ -117,7 +117,7 @@ private fun hentUtvidetAndelerIPeriode(begrunnelsesGrunnlagPerPerson: Map<Person
     begrunnelsesGrunnlagPerPerson.values.flatMap { it.dennePerioden.andeler }
         .filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
 
-private fun IVedtakBegrunnelse.hentSanityBegrunnelse(grunnlag: GrunnlagForBegrunnelse) = when (this) {
+fun IVedtakBegrunnelse.hentSanityBegrunnelse(grunnlag: GrunnlagForBegrunnelse) = when (this) {
     is EØSStandardbegrunnelse -> grunnlag.sanityEØSBegrunnelser[this]
     is Standardbegrunnelse -> grunnlag.sanityBegrunnelser[this]
 } ?: throw Feil("Fant ikke tilsvarende sanitybegrunnelse for $this")
