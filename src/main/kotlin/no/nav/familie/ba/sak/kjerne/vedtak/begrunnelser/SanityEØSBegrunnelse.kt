@@ -91,6 +91,7 @@ data class SanityEØSBegrunnelse(
 ) : ISanityBegrunnelse {
     override val lovligOppholdTriggere: List<VilkårTrigger> = emptyList()
     override val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger> = emptyList()
+    override val valgbarhet = null
     override val bosattIRiketTriggere: List<VilkårTrigger> = emptyList()
     override val giftPartnerskapTriggere: List<VilkårTrigger> = emptyList()
     override val borMedSokerTriggere: List<VilkårTrigger> = emptyList()
