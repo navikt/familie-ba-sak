@@ -55,15 +55,9 @@ data class RestSanityEØSBegrunnelse(
             hjemlerEØSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
             hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
             vilkår = eosVilkaar?.mapNotNull { konverterTilEnumverdi<Vilkår>(it) }?.toSet() ?: emptySet(),
-            periodeResultat = vedtakResultat?.let {
-                finnEnumverdi(it, SanityPeriodeResultat.entries.toTypedArray(), apiNavn)
-            },
-            fagsakType = fagsakType?.let {
-                finnEnumverdi(it, FagsakType.entries.toTypedArray(), apiNavn)
-            },
-            tema = tema?.let {
-                finnEnumverdi(it, Tema.entries.toTypedArray(), apiNavn)
-            },
+            periodeResultat = vedtakResultat.finnEnumverdi<SanityPeriodeResultat>(apiNavn),
+            fagsakType = fagsakType.finnEnumverdi<FagsakType>(apiNavn),
+            tema = tema.finnEnumverdi<Tema>(apiNavn),
         )
     }
 

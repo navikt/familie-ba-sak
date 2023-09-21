@@ -43,70 +43,56 @@ data class RestSanityBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
             vilkaar = vilkaar?.mapNotNull {
-                finnEnumverdi(it, SanityVilkår.entries.toTypedArray(), apiNavn)
+                it.finnEnumverdi<SanityVilkår>(apiNavn)
             } ?: emptyList(),
             vilkår = vilkaar?.mapNotNull {
-                finnEnumverdi(it, SanityVilkår.entries.toTypedArray(), apiNavn)
-            }?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
-            rolle = rolle?.mapNotNull { finnEnumverdi(it, VilkårRolle.entries.toTypedArray(), apiNavn) } ?: emptyList(),
+                it.finnEnumverdi<SanityVilkår>(apiNavn)
+            }?.map { it.tilVilkår() }?.toSet()
+                ?: emptySet(),
+            rolle = rolle?.mapNotNull { it.finnEnumverdi<VilkårRolle>(apiNavn) }
+                ?: emptyList(),
             lovligOppholdTriggere = lovligOppholdTriggere?.mapNotNull {
-                finnEnumverdi(it, VilkårTrigger.entries.toTypedArray(), apiNavn)
+                it.finnEnumverdi<VilkårTrigger>(apiNavn)
             } ?: emptyList(),
             bosattIRiketTriggere = bosattIRiketTriggere?.mapNotNull {
-                finnEnumverdi(it, VilkårTrigger.entries.toTypedArray(), apiNavn)
+                it.finnEnumverdi<VilkårTrigger>(apiNavn)
             } ?: emptyList(),
             giftPartnerskapTriggere = giftPartnerskapTriggere?.mapNotNull {
-                finnEnumverdi(it, VilkårTrigger.entries.toTypedArray(), apiNavn)
+                it.finnEnumverdi<VilkårTrigger>(apiNavn)
             } ?: emptyList(),
             borMedSokerTriggere = borMedSokerTriggere?.mapNotNull {
-                finnEnumverdi(it, VilkårTrigger.entries.toTypedArray(), apiNavn)
+                it.finnEnumverdi<VilkårTrigger>(apiNavn)
             } ?: emptyList(),
             ovrigeTriggere = ovrigeTriggere?.mapNotNull {
-                finnEnumverdi(it, ØvrigTrigger.entries.toTypedArray(), apiNavn)
+                it.finnEnumverdi<ØvrigTrigger>(apiNavn)
             } ?: emptyList(),
             endringsaarsaker = endringsaarsaker?.mapNotNull {
-                finnEnumverdi(it, Årsak.entries.toTypedArray(), apiNavn)
+                it.finnEnumverdi<Årsak>(apiNavn)
             } ?: emptyList(),
             hjemler = hjemler ?: emptyList(),
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
-            endretUtbetalingsperiodeDeltBostedUtbetalingTrigger =
-            if (endretUtbetalingsperiodeDeltBostedUtbetalingTrigger != null) {
-                finnEnumverdi(
-                    endretUtbetalingsperiodeDeltBostedUtbetalingTrigger,
-                    EndretUtbetalingsperiodeDeltBostedTriggere.entries.toTypedArray(),
-                    apiNavn,
-                )
-            } else {
-                null
-            },
+            endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedUtbetalingTrigger
+                .finnEnumverdi<EndretUtbetalingsperiodeDeltBostedTriggere>(apiNavn),
             endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere?.mapNotNull {
-                finnEnumverdi(it, EndretUtbetalingsperiodeTrigger.entries.toTypedArray(), apiNavn)
+                it.finnEnumverdi<EndretUtbetalingsperiodeTrigger>(apiNavn)
             } ?: emptyList(),
             utvidetBarnetrygdTriggere = utvidetBarnetrygdTriggere?.mapNotNull {
-                finnEnumverdi(it, UtvidetBarnetrygdTrigger.entries.toTypedArray(), apiNavn)
+                it.finnEnumverdi<UtvidetBarnetrygdTrigger>(apiNavn)
             } ?: emptyList(),
-            valgbarhet = valgbarhet?.let { finnEnumverdi(valgbarhet, Valgbarhet.entries.toTypedArray(), apiNavn) },
-            periodeResultat = vedtakResultat?.let {
-                finnEnumverdi(it, SanityPeriodeResultat.entries.toTypedArray(), apiNavn)
-            },
-            fagsakType = fagsakType?.let {
-                finnEnumverdi(it, FagsakType.entries.toTypedArray(), apiNavn)
-            },
-            tema = tema?.let {
-                finnEnumverdi(it, Tema.entries.toTypedArray(), apiNavn)
-            },
-
+            valgbarhet = valgbarhet.finnEnumverdi<Valgbarhet>(apiNavn),
+            periodeResultat = vedtakResultat.finnEnumverdi<SanityPeriodeResultat>(apiNavn),
+            fagsakType = fagsakType.finnEnumverdi<FagsakType>(apiNavn),
+            tema = tema.finnEnumverdi<Tema>(apiNavn),
         )
     }
 }
 
-private val logger: Logger = LoggerFactory.getLogger(RestSanityBegrunnelse::class.java)
-
-fun <T : Enum<T>> finnEnumverdi(verdi: String, enumverdier: Array<T>, apiNavn: String): T? {
-    val enumverdi = enumverdier.firstOrNull { verdi == it.name }
+inline fun <reified T : Enum<T>> String?.finnEnumverdi(apiNavn: String): T? {
+    val enumverdi = enumValues<T>().find { this != null && it.name == this }
     if (enumverdi == null) {
+        val logger: Logger = LoggerFactory.getLogger(RestSanityBegrunnelse::class.java)
         logger.error(
-            "$verdi på begrunnelsen $apiNavn er ikke blant verdiene til enumen ${enumverdier.javaClass.simpleName}",
+            "$this på begrunnelsen $apiNavn er ikke blant verdiene til enumen ${enumValues<T>().javaClass.simpleName}",
         )
     }
     return enumverdi
