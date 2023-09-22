@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDateEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.zipMedNeste
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -285,7 +286,7 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
                 Pair(gjeldende, erForrigeInnvilget)
             }
 
-        grunnlagTidslinjeMedErForrigeBehandlingInnvilget.zipMedNeste()
+        grunnlagTidslinjeMedErForrigeBehandlingInnvilget.zipMedNeste(ZipPadding.FØR)
             .map {
                 val forrigePeriode = it?.first?.first
                 val erForrigePeriodeInnvilgetIForrigeBehandling = it?.first?.second ?: false

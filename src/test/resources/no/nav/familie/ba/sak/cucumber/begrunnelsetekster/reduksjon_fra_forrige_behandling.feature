@@ -195,8 +195,6 @@ Egenskap: Reduksjon fra forrige behandling
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Inkluderte Begrunnelser           | Ekskluderte Begrunnelser |
-      | 01.02.2023 | 28.02.2023 | UTBETALING                                              |           |                                   |                          |
-      | 01.03.2023 | 31.05.2023 | UTBETALING                                              |           |                                   |                          |
       | 01.06.2023 | 30.06.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_BARN_BOR_IKKE_MED_SØKER |                          |
       | 01.07.2023 | 31.08.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_BARN_BOR_IKKE_MED_SØKER |                          |
       | 01.09.2023 | 28.02.2025 | UTBETALING                                              |           |                                   |                          |

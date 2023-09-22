@@ -6,11 +6,6 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 class ZipTidslinjeTest {
-
-    val kombinator = { venstre: Char?, høyre: Char? ->
-        (venstre?.toString() ?: "").trim() + (høyre?.toString() ?: "").trim()
-    }
-
     @Test
     fun testZipMedNesteTidslinje() {
         val aTilF = ('a'..'f').toList().joinToString("")

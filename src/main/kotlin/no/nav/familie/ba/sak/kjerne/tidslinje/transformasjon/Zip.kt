@@ -5,23 +5,38 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding.*
 import java.time.YearMonth
 
 /**
- * val aTilF = ('a'..'f').toList().joinToString("")
- * val bokstavTidslinje = aTilF.tilCharTidslinje(YearMonth.now())
- * val bokstavParTidslinje = bokstavTidslinje.zipMedNeste()
+ * Returnerer en tidslinje med par av hvert etterfølgende element i tidslinjen.
  *
- * println(aTilF) //
- *     "abcdef"
+ * val aTilD = "abcd"
+ * val bokstavTidslinje = aTilF.tilCharTidslinje(jan(2020))
+ * val bokstavParTidslinje = bokstavTidslinje.zipMedNeste(ZipPadding.FØR)
  *
- * println(bokstavParTidslinje.perioder().map { it.innhold }) //
- *     [(null, a), (a, b), (b, c), (c, d), (d, e), (e, f)]
+ * println(bokstavTidslinje) //
+ *     2020-01 - 2020-01: a | 2020-02 - 2020-02: b | 2020-03 - 2020-03: c | 2020-04 - 2020-04: d
+ *
+ * println(bokstavParTidslinje) //
+ *     2020-01 - 2020-01: (null, a) | 2020-02 - 2020-02: (a, b) | 2020-03 - 2020-03: (b, c) | 2020-04 - 2020-04: (c, d)
  */
-fun <T> Tidslinje<T, Måned>.zipMedNeste(): Tidslinje<Pair<T?, T?>, Måned> = (
-    listOf(
+enum class ZipPadding {
+    FØR,
+    ETTER,
+    INGEN_PADDING,
+}
+
+fun <T> Tidslinje<T, Måned>.zipMedNeste(zipPadding: ZipPadding = INGEN_PADDING): Tidslinje<Pair<T?, T?>, Måned> {
+    val padding = listOf(
         månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
-    ) + perioder()
-    ).zipWithNext { forrige, denne ->
-    periodeAv(denne.fraOgMed, denne.tilOgMed, Pair(forrige.innhold, denne.innhold))
-}.tilTidslinje()
+    )
+
+    return when (zipPadding) {
+        FØR -> padding + perioder()
+        ETTER -> perioder() + padding
+        INGEN_PADDING -> perioder()
+    }.zipWithNext { forrige, denne ->
+        periodeAv(denne.fraOgMed, denne.tilOgMed, Pair(forrige.innhold, denne.innhold))
+    }.tilTidslinje()
+}
