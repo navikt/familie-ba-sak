@@ -10,7 +10,7 @@ class ZipTidslinjeTest {
     fun testZipMedNesteTidslinje() {
         val aTilF = ('a'..'f').toList().joinToString("")
         val bokstavTidslinje = aTilF.tilCharTidslinje(YearMonth.now())
-        val bokstavParTidslinje = bokstavTidslinje.zipMedNeste()
+        val bokstavParTidslinje = bokstavTidslinje.zipMedNeste(ZipPadding.FØR)
 
         assertThat(aTilF).isEqualTo("abcdef")
 
