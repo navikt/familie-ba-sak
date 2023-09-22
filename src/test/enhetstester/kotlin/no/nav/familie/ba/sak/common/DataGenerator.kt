@@ -44,6 +44,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -1197,7 +1198,7 @@ fun lagRestSanityBegrunnelse(
     vedtakResultat: String? = null,
     fagsakType: String? = null,
     tema: String? = null,
-
+    periodeType: String? = null,
 ): RestSanityBegrunnelse = RestSanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1216,6 +1217,7 @@ fun lagRestSanityBegrunnelse(
     vedtakResultat = vedtakResultat,
     fagsakType = fagsakType,
     tema = tema,
+    periodeType = periodeType,
 )
 
 fun lagSanityBegrunnelse(
@@ -1235,6 +1237,7 @@ fun lagSanityBegrunnelse(
     endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
     resultat: SanityPeriodeResultat? = null,
     fagsakType: FagsakType? = null,
+    periodeType: BrevPeriodeType? = null,
 ): SanityBegrunnelse = SanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1252,6 +1255,7 @@ fun lagSanityBegrunnelse(
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
     periodeResultat = resultat,
     fagsakType = fagsakType,
+    periodeType = periodeType,
 )
 
 fun lagSanityEøsBegrunnelse(
@@ -1268,6 +1272,7 @@ fun lagSanityEøsBegrunnelse(
     vilkår: List<Vilkår> = emptyList(),
     fagsakType: FagsakType? = null,
     tema: Tema? = null,
+    periodeType: BrevPeriodeType? = null,
 ): SanityEØSBegrunnelse = SanityEØSBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1282,6 +1287,7 @@ fun lagSanityEøsBegrunnelse(
     vilkår = vilkår.toSet(),
     fagsakType = fagsakType,
     tema = tema,
+    periodeType = periodeType,
 )
 
 fun lagTriggesAv(
