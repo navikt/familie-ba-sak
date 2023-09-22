@@ -242,6 +242,7 @@ class BrevPeriodeGenerator(
                 minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG && skalBrukeNyBegrunnelseLogikk -> "til og med $tomDato "
                 minimertVedtaksperiode.type == Vedtaksperiodetype.FORTSATT_INNVILGET -> ""
                 tomDato.isNullOrBlank() -> ""
+                brevPeriodeType == BrevPeriodeType.INGEN_UTBETALING -> ""
                 brevPeriodeType == BrevPeriodeType.INNVILGELSE_INGEN_UTBETALING -> " til $tomDato"
                 else -> "til $tomDato "
             },
