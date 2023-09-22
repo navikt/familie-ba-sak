@@ -5,7 +5,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding.*
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding.ETTER
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding.FØR
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding.INGEN_PADDING
 import java.time.YearMonth
 
 /**
