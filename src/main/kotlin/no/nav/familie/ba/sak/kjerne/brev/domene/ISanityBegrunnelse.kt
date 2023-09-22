@@ -51,7 +51,7 @@ data class SanityBegrunnelse(
     override val fagsakType: FagsakType? = null,
     override val tema: Tema? = null,
     override val valgbarhet: Valgbarhet? = null,
-    override val periodeType: BrevPeriodeType?,
+    override val periodeType: BrevPeriodeType? = null,
     @Deprecated("Bruk vilkår")
     val vilkaar: List<SanityVilkår> = emptyList(),
     val rolle: List<VilkårRolle> = emptyList(),
