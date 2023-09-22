@@ -11,8 +11,8 @@ fun erReduksjonSidenForrigeBehandling(
     erInnvilgetIForrigeBehandling: Boolean,
     erInnvilgetIForrigePeriodeIForrigeBehandling: Boolean,
 ): Boolean {
-    val erLøpendeReduksjon =
-        !erInnvilget && !erInnvilgetIForrigeBehandling && !erInnvilgetForrigePeriode && erInnvilgetIForrigePeriodeIForrigeBehandling
-
-    return (!erInnvilget && erInnvilgetIForrigeBehandling) || erLøpendeReduksjon
+    return !erInnvilget &&
+        !erInnvilgetForrigePeriode &&
+        erInnvilgetIForrigeBehandling &&
+        !erInnvilgetIForrigePeriodeIForrigeBehandling
 }

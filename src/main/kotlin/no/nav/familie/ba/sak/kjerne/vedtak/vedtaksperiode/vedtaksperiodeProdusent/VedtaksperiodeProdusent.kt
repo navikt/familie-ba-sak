@@ -281,6 +281,7 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
 
         val innvilgetForrigeBehandlingTidslinje =
             grunnlagForrigeBehandling?.map { it?.erInnvilget() ?: false } ?: TomTidslinje()
+
         val grunnlagTidslinjeMedErForrigeBehandlingInnvilget =
             grunnlagstidslinje.kombinerMed(innvilgetForrigeBehandlingTidslinje) { gjeldende, erForrigeInnvilget ->
                 Pair(gjeldende, erForrigeInnvilget)
@@ -309,7 +310,7 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
 private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.slåSammenSammenhengendeOpphørsPerioder(): Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned> {
     val perioder = this.perioder().sortedBy { it.fraOgMed }.toList()
 
-    val b = perioder.fold(emptyList()) { acc: List<Periode<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>, periode ->
+    return perioder.fold(emptyList()) { acc: List<Periode<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>, periode ->
         val sistePeriode = acc.lastOrNull()
 
         val erInnvilgetForrigePeriode = sistePeriode?.innhold?.gjeldende?.erInnvilget() ?: false
@@ -318,15 +319,15 @@ private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.slåSamme
         if (sistePeriode != null &&
             !erInnvilgetForrigePeriode &&
             !erInnvilget &&
-            sistePeriode.innhold?.erReduksjonSidenForrigeBehandling == true
+            periode.innhold?.erReduksjonSidenForrigeBehandling != true &&
+            periode.innhold?.gjeldende?.erEksplisittAvslag() != true &&
+            sistePeriode.innhold?.gjeldende?.erEksplisittAvslag() != true
         ) {
             acc.dropLast(1) + sistePeriode.copy(tilOgMed = periode.tilOgMed)
         } else {
             acc + periode
         }
-    }
-
-    return b.tilTidslinje()
+    }.tilTidslinje()
 }
 
 fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksperiodeMedBegrunnelser(

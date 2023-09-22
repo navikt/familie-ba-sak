@@ -67,7 +67,7 @@ Egenskap: Reduksjon forrige periode
     Når vedtaksperioder med begrunnelser genereres for behandling 2
 
     Så forvent følgende vedtaksperioder med begrunnelser
-      | Fra dato   | Til dato   | Vedtaksperiodetype                                      | Kommentar |
-      | 01.04.2023 | 30.06.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           |
-      | 01.07.2023 | 30.09.2025 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           |
-      | 01.10.2025 |            | OPPHØR                                                  |           |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar |
+      | 01.04.2023 | 30.06.2023 | UTBETALING         |           |
+      | 01.07.2023 | 30.09.2025 | UTBETALING         |           |
+      | 01.10.2025 |            | OPPHØR             |           |

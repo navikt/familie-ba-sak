@@ -66,7 +66,7 @@ Egenskap: Reduksjon fra forrige behandling
       | 2            | 200056155 | 1                   |
 
     Og følgende persongrunnlag for begrunnelse
-      | BehandlingId | AktørId       | Persontype | Fødselsdato |
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | BARN       | 22.08.2022  |
       | 1            | 3456    | SØKER      | 07.05.1985  |
       | 2            | 1234    | BARN       | 22.08.2022  |
@@ -139,34 +139,34 @@ Egenskap: Reduksjon fra forrige behandling
     Og lag personresultater for begrunnelse for behandling 2
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
-      | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
-      | 1234    | LOVLIG_OPPHOLD                                               |                  | 29.12.1984 |            | OPPFYLT      | Nei                  |
-      | 1234    | BOSATT_I_RIKET                                               |                  | 11.11.2021 |            | OPPFYLT      | Nei                  |
+      | AktørId | Vilkår                                                       | Fra dato   | Til dato   | Resultat     |
+      | 1234    | LOVLIG_OPPHOLD                                               | 29.12.1984 |            | OPPFYLT      |
+      | 1234    | BOSATT_I_RIKET                                               | 11.11.2021 |            | OPPFYLT      |
 
-      | 3456    | UNDER_18_ÅR                                                  |                  | 31.03.2019 | 30.03.2037 | OPPFYLT      | Nei                  |
-      | 3456    | BOR_MED_SØKER                                                |                  | 31.03.2019 | 11.01.2023 | OPPFYLT      | Nei                  |
-      | 3456    | GIFT_PARTNERSKAP,LOVLIG_OPPHOLD                              |                  | 31.03.2019 |            | OPPFYLT      | Nei                  |
-      | 3456    | BOSATT_I_RIKET                                               |                  | 11.11.2021 |            | OPPFYLT      | Nei                  |
-      | 3456    | BOR_MED_SØKER                                                |                  | 12.01.2023 | 14.05.2023 | IKKE_OPPFYLT | Nei                  |
-      | 3456    | BOR_MED_SØKER                                                |                  | 15.05.2023 |            | OPPFYLT      | Nei                  |
+      | 3456    | UNDER_18_ÅR                                                  | 31.03.2019 | 30.03.2037 | OPPFYLT      |
+      | 3456    | BOR_MED_SØKER                                                | 31.03.2019 | 11.01.2023 | OPPFYLT      |
+      | 3456    | GIFT_PARTNERSKAP,LOVLIG_OPPHOLD                              | 31.03.2019 |            | OPPFYLT      |
+      | 3456    | BOSATT_I_RIKET                                               | 11.11.2021 |            | OPPFYLT      |
+      | 3456    | BOR_MED_SØKER                                                | 12.01.2023 | 14.05.2023 | IKKE_OPPFYLT |
+      | 3456    | BOR_MED_SØKER                                                | 15.05.2023 |            | OPPFYLT      |
 
-      | 5678    | UNDER_18_ÅR                                                  |                  | 23.02.2022 | 22.02.2040 | OPPFYLT      | Nei                  |
-      | 5678    | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP,BOSATT_I_RIKET,BOR_MED_SØKER |                  | 23.02.2022 |            | OPPFYLT      | Nei                  |
+      | 5678    | UNDER_18_ÅR                                                  | 23.02.2022 | 22.02.2040 | OPPFYLT      |
+      | 5678    | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP,BOSATT_I_RIKET,BOR_MED_SØKER | 23.02.2022 |            | OPPFYLT      |
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 2
-      | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
-      | 1234    | LOVLIG_OPPHOLD                                               |                  | 29.12.1984 |            | OPPFYLT      | Nei                  |
-      | 1234    | BOSATT_I_RIKET                                               |                  | 11.11.2021 |            | OPPFYLT      | Nei                  |
+      | AktørId | Vilkår                                                       | Fra dato   | Til dato   | Resultat     |
+      | 1234    | LOVLIG_OPPHOLD                                               | 29.12.1984 |            | OPPFYLT      |
+      | 1234    | BOSATT_I_RIKET                                               | 11.11.2021 |            | OPPFYLT      |
 
-      | 3456    | UNDER_18_ÅR                                                  |                  | 31.03.2019 | 30.03.2037 | OPPFYLT      | Nei                  |
-      | 3456    | BOR_MED_SØKER                                                |                  | 31.03.2019 | 11.01.2023 | OPPFYLT      | Nei                  |
-      | 3456    | GIFT_PARTNERSKAP,LOVLIG_OPPHOLD                              |                  | 31.03.2019 |            | OPPFYLT      | Nei                  |
-      | 3456    | BOSATT_I_RIKET                                               |                  | 11.11.2021 |            | OPPFYLT      | Nei                  |
-      | 3456    | BOR_MED_SØKER                                                |                  | 12.01.2023 | 15.08.2023 | IKKE_OPPFYLT | Nei                  |
-      | 3456    | BOR_MED_SØKER                                                |                  | 16.08.2023 |            | OPPFYLT      | Nei                  |
+      | 3456    | UNDER_18_ÅR                                                  | 31.03.2019 | 30.03.2037 | OPPFYLT      |
+      | 3456    | BOR_MED_SØKER                                                | 31.03.2019 | 11.01.2023 | OPPFYLT      |
+      | 3456    | GIFT_PARTNERSKAP,LOVLIG_OPPHOLD                              | 31.03.2019 |            | OPPFYLT      |
+      | 3456    | BOSATT_I_RIKET                                               | 11.11.2021 |            | OPPFYLT      |
+      | 3456    | BOR_MED_SØKER                                                | 12.01.2023 | 15.08.2023 | IKKE_OPPFYLT |
+      | 3456    | BOR_MED_SØKER                                                | 16.08.2023 |            | OPPFYLT      |
 
-      | 5678    | UNDER_18_ÅR                                                  |                  | 23.02.2022 | 22.02.2040 | OPPFYLT      | Nei                  |
-      | 5678    | BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD,GIFT_PARTNERSKAP |                  | 23.02.2022 |            | OPPFYLT      | Nei                  |
+      | 5678    | UNDER_18_ÅR                                                  | 23.02.2022 | 22.02.2040 | OPPFYLT      |
+      | 5678    | BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD,GIFT_PARTNERSKAP | 23.02.2022 |            | OPPFYLT      |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
