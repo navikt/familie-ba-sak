@@ -4,12 +4,16 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -26,6 +30,9 @@ class ForvalterController(
     private val integrasjonClient: IntegrasjonClient,
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
+    private val behandlingsRepository: BehandlingRepository,
+    private val fagsakRepository: FagsakRepository,
+    private val fagsakService: FagsakService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -178,6 +185,35 @@ class ForvalterController(
         }
 
         return ResponseEntity.ok(SendUtbetalingsoppdragPåNyttResponse(iverksattOk = iverksattOk, harFeil = harFeil))
+    }
+
+    @PostMapping("/populer-stonad-fom-tom/{behandlingId}")
+    fun populerStønadFomTomForBehandling(@PathVariable behandlingId: Long): ResponseEntity<Boolean> {
+        return ResponseEntity.ok(forvalterService.oppdaterStønadFomTomForBehandling(behandlingId))
+    }
+
+    @PostMapping("/populer-stonad-fom-tom-alle/{limit}")
+    fun populerStønadFomTom(@PathVariable limit: Int): ResponseEntity<String> {
+        behandlingsRepository.finnAktiveBehandlingerSomManglerStønadTom(limit).forEach { behandlingId ->
+            try {
+                val harOppdatertTom = forvalterService.oppdaterStønadFomTomForBehandling(behandlingId)
+                logger.info("oppdaterStønadFomTomForBehandling for behandlingId=$behandlingId resultat=$harOppdatertTom")
+            } catch (e: Exception) {
+                logger.warn("Fikk ikke satt stønadTom for behandling=$behandlingId", e)
+            }
+        }
+
+        return ResponseEntity.ok("ok")
+    }
+
+    @GetMapping("/finnFagsakerSomSkalAvsluttes")
+    fun finnFagsakerSomSkalAvsluttes(): ResponseEntity<List<Long>> {
+        return ResponseEntity.ok(fagsakRepository.finnFagsakerSomSkalAvsluttes())
+    }
+
+    @PostMapping("oppdaterLøpendeStatusPåFagsaker")
+    fun oppdaterLøpendeStatusPåFagsaker() {
+        fagsakService.oppdaterLøpendeStatusPåFagsaker()
     }
 
     data class SendUtbetalingsoppdragPåNyttResponse(

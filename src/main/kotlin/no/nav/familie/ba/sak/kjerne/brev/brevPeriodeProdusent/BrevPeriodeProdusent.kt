@@ -4,17 +4,19 @@ import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBeg
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.lagBrevBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BrevBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import tilBrevBegrunnelse
 
 fun VedtaksperiodeMedBegrunnelser.lagBrevPeriode(
     grunnlagForBegrunnelse: GrunnlagForBegrunnelse,
+    landkoder: Map<String, String>,
 ): BrevPeriode? {
     val standardbegrunnelser =
         this.begrunnelser.map { it.standardbegrunnelse.lagBrevBegrunnelse(this, grunnlagForBegrunnelse) }
-    val eøsBegrunnelser = emptyList<BegrunnelseData>()
+    val eøsBegrunnelser =
+        this.eøsBegrunnelser.flatMap { it.begrunnelse.tilBrevBegrunnelse(this, grunnlagForBegrunnelse, landkoder) }
     val fritekster = this.fritekster.map { FritekstBegrunnelse(it.fritekst) }
 
     val begrunnelserOgFritekster =
@@ -43,5 +45,6 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
         antallBarnMedNullutbetaling = "",
         fodselsdagerBarnMedUtbetaling = "",
         fodselsdagerBarnMedNullutbetaling = "",
+        duEllerInstitusjonen = "",
     )
 }

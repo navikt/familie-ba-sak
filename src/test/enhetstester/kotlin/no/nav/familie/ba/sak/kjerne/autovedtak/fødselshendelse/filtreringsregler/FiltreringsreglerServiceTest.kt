@@ -11,6 +11,8 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
@@ -30,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -40,6 +43,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import java.time.YearMonth
 
 @ExtendWith(MockKExtension::class)
 class FiltreringsreglerServiceTest {
@@ -73,6 +77,9 @@ class FiltreringsreglerServiceTest {
 
     @InjectMockKs
     private lateinit var filtreringsreglerService: FiltreringsreglerService
+
+    @MockK
+    private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når mors vilkår om utvidet barnetrygd er oppfylt i tidsrommet barnet er mellom 0 og 18`() {
@@ -388,6 +395,75 @@ class FiltreringsreglerServiceTest {
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
 
+    @Test
+    fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når mor har opphørt barnetrygd`() {
+        val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
+        val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
+        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val sisteVedtatteBehandling = lagBehandling()
+        val behandling = lagBehandling()
+
+        val fødselshendelsefiltreringResultatSlot =
+            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
+
+        clearMocks(andelTilkjentYtelseRepository)
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns listOf(
+            MånedPeriode(YearMonth.of(2018, 1), YearMonth.now()),
+        )
+            .map {
+                lagAndelTilkjentYtelse(it.fom, it.tom)
+            }
+
+        mockkObject(FiltreringsregelEvaluering)
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+
+        filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+
+        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+
+        val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
+        val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
+
+        assertThat(filtreringsreglerFakta.morHarIkkeOpphørtBarnetrygd).isFalse
+
+        assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
+            Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
+        )
+        assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
+    }
+
+    @Test
+    fun `kjørFiltreringsregler - skal gi resultat oppfylt når vilkår er oppfylt og mor ikke har opphørt barnetrygd`() {
+        val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
+        val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
+        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val sisteVedtatteBehandling = lagBehandling()
+        val behandling = lagBehandling()
+
+        val fødselshendelsefiltreringResultatSlot =
+            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
+
+        clearMocks(andelTilkjentYtelseRepository)
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns emptyList()
+
+        mockkObject(FiltreringsregelEvaluering)
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+
+        filtreringsreglerService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+
+        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+
+        val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
+        val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
+
+        assertThat(filtreringsreglerFakta.morHarIkkeOpphørtBarnetrygd).isTrue
+
+        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD }.resultat).isEqualTo(
+            Resultat.OPPFYLT,
+        )
+        assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isTrue
+    }
+
     private fun settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(
         mor: Person,
         barna: List<Person>,
@@ -443,6 +519,14 @@ class FiltreringsreglerServiceTest {
                 barna,
             )
         } returns false
+
+        val andelTilkjentytelse = listOf(
+            MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
+        )
+            .map {
+                lagAndelTilkjentYtelse(it.fom, it.tom)
+            }
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
 
         val fødselshendelsefiltreringResultatSlot = slot<List<FødselshendelsefiltreringResultat>>()
 

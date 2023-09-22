@@ -195,15 +195,15 @@ fun lagKompetanser(
             søkersAktivitetsland = parseValgfriString(
                 VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITETSLAND,
                 rad,
-            ) ?: "PL",
+            )?.also { validerErLandkode(it) } ?: "PL",
             annenForeldersAktivitetsland = parseValgfriString(
                 VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITETSLAND,
                 rad,
-            ) ?: "NO",
+            )?.also { validerErLandkode(it) } ?: "NO",
             barnetsBostedsland = parseValgfriString(
                 VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.BARNETS_BOSTEDSLAND,
                 rad,
-            ) ?: "NO",
+            )?.also { validerErLandkode(it) } ?: "NO",
             resultat = parseEnum<KompetanseResultat>(
                 VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.RESULTAT,
                 rad,
@@ -211,6 +211,12 @@ fun lagKompetanser(
         ).also { it.behandlingId = behandlingId }
     }.groupBy { it.behandlingId }
         .toMutableMap()
+
+private fun validerErLandkode(it: String) {
+    if (it.length != 2) {
+        error("$it er ikke en landkode")
+    }
+}
 
 fun lagEndredeUtbetalinger(
     nyeEndredeUtbetalingAndeler: MutableList<MutableMap<String, String>>,

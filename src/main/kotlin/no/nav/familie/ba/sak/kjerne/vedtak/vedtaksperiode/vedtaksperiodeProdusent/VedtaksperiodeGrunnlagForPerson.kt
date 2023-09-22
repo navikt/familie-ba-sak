@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -169,6 +170,7 @@ data class KompetanseForVedtaksperiode(
     val søkersAktivitetsland: String,
     val barnetsBostedsland: String,
     val resultat: KompetanseResultat,
+    val barnAktører: Set<Aktør>,
 ) {
     constructor(kompetanse: UtfyltKompetanse) : this(
         søkersAktivitet = kompetanse.søkersAktivitet,
@@ -177,6 +179,7 @@ data class KompetanseForVedtaksperiode(
         søkersAktivitetsland = kompetanse.søkersAktivitetsland,
         barnetsBostedsland = kompetanse.barnetsBostedsland,
         resultat = kompetanse.resultat,
+        barnAktører = kompetanse.barnAktører,
     )
 }
 
