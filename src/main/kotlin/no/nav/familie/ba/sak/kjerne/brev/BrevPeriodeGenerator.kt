@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetan
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataUtenKompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentBrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import java.time.LocalDate
@@ -228,7 +229,7 @@ class BrevPeriodeGenerator(
 
         val utbetalingsbeløp = minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()
         val brevPeriodeType = if (skalBrukeNyBegrunnelseLogikk) {
-            hentPeriodeType(utbetalingsbeløp, minimertVedtaksperiode.fom)
+            hentBrevPeriodeType(minimertVedtaksperiode.type, minimertVedtaksperiode.fom, utbetalingsbeløp)
         } else {
             hentPeriodeTypeGammel(utbetalingsbeløp, minimertVedtaksperiode.fom, barnMedUtbetaling)
         }
@@ -290,23 +291,6 @@ class BrevPeriodeGenerator(
                     else -> "Du"
                 }
             }
-        }
-
-    private fun hentPeriodeType(
-        utbetalingsbeløp: Int,
-        fom: LocalDate?,
-    ): BrevPeriodeType =
-        when (minimertVedtaksperiode.type) {
-            Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET_NY
-            Vedtaksperiodetype.UTBETALING -> when {
-                utbetalingsbeløp == 0 -> BrevPeriodeType.INGEN_UTBETALING
-                else -> BrevPeriodeType.UTBETALING
-            }
-
-            Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.INGEN_UTBETALING else BrevPeriodeType.INGEN_UTBETALING_UTEN_PERIODE
-            Vedtaksperiodetype.OPPHØR -> BrevPeriodeType.INGEN_UTBETALING
-            Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.UTBETALING
-            Vedtaksperiodetype.ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
         }
 
     @Deprecated("Erstattes av hentPeriodeType etter at ny begrunnelse logikk er produksjonsatt")
