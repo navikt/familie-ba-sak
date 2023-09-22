@@ -15,7 +15,7 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
       | 1            | 3456     | BARN       | 13.04.2020  |
       | 2            | 3456     | BARN       | 12.05.2020  |
 
-  Scenario: Skal lage vedtaksperioder for revurdering mot forrige behandling hvor det viser seg at barnet ikke bodde hos mor det første året.
+  Scenario: Vedtaksperiode der barn får endret fødselsdatp
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |

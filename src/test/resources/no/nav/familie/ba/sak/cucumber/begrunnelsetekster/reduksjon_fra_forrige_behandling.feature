@@ -36,8 +36,8 @@ Egenskap: Reduksjon fra forrige behandling
       | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD                                |                  | 15.03.2023 |            | OPPFYLT  | Nei                  |
 
-      | 2       | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP,BOSATT_I_RIKET               |                  | 15.03.2023 | 30.06.2023 | OPPFYLT  | Nei                  |
       | 2       | UNDER_18_ÅR                                                  |                  | 15.03.2023 | 14.03.2041 | OPPFYLT  | Nei                  |
+      | 2       | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP,BOSATT_I_RIKET               |                  | 15.03.2023 | 30.06.2023 | OPPFYLT  | Nei                  |
       | 2       | BOR_MED_SØKER                                                |                  | 16.04.2023 |            | OPPFYLT  | Nei                  |
 
       | 3       | UNDER_18_ÅR                                                  |                  | 15.03.2023 | 14.03.2041 | OPPFYLT  | Nei                  |
