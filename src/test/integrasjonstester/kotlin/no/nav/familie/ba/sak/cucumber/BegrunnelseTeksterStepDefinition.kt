@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegr
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
@@ -235,6 +236,7 @@ class BegrunnelseTeksterStepDefinition {
             andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
             perioderOvergangsstønad = overgangsstønadForVedtaksperiode[behandlingId] ?: emptyList(),
             uregistrerteBarn = emptyList(),
+            behandlingUnderkategori = behandlinger[behandlingId]?.underkategori ?: BehandlingUnderkategori.ORDINÆR,
         )
 
         val grunnlagForVedtaksperiodeForrigeBehandling = forrigeBehandlingId?.let {
@@ -249,6 +251,7 @@ class BegrunnelseTeksterStepDefinition {
                 andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
                 perioderOvergangsstønad = emptyList(),
                 uregistrerteBarn = emptyList(),
+                behandlingUnderkategori = behandlinger[behandlingId]?.underkategori ?: BehandlingUnderkategori.ORDINÆR,
             )
         }
 

@@ -328,6 +328,7 @@ class VedtaksperiodeService(
             perioderOvergangsstønad = småbarnstilleggService.hentPerioderMedFullOvergangsstønad(this),
             uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = this.id)?.hentUregistrerteBarn()
                 ?: emptyList(),
+            behandlingUnderkategori = this.underkategori,
         )
 
     @Transactional

@@ -363,6 +363,7 @@ fun lagVedtaksPerioder(
         andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
         perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
         uregistrerteBarn = uregistrerteBarn,
+        behandlingUnderkategori = vedtak.behandling.underkategori,
     )
 
     val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
@@ -379,6 +380,7 @@ fun lagVedtaksPerioder(
             andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
             perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
             uregistrerteBarn = emptyList(),
+            behandlingUnderkategori = vedtak.behandling.underkategori,
         )
     }
 

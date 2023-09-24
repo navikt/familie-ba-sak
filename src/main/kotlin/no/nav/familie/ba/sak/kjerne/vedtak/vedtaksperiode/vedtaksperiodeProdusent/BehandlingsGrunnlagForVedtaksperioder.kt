@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -66,6 +67,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
     val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     val perioderOvergangsstønad: List<InternPeriodeOvergangsstønad>,
     val uregistrerteBarn: List<BarnMedOpplysninger>,
+    val behandlingUnderkategori: BehandlingUnderkategori,
 ) {
     val utfylteEndredeUtbetalinger = endredeUtbetalinger
         .map { it.tilIEndretUtbetalingAndel() }
@@ -108,6 +110,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                     ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje,
                     fagsakType = fagsakType,
                     vilkårRolle = vilkårRolle,
+                    behandlingUnderkategori = behandlingUnderkategori,
                 )
 
             AktørOgRolleBegrunnelseGrunnlag(aktør, vilkårRolle) to
@@ -311,12 +314,13 @@ private fun List<VilkårResultat>.hentForskjøvedeVilkårResultaterForPersonsAnd
     ordinæreVilkårForSøkerTidslinje: Tidslinje<List<VilkårResultat>, Måned>,
     fagsakType: FagsakType,
     vilkårRolle: PersonType,
+    behandlingUnderkategori: BehandlingUnderkategori,
 ): Tidslinje<List<VilkårResultat>, Måned> {
     val forskjøvedeVilkårResultaterForPerson = this.tilForskjøvedeVilkårTidslinjer(person.fødselsdato).kombiner { it }
 
     return when (vilkårRolle) {
         PersonType.SØKER -> forskjøvedeVilkårResultaterForPerson.map { vilkårResultater ->
-            vilkårResultater?.filtrerErIkkeOrdinærtFor(vilkårRolle)?.takeIf { it.isNotEmpty() }
+            vilkårResultater?.filtrerErIkkeOrdinærtFor(vilkårRolle, fagsakType, behandlingUnderkategori)?.takeIf { it.isNotEmpty() }
         }.kombinerMed(erMinstEttBarnMedUtbetalingTidslinje) { vilkårResultaterForSøker, erMinstEttBarnMedUtbetaling ->
             vilkårResultaterForSøker?.takeIf { erMinstEttBarnMedUtbetaling == true || vilkårResultaterForSøker.any { it.erEksplisittAvslagPåSøknad == true } }
         }
@@ -343,8 +347,12 @@ private fun slåSammenHvisMulig(
     else -> høyre + venstre
 }
 
-private fun Iterable<VilkårResultat>.filtrerErIkkeOrdinærtFor(persontype: PersonType): List<VilkårResultat> {
-    val ordinæreVilkårForPerson = Vilkår.hentOrdinæreVilkårFor(persontype)
+private fun Iterable<VilkårResultat>.filtrerErIkkeOrdinærtFor(
+    persontype: PersonType,
+    fagsakType: FagsakType,
+    behandlingUnderkategori: BehandlingUnderkategori,
+): List<VilkårResultat> {
+    val ordinæreVilkårForPerson = Vilkår.hentVilkårFor(persontype, fagsakType, behandlingUnderkategori)
 
     return this.filterNot { ordinæreVilkårForPerson.contains(it.vilkårType) }
 }
