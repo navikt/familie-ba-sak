@@ -247,7 +247,7 @@ class BegrunnelseTeksterStepDefinition {
                 kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                 endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
                 andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
-                perioderOvergangsstønad = emptyList(),
+                perioderOvergangsstønad = overgangsstønadForVedtaksperiode[forrigeBehandlingId] ?: emptyList(),
                 uregistrerteBarn = emptyList(),
             )
         }
