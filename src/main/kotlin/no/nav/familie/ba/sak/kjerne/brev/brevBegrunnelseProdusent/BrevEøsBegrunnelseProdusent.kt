@@ -15,22 +15,20 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataUtenKompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.finnBegrunnelseGrunnlagPerPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserPerPerson
 import java.time.LocalDate
 
 fun EØSStandardbegrunnelse.tilBrevBegrunnelse(
     vedtaksperiode: VedtaksperiodeMedBegrunnelser,
     grunnlag: GrunnlagForBegrunnelse,
+    begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
     landkoder: Map<String, String>,
 ): List<EØSBegrunnelseData> {
     val sanityBegrunnelse = hentSanityBegrunnelse(grunnlag)
     val personerGjeldeneForBegrunnelse = vedtaksperiode.hentGyldigeBegrunnelserPerPerson(
         grunnlag,
     ).mapNotNull { (person, begrunnelserPåPerson) -> person.takeIf { this in begrunnelserPåPerson } }
-
-    val begrunnelsesGrunnlagPerPerson = vedtaksperiode.finnBegrunnelseGrunnlagPerPerson(grunnlag)
-
     val periodegrunnlagForPersonerIBegrunnelse =
         begrunnelsesGrunnlagPerPerson.filter { (person, _) -> person in personerGjeldeneForBegrunnelse }
 
