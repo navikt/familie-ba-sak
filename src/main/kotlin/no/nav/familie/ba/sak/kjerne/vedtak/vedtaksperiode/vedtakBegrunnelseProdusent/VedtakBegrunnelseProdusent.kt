@@ -319,7 +319,22 @@ private fun hentEØSStandardBegrunnelser(
         erEndringIKompetanse(begrunnelseGrunnlag) && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
     }
 
-    return filtrertPåVilkår + filtrertPåKompetanse
+    val filtrertPåPeriodeResultat = begrunnelserFiltrertPåPeriodetype.filterValues {
+        filtrerPåPeriodeResultat(relevantePeriodeResultater, it)
+    }
+
+    return filtrertPåVilkår + filtrertPåKompetanse + filtrertPåPeriodeResultat
+}
+
+private fun filtrerPåPeriodeResultat(
+    relevantePeriodeResultater: List<SanityPeriodeResultat>,
+    sanityEøsBegrunnelse: SanityEØSBegrunnelse
+): Boolean {
+    val periodeResultatErIngenEndring = SanityPeriodeResultat.INGEN_ENDRING in relevantePeriodeResultater
+    val periodeResultatPåBegrunnelseErInnvilgetEllerØkning =
+        sanityEøsBegrunnelse.periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING
+
+    return periodeResultatErIngenEndring && periodeResultatPåBegrunnelseErInnvilgetEllerØkning
 }
 
 fun SanityBegrunnelse.erGjeldendeForRolle(
@@ -679,8 +694,8 @@ private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOg
             månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + grunnlagPerioderSplittetPåVedtaksperiode
         ).zipWithNext { forrige, denne ->
-        periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
-    }.tilTidslinje()
+            periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
+        }.tilTidslinje()
 }
 
 private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
