@@ -1,12 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMåned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -45,11 +46,11 @@ class VilkårsvurderingTidslinjeService(
             .personResultater.single { it.aktør == søker.aktør }
 
         val erAnnenForelderOmfattetAvNorskLovgivingTidslinje = søkerPersonresultater.vilkårResultater
-            .filter { it.vilkårType === Vilkår.BOSATT_I_RIKET }
+            .filter { it.vilkårType === Vilkår.BOSATT_I_RIKET && it.erOppfylt() }
             .map {
                 periodeAv(
-                    it.periodeFom,
-                    it.periodeTom,
+                    it.periodeFom!!.førsteDagINesteMåned(),
+                    it.periodeTom?.sisteDagIMåned(),
                     it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING),
                 )
             }
@@ -57,6 +58,6 @@ class VilkårsvurderingTidslinjeService(
 
         val månedsbasertTidslinje =
             erAnnenForelderOmfattetAvNorskLovgivingTidslinje.tilMåned { it.contains(element = true) }
-        return månedsbasertTidslinje.forskyv(1)
+        return månedsbasertTidslinje
     }
 }

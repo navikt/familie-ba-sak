@@ -13,5 +13,6 @@ object BrevPeriodeParser {
         SØKNADSTIDSPUNKT("Søknadstidspunkt"),
         AVTALETIDSPUNKT_DELT_BOSTED("Avtaletidspunkt delt bosted"),
         SØKERS_RETT_TIL_UTVIDET("Søkers rett til utvidet"),
+        TYPE("Type"),
     }
 }

@@ -280,7 +280,7 @@ private fun hentErMinstEttBarnMedUtbetalingTidslinje(
 ): Tidslinje<Boolean, Måned> {
     val søker = persongrunnlag.søker
     val søkerSinerOrdinæreVilkårErOppfyltTidslinje =
-        personResultater.single { it.erSøkersResultater() }.tilTidslinjeForSplittForPerson(
+        personResultater.single { it.aktør == søker.aktør }.tilTidslinjeForSplittForPerson(
             person = søker,
             fagsakType = fagsakType,
         ).map { it != null }
