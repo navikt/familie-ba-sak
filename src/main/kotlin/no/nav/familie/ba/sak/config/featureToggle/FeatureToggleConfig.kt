@@ -14,6 +14,8 @@ class FeatureToggleConfig {
         const val ER_MANUEL_POSTERING_TOGGLE_PÅ = "familie-ba-sak.manuell-postering"
         const val FEILUTBETALT_VALUTA_PR_MND = "familie-ba-sak.feilutbetalt-valuta-pr-mnd"
         const val BEGRUNNELSER_NY = "familie-ba-sak.begrunnelser-ny"
+        const val EØS_PRAKSISENDRING_SEPTEMBER2023 =
+            "familie-ba-sak.behandling.eos-annen-forelder-omfattet-av-norsk-lovgivning"
 
         // unleash toggles for satsendring, kan slettes etter at satsendring er skrudd på for alle satstyper
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
