@@ -2,7 +2,17 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProduse
 
 data class GrunnlagForGjeldendeOgForrigeBehandling(
     val gjeldende: VedtaksperiodeGrunnlagForPerson?,
-    val personHarRettIForrigeBehandling: Boolean,
-) {
-    val gjeldendeErNullForrigeErInnvilget = gjeldende == null && personHarRettIForrigeBehandling
+    val erReduksjonSidenForrigeBehandling: Boolean = false,
+)
+
+fun erReduksjonSidenForrigeBehandling(
+    erInnvilget: Boolean,
+    erInnvilgetForrigePeriode: Boolean,
+    erInnvilgetIForrigeBehandling: Boolean,
+    erInnvilgetIForrigePeriodeIForrigeBehandling: Boolean,
+): Boolean {
+    return !erInnvilget &&
+        !erInnvilgetForrigePeriode &&
+        erInnvilgetIForrigeBehandling &&
+        !erInnvilgetIForrigePeriodeIForrigeBehandling
 }
