@@ -328,7 +328,7 @@ private fun hentEØSStandardBegrunnelser(
 
 private fun filtrerPåPeriodeResultat(
     relevantePeriodeResultater: List<SanityPeriodeResultat>,
-    sanityEøsBegrunnelse: SanityEØSBegrunnelse
+    sanityEøsBegrunnelse: SanityEØSBegrunnelse,
 ): Boolean {
     val periodeResultatErIngenEndring = SanityPeriodeResultat.INGEN_ENDRING in relevantePeriodeResultater
     val periodeResultatPåBegrunnelseErInnvilgetEllerØkning =
@@ -694,8 +694,8 @@ private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOg
             månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + grunnlagPerioderSplittetPåVedtaksperiode
         ).zipWithNext { forrige, denne ->
-            periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
-        }.tilTidslinje()
+        periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
+    }.tilTidslinje()
 }
 
 private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
