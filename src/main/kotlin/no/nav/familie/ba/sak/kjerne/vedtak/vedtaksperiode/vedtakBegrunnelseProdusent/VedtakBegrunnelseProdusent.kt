@@ -637,10 +637,10 @@ fun VedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
                 val perioder = grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder()
                 perioder.single { grunnlag.nåDato.toYearMonth() in it.fraOgMed.tilYearMonthEllerUendeligFortid()..it.tilOgMed.tilYearMonthEllerUendeligFramtid() }.innhold!!
             } else {
-                begrunnelseperioderIVedtaksperiode.single()
+                begrunnelseperioderIVedtaksperiode.first()
             }
 
-            else -> begrunnelseperioderIVedtaksperiode.single()
+            else -> begrunnelseperioderIVedtaksperiode.first()
         }
     }
 }

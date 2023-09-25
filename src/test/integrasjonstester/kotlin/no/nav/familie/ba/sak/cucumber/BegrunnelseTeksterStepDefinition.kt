@@ -281,6 +281,9 @@ class BegrunnelseTeksterStepDefinition {
                                 }
                             }",
                     )
+            assertThat(faktisk.type)
+                .`as`("For periode: ${forventet.fom} til ${forventet.tom}")
+                .isEqualTo(forventet.type)
             assertThat(faktisk.gyldigeBegrunnelser)
                 .`as`("For periode: ${forventet.fom} til ${forventet.tom}")
                 .containsAll(forventet.inkluderteStandardBegrunnelser)
