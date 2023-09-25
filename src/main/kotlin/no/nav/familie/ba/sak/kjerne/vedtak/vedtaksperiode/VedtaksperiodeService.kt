@@ -67,6 +67,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import utledEndringstidspunkt
@@ -622,6 +624,28 @@ class VedtaksperiodeService(
         }
         return vedtak.behandling.kategori == BehandlingKategori.EØS &&
             hentPersisterteVedtaksperioder(vedtak).any { it.tom?.erSenereEnnInneværendeMåned() != false }
+    }
+
+    fun skalMeldeFraOmEndringerEøsSelvstendigRett(vedtak: Vedtak): Boolean {
+        val vilkårsvurdering =
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = vedtak.behandling.id)
+
+        val annenForelderOmfattetAvNorskLovgivningErSattPåBosattIRiket = (
+            vilkårsvurdering?.personResultater?.flatMap { it.vilkårResultater }
+                ?.any { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING) && it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                ?: false
+            )
+
+        val passendeBehandlingsresultat = vedtak.behandling.resultat !in listOf(
+            Behandlingsresultat.AVSLÅTT,
+            Behandlingsresultat.ENDRET_OG_OPPHØRT,
+            Behandlingsresultat.OPPHØRT,
+        )
+
+        val eøsPraksisEndringFeatureToggleErSlåttPå =
+            featureToggleService.isEnabled(FeatureToggleConfig.EØS_PRAKSISENDRING_SEPTEMBER2023)
+
+        return annenForelderOmfattetAvNorskLovgivningErSattPåBosattIRiket && passendeBehandlingsresultat && eøsPraksisEndringFeatureToggleErSlåttPå
     }
 
     fun beskrivPerioderMedFeilutbetaltValuta(vedtak: Vedtak): Set<String>? {
