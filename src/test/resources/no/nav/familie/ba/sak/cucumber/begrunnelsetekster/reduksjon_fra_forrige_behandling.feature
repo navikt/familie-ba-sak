@@ -128,10 +128,10 @@ Egenskap: Reduksjon fra forrige behandling
 
     Og følgende persongrunnlag for begrunnelse
       | BehandlingId | AktørId | Persontype | Fødselsdato |
-      | 1            | 3456    | BARN       | 26.08.2022  |
       | 1            | 1234    | SØKER      | 19.11.1984  |
-      | 2            | 3456    | BARN       | 26.08.2022  |
+      | 1            | 3456    | BARN       | 26.08.2019  |
       | 2            | 1234    | SØKER      | 19.11.1984  |
+      | 2            | 3456    | BARN       | 26.08.2019  |
 
     Og følgende dagens dato 17.09.2023
     Og lag personresultater for begrunnelse for behandling 1
@@ -157,25 +157,38 @@ Egenskap: Reduksjon fra forrige behandling
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
-      | 3456    | 1            | 01.09.2019 | 28.02.2020 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
-      | 3456    | 1            | 01.03.2020 | 30.06.2020 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
-      | 3456    | 1            | 01.07.2020 | 31.12.2021 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 1234    | 1            | 01.09.2019 | 28.02.2020 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
       | 1234    | 1            | 01.03.2020 | 30.06.2020 | 2489  | UTVIDET_BARNETRYGD | 100     | 2489 |
       | 1234    | 1            | 01.07.2020 | 31.12.2021 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
       | 1234    | 1            | 01.04.2020 | 30.06.2020 | 678   | SMÅBARNSTILLEGG    | 100     | 678  |
       | 1234    | 1            | 01.07.2020 | 31.12.2021 | 696   | SMÅBARNSTILLEGG    | 100     | 696  |
-      | 3456    | 2            | 01.09.2019 | 28.02.2020 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
-      | 3456    | 2            | 01.03.2020 | 30.06.2020 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
-      | 3456    | 2            | 01.07.2020 | 31.12.2021 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+
+      | 3456    | 1            | 01.09.2019 | 28.02.2020 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 3456    | 1            | 01.03.2020 | 30.06.2020 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
+      | 3456    | 1            | 01.07.2020 | 31.12.2021 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+
       | 1234    | 2            | 01.09.2019 | 28.02.2020 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
       | 1234    | 2            | 01.03.2020 | 30.06.2020 | 2489  | UTVIDET_BARNETRYGD | 100     | 2489 |
       | 1234    | 2            | 01.07.2020 | 31.12.2021 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
 
+      | 3456    | 2            | 01.09.2019 | 28.02.2020 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 3456    | 2            | 01.03.2020 | 30.06.2020 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
+      | 3456    | 2            | 01.07.2020 | 31.12.2021 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+
+    Og med overgangsstønad for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   |
+      | 3456    | 1            | 01.04.2020 | 30.06.2020 |
+      | 3456    | 1            | 01.07.2020 | 30.09.2020 |
+      | 3456    | 1            | 01.10.2020 | 31.12.2020 |
+      | 3456    | 1            | 01.01.2021 | 31.03.2021 |
+      | 3456    | 1            | 01.04.2021 | 30.06.2021 |
+      | 3456    | 1            | 01.07.2021 | 30.09.2021 |
+      | 3456    | 1            | 01.10.2021 | 31.12.2021 |
+
     Når begrunnelsetekster genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                         | Ekskluderte Begrunnelser |
-      | 01.03.2020 | 30.06.2020 | UTBETALING         |           |                                                 |                          |
-      | 01.07.2020 | 31.12.2021 | UTBETALING         |           |                                                 |                          |
-      | 01.01.2022 |            | OPPHØR             |           | SMÅBARNSTILLEGG_HADDE_IKKE_FULL_OVERGANGSSTØNAD |                          |
+      | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Inkluderte Begrunnelser                         | Ekskluderte Begrunnelser |
+      | 01.03.2020 | 31.03.2020 | UTBETALING                                              |           |                                                 |                          |
+      | 01.04.2020 | 31.12.2021 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | SMÅBARNSTILLEGG_HADDE_IKKE_FULL_OVERGANGSSTØNAD |                          |
+      | 01.01.2022 |            | OPPHØR                                                  |           |                                                 |                          |
