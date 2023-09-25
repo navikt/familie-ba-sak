@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
+import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdiNullable
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -58,7 +59,7 @@ data class RestSanityEØSBegrunnelse(
             hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
             vilkår = eosVilkaar?.mapNotNull { konverterTilEnumverdi<Vilkår>(it) }?.toSet() ?: emptySet(),
             periodeResultat = vedtakResultat.finnEnumverdi<SanityPeriodeResultat>(apiNavn),
-            fagsakType = fagsakType.finnEnumverdi<FagsakType>(apiNavn),
+            fagsakType = fagsakType.finnEnumverdiNullable<FagsakType>(),
             tema = tema.finnEnumverdi<Tema>(apiNavn),
             periodeType = periodeType.finnEnumverdi<BrevPeriodeType>(apiNavn),
         )

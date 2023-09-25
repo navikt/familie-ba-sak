@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.Logger
@@ -40,7 +41,7 @@ data class RestSanityBegrunnelse(
     val periodeType: String?,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
-        if (apiNavn == null) return null
+        if (apiNavn == null || apiNavn !in Standardbegrunnelse.entries.map { it.sanityApiNavn }) return null
         return SanityBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
@@ -74,7 +75,7 @@ data class RestSanityBegrunnelse(
             hjemler = hjemler ?: emptyList(),
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
             endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedUtbetalingTrigger
-                .finnEnumverdi<EndretUtbetalingsperiodeDeltBostedTriggere>(apiNavn),
+                .finnEnumverdiNullable<EndretUtbetalingsperiodeDeltBostedTriggere>(),
             endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere?.mapNotNull {
                 it.finnEnumverdi<EndretUtbetalingsperiodeTrigger>(apiNavn)
             } ?: emptyList(),
@@ -83,7 +84,7 @@ data class RestSanityBegrunnelse(
             } ?: emptyList(),
             valgbarhet = valgbarhet.finnEnumverdi<Valgbarhet>(apiNavn),
             periodeResultat = vedtakResultat.finnEnumverdi<SanityPeriodeResultat>(apiNavn),
-            fagsakType = fagsakType.finnEnumverdi<FagsakType>(apiNavn),
+            fagsakType = fagsakType.finnEnumverdiNullable<FagsakType>(),
             tema = tema.finnEnumverdi<Tema>(apiNavn),
             periodeType = periodeType.finnEnumverdi<BrevPeriodeType>(apiNavn),
         )
@@ -99,6 +100,10 @@ inline fun <reified T : Enum<T>> String?.finnEnumverdi(apiNavn: String): T? {
         )
     }
     return enumverdi
+}
+
+inline fun <reified T : Enum<T>> String?.finnEnumverdiNullable(): T? {
+    return enumValues<T>().find { this != null && it.name == this }
 }
 
 enum class SanityVilkår {
