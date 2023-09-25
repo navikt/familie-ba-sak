@@ -15,6 +15,8 @@ data class ForsattInnvilget(
         informasjonOmAarligKontroll: Boolean = false,
         refusjonEosAvklart: RefusjonEøsAvklart? = null,
         refusjonEosUavklart: RefusjonEøsUavklart? = null,
+        duMåMeldeFraOmEndringer: Boolean = true,
+        duMåMeldeFraOmEndringerEøsSelvstendigRett: Boolean = false,
     ) :
         this(
             mal = mal,
@@ -32,6 +34,8 @@ data class ForsattInnvilget(
                     informasjonOmAarligKontroll = informasjonOmAarligKontroll,
                     refusjonEosAvklart = refusjonEosAvklart,
                     refusjonEosUavklart = refusjonEosUavklart,
+                    duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
+                    duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     gjelder = flettefelt(vedtakFellesfelter.gjelder),
@@ -59,5 +63,7 @@ data class ForsattInnvilgetData(
         val informasjonOmAarligKontroll: Boolean,
         val refusjonEosAvklart: RefusjonEøsAvklart?,
         val refusjonEosUavklart: RefusjonEøsUavklart?,
+        val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
+        val duMaaMeldeFraOmEndringer: Boolean,
     )
 }

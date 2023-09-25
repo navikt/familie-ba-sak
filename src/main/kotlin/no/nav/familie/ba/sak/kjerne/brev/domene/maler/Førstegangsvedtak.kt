@@ -15,6 +15,8 @@ data class Førstegangsvedtak(
         informasjonOmAarligKontroll: Boolean = false,
         refusjonEosAvklart: RefusjonEøsAvklart? = null,
         refusjonEosUavklart: RefusjonEøsUavklart? = null,
+        duMåMeldeFraOmEndringer: Boolean = true,
+        duMåMeldeFraOmEndringerEøsSelvstendigRett: Boolean = false,
     ) :
         this(
             mal = mal,
@@ -32,6 +34,8 @@ data class Førstegangsvedtak(
                     informasjonOmAarligKontroll = informasjonOmAarligKontroll,
                     refusjonEosAvklart = refusjonEosAvklart,
                     refusjonEosUavklart = refusjonEosUavklart,
+                    duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
+                    duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
                 ),
                 perioder = vedtakFellesfelter.perioder,
                 flettefelter = FlettefelterForDokumentImpl(
@@ -59,5 +63,7 @@ data class FørstegangsvedtakData(
         val informasjonOmAarligKontroll: Boolean,
         val refusjonEosAvklart: RefusjonEøsAvklart?,
         val refusjonEosUavklart: RefusjonEøsUavklart?,
+        val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
+        val duMaaMeldeFraOmEndringer: Boolean,
     )
 }
