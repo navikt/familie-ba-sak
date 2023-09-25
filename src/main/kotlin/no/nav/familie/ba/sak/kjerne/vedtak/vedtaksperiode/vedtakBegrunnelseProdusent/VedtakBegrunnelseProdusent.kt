@@ -760,7 +760,6 @@ fun ISanityBegrunnelse.erGjeldendeForBrevPeriodeType(
         vedtaksperiode.fom,
         totalUtbetaligIPeriode,
     )
-    return this.periodeType == null ||
-        this.periodeType == brevPeriodeType ||
+    return this.periodeType == brevPeriodeType ||
         (this.periodeType == BrevPeriodeType.FORTSATT_INNVILGET && brevPeriodeType == BrevPeriodeType.FORTSATT_INNVILGET_NY)
 }
