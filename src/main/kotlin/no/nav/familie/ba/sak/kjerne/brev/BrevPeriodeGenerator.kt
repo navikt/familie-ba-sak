@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.hentKompetanserForEØSBegru
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -229,7 +230,11 @@ class BrevPeriodeGenerator(
 
         val utbetalingsbeløp = minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()
         val brevPeriodeType = if (skalBrukeNyBegrunnelseLogikk) {
-            hentBrevPeriodeType(minimertVedtaksperiode.type, minimertVedtaksperiode.fom, utbetalingsbeløp)
+            hentBrevPeriodeType(
+                vedtaksperiodetype = minimertVedtaksperiode.type,
+                fom = minimertVedtaksperiode.fom,
+                erUtbetalingEllerDeltBostedIPeriode = minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer.any { it.endringsårsak == Årsak.DELT_BOSTED || it.utbetaltPerMnd > 0 },
+            )
         } else {
             hentPeriodeTypeGammel(utbetalingsbeløp, minimertVedtaksperiode.fom, barnMedUtbetaling)
         }

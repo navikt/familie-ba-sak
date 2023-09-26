@@ -15,7 +15,7 @@ fun hentFortsattInnvilgetBegrunnelserPerPerson(
 ): Map<Person, Set<IVedtakBegrunnelse>> {
     val fagsakType = grunnlag.behandlingsGrunnlagForVedtaksperioder.fagsakType
 
-    val totalUtbetalingIPeriode = hentTotalUtbetaling(begrunnelseGrunnlagPerPerson)
+    val totalUtbetalingIPeriode = erUtbetalingPåMinstEnPerson(begrunnelseGrunnlagPerPerson)
 
     val relevanteStandardbegrunnelser = grunnlag.sanityBegrunnelser
         .filterValues { it.erGjeldendeForFagsakType(fagsakType) }

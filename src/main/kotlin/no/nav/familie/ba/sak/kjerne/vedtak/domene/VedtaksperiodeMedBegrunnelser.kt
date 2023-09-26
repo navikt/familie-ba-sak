@@ -227,13 +227,13 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidsl
 fun hentBrevPeriodeType(
     vedtaksperiodetype: Vedtaksperiodetype,
     fom: LocalDate?,
-    utbetalingIPeriode: Int,
+    erUtbetalingEllerDeltBostedIPeriode: Boolean,
 ): BrevPeriodeType =
     when (vedtaksperiodetype) {
         Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET_NY
         Vedtaksperiodetype.UTBETALING -> when {
-            utbetalingIPeriode == 0 -> BrevPeriodeType.INGEN_UTBETALING
-            else -> BrevPeriodeType.UTBETALING
+            erUtbetalingEllerDeltBostedIPeriode -> BrevPeriodeType.UTBETALING
+            else -> BrevPeriodeType.INGEN_UTBETALING
         }
 
         Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.INGEN_UTBETALING else BrevPeriodeType.INGEN_UTBETALING_UTEN_PERIODE
