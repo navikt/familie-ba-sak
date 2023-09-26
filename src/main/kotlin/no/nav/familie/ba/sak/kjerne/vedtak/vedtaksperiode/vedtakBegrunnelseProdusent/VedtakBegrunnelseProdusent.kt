@@ -81,7 +81,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
         )
     }
 
-    val erUtbetalingEllerDeltBostedIPeriode = erUtbetalingPåMinstEnPerson(begrunnelseGrunnlagPerPerson)
+    val erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson)
 
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
         val relevantePeriodeResultater =
@@ -119,7 +119,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
     }
 }
 
-fun erUtbetalingPåMinstEnPerson(begrunnelseGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
+fun erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
     begrunnelseGrunnlagPerPerson.values.any { grunnlagForPeriode ->
         val dennePerioden = grunnlagForPeriode.dennePerioden
         dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED ||

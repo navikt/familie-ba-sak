@@ -15,16 +15,16 @@ fun hentFortsattInnvilgetBegrunnelserPerPerson(
 ): Map<Person, Set<IVedtakBegrunnelse>> {
     val fagsakType = grunnlag.behandlingsGrunnlagForVedtaksperioder.fagsakType
 
-    val totalUtbetalingIPeriode = erUtbetalingPåMinstEnPerson(begrunnelseGrunnlagPerPerson)
+    val erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson)
 
     val relevanteStandardbegrunnelser = grunnlag.sanityBegrunnelser
         .filterValues { it.erGjeldendeForFagsakType(fagsakType) }
-        .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, totalUtbetalingIPeriode) }
+        .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
         .filterValues { it.periodeResultat == SanityPeriodeResultat.INGEN_ENDRING }
 
     val relevanteEøsBegrunnelser = grunnlag.sanityEØSBegrunnelser
         .filterValues { it.erGjeldendeForFagsakType(fagsakType) }
-        .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, totalUtbetalingIPeriode) }
+        .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
         .filterValues { it.periodeResultat == SanityPeriodeResultat.INGEN_ENDRING }
 
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
