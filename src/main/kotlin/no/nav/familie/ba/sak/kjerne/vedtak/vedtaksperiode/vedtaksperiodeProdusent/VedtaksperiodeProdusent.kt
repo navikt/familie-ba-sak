@@ -26,7 +26,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDateEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.zipMedNeste
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -51,12 +53,12 @@ fun genererVedtaksperioder(
         )
     }
 
-    val grunnlagTidslinjePerPerson = grunnlagForVedtakPerioder.utledGrunnlagTidslinjePerPerson()
-
     val grunnlagTidslinjePerPersonForrigeBehandling =
         grunnlagForVedtakPerioderForrigeBehandling
             ?.let { grunnlagForVedtakPerioderForrigeBehandling.utledGrunnlagTidslinjePerPerson() }
             ?: emptyMap()
+
+    val grunnlagTidslinjePerPerson = grunnlagForVedtakPerioder.utledGrunnlagTidslinjePerPerson()
 
     val perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling =
         finnPerioderSomSkalBegrunnes(
@@ -197,9 +199,9 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.sl�
             val gjeldendeErIkkeInnvilgetIkkeAvslag =
                 it.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget && !it.gjeldende.erEksplisittAvslag
             val gjeldendeErInnvilget = it.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårInnvilget
-            val gjeldendeErNullForrigeErInnvilget = it.gjeldendeErNullForrigeErInnvilget
+            val erReduksjonSidenForrigeBehandling = it.erReduksjonSidenForrigeBehandling
 
-            gjeldendeErIkkeInnvilgetIkkeAvslag || gjeldendeErInnvilget || gjeldendeErNullForrigeErInnvilget
+            gjeldendeErIkkeInnvilgetIkkeAvslag || gjeldendeErInnvilget || erReduksjonSidenForrigeBehandling
         }
     }
 
@@ -277,17 +279,56 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
     grunnlagTidslinjePerPerson.map { (aktørId, grunnlagstidslinje) ->
         val grunnlagForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling[aktørId]
 
-        grunnlagstidslinje.kombinerMed(grunnlagForrigeBehandling ?: TomTidslinje()) { gjeldende, forrige ->
-            val gjeldendeErIkkeOppfylt = gjeldende !is VedtaksperiodeGrunnlagForPersonVilkårInnvilget
-            val forrigeErOppfylt = forrige is VedtaksperiodeGrunnlagForPersonVilkårInnvilget
+        val innvilgetForrigeBehandlingTidslinje =
+            grunnlagForrigeBehandling?.map { it?.erInnvilget() ?: false } ?: TomTidslinje()
 
-            if (gjeldendeErIkkeOppfylt && forrigeErOppfylt) {
-                GrunnlagForGjeldendeOgForrigeBehandling(gjeldende, true)
-            } else {
-                gjeldende?.let { GrunnlagForGjeldendeOgForrigeBehandling(gjeldende, false) }
+        val grunnlagTidslinjeMedErForrigeBehandlingInnvilget =
+            grunnlagstidslinje.kombinerMed(innvilgetForrigeBehandlingTidslinje) { gjeldende, erForrigeInnvilget ->
+                Pair(gjeldende, erForrigeInnvilget)
             }
-        }.slåSammenLike()
+
+        grunnlagTidslinjeMedErForrigeBehandlingInnvilget.zipMedNeste(ZipPadding.FØR)
+            .map {
+                val forrigePeriode = it?.first?.first
+                val erForrigePeriodeInnvilgetIForrigeBehandling = it?.first?.second ?: false
+                val gjeldende = it?.second?.first
+                val erGjeldendePeriodeInnvilgetIForrigeBehandling = it?.second?.second ?: false
+
+                GrunnlagForGjeldendeOgForrigeBehandling(
+                    gjeldende = gjeldende,
+                    erReduksjonSidenForrigeBehandling =
+                    erReduksjonSidenForrigeBehandling(
+                        gjeldende?.erInnvilget() ?: false,
+                        forrigePeriode?.erInnvilget() ?: false,
+                        erGjeldendePeriodeInnvilgetIForrigeBehandling,
+                        erForrigePeriodeInnvilgetIForrigeBehandling,
+                    ),
+                )
+            }.slåSammenLike().slåSammenSammenhengendeOpphørsPerioder()
     }
+
+private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.slåSammenSammenhengendeOpphørsPerioder(): Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned> {
+    val perioder = this.perioder().sortedBy { it.fraOgMed }.toList()
+
+    return perioder.fold(emptyList()) { acc: List<Periode<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>, periode ->
+        val sistePeriode = acc.lastOrNull()
+
+        val erInnvilgetForrigePeriode = sistePeriode?.innhold?.gjeldende?.erInnvilget() ?: false
+        val erInnvilget = periode.innhold?.gjeldende?.erInnvilget() ?: false
+
+        if (sistePeriode != null &&
+            !erInnvilgetForrigePeriode &&
+            !erInnvilget &&
+            periode.innhold?.erReduksjonSidenForrigeBehandling != true &&
+            periode.innhold?.gjeldende?.erEksplisittAvslag() != true &&
+            sistePeriode.innhold?.gjeldende?.erEksplisittAvslag() != true
+        ) {
+            acc.dropLast(1) + sistePeriode.copy(tilOgMed = periode.tilOgMed)
+        } else {
+            acc + periode
+        }
+    }.tilTidslinje()
+}
 
 fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksperiodeMedBegrunnelser(
     vedtak: Vedtak,
@@ -321,7 +362,7 @@ private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVe
     val erAvslagsperiode = this.innhold != null && this.innhold.all { it.gjeldende?.erEksplisittAvslag() == true }
 
     return when {
-        erUtbetalingsperiode -> if (this.innhold?.any { it.gjeldendeErNullForrigeErInnvilget } == true) {
+        erUtbetalingsperiode -> if (this.innhold?.any { it.erReduksjonSidenForrigeBehandling } == true) {
             Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
         } else {
             Vedtaksperiodetype.UTBETALING

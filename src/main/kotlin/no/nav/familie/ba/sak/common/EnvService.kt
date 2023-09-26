@@ -12,5 +12,5 @@ class EnvService(private val environment: Environment) {
 
     fun erPreprod() = environment.erAktiv(Profil.Preprod)
 
-    fun erDev() = environment.erAktiv(Profil.Dev) || environment.erAktiv(Profil.Postgres)
+    fun erDev() = environment.erAktiv(Profil.Dev) || environment.erAktiv(Profil.Postgres) || environment.erAktiv(Profil.DevPostgresPreprod)
 }

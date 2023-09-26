@@ -20,8 +20,12 @@ class PensjonConfig(
     @Bean
     fun pensjonFilter() = object : OncePerRequestFilter() {
         override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
-            val clientNavn = oidcUtil.getClaim("azp_name")
-            val erKallerPensjon = clientNavn.contains("omsorgsopptjening")
+            val clientNavn: String? = try {
+                oidcUtil.getClaim("azp_name")
+            } catch (throwable: Throwable) {
+                null
+            }
+            val erKallerPensjon = clientNavn?.contains("omsorgsopptjening") ?: false
             val harForvalterRolle = SikkerhetContext.harInnloggetBrukerForvalterRolle(rolleConfig)
             val erPensjonRequest = request.requestURI.startsWith("/api/ekstern/pensjon")
 
