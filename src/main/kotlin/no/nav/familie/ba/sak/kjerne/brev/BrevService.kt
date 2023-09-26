@@ -87,6 +87,10 @@ class BrevService(
         val vedtakFellesfelter = lagVedtaksbrevFellesfelter(vedtak)
         validerBrevdata(brevmal, vedtakFellesfelter)
 
+        val skalMeldeFraOmEndringerEøsSelvstendigRett by lazy {
+            vedtaksperiodeService.skalMeldeFraOmEndringerEøsSelvstendigRett(vedtak)
+        }
+
         return when (brevmal) {
             Brevmal.VEDTAK_FØRSTEGANGSVEDTAK -> Førstegangsvedtak(
                 vedtakFellesfelter = vedtakFellesfelter,
@@ -94,6 +98,8 @@ class BrevService(
                 informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
                 refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
                 refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
+                duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
+                duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
             )
 
             Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON -> Førstegangsvedtak(
@@ -113,6 +119,8 @@ class BrevService(
                 },
                 refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
                 refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
+                duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
+                duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
             )
 
             Brevmal.VEDTAK_ENDRING_INSTITUSJON -> VedtakEndring(
@@ -162,6 +170,8 @@ class BrevService(
                 informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
                 refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
                 refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
+                duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
+                duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
             )
 
             Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> ForsattInnvilget(
