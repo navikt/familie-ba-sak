@@ -196,7 +196,7 @@ private fun hentEndretUtbetalingRader(endredeUtbetalinger: List<EndretUtbetaling
       | ${it.person.aktør.aktørId} |${it.behandlingId}|${
                 it.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
             }|${
-                it.tom.førsteDagIInneværendeMåned().tilddMMyyyy()
+                it.tom.sisteDagIInneværendeMåned().tilddMMyyyy()
             }|${it.årsak} | ${it.prosent} |"""
         } ?: ""
 
