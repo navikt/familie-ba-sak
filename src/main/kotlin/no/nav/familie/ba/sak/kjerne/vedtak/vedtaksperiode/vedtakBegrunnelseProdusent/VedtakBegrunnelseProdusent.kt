@@ -266,7 +266,14 @@ private fun SanityBegrunnelse.erGjeldendeForReduksjonFraForrigeBehandling(begrun
 
     val begrunnelseGjelderMistedeVilkår = this.vilkår.all { it in vilkårMistetSidenForrigeBehandling }
 
-    return begrunnelseGjelderReduksjonFraForrigeBehandling() && begrunnelseGjelderMistedeVilkår
+    val haddeSmåbarnstilleggForrigeBehandling = begrunnelseGrunnlag.erSmåbarnstilleggIForrigeBehandlingPeriode
+    val harSmåbarnstilleggDennePerioden =
+        begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.SMÅBARNSTILLEGG }
+
+    val begrunnelseGjelderTaptSmåbarnstillegg =
+        UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG in utvidetBarnetrygdTriggere && haddeSmåbarnstilleggForrigeBehandling && !harSmåbarnstilleggDennePerioden
+
+    return begrunnelseGjelderReduksjonFraForrigeBehandling() && (begrunnelseGjelderMistedeVilkår || begrunnelseGjelderTaptSmåbarnstillegg)
 }
 
 private fun SanityBegrunnelse.begrunnelseGjelderReduksjonFraForrigeBehandling() =
