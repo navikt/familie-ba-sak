@@ -60,7 +60,7 @@ Egenskap: Begrunnelser for hendelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
       | 01.05.2017 | 31.03.2023 | UTBETALING         |                         |                          |
       | 01.04.2023 | 31.03.2024 | UTBETALING         | REDUKSJON_UNDER_6_ÅR    |                          |
-      | 01.04.2024 |            | OPPHØR             | REDUKSJON_BARN_DØD      |                          |
+      | 01.04.2024 |            | OPPHØR             | OPPHØR_BARN_DØD         |                          |
 
   Scenario: Skal ta med satsendringbegrunnelse ved satsendring
     Og følgende persongrunnlag for begrunnelse
