@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.OMREGNING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SMÅBARNSTILLEGG
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -279,30 +280,45 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
     grunnlagTidslinjePerPerson.map { (aktørId, grunnlagstidslinje) ->
         val grunnlagForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling[aktørId]
 
-        val innvilgetForrigeBehandlingTidslinje =
-            grunnlagForrigeBehandling?.map { it?.erInnvilget() ?: false } ?: TomTidslinje()
+        val ytelsestyperInnvilgetForrigeBehandlingTidslinje =
+            grunnlagForrigeBehandling?.map { it?.hentInnvilgedeYtelsestyper() } ?: TomTidslinje()
 
-        val grunnlagTidslinjeMedErForrigeBehandlingInnvilget =
-            grunnlagstidslinje.kombinerMed(innvilgetForrigeBehandlingTidslinje) { gjeldende, erForrigeInnvilget ->
-                Pair(gjeldende, erForrigeInnvilget)
+        val grunnlagTidslinjeMedInnvilgedeYtelsestyperForrigeBehandling =
+            grunnlagstidslinje.kombinerMed(ytelsestyperInnvilgetForrigeBehandlingTidslinje) { gjeldendePeriode, innvilgedeYtelsestyperForrigeBehandling ->
+                Pair(gjeldendePeriode, innvilgedeYtelsestyperForrigeBehandling)
             }
 
-        grunnlagTidslinjeMedErForrigeBehandlingInnvilget.zipMedNeste(ZipPadding.FØR)
+        grunnlagTidslinjeMedInnvilgedeYtelsestyperForrigeBehandling.zipMedNeste(ZipPadding.FØR)
             .map {
                 val forrigePeriode = it?.first?.first
-                val erForrigePeriodeInnvilgetIForrigeBehandling = it?.first?.second ?: false
+                val innvilgedeYtelsestyperForrigePeriode = forrigePeriode?.hentInnvilgedeYtelsestyper()
+                val innvilgedeYtelsestyperForrigePeriodeForrigeBehandling = it?.first?.second ?: emptyList()
                 val gjeldende = it?.second?.first
-                val erGjeldendePeriodeInnvilgetIForrigeBehandling = it?.second?.second ?: false
+                val innvilgedeYtelsestyperDennePerioden = gjeldende?.hentInnvilgedeYtelsestyper()
+                val innvilgedeYtelsestyperDennePeriodenForrigeBehandling = it?.second?.second ?: emptyList()
+
+                val erReduksjonFraForrigeBehandlingPåYtelsestyper = YtelseType.values().map { ytelseType ->
+                    val ytelseInnvilgetDennePerioden =
+                        innvilgedeYtelsestyperDennePerioden?.contains(ytelseType) ?: false
+                    val ytelseInnvilgetForrigePeriode =
+                        innvilgedeYtelsestyperForrigePeriode?.contains(ytelseType) ?: false
+                    val ytelseInnvilgetDennePeriodenForrigeBehandling =
+                        innvilgedeYtelsestyperDennePeriodenForrigeBehandling.contains(ytelseType)
+                    val ytelseInnvilgetForrigePeriodeForrigeBehandling =
+                        innvilgedeYtelsestyperForrigePeriodeForrigeBehandling.contains(ytelseType)
+
+                    erReduksjonSidenForrigeBehandling(
+                        ytelseInnvilgetDennePerioden,
+                        ytelseInnvilgetForrigePeriode,
+                        ytelseInnvilgetDennePeriodenForrigeBehandling,
+                        ytelseInnvilgetForrigePeriodeForrigeBehandling,
+                    )
+                }
 
                 GrunnlagForGjeldendeOgForrigeBehandling(
                     gjeldende = gjeldende,
-                    erReduksjonSidenForrigeBehandling =
-                    erReduksjonSidenForrigeBehandling(
-                        gjeldende?.erInnvilget() ?: false,
-                        forrigePeriode?.erInnvilget() ?: false,
-                        erGjeldendePeriodeInnvilgetIForrigeBehandling,
-                        erForrigePeriodeInnvilgetIForrigeBehandling,
-                    ),
+                    erReduksjonSidenForrigeBehandling = erReduksjonFraForrigeBehandlingPåYtelsestyper.any { it },
+
                 )
             }.slåSammenLike().slåSammenSammenhengendeOpphørsPerioder()
     }
