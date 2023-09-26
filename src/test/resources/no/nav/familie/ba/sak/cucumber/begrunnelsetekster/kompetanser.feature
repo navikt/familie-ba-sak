@@ -180,8 +180,8 @@ Egenskap: Begrunnelser for kompetanser
     Når begrunnelsetekster genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                | Ekskluderte Begrunnelser                              |
-      | 01.05.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN                  | FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD | REDUKSJON_BARN_DØD_EØS,REDUKSJON_IKKE_ANSVAR_FOR_BARN |
-      | 01.07.2023 | 31.01.2033 | UTBETALING         |                                   |                                        |                                                       |
-      | 01.02.2033 |            | OPPHØR             |                                   |                                        |                                                       |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                 | Ekskluderte Begrunnelser                                                                       |
+      | 01.05.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN                  | INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE | REDUKSJON_BARN_DØD_EØS, REDUKSJON_IKKE_ANSVAR_FOR_BARN, FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD |
+      | 01.07.2023 | 31.01.2033 | UTBETALING         |                                   |                                         |                                                                                                |
+      | 01.02.2033 |            | OPPHØR             |                                   |                                         |                                                                                                |
 
