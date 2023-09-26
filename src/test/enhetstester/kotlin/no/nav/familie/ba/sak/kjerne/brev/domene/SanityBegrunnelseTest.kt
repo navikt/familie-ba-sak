@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.lagRestSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -8,6 +9,7 @@ class SanityBegrunnelseTest {
     @Test
     fun `skal fjerne ugyldige enumverdier`() {
         val restSanityBegrunnelse = lagRestSanityBegrunnelse(
+            apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
             ovrigeTriggere = listOf(
                 ØvrigTrigger.BARN_MED_6_ÅRS_DAG.name,
                 "IKKE_GYLDIG_ØVRIG_TRIGGER",
