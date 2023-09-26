@@ -135,6 +135,7 @@ data class UtbetalingPåPerson(
     val utbetaltPerMnd: Int,
     val erPåvirketAvEndring: Boolean = false,
     val prosent: BigDecimal = BigDecimal(100),
+    val endringsårsak: Årsak? = null,
 ) {
     fun tilMinimertUtbetalingsperiodeDetalj(minimertRestPerson: MinimertRestPerson) =
         MinimertUtbetalingsperiodeDetalj(
@@ -143,6 +144,7 @@ data class UtbetalingPåPerson(
             prosent = this.prosent,
             erPåvirketAvEndring = this.erPåvirketAvEndring,
             ytelseType = this.ytelseType,
+            endringsårsak = endringsårsak,
         )
 }
 

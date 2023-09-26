@@ -983,7 +983,14 @@ fun lagUtbetalingsperiodeDetalj(
     ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
     prosent: BigDecimal = BigDecimal.valueOf(100),
-) = UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, false, prosent)
+) = UtbetalingsperiodeDetalj(
+    person = person,
+    ytelseType = ytelseType,
+    utbetaltPerMnd = utbetaltPerMnd,
+    erPåvirketAvEndring = false,
+    endringsårsak = null,
+    prosent = prosent,
+)
 
 fun lagVedtaksperiodeMedBegrunnelser(
     vedtak: Vedtak = lagVedtak(),
