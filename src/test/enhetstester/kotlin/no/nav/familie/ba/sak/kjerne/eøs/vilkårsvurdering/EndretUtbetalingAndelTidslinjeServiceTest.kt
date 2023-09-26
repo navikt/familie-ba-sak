@@ -32,7 +32,7 @@ internal class EndretUtbetalingAndelTidslinjeServiceTest {
             person.aktør to "TTTTT".somBoolskTidslinje(mar(2020)),
         )
 
-        val faktisk = endringer.tilBarnasHarEtterbetaling3ÅrTidslinjer()
+        val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
 
         assertEquals(forventet, faktisk)
     }
@@ -68,7 +68,7 @@ internal class EndretUtbetalingAndelTidslinjeServiceTest {
             person2.aktør to "TTTTTTTTTTTTTTTTT".somBoolskTidslinje(nov(2019)).filtrerIkkeNull(),
         )
 
-        val faktisk = endringer.tilBarnasHarEtterbetaling3ÅrTidslinjer()
+        val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
 
         assertEquals(forventet, faktisk)
     }
@@ -85,7 +85,7 @@ internal class EndretUtbetalingAndelTidslinjeServiceTest {
             ),
         )
 
-        val faktisk = endringer.tilBarnasHarEtterbetaling3ÅrTidslinjer()
+        val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
 
         assertEquals(emptyMap<Aktør, Tidslinje<Boolean, Måned>>(), faktisk)
     }
