@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.finnBegrunnelseGrunnlagPerPerson
-import tilBrevBegrunnelse
+import lagBrevBegrunnelse
 
 fun VedtaksperiodeMedBegrunnelser.lagBrevPeriode(
     grunnlagForBegrunnelse: GrunnlagForBegrunnelse,
@@ -31,7 +31,7 @@ fun VedtaksperiodeMedBegrunnelser.lagBrevPeriode(
 
     val eøsBegrunnelser =
         this.eøsBegrunnelser.flatMap {
-            it.begrunnelse.tilBrevBegrunnelse(
+            it.begrunnelse.lagBrevBegrunnelse(
                 this,
                 grunnlagForBegrunnelse,
                 begrunnelsesGrunnlagPerPerson,

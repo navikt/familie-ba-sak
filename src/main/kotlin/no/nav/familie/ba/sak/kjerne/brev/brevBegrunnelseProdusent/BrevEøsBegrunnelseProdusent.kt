@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserPerPerson
 import java.time.LocalDate
 
-fun EØSStandardbegrunnelse.tilBrevBegrunnelse(
+fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     vedtaksperiode: VedtaksperiodeMedBegrunnelser,
     grunnlag: GrunnlagForBegrunnelse,
     begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
