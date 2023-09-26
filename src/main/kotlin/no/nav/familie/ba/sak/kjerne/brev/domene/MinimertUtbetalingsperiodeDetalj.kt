@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
@@ -12,6 +13,7 @@ data class MinimertUtbetalingsperiodeDetalj(
     val ytelseType: YtelseType,
     val utbetaltPerMnd: Int,
     val erPåvirketAvEndring: Boolean,
+    val endringsårsak: Årsak?,
     val prosent: BigDecimal,
 )
 
@@ -21,6 +23,7 @@ fun UtbetalingsperiodeDetalj.tilMinimertUtbetalingsperiodeDetalj() = MinimertUtb
     utbetaltPerMnd = this.utbetaltPerMnd,
     erPåvirketAvEndring = this.erPåvirketAvEndring,
     prosent = this.prosent,
+    endringsårsak = this.endringsårsak,
 )
 
 fun List<MinimertUtbetalingsperiodeDetalj>.antallBarn(): Int =
