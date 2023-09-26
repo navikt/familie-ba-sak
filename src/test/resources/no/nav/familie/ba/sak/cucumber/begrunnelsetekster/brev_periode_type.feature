@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Gyldige begrunnelser for forskjellige brevbegrunnelsetyper
+Egenskap: Gyldige begrunnelser for forskjellige brevperiodetyper
 
   Bakgrunn:
     Gitt følgende fagsaker for begrunnelse
