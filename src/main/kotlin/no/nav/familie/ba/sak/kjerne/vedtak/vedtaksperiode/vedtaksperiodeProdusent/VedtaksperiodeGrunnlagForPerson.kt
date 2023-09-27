@@ -35,7 +35,7 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
             this.andeler.filter { it.prosent > BigDecimal.ZERO }
                 .map { it.type }.toSet()
         } else {
-            null
+            emptySet()
         }
 
     fun kopier(
