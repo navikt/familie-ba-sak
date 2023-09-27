@@ -35,7 +35,8 @@ Egenskap: Endringstidspunkt påvirker periodene
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato | Vedtaksperiodetype | Kommentar            |
-      | 01.01.2017 |          | Opphør             | Endret utbetaling 0% |
+      | 01.01.2017 | 30.11.2034 | Opphør             | Endret utbetaling 0% |
+      | 01.12.2034 |            | Opphør             | Opphør 18 år         |
 
   Scenario:  Skal lage utbetalingsperiode når andelene er endret til 0% og det er delt bosted
 
