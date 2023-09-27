@@ -296,16 +296,17 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
                 val forrigePeriode = it?.first
                 val gjeldende = it?.second
 
-                val erReduksjonFraForrigeBehandlingPåYtelsestyper = erReduksjonFraForrigeBehandlingPåYtelsestyper(
-                    innvilgedeYtelsestyperForrigePeriode = forrigePeriode?.grunnlagForPerson?.hentInnvilgedeYtelsestyper(),
-                    innvilgedeYtelsestyperForrigePeriodeForrigeBehandling = forrigePeriode?.innvilgedeYtelsestyperForrigeBehandling,
-                    innvilgedeYtelsestyperDennePerioden = gjeldende?.grunnlagForPerson?.hentInnvilgedeYtelsestyper(),
-                    innvilgedeYtelsestyperDennePeriodenForrigeBehandling = gjeldende?.innvilgedeYtelsestyperForrigeBehandling,
-                )
+                val erReduksjonFraForrigeBehandlingPåMinstEnYtelsestype =
+                    erReduksjonFraForrigeBehandlingPåMinstEnYtelsestype(
+                        innvilgedeYtelsestyperForrigePeriode = forrigePeriode?.grunnlagForPerson?.hentInnvilgedeYtelsestyper(),
+                        innvilgedeYtelsestyperForrigePeriodeForrigeBehandling = forrigePeriode?.innvilgedeYtelsestyperForrigeBehandling,
+                        innvilgedeYtelsestyperDennePerioden = gjeldende?.grunnlagForPerson?.hentInnvilgedeYtelsestyper(),
+                        innvilgedeYtelsestyperDennePeriodenForrigeBehandling = gjeldende?.innvilgedeYtelsestyperForrigeBehandling,
+                    )
 
                 GrunnlagForGjeldendeOgForrigeBehandling(
                     gjeldende = gjeldende?.grunnlagForPerson,
-                    erReduksjonSidenForrigeBehandling = erReduksjonFraForrigeBehandlingPåYtelsestyper.any { it },
+                    erReduksjonSidenForrigeBehandling = erReduksjonFraForrigeBehandlingPåMinstEnYtelsestype,
 
                 )
             }.slåSammenLike().slåSammenSammenhengendeOpphørsPerioder()
@@ -316,13 +317,13 @@ data class GjeldendeMedInnvilgedeYtelsestyperForrigeBehandling(
     val innvilgedeYtelsestyperForrigeBehandling: Set<YtelseType>?,
 )
 
-private fun erReduksjonFraForrigeBehandlingPåYtelsestyper(
+private fun erReduksjonFraForrigeBehandlingPåMinstEnYtelsestype(
     innvilgedeYtelsestyperForrigePeriode: Set<YtelseType>?,
     innvilgedeYtelsestyperForrigePeriodeForrigeBehandling: Set<YtelseType>?,
     innvilgedeYtelsestyperDennePerioden: Set<YtelseType>?,
     innvilgedeYtelsestyperDennePeriodenForrigeBehandling: Set<YtelseType>?,
-): List<Boolean> {
-    return YtelseType.values().map { ytelseType ->
+): Boolean {
+    return YtelseType.values().any { ytelseType ->
         val ytelseInnvilgetDennePerioden =
             innvilgedeYtelsestyperDennePerioden?.contains(ytelseType) ?: false
         val ytelseInnvilgetForrigePeriode =
