@@ -738,13 +738,13 @@ class UtbetalingsoppdragGeneratorServiceTest {
     ) {
         if (forrigeTilkjentYtelse == null) {
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns null
-            every { andelTilkjentYtelseRepository.hentSisteAndelPerIdent(behandling.fagsak.id) } returns emptyList()
+            every { andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(behandling.fagsak.id) } returns emptyList()
         } else {
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeTilkjentYtelse.behandling
 
             every { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(forrigeTilkjentYtelse.behandling.id) } returns forrigeTilkjentYtelse
 
-            every { andelTilkjentYtelseRepository.hentSisteAndelPerIdent(behandling.fagsak.id) } returns
+            every { andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(behandling.fagsak.id) } returns
                 forrigeTilkjentYtelse.andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
                     .groupBy { it.aktør.aktivFødselsnummer() }
                     .mapValues { it.value.maxBy { it.periodeOffset!! } }.values.toList()
