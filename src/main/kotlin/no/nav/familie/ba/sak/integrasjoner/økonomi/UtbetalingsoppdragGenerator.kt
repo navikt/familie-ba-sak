@@ -50,7 +50,7 @@ class UtbetalingsoppdragGenerator(
                 fagsystem = FagsystemBA.BARNETRYGD,
                 personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
                 vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
-                opphørFra = opphørFra(
+                opphørAlleKjederFra = finnOpphørsdatoForAlleKjeder(
                     forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                     sisteAndelPerKjede = sisteAndelPerKjede,
                     endretMigreringsDato = endretMigreringsDato,
@@ -80,7 +80,7 @@ class UtbetalingsoppdragGenerator(
             kildeBehandlingId = kildeBehandlingId,
         )
 
-    private fun opphørFra(
+    private fun finnOpphørsdatoForAlleKjeder(
         forrigeTilkjentYtelse: TilkjentYtelse?,
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         endretMigreringsDato: YearMonth?,
