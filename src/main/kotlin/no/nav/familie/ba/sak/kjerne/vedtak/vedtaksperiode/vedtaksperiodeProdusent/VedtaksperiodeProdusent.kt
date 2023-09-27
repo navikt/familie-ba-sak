@@ -309,7 +309,7 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
                     erReduksjonSidenForrigeBehandling = erReduksjonFraForrigeBehandlingPåMinstEnYtelsestype,
 
                 )
-            }.slåSammenLike().slåSammenSammenhengendeOpphørsPerioder()
+            }.slåSammenSammenhengendeOpphørsPerioder()
     }
 
 data class GjeldendeMedInnvilgedeYtelsestyperForrigeBehandling(
