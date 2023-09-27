@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.KombinertRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPPFYLT_BLANDET_REGELVERK
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.tilBarnasHarEtterbetaling3ÅrTidslinjer
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.tilBarnasSkalIkkeUtbetalesTidslinjer
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -58,8 +58,8 @@ class TilpassKompetanserTilRegelverkService(
         val barnasRegelverkResultatTidslinjer =
             vilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId)
 
-        val barnasHarEtterbetaling3ÅrTidslinjer =
-            endretUtbetalingAndelTidslinjeService.hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId)
+        val barnasSkalIkkeUtbetalesTidslinjer =
+            endretUtbetalingAndelTidslinjeService.hentBarnasSkalIkkeUtbetalesTidslinjer(behandlingId)
 
         val annenForelderOmfattetAvNorskLovgivningTidslinje =
             vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = behandlingId)
@@ -67,7 +67,7 @@ class TilpassKompetanserTilRegelverkService(
         val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
             gjeldendeKompetanser,
             barnasRegelverkResultatTidslinjer,
-            barnasHarEtterbetaling3ÅrTidslinjer,
+            barnasSkalIkkeUtbetalesTidslinjer,
             annenForelderOmfattetAvNorskLovgivningTidslinje,
             brukBarnetsRegelverkVedBlandetResultat = unleashNext.isEnabled(ENDRET_EØS_REGELVERKFILTER_FOR_BARN),
         ).medBehandlingId(behandlingId)
@@ -98,8 +98,8 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
         val barnasRegelverkResultatTidslinjer =
             vilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId)
 
-        val barnasHarEtterbetaling3ÅrTidslinjer = endretUtbetalingAndeler
-            .tilBarnasHarEtterbetaling3ÅrTidslinjer()
+        val barnasSkalIkkeUtbetalesTidslinjer = endretUtbetalingAndeler
+            .tilBarnasSkalIkkeUtbetalesTidslinjer()
 
         val annenForelderOmfattetAvNorskLovgivningTidslinje =
             vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = behandlingId)
@@ -107,7 +107,7 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
         val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
             gjeldendeKompetanser,
             barnasRegelverkResultatTidslinjer,
-            barnasHarEtterbetaling3ÅrTidslinjer,
+            barnasSkalIkkeUtbetalesTidslinjer,
             annenForelderOmfattetAvNorskLovgivningTidslinje,
             brukBarnetsRegelverkVedBlandetResultat = unleashNext.isEnabled(ENDRET_EØS_REGELVERKFILTER_FOR_BARN),
         ).medBehandlingId(behandlingId)
@@ -119,14 +119,14 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
 fun tilpassKompetanserTilRegelverk(
     gjeldendeKompetanser: Collection<Kompetanse>,
     barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<KombinertRegelverkResultat, Måned>>,
-    barnasHarEtterbetaling3ÅrTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
+    barnasSkalIkkeUtbetalesTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
     annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean, Måned> = TomTidslinje<Boolean, Måned>(),
     brukBarnetsRegelverkVedBlandetResultat: Boolean = true,
 ): Collection<Kompetanse> {
     val barnasEøsRegelverkTidslinjer = barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer(
         brukBarnetsRegelverkVedBlandetResultat,
     )
-        .leftJoin(barnasHarEtterbetaling3ÅrTidslinjer) { regelverk, harEtterbetaling3År ->
+        .leftJoin(barnasSkalIkkeUtbetalesTidslinjer) { regelverk, harEtterbetaling3År ->
             when (harEtterbetaling3År) {
                 true -> null // ta bort regelverk hvis barnet har etterbetaling 3 år
                 else -> regelverk

@@ -149,6 +149,10 @@ class KontrollerNyUtbetalingsgeneratorService(
                 loggSimuleringsPerioderMedDiff(simuleringsPerioderGammel, simuleringsPerioderNy)
             }
 
+            if (diffFeilTyper.isNotEmpty()) {
+                secureLogger.info("kontrollerNyUtbetalingsgenerator for ${behandling.id} ga følgende feiltyper=$diffFeilTyper")
+            }
+
             return diffFeilTyper
         } catch (e: Exception) {
             secureLogger.warn(
@@ -185,8 +189,9 @@ class KontrollerNyUtbetalingsgeneratorService(
         gammeltSimuleringResultat: DetaljertSimuleringResultat,
         behandling: Behandling,
     ): Boolean {
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
         if (!(nyttSimuleringResultat.simuleringMottaker.isNotEmpty() && gammeltSimuleringResultat.simuleringMottaker.isNotEmpty())) {
-            secureLogger.warn("Behandling ${behandling.id} får tomt simuleringsresultat med ny eller gammel generator. Ny er tom: ${nyttSimuleringResultat.simuleringMottaker.isEmpty()}, Gammel er tom: ${gammeltSimuleringResultat.simuleringMottaker.isEmpty()}")
+            secureLogger.warn("Behandling ${behandling.id} får tomt simuleringsresultat med ny eller gammel generator. Ny er tom: ${nyttSimuleringResultat.simuleringMottaker.isEmpty()}, Gammel er tom: ${gammeltSimuleringResultat.simuleringMottaker.isEmpty()}. antallAndeler=${tilkjentYtelse.andelerTilkjentYtelse.size}, resultat=${behandling.resultat}")
             return false
         }
         return true

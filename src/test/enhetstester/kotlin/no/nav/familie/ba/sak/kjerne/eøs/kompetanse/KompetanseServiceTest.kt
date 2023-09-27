@@ -269,7 +269,7 @@ internal class KompetanseServiceTest {
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
-        every { endretUtbetalingAndelTidslinjeService.hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId) } returns emptyMap()
+        every { endretUtbetalingAndelTidslinjeService.hentBarnasSkalIkkeUtbetalesTidslinjer(behandlingId) } returns emptyMap()
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 
@@ -316,7 +316,7 @@ internal class KompetanseServiceTest {
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
-        every { endretUtbetalingAndelTidslinjeService.hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId) } returns emptyMap()
+        every { endretUtbetalingAndelTidslinjeService.hentBarnasSkalIkkeUtbetalesTidslinjer(behandlingId) } returns emptyMap()
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
@@ -362,7 +362,7 @@ internal class KompetanseServiceTest {
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
-        every { endretUtbetalingAndelTidslinjeService.hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId) } returns emptyMap()
+        every { endretUtbetalingAndelTidslinjeService.hentBarnasSkalIkkeUtbetalesTidslinjer(behandlingId) } returns emptyMap()
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 

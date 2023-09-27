@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 
 enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
@@ -335,6 +336,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     AVSLAG_SELVSTENDIG_RETT_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagSelvstendigRettUtsendtArbeidstakerFraAnnetEosLand"
+    },
+    AVSLAG_SELVSTENDIG_RETT_BOR_IKKE_FAST_MED_BARNET {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagSelvstendigRettBorIkkeFastMedBarnet"
     },
     FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD {
         override val sanityApiNavn = "fortsattInnvilgetPrimaerlandStandard"

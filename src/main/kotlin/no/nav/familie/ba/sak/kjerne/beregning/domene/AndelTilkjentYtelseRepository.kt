@@ -103,5 +103,5 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
     """,
         nativeQuery = true,
     )
-    fun hentSisteAndelPerIdent(fagsakId: Long): List<AndelTilkjentYtelse>
+    fun hentSisteAndelPerIdentOgType(fagsakId: Long): List<AndelTilkjentYtelse>
 }
