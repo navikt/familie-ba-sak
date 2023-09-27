@@ -144,6 +144,20 @@ class TestVerktøyController(
         }
     }
 
+    @GetMapping(path = ["/behandling/{behandlingId}/vedtaksperiodertest"])
+    @Unprotected
+    fun hentVedtaksperioderTestPåBehandling(@PathVariable behandlingId: Long): String {
+        return if (envService.erPreprod() || envService.erDev()) {
+            testVerktøyService.hentVedtaksperioderTest(behandlingId)
+                .replace("\n", System.lineSeparator())
+        } else {
+            throw FunksjonellFeil(
+                httpStatus = HttpStatus.BAD_REQUEST,
+                melding = ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING,
+            )
+        }
+    }
+
     @GetMapping("/redirect/behandling/{behandlingId}")
     @Unprotected
     fun redirectTilBarnetrygd(@PathVariable behandlingId: Long): ResponseEntity<Any> {
