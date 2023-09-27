@@ -332,12 +332,10 @@ private fun erReduksjonFraForrigeBehandlingPåYtelsestyper(
         val ytelseInnvilgetForrigePeriodeForrigeBehandling =
             innvilgedeYtelsestyperForrigePeriodeForrigeBehandling?.contains(ytelseType) ?: false
 
-        erReduksjonSidenForrigeBehandling(
-            ytelseInnvilgetDennePerioden,
-            ytelseInnvilgetForrigePeriode,
-            ytelseInnvilgetDennePeriodenForrigeBehandling,
-            ytelseInnvilgetForrigePeriodeForrigeBehandling,
-        )
+        !ytelseInnvilgetForrigePeriode &&
+            !ytelseInnvilgetDennePerioden &&
+            !ytelseInnvilgetForrigePeriodeForrigeBehandling &&
+            ytelseInnvilgetDennePeriodenForrigeBehandling
     }
 }
 
