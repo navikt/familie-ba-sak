@@ -115,8 +115,76 @@ Egenskap: Reduksjon fra forrige behandling
       | 01.08.2028 | 31.07.2040 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
       | 01.08.2040 |            | OPPHØR                                                  |           |                         |                          |
 
-  Scenario: Skal få reduksjon fra forrige behandling-begrunnelser knyttet til bor fast hos søker for det ene barnet
+  Scenario: Skal få reduksjon fra forrige behandling-begrunnelse knyttet til småbarnstillegg når overgangsstønad forsvinner
     Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
+      | 1            | 1        |                     | INNVILGET           | SØKNAD           |
+      | 2            | 1        | 1                   | ENDRET_UTBETALING   | SMÅBARNSTILLEGG  |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1234    | SØKER      | 19.11.1984  |
+      | 1            | 3456    | BARN       | 26.08.2016  |
+      | 2            | 1234    | SØKER      | 19.11.1984  |
+      | 2            | 3456    | BARN       | 26.08.2016  |
+
+
+    Og følgende dagens dato 17.09.2023
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1234    | LOVLIG_OPPHOLD,BOSATT_I_RIKET                 |                  | 19.11.1984 |            | OPPFYLT  | Nei                  |
+      | 1234    | UTVIDET_BARNETRYGD                            |                  | 26.08.2016 |            | OPPFYLT  | Nei                  |
+
+      | 3456    | LOVLIG_OPPHOLD,BOR_MED_SØKER,GIFT_PARTNERSKAP |                  | 26.08.2016 |            | OPPFYLT  | Nei                  |
+      | 3456    | BOSATT_I_RIKET                                |                  | 26.08.2016 | 31.12.2018 | OPPFYLT  | Nei                  |
+      | 3456    | UNDER_18_ÅR                                   |                  | 26.08.2016 | 25.08.2034 | OPPFYLT  | Nei                  |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår                                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1234    | LOVLIG_OPPHOLD,BOSATT_I_RIKET                 |                  | 19.11.1984 |            | OPPFYLT  | Nei                  |
+      | 1234    | UTVIDET_BARNETRYGD                            |                  | 26.08.2016 |            | OPPFYLT  | Nei                  |
+
+      | 3456    | LOVLIG_OPPHOLD,BOR_MED_SØKER,GIFT_PARTNERSKAP |                  | 26.08.2016 |            | OPPFYLT  | Nei                  |
+      | 3456    | BOSATT_I_RIKET                                |                  | 26.08.2016 | 31.12.2018 | OPPFYLT  | Nei                  |
+      | 3456    | UNDER_18_ÅR                                   |                  | 26.08.2016 | 25.08.2034 | OPPFYLT  | Nei                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 1234    | 1            | 01.09.2016 | 31.12.2018 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
+      | 1234    | 1            | 01.04.2017 | 31.12.2018 | 660   | SMÅBARNSTILLEGG    | 100     | 660  |
+
+      | 3456    | 1            | 01.09.2016 | 31.12.2018 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+
+      | 1234    | 2            | 01.09.2016 | 31.12.2018 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
+
+      | 3456    | 2            | 01.09.2016 | 31.12.2018 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+
+    Og med overgangsstønad for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   |
+      | 3456    | 1            | 01.04.2017 | 30.06.2017 |
+      | 3456    | 1            | 01.07.2017 | 30.09.2017 |
+      | 3456    | 1            | 01.10.2017 | 31.12.2017 |
+      | 3456    | 1            | 01.01.2018 | 31.03.2018 |
+      | 3456    | 1            | 01.04.2018 | 30.06.2018 |
+      | 3456    | 1            | 01.07.2018 | 30.09.2018 |
+      | 3456    | 1            | 01.10.2018 | 31.12.2018 |
+
+    Når begrunnelsetekster genereres for behandling 2
+
+    Så forvent følgende standardBegrunnelser
+      | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Inkluderte Begrunnelser                         | Ekskluderte Begrunnelser |
+      | 01.04.2017 | 31.12.2018 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | SMÅBARNSTILLEGG_HADDE_IKKE_FULL_OVERGANGSSTØNAD |                          |
+      | 01.01.2019 |            | OPPHØR                                                  |           |                                                 |                          |
+
+  Scenario: Skal få reduksjon fra forrige behandling-begrunnelser knyttet til bor fast hos søker for det ene barnet
+  Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 

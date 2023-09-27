@@ -30,6 +30,14 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
 
     fun erInnvilget() = this is VedtaksperiodeGrunnlagForPersonVilkårInnvilget && this.erInnvilgetEndretUtbetaling()
 
+    fun hentInnvilgedeYtelsestyper() =
+        if (this is VedtaksperiodeGrunnlagForPersonVilkårInnvilget) {
+            this.andeler.filter { it.prosent > BigDecimal.ZERO }
+                .map { it.type }.toSet()
+        } else {
+            emptySet()
+        }
+
     fun kopier(
         person: Person = this.person,
         vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode> = this.vilkårResultaterForVedtaksperiode,
