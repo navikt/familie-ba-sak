@@ -33,7 +33,7 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
     fun hentInnvilgedeYtelsestyper() =
         if (this is VedtaksperiodeGrunnlagForPersonVilkårInnvilget) {
             this.andeler.filter { it.prosent > BigDecimal.ZERO }
-                .map { it.type }
+                .map { it.type }.toSet()
         } else {
             null
         }

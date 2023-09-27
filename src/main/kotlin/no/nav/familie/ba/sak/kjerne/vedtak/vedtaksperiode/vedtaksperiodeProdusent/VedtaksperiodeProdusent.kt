@@ -285,17 +285,22 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
 
         val grunnlagTidslinjeMedInnvilgedeYtelsestyperForrigeBehandling =
             grunnlagstidslinje.kombinerMed(ytelsestyperInnvilgetForrigeBehandlingTidslinje) { gjeldendePeriode, innvilgedeYtelsestyperForrigeBehandling ->
-                Pair(gjeldendePeriode, innvilgedeYtelsestyperForrigeBehandling)
+                GjeldendeMedInnvilgedeYtelsestyperForrigeBehandling(
+                    gjeldendePeriode,
+                    innvilgedeYtelsestyperForrigeBehandling,
+                )
             }
 
         grunnlagTidslinjeMedInnvilgedeYtelsestyperForrigeBehandling.zipMedNeste(ZipPadding.FØR)
             .map {
-                val forrigePeriode = it?.first?.first
+                val forrigePeriode = it?.first?.grunnlagForPerson
                 val innvilgedeYtelsestyperForrigePeriode = forrigePeriode?.hentInnvilgedeYtelsestyper()
-                val innvilgedeYtelsestyperForrigePeriodeForrigeBehandling = it?.first?.second ?: emptyList()
-                val gjeldende = it?.second?.first
+                val innvilgedeYtelsestyperForrigePeriodeForrigeBehandling =
+                    it?.first?.innvilgedeYtelsestyperForrigeBehandling ?: emptySet()
+                val gjeldende = it?.second?.grunnlagForPerson
                 val innvilgedeYtelsestyperDennePerioden = gjeldende?.hentInnvilgedeYtelsestyper()
-                val innvilgedeYtelsestyperDennePeriodenForrigeBehandling = it?.second?.second ?: emptyList()
+                val innvilgedeYtelsestyperDennePeriodenForrigeBehandling =
+                    it?.second?.innvilgedeYtelsestyperForrigeBehandling ?: emptySet()
 
                 val erReduksjonFraForrigeBehandlingPåYtelsestyper = YtelseType.values().map { ytelseType ->
                     val ytelseInnvilgetDennePerioden =
@@ -322,6 +327,11 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
                 )
             }.slåSammenLike().slåSammenSammenhengendeOpphørsPerioder()
     }
+
+data class GjeldendeMedInnvilgedeYtelsestyperForrigeBehandling(
+    val grunnlagForPerson: VedtaksperiodeGrunnlagForPerson?,
+    val innvilgedeYtelsestyperForrigeBehandling: Set<YtelseType>?,
+)
 
 private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.slåSammenSammenhengendeOpphørsPerioder(): Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned> {
     val perioder = this.perioder().sortedBy { it.fraOgMed }.toList()
