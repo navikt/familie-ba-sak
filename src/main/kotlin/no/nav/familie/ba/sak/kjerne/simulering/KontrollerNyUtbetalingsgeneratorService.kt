@@ -26,6 +26,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.YearMonth
 
 @Service
 class KontrollerNyUtbetalingsgeneratorService(
@@ -149,6 +150,10 @@ class KontrollerNyUtbetalingsgeneratorService(
                 loggSimuleringsPerioderMedDiff(simuleringsPerioderGammel, simuleringsPerioderNy)
             }
 
+            if (diffFeilTyper.isNotEmpty()) {
+                secureLogger.info("kontrollerNyUtbetalingsgenerator for ${behandling.id} ga følgende feiltyper=$diffFeilTyper")
+            }
+
             return diffFeilTyper
         } catch (e: Exception) {
             secureLogger.warn(
@@ -185,8 +190,13 @@ class KontrollerNyUtbetalingsgeneratorService(
         gammeltSimuleringResultat: DetaljertSimuleringResultat,
         behandling: Behandling,
     ): Boolean {
+        val andelerEtterDagensDato = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
+            .andelerTilkjentYtelse
+            .filter { andelTilkjentYtelse ->
+                andelTilkjentYtelse.stønadTom.isAfter(YearMonth.now())
+            }
         if (!(nyttSimuleringResultat.simuleringMottaker.isNotEmpty() && gammeltSimuleringResultat.simuleringMottaker.isNotEmpty())) {
-            secureLogger.warn("Behandling ${behandling.id} får tomt simuleringsresultat med ny eller gammel generator. Ny er tom: ${nyttSimuleringResultat.simuleringMottaker.isEmpty()}, Gammel er tom: ${gammeltSimuleringResultat.simuleringMottaker.isEmpty()}")
+            secureLogger.warn("Behandling ${behandling.id} får tomt simuleringsresultat med ny eller gammel generator. Ny er tom: ${nyttSimuleringResultat.simuleringMottaker.isEmpty()}, Gammel er tom: ${gammeltSimuleringResultat.simuleringMottaker.isEmpty()}. antallAndeler=${andelerEtterDagensDato.size}, resultat=${behandling.resultat}")
             return false
         }
         return true
