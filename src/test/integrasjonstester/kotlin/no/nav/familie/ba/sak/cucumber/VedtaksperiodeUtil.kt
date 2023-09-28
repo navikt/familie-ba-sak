@@ -57,6 +57,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilVedtaksperio
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -143,6 +144,11 @@ fun leggTilVilkårResultatPåPersonResultat(
             rad,
         )
 
+        val vurderesEtterForEnRad = parseValgfriEnum<Regelverk>(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.VURDERES_ETTER,
+            rad,
+        ) ?: Regelverk.NASJONALE_REGLER
+
         val vilkårResultaterForÉnRad = vilkårForÉnRad.map { vilkår ->
             VilkårResultat(
                 sistEndretIBehandlingId = behandlingId,
@@ -160,6 +166,7 @@ fun leggTilVilkårResultatPåPersonResultat(
                 ),
                 begrunnelse = "",
                 utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingForÉnRad,
+                vurderesEtter = vurderesEtterForEnRad,
             )
         }
         personResultat.vilkårResultater.addAll(vilkårResultaterForÉnRad)

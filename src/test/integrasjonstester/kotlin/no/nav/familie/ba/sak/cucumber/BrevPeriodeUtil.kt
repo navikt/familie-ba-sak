@@ -73,7 +73,7 @@ fun parseStandardBegrunnelse(rad: Tabellrad) =
             rad,
         ),
         maalform = parseEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad).tilSanityFormat(),
-        belop = parseString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BELØP, rad),
+        belop = parseString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BELØP, rad).replace(' ', ' '),
         soknadstidspunkt = parseValgfriString(
             BrevPeriodeParser.DomenebegrepBrevBegrunnelse.SØKNADSTIDSPUNKT,
             rad,

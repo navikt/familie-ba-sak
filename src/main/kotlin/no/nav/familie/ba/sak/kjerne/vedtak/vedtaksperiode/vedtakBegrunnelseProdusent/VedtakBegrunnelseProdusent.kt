@@ -45,6 +45,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.EndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -269,7 +270,13 @@ private fun filtrerPåEndretUtbetaling(
 private fun filtrerPåVilkår(
     it: SanityBegrunnelse,
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
-) = !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag)
+) =
+    !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag) && vilkårErIkkeVurdertEtterEøsForordningen(
+        begrunnelseGrunnlag,
+    )
+
+private fun vilkårErIkkeVurdertEtterEøsForordningen(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean =
+    begrunnelseGrunnlag.dennePerioden.vilkårResultater.none { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
 
 private fun SanityBegrunnelse.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
     if (begrunnelseGrunnlag !is BegrunnelseGrunnlagForPeriodeMedReduksjonPåTversAvBehandlinger) {
