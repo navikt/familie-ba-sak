@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndre
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
+import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.hentIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentKompetanserSomStopperRettFørPeriode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -55,16 +56,19 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentUtbetalingsperiodeDetaljer
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.sorter
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.BehandlingsGrunnlagForVedtaksperioder
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.genererVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utbetalingsperiodemedbegrunnelser.UtbetalingsperiodeMedBegrunnelserService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import utledEndringstidspunkt
@@ -439,6 +443,7 @@ class VedtaksperiodeService(
             hentUtvidetVedtaksperioderMedBegrunnelserOgGyldigeBegrunnelser(
                 behandling = behandling,
                 utvidedeVedtaksperioderMedBegrunnelser = utvidetVedtaksperioderMedBegrunnelser,
+                vedtak = vedtak,
                 persongrunnlag = persongrunnlag,
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 endretUtbetalingAndeler = endreteUtbetalinger,
@@ -451,6 +456,7 @@ class VedtaksperiodeService(
     private fun hentUtvidetVedtaksperioderMedBegrunnelserOgGyldigeBegrunnelser(
         behandling: Behandling,
         utvidedeVedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
+        vedtak: Vedtak,
         persongrunnlag: PersonopplysningGrunnlag,
         andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
@@ -460,10 +466,7 @@ class VedtaksperiodeService(
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
         val kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id)
-        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-
-        val behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder()
-        val behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder()
+        val grunnlagForBegrunnelser = hentGrunnlagForBegrunnelse(behandling)
 
         return utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
             val kompetanserIPeriode = kompetanser.hentIPeriode(
@@ -481,13 +484,8 @@ class VedtaksperiodeService(
 
             utvidetVedtaksperiodeMedBegrunnelser.copy(
                 gyldigeBegrunnelser = if (featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)) {
-                    utvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
-                        behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
-                        behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-                        sanityBegrunnelser = sanityBegrunnelser,
-                        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-                        nåDato = LocalDate.now(),
-                    ).toList()
+                    utvidetVedtaksperiodeMedBegrunnelser.tilVedtaksperiodeMedBegrunnelser(vedtak)
+                        .hentGyldigeBegrunnelserForPeriode(grunnlagForBegrunnelser).toList()
                 } else {
                     hentGyldigeBegrunnelserForPeriodeGammel(
                         utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
@@ -505,6 +503,24 @@ class VedtaksperiodeService(
                 },
             )
         }
+    }
+
+    fun hentGrunnlagForBegrunnelse(behandling: Behandling): GrunnlagForBegrunnelse {
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+
+        val behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder()
+        val behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder()
+
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
+
+        return GrunnlagForBegrunnelse(
+            behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
+            behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
+            sanityBegrunnelser = sanityBegrunnelser,
+            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+            nåDato = LocalDate.now(),
+        )
     }
 
     private fun hentAktørerMedUtbetaling(
@@ -607,6 +623,28 @@ class VedtaksperiodeService(
         }
         return vedtak.behandling.kategori == BehandlingKategori.EØS &&
             hentPersisterteVedtaksperioder(vedtak).any { it.tom?.erSenereEnnInneværendeMåned() != false }
+    }
+
+    fun skalMeldeFraOmEndringerEøsSelvstendigRett(vedtak: Vedtak): Boolean {
+        val vilkårsvurdering =
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = vedtak.behandling.id)
+
+        val annenForelderOmfattetAvNorskLovgivningErSattPåBosattIRiket = (
+            vilkårsvurdering?.personResultater?.flatMap { it.vilkårResultater }
+                ?.any { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING) && it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                ?: false
+            )
+
+        val passendeBehandlingsresultat = vedtak.behandling.resultat !in listOf(
+            Behandlingsresultat.AVSLÅTT,
+            Behandlingsresultat.ENDRET_OG_OPPHØRT,
+            Behandlingsresultat.OPPHØRT,
+        )
+
+        val eøsPraksisEndringFeatureToggleErSlåttPå =
+            featureToggleService.isEnabled(FeatureToggleConfig.EØS_PRAKSISENDRING_SEPTEMBER2023)
+
+        return annenForelderOmfattetAvNorskLovgivningErSattPåBosattIRiket && passendeBehandlingsresultat && eøsPraksisEndringFeatureToggleErSlåttPå
     }
 
     fun beskrivPerioderMedFeilutbetaltValuta(vedtak: Vedtak): Set<String>? {

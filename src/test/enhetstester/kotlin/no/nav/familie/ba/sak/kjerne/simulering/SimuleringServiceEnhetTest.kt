@@ -2,13 +2,20 @@ package no.nav.familie.ba.sak.kjerne.simulering
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.lagUtbetalingsoppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -24,11 +31,15 @@ import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPosterin
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
+import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
+import no.nav.familie.unleash.UnleashService
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -49,6 +60,7 @@ internal class SimuleringServiceEnhetTest {
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService = mockk()
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
+    private val unleashService: UnleashService = mockk()
 
     private val simuleringService: SimuleringService = SimuleringService(
         økonomiKlient,
@@ -56,6 +68,7 @@ internal class SimuleringServiceEnhetTest {
         økonomiSimuleringMottakerRepository,
         tilgangService,
         featureToggleService,
+        unleashService,
         vedtakRepository,
         utbetalingsoppdragGeneratorService,
         behandlingHentOgPersisterService,
@@ -287,6 +300,110 @@ internal class SimuleringServiceEnhetTest {
         )
 
         assertThrows<Feil> { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) }
+    }
+
+    @Test
+    fun `hentSimuleringFraFamilieOppdrag - skal bruke gammel utbetalingsgenerator når toggel er av`() {
+        setupMocksForFeatureToggleTests(false)
+        simuleringService.hentSimuleringFraFamilieOppdrag(lagVedtak())
+
+        verify(exactly = 1) {
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = any(),
+                saksbehandlerId = any(),
+                andelTilkjentYtelseForUtbetalingsoppdragFactory = any(),
+                erSimulering = any(),
+            )
+        }
+
+        verify(exactly = 0) {
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = any(),
+                saksbehandlerId = any(),
+                erSimulering = any(),
+            )
+        }
+    }
+
+    @Test
+    fun `hentSimuleringFraFamilieOppdrag - skal bruke ny utbetalingsgenerator når toggel er på`() {
+        setupMocksForFeatureToggleTests(true)
+        simuleringService.hentSimuleringFraFamilieOppdrag(lagVedtak())
+
+        verify(exactly = 0) {
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = any(),
+                saksbehandlerId = any(),
+                andelTilkjentYtelseForUtbetalingsoppdragFactory = any(),
+                erSimulering = any(),
+            )
+        }
+
+        verify(exactly = 1) {
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = any(),
+                saksbehandlerId = any(),
+                erSimulering = any(),
+            )
+        }
+    }
+
+    private fun setupMocksForFeatureToggleTests(togglePå: Boolean) {
+        every { beregningService.erEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(any()) } returns true
+
+        every {
+            unleashService.isEnabled(
+                toggleId = any(),
+                properties = any(),
+            )
+        } returns togglePå
+
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag(
+            listOf(
+                Utbetalingsperiode(
+                    erEndringPåEksisterendePeriode = false,
+                    opphør = null,
+                    periodeId = 1,
+                    forrigePeriodeId = null,
+                    datoForVedtak = LocalDate.now(),
+                    klassifisering = "BATR",
+                    vedtakdatoFom = inneværendeMåned().førsteDagIInneværendeMåned(),
+                    vedtakdatoTom = inneværendeMåned().sisteDagIInneværendeMåned(),
+                    sats = BigDecimal(1054),
+                    satsType = Utbetalingsperiode.SatsType.MND,
+                    utbetalesTil = "13455678910",
+                    behandlingId = 1,
+                ),
+            ),
+        )
+
+        every {
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = any(),
+                saksbehandlerId = any(),
+                andelTilkjentYtelseForUtbetalingsoppdragFactory = any(),
+                erSimulering = any(),
+            )
+        } returns utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
+
+        every {
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = any(),
+                saksbehandlerId = any(),
+                erSimulering = any(),
+            )
+        } returns BeregnetUtbetalingsoppdragLongId(utbetalingsoppdrag = utbetalingsoppdrag, andeler = emptyList())
+
+        every { økonomiKlient.hentSimulering(utbetalingsoppdrag.tilRestUtbetalingsoppdrag()) } returns mockk()
+
+        every {
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = any(),
+                gammeltSimuleringResultat = any(),
+                gammeltUtbetalingsoppdrag = any(),
+                erSimulering = any(),
+            )
+        } returns mockk()
     }
 
     private fun mockØkonomiSimuleringMottaker(

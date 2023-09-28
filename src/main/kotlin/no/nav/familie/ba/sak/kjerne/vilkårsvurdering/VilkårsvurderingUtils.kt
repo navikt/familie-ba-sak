@@ -15,11 +15,11 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -50,7 +50,7 @@ object VilkårsvurderingUtils {
             vilkårType = vilkårType,
             resultat = Resultat.IKKE_VURDERT,
             begrunnelse = "",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
         )
         if (harUvurdertePerioder(personResultat, vilkårType)) {
             throw FunksjonellFeil(
@@ -453,7 +453,7 @@ fun genererPersonResultatForPerson(
             periodeFom = fom,
             periodeTom = tom,
             begrunnelse = utledBegrunnelse(vilkår, person),
-            behandlingId = personResultat.vilkårsvurdering.behandling.id,
+            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
         )
     }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 

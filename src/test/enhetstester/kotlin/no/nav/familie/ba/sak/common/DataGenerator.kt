@@ -37,12 +37,14 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBost
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -79,7 +81,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
@@ -567,7 +568,7 @@ fun lagPersonResultat(
                     vilkårType = it,
                     resultat = resultat,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                     utdypendeVilkårsvurderinger = listOfNotNull(
                         when {
                             erDeltBosted && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED
@@ -589,7 +590,7 @@ fun lagPersonResultat(
                     vilkårType = vilkårType,
                     resultat = resultat,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                     erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
                 ),
             ),
@@ -636,7 +637,7 @@ fun lagVilkårsvurdering(
                 periodeFom = søkerPeriodeFom,
                 periodeTom = søkerPeriodeTom,
                 begrunnelse = "",
-                behandlingId = behandling.id,
+                sistEndretIBehandlingId = behandling.id,
             ),
             VilkårResultat(
                 personResultat = personResultat,
@@ -645,7 +646,7 @@ fun lagVilkårsvurdering(
                 periodeFom = søkerPeriodeFom,
                 periodeTom = søkerPeriodeTom,
                 begrunnelse = "",
-                behandlingId = behandling.id,
+                sistEndretIBehandlingId = behandling.id,
             ),
         ),
     )
@@ -982,7 +983,14 @@ fun lagUtbetalingsperiodeDetalj(
     ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
     prosent: BigDecimal = BigDecimal.valueOf(100),
-) = UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, false, prosent)
+) = UtbetalingsperiodeDetalj(
+    person = person,
+    ytelseType = ytelseType,
+    utbetaltPerMnd = utbetaltPerMnd,
+    erPåvirketAvEndring = false,
+    endringsårsak = null,
+    prosent = prosent,
+)
 
 fun lagVedtaksperiodeMedBegrunnelser(
     vedtak: Vedtak = lagVedtak(),
@@ -1052,7 +1060,7 @@ fun lagVilkårResultat(
     periodeFom = fom?.toLocalDate(),
     periodeTom = tom?.toLocalDate(),
     begrunnelse = "",
-    behandlingId = behandlingId,
+    sistEndretIBehandlingId = behandlingId,
     vurderesEtter = vilkårRegelverk,
 )
 
@@ -1074,7 +1082,7 @@ fun lagVilkårResultat(
     periodeFom = periodeFom,
     periodeTom = periodeTom,
     begrunnelse = begrunnelse,
-    behandlingId = behandlingId,
+    sistEndretIBehandlingId = behandlingId,
     utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
     erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
     standardbegrunnelser = standardbegrunnelser,
@@ -1197,7 +1205,7 @@ fun lagRestSanityBegrunnelse(
     vedtakResultat: String? = null,
     fagsakType: String? = null,
     tema: String? = null,
-
+    periodeType: String? = null,
 ): RestSanityBegrunnelse = RestSanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1216,6 +1224,7 @@ fun lagRestSanityBegrunnelse(
     vedtakResultat = vedtakResultat,
     fagsakType = fagsakType,
     tema = tema,
+    periodeType = periodeType,
 )
 
 fun lagSanityBegrunnelse(
@@ -1235,6 +1244,7 @@ fun lagSanityBegrunnelse(
     endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
     resultat: SanityPeriodeResultat? = null,
     fagsakType: FagsakType? = null,
+    periodeType: BrevPeriodeType? = null,
 ): SanityBegrunnelse = SanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1252,6 +1262,7 @@ fun lagSanityBegrunnelse(
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
     periodeResultat = resultat,
     fagsakType = fagsakType,
+    periodeType = periodeType,
 )
 
 fun lagSanityEøsBegrunnelse(
@@ -1268,6 +1279,7 @@ fun lagSanityEøsBegrunnelse(
     vilkår: List<Vilkår> = emptyList(),
     fagsakType: FagsakType? = null,
     tema: Tema? = null,
+    periodeType: BrevPeriodeType? = null,
 ): SanityEØSBegrunnelse = SanityEØSBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1282,6 +1294,7 @@ fun lagSanityEøsBegrunnelse(
     vilkår = vilkår.toSet(),
     fagsakType = fagsakType,
     tema = tema,
+    periodeType = periodeType,
 )
 
 fun lagTriggesAv(

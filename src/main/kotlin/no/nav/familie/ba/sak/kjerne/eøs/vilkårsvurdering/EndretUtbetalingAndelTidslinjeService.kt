@@ -13,20 +13,21 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 
 @Service
 class EndretUtbetalingAndelTidslinjeService(
     val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
 ) {
-    fun hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId: BehandlingId) =
+    fun hentBarnasSkalIkkeUtbetalesTidslinjer(behandlingId: BehandlingId) =
         endretUtbetalingAndelHentOgPersisterService
             .hentForBehandling(behandlingId.id)
-            .tilBarnasHarEtterbetaling3ÅrTidslinjer()
+            .tilBarnasSkalIkkeUtbetalesTidslinjer()
 }
 
-internal fun Iterable<EndretUtbetalingAndel>.tilBarnasHarEtterbetaling3ÅrTidslinjer(): Map<Aktør, Tidslinje<Boolean, Måned>> {
+internal fun Iterable<EndretUtbetalingAndel>.tilBarnasSkalIkkeUtbetalesTidslinjer(): Map<Aktør, Tidslinje<Boolean, Måned>> {
     return this
-        .filter { it.årsak == Årsak.ETTERBETALING_3ÅR }
+        .filter { it.årsak in listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ALLEREDE_UTBETALT, Årsak.ENDRE_MOTTAKER) && it.prosent == BigDecimal.ZERO }
         .filter { it.person?.type == PersonType.BARN }
         .filter { it.person?.aktør != null }
         .groupBy { it.person?.aktør!! }

@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.skalIverksettesMotOppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -25,6 +26,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.YearMonth
 
 @Service
 class KontrollerNyUtbetalingsgeneratorService(
@@ -67,17 +69,30 @@ class KontrollerNyUtbetalingsgeneratorService(
         try {
             if (!skalKontrollereOppMotNyUtbetalingsgenerator()) return emptyList()
 
-            val diffFeilTyper = mutableListOf<DiffFeilType>()
-
             val behandling = vedtak.behandling
 
-            val beregnetUtbetalingsoppdrag = utbetalingsoppdragGeneratorService.genererUtbetalingsoppdrag(
-                vedtak = vedtak,
-                saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-                erSimulering = erSimulering,
-            )
+            if (erSimulering) {
+                secureLogger.info("Simulerer utbetalingsoppdrag for simulering for behandling ${behandling.id}")
+            } else {
+                secureLogger.info(
+                    "Simulerer utbetalingsoppdrag for iverksettelse for behandling ${behandling.id}",
+                )
+            }
 
-            if (!beregnetUtbetalingsoppdrag.utbetalingsoppdrag.skalIverksettesMotOppdrag()) return emptyList()
+            val diffFeilTyper = mutableListOf<DiffFeilType>()
+
+            val beregnetUtbetalingsoppdrag =
+                utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                    vedtak = vedtak,
+                    saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                    erSimulering = erSimulering,
+                )
+
+            if (!beregnetUtbetalingsoppdrag.utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
+                    .skalIverksettesMotOppdrag()
+            ) {
+                return emptyList()
+            }
 
             secureLogger.info("Behandling ${behandling.id} har følgende oppdaterte andeler: ${beregnetUtbetalingsoppdrag.andeler}")
 
@@ -92,7 +107,7 @@ class KontrollerNyUtbetalingsgeneratorService(
             }
 
             val nyttSimuleringResultat =
-                økonomiKlient.hentSimulering(beregnetUtbetalingsoppdrag.utbetalingsoppdrag)
+                økonomiKlient.hentSimulering(beregnetUtbetalingsoppdrag.utbetalingsoppdrag.tilRestUtbetalingsoppdrag())
 
             if (nyttSimuleringResultat.simuleringMottaker.isEmpty() && gammeltSimuleringResultat.simuleringMottaker.isEmpty()) return diffFeilTyper
 
@@ -135,6 +150,10 @@ class KontrollerNyUtbetalingsgeneratorService(
                 loggSimuleringsPerioderMedDiff(simuleringsPerioderGammel, simuleringsPerioderNy)
             }
 
+            if (diffFeilTyper.isNotEmpty()) {
+                secureLogger.info("kontrollerNyUtbetalingsgenerator for ${behandling.id} ga følgende feiltyper=$diffFeilTyper")
+            }
+
             return diffFeilTyper
         } catch (e: Exception) {
             secureLogger.warn(
@@ -171,8 +190,13 @@ class KontrollerNyUtbetalingsgeneratorService(
         gammeltSimuleringResultat: DetaljertSimuleringResultat,
         behandling: Behandling,
     ): Boolean {
+        val andelerEtterDagensDato = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
+            .andelerTilkjentYtelse
+            .filter { andelTilkjentYtelse ->
+                andelTilkjentYtelse.stønadTom.isAfter(YearMonth.now())
+            }
         if (!(nyttSimuleringResultat.simuleringMottaker.isNotEmpty() && gammeltSimuleringResultat.simuleringMottaker.isNotEmpty())) {
-            secureLogger.warn("Behandling ${behandling.id} får tomt simuleringsresultat med ny eller gammel generator. Ny er tom: ${nyttSimuleringResultat.simuleringMottaker.isEmpty()}, Gammel er tom: ${gammeltSimuleringResultat.simuleringMottaker.isEmpty()}")
+            secureLogger.warn("Behandling ${behandling.id} får tomt simuleringsresultat med ny eller gammel generator. Ny er tom: ${nyttSimuleringResultat.simuleringMottaker.isEmpty()}, Gammel er tom: ${gammeltSimuleringResultat.simuleringMottaker.isEmpty()}. antallAndeler=${andelerEtterDagensDato.size}, resultat=${behandling.resultat}")
             return false
         }
         return true
@@ -198,7 +222,7 @@ class KontrollerNyUtbetalingsgeneratorService(
             simuleringsPerioderTidslinjeGammelFraNy
                 .kombinerMed(simuleringsPerioderNyTidslinje) { gammel, ny ->
                     KombinertSimuleringsResultat(
-                        erLike = gammel?.resultat == ny?.resultat,
+                        erLike = gammel?.resultat == (ny?.resultat ?: BigDecimal.ZERO),
                         gammel = gammel,
                         ny = ny,
                     )

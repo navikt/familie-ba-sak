@@ -30,6 +30,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingServiceTest.Companion.validerKopiertVilkårsvurdering
@@ -45,6 +48,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import kotlin.reflect.full.declaredMemberProperties
 
@@ -84,6 +88,9 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
     @Autowired
     private val personRepository: PersonRepository,
+
+    @Autowired
+    private val aktørIdRepository: AktørIdRepository,
 
 ) : AbstractSpringIntegrationTest() {
     @BeforeAll
@@ -664,6 +671,123 @@ class VilkårsvurderingForNyBehandlingServiceTest(
     }
 
     @Test
+    fun `genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato - skal kunne identifisere og kopiere forkjøvede vilkår som alltid starter fra fødselsdato når aktør har fått ny fødselsdato siden forrige behandling`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+        val søkerFødselsdato = LocalDate.of(1984, 8, 1)
+        val barnetsFødselsdato = LocalDate.now().minusYears(10)
+        val nyMigreringsdato = LocalDate.now().minusYears(5)
+
+        val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val forrigeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.MIGRERING,
+            ),
+        )
+        val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandlingId = forrigeBehandling.id,
+            søkerPersonIdent = søkerFnr,
+            barnasIdenter = listOf(barnFnr),
+            barnasFødselsdatoer = listOf(barnetsFødselsdato),
+            søkerFødselsdato = søkerFødselsdato,
+            søkerAktør = søkerAktør,
+            barnAktør = barnAktør,
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
+
+        var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
+        val søkerPersonResultat = PersonResultat(
+            vilkårsvurdering = forrigeVilkårsvurdering,
+            aktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+        )
+        val deltBostedTom = nyMigreringsdato.plusYears(2)
+        val deltBostedBegrunnelse = "Dette er en kopiert begrunnelse"
+        søkerPersonResultat.setSortedVilkårResultater(
+            lagSøkerVilkårResultat(
+                søkerPersonResultat = søkerPersonResultat,
+                periodeFom = nyMigreringsdato.plusYears(1),
+                behandlingId = forrigeBehandling.id,
+            ).plus(
+                lagVilkårResultat(
+                    personResultat = søkerPersonResultat,
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    periodeFom = nyMigreringsdato.plusMonths(5),
+                    periodeTom = deltBostedTom,
+                    behandlingId = forrigeBehandling.id,
+                    begrunnelse = deltBostedBegrunnelse,
+                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                ),
+            ),
+        )
+        val barnPersonResultat = PersonResultat(
+            vilkårsvurdering = forrigeVilkårsvurdering,
+            aktør = personidentService.hentOgLagreAktør(barnFnr, true),
+        )
+        barnPersonResultat.setSortedVilkårResultater(
+            lagBarnVilkårResultat(
+                barnPersonResultat = barnPersonResultat,
+                barnetsFødselsdato = barnetsFødselsdato,
+                behandlingId = forrigeBehandling.id,
+                periodeFom = nyMigreringsdato.plusMonths(5),
+            ),
+        )
+        forrigeVilkårsvurdering = forrigeVilkårsvurdering.apply {
+            personResultater = setOf(
+                søkerPersonResultat,
+                barnPersonResultat,
+            )
+        }
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
+
+        markerBehandlingSomAvsluttet(forrigeBehandling)
+
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+            ),
+        )
+        // val oppdatertBarnAktør = listOf(leggTilNyIdentPåAktør(barnAktør.first(), randomFnr()))
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandlingId = behandling.id,
+            søkerPersonIdent = søkerFnr,
+            barnasIdenter = listOf(barnFnr),
+            // Justerer barnets fødselsdato slik at eksisterende vilkår for UNDER_18 og GIFT_PARNTERSKAP får "feil" fom og tom
+            barnasFødselsdatoer = listOf(barnetsFødselsdato.minusMonths(2)),
+            søkerFødselsdato = søkerFødselsdato,
+            søkerAktør = søkerAktør,
+            barnAktør = barnAktør,
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vilkårsvurdering =
+            vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+                behandling = behandling,
+                forrigeBehandlingSomErVedtatt = forrigeBehandling,
+                nyMigreringsdato = nyMigreringsdato,
+            )
+        assertThat(vilkårsvurdering.personResultater).isNotEmpty
+        val søkerVilkårResultat =
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == søkerFnr }.vilkårResultater
+        assertThat(søkerVilkårResultat).hasSize(3)
+        val barnVilkårResultat =
+            vilkårsvurdering.personResultater.first {
+                it.aktør.aktivFødselsnummer() == barnAktør.first().aktivFødselsnummer()
+            }.vilkårResultater
+        assertThat(barnVilkårResultat).hasSize(5)
+        assertThat(
+            barnVilkårResultat.filter { it.vilkårType.gjelderAlltidFraBarnetsFødselsdato() }
+                .all { it.periodeFom == personopplysningGrunnlag.barna.first().fødselsdato },
+        )
+    }
+
+    @Test
     fun `skal lage vilkårsvurderingsperiode for helmanuell migrering`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
@@ -932,5 +1056,17 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         behandling.status = BehandlingStatus.AVSLUTTET
         behandling.leggTilBehandlingStegTilstand(StegType.BEHANDLING_AVSLUTTET)
         return behandlingHentOgPersisterService.lagreOgFlush(behandling)
+    }
+
+    private fun leggTilNyIdentPåAktør(aktør: Aktør, nyttFnr: String): Aktør {
+        aktør.personidenter.filter { it.aktiv }.map {
+            it.aktiv = false
+            it.gjelderTil = LocalDateTime.now()
+        }
+        val oppdatertAktør = aktørIdRepository.saveAndFlush(aktør)
+        oppdatertAktør.personidenter.add(
+            Personident(fødselsnummer = nyttFnr, aktør = oppdatertAktør),
+        )
+        return aktørIdRepository.saveAndFlush(oppdatertAktør)
     }
 }

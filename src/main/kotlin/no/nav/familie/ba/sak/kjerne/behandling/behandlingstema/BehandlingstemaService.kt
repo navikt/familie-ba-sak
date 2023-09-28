@@ -114,7 +114,7 @@ class BehandlingstemaService(
                 ?: return aktivBehandling.kategori
         val erVilkårMedEØSRegelverkBehandlet = vilkårsvurdering.personResultater
             .flatMap { it.vilkårResultater }
-            .filter { it.behandlingId == aktivBehandling.id }
+            .filter { it.sistEndretIBehandlingId == aktivBehandling.id }
             .any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
 
         return if (erVilkårMedEØSRegelverkBehandlet) {
@@ -138,7 +138,7 @@ class BehandlingstemaService(
             vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
                 ?.personResultater
                 ?.flatMap { it.vilkårResultater }
-                ?.filter { it.behandlingId == aktivBehandling.id }
+                ?.filter { it.sistEndretIBehandlingId == aktivBehandling.id }
                 ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         return if (erUtvidetVilkårBehandlet == true) {

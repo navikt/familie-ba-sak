@@ -68,8 +68,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                     FROM behandling b
                              INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
                              INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                    WHERE ty.utbetalingsoppdrag IS NOT NULL
-                      AND f.status = 'LØPENDE'
+                    WHERE f.status = 'LØPENDE'
                       AND f.arkivert = FALSE
                     ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC)
                 

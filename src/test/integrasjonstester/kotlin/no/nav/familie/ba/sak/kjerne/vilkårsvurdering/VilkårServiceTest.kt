@@ -498,7 +498,7 @@ class VilkårServiceTest(
         vilkårsvurdering2.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
                 if (personResultat.aktør.aktivFødselsnummer() == barnFnr2) {
-                    assertEquals(behandling2.id, vilkårResultat.behandlingId)
+                    assertEquals(behandling2.id, vilkårResultat.sistEndretIBehandlingId)
                 } else {
                     if (vilkårResultat.vilkårType === Vilkår.LOVLIG_OPPHOLD) {
                         assertEquals(vilkårResultat.resultatBegrunnelse, vilkårResultat.resultatBegrunnelse)
@@ -507,7 +507,7 @@ class VilkårServiceTest(
                     }
 
                     assertEquals(Resultat.OPPFYLT, vilkårResultat.resultat)
-                    assertEquals(behandling.id, vilkårResultat.behandlingId)
+                    assertEquals(behandling.id, vilkårResultat.sistEndretIBehandlingId)
                 }
             }
         }
@@ -569,7 +569,7 @@ class VilkårServiceTest(
 
         val personResultat = vilkårsvurdering1.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }!!
         val borMedSøkerVilkår = personResultat.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
-        assertEquals(behandling.id, borMedSøkerVilkår.behandlingId)
+        assertEquals(behandling.id, borMedSøkerVilkår.sistEndretIBehandlingId)
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
@@ -591,7 +591,7 @@ class VilkårServiceTest(
             vilkårsvurderingEtterEndring.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }!!
         val borMedSøkerVilkårEtterEndring =
             personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
-        assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.behandlingId)
+        assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.sistEndretIBehandlingId)
     }
 
     @Test

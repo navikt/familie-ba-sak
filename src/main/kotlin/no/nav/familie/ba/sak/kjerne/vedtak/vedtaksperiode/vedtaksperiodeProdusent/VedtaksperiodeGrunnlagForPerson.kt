@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
+package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -28,6 +29,14 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
         this is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget && this.erEksplisittAvslag
 
     fun erInnvilget() = this is VedtaksperiodeGrunnlagForPersonVilkårInnvilget && this.erInnvilgetEndretUtbetaling()
+
+    fun hentInnvilgedeYtelsestyper() =
+        if (this is VedtaksperiodeGrunnlagForPersonVilkårInnvilget) {
+            this.andeler.filter { it.prosent > BigDecimal.ZERO }
+                .map { it.type }.toSet()
+        } else {
+            emptySet()
+        }
 
     fun kopier(
         person: Person = this.person,
@@ -98,10 +107,12 @@ fun List<VilkårResultatForVedtaksperiode>.erLikUtenFomOgTom(other: List<Vilkår
 data class EndretUtbetalingAndelForVedtaksperiode(
     val prosent: BigDecimal,
     val årsak: Årsak,
+    val søknadstidspunkt: LocalDate,
 ) {
     constructor(endretUtbetalingAndel: IUtfyltEndretUtbetalingAndel) : this(
         prosent = endretUtbetalingAndel.prosent,
         årsak = endretUtbetalingAndel.årsak,
+        søknadstidspunkt = endretUtbetalingAndel.søknadstidspunkt,
     )
 }
 
@@ -167,6 +178,7 @@ data class KompetanseForVedtaksperiode(
     val søkersAktivitetsland: String,
     val barnetsBostedsland: String,
     val resultat: KompetanseResultat,
+    val barnAktører: Set<Aktør>,
 ) {
     constructor(kompetanse: UtfyltKompetanse) : this(
         søkersAktivitet = kompetanse.søkersAktivitet,
@@ -175,6 +187,7 @@ data class KompetanseForVedtaksperiode(
         søkersAktivitetsland = kompetanse.søkersAktivitetsland,
         barnetsBostedsland = kompetanse.barnetsBostedsland,
         resultat = kompetanse.resultat,
+        barnAktører = kompetanse.barnAktører,
     )
 }
 

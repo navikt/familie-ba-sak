@@ -1,9 +1,9 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
+package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -26,12 +26,15 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedDatert
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedNullable
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
@@ -41,7 +44,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvni
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import java.time.LocalDate
 
 typealias AktørId = String
 
@@ -200,15 +202,16 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                 .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(erUtbetalingSmåbarnstilleggTidslinje)
 
         val grunnlagTidslinje = harRettPåUtbetalingTidslinje
-            .kombinerMed(
+            .kombinerMedDatert(
                 this.tilVilkårResultaterForVedtaksPeriodeTidslinje(),
                 andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForVedtaksPeriodeTidslinje(),
-            ) { personHarRettPåUtbetalingIPeriode, vilkårResultater, andeler ->
+            ) { personHarRettPåUtbetalingIPeriode, vilkårResultater, andeler, tidspunkt ->
                 lagGrunnlagForVilkårOgAndel(
                     personHarRettPåUtbetalingIPeriode = personHarRettPåUtbetalingIPeriode,
                     vilkårResultater = vilkårResultater,
                     person = person,
                     andeler = andeler,
+                    tidspunkt,
                 )
             }.kombinerMedNullable(kompetanseTidslinje) { grunnlagForPerson, kompetanse ->
                 lagGrunnlagMedKompetanse(grunnlagForPerson, kompetanse)
@@ -277,7 +280,7 @@ private fun hentErMinstEttBarnMedUtbetalingTidslinje(
 ): Tidslinje<Boolean, Måned> {
     val søker = persongrunnlag.søker
     val søkerSinerOrdinæreVilkårErOppfyltTidslinje =
-        personResultater.single { it.erSøkersResultater() }.tilTidslinjeForSplittForPerson(
+        personResultater.single { it.aktør == søker.aktør }.tilTidslinjeForSplittForPerson(
             person = søker,
             fagsakType = fagsakType,
         ).map { it != null }
@@ -351,13 +354,13 @@ private fun lagGrunnlagForVilkårOgAndel(
     vilkårResultater: List<VilkårResultatForVedtaksperiode>?,
     person: Person,
     andeler: Iterable<AndelForVedtaksperiode>?,
+    måned: Tidspunkt<Måned>,
 ) = if (personHarRettPåUtbetalingIPeriode == true) {
     if (andeler == null) {
         secureLogger.info(
-            "Vi har fått en innvilget vedtaksperiode, men det finnes ingen andeler.\n" +
-                "$person\n" +
-                "$vilkårResultater\n" +
-                "$andeler",
+            "Andeler må finnes for innvilgede vedtaksperioder, men det var ikke andeler i ${
+                måned.tilYearMonthEllerNull()?.tilMånedÅr() ?: "uendelig ${måned.uendelighet}"
+            } for $person",
         )
     }
 
@@ -367,9 +370,9 @@ private fun lagGrunnlagForVilkårOgAndel(
         person = person,
         andeler = andeler
             ?: error(
-                "andeler må finnes for innvilgede vedtaksperioder. Vedtaksperioden er innenfor ${
-                    vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }.minOf { it.fom ?: LocalDate.MIN }
-                } -> ${vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }.maxOf { it.tom ?: LocalDate.MAX }}",
+                "Andeler må finnes for innvilgede vedtaksperioder, men det var ikke andeler i ${
+                    måned.tilYearMonthEllerNull()?.tilMånedÅr() ?: "uendelig ${måned.uendelighet}"
+                }",
             ),
     )
 } else {
@@ -393,13 +396,7 @@ private fun lagGrunnlagMedEndretUtbetalingAndel(
     endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode?,
 ) = when (vedtaksperiodeGrunnlagForPerson) {
     is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> vedtaksperiodeGrunnlagForPerson.copy(endretUtbetalingAndel = endretUtbetalingAndel)
-    is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> {
-        if (endretUtbetalingAndel != null) {
-            throw Feil("GrunnlagForPersonIkkeInnvilget for aktør ${vedtaksperiodeGrunnlagForPerson.person.aktør} kan ikke ha endretUtbetalingAndel siden den ikke er innvilget")
-        }
-        vedtaksperiodeGrunnlagForPerson
-    }
-
+    is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> vedtaksperiodeGrunnlagForPerson
     null -> null
 }
 

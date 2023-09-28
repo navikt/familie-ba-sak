@@ -86,11 +86,11 @@ enum class Begrunnelsetype {
     FRITEKST,
 }
 
-interface Begrunnelse : Comparable<Begrunnelse> {
+interface BrevBegrunnelse : Comparable<BrevBegrunnelse> {
     val type: Begrunnelsetype
     val vedtakBegrunnelseType: VedtakBegrunnelseType?
 
-    override fun compareTo(other: Begrunnelse): Int {
+    override fun compareTo(other: BrevBegrunnelse): Int {
         return when {
             this.type == Begrunnelsetype.FRITEKST -> Int.MAX_VALUE
             other.type == Begrunnelsetype.FRITEKST -> -Int.MAX_VALUE
@@ -102,7 +102,7 @@ interface Begrunnelse : Comparable<Begrunnelse> {
     }
 }
 
-interface BegrunnelseMedData : Begrunnelse {
+interface BegrunnelseMedData : BrevBegrunnelse {
     val apiNavn: String
 }
 
@@ -129,7 +129,7 @@ data class BegrunnelseData(
 
 data class FritekstBegrunnelse(
     val fritekst: String,
-) : Begrunnelse {
+) : BrevBegrunnelse {
     override val vedtakBegrunnelseType: VedtakBegrunnelseType? = null
     override val type: Begrunnelsetype = Begrunnelsetype.FRITEKST
 }
@@ -171,7 +171,7 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     uregistrerteBarn: List<MinimertUregistrertBarn>,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
     minimerteRestEndredeAndeler: List<MinimertRestEndretAndel>,
-): Begrunnelse {
+): BrevBegrunnelse {
     val personerPåBegrunnelse =
         personerIPersongrunnlag.filter { person -> this.personIdenter.contains(person.personIdent) }
 

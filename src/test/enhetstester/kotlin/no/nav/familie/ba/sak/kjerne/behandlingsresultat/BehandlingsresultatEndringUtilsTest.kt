@@ -121,7 +121,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
@@ -138,7 +138,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
@@ -960,7 +960,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
@@ -974,7 +974,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2020, 1, 2),
                 periodeTom = LocalDate.of(2022, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
@@ -991,7 +991,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
@@ -1005,7 +1005,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2020, 1, 2),
                 periodeTom = LocalDate.of(2022, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
@@ -1038,7 +1038,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
@@ -1055,7 +1055,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
@@ -1088,7 +1088,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG,
                 ),
@@ -1104,7 +1104,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
@@ -1137,7 +1137,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = fødselsdato,
                 periodeTom = null,
                 begrunnelse = "",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.NASJONALE_REGLER,
             ),
@@ -1151,7 +1151,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = fødselsdato,
                 periodeTom = mai22.atDay(7),
                 begrunnelse = "",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.NASJONALE_REGLER,
             ),
@@ -1162,7 +1162,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = mai22.atDay(8),
                 periodeTom = null,
                 begrunnelse = "",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.NASJONALE_REGLER,
             ),
@@ -1192,7 +1192,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = fødselsdato,
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
@@ -1209,7 +1209,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = fødselsdato,
                 periodeTom = null,
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                sistEndretIBehandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,

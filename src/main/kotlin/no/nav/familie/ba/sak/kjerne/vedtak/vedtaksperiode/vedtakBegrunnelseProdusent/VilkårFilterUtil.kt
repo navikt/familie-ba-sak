@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilUtdypendeVilkårsvurderinger
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.VilkårResultatForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
@@ -67,7 +67,7 @@ private fun finnUtgjørendeVilkår(
         oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
         oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
     )
-    val vilkårEndret = hentOppfylteVilkårResultaterMedEndretUtdypende(
+    val vilkårEndret = hentOppfylteVilkårResultaterEndret(
         oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
         oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
     )
@@ -96,24 +96,17 @@ private fun finnUtgjørendeVilkår(
     }.toSet()
 }
 
-private fun hentOppfylteVilkårResultaterMedEndretUtdypende(
+private fun hentOppfylteVilkårResultaterEndret(
     oppfylteVilkårResultaterDennePerioden: List<VilkårResultatForVedtaksperiode>,
     oppfylteVilkårResultaterForrigePeriode: List<VilkårResultatForVedtaksperiode>,
-): List<VilkårResultatForVedtaksperiode> {
-    val oppfylteVilkårMedEndretUtdypende =
-        oppfylteVilkårResultaterForrigePeriode.filter { vilkårResultatForrigePeriode ->
-            val sammeVilkårResultatDennePerioden =
-                oppfylteVilkårResultaterDennePerioden.singleOrNull { it.vilkårType == vilkårResultatForrigePeriode.vilkårType }
-            val utdypendeVilkårsvurderingDennePerioden =
-                sammeVilkårResultatDennePerioden?.utdypendeVilkårsvurderinger?.toSet() ?: emptySet()
-            val utdypendeVilkårsvurderingForrigePeriode =
-                vilkårResultatForrigePeriode.utdypendeVilkårsvurderinger.toSet()
+): List<VilkårResultatForVedtaksperiode> =
+    oppfylteVilkårResultaterDennePerioden.filter { vilkårResultatForrigePeriode ->
+        val sammeVilkårResultatForrigePeriode =
+            oppfylteVilkårResultaterForrigePeriode.singleOrNull { it.vilkårType == vilkårResultatForrigePeriode.vilkårType }
 
-            utdypendeVilkårsvurderingForrigePeriode != utdypendeVilkårsvurderingDennePerioden
-        }.map { it.vilkårType }
-
-    return oppfylteVilkårResultaterDennePerioden.filter { it.vilkårType in oppfylteVilkårMedEndretUtdypende }
-}
+        sammeVilkårResultatForrigePeriode != null &&
+            vilkårResultatForrigePeriode != sammeVilkårResultatForrigePeriode
+    }
 
 private fun hentVilkårResultaterTjent(
     oppfylteVilkårResultaterDennePerioden: List<VilkårResultatForVedtaksperiode>,

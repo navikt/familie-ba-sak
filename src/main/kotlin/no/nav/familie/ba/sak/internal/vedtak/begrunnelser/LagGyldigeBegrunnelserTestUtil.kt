@@ -157,8 +157,9 @@ fun hentTekstForTilkjentYtelse(
         hentAndelRader(andelerForrigeBehandling) +
         hentAndelRader(andeler)
 
-private fun hentAndelRader(andeler: List<AndelTilkjentYtelse>?): String =
-    andeler?.joinToString("") {
+private fun hentAndelRader(andeler: List<AndelTilkjentYtelse>?): String = andeler
+    ?.sortedWith(compareBy({ it.aktør.aktivFødselsnummer() }, { it.stønadFom }, { it.stønadTom }))
+    ?.joinToString("") {
         """
       | ${it.aktør.aktørId} |${it.behandlingId}|${
             it.stønadFom.førsteDagIInneværendeMåned().tilddMMyyyy()
@@ -195,7 +196,7 @@ private fun hentEndretUtbetalingRader(endredeUtbetalinger: List<EndretUtbetaling
       | ${it.person.aktør.aktørId} |${it.behandlingId}|${
                 it.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
             }|${
-                it.tom.førsteDagIInneværendeMåned().tilddMMyyyy()
+                it.tom.sisteDagIInneværendeMåned().tilddMMyyyy()
             }|${it.årsak} | ${it.prosent} |"""
         } ?: ""
 
