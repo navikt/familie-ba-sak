@@ -24,7 +24,7 @@ data class BrevPeriode(
     constructor(
         fom: String,
         tom: String,
-        belop: String,
+        beløp: String,
         begrunnelser: List<BrevBegrunnelse>,
         brevPeriodeType: BrevPeriodeType,
         antallBarn: String,
@@ -37,7 +37,7 @@ data class BrevPeriode(
     ) : this(
         fom = flettefelt(fom),
         tom = flettefelt(tom),
-        belop = flettefelt(belop),
+        belop = flettefelt(beløp),
         antallBarn = flettefelt(antallBarn),
         barnasFodselsdager = flettefelt(barnasFodselsdager),
         antallBarnMedUtbetaling = flettefelt(antallBarnMedUtbetaling),

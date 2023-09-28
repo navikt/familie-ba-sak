@@ -252,7 +252,7 @@ class BrevPeriodeGenerator(
                 brevPeriodeType == BrevPeriodeType.INNVILGELSE_INGEN_UTBETALING -> " til $tomDato"
                 else -> "til $tomDato "
             },
-            belop = Utils.formaterBeløp(utbetalingsbeløp),
+            beløp = Utils.formaterBeløp(utbetalingsbeløp),
             begrunnelser = begrunnelserOgFritekster,
             brevPeriodeType = brevPeriodeType,
             antallBarn = barnIPeriode.size.toString(),
