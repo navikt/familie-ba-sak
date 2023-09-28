@@ -67,7 +67,7 @@ private fun finnUtgjørendeVilkår(
         oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
         oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
     )
-    val vilkårEndret = hentOppfylteVilkårResultaterMedEndretUtdypende(
+    val vilkårEndret = hentOppfylteVilkårResultaterEndret(
         oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
         oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
     )
@@ -96,24 +96,17 @@ private fun finnUtgjørendeVilkår(
     }.toSet()
 }
 
-private fun hentOppfylteVilkårResultaterMedEndretUtdypende(
+private fun hentOppfylteVilkårResultaterEndret(
     oppfylteVilkårResultaterDennePerioden: List<VilkårResultatForVedtaksperiode>,
     oppfylteVilkårResultaterForrigePeriode: List<VilkårResultatForVedtaksperiode>,
-): List<VilkårResultatForVedtaksperiode> {
-    val oppfylteVilkårMedEndretUtdypende =
-        oppfylteVilkårResultaterForrigePeriode.filter { vilkårResultatForrigePeriode ->
-            val sammeVilkårResultatDennePerioden =
-                oppfylteVilkårResultaterDennePerioden.singleOrNull { it.vilkårType == vilkårResultatForrigePeriode.vilkårType }
-            val utdypendeVilkårsvurderingDennePerioden =
-                sammeVilkårResultatDennePerioden?.utdypendeVilkårsvurderinger?.toSet() ?: emptySet()
-            val utdypendeVilkårsvurderingForrigePeriode =
-                vilkårResultatForrigePeriode.utdypendeVilkårsvurderinger.toSet()
+): List<VilkårResultatForVedtaksperiode> =
+    oppfylteVilkårResultaterDennePerioden.filter { vilkårResultatForrigePeriode ->
+        val sammeVilkårResultatForrigePeriode =
+            oppfylteVilkårResultaterForrigePeriode.singleOrNull { it.vilkårType == vilkårResultatForrigePeriode.vilkårType }
 
-            utdypendeVilkårsvurderingForrigePeriode != utdypendeVilkårsvurderingDennePerioden
-        }.map { it.vilkårType }
-
-    return oppfylteVilkårResultaterDennePerioden.filter { it.vilkårType in oppfylteVilkårMedEndretUtdypende }
-}
+        sammeVilkårResultatForrigePeriode != null &&
+            vilkårResultatForrigePeriode != sammeVilkårResultatForrigePeriode
+    }
 
 private fun hentVilkårResultaterTjent(
     oppfylteVilkårResultaterDennePerioden: List<VilkårResultatForVedtaksperiode>,
