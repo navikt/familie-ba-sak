@@ -166,7 +166,7 @@ fun leggTilVilkårResultatPåPersonResultat(
                 ),
                 begrunnelse = "",
                 utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingForÉnRad,
-                vurderesEtter = vurderesEtterForEnRad
+                vurderesEtter = vurderesEtterForEnRad,
             )
         }
         personResultat.vilkårResultater.addAll(vilkårResultaterForÉnRad)

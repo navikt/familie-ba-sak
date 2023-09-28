@@ -249,10 +249,13 @@ private fun filtrerPåEndretUtbetaling(
 private fun filtrerPåVilkår(
     it: SanityBegrunnelse,
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
-) = !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag) && !finnesVilkårVurdertEtterEøsForordning(begrunnelseGrunnlag)
+) =
+    !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag) && vilkårErIkkeVurdertEtterEøsForordningen(
+        begrunnelseGrunnlag,
+    )
 
-private fun finnesVilkårVurdertEtterEøsForordning(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean =
-     begrunnelseGrunnlag.dennePerioden.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
+private fun vilkårErIkkeVurdertEtterEøsForordningen(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean =
+    begrunnelseGrunnlag.dennePerioden.vilkårResultater.none { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
 
 private fun SanityBegrunnelse.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
     if (begrunnelseGrunnlag !is BegrunnelseGrunnlagForPeriodeMedReduksjonPåTversAvBehandlinger) {
