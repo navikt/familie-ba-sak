@@ -9,9 +9,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse

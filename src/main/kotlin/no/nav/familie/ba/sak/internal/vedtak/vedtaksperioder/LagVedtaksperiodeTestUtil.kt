@@ -1,9 +1,9 @@
-package no.nav.familie.ba.sak.internal.vedtak.begrunnelser
+package no.nav.familie.ba.sak.internal.vedtak.vedtaksperioder
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilddMMyyyy
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.internal.vedtak.begrunnelser.VilkårResultatRad
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -15,11 +15,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilIKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import org.apache.commons.lang3.RandomStringUtils
 import java.time.LocalDate
 
-fun lagGyldigeBegrunnelserTest(
+fun lagVedtaksperioderTest(
     behandling: Behandling,
     forrigeBehandling: Behandling?,
     persongrunnlag: PersonopplysningGrunnlag,
@@ -56,26 +55,26 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
     hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
-    Når begrunnelsetekster genereres for behandling ${behandling.id}""" +
+    Når vedtaksperioder med begrunnelser genereres for behandling ${behandling.id}""" +
     hentTekstForVedtaksperioder(vedtaksperioder) + """
 </pre> 
     """
 
 private fun lagPersonresultaterTekst(behandling: Behandling?) = behandling?.let {
     """
-    Og lag personresultater for begrunnelse for behandling ${it.id}"""
+    Og lag personresultater for behandling ${it.id}"""
 } ?: ""
 
-fun hentTekstForFagsak(behandling: Behandling) =
+private fun hentTekstForFagsak(behandling: Behandling) =
     """
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsak
       | FagsakId | Fagsaktype |
       | ${behandling.fagsak.id} | ${behandling.fagsak.type} |"""
 
-fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: Behandling?) =
+private fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: Behandling?) =
     """
 
-    Gitt følgende behandling
+    Gitt følgende vedtak
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |${
         forrigeBehandling?.let {
             """ 
@@ -84,13 +83,13 @@ fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: Behandli
     }
       | ${behandling.id} | ${behandling.fagsak.id} | ${forrigeBehandling?.id ?: ""} |${behandling.resultat} | ${behandling.opprettetÅrsak} |"""
 
-fun hentTekstForPersongrunnlag(
+private fun hentTekstForPersongrunnlag(
     persongrunnlag: PersonopplysningGrunnlag,
     persongrunnlagForrigeBehandling: PersonopplysningGrunnlag?,
 ) =
     """
     
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |""" +
         hentPersongrunnlagRader(persongrunnlagForrigeBehandling) +
         hentPersongrunnlagRader(persongrunnlag)
@@ -101,7 +100,7 @@ private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): 
       | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|"""
     } ?: ""
 
-fun hentTekstForVilkårresultater(
+private fun hentTekstForVilkårresultater(
     personResultater: Set<PersonResultat>?,
     behandlingId: Long?,
 ): String {
@@ -111,19 +110,10 @@ fun hentTekstForVilkårresultater(
 
     return """
         
-    Og legg til nye vilkårresultater for begrunnelse for behandling $behandlingId
+    Og legg til nye vilkårresultater for behandling $behandlingId
       | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag |""" +
         tilVilkårResultatRader(personResultater)
 }
-
-data class VilkårResultatRad(
-    val aktørId: String,
-    val utdypendeVilkårsvurderinger: Set<UtdypendeVilkårsvurdering>,
-    val fom: LocalDate?,
-    val tom: LocalDate?,
-    val resultat: Resultat,
-    val erEksplisittAvslagPåSøknad: Boolean?,
-)
 
 private fun tilVilkårResultatRader(personResultater: Set<PersonResultat>?) =
     personResultater?.joinToString("\n") { personResultat ->
@@ -146,13 +136,13 @@ private fun tilVilkårResultatRader(personResultater: Set<PersonResultat>?) =
             }
     } ?: ""
 
-fun hentTekstForTilkjentYtelse(
+private fun hentTekstForTilkjentYtelse(
     andeler: List<AndelTilkjentYtelse>,
     andelerForrigeBehandling: List<AndelTilkjentYtelse>?,
 ) =
     """
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats | """ +
         hentAndelRader(andelerForrigeBehandling) +
         hentAndelRader(andeler)
@@ -168,7 +158,7 @@ private fun hentAndelRader(andeler: List<AndelTilkjentYtelse>?): String = andele
         }|${it.kalkulertUtbetalingsbeløp}| ${it.type} | ${it.prosent} | ${it.sats} | """
     } ?: ""
 
-fun hentTekstForEndretUtbetaling(
+private fun hentTekstForEndretUtbetaling(
     endredeUtbetalinger: List<EndretUtbetalingAndel>,
     endredeUtbetalingerForrigeBehandling: List<EndretUtbetalingAndel>?,
 ): String {
@@ -180,7 +170,7 @@ fun hentTekstForEndretUtbetaling(
     } else {
         """
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med endrede utbetalinger
       | AktørId  | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |""" +
             hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
             hentEndretUtbetalingRader(endredeUtbetalinger)
@@ -200,7 +190,7 @@ private fun hentEndretUtbetalingRader(endredeUtbetalinger: List<EndretUtbetaling
             }|${it.årsak} | ${it.prosent} |"""
         } ?: ""
 
-fun hentTekstForKompetanse(
+private fun hentTekstForKompetanse(
     kompetanse: Collection<Kompetanse>,
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
 ): String {
@@ -212,7 +202,7 @@ fun hentTekstForKompetanse(
     } else {
         """
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId | Fra dato | Til dato | Resultat | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |""" +
             rader
     }
@@ -247,17 +237,17 @@ private fun hentKompetanseRader(kompetanser: Collection<Kompetanse>?): String =
             } |"""
         } ?: ""
 
-fun hentTekstForVedtaksperioder(
+private fun hentTekstForVedtaksperioder(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ) =
     """
         
-    Så forvent følgende standardBegrunnelser
-      | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |""" +
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar     |""" +
         hentVedtaksperiodeRader(vedtaksperioder)
 
-fun hentVedtaksperiodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
+private fun hentVedtaksperiodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") {
         """
-      | ${it.fom?.tilddMMyyyy() ?: ""} |${it.tom?.tilddMMyyyy() ?: ""} |${it.type} | | | |"""
+      | ${it.fom?.tilddMMyyyy() ?: ""} |${it.tom?.tilddMMyyyy() ?: ""} |${it.type} |               |"""
     }

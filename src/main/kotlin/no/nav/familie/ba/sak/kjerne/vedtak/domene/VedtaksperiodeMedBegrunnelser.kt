@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
@@ -222,3 +223,21 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidsl
         }.tilTidslinje()
     }.kombiner { it.takeIf { it.toList().isNotEmpty() } }
     .slåSammenLike()
+
+fun hentBrevPeriodeType(
+    vedtaksperiodetype: Vedtaksperiodetype,
+    fom: LocalDate?,
+    erUtbetalingEllerDeltBostedIPeriode: Boolean,
+): BrevPeriodeType =
+    when (vedtaksperiodetype) {
+        Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET_NY
+        Vedtaksperiodetype.UTBETALING -> when {
+            erUtbetalingEllerDeltBostedIPeriode -> BrevPeriodeType.UTBETALING
+            else -> BrevPeriodeType.INGEN_UTBETALING
+        }
+
+        Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.INGEN_UTBETALING else BrevPeriodeType.INGEN_UTBETALING_UTEN_PERIODE
+        Vedtaksperiodetype.OPPHØR -> BrevPeriodeType.INGEN_UTBETALING
+        Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.UTBETALING
+        Vedtaksperiodetype.ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
+    }
