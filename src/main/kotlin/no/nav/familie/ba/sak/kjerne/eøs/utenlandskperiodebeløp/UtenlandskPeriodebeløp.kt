@@ -81,7 +81,7 @@ data class UtenlandskPeriodebeløp(
     override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) = copy(
         fom = fom,
         tom = tom,
-        barnAktører = barnAktører,
+        barnAktører = barnAktører.toSet(), // .toSet() brukes for at det skal bli et nytt sett (to objekter kan ikke ha referanse til samme sett)
     )
 
     companion object {
