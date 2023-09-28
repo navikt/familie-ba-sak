@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Innvilgelsesbegrunnelser vilkårsvurdering flettefelt
+Egenskap: Vil flette inn riktig antall barn og fødselsdatoer ved innvilgetebegrunnelser som går på vilkårsvurdering.
 
   Bakgrunn:
     Gitt følgende fagsaker for begrunnelse
@@ -18,7 +18,7 @@ Egenskap: Innvilgelsesbegrunnelser vilkårsvurdering flettefelt
       | 1            | 3456    | BARN       | 02.02.2015  |
       | 1            | 5678    | BARN       | 07.09.2019  |
 
-  Scenario: Du og barnet
+  Scenario: Du og barna - skal ha med begge barn og søker
     Og følgende dagens dato 26.09.2023
     Og lag personresultater for begrunnelse for behandling 1
 
@@ -54,7 +54,7 @@ Egenskap: Innvilgelsesbegrunnelser vilkårsvurdering flettefelt
       | INNVILGET_BOSATT_I_RIKTET | Ja            | 02.02.15 og 07.09.19 | 2           | november 2022                        | NB      | 2 730 |                  | SØKER_HAR_IKKE_RETT     |
 
 
-  Scenario: barnet
+  Scenario: barnet - skal kun ta med et barn når det bare er et barn som har endring i vilkår
     Og følgende dagens dato 27.09.2023
     Og lag personresultater for begrunnelse for behandling 1
 
@@ -89,7 +89,7 @@ Egenskap: Innvilgelsesbegrunnelser vilkårsvurdering flettefelt
       | INNVILGET_BOSATT_I_RIKTET | Nei           | 07.09.19            | 1           | november 2022                        | NB      | 1 676 |                  | SØKER_HAR_IKKE_RETT     |
 
 
-  Scenario: Back to back perioder
+  Scenario: Back to back perioder - ønsker kun å begrunne barnet som har flyttet til søker i INNVILGET_BOR_HOS_SØKER
     Og følgende dagens dato 27.09.2023
     Og lag personresultater for begrunnelse for behandling 1
 
@@ -131,7 +131,7 @@ Egenskap: Innvilgelsesbegrunnelser vilkårsvurdering flettefelt
       | REDUKSJON_AVTALE_FAST_BOSTED | Nei           | 07.09.19            | 1           | mai 2023                             | NB      | 862   |                  | SØKER_HAR_IKKE_RETT     |
 
 
-  Scenario:Endret for 1 av 2
+  Scenario:Endret for 1 av 2 - Skal kun flette inn barnet som det er utbetaling for når det andre barnet etterbetales
     Og følgende dagens dato 27.09.2023
     Og lag personresultater for begrunnelse for behandling 1
 
