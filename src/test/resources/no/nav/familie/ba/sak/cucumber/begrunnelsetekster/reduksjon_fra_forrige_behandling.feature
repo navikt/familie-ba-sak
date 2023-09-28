@@ -270,3 +270,66 @@ Egenskap: Reduksjon fra forrige behandling
       | 01.02.2028 | 28.02.2037 | UTBETALING                                              |           |                                   |                          |
       | 01.03.2037 | 31.01.2040 | UTBETALING                                              |           |                                   |                          |
       | 01.02.2040 |            | OPPHØR                                                  |           |                                   |                          |
+
+  Scenario: Skal ikke få reduksjon fra forrige behandling-begrunnelse, men vanlig reduksjon
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
+      | 1            | 1        |                     | INNVILGET           | SØKNAD           |
+      | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1234    | SØKER      | 19.11.1984  |
+      | 1            | 3456    | BARN       | 26.08.2016  |
+      | 1            | 5678    | BARN       | 23.08.2017  |
+      | 2            | 1234    | SØKER      | 19.11.1984  |
+      | 2            | 3456    | BARN       | 26.08.2016  |
+      | 2            | 5678    | BARN       | 23.08.2017  |
+
+
+    Og følgende dagens dato 28.09.2023
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1234    | LOVLIG_OPPHOLD,BOSATT_I_RIKET                 |                  | 19.11.1984 |            | OPPFYLT  | Nei                  |
+
+      | 3456    | LOVLIG_OPPHOLD,BOR_MED_SØKER,GIFT_PARTNERSKAP |                  | 26.08.2016 |            | OPPFYLT  | Nei                  |
+      | 3456    | BOSATT_I_RIKET                                |                  | 26.08.2016 | 31.12.2018 | OPPFYLT  | Nei                  |
+      | 3456    | UNDER_18_ÅR                                   |                  | 26.08.2016 | 25.08.2034 | OPPFYLT  | Nei                  |
+
+      | 5678    | LOVLIG_OPPHOLD,BOR_MED_SØKER,GIFT_PARTNERSKAP |                  | 23.08.2017 |            | OPPFYLT  | Nei                  |
+      | 5678    | BOSATT_I_RIKET                                |                  | 23.08.2017 | 31.12.2018 | OPPFYLT  | Nei                  |
+      | 5678    | UNDER_18_ÅR                                   |                  | 23.08.2017 | 22.08.2035 | OPPFYLT  | Nei                  |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår                                          | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1234    | LOVLIG_OPPHOLD,BOSATT_I_RIKET                   |                  | 19.11.1984 |            | OPPFYLT  | Nei                  |
+
+      | 3456    | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP, BOSATT_I_RIKET |                  | 26.08.2016 |            | OPPFYLT  | Nei                  |
+      | 3456    | BOR_MED_SØKER                                   |                  | 26.08.2016 | 31.12.2018 | OPPFYLT  | Nei                  |
+      | 3456    | UNDER_18_ÅR                                     |                  | 26.08.2016 | 25.08.2034 | OPPFYLT  | Nei                  |
+
+      | 5678    | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP, BOSATT_I_RIKET |                  | 23.08.2017 |            | OPPFYLT  | Nei                  |
+      | 5678    | BOR_MED_SØKER                                   |                  | 23.08.2017 | 31.08.2018 | OPPFYLT  | Nei                  |
+      | 5678    | UNDER_18_ÅR                                     |                  | 23.08.2017 | 22.08.2035 | OPPFYLT  | Nei                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 3456    | 1            | 01.09.2016 | 31.12.2018 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 5678    | 1            | 01.09.2017 | 31.12.2018 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+
+      | 3456    | 2            | 01.09.2016 | 31.12.2018 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 5678    | 2            | 01.09.2017 | 31.08.2018 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+
+    Når begrunnelsetekster genereres for behandling 2
+
+    Så forvent følgende standardBegrunnelser
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser          |
+      | 01.09.2018 | 31.12.2018 | UTBETALING         |           | REDUKSJON_FLYTTET_BARN  | REDUKSJON_BARN_BOR_IKKE_MED_SØKER |
+      | 01.01.2019 |            | OPPHØR             |           |                         |                                   |
