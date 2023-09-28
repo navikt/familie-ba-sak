@@ -197,6 +197,7 @@ private fun hentStandardBegrunnelser(
 
     val relevanteBegrunnelser = filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser
         .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
+        .filterValues { !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && !it.begrunnelseGjelderOpphørFraForrigeBehandling() }
 
     val filtrertPåVilkårOgEndretUtbetaling = relevanteBegrunnelser.filterValues {
         val begrunnelseErGjeldendeForUtgjørendeVilkår = it.vilkår.isNotEmpty()
