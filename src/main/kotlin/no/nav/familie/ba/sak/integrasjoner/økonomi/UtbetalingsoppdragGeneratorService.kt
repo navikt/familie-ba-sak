@@ -49,7 +49,7 @@ class UtbetalingsoppdragGeneratorService(
         val nyTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = vedtak.behandling.id)
         val endretMigreringsDato = beregnOmMigreringsDatoErEndret(
             vedtak.behandling,
-            forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minByOrNull { it.stønadFom }?.stønadFom,
+            forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom },
         )
         val sisteAndelPerKjede = hentSisteAndelTilkjentYtelse(vedtak.behandling.fagsak)
         val beregnetUtbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
@@ -95,7 +95,7 @@ class UtbetalingsoppdragGeneratorService(
             ?.let { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandlingId = it.id) }
 
     private fun hentSisteAndelTilkjentYtelse(fagsak: Fagsak) =
-        andelTilkjentYtelseRepository.hentSisteAndelPerIdent(fagsakId = fagsak.id)
+        andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(fagsakId = fagsak.id)
             .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
 
     @Transactional

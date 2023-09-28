@@ -396,13 +396,7 @@ private fun lagGrunnlagMedEndretUtbetalingAndel(
     endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode?,
 ) = when (vedtaksperiodeGrunnlagForPerson) {
     is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> vedtaksperiodeGrunnlagForPerson.copy(endretUtbetalingAndel = endretUtbetalingAndel)
-    is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> {
-        if (endretUtbetalingAndel != null) {
-            throw Feil("GrunnlagForPersonIkkeInnvilget for aktør ${vedtaksperiodeGrunnlagForPerson.person.aktør} kan ikke ha endretUtbetalingAndel siden den ikke er innvilget")
-        }
-        vedtaksperiodeGrunnlagForPerson
-    }
-
+    is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> vedtaksperiodeGrunnlagForPerson
     null -> null
 }
 
