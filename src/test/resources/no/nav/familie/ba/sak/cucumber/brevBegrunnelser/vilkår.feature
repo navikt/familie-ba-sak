@@ -33,5 +33,5 @@ Egenskap: Brevbegrunnelser ved endring av vilkår
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.04.2021 til -
       | Begrunnelse                   | Gjelder søker | Barnas fødselsdager | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | OPPHØR_BARN_FLYTTET_FRA_SØKER | Nei           | 13.04.20            | 1           | mars 2021                            | NB      | 0     |                  | SØKER_HAR_IKKE_RETT     |
+      | OPPHØR_BARN_FLYTTET_FRA_SØKER | Nei           | 13.04.2020          | 1           | mars 2021                            | NB      | 0     |                  | SØKER_HAR_IKKE_RETT     |
 

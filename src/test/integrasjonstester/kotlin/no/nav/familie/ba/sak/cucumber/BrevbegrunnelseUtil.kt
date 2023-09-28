@@ -4,7 +4,9 @@ import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.norskDatoFormatter
+import no.nav.familie.ba.sak.cucumber.domeneparser.norskDatoFormatterKort
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseBoolean
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseDatoListe
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
@@ -55,10 +57,10 @@ fun parseStandardBegrunnelse(rad: Tabellrad) =
         ).sanityApiNavn,
 
         gjelderSoker = parseBoolean(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.GJELDER_SØKER, rad),
-        barnasFodselsdatoer = parseString(
+        barnasFodselsdatoer = parseDatoListe(
             BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDAGER,
             rad,
-        ),
+        ).joinToString { it.format(norskDatoFormatterKort) },
 
         fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = "",
         fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling = "",

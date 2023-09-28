@@ -1,14 +1,23 @@
 package no.nav.familie.ba.sak.cucumber.domeneparser
 
+import no.nav.familie.ba.sak.common.nbLocale
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 val norskDatoFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+val norskDatoFormatterKort = DateTimeFormatter.ofPattern("dd.MM.yy", nbLocale)
 val norskÅrMånedFormatter = DateTimeFormatter.ofPattern("MM.yyyy")
 val isoDatoFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 val isoÅrMånedFormatter = DateTimeFormatter.ofPattern("yyyy-MM")
+
+fun parseDatoListe(domenebegrep: Domenenøkkel, rad: Map<String, String>): List<LocalDate> {
+    val stringVerdier = parseString(domenebegrep, rad).split(",").map { it.trim() }
+    return stringVerdier.map {
+        parseDato(it)
+    }
+}
 
 fun parseDato(domenebegrep: Domenenøkkel, rad: Map<String, String>): LocalDate {
     return parseDato(domenebegrep.nøkkel, rad)
