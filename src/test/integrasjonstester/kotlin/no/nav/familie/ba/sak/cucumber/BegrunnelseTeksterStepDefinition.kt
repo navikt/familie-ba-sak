@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -320,6 +321,31 @@ class BegrunnelseTeksterStepDefinition {
         assertThat(faktiskeBegrunnelser.sortedBy { it.apiNavn })
             .usingRecursiveComparison()
             .isEqualTo(forvendtedeBegrunnelser.sortedBy { it.apiNavn })
+    }
+
+    /**
+     * Mulige verdier: | Type | Fra dato | Til dato | Beløp | Antall barn | Barnas fødselsdager | Du eller institusjonen |
+     */
+    @Så("forvent følgende brevperioder for behandling {}")
+    fun `forvent følgende brevperioder for behandling i periode`(
+        behandlingId: Long,
+        dataTable: DataTable,
+    ) {
+        val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
+        val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+        val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
+
+        val faktiskeBrevperioder: List<BrevPeriode> =
+            vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.mapNotNull {
+                it.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)
+            }
+
+        val forvendtedeBrevperioder = parseBrevPerioder(dataTable)
+
+        assertThat(faktiskeBrevperioder)
+            .usingRecursiveComparison()
+            .ignoringFields("begrunnelser")
+            .isEqualTo(forvendtedeBrevperioder)
     }
 
     // For å laste ned begrunnelsene på nytt anbefales https://familie-brev.sanity.studio/ba-test/vision med query fra SanityQueries.kt .

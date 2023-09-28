@@ -12,6 +12,13 @@ val norskÅrMånedFormatter = DateTimeFormatter.ofPattern("MM.yyyy")
 val isoDatoFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 val isoÅrMånedFormatter = DateTimeFormatter.ofPattern("yyyy-MM")
 
+fun parseValgfriDatoListe(domenebegrep: Domenenøkkel, rad: Map<String, String>): List<LocalDate> {
+    val stringVerdier = parseValgfriString(domenebegrep, rad)?.split(",")?.map { it.trim() } ?: emptyList()
+    return stringVerdier.map {
+        parseDato(it)
+    }
+}
+
 fun parseDatoListe(domenebegrep: Domenenøkkel, rad: Map<String, String>): List<LocalDate> {
     val stringVerdier = parseString(domenebegrep, rad).split(",").map { it.trim() }
     return stringVerdier.map {
