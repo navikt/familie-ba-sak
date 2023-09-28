@@ -153,11 +153,11 @@ Egenskap: Tema
     Når begrunnelsetekster genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser              |
-      | 01.06.2022 | 28.02.2023 | UTBETALING         |           |                         | INNVILGET_EØS_BORGER_EKTEFELLE_JOBBER |
-      | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                         |                                       |
-      | 01.07.2023 | 31.08.2023 | UTBETALING         |           |                         |                                       |
-      | 01.09.2023 | 31.05.2025 | UTBETALING         |           |                         |                                       |
-      | 01.06.2025 | 30.11.2032 | UTBETALING         |           |                         |                                       |
-      | 01.12.2032 | 31.05.2037 | UTBETALING         |           |                         |                                       |
-      | 01.06.2037 |            | OPPHØR             |           |                         |                                       |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                    | Regelverk Ekskluderte Begrunnelser | Ekskluderte Begrunnelser              |
+      | 01.06.2022 | 28.02.2023 | UTBETALING         | EØS_FORORDNINGEN                  | INNVILGET_PRIMÆRLAND_UK_OG_UTLAND_STANDARD | NASJONALE_REGLER                   | INNVILGET_EØS_BORGER_EKTEFELLE_JOBBER |
+      | 01.03.2023 | 30.06.2023 | UTBETALING         |                                   |                                            |                                    |                                       |
+      | 01.07.2023 | 31.08.2023 | UTBETALING         |                                   |                                            |                                    |                                       |
+      | 01.09.2023 | 31.05.2025 | UTBETALING         |                                   |                                            |                                    |                                       |
+      | 01.06.2025 | 30.11.2032 | UTBETALING         |                                   |                                            |                                    |                                       |
+      | 01.12.2032 | 31.05.2037 | UTBETALING         |                                   |                                            |                                    |                                       |
+      | 01.06.2037 |            | OPPHØR             |                                   |                                            |                                    |                                       |
