@@ -51,5 +51,5 @@ Egenskap: Brevbegrunnelser ved endring av kompetanse
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.05.2021 til 31.03.2038
       | Begrunnelse                     | Type | Barnas fødselsdager | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet |
-      | INNVILGET_SEKUNDÆRLAND_STANDARD | EØS  | 13.04.2020          | 1           | NB      | Norge                          | Polen               | Polen                 | I_ARBEID                  | ARBEIDER         |
+      | INNVILGET_SEKUNDÆRLAND_STANDARD | EØS  | 13.04.20            | 1           | NB      | Norge                          | Polen               | Polen                 | I_ARBEID                  | ARBEIDER         |
 

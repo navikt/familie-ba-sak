@@ -4,13 +4,11 @@ import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.norskDatoFormatter
-import no.nav.familie.ba.sak.cucumber.domeneparser.norskDatoFormatterKort
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriBoolean
-import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDatoListe
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.SøkersRettTilUtvidet
@@ -57,10 +55,10 @@ fun parseStandardBegrunnelse(rad: Tabellrad) =
         ).sanityApiNavn,
 
         gjelderSoker = parseBoolean(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.GJELDER_SØKER, rad),
-        barnasFodselsdatoer = parseValgfriDatoListe(
+        barnasFodselsdatoer = parseValgfriString(
             BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDAGER,
             rad,
-        ).joinToString { it.format(norskDatoFormatterKort) },
+        ) ?: "",
 
         fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = "",
         fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling = "",
