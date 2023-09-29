@@ -17,7 +17,7 @@ Egenskap: Begrunnelser for utvidet barnetrygd
       | 1            | 1       | SØKER      | 26.04.1985  |
       | 1            | 2       | BARN       | 12.01.2022  |
 
-  Scenario: Skal gi innvilgelsesbegrunnelse for utvidet i første utbetalingsperiode etter at utvidet er oppfylt
+  Scenario: Skal gi innvilgelsesbegrunnelse INNVILGET_BOR_ALENE_MED_BARN for utvidet i første utbetalingsperiode etter at utvidet er oppfylt
     Og følgende dagens dato 28.09.2023
     Og lag personresultater for begrunnelse for behandling 1
 
@@ -40,5 +40,5 @@ Egenskap: Begrunnelser for utvidet barnetrygd
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser      | Ekskluderte Begrunnelser |
-      | 01.05.2023 | 30.06.2023 | UTBETALING         |           | INNVILGET_BOR_ALENE_MED_BARN |                          |
+      | 01.05.2023 | 30.06.2023 | UTBETALING         |           | INNVILGET_BOR_ALENE_MED_BARN | INNVILGET_SKILT          |
       | 01.07.2023 |            | OPPHØR             |           |                              |                          |
