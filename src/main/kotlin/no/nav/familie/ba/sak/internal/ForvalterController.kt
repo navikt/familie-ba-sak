@@ -221,7 +221,10 @@ class ForvalterController(
 
     @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd")
     fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(): ResponseEntity<List<Long>> {
-        return ResponseEntity.ok(forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd())
+        val åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd =
+            forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd()
+        logger.info("Følgende fagsaker har flere migreringsbehandlinger og løpende sak i Infotrygd: $åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd")
+        return ResponseEntity.ok(åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd)
     }
 
     data class SendUtbetalingsoppdragPåNyttResponse(
