@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Reduksjon fra forrige behandling
+Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
 
   Scenario: Skal gi reduksjon fra forrige behandling-begrunnelser knyttet til bor med søker når bor med søker er innvilget en måned senere i revurdering
     Gitt følgende behandling
