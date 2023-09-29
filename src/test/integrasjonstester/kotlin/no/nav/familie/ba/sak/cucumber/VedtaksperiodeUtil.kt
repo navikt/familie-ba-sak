@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
+import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
@@ -407,7 +408,10 @@ fun leggBegrunnelserIVedtaksperiodene(
 
     val vedtaksperiode =
         vedtaksperioder.find { it.fom == fom && it.tom == tom }
-            ?: throw Feil("Ingen vedtaksperioder med Fom=$fom og Tom=$tom")
+            ?: throw Feil(
+                "Ingen vedtaksperioder med Fom=$fom og Tom=$tom. " +
+                    "Vedtaksperiodene var ${vedtaksperioder.map { "\n${it.fom?.tilddMMyyyy()} til ${it.tom?.tilddMMyyyy()}" }}",
+            )
     val vedtaksperiodeMedBegrunnelser = vedtaksperiode.tilVedtaksperiodeMedBegrunnelser(
         vedtak,
     )
