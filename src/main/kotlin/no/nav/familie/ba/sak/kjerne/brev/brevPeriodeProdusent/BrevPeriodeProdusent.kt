@@ -84,11 +84,6 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
             brevPeriodeType = brevPeriodeType,
             fagsakType = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioder.fagsakType,
         ),
-
-        antallBarnMedUtbetaling = "", // TODO er denne i bruk
-        antallBarnMedNullutbetaling = "", // TODO er denne i bruk
-        fodselsdagerBarnMedUtbetaling = "", // TODO er denne i bruk
-        fodselsdagerBarnMedNullutbetaling = "", // TODO er denne i bruk
     )
 }
 

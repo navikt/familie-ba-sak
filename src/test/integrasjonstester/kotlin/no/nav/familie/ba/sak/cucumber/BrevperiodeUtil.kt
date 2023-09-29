@@ -37,11 +37,6 @@ fun parseBrevPerioder(dataTable: DataTable): List<BrevPeriode> {
             antallBarn = antallBarn.toString(),
             barnasFodselsdager = barnasFodselsdatoer,
             duEllerInstitusjonen = duEllerInstitusjonen,
-
-            antallBarnMedUtbetaling = "",
-            antallBarnMedNullutbetaling = "",
-            fodselsdagerBarnMedUtbetaling = "",
-            fodselsdagerBarnMedNullutbetaling = "",
         )
     }
 }

@@ -13,11 +13,6 @@ data class BrevPeriode(
     val barnasFodselsdager: Flettefelt,
     val begrunnelser: List<BrevBegrunnelse>,
     val type: Flettefelt,
-
-    val antallBarnMedUtbetaling: Flettefelt,
-    val antallBarnMedNullutbetaling: Flettefelt,
-    val fodselsdagerBarnMedUtbetaling: Flettefelt,
-    val fodselsdagerBarnMedNullutbetaling: Flettefelt,
     val duEllerInstitusjonen: Flettefelt,
 ) {
 
@@ -29,10 +24,6 @@ data class BrevPeriode(
         brevPeriodeType: BrevPeriodeType,
         antallBarn: String,
         barnasFodselsdager: String,
-        antallBarnMedUtbetaling: String,
-        antallBarnMedNullutbetaling: String,
-        fodselsdagerBarnMedUtbetaling: String,
-        fodselsdagerBarnMedNullutbetaling: String,
         duEllerInstitusjonen: String,
     ) : this(
         fom = flettefelt(fom),
@@ -40,10 +31,6 @@ data class BrevPeriode(
         belop = flettefelt(beløp),
         antallBarn = flettefelt(antallBarn),
         barnasFodselsdager = flettefelt(barnasFodselsdager),
-        antallBarnMedUtbetaling = flettefelt(antallBarnMedUtbetaling),
-        antallBarnMedNullutbetaling = flettefelt(antallBarnMedNullutbetaling),
-        fodselsdagerBarnMedUtbetaling = flettefelt(fodselsdagerBarnMedUtbetaling),
-        fodselsdagerBarnMedNullutbetaling = flettefelt(fodselsdagerBarnMedNullutbetaling),
         begrunnelser = begrunnelser,
         type = flettefelt(brevPeriodeType.apiNavn),
         duEllerInstitusjonen = flettefelt(duEllerInstitusjonen),

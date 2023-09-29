@@ -257,10 +257,6 @@ class BrevPeriodeGenerator(
             brevPeriodeType = brevPeriodeType,
             antallBarn = barnIPeriode.size.toString(),
             barnasFodselsdager = barnIPeriode.tilBarnasFødselsdatoer(),
-            antallBarnMedUtbetaling = barnMedUtbetaling.size.toString(),
-            antallBarnMedNullutbetaling = barnMedNullutbetaling.size.toString(),
-            fodselsdagerBarnMedUtbetaling = barnMedUtbetaling.tilBarnasFødselsdatoer(),
-            fodselsdagerBarnMedNullutbetaling = barnMedNullutbetaling.tilBarnasFødselsdatoer(),
             duEllerInstitusjonen = duEllerInstitusjonen,
         )
     }
