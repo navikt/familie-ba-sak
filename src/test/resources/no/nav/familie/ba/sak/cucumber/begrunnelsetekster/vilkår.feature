@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Begrunnelser ved endring av vilkår
+Egenskap: Gyldige begrunnelser ved endring av vilkår
 
   Bakgrunn:
     Gitt følgende behandling
@@ -75,7 +75,7 @@ Egenskap: Begrunnelser ved endring av vilkår
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser      |
       | 01.05.2021 | 31.03.2022 | UTBETALING         | INNVILGET_BOR_HOS_SØKER       | REDUKSJON_IKKE_BOSATT_I_NORGE |
       | 01.04.2022 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER |                               |
-    
+
   Scenario: Skal ikke gi reduksjonsbegrunnelse når det er innvilgelse
     Og lag personresultater for begrunnelse for behandling 1
 

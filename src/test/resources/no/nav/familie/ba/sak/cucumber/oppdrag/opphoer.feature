@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Opphør
+Egenskap: Utbetalingsoppdrag: Opphør
 
 
   Scenario: Opphør en periode

@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Behandling med uregistrert barn
+Egenskap: Vedtaksperioder for behandling med uregistrert barn
 
   Bakgrunn:
     Gitt følgende vedtak

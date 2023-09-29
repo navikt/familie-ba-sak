@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 
-Egenskap: Vedtaksperioder med mor og to barn
+Egenskap: Vedtaksperioder for opphørsperioder skal håndtere vilkårsendringer
 
   Bakgrunn:
     Gitt følgende vedtak

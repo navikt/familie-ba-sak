@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtaksperioder med mor og et barn
+Egenskap: Gyldige begrunnelser for etter endret utbetaling, en mor med ett barn
 
   Bakgrunn:
     Gitt følgende behandling

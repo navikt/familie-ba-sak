@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Brevbegrunnelser ved endring av vilkår
+Egenskap: Brevperioder ved endring av vilkår
 
   Bakgrunn:
     Gitt følgende behandling

@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Opphør fra forrige behandling
+Egenskap: Gyldige begrunnelser for opphør fra forrige behandling
 
   Bakgrunn:
     Gitt følgende behandling

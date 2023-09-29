@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Avslag
+Egenskap: Gyldige begrunnelser for avslag
 
   Bakgrunn:
     Gitt følgende behandling
