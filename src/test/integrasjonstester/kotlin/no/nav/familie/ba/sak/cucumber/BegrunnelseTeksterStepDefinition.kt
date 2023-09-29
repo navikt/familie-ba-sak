@@ -111,7 +111,7 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     /**
-     * Mulige verdier: | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag |
+     * Mulige verdier: | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Vurderes etter |
      */
     @Og("legg til nye vilkårresultater for begrunnelse for behandling {}")
     fun `legg til nye vilkårresultater for behandling`(behandlingId: Long, dataTable: DataTable) {
