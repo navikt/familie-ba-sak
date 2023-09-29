@@ -33,5 +33,5 @@ Egenskap: Brevbegrunnelser ved endring av vilkår
 
     Så forvent følgende brevperioder for behandling 1
       | Type             | Fra dato   | Til dato | Beløp | Antall barn | Barnas fødselsdager | Du eller institusjonen |
-      | INGEN_UTBETALING | 01.04.2021 |          | 0     | 0           |                     | du                     |
+      | INGEN_UTBETALING | april 2021 |          | 0     | 0           |                     | du                     |
 
