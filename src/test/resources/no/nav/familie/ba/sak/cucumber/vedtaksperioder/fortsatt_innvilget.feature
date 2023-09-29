@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Fortsatt innvilget
+Egenskap: Vedtaksperioder for fortsatt innvilget
 
   Bakgrunn:
     Gitt følgende fagsaker
