@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Overgangsstønad og småbarnstillegg
+Egenskap: Gyldige begrunnelser for overgangsstønad og småbarnstillegg
 
   Bakgrunn:
     Gitt følgende behandling

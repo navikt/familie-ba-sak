@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 
-Egenskap: Endringstidspunkt påvirker periodene
+Egenskap: Vedtaksperioder for enslig mindreårig
 
   Bakgrunn:
     Gitt følgende fagsaker

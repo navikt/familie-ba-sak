@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Tema
+Egenskap: Gyldige begrunnelser for behandlingstema
 
   Bakgrunn:
     Gitt følgende fagsaker for begrunnelse

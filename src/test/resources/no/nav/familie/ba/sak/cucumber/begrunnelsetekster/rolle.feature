@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Begrunnelser ved endring av vilkår
+Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
 
   Bakgrunn:
     Gitt følgende fagsaker for begrunnelse

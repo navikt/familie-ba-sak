@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Ett barn fødes etter et annet
+Egenskap: Gyldige begrunnelser når ett barn fødes etter et annet
 
   Bakgrunn:
     Gitt følgende behandling

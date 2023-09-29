@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vil flette inn riktig antall barn og fødselsdatoer ved innvilgetebegrunnelser som går på vilkårsvurdering.
+Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkår
 
   Bakgrunn:
     Gitt følgende fagsaker for begrunnelse
