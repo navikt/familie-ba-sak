@@ -181,4 +181,15 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         """,
     )
     fun finnFagsakerSomHarAndelerForAktør(aktør: Aktør): List<Fagsak>
+
+    @Query(
+        """
+        SELECT distinct f FROM fagsak f
+            JOIN behandling b ON f.id = b.fk_fagsak_id
+            WHERE f.status = 'LØPENDE' AND b.opprettet_aarsak in ('HELMANUELL_MIGRERING', 'MIGRERING') AND b.resultat NOT IN ('HENLAGT_FEILAKTIG_OPPRETTET', 'HENLAGT_SØKNAD_TRUKKET', 'HENLAGT_AUTOMATISK_FØDSELSHENDELSE', 'HENLAGT_TEKNISK_VEDLIKEHOLD')
+        GROUP BY f.id
+        HAVING COUNT(*) >= 2
+        """,
+    )
+    fun finnFagsakerMedFlereMigreringsbehandlinger(): List<Fagsak>
 }

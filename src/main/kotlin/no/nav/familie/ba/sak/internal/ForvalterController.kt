@@ -168,7 +168,10 @@ class ForvalterController(
     }
 
     @PostMapping("/sendKorrigertUtbetalingsoppdragForBehandling/{behandlingId}/{versjon}")
-    fun sendKorrigertUtbetalingsoppdragForBehandling(@PathVariable behandlingId: Long, @PathVariable versjon: Int): ResponseEntity<SendUtbetalingsoppdragPåNyttResponse> {
+    fun sendKorrigertUtbetalingsoppdragForBehandling(
+        @PathVariable behandlingId: Long,
+        @PathVariable versjon: Int,
+    ): ResponseEntity<SendUtbetalingsoppdragPåNyttResponse> {
         val harFeil = mutableSetOf<Pair<Long, String>>()
         val iverksattOk = mutableSetOf<Long>()
         try {
@@ -214,6 +217,11 @@ class ForvalterController(
     @PostMapping("oppdaterLøpendeStatusPåFagsaker")
     fun oppdaterLøpendeStatusPåFagsaker() {
         fagsakService.oppdaterLøpendeStatusPåFagsaker()
+    }
+
+    @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd")
+    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(): ResponseEntity<List<Long>> {
+        return ResponseEntity.ok(forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd())
     }
 
     data class SendUtbetalingsoppdragPåNyttResponse(
