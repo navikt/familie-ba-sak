@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtak for førstegangsbehandling
+Egenskap: Utbetalingsoppdrag: Vedtak for førstegangsbehandling
 
 
   Scenario: Vedtak med en periode

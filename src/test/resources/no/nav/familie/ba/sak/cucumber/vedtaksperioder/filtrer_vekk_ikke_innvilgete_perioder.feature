@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtaksperioder med mor og to barn
+Egenskap: Vedtaksperioder skal filtrere vekk irrelevante perioder
 
   Bakgrunn:
     Gitt følgende vedtak
@@ -19,12 +19,12 @@ Egenskap: Vedtaksperioder med mor og to barn
     Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                           | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD   | 11.01.1970 |            | Oppfylt      |                      |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET | 13.04.2020 | 06.06.2021 | Oppfylt      |                      |
+      | 3456    | LOVLIG_OPPHOLD                   | 13.04.2020 | 08.08.2021 | Oppfylt      |                      |
       | 3456    | BOR_MED_SØKER                    | 13.04.2020 | 08.08.2021 | Oppfylt      |                      |
+      | 3456    | UNDER_18_ÅR                      | 13.04.2020 | 12.04.2038 | Oppfylt      |                      |
       | 3456    | BOR_MED_SØKER                    | 01.09.2021 | 04.10.2022 | ikke_oppfylt | Ja                   |
       | 3456    | BOR_MED_SØKER                    | 05.10.2022 |            | ikke_oppfylt |                      |
-      | 3456    | LOVLIG_OPPHOLD                   | 13.04.2020 | 08.08.2021 | Oppfylt      |                      |
-      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET | 13.04.2020 | 06.06.2021 | Oppfylt      |                      |
-      | 3456    | UNDER_18_ÅR                      | 13.04.2020 | 12.04.2038 | Oppfylt      |                      |
 
 
     Og med andeler tilkjent ytelse

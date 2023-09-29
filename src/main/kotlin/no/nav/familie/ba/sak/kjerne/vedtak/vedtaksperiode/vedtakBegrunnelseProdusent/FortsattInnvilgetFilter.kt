@@ -6,19 +6,25 @@ import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBeg
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 
 fun hentFortsattInnvilgetBegrunnelserPerPerson(
     begrunnelseGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
     grunnlag: GrunnlagForBegrunnelse,
+    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
 ): Map<Person, Set<IVedtakBegrunnelse>> {
     val fagsakType = grunnlag.behandlingsGrunnlagForVedtaksperioder.fagsakType
 
-    val standardbegrunnelserIngenEndring = grunnlag.sanityBegrunnelser
+    val erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson)
+
+    val relevanteStandardbegrunnelser = grunnlag.sanityBegrunnelser
         .filterValues { it.erGjeldendeForFagsakType(fagsakType) }
+        .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
         .filterValues { it.periodeResultat == SanityPeriodeResultat.INGEN_ENDRING }
 
-    val eøsBegrunnelserIngenEndring = grunnlag.sanityEØSBegrunnelser
+    val relevanteEøsBegrunnelser = grunnlag.sanityEØSBegrunnelser
         .filterValues { it.erGjeldendeForFagsakType(fagsakType) }
+        .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
         .filterValues { it.periodeResultat == SanityPeriodeResultat.INGEN_ENDRING }
 
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
@@ -27,11 +33,11 @@ fun hentFortsattInnvilgetBegrunnelserPerPerson(
         val oppfylteVilkårresultater =
             begrunnelseGrunnlagForPerson.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }.toList()
 
-        val standardbegrunnelseSomMatcherVilkår = standardbegrunnelserIngenEndring
+        val standardbegrunnelseSomMatcherVilkår = relevanteStandardbegrunnelser
             .filterValues { it.erGjeldendeForRolle(person, fagsakType) }
             .filterValues { it.erLikVilkårOgUtdypendeVilkårIPeriode(oppfylteVilkårresultater) }
 
-        val eøsBegrunnelserSomMatcherKompetanse = eøsBegrunnelserIngenEndring
+        val eøsBegrunnelserSomMatcherKompetanse = relevanteEøsBegrunnelser
             .filterValues { it.erLikKompetanseIPeriode(begrunnelseGrunnlag) }
 
         standardbegrunnelseSomMatcherVilkår.keys.toSet() +

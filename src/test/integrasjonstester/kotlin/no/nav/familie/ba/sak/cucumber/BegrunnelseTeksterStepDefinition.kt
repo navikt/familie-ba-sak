@@ -18,6 +18,8 @@ import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBeg
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -27,7 +29,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.RestSanityEØSBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -110,7 +111,7 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     /**
-     * Mulige verdier: | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag |
+     * Mulige verdier: | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Vurderes etter |
      */
     @Og("legg til nye vilkårresultater for begrunnelse for behandling {}")
     fun `legg til nye vilkårresultater for behandling`(behandlingId: Long, dataTable: DataTable) {
@@ -247,7 +248,7 @@ class BegrunnelseTeksterStepDefinition {
                 kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                 endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
                 andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
-                perioderOvergangsstønad = emptyList(),
+                perioderOvergangsstønad = overgangsstønadForVedtaksperiode[forrigeBehandlingId] ?: emptyList(),
                 uregistrerteBarn = emptyList(),
             )
         }
@@ -281,6 +282,9 @@ class BegrunnelseTeksterStepDefinition {
                                 }
                             }",
                     )
+            assertThat(faktisk.type)
+                .`as`("For periode: ${forventet.fom} til ${forventet.tom}")
+                .isEqualTo(forventet.type)
             assertThat(faktisk.gyldigeBegrunnelser)
                 .`as`("For periode: ${forventet.fom} til ${forventet.tom}")
                 .containsAll(forventet.inkluderteStandardBegrunnelser)
@@ -317,6 +321,31 @@ class BegrunnelseTeksterStepDefinition {
         assertThat(faktiskeBegrunnelser.sortedBy { it.apiNavn })
             .usingRecursiveComparison()
             .isEqualTo(forvendtedeBegrunnelser.sortedBy { it.apiNavn })
+    }
+
+    /**
+     * Mulige verdier: | Type | Fra dato | Til dato | Beløp | Antall barn | Barnas fødselsdager | Du eller institusjonen |
+     */
+    @Så("forvent følgende brevperioder for behandling {}")
+    fun `forvent følgende brevperioder for behandling i periode`(
+        behandlingId: Long,
+        dataTable: DataTable,
+    ) {
+        val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
+        val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+        val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
+
+        val faktiskeBrevperioder: List<BrevPeriode> =
+            vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.mapNotNull {
+                it.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)
+            }
+
+        val forvendtedeBrevperioder = parseBrevPerioder(dataTable)
+
+        assertThat(faktiskeBrevperioder)
+            .usingRecursiveComparison()
+            .ignoringFields("begrunnelser")
+            .isEqualTo(forvendtedeBrevperioder)
     }
 
     // For å laste ned begrunnelsene på nytt anbefales https://familie-brev.sanity.studio/ba-test/vision med query fra SanityQueries.kt .

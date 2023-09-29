@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Begrunnelser for kompetanser
+Egenskap: Gyldige begrunnelser for kompetanser
 
   Bakgrunn:
     Gitt følgende behandling
@@ -121,7 +121,7 @@ Egenskap: Begrunnelser for kompetanser
       | 01.07.2023 | 31.08.2023 | UTBETALING         |                                   |                                    |                          |
       | 01.09.2023 |            | OPPHØR             | EØS_FORORDNINGEN                  | OPPHØR_IKKE_STATSBORGER_I_EØS_LAND |                          |
 
-  Scenario: Skal begrunne endring i kompetanse, når resultat er fortsatt innvilget
+  Scenario: Skal begrunne endring i kompetanse når det ikke er noen endringer i resten av behandlingen
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
@@ -180,8 +180,8 @@ Egenskap: Begrunnelser for kompetanser
     Når begrunnelsetekster genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                | Ekskluderte Begrunnelser                              |
-      | 01.05.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN                  | FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD | REDUKSJON_BARN_DØD_EØS,REDUKSJON_IKKE_ANSVAR_FOR_BARN |
-      | 01.07.2023 | 31.01.2033 | UTBETALING         |                                   |                                        |                                                       |
-      | 01.02.2033 |            | OPPHØR             |                                   |                                        |                                                       |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                 | Ekskluderte Begrunnelser                                                                       |
+      | 01.05.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN                  | INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE | REDUKSJON_BARN_DØD_EØS, REDUKSJON_IKKE_ANSVAR_FOR_BARN, FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD |
+      | 01.07.2023 | 31.01.2033 | UTBETALING         |                                   |                                         |                                                                                                |
+      | 01.02.2033 |            | OPPHØR             |                                   |                                         |                                                                                                |
 

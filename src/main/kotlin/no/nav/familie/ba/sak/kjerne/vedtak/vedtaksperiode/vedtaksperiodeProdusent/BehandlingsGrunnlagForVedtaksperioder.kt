@@ -280,7 +280,7 @@ private fun hentErMinstEttBarnMedUtbetalingTidslinje(
 ): Tidslinje<Boolean, Måned> {
     val søker = persongrunnlag.søker
     val søkerSinerOrdinæreVilkårErOppfyltTidslinje =
-        personResultater.single { it.erSøkersResultater() }.tilTidslinjeForSplittForPerson(
+        personResultater.single { it.aktør == søker.aktør }.tilTidslinjeForSplittForPerson(
             person = søker,
             fagsakType = fagsakType,
         ).map { it != null }
@@ -396,13 +396,7 @@ private fun lagGrunnlagMedEndretUtbetalingAndel(
     endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode?,
 ) = when (vedtaksperiodeGrunnlagForPerson) {
     is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> vedtaksperiodeGrunnlagForPerson.copy(endretUtbetalingAndel = endretUtbetalingAndel)
-    is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> {
-        if (endretUtbetalingAndel != null) {
-            throw Feil("GrunnlagForPersonIkkeInnvilget for aktør ${vedtaksperiodeGrunnlagForPerson.person.aktør} kan ikke ha endretUtbetalingAndel siden den ikke er innvilget")
-        }
-        vedtaksperiodeGrunnlagForPerson
-    }
-
+    is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> vedtaksperiodeGrunnlagForPerson
     null -> null
 }
 

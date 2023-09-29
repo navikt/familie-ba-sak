@@ -18,6 +18,8 @@ data class VedtakEndring(
         feilutbetaltValuta: FeilutbetaltValuta? = null,
         refusjonEosAvklart: RefusjonEøsAvklart? = null,
         refusjonEosUavklart: RefusjonEøsUavklart? = null,
+        duMåMeldeFraOmEndringer: Boolean = true,
+        duMåMeldeFraOmEndringerEøsSelvstendigRett: Boolean = false,
     ) :
         this(
             mal = mal,
@@ -39,6 +41,8 @@ data class VedtakEndring(
                     forMyeUtbetaltBarnetrygd = feilutbetaltValuta,
                     refusjonEosAvklart = refusjonEosAvklart,
                     refusjonEosUavklart = refusjonEosUavklart,
+                    duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
+                    duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     gjelder = flettefelt(vedtakFellesfelter.gjelder),
@@ -70,5 +74,7 @@ data class EndringVedtakData(
         val forMyeUtbetaltBarnetrygd: FeilutbetaltValuta?,
         val refusjonEosAvklart: RefusjonEøsAvklart?,
         val refusjonEosUavklart: RefusjonEøsUavklart?,
+        val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
+        val duMaaMeldeFraOmEndringer: Boolean,
     )
 }

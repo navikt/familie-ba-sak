@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.net.URI
 
 @RestController
 @RequestMapping(value = ["/internal", "/testverktoy"])
@@ -45,6 +47,7 @@ class TestVerktøyController(
     private val taskService: TaskService,
     private val startSatsendring: StartSatsendring,
     private val testVerktøyService: TestVerktøyService,
+    private val behandlingRepository: BehandlingRepository,
 ) {
 
     @GetMapping(path = ["/autobrev"])
@@ -139,6 +142,36 @@ class TestVerktøyController(
                 melding = ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING,
             )
         }
+    }
+
+    @GetMapping(path = ["/behandling/{behandlingId}/vedtaksperiodertest"])
+    @Unprotected
+    fun hentVedtaksperioderTestPåBehandling(@PathVariable behandlingId: Long): String {
+        return if (envService.erPreprod() || envService.erDev()) {
+            testVerktøyService.hentVedtaksperioderTest(behandlingId)
+                .replace("\n", System.lineSeparator())
+        } else {
+            throw FunksjonellFeil(
+                httpStatus = HttpStatus.BAD_REQUEST,
+                melding = ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING,
+            )
+        }
+    }
+
+    @GetMapping("/redirect/behandling/{behandlingId}")
+    @Unprotected
+    fun redirectTilBarnetrygd(@PathVariable behandlingId: Long): ResponseEntity<Any> {
+        val hostname = if (envService.erDev()) {
+            "http://localhost:8000"
+        } else if (envService.erPreprod()) {
+            "https://barnetrygd.intern.dev.nav.no"
+        } else if (envService.erProd()) {
+            "https://barnetrygd.intern.nav.no"
+        } else {
+            error("Klarer ikke å utlede miljø for redirect til fagsak")
+        }
+        val behandling = behandlingRepository.finnBehandling(behandlingId)
+        return ResponseEntity.status(302).location(URI.create("$hostname/fagsak/${behandling.fagsak.id}/$behandlingId/")).build()
     }
 
     companion object {

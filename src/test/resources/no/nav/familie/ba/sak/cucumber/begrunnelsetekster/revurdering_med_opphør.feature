@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Revurdering med opphør
+Egenskap: Gyldige begrunnelser for revurdering med opphør
 
   Bakgrunn:
     Gitt følgende behandling
@@ -50,4 +50,4 @@ Egenskap: Revurdering med opphør
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
-      | 01.09.2023 |          | OPPHØR             |           | REDUKSJON_FLYTTET_BARN  |                          |
+      | 01.09.2023 |          | OPPHØR             |           | OPPHØR_BARN_FLYTTET_FRA_SØKER |                          |

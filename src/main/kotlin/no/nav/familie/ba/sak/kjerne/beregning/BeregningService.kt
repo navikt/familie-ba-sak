@@ -80,7 +80,7 @@ class BeregningService(
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
     fun hentSisteAndelPerIdent(fagsakId: Long): Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag> {
-        return andelTilkjentYtelseRepository.hentSisteAndelPerIdent(fagsakId)
+        return andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(fagsakId)
             .groupBy { IdentOgYtelse(it.aktør.aktivFødselsnummer(), it.type) }
             .mapValues { AndelTilkjentYtelseForSimuleringFactory().pakkInnForUtbetaling(it.value).single() }
     }

@@ -52,6 +52,7 @@ object VedtaksperiodeMedBegrunnelserParser {
         VILKÅR("Vilkår"),
         UTDYPENDE_VILKÅR("Utdypende vilkår"),
         RESULTAT("Resultat"),
+        VURDERES_ETTER("Vurderes etter"),
         BELØP("Beløp"),
         SATS("Sats"),
         ER_EKSPLISITT_AVSLAG("Er eksplisitt avslag"),

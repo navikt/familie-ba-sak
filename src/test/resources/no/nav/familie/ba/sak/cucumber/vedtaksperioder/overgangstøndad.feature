@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 
-Egenskap: Overgangsstønad skal påvirke periodene
+Egenskap: Vedtaksperioder med overgangsstønad
 
   Bakgrunn:
     Gitt følgende vedtak

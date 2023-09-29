@@ -68,24 +68,6 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                     FROM behandling b
                              INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
                              INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                    WHERE ty.utbetalingsoppdrag IS NOT NULL
-                      AND f.status = 'LØPENDE'
-                      AND f.arkivert = FALSE
-                    ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC)
-                
-                SELECT silp.fk_fagsak_id
-                FROM sisteiverksatte silp
-                WHERE  silp.stonad_tom < DATE_TRUNC('month', NOW())""",
-        nativeQuery = true,
-    )
-    fun finnFagsakerSomSkalAvsluttes(): List<Long>
-
-    @Query(
-        value = """WITH sisteiverksatte AS (
-                    SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id, stonad_tom
-                    FROM behandling b
-                             INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                             INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
                     WHERE f.status = 'LØPENDE'
                       AND f.arkivert = FALSE
                     ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC)
@@ -95,7 +77,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 WHERE  silp.stonad_tom < DATE_TRUNC('month', NOW())""",
         nativeQuery = true,
     )
-    fun finnFagsakerSomSkalAvsluttesNy(): List<Long>
+    fun finnFagsakerSomSkalAvsluttes(): List<Long>
 
     /**
      * Denne skal plukke fagsaker som løper _og_ har barn født innenfor anngitt tidsintervall.

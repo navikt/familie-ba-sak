@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtaksperioder med kompetanser
+Egenskap: Vedtaksperioder med kompetanser for flere barn
 
   Bakgrunn:
     Gitt følgende vedtak
