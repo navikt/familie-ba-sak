@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.BrevBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentBrevPeriodeType
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erUtbetalingEllerDeltBostedIPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.finnBegrunnelseGrunnlagPerPerson
@@ -67,6 +68,7 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
 ): BrevPeriode {
     val barnMedUtbetaling = begrunnelseGrunnlagPerPerson.finnBarnMedUtbetaling().keys
     val beløp = begrunnelseGrunnlagPerPerson.hentTotaltUtbetaltIPeriode()
+
     val brevPeriodeType = hentBrevPeriodeType(
         vedtaksperiodeMedBegrunnelser = this,
         erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson),
@@ -74,7 +76,7 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
 
     return BrevPeriode(
         fom = this.fom?.tilMånedÅr() ?: "",
-        tom = this.tom?.tilMånedÅr() ?: "",
+        tom = hentTomTekstForBrev(brevPeriodeType),
         beløp = beløp.toString(),
         begrunnelser = begrunnelserOgFritekster,
         brevPeriodeType = brevPeriodeType,
@@ -85,6 +87,22 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
             fagsakType = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioder.fagsakType,
         ),
     )
+}
+
+private fun VedtaksperiodeMedBegrunnelser.hentTomTekstForBrev(
+    brevPeriodeType: BrevPeriodeType,
+) = if (this.tom == null) {
+    ""
+} else {
+    val tomDato = this.tom.tilMånedÅr()
+    when (brevPeriodeType) {
+        BrevPeriodeType.UTBETALING -> "til $tomDato"
+        BrevPeriodeType.INGEN_UTBETALING -> if (this.type == Vedtaksperiodetype.AVSLAG) "til og med $tomDato " else ""
+        BrevPeriodeType.INGEN_UTBETALING_UTEN_PERIODE -> ""
+        BrevPeriodeType.FORTSATT_INNVILGET -> ""
+        BrevPeriodeType.FORTSATT_INNVILGET_NY -> ""
+        else -> error("$brevPeriodeType skal ikke brukes")
+    }
 }
 
 private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentTotaltUtbetaltIPeriode() =
