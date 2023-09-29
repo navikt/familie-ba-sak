@@ -225,6 +225,16 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidsl
     .slåSammenLike()
 
 fun hentBrevPeriodeType(
+    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    erUtbetalingEllerDeltBostedIPeriode: Boolean,
+): BrevPeriodeType =
+    hentBrevPeriodeType(
+        vedtaksperiodetype = vedtaksperiodeMedBegrunnelser.type,
+        fom = vedtaksperiodeMedBegrunnelser.fom,
+        erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode,
+    )
+
+fun hentBrevPeriodeType(
     vedtaksperiodetype: Vedtaksperiodetype,
     fom: LocalDate?,
     erUtbetalingEllerDeltBostedIPeriode: Boolean,

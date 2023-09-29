@@ -162,3 +162,40 @@ Egenskap: Opphør fra forrige behandling
       | 01.07.2023 | 31.03.2024 | UTBETALING         |           |                            |                          |
       | 01.04.2024 | 30.04.2028 | UTBETALING         |           |                            |                          |
       | 01.05.2028 |            | OPPHØR             |           |                            |                          |
+
+  Scenario: Skal ikke gi opphør fra forrige behandling, men normalt avslag
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat  | Behandlingsårsak |
+      | 1            | 1        |                     | INNVILGET_OG_OPPHØRT | SØKNAD           |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1234    | SØKER      | 23.04.1985  |
+      | 1            | 3456    | BARN       | 20.03.2015  |
+    Og følgende dagens dato 28.09.2023
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                       | Utdypende vilkår         | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1234    | LOVLIG_OPPHOLD               |                          | 23.04.1985 |            | OPPFYLT  | Nei                  |
+      | 1234    | BOSATT_I_RIKET               | VURDERING_ANNET_GRUNNLAG | 01.06.2019 | 28.02.2022 | OPPFYLT  | Nei                  |
+
+      | 3456    | UNDER_18_ÅR                  |                          | 20.03.2015 | 19.03.2033 | OPPFYLT  | Nei                  |
+      | 3456    | GIFT_PARTNERSKAP             |                          | 20.03.2015 |            | OPPFYLT  | Nei                  |
+      | 3456    | BOR_MED_SØKER,LOVLIG_OPPHOLD |                          | 01.06.2019 |            | OPPFYLT  | Nei                  |
+      | 3456    | BOSATT_I_RIKET               |                          | 19.11.2021 | 28.02.2022 | OPPFYLT  | Nei                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 3456    | 1            | 01.12.2021 | 28.02.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+
+    Når begrunnelsetekster genereres for behandling 1
+
+    Så forvent følgende standardBegrunnelser
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser   |
+      | 01.12.2021 | 28.02.2022 | UTBETALING         |           |                         |                            |
+      | 01.03.2022 |            | OPPHØR             |           | AVSLAG_BOSATT_I_RIKET   | OPPHØR_IKKE_BOSATT_I_NORGE |
