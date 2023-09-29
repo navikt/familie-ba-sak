@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Reduksjon forrige periode
+Egenskap: Vedtaksperioder med reduksjon fra forrige periode eller behandling
 
   Bakgrunn:
     Gitt følgende vedtak

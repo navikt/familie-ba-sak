@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Endring av migreringsdato
+Egenskap: Utbetalingsoppdrag: Endring av migreringsdato
 
 
   Scenario: Endrer migreringsdato på en behandling før første fom

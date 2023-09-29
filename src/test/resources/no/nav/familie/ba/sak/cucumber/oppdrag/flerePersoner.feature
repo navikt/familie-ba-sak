@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtak med flere identer
+Egenskap: Utbetalingsoppdrag: Vedtak med flere identer
 
 
   Scenario: Vedtak med to perioder på ulike identer

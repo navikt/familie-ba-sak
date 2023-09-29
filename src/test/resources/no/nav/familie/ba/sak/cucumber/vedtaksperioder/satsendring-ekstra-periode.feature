@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Satsendring
+Egenskap: Vedtaksperioder for Satsendring
 
   Bakgrunn:
     Gitt følgende fagsaker

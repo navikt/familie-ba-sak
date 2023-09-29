@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Begrunnelser for utdypende vilkårsvurdering med utbetaling
+Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
 
   Bakgrunn:
     Gitt følgende behandling

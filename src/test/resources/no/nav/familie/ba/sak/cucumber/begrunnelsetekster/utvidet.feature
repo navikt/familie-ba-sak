@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Begrunnelser for utvidet barnetrygd
+Egenskap: Gyldige begrunnelser for utvidet barnetrygd
 
   Bakgrunn:
     Gitt følgende fagsaker for begrunnelse

@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Kombinasjon av utgjørende vilkår og endret utbetaling årsaker
+Egenskap: Gyldige begrunnelser for kombinasjon av utgjørende vilkår og endret utbetaling årsaker
 
   Bakgrunn:
     Gitt følgende behandling

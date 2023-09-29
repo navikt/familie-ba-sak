@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtaksperioder med mor og to barn
+Egenskap: Vedtaksperioder skal filtrere vekk irrelevante perioder
 
   Bakgrunn:
     Gitt følgende vedtak
