@@ -55,10 +55,10 @@ fun parseStandardBegrunnelse(rad: Tabellrad) =
         ).sanityApiNavn,
 
         gjelderSoker = parseBoolean(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.GJELDER_SØKER, rad),
-        barnasFodselsdatoer = parseString(
+        barnasFodselsdatoer = parseValgfriString(
             BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDAGER,
             rad,
-        ),
+        ) ?: "",
 
         fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = "",
         fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling = "",
