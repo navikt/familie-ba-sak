@@ -96,19 +96,44 @@ object EndretUtbetalingAndelValidering {
     fun validerÅrsak(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         vilkårsvurdering: Vilkårsvurdering?,
-    ) {
-        val årsak = endretUtbetalingAndel.årsak
-        if (årsak == Årsak.DELT_BOSTED) {
+    ) = when (endretUtbetalingAndel.årsak!!) {
+        Årsak.DELT_BOSTED -> {
             val deltBostedPerioder = finnDeltBostedPerioder(
                 person = endretUtbetalingAndel.person,
                 vilkårsvurdering = vilkårsvurdering,
             ).map { it.tilMånedPeriode() }
-            validerDeltBosted(endretUtbetalingAndel = endretUtbetalingAndel, deltBostedPerioder = deltBostedPerioder)
-        } else if (årsak == Årsak.ETTERBETALING_3ÅR) {
-            validerEtterbetaling3År(
+
+            validerDeltBosted(
                 endretUtbetalingAndel = endretUtbetalingAndel,
-                behandlingOpprettetTidspunkt = vilkårsvurdering?.behandling?.opprettetTidspunkt?.toLocalDate(),
+                deltBostedPerioder = deltBostedPerioder,
             )
+        }
+
+        Årsak.ETTERBETALING_3ÅR -> validerEtterbetaling3År(
+            endretUtbetalingAndel = endretUtbetalingAndel,
+            behandlingOpprettetTidspunkt = vilkårsvurdering?.behandling?.opprettetTidspunkt?.toLocalDate(),
+        )
+
+        Årsak.ALLEREDE_UTBETALT -> validerAlleredeUtbetalt(endretUtbetalingAndel = endretUtbetalingAndel)
+
+        Årsak.ENDRE_MOTTAKER -> validerEndreMottaker(endretUtbetalingAndel = endretUtbetalingAndel)
+    }
+
+    private fun validerEndreMottaker(endretUtbetalingAndel: EndretUtbetalingAndel) {
+        val innværendeÅrMåned = YearMonth.now()
+
+        if (endretUtbetalingAndel.fom?.isBefore(innværendeÅrMåned) == true) {
+            throw FunksjonellFeil("Du har valgt årsaken Foreldre bor sammen, endre mottaker. Du kan ikke velge denne årsaken og en fra og med dato tilbake i tid. Ta kontakt med superbruker om du er usikker på hva du skal gjøre.")
+        }
+
+        if (endretUtbetalingAndel.tom?.isSameOrBefore(innværendeÅrMåned) == true) {
+            throw FunksjonellFeil("Du har valgt årsaken Foreldre bor sammen, endre mottaker. Du kan ikke velge denne årsaken og en til og med dato tilbake i tid. Ta kontakt med superbruker om du er usikker på hva du skal gjøre.")
+        }
+    }
+
+    private fun validerAlleredeUtbetalt(endretUtbetalingAndel: EndretUtbetalingAndel) {
+        if (endretUtbetalingAndel.tom?.isAfter(YearMonth.now()) == true) {
+            throw FunksjonellFeil("Du har valgt årsaken allerede utbetalt. Du kan ikke velge denne årsaken og en til og med dato frem i tid. Ta kontakt med superbruker om du er usikker på hva du skal gjøre.")
         }
     }
 
@@ -122,7 +147,11 @@ object EndretUtbetalingAndelValidering {
                 "Du kan ikke sette årsak etterbetaling 3 år når du har valgt at perioden skal utbetales.",
             )
         } else if (
-            endretUtbetalingAndel.tom?.isAfter(hentGyldigEtterbetalingFom(kravDato = kravDato ?: LocalDate.now())) == true
+            endretUtbetalingAndel.tom?.isAfter(
+                hentGyldigEtterbetalingFom(
+                    kravDato = kravDato ?: LocalDate.now(),
+                ),
+            ) == true
         ) {
             throw FunksjonellFeil(
                 "Du kan ikke stoppe etterbetaling for en periode som ikke strekker seg mer enn 3 år tilbake i tid.",
