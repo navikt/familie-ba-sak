@@ -93,11 +93,13 @@ fun lagVedtak(
             val fagsak = fagsaker[fagsakId] ?: defaultFagsak()
             val behandlingÅrsak = parseValgfriEnum<BehandlingÅrsak>(Domenebegrep.BEHANDLINGSÅRSAK, rad)
             val behandlingResultat = parseValgfriEnum<Behandlingsresultat>(Domenebegrep.BEHANDLINGSRESULTAT, rad)
+            val skalBehandlesAutomatisk = parseValgfriBoolean(Domenebegrep.SKAL_BEHANLDES_AUTOMATISK, rad) ?: false
 
             lagBehandling(
                 fagsak = fagsak,
                 årsak = behandlingÅrsak ?: BehandlingÅrsak.SØKNAD,
                 resultat = behandlingResultat ?: Behandlingsresultat.IKKE_VURDERT,
+                skalBehandlesAutomatisk = skalBehandlesAutomatisk,
             ).copy(id = behandlingId)
         }.associateBy { it.id },
     )
