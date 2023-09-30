@@ -309,10 +309,19 @@ class BegrunnelseTeksterStepDefinition {
         val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
         val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
 
+        val vedtaksperiodeMedBegrunnelser = vedtaksperioderMedBegrunnelser.find {
+            it.fom == parseNullableDato(periodeFom) && it.tom == parseNullableDato(periodeTom)
+        } ?: throw Feil(
+            "Forventet å finne en vedtaksperiode med Fom: $periodeFom og Tom: $periodeTom. \n" +
+                "Faktiske vedtaksperioder var \n${
+                    vedtaksperioderMedBegrunnelser.joinToString("\n") {
+                        "   Fom: ${it.fom}, Tom: ${it.tom}"
+                    }
+                }",
+        )
+
         val faktiskeBegrunnelser: List<BegrunnelseMedData> =
-            vedtaksperioderMedBegrunnelser.single {
-                it.fom == parseNullableDato(periodeFom) && it.tom == parseNullableDato(periodeTom)
-            }.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)!!
+            vedtaksperiodeMedBegrunnelser.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)!!
                 .begrunnelser
                 .filterIsInstance<BegrunnelseMedData>()
 
