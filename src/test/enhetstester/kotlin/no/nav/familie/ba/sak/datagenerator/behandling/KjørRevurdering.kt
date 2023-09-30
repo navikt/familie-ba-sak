@@ -368,6 +368,16 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
     val vedtaksperiode = perisisterteVedtaksperioder.first()
 
     val (begrunnelser, eøsBegrunnelser) = if (featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)) {
+        val grunnlagForBegrunnelse = vedtaksperiodeService.hentGrunnlagForBegrunnelse(behandling)
+        val begrunnelserPerPerson = vedtaksperiode.hentGyldigeBegrunnelserPerPerson(grunnlagForBegrunnelse)
+
+        Pair(
+            begrunnelserPerPerson.values.flatten()
+                .filterIsInstance<Standardbegrunnelse>(),
+            begrunnelserPerPerson.values.flatten()
+                .filterIsInstance<EØSStandardbegrunnelse>(),
+        )
+    } else {
         val utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiode.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = personopplysningGrunnlag,
             andelerTilkjentYtelse = andelerTilkjentYtelse,
@@ -409,16 +419,6 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
                 featureToggleService = featureToggleService,
             ),
             emptyList(),
-        )
-    } else {
-        val grunnlagForBegrunnelse = vedtaksperiodeService.hentGrunnlagForBegrunnelse(behandling)
-        val begrunnelserPerPerson = vedtaksperiode.hentGyldigeBegrunnelserPerPerson(grunnlagForBegrunnelse)
-
-        Pair(
-            begrunnelserPerPerson.values.flatten()
-                .filterIsInstance<Standardbegrunnelse>(),
-            begrunnelserPerPerson.values.flatten()
-                .filterIsInstance<EØSStandardbegrunnelse>(),
         )
     }
 
