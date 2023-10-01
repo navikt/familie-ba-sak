@@ -16,7 +16,7 @@ fun parseBrevPerioder(dataTable: DataTable): List<BrevPeriode> {
         val beløp = parseString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BELØP, rad)
         val antallBarn = parseInt(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.ANTALL_BARN, rad)
         val barnasFodselsdatoer = parseValgfriString(
-            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDATOER,
+            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDAGER,
             rad,
         ) ?: ""
         val duEllerInstitusjonen =

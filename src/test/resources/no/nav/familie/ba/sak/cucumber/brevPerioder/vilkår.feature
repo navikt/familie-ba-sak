@@ -32,6 +32,6 @@ Egenskap: Brevperioder ved endring av vilkår
       | 01.04.2021 |          | OPPHØR_BARN_FLYTTET_FRA_SØKER |                 |            |
 
     Så forvent følgende brevperioder for behandling 1
-      | Type             | Fra dato   | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdatoer | Du eller institusjonen |
+      | Type             | Fra dato   | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
       | INGEN_UTBETALING | april 2021 |          | 0     | 0                          |                      | du                     |
 
