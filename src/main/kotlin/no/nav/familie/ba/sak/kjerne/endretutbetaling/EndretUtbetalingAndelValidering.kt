@@ -96,27 +96,31 @@ object EndretUtbetalingAndelValidering {
     fun validerÅrsak(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         vilkårsvurdering: Vilkårsvurdering?,
-    ) = when (endretUtbetalingAndel.årsak!!) {
-        Årsak.DELT_BOSTED -> {
-            val deltBostedPerioder = finnDeltBostedPerioder(
-                person = endretUtbetalingAndel.person,
-                vilkårsvurdering = vilkårsvurdering,
-            ).map { it.tilMånedPeriode() }
+    ) {
+        val årsak = endretUtbetalingAndel.årsak ?: return
 
-            validerDeltBosted(
+        return when (årsak) {
+            Årsak.DELT_BOSTED -> {
+                val deltBostedPerioder = finnDeltBostedPerioder(
+                    person = endretUtbetalingAndel.person,
+                    vilkårsvurdering = vilkårsvurdering,
+                ).map { it.tilMånedPeriode() }
+
+                validerDeltBosted(
+                    endretUtbetalingAndel = endretUtbetalingAndel,
+                    deltBostedPerioder = deltBostedPerioder,
+                )
+            }
+
+            Årsak.ETTERBETALING_3ÅR -> validerEtterbetaling3År(
                 endretUtbetalingAndel = endretUtbetalingAndel,
-                deltBostedPerioder = deltBostedPerioder,
+                behandlingOpprettetTidspunkt = vilkårsvurdering?.behandling?.opprettetTidspunkt?.toLocalDate(),
             )
+
+            Årsak.ALLEREDE_UTBETALT -> validerAlleredeUtbetalt(endretUtbetalingAndel = endretUtbetalingAndel)
+
+            Årsak.ENDRE_MOTTAKER -> validerEndreMottaker(endretUtbetalingAndel = endretUtbetalingAndel)
         }
-
-        Årsak.ETTERBETALING_3ÅR -> validerEtterbetaling3År(
-            endretUtbetalingAndel = endretUtbetalingAndel,
-            behandlingOpprettetTidspunkt = vilkårsvurdering?.behandling?.opprettetTidspunkt?.toLocalDate(),
-        )
-
-        Årsak.ALLEREDE_UTBETALT -> validerAlleredeUtbetalt(endretUtbetalingAndel = endretUtbetalingAndel)
-
-        Årsak.ENDRE_MOTTAKER -> validerEndreMottaker(endretUtbetalingAndel = endretUtbetalingAndel)
     }
 
     private fun validerEndreMottaker(endretUtbetalingAndel: EndretUtbetalingAndel) {
