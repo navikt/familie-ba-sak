@@ -5,8 +5,9 @@ object BrevPeriodeParser {
     enum class DomenebegrepBrevBegrunnelse(override val nøkkel: String) : Domenenøkkel {
         BEGRUNNELSE("Begrunnelse"),
         GJELDER_SØKER("Gjelder søker"),
-        BARNAS_FØDSELSDAGER("Barnas fødselsdager"),
-        ANTALL_BARN("Antall barn"),
+        BARNAS_FØDSELSDATOER("Barnas fødselsdatoer"), // brevbegrunnelser
+        BARNAS_FØDSELSDAGER("Barnas fødselsdager"), // brevperioder
+        ANTALL_BARN("Antall barn med utbetaling"),
         MÅNED_OG_ÅR_BEGRUNNELSEN_GJELDER_FOR("Måned og år begrunnelsen gjelder for"),
         MÅLFORM("Målform"),
         BELØP("Beløp"),
