@@ -257,13 +257,18 @@ fun erFørstePeriodeOgVilkårIkkeOppfylt(
 ): Boolean {
     val vilkårIkkeOppfyltForPeriode =
         vilkårResultat.resultat == Resultat.IKKE_OPPFYLT &&
-            vilkårResultat.toPeriode().overlapperHeltEllerDelvisMed(vedtaksperiode)
+            vilkårResultat.toPeriode().copy(fom = vilkårResultat.periodeFom?.plusMonths(1) ?: TIDENES_MORGEN)
+                .overlapperHeltEllerDelvisMed(vedtaksperiode)
 
     val vilkårOppfyltRettEtterPeriode =
         vilkårResultat.resultat == Resultat.OPPFYLT &&
             vedtaksperiode.tom.toYearMonth() == vilkårResultat.periodeFom!!.toYearMonth()
 
+    val vilkårAvsluttesInnenforSammeMåned =
+        (vilkårResultat.periodeFom?.toYearMonth() == vilkårResultat.periodeTom?.toYearMonth()) &&
+            vilkårResultat.resultat == Resultat.OPPFYLT
+
     return erFørsteVedtaksperiodePåFagsak &&
         triggesAv.erUtdypendeVilkårsvurderingOppfylt(vilkårResultat) &&
-        (vilkårIkkeOppfyltForPeriode || vilkårOppfyltRettEtterPeriode)
+        (vilkårIkkeOppfyltForPeriode || vilkårOppfyltRettEtterPeriode || vilkårAvsluttesInnenforSammeMåned)
 }
