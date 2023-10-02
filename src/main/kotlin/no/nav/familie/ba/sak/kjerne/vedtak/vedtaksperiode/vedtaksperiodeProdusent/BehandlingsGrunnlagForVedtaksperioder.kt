@@ -110,7 +110,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                     ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje,
                     fagsakType = fagsakType,
                     vilkårRolle = vilkårRolle,
-                    bareSøkerOgUregistrertBarn = bareSøkerOgUregistrertBarn
+                    bareSøkerOgUregistrertBarn = bareSøkerOgUregistrertBarn,
                 )
 
             AktørOgRolleBegrunnelseGrunnlag(aktør, vilkårRolle) to
