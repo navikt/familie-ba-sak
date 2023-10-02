@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Håndtering av 0-beløp
+Egenskap: Utbetalingsoppdrag: Håndtering av 0-beløp
 
 
   Scenario: Endrer en tidligere periode til 0-utbetaling

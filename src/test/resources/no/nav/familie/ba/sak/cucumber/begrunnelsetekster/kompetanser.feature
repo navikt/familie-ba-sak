@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Begrunnelser for kompetanser
+Egenskap: Gyldige begrunnelser for kompetanser
 
   Bakgrunn:
     Gitt følgende behandling

@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Begrunnelser for hendelser
+Egenskap: Gyldige begrunnelser for hendelser
 
   Bakgrunn:
     Gitt følgende behandling

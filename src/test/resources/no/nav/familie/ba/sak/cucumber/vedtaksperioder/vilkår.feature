@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtaksperioder med mor og et barn
+Egenskap: Vedtaksperioder ved endring av vilkår for mor og et barn
 
   Bakgrunn:
     Gitt følgende vedtak

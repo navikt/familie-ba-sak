@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Brevbegrunnelser ved endring av vilkår
+Egenskap: Brevperioder ved endring av vilkår
 
   Bakgrunn:
     Gitt følgende behandling
@@ -31,7 +31,7 @@ Egenskap: Brevbegrunnelser ved endring av vilkår
       | Fra dato   | Til dato | Standardbegrunnelser          | Eøsbegrunnelser | Fritekster |
       | 01.04.2021 |          | OPPHØR_BARN_FLYTTET_FRA_SØKER |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.04.2021 til -
-      | Begrunnelse                   | Gjelder søker | Barnas fødselsdatoer | Antall barn med utbetaling | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | OPPHØR_BARN_FLYTTET_FRA_SØKER | Nei           | 13.04.20             | 1                          | mars 2021                            | NB      | 0     |                  | SØKER_HAR_IKKE_RETT     |
+    Så forvent følgende brevperioder for behandling 1
+      | Type             | Fra dato   | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
+      | INGEN_UTBETALING | april 2021 |          | 0     | 0                          |                      | du                     |
 

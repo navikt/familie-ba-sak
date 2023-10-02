@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Revurdering med opphør
+Egenskap: Gyldige begrunnelser for revurdering med opphør
 
   Bakgrunn:
     Gitt følgende behandling

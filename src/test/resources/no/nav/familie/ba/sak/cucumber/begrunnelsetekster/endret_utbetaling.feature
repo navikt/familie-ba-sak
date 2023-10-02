@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Begrunnelse etter endret utbetaling
+Egenskap: Gyldige begrunnelser for endret utbetaling
 
   Bakgrunn:
     Gitt følgende behandling

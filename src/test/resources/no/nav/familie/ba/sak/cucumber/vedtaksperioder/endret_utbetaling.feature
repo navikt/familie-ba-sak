@@ -1,8 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-
-Egenskap: Endringstidspunkt påvirker periodene
+Egenskap: Vedtaksperioder med endret utbetaling der endringstidspunkt påvirker periodene
 
   Bakgrunn:
     Gitt følgende vedtak

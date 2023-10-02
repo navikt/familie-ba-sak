@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Automatiske begrunnelser
+Egenskap: Gyldige begrunnelser for manuell saksbehandling
 
   Bakgrunn:
     Gitt følgende fagsaker for begrunnelse

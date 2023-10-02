@@ -4,7 +4,9 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilUtdypendeVilkårsvurderinger
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -77,8 +79,13 @@ private fun finnUtgjørendeVilkår(
     )
 
     return if (begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget()) {
+        val utvidetTriggetAvInnvilgelse = hentUtvidetTriggetAvInnvilgelse(
+            sanityBegrunnelse = sanityBegrunnelse,
+            andelerForrigePeriode = begrunnelseGrunnlag.forrigePeriode?.andeler,
+            oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
+        )
         when (sanityBegrunnelse.periodeResultat) {
-            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING -> vilkårTjent + vilkårEndret
+            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING -> vilkårTjent + vilkårEndret + utvidetTriggetAvInnvilgelse
             SanityPeriodeResultat.INGEN_ENDRING -> vilkårEndret
             SanityPeriodeResultat.IKKE_INNVILGET,
             SanityPeriodeResultat.REDUKSJON,
@@ -130,4 +137,18 @@ private fun hentVilkårResultaterTapt(
     val vilkårTapt = oppfyltForrigePeriode - oppfyltDennePerioden
 
     return oppfylteVilkårResultaterForrigePeriode.filter { it.vilkårType in vilkårTapt }
+}
+
+private fun hentUtvidetTriggetAvInnvilgelse(
+    sanityBegrunnelse: ISanityBegrunnelse,
+    andelerForrigePeriode: Iterable<AndelForVedtaksperiode>?,
+    oppfylteVilkårResultaterDennePerioden: List<VilkårResultatForVedtaksperiode>,
+): List<VilkårResultatForVedtaksperiode> {
+    if (sanityBegrunnelse.apiNavn != Standardbegrunnelse.INNVILGET_BOR_ALENE_MED_BARN.sanityApiNavn) {
+        return emptyList()
+    }
+    val ingenAndelerForrigePeriode = andelerForrigePeriode == null || !andelerForrigePeriode.any()
+    val utvidetOppfyltDennePerioden =
+        oppfylteVilkårResultaterDennePerioden.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+    return if (ingenAndelerForrigePeriode) utvidetOppfyltDennePerioden else emptyList()
 }
