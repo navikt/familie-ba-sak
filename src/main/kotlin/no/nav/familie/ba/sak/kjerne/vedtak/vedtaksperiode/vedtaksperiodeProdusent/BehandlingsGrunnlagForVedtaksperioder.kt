@@ -93,6 +93,8 @@ data class BehandlingsGrunnlagForVedtaksperioder(
             }
         }
 
+        val bareSøkerOgUregistrertBarn = uregistrerteBarn.isNotEmpty() && personResultater.size == 1
+
         val grunnlagForPersonTidslinjer = personresultaterOgRolleForVilkår.associate { (vilkårRolle, personResultat) ->
             val aktør = personResultat.aktør
             val person = persongrunnlag.personer.single { person -> aktør == person.aktør }
@@ -108,6 +110,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                     ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje,
                     fagsakType = fagsakType,
                     vilkårRolle = vilkårRolle,
+                    bareSøkerOgUregistrertBarn = bareSøkerOgUregistrertBarn
                 )
 
             AktørOgRolleBegrunnelseGrunnlag(aktør, vilkårRolle) to
@@ -311,12 +314,17 @@ private fun List<VilkårResultat>.hentForskjøvedeVilkårResultaterForPersonsAnd
     ordinæreVilkårForSøkerTidslinje: Tidslinje<List<VilkårResultat>, Måned>,
     fagsakType: FagsakType,
     vilkårRolle: PersonType,
+    bareSøkerOgUregistrertBarn: Boolean,
 ): Tidslinje<List<VilkårResultat>, Måned> {
     val forskjøvedeVilkårResultaterForPerson = this.tilForskjøvedeVilkårTidslinjer(person.fødselsdato).kombiner { it }
 
     return when (vilkårRolle) {
         PersonType.SØKER -> forskjøvedeVilkårResultaterForPerson.map { vilkårResultater ->
-            vilkårResultater?.filtrerErIkkeOrdinærtFor(vilkårRolle)?.takeIf { it.isNotEmpty() }
+            if (bareSøkerOgUregistrertBarn) {
+                vilkårResultater?.toList()?.takeIf { it.isNotEmpty() }
+            } else {
+                vilkårResultater?.filtrerErIkkeOrdinærtFor(vilkårRolle)?.takeIf { it.isNotEmpty() }
+            }
         }.kombinerMed(erMinstEttBarnMedUtbetalingTidslinje) { vilkårResultaterForSøker, erMinstEttBarnMedUtbetaling ->
             vilkårResultaterForSøker?.takeIf { erMinstEttBarnMedUtbetaling == true || vilkårResultaterForSøker.any { it.erEksplisittAvslagPåSøknad == true } }
         }
