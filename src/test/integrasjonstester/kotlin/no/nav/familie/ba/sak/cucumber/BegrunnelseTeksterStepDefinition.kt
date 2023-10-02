@@ -324,7 +324,7 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     /**
-     * Mulige verdier: | Type | Fra dato | Til dato | Beløp | Antall barn | Barnas fødselsdager | Du eller institusjonen |
+     * Mulige verdier: | Type | Fra dato | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
      */
     @Så("forvent følgende brevperioder for behandling {}")
     fun `forvent følgende brevperioder for behandling i periode`(
