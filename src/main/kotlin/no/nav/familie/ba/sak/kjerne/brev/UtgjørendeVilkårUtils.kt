@@ -257,8 +257,7 @@ fun erFørstePeriodeOgVilkårIkkeOppfylt(
 ): Boolean {
     val vilkårIkkeOppfyltForPeriode =
         vilkårResultat.resultat == Resultat.IKKE_OPPFYLT &&
-            vilkårResultat.toPeriode().copy(fom = vilkårResultat.periodeFom?.plusMonths(1) ?: TIDENES_MORGEN)
-                .overlapperHeltEllerDelvisMed(vedtaksperiode)
+            vilkårResultat.toPeriode().overlapperHeltEllerDelvisMed(vedtaksperiode)
 
     val vilkårOppfyltRettEtterPeriode =
         vilkårResultat.resultat == Resultat.OPPFYLT &&
