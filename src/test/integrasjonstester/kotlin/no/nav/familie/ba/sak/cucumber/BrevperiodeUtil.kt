@@ -13,14 +13,14 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.BrevBegrunnelse
 fun parseBrevPerioder(dataTable: DataTable): List<BrevPeriode> {
     return dataTable.asMaps().map { rad: Tabellrad ->
 
-        val beløp = parseString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BELØP, rad)
-        val antallBarn = parseInt(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.ANTALL_BARN, rad)
-        val barnasFodselsdatoer = parseValgfriString(
-            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDAGER,
+        val beløp = parseString(BrevPeriodeParser.DomenebegrepBrevPeriode.BELØP, rad)
+        val antallBarn = parseInt(BrevPeriodeParser.DomenebegrepBrevPeriode.ANTALL_BARN, rad)
+        val barnasFodselsdager = parseValgfriString(
+            BrevPeriodeParser.DomenebegrepBrevPeriode.BARNAS_FØDSELSDAGER,
             rad,
         ) ?: ""
         val duEllerInstitusjonen =
-            parseString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.DU_ELLER_INSTITUSJONEN, rad)
+            parseString(BrevPeriodeParser.DomenebegrepBrevPeriode.DU_ELLER_INSTITUSJONEN, rad)
 
         BrevPeriode(
             fom = parseValgfriString(Domenebegrep.FRA_DATO, rad) ?: "",
@@ -28,9 +28,9 @@ fun parseBrevPerioder(dataTable: DataTable): List<BrevPeriode> {
             beløp = beløp,
             // egen test for dette. Se `forvent følgende brevbegrunnelser for behandling i periode`()
             begrunnelser = emptyList<BrevBegrunnelse>(),
-            brevPeriodeType = parseEnum(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.TYPE, rad),
+            brevPeriodeType = parseEnum(BrevPeriodeParser.DomenebegrepBrevPeriode.TYPE, rad),
             antallBarn = antallBarn.toString(),
-            barnasFodselsdager = barnasFodselsdatoer,
+            barnasFodselsdager = barnasFodselsdager,
             duEllerInstitusjonen = duEllerInstitusjonen,
         )
     }
