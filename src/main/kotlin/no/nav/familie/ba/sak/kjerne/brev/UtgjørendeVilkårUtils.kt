@@ -263,7 +263,11 @@ fun erFørstePeriodeOgVilkårIkkeOppfylt(
         vilkårResultat.resultat == Resultat.OPPFYLT &&
             vedtaksperiode.tom.toYearMonth() == vilkårResultat.periodeFom!!.toYearMonth()
 
+    val vilkårAvsluttesInnenforSammeMåned =
+        (vilkårResultat.periodeFom?.toYearMonth() == vilkårResultat.periodeTom?.toYearMonth()) &&
+            vilkårResultat.resultat == Resultat.OPPFYLT
+
     return erFørsteVedtaksperiodePåFagsak &&
         triggesAv.erUtdypendeVilkårsvurderingOppfylt(vilkårResultat) &&
-        (vilkårIkkeOppfyltForPeriode || vilkårOppfyltRettEtterPeriode)
+        (vilkårIkkeOppfyltForPeriode || vilkårOppfyltRettEtterPeriode || vilkårAvsluttesInnenforSammeMåned)
 }
