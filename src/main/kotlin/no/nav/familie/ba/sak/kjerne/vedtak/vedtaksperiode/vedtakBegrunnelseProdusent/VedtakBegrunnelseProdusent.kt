@@ -271,12 +271,12 @@ private fun filtrerPåVilkår(
     it: SanityBegrunnelse,
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
 ) =
-    !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag) && vilkårErIkkeVurdertEtterEøsForordningen(
+    !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag) && it.erGjeldendeForRegelverk(
         begrunnelseGrunnlag,
     )
 
-private fun vilkårErIkkeVurdertEtterEøsForordningen(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean =
-    begrunnelseGrunnlag.dennePerioden.vilkårResultater.none { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
+private fun SanityBegrunnelse.erGjeldendeForRegelverk(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean =
+    begrunnelseGrunnlag.dennePerioden.vilkårResultater.none { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } || this.tema == Tema.FELLES
 
 private fun SanityBegrunnelse.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
     if (begrunnelseGrunnlag !is BegrunnelseGrunnlagForPeriodeMedReduksjonPåTversAvBehandlinger) {
