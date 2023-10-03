@@ -418,11 +418,16 @@ class ForvalterService(
         return false
     }
 
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(): List<Long> {
+    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(): List<Pair<Long, String>> {
         val løpendeFagsakerMedFlereMigreringsbehandlinger =
             fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger()
         return løpendeFagsakerMedFlereMigreringsbehandlinger.filter { infotrygdService.harLøpendeSakIInfotrygd(listOf(it.aktør.aktivFødselsnummer())) }
-            .map { it.id }
+            .map { Pair(it.id, it.aktør.aktivFødselsnummer()) }
+    }
+
+    fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(): List<Pair<Long, String>> {
+        return fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger()
+            .map { Pair(it.id, it.aktør.aktivFødselsnummer()) }
     }
 }
 

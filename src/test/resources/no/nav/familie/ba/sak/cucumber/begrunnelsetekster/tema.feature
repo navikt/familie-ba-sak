@@ -161,3 +161,57 @@ Egenskap: Gyldige begrunnelser for behandlingstema
       | 01.06.2025 | 30.11.2032 | UTBETALING         |                                   |                                            |                                    |                                       |
       | 01.12.2032 | 31.05.2037 | UTBETALING         |                                   |                                            |                                    |                                       |
       | 01.06.2037 |            | OPPHØR             |                                   |                                            |                                    |                                       |
+
+
+  Scenario: Man skal kunne få begrunnelsetekster med tema Felles uavhengig om det er EØS eller Nasjonal
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
+      | 1            | 1        |                     | INNVILGET           | SØKNAD           |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1234    | SØKER      | 30.04.1994  |
+      | 1            | 4567    | BARN       | 29.04.2015  |
+
+
+    Og følgende dagens dato 03.10.2023
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår             | Utdypende vilkår             | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
+      | 4567    | UNDER_18_ÅR        |                              | 29.04.2015 | 28.04.2033 | OPPFYLT      | Nei                  |
+      | 4567    | GIFT_PARTNERSKAP   |                              | 29.04.2015 |            | OPPFYLT      | Nei                  |
+      | 4567    | BOR_MED_SØKER      | BARN_BOR_I_NORGE_MED_SØKER   | 25.07.2022 |            | OPPFYLT      | Nei                  |
+      | 4567    | LOVLIG_OPPHOLD     |                              | 25.07.2022 |            | OPPFYLT      | Nei                  |
+      | 4567    | BOSATT_I_RIKET     | BARN_BOR_I_NORGE             | 25.07.2022 |            | OPPFYLT      | Nei                  |
+
+      | 1234    | LOVLIG_OPPHOLD     |                              | 25.07.2022 |            | OPPFYLT      | Nei                  |
+      | 1234    | UTVIDET_BARNETRYGD |                              | 25.07.2022 | 30.05.2023 | OPPFYLT      | Nei                  |
+      | 1234    | BOSATT_I_RIKET     | OMFATTET_AV_NORSK_LOVGIVNING | 25.07.2022 |            | OPPFYLT      | Nei                  |
+      | 1234    | UTVIDET_BARNETRYGD |                              | 31.05.2023 |            | IKKE_OPPFYLT | Nei                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 4567    | 1            | 01.08.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 4567    | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 4567    | 1            | 01.07.2023 | 31.03.2033 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 1234    | 1            | 01.08.2022 | 28.02.2023 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
+      | 1234    | 1            | 01.03.2023 | 31.05.2023 | 2489  | UTVIDET_BARNETRYGD | 100     | 2489 |
+
+    Og med kompetanser for begrunnelse
+      | AktørId | Fra dato   | Til dato | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
+      | 4567    | 01.08.2022 |          | NORGE_ER_PRIMÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | IE                             | NO                  |
+
+    Når begrunnelsetekster genereres for behandling 1
+
+    Så forvent følgende standardBegrunnelser
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser            | Ekskluderte Begrunnelser |
+      | 01.08.2022 | 28.02.2023 | UTBETALING         |           | INNVILGET_FLYTTET_ETTER_SEPARASJON |                          |
+      | 01.03.2023 | 31.05.2023 | UTBETALING         |           |                                    |                          |
+      | 01.06.2023 | 30.06.2023 | UTBETALING         |           |                                    |                          |
+      | 01.07.2023 | 31.03.2033 | UTBETALING         |           |                                    |                          |
+      | 01.04.2033 |            | OPPHØR             |           |                                    |                          |
