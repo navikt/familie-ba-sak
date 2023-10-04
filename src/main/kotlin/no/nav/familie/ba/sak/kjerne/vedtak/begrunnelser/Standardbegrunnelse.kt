@@ -1540,7 +1540,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
             throw Feil("Begrunnelse $this kan ikke deles opp.")
         }
         return when (this) {
-            Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING -> {
+            ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING -> {
                 val deltBostedEndringsperioder = this.hentRelevanteEndringsperioderForBegrunnelse(
                     minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
                     vedtaksperiode = periode,
