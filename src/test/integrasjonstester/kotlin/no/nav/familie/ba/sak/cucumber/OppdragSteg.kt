@@ -62,7 +62,7 @@ class OppdragSteg {
     }
 
     @Gitt("følgende behandlingsinformasjon")
-    fun `følgendeBehandlingsinformasjon`(dataTable: DataTable) {
+    fun følgendeBehandlingsinformasjon(dataTable: DataTable) {
         endretMigreringsdatoMap = dataTable.groupByBehandlingId()
             .mapValues {
                 it.value.map { entry: Map<String, String> -> parseÅrMåned(entry[Domenebegrep.ENDRET_MIGRERINGSDATO.nøkkel]!!) }
