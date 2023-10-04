@@ -41,13 +41,13 @@ class TestSantityKlient : SanityKlient("ba-brev", restTemplate) {
     }
 
     fun hentBegrunnelserMap(): Map<Standardbegrunnelse, SanityBegrunnelse> {
-        val enumVerdier = Standardbegrunnelse.values().associateBy { it.sanityApiNavn }
+        val enumVerdier = Standardbegrunnelse.entries.associateBy { it.sanityApiNavn }
         val begrunnelser = hentBegrunnelser()
         return tilMap(begrunnelser, enumVerdier)
     }
 
     fun hentEØSBegrunnelserMap(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
-        val enumVerdier = EØSStandardbegrunnelse.values().associateBy { it.sanityApiNavn }
+        val enumVerdier = EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
         val begrunnelser = hentEØSBegrunnelser()
         return tilMap(begrunnelser, enumVerdier)
     }

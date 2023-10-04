@@ -117,7 +117,7 @@ class DokumentDistribueringService(
         antallBrevSendt[brevmal]?.increment()
     }
 
-    private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
+    private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.entries.toTypedArray()).associateWith {
         Metrics.counter(
             "brev.sendt",
             "brevtype",
@@ -126,7 +126,7 @@ class DokumentDistribueringService(
     }
 
     private val antallBrevIkkeDistribuertUkjentAndresse: Map<Brevmal, Counter> =
-        mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
+        mutableListOf<Brevmal>().plus(Brevmal.entries.toTypedArray()).associateWith {
             Metrics.counter(
                 "brev.ikke.sendt.ukjent.andresse",
                 "brevtype",

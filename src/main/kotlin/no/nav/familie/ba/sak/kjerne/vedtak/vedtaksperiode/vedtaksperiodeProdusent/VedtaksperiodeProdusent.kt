@@ -331,7 +331,7 @@ private fun erReduksjonFraForrigeBehandlingPåMinstEnYtelsestype(
     innvilgedeYtelsestyperDennePerioden: Set<YtelseType>?,
     innvilgedeYtelsestyperDennePeriodenForrigeBehandling: Set<YtelseType>?,
 ): Boolean {
-    return YtelseType.values().any { ytelseType ->
+    return YtelseType.entries.any { ytelseType ->
         val ytelseInnvilgetDennePerioden =
             innvilgedeYtelsestyperDennePerioden?.contains(ytelseType) ?: false
         val ytelseInnvilgetForrigePeriode =

@@ -405,7 +405,7 @@ class UtbetalingssikkerhetTest {
             SatsType.ORBA,
             SatsType.UTVIDET_BARNETRYGD,
         )
-        assertTrue(støttedeSatstyper.containsAll(SatsType.values().toSet()))
-        assertEquals(støttedeSatstyper.size, SatsType.values().size)
+        assertTrue(støttedeSatstyper.containsAll(SatsType.entries.toSet()))
+        assertEquals(støttedeSatstyper.size, SatsType.entries.size)
     }
 }

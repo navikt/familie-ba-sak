@@ -45,7 +45,7 @@ object EndringIVilkårsvurderingUtil {
             val personIBehandling = personerIBehandling.singleOrNull { it.aktør == aktør }
             val personIForrigeBehandling = personerIForrigeBehandling.singleOrNull { it.aktør == aktør }
 
-            Vilkår.values().map { vilkår ->
+            Vilkår.entries.map { vilkår ->
                 lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
                     nåværendeOppfylteVilkårResultater = nåværendePersonResultater
                         .filter { it.aktør == aktør }

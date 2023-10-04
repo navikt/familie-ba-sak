@@ -31,7 +31,7 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenTidligerePerioder(
 ): List<InternPeriodeOvergangsstønad> {
     val tidligerePerioder = this.filter { it.fomDato.isSameOrBefore(dagensDato) }
 
-    val nyePerioder = this.minus(tidligerePerioder)
+    val nyePerioder = this.minus(tidligerePerioder.toSet())
     return tidligerePerioder.slåSammenSammenhengendePerioder() + nyePerioder
 }
 
@@ -65,7 +65,7 @@ fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandl
     dagensDato: LocalDate,
 ): List<InternPeriodeOvergangsstønad> {
     val tidligerePerioder = this.filter { it.tomDato.isSameOrBefore(dagensDato) }
-    val framtidigePerioder = this.minus(tidligerePerioder)
+    val framtidigePerioder = this.minus(tidligerePerioder.toSet())
     val nyeOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(framtidigePerioder)
 
     val gammelOvergangsstønadTidslinje =

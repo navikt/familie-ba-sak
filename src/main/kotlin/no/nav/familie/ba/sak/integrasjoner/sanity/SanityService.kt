@@ -22,7 +22,7 @@ class SanityService(
 
     @Cacheable("sanityBegrunnelser", cacheManager = "shortCache")
     fun hentSanityBegrunnelser(): Map<Standardbegrunnelse, SanityBegrunnelse> {
-        val enumPåApiNavn = Standardbegrunnelse.values().associateBy { it.sanityApiNavn }
+        val enumPåApiNavn = Standardbegrunnelse.entries.associateBy { it.sanityApiNavn }
         val sanityBegrunnelser = sanityKlient.hentBegrunnelser()
         logManglerSanityBegrunnelseForEnum(enumPåApiNavn, sanityBegrunnelser, "SanityBegrunnelse")
         return sanityBegrunnelser
@@ -44,9 +44,9 @@ class SanityService(
 
         // TODO: Fjern filtrering av begrunnelser etter at EØS praksisendringen er live i prod
         val enumPåApiNavn = if (eøsPraksisEndringFeatureToggleErSlåttPå) {
-            EØSStandardbegrunnelse.values().associateBy { it.sanityApiNavn }
+            EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
         } else {
-            EØSStandardbegrunnelse.values().subtract(EØSStandardbegrunnelse.eøsPraksisendringBegrunnelser())
+            EØSStandardbegrunnelse.entries.toTypedArray().subtract(EØSStandardbegrunnelse.eøsPraksisendringBegrunnelser())
                 .associateBy { it.sanityApiNavn }
         }
 

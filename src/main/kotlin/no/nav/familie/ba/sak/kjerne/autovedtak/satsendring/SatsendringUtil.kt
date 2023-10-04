@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import java.math.BigDecimal
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertMedSisteSatser(): Boolean =
-    SatsType.values()
+    SatsType.entries
         .filter { it != SatsType.FINN_SVAL }
         .all { this.erOppdatertFor(it) }
 

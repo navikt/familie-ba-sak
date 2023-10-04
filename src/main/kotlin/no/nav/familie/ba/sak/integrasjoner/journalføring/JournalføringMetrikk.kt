@@ -13,7 +13,7 @@ class JournalføringMetrikk {
 
     private val antallGenerellSak: Counter = Metrics.counter("journalfoering.behandling", "behandlingstype", "Fagsak")
 
-    private val antallTilBehandling = BehandlingType.values().associateWith {
+    private val antallTilBehandling = BehandlingType.entries.associateWith {
         Metrics.counter("journalfoering.behandling", "behandlingstype", it.visningsnavn)
     }
 

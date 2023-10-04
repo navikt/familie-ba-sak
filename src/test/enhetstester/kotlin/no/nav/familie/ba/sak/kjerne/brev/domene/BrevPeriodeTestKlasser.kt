@@ -213,7 +213,7 @@ data class BegrunnelseDataTestConfig(
         avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: "",
         sokersRettTilUtvidet = this.sokersRettTilUtvidet
             ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat(),
-        vedtakBegrunnelseType = Standardbegrunnelse.values()
+        vedtakBegrunnelseType = Standardbegrunnelse.entries
             .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
             ?: throw Feil("Fant ikke Standardbegrunnelse med apiNavn ${this.apiNavn}"),
     )
@@ -238,7 +238,7 @@ data class EØSBegrunnelseTestConfig(
         barnasFodselsdatoer = this.barnasFodselsdatoer,
         antallBarn = this.antallBarn,
         maalform = this.maalform,
-        vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
+        vedtakBegrunnelseType = EØSStandardbegrunnelse.entries
             .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
             ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
         sokersAktivitet = this.sokersAktivitet,

@@ -30,14 +30,14 @@ class BrevTypeTest {
         Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
     )
 
-    private val førerIkkeTilAvventingAvDokumentasjon = Brevmal.values()
+    private val førerIkkeTilAvventingAvDokumentasjon = Brevmal.entries
         .filter {
             it !in førerTilAvventerDokumentasjon && it !in eøsDokumentMedAvventerDokumentasjon
         }
 
     @Test
     fun `Skal si om behandling settes på vent`() {
-        val setterIkkeBehandlingPåVent = Brevmal.values()
+        val setterIkkeBehandlingPåVent = Brevmal.entries
             .filter { !førerTilAvventerDokumentasjon.contains(it) && it !in eøsDokumentMedAvventerDokumentasjon }
 
         setterIkkeBehandlingPåVent.forEach {

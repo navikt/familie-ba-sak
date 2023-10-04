@@ -36,7 +36,7 @@ enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering)
 }
 
 object FiltreringsregelEvaluering {
-    fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) = Filtreringsregel.values()
+    fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) = Filtreringsregel.entries
         .fold(mutableListOf<Evaluering>()) { acc, filtreringsregel ->
             if (acc.any { it.resultat == Resultat.IKKE_OPPFYLT }) {
                 acc.add(

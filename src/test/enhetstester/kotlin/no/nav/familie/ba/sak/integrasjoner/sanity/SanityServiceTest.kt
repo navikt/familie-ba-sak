@@ -28,7 +28,7 @@ class SanityServiceTest {
     fun `hentSanityEØSBegrunnelser - skal filtrere bort nye begrunnelser tilknyttet EØS praksisendring dersom toggel er av`() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.EØS_PRAKSISENDRING_SEPTEMBER2023) } returns false
 
-        every { sanityKlient.hentEØSBegrunnelser() } returns EØSStandardbegrunnelse.values().map {
+        every { sanityKlient.hentEØSBegrunnelser() } returns EØSStandardbegrunnelse.entries.map {
             SanityEØSBegrunnelse(
                 apiNavn = it.sanityApiNavn,
                 navnISystem = it.name,
@@ -56,7 +56,7 @@ class SanityServiceTest {
     fun `hentSanityEØSBegrunnelser - skal ikke filtrere bort nye begrunnelser tilknyttet EØS praksisendring dersom toggel er på`() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.EØS_PRAKSISENDRING_SEPTEMBER2023) } returns true
 
-        every { sanityKlient.hentEØSBegrunnelser() } returns EØSStandardbegrunnelse.values().map {
+        every { sanityKlient.hentEØSBegrunnelser() } returns EØSStandardbegrunnelse.entries.map {
             SanityEØSBegrunnelse(
                 apiNavn = it.sanityApiNavn,
                 navnISystem = it.name,
@@ -77,6 +77,6 @@ class SanityServiceTest {
 
         val eøsBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
 
-        assertThat(eøsBegrunnelser.keys).isEqualTo(EØSStandardbegrunnelse.values().toSet())
+        assertThat(eøsBegrunnelser.keys).isEqualTo(EØSStandardbegrunnelse.entries.toSet())
     }
 }

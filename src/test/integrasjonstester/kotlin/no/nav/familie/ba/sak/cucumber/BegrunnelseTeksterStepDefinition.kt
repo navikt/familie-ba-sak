@@ -359,7 +359,7 @@ class BegrunnelseTeksterStepDefinition {
             objectMapper.readValue(restSanityBegrunnelserJson.readText(), Array<RestSanityBegrunnelse>::class.java)
                 .toList()
 
-        val enumPåApiNavn = Standardbegrunnelse.values().associateBy { it.sanityApiNavn }
+        val enumPåApiNavn = Standardbegrunnelse.entries.associateBy { it.sanityApiNavn }
         val sanityBegrunnelser = restSanityBegrunnelser.mapNotNull { it.tilSanityBegrunnelse() }
 
         return sanityBegrunnelser

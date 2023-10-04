@@ -331,8 +331,8 @@ internal class StandardbegrunnelseTest {
 
     @Test
     fun `Alle begrunnelser er unike`() {
-        val vedtakBegrunnelser = Standardbegrunnelse.values().groupBy { it.sanityApiNavn }
-        assertEquals(vedtakBegrunnelser.size, Standardbegrunnelse.values().size)
+        val vedtakBegrunnelser = Standardbegrunnelse.entries.groupBy { it.sanityApiNavn }
+        assertEquals(vedtakBegrunnelser.size, Standardbegrunnelse.entries.size)
     }
 
     private fun String.startsWithUppercaseLetter(): Boolean {

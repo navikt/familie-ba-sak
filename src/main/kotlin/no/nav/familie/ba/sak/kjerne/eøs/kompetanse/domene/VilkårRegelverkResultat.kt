@@ -24,7 +24,7 @@ data class VilkårRegelverkResultat(
 fun VilkårRegelverkResultat.medRegelverk(regelverk: Regelverk) =
     VilkårRegelverkResultat(
         this.vilkår,
-        RegelverkResultat.values().first { it.regelverk == regelverk && it.resultat == this.resultat },
+        RegelverkResultat.entries.first { it.regelverk == regelverk && it.resultat == this.resultat },
         this.utdypendeVilkårsvurderinger,
     )
 

@@ -50,8 +50,8 @@ class FiltreringsreglerService(
     val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
 
     init {
-        Filtreringsregel.values().map {
-            Resultat.values().forEach { resultat ->
+        Filtreringsregel.entries.map {
+            Resultat.entries.forEach { resultat ->
                 filtreringsreglerMetrics["${it.name}_${resultat.name}"] =
                     Metrics.counter(
                         "familie.ba.sak.filtreringsregler.utfall",

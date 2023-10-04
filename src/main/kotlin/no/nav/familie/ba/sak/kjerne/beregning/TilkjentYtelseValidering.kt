@@ -123,7 +123,7 @@ object TilkjentYtelseValidering {
         andelerForPerson: List<AndelTilkjentYtelse>,
         gyldigEtterbetalingFom: YearMonth,
     ): Boolean {
-        return YtelseType.values().any { ytelseType ->
+        return YtelseType.entries.any { ytelseType ->
             val forrigeAndelerForPersonOgType = forrigeAndelerForPerson.filter { it.type == ytelseType }
             val andelerForPersonOgType = andelerForPerson.filter { it.type == ytelseType }
 
@@ -226,7 +226,7 @@ object TilkjentYtelseValidering {
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
     ): List<MånedPeriode> {
-        val kombinertOverlappTidslinje = YtelseType.values().map { ytelseType ->
+        val kombinertOverlappTidslinje = YtelseType.entries.map { ytelseType ->
             lagErOver100ProsentUtbetalingPåYtelseTidslinje(
                 andeler = andeler.filter { it.type == ytelseType },
                 barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger.filter { it.type == ytelseType },

@@ -85,7 +85,7 @@ class AutomatiskBeslutningServiceTest {
     fun `behandlingSkalAutomatiskBesluttes - skal returnere false dersom behandling ikke er migrering uavhengig av avvik og manuelle posteringer`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
-        BehandlingType.values().filter {
+        BehandlingType.entries.filter {
             !listOf(
                 BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,

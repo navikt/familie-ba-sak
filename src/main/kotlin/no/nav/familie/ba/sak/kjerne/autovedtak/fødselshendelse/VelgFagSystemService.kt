@@ -43,7 +43,7 @@ class VelgFagSystemService(
     val utfallForValgAvFagsystem = mutableMapOf<FagsystemUtfall, Counter>()
 
     init {
-        values().forEach {
+        FagsystemUtfall.entries.forEach {
             utfallForValgAvFagsystem[it] = Metrics.counter(
                 "familie.ba.sak.velgfagsystem",
                 "navn",

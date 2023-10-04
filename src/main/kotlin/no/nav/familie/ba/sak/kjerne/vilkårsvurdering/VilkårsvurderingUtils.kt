@@ -331,8 +331,7 @@ object VilkårsvurderingUtils {
 fun standardbegrunnelserTilNedtrekksmenytekster(
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
 ) =
-    Standardbegrunnelse
-        .values()
+    Standardbegrunnelse.entries
         .groupBy { it.vedtakBegrunnelseType }
         .mapValues { begrunnelseGruppe ->
             begrunnelseGruppe.value
@@ -346,7 +345,7 @@ fun standardbegrunnelserTilNedtrekksmenytekster(
 
 fun eøsStandardbegrunnelserTilNedtrekksmenytekster(
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
-) = EØSStandardbegrunnelse.values().groupBy { it.vedtakBegrunnelseType }
+) = EØSStandardbegrunnelse.entries.groupBy { it.vedtakBegrunnelseType }
     .mapValues { begrunnelseGruppe ->
         begrunnelseGruppe.value.flatMap { vedtakBegrunnelse ->
             eøsBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(

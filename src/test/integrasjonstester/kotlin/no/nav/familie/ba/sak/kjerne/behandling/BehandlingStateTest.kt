@@ -77,7 +77,7 @@ class BehandlingStateTest(
 
         @Test
         fun `kan maks ha en parallell behandling i arbeid`() {
-            BehandlingStatus.values().filter { it != BehandlingStatus.AVSLUTTET && it != BehandlingStatus.SATT_PÅ_MASKINELL_VENT }
+            BehandlingStatus.entries.filter { it != BehandlingStatus.AVSLUTTET && it != BehandlingStatus.SATT_PÅ_MASKINELL_VENT }
                 .forEach {
                     behandlingRepository.deleteAll()
                     opprettBehandling(status = it, aktiv = false)
