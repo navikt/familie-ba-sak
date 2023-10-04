@@ -330,15 +330,15 @@ class StegServiceIntegrationTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, henlagtBehandling.steg)
         assertTrue {
             oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
-                .filter { it.type == Oppgavetype.BehandleSak }.isNotEmpty()
+                .any { it.type == Oppgavetype.BehandleSak }
         }
         assertTrue {
             oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
-                .filter { it.type == Oppgavetype.BehandleUnderkjentVedtak }.isNotEmpty()
+                .any { it.type == Oppgavetype.BehandleUnderkjentVedtak }
         }
         assertTrue {
             oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
-                .filter { it.type == Oppgavetype.Journalføring }.isEmpty()
+                .none { it.type == Oppgavetype.Journalføring }
         }
     }
 

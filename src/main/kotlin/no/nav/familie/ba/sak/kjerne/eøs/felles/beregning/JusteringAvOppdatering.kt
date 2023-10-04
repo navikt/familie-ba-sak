@@ -29,21 +29,21 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.utenInnholdTilOgMed
 fun <T : PeriodeOgBarnSkjemaEntitet<T>> T.somInversOppdateringEllersNull(gjeldendeSkjemaer: Collection<T>): T? {
     val oppdatering = this
 
-    val skjemaetDerTilOgMedForkortes = gjeldendeSkjemaer.filter { gjeldende ->
+    val skjemaetDerTilOgMedForkortes = gjeldendeSkjemaer.singleOrNull { gjeldende ->
         gjeldende.tilOgMedBlirForkortetEllerLukketAv(oppdatering) &&
             gjeldende.erLikBortsettFraTilOgMed(oppdatering)
-    }.singleOrNull()
+    }
 
-    val skjemaetDerBarnFjernes = gjeldendeSkjemaer.filter { gjeldende ->
+    val skjemaetDerBarnFjernes = gjeldendeSkjemaer.singleOrNull { gjeldende ->
         oppdatering.harEkteDelmengdeAvBarna(gjeldende) &&
             gjeldende.erLikBortsettFraBarn(oppdatering)
-    }.singleOrNull()
+    }
 
-    val skjemaetDerTilOgMedForkortesOgBarnFjernes = gjeldendeSkjemaer.filter { gjeldende ->
+    val skjemaetDerTilOgMedForkortesOgBarnFjernes = gjeldendeSkjemaer.singleOrNull { gjeldende ->
         gjeldende.tilOgMedBlirForkortetEllerLukketAv(oppdatering) &&
             oppdatering.harEkteDelmengdeAvBarna(gjeldende) &&
             gjeldende.erLikBortsettFraBarnOgTilOgMed(oppdatering)
-    }.singleOrNull()
+    }
 
     return when {
         skjemaetDerTilOgMedForkortesOgBarnFjernes != null ->

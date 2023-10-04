@@ -38,8 +38,8 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner
             RestPersonMedAndeler(
                 personIdent = this.søkerOgBarn.find { person -> person.aktør == personId }?.aktør?.aktivFødselsnummer(),
                 beløp = sammenslåtteAndeler.sumOf { it.kalkulertUtbetalingsbeløp },
-                stønadFom = sammenslåtteAndeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN.toYearMonth(),
-                stønadTom = sammenslåtteAndeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX.toYearMonth(),
+                stønadFom = sammenslåtteAndeler.minOfOrNull { it.stønadFom } ?: LocalDate.MIN.toYearMonth(),
+                stønadTom = sammenslåtteAndeler.maxOfOrNull { it.stønadTom } ?: LocalDate.MAX.toYearMonth(),
                 ytelsePerioder = sammenslåtteAndeler.map { it1 ->
                     RestYtelsePeriode(
                         beløp = it1.kalkulertUtbetalingsbeløp,

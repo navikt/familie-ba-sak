@@ -35,12 +35,12 @@ fun Iterable<Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerTilkjentYtelse():
 
 fun Tidslinje<AndelTilkjentYtelse, Måned>.tilAndelTilkjentYtelse(): List<AndelTilkjentYtelse> {
     return this
-        .perioder().map {
+        .perioder().mapNotNull {
             it.innhold?.medPeriode(
                 it.fraOgMed.tilYearMonth(),
                 it.tilOgMed.tilYearMonth(),
             )
-        }.filterNotNull()
+        }
 }
 
 fun AndelTilkjentYtelse.tilPeriode() = Periode(

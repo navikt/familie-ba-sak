@@ -473,8 +473,7 @@ class RestartAvSmåbarnstilleggTest(
         if (skalBegrunneSmåbarnstillegg) {
             val småbarnstilleggVedtaksperioder =
                 vedtaksperioderMedBegrunnelser.filter {
-                    it.utbetalingsperiodeDetaljer.filter { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.ytelseType == YtelseType.SMÅBARNSTILLEGG }
-                        .isNotEmpty()
+                    it.utbetalingsperiodeDetaljer.any { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.ytelseType == YtelseType.SMÅBARNSTILLEGG }
                 }
 
             småbarnstilleggVedtaksperioder.forEach { periode ->

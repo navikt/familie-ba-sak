@@ -48,14 +48,14 @@ class VilkårsvurderingTidslinjer(
     fun søkersTidslinjer(): SøkersTidslinjer = søkersTidslinje
 
     private val barnasTidslinjer: Map<Aktør, BarnetsTidslinjer> =
-        barna.map {
+        barna.associate {
             it.aktør to BarnetsTidslinjer(
                 tidslinjer = this,
                 aktør = it.aktør,
                 fagsakType = vilkårsvurdering.behandling.fagsak.type,
                 behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
             )
-        }.toMap()
+        }
 
     fun forBarn(barn: Person) = barnasTidslinjer[barn.aktør]!!
 

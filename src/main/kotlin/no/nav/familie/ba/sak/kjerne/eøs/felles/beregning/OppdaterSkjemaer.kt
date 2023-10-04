@@ -12,9 +12,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.medBarnOgPeriodeSomOverlapperMed
  */
 fun <T : PeriodeOgBarnSkjema<T>> oppdaterSkjemaerRekursivt(skjemaer: Collection<T>, oppdatering: T): Collection<T> {
     val førsteSkjemaSomOppdateres = skjemaer
-        .filter { it.medBarnOgPeriodeSomOverlapperMed(oppdatering) != null } // Må overlappe i periode og barn
-        .filter { it.bareInnhold() != oppdatering.bareInnhold() } // Må være en endring i selve innholdet i skjemaet
-        .firstOrNull() ?: return skjemaer
+        .filter { it.medBarnOgPeriodeSomOverlapperMed(oppdatering) != null }
+        .firstOrNull { it.bareInnhold() != oppdatering.bareInnhold() } ?: return skjemaer
 
     // oppdatertSkjema har innholdet fra oppdateringen, samt felles barn og perioder
     // Vi sjekket at det VAR en overlapp rett over, så det er ikke fare for NullPointerException
