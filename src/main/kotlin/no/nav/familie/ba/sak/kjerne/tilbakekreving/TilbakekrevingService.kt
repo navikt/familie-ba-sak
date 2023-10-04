@@ -236,13 +236,12 @@ class TilbakekrevingService(
     private fun hentVerge(vergeIdent: String?): Verge? {
         val verge: Verge? = if (vergeIdent != null) {
             val aktør = personidentService.hentAktør(vergeIdent)
-            personopplysningerService.hentPersoninfoNavnOgAdresse(aktør).let {
-                Verge(
-                    vergetype = Vergetype.VERGE_FOR_BARN,
-                    navn = it.navn!!,
-                    personIdent = aktør.aktivFødselsnummer(),
-                )
-            }
+
+            Verge(
+                vergetype = Vergetype.VERGE_FOR_BARN,
+                navn = personopplysningerService.hentPersoninfoNavnOgAdresse(aktør).navn!!,
+                personIdent = aktør.aktivFødselsnummer(),
+            )
         } else {
             null
         }
