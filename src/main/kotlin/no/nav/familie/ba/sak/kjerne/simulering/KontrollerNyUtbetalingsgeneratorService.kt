@@ -254,7 +254,7 @@ class KontrollerNyUtbetalingsgeneratorService(
             .filter { it.innhold!!.resultat.compareTo(BigDecimal.ZERO) != 0 }
 
         if (perioderFraGammelFørNyMedResultatUlik0.isNotEmpty()) {
-            secureLogger.warn("Behandling ${behandling.id}  har diff i simuleringsresultat ved bruk av ny utbetalingsgenerator - simuleringsperioder før simuleringsperioder fra gammel generator gir resultat ulik 0. [${perioderFraGammelFørNyMedResultatUlik0.joinToString() { it.toString() }}]")
+            secureLogger.warn("Behandling ${behandling.id}  har diff i simuleringsresultat ved bruk av ny utbetalingsgenerator - simuleringsperioder før simuleringsperioder fra gammel generator gir resultat ulik 0. [${perioderFraGammelFørNyMedResultatUlik0.joinToString { it.toString() }}]")
             return DiffFeilType.TidligerePerioderIGammelUlik0
         }
         return null
@@ -264,7 +264,7 @@ class KontrollerNyUtbetalingsgeneratorService(
         simuleringsPerioderGammel: List<SimuleringsPeriode>,
         simuleringsPerioderNy: List<SimuleringsPeriode>,
     ) {
-        secureLogger.warn("Simuleringsperioder med diff - Gammel: [${simuleringsPerioderGammel.joinToString() { "${it.fom} - ${it.tom}: ${it.resultat}" }}] Ny: [${simuleringsPerioderNy.joinToString() { "${it.fom} - ${it.tom}: ${it.resultat}" }}]")
+        secureLogger.warn("Simuleringsperioder med diff - Gammel: [${simuleringsPerioderGammel.joinToString { "${it.fom} - ${it.tom}: ${it.resultat}" }}] Ny: [${simuleringsPerioderNy.joinToString { "${it.fom} - ${it.tom}: ${it.resultat}" }}]")
     }
 
     private fun DetaljertSimuleringResultat.tilSorterteSimuleringsPerioder(behandling: Behandling): List<SimuleringsPeriode> =
