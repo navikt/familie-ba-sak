@@ -270,7 +270,7 @@ class UtbetalingsoppdragGenerator(
 }
 
 abstract class AndelTilkjentYtelseForUtbetalingsoppdrag(private val andelTilkjentYtelse: AndelTilkjentYtelse) {
-    val behandlingId: Long? = andelTilkjentYtelse.behandlingId
+    val behandlingId: Long = andelTilkjentYtelse.behandlingId
     val tilkjentYtelse: TilkjentYtelse = andelTilkjentYtelse.tilkjentYtelse
     val kalkulertUtbetalingsbeløp: Int = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
     val stønadFom: YearMonth = andelTilkjentYtelse.stønadFom
