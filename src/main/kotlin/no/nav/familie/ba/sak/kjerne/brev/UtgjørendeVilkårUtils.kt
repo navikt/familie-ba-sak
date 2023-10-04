@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -225,8 +226,15 @@ private fun erInnvilgetVilkårResultatUtgjørende(
     val vilkårResultatFomMåned = minimertVilkårResultat.periodeFom!!.toYearMonth()
     val vedtaksperiodeFomMåned = vedtaksperiode.fom.toYearMonth()
 
+    val erVilkårOgVedtakFomSammeMåned =
+        if (minimertVilkårResultat.periodeFom.førsteDagIInneværendeMåned() == minimertVilkårResultat.periodeFom) {
+            vilkårResultatFomMåned == vedtaksperiodeFomMåned
+        } else {
+            vilkårResultatFomMåned == vedtaksperiodeFomMåned.minusMonths(1)
+        }
+
     return triggesAv.erUtdypendeVilkårsvurderingOppfylt(minimertVilkårResultat) &&
-        vilkårResultatFomMåned == vedtaksperiodeFomMåned.minusMonths(1) &&
+        erVilkårOgVedtakFomSammeMåned &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT
 }
 
