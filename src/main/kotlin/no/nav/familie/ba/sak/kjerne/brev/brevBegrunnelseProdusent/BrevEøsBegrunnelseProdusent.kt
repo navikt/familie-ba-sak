@@ -26,11 +26,11 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     landkoder: Map<String, String>,
 ): List<EØSBegrunnelseData> {
     val sanityBegrunnelse = hentSanityBegrunnelse(grunnlag)
-    val personerGjeldeneForBegrunnelse = vedtaksperiode.hentGyldigeBegrunnelserPerPerson(
+    val personerGjeldendeForBegrunnelse = vedtaksperiode.hentGyldigeBegrunnelserPerPerson(
         grunnlag,
     ).mapNotNull { (person, begrunnelserPåPerson) -> person.takeIf { this in begrunnelserPåPerson } }
     val periodegrunnlagForPersonerIBegrunnelse =
-        begrunnelsesGrunnlagPerPerson.filter { (person, _) -> person in personerGjeldeneForBegrunnelse }
+        begrunnelsesGrunnlagPerPerson.filter { (person, _) -> person in personerGjeldendeForBegrunnelse }
 
     val kompetanser = when (sanityBegrunnelse.periodeResultat) {
         SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
@@ -45,10 +45,9 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     }
 
     return if (kompetanser.isEmpty() && sanityBegrunnelse.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {
-        val personerIBegrunnelse = personerGjeldeneForBegrunnelse
         val barnPåBehandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
-        val barnIBegrunnelse = personerGjeldeneForBegrunnelse.filter { it.type == PersonType.BARN }
-        val gjelderSøker = personerIBegrunnelse.any { it.type == PersonType.SØKER }
+        val barnIBegrunnelse = personerGjeldendeForBegrunnelse.filter { it.type == PersonType.BARN }
+        val gjelderSøker = personerGjeldendeForBegrunnelse.any { it.type == PersonType.SØKER }
 
         val barnasFødselsdatoer = hentBarnasFødselsdatoerForAvslagsbegrunnelse(
             barnIBegrunnelse = barnIBegrunnelse,
@@ -103,8 +102,7 @@ fun hentBarnasFødselsdatoerForAvslagsbegrunnelse(
         if (gjelderSøker) barnPåBehandling.map { it.fødselsdato } else barnIBegrunnelse.map { it.fødselsdato }
     val uregistrerteBarnFødselsdatoer =
         uregistrerteBarn.mapNotNull { it.fødselsdato }
-    val alleBarnaFødselsdatoer = registrerteBarnFødselsdatoer + uregistrerteBarnFødselsdatoer
-    return alleBarnaFødselsdatoer
+    return registrerteBarnFødselsdatoer + uregistrerteBarnFødselsdatoer
 }
 
 data class Landkode(val kode: String, val navn: String) {
