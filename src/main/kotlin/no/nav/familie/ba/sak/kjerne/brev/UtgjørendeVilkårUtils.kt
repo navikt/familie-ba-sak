@@ -86,7 +86,6 @@ private fun hentPersonerMedUtgjørendeVilkår(
                             triggesAv = triggesAv,
                             vedtaksperiode = vedtaksperiode,
                             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-                            featureToggleService = featureToggleService,
                             begrunnelse = begrunnelse,
                         )
                     }
@@ -115,7 +114,6 @@ private fun erVilkårResultatUtgjørende(
     begrunnelse: IVedtakBegrunnelse,
     vedtaksperiode: Periode,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    featureToggleService: FeatureToggleService,
 ): Boolean {
     if (minimertVilkårResultat.periodeFom == null && !begrunnelseType.erAvslag()) {
         return false
