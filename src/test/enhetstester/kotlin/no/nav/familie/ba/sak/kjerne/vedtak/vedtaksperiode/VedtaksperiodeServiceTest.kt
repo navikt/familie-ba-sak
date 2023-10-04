@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -40,7 +39,6 @@ class VedtaksperiodeServiceTest {
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository = mockk()
-    private val brevmalService: BrevmalService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val småbarnstilleggService: SmåbarnstilleggService = mockk()
     private val refusjonEøsRepository = mockk<RefusjonEøsRepository>()
@@ -57,12 +55,10 @@ class VedtaksperiodeServiceTest {
             sanityService = mockk(),
             søknadGrunnlagService = mockk(relaxed = true),
             endretUtbetalingAndelRepository = mockk(),
-            utbetalingsperiodeMedBegrunnelserService = mockk(relaxed = true),
             kompetanseRepository = mockk(),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             featureToggleService = featureToggleService,
             feilutbetaltValutaRepository = feilutbetaltValutaRepository,
-            brevmalService = brevmalService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             småbarnstilleggService = småbarnstilleggService,
             refusjonEøsRepository = refusjonEøsRepository,

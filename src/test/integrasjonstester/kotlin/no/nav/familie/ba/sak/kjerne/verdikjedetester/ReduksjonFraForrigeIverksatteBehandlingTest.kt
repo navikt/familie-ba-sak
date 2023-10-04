@@ -6,7 +6,6 @@ import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -68,8 +67,6 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     @Test
     @Disabled("Utsatt, mulig vi bør se nøyere på denne når BEGRUNNELSER_NY togglen kan fjernes.")
     fun `Skal lage reduksjon fra sist iverksatte behandling-periode når småbarnstillegg blir borte`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
-
         val personScenario: RestScenario = lagScenario(barnFødselsdato)
         val fagsak: RestMinimalFagsak = lagFagsak(personScenario)
 

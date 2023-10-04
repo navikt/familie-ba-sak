@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeGenerator
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BrevBegrunnelse
@@ -18,7 +17,6 @@ data class BrevperiodeData(
     val minimerteKompetanserForPeriode: List<MinimertKompetanse>,
     val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>,
     val dødeBarnForrigePeriode: List<String>,
-    val featureToggleService: FeatureToggleService,
 ) : Comparable<BrevperiodeData> {
 
     fun tilBrevPeriodeGenerator() = BrevPeriodeGenerator(
@@ -31,7 +29,6 @@ data class BrevperiodeData(
         minimerteKompetanserForPeriode = minimerteKompetanserForPeriode,
         minimerteKompetanserSomStopperRettFørPeriode = minimerteKompetanserSomStopperRettFørPeriode,
         dødeBarnForrigePeriode = dødeBarnForrigePeriode,
-        featureToggleService = featureToggleService,
     )
 
     fun hentBegrunnelserOgFritekster(): List<BrevBegrunnelse> {
