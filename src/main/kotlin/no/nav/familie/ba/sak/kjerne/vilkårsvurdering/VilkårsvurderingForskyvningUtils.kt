@@ -33,7 +33,7 @@ object VilkårsvurderingForskyvningUtils {
             personResultat.tilTidslinjeForSplittForPerson(person = person, fagsakType = fagsakType)
         }
 
-        return tidslinjerPerPerson.kombiner { it.filterNotNull().flatten() }.filtrerIkkeNull().slåSammenLike()
+        return tidslinjerPerPerson.kombiner { it.toList().flatten() }.filtrerIkkeNull().slåSammenLike()
     }
 
     fun PersonResultat.tilTidslinjeForSplittForPerson(
@@ -141,7 +141,7 @@ object VilkårsvurderingForskyvningUtils {
         fagsakType: FagsakType,
     ): List<VilkårResultat>? {
         return if (vilkårResultater.alleOrdinæreVilkårErOppfylt(personType, fagsakType)) {
-            vilkårResultater.filterNotNull()
+            vilkårResultater.toList()
         } else {
             null
         }

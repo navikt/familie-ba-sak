@@ -28,7 +28,7 @@ class KafkaAivenErrorHandler : CommonContainerStoppingErrorHandler() {
         consumer: Consumer<*, *>,
         container: MessageListenerContainer,
     ) {
-        if (records.isNullOrEmpty()) {
+        if (records.isEmpty()) {
             logger.error("Feil ved konsumering av melding. Ingen records. ${consumer.subscription()}", e)
             scheduleRestart(
                 e,
