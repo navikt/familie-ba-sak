@@ -16,7 +16,7 @@ open class PdlBaseResponse<T>(
     }
 
     fun errorMessages(): String {
-        return errors?.joinToString { it -> it.message } ?: ""
+        return errors?.joinToString { it.message } ?: ""
     }
 }
 
