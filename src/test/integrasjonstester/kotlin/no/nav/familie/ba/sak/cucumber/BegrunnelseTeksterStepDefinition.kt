@@ -253,14 +253,13 @@ class BegrunnelseTeksterStepDefinition {
             )
         }
 
-        val grunnlagForBegrunnelse = GrunnlagForBegrunnelse(
+        return GrunnlagForBegrunnelse(
             behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtaksperiode,
             behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
             sanityBegrunnelser = mockHentSanityBegrunnelser(),
             sanityEØSBegrunnelser = mockHentSanityEØSBegrunnelser(),
             nåDato = dagensDato,
         )
-        return grunnlagForBegrunnelse
     }
 
     /**
