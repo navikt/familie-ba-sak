@@ -111,7 +111,7 @@ internal class StønadsstatistikkServiceTest(
             periodeIdOffset = null,
         )
 
-        val kompetanseperioder = setOf<no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse>(
+        val kompetanseperioder = setOf(
             no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse(
                 fom = YearMonth.now(),
                 tom = null,

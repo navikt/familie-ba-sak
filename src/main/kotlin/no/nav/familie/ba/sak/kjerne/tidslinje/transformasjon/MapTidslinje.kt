@@ -16,7 +16,7 @@ fun <I, T : Tidsenhet, R> Tidslinje<I, T>.map(mapper: (I?) -> R?): Tidslinje<R, 
         val innholdsresultat = this.innholdForTidspunkt(tidspunkt)
         when (innholdsresultat.harInnhold) {
             false -> Innhold.utenInnhold()
-            else -> Innhold<R>(mapper(innholdsresultat.innhold))
+            else -> Innhold(mapper(innholdsresultat.innhold))
         }
     }
 
@@ -29,6 +29,6 @@ fun <I, T : Tidsenhet, R> Tidslinje<I, T>.mapIkkeNull(mapper: (I) -> R?): Tidsli
         val innholdsresultat = this.innholdForTidspunkt(tidspunkt)
         when (innholdsresultat.harInnhold) {
             false, (innholdsresultat.innhold == null) -> Innhold.utenInnhold()
-            else -> Innhold<R>(mapper(innholdsresultat.innhold!!))
+            else -> Innhold(mapper(innholdsresultat.innhold!!))
         }
     }

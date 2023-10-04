@@ -403,5 +403,5 @@ data class SammenlignbarBegrunnelse(
     val tom: LocalDate?,
     val type: Vedtaksperiodetype,
     val inkluderteStandardBegrunnelser: Set<IVedtakBegrunnelse>,
-    val ekskluderteStandardBegrunnelser: Set<IVedtakBegrunnelse> = emptySet<IVedtakBegrunnelse>(),
+    val ekskluderteStandardBegrunnelser: Set<IVedtakBegrunnelse> = emptySet(),
 )

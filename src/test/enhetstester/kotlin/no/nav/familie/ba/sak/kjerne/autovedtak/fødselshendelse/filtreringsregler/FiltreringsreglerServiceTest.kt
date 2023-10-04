@@ -531,7 +531,7 @@ class FiltreringsreglerServiceTest {
         val fødselshendelsefiltreringResultatSlot = slot<List<FødselshendelsefiltreringResultat>>()
 
         every {
-            fødselshendelsefiltreringResultatRepository.saveAll<FødselshendelsefiltreringResultat>(
+            fødselshendelsefiltreringResultatRepository.saveAll(
                 capture(
                     fødselshendelsefiltreringResultatSlot,
                 ),

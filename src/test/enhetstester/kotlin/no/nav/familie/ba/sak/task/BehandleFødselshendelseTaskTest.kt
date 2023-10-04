@@ -71,7 +71,7 @@ internal class BehandleFødselshendelseTaskTest {
                     } returns ""
                 },
                 velgFagsystemService = mockk<VelgFagSystemService>().apply {
-                    every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
+                    every { velgFagsystem(any()) } returns Pair(
                         FagsystemRegelVurdering.SEND_TIL_BA,
                         FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
                     )
@@ -109,7 +109,7 @@ internal class BehandleFødselshendelseTaskTest {
             personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns randomAktør },
             autovedtakStegService = mockk(),
             velgFagsystemService = mockk<VelgFagSystemService>().apply {
-                every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
+                every { velgFagsystem(any()) } returns Pair(
                     FagsystemRegelVurdering.SEND_TIL_BA,
                     FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
                 )
@@ -148,7 +148,7 @@ internal class BehandleFødselshendelseTaskTest {
             taskRepositoryWrapper = mockk(),
             autovedtakStegService = autovedtakStegService,
             velgFagsystemService = mockk<VelgFagSystemService>().apply {
-                every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
+                every { velgFagsystem(any()) } returns Pair(
                     FagsystemRegelVurdering.SEND_TIL_BA,
                     FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
                 )

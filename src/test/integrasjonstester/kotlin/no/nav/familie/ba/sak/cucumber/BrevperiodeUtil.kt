@@ -27,7 +27,7 @@ fun parseBrevPerioder(dataTable: DataTable): List<BrevPeriode> {
             tom = parseValgfriString(Domenebegrep.TIL_DATO, rad) ?: "",
             beløp = beløp,
             // egen test for dette. Se `forvent følgende brevbegrunnelser for behandling i periode`()
-            begrunnelser = emptyList<BrevBegrunnelse>(),
+            begrunnelser = emptyList(),
             brevPeriodeType = parseEnum(BrevPeriodeParser.DomenebegrepBrevPeriode.TYPE, rad),
             antallBarn = antallBarn.toString(),
             barnasFodselsdager = barnasFodselsdager,
