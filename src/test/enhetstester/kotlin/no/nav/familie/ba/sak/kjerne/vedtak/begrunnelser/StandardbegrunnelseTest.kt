@@ -71,7 +71,6 @@ internal class StandardbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = emptyList(),
-                    featureToggleService = featureToggleService,
                 ),
         )
     }
@@ -90,7 +89,6 @@ internal class StandardbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = emptyList(),
-                    featureToggleService = featureToggleService,
                 ),
         )
     }
@@ -109,7 +107,6 @@ internal class StandardbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = emptyList(),
-                    featureToggleService = featureToggleService,
                 ),
         )
     }
@@ -134,7 +131,6 @@ internal class StandardbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = emptyList(),
-                    featureToggleService = featureToggleService,
                 ),
         )
     }
@@ -159,7 +155,6 @@ internal class StandardbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = emptyList(),
-                    featureToggleService = featureToggleService,
                 ),
         )
     }
@@ -184,7 +179,6 @@ internal class StandardbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = emptyList(),
-                    featureToggleService = featureToggleService,
                 ),
         )
     }
@@ -205,7 +199,6 @@ internal class StandardbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = emptyList(),
-                    featureToggleService = featureToggleService,
                 ),
         )
     }
@@ -226,7 +219,6 @@ internal class StandardbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = emptyList(),
-                    featureToggleService = featureToggleService,
                 ),
         )
     }
@@ -261,7 +253,6 @@ internal class StandardbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = emptyList(),
-                    featureToggleService = featureToggleService,
                 ),
         )
     }
@@ -296,7 +287,6 @@ internal class StandardbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = emptyList(),
-                    featureToggleService = featureToggleService,
                 ),
         )
     }
@@ -390,7 +380,6 @@ internal class StandardbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = ytelserForrigeMåned,
-                    featureToggleService = featureToggleService,
                 ),
         )
     }
@@ -434,7 +423,6 @@ internal class StandardbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = ytelserForrigeMåned,
-                    featureToggleService = featureToggleService,
                 ),
         )
     }
@@ -478,7 +466,6 @@ internal class StandardbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = ytelserForrigeMåned,
-                    featureToggleService = featureToggleService,
                 ),
         )
     }

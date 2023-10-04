@@ -1,13 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -43,13 +40,10 @@ class EndringstidspunktTest(
     @Autowired private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     @Autowired private val brevmalService: BrevmalService,
-    @Autowired private val featureToggleService: FeatureToggleService,
 ) : AbstractVerdikjedetest() {
 
     @Test
     fun `Skal filtrere bort alle vedtaksperioder før endringstidspunktet`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
-
         val barnFødselsdato = LocalDate.now().minusYears(2)
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
@@ -94,7 +88,6 @@ class EndringstidspunktTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
-            featureToggleService = featureToggleService,
         )
 
         val sisteDagUtenDeltBostedOppfylt = barnFødselsdato.plusYears(1).sisteDagIMåned()
@@ -150,7 +143,6 @@ class EndringstidspunktTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
-            featureToggleService = featureToggleService,
         )
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)

@@ -16,20 +16,24 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
             periodetype: Vedtaksperiodetype,
 
         ): IBegrunnelseGrunnlagForPeriode =
-            if (periodetype == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING) {
-                BegrunnelseGrunnlagForPeriodeMedReduksjonPåTversAvBehandlinger(
-                    dennePerioden = dennePerioden,
-                    forrigePeriode = forrigePeriode,
-                    sammePeriodeForrigeBehandling = sammePeriodeForrigeBehandling,
-                )
-            } else if (periodetype == Vedtaksperiodetype.OPPHØR) {
-                BegrunnelseGrunnlagForPeriodeMedOpphør(
-                    dennePerioden = dennePerioden,
-                    forrigePeriode = forrigePeriode,
-                    sammePeriodeForrigeBehandling = sammePeriodeForrigeBehandling,
-                )
-            } else {
-                BegrunnelseGrunnlagForPeriode(dennePerioden, forrigePeriode, sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true)
+            when (periodetype) {
+                Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> {
+                    BegrunnelseGrunnlagForPeriodeMedReduksjonPåTversAvBehandlinger(
+                        dennePerioden = dennePerioden,
+                        forrigePeriode = forrigePeriode,
+                        sammePeriodeForrigeBehandling = sammePeriodeForrigeBehandling,
+                    )
+                }
+                Vedtaksperiodetype.OPPHØR -> {
+                    BegrunnelseGrunnlagForPeriodeMedOpphør(
+                        dennePerioden = dennePerioden,
+                        forrigePeriode = forrigePeriode,
+                        sammePeriodeForrigeBehandling = sammePeriodeForrigeBehandling,
+                    )
+                }
+                else -> {
+                    BegrunnelseGrunnlagForPeriode(dennePerioden, forrigePeriode, sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true)
+                }
             }
     }
 }

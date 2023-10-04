@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
@@ -39,7 +38,6 @@ fun hentPersonerForAlleUtgjørendeVilkår(
     triggesAv: TriggesAv,
     begrunnelse: IVedtakBegrunnelse,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    featureToggleService: FeatureToggleService,
 ): Set<MinimertRestPerson> {
     return triggesAv.vilkår.fold(setOf()) { acc, vilkår ->
         acc + hentPersonerMedUtgjørendeVilkår(
@@ -51,7 +49,6 @@ fun hentPersonerForAlleUtgjørendeVilkår(
             triggesAv = triggesAv,
             begrunnelse = begrunnelse,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-            featureToggleService = featureToggleService,
         )
     }
 }
@@ -65,7 +62,6 @@ private fun hentPersonerMedUtgjørendeVilkår(
     triggesAv: TriggesAv,
     begrunnelse: IVedtakBegrunnelse,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    featureToggleService: FeatureToggleService,
 ): List<MinimertRestPerson> {
     val aktuellePersonidenter = aktuellePersonerForVedtaksperiode.map { it.personIdent }
 
@@ -85,7 +81,6 @@ private fun hentPersonerMedUtgjørendeVilkår(
                             triggesAv = triggesAv,
                             vedtaksperiode = vedtaksperiode,
                             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-                            featureToggleService = featureToggleService,
                             begrunnelse = begrunnelse,
                         )
                     }
@@ -114,7 +109,6 @@ private fun erVilkårResultatUtgjørende(
     begrunnelse: IVedtakBegrunnelse,
     vedtaksperiode: Periode,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    featureToggleService: FeatureToggleService,
 ): Boolean {
     if (minimertVilkårResultat.periodeFom == null && !begrunnelseType.erAvslag()) {
         return false

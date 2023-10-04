@@ -1,21 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
-import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.EfSakRestClientMock
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
-import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -27,21 +19,16 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -50,9 +37,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.util.sisteSmåbarnstilleggSatsTilTester
@@ -91,12 +75,7 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val autovedtakStegService: AutovedtakStegService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val opprettTaskService: OpprettTaskService,
-    @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
-    @Autowired private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
-    @Autowired private val persongrunnlagService: PersongrunnlagService,
-    @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     @Autowired private val brevmalService: BrevmalService,
-    @Autowired private val featureToggleService: FeatureToggleService,
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato = LocalDate.now().minusYears(2)
@@ -125,7 +104,6 @@ class BehandleSmåbarnstilleggTest(
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
     }
 
     @AfterEach
@@ -440,156 +418,6 @@ class BehandleSmåbarnstilleggTest(
             vedtakService = vedtakService,
             stegService = stegService,
             brevmalService = brevmalService,
-        )
-    }
-
-    @Test
-    @Order(5)
-    fun `Skal begrunne ny periode med småbarnstillegg som er etterfølgende en gammel småbarnstillegg-periode`() {
-        EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
-
-        val søkersIdent = scenario.søker.ident!!
-        val søkersAktør = personidentService.hentAktør(søkersIdent)
-
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = listOf(
-                EksternPeriode(
-                    personIdent = søkersIdent,
-                    fomDato = periodeMedFullOvergangsstønadFom,
-                    tomDato = LocalDate.now(),
-                    datakilde = Datakilde.EF,
-                ),
-                EksternPeriode(
-                    personIdent = søkersIdent,
-                    fomDato = LocalDate.now().nesteMåned().førsteDagIInneværendeMåned(),
-                    tomDato = LocalDate.now().plusMonths(3),
-                    datakilde = Datakilde.EF,
-                ),
-            ),
-        )
-        autovedtakStegService.kjørBehandlingSmåbarnstillegg(
-            mottakersAktør = søkersAktør,
-            aktør = søkersAktør,
-        )
-        val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
-
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-            behandlingId = aktivBehandling.id,
-        ).sortedBy { it.stønadFom }
-
-        val småbarnstilleggAndeler = andelerTilkjentYtelse.filter { it.erSmåbarnstillegg() }
-
-        assertEquals(2, småbarnstilleggAndeler.size)
-        assertEquals(YearMonth.now(), småbarnstilleggAndeler.first().stønadTom)
-        assertEquals(YearMonth.now().plusMonths(1), småbarnstilleggAndeler.last().stønadFom)
-        assertEquals(YearMonth.now().plusMonths(3), småbarnstilleggAndeler.last().stønadTom)
-
-        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(
-            vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.id),
-        )
-
-        val aktuellVedtaksperiode =
-            vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == YearMonth.now().nesteMåned() }
-
-        assertNotNull(aktuellVedtaksperiode)
-        assertTrue(aktuellVedtaksperiode?.begrunnelser?.any { it.standardbegrunnelse == Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG } == true)
-    }
-
-    @Test
-    fun `Skal kunne begrunne ny periode når overgangsstønad blir forlenget`() {
-        val testScenario = mockServerKlient().lagScenario(restScenario)
-
-        val fomDato = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned()
-        val tomDato1 = LocalDate.now().sisteDagIMåned()
-        val tomDato2 = barnFødselsdato.plusYears(3)
-
-        val søkersIdent = testScenario.søker.ident!!
-        val søkersAktør = personidentService.hentAktør(søkersIdent)
-
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
-            EksternePerioderResponse(
-                perioder = listOf(
-                    EksternPeriode(
-                        personIdent = søkersIdent,
-                        fomDato = fomDato,
-                        tomDato = tomDato1,
-                        datakilde = Datakilde.EF,
-                    ),
-                ),
-            )
-        opprettOgKjørGjennomUtvidetBehandling(
-            testScenario,
-            LocalDate.parse(testScenario.barna.single().fødselsdato),
-        )
-
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = listOf(
-                EksternPeriode(
-                    personIdent = søkersIdent,
-                    fomDato = fomDato,
-                    tomDato = tomDato2,
-                    datakilde = Datakilde.EF,
-                ),
-            ),
-        )
-        autovedtakStegService.kjørBehandlingSmåbarnstillegg(
-            mottakersAktør = søkersAktør,
-            aktør = søkersAktør,
-        )
-
-        val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
-
-        val småbarnstilleggAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-            behandlingId = aktivBehandling.id,
-        ).filter { it.erSmåbarnstillegg() }.sortedBy { it.id }
-
-        assertEquals(2, småbarnstilleggAndeler.size)
-        assertEquals(fomDato.toYearMonth(), småbarnstilleggAndeler.first().stønadFom)
-        assertEquals(tomDato1.toYearMonth(), småbarnstilleggAndeler.first().stønadTom)
-        assertEquals(tomDato1.plusDays(1).toYearMonth(), småbarnstilleggAndeler.last().stønadFom)
-        assertEquals(tomDato2.toYearMonth(), småbarnstilleggAndeler.last().stønadTom)
-    }
-
-    private fun opprettOgKjørGjennomUtvidetBehandling(
-        scenario: RestScenario,
-        utvidetPeriodeFom: LocalDate,
-    ): Behandling {
-        val overstyrendeVilkårResultaterFGB =
-            scenario.barna.associate { it.aktørId!! to emptyList<VilkårResultat>() }.toMutableMap()
-
-        overstyrendeVilkårResultaterFGB[scenario.søker.aktørId!!] = listOf(
-            lagVilkårResultat(
-                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                periodeFom = utvidetPeriodeFom,
-                periodeTom = null,
-                personResultat = mockk(relaxed = true),
-            ),
-        )
-
-        return kjørStegprosessForBehandling(
-            tilSteg = StegType.BEHANDLING_AVSLUTTET,
-            søkerFnr = scenario.søker.ident!!,
-            barnasIdenter = listOf(scenario.barna.first().ident!!),
-            vedtakService = vedtakService,
-            underkategori = BehandlingUnderkategori.UTVIDET,
-            behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-            overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(
-                scenario,
-                overstyrendeVilkårResultaterFGB,
-            ),
-
-            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
-            fagsakService = fagsakService,
-            persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            brevmalService = brevmalService,
-            featureToggleService = featureToggleService,
         )
     }
 }

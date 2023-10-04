@@ -5,8 +5,6 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -15,31 +13,19 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.erGyldigForKompetanseMedData
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtaksperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.endretUtbetalingsperiodeBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentUtbetalingsperiodeDetaljer
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 
@@ -177,108 +163,6 @@ private fun utledTom(
     overlappendePeriode: LocalDateSegment<Int>,
 ) = if (gammeltSegment.tom > overlappendePeriode.tom) overlappendePeriode.tom else gammeltSegment.tom
 
-@Deprecated("Skal byttes ut med hentGyldigeBegrunnelserForPeriode")
-fun hentGyldigeBegrunnelserForPeriodeGammel(
-    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
-    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
-    persongrunnlag: PersonopplysningGrunnlag,
-    vilkårsvurdering: Vilkårsvurdering,
-    aktørIderMedUtbetaling: List<String>,
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
-    kompetanserIPeriode: List<Kompetanse>,
-    kompetanserSomStopperRettFørPeriode: List<Kompetanse>,
-    featureToggleService: FeatureToggleService,
-): List<IVedtakBegrunnelse> {
-    val standardbegrunnelser = hentGyldigeStandardbegrunnelserForVedtaksperiode(
-        utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-        sanityBegrunnelser = sanityBegrunnelser,
-        persongrunnlag = persongrunnlag,
-        vilkårsvurdering = vilkårsvurdering,
-        aktørIderMedUtbetaling = aktørIderMedUtbetaling,
-        endretUtbetalingAndeler = endretUtbetalingAndeler,
-        andelerTilkjentYtelse = andelerTilkjentYtelse,
-        featureToggleService = featureToggleService,
-    )
-    val eøsBegrunnelser = hentGyldigeEØSBegrunnelserForPeriode(
-        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-        kompetanserIPeriode = kompetanserIPeriode,
-        kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode,
-        minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
-    )
-
-    return standardbegrunnelser + eøsBegrunnelser
-}
-
-fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
-    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
-    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
-    persongrunnlag: PersonopplysningGrunnlag,
-    vilkårsvurdering: Vilkårsvurdering,
-    aktørIderMedUtbetaling: List<String>,
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    featureToggleService: FeatureToggleService,
-) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
-    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
-    sanityBegrunnelser = sanityBegrunnelser,
-    minimertePersoner = persongrunnlag.tilMinimertePersoner(),
-    minimertePersonresultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-    aktørIderMedUtbetaling = aktørIderMedUtbetaling,
-    minimerteEndredeUtbetalingAndeler = endretUtbetalingAndeler.map { it.tilMinimertEndretUtbetalingAndel() },
-    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
-        andelerTilkjentYtelse,
-        utvidetVedtaksperiodeMedBegrunnelser.fom,
-    ),
-    ytelserForSøkerForrigeMåned = hentYtelserForSøkerForrigeMåned(
-        andelerTilkjentYtelse,
-        utvidetVedtaksperiodeMedBegrunnelser,
-    ),
-    ytelserForrigePerioder = andelerTilkjentYtelse.filter {
-        ytelseErFraForrigePeriode(
-            it,
-            utvidetVedtaksperiodeMedBegrunnelser,
-        )
-    },
-    featureToggleService = featureToggleService,
-)
-
-fun hentGyldigeEØSBegrunnelserForPeriode(
-    sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
-    kompetanserIPeriode: List<Kompetanse>,
-    kompetanserSomStopperRettFørPeriode: List<Kompetanse>,
-    minimertVedtaksperiode: MinimertVedtaksperiode,
-) = EØSStandardbegrunnelse.entries
-    .filter { minimertVedtaksperiode.type.tillatteBegrunnelsestyper.contains(it.vedtakBegrunnelseType) }
-    .mapNotNull { it.tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser) }.filter { begrunnelse ->
-        when (begrunnelse.eøsBegrunnelse.vedtakBegrunnelseType) {
-            VedtakBegrunnelseType.EØS_INNVILGET, VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET -> kompetanserIPeriode.any { kompetanse ->
-                kompetanse.validerFelterErSatt()
-                begrunnelse.erGyldigForKompetanseMedData(
-                    annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
-                    barnetsBostedslandFraKompetanse = landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland!!),
-                    resultatFraKompetanse = kompetanse.resultat!!,
-                )
-            }
-
-            VedtakBegrunnelseType.EØS_OPPHØR, VedtakBegrunnelseType.EØS_REDUKSJON -> kompetanserSomStopperRettFørPeriode.any { kompetanse ->
-                kompetanse.validerFelterErSatt()
-                begrunnelse.erGyldigForKompetanseMedData(
-                    annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
-                    barnetsBostedslandFraKompetanse = landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland!!),
-                    resultatFraKompetanse = kompetanse.resultat!!,
-                )
-            }
-
-            VedtakBegrunnelseType.EØS_AVSLAG -> minimertVedtaksperiode.type.tillatteBegrunnelsestyper.contains(
-                VedtakBegrunnelseType.EØS_AVSLAG,
-            )
-
-            else -> false
-        }
-    }.map { it.eøsBegrunnelse }
-
 fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode: MinimertVedtaksperiode,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
@@ -289,9 +173,8 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     ytelserForrigePerioder: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    featureToggleService: FeatureToggleService,
 ): List<Standardbegrunnelse> {
-    val tillateBegrunnelserForVedtakstype = hentPåskruddeStandardbegrunnelser(featureToggleService)
+    val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.entries
         .filter {
             minimertVedtaksperiode.type.tillatteBegrunnelsestyper.contains(it.vedtakBegrunnelseType)
         }.filter {
@@ -318,7 +201,6 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
             erFørsteVedtaksperiodePåFagsak,
             ytelserForSøkerForrigeMåned,
             ytelserForrigePerioder,
-            featureToggleService,
         )
 
         else -> {
@@ -333,21 +215,10 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
                 erFørsteVedtaksperiodePåFagsak,
                 ytelserForSøkerForrigeMåned,
                 ytelserForrigePerioder,
-                featureToggleService,
             )
         }
     }
 }
-
-private fun hentPåskruddeStandardbegrunnelser(featureToggleService: FeatureToggleService) =
-    Standardbegrunnelse.entries
-        .filter {
-            if (it == Standardbegrunnelse.ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR) {
-                featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)
-            } else {
-                true
-            }
-        }
 
 private fun velgRedusertBegrunnelser(
     tillateBegrunnelserForVedtakstype: List<Standardbegrunnelse>,
@@ -360,14 +231,13 @@ private fun velgRedusertBegrunnelser(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    featureToggleService: FeatureToggleService,
 ): List<Standardbegrunnelse> {
     val redusertBegrunnelser = tillateBegrunnelserForVedtakstype.filter {
         sanityBegrunnelser[it]?.triggesAv?.gjelderFraInnvilgelsestidspunkt ?: false
     }
     if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
         val utbetalingsbegrunnelser = velgUtbetalingsbegrunnelser(
-            hentPåskruddeStandardbegrunnelser(featureToggleService),
+            Standardbegrunnelse.entries,
             sanityBegrunnelser,
             minimertVedtaksperiode,
             minimertePersonresultater,
@@ -377,7 +247,6 @@ private fun velgRedusertBegrunnelser(
             erFørsteVedtaksperiodePåFagsak,
             ytelserForSøkerForrigeMåned,
             ytelserForrigePeriode,
-            featureToggleService,
         )
         return redusertBegrunnelser + utbetalingsbegrunnelser
     }
@@ -395,7 +264,6 @@ private fun velgUtbetalingsbegrunnelser(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    featureToggleService: FeatureToggleService,
 ): List<Standardbegrunnelse> {
     val standardbegrunnelser: MutableSet<Standardbegrunnelse> =
         tillateBegrunnelserForVedtakstype.filter { !it.vedtakBegrunnelseType.erFortsattInnvilget() }
@@ -411,7 +279,6 @@ private fun velgUtbetalingsbegrunnelser(
                         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                         ytelserForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
                         ytelserForrigePeriode = ytelserForrigePeriode,
-                        featureToggleService = featureToggleService,
                     )
                 ) {
                     acc.add(standardBegrunnelse)

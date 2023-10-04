@@ -82,8 +82,6 @@ data class AndelTilkjentYtelseForTidslinje(
     val sats: Int,
     val ytelseType: YtelseType,
     val prosent: BigDecimal,
-    val stønadFom: YearMonth? = null,
-    val stønadTom: YearMonth? = null,
     val nasjonaltPeriodebeløp: Int = beløp,
     val differanseberegnetPeriodebeløp: Int? = null,
 )
