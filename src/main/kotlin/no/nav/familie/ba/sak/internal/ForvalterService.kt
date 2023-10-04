@@ -210,7 +210,7 @@ class ForvalterService(
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun lagKorrigertUtbetalingsoppdragOgIverksettMotØkonomi(behandlingId: Long, versjon: Int = 1) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
-        if (tilkjentYtelse.behandling.aktiv == false) throw Exception("Behandling $behandlingId er ikke den aktive behandlingen på fagsaken")
+        if (!tilkjentYtelse.behandling.aktiv) throw Exception("Behandling $behandlingId er ikke den aktive behandlingen på fagsaken")
         val validertUtbetalingsoppdrag = validerOpphørsdatoIUtbetalingsoppdrag(tilkjentYtelse)
         if (!validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer && validertUtbetalingsoppdrag.nyttUtbetalingsoppdrag != null && detFinnesUtbetalingsperioderMedFeilOgTilhørendeKorrigerteUtbetalingsperioder(
                 validertUtbetalingsoppdrag,

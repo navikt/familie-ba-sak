@@ -133,7 +133,7 @@ class PersonidentService(
      */
 
     private fun validerOmAktørIdErMerget(alleHistoriskeIdenterFraPdl: List<IdentInformasjon>) {
-        val alleHistoriskeAktørIder = alleHistoriskeIdenterFraPdl.filter { it.gruppe == "AKTORID" && it.historisk == true }.map { it.ident }
+        val alleHistoriskeAktørIder = alleHistoriskeIdenterFraPdl.filter { it.gruppe == "AKTORID" && it.historisk }.map { it.ident }
 
         val aktiveAktørerForHistoriskAktørIder = alleHistoriskeAktørIder
             .mapNotNull { aktørId -> aktørIdRepository.findByAktørIdOrNull(aktørId) }
@@ -189,7 +189,7 @@ class PersonidentService(
             )
 
     private fun filtrerAktivtAktørId(identerFraPdl: List<IdentInformasjon>): String =
-        identerFraPdl.singleOrNull { it.gruppe == "AKTORID" && it.historisk == false }?.ident
+        identerFraPdl.singleOrNull { it.gruppe == "AKTORID" && !it.historisk }?.ident
             ?: throw Error("Finner ikke aktørId i Pdl")
 
     companion object {
