@@ -146,7 +146,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            featureToggleService = featureToggleService,
+
             begrunnelse = Standardbegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
         )
 
@@ -167,7 +167,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            featureToggleService = featureToggleService,
+
             begrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
         )
 
@@ -244,7 +244,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            featureToggleService = featureToggleService,
+
             begrunnelse = Standardbegrunnelse.REDUKSJON_BOSATT_I_RIKTET,
         )
 
@@ -265,7 +265,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            featureToggleService = featureToggleService,
+
             begrunnelse = Standardbegrunnelse.OPPHØR_UTVANDRET,
         )
 
@@ -337,7 +337,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            featureToggleService = featureToggleService,
+
             begrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
         )
 
@@ -352,7 +352,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            featureToggleService = featureToggleService,
+
             begrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
         )
 
@@ -439,7 +439,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            featureToggleService = featureToggleService,
+
             begrunnelse = avslagBegrunnelse1,
         )
 
@@ -454,7 +454,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            featureToggleService = featureToggleService,
+
             begrunnelse = avslagBegrunnelse2,
         )
 

@@ -1,17 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.testSanityKlient
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -257,101 +249,5 @@ class VedtaksperiodeUtilTest {
         )
         Assertions.assertEquals(fom3, periode4.fom)
         Assertions.assertEquals(sisteTom, periode4.tom)
-    }
-
-    @Test
-    fun `skal finne riktige begrunnelser for kompetanse når barn bor i utlandet`() {
-        val kompetanserIPeriode: List<Kompetanse> =
-            listOf(
-                lagKompetanse(
-                    annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
-                    barnetsBostedsland = "SE",
-                    kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-                    søkersAktivitetsland = "NO",
-                    søkersAktivitet = KompetanseAktivitet.ARBEIDER,
-                    annenForeldersAktivitetsland = "SE",
-                    barnAktører = setOf(Aktør("1234567891011", mutableSetOf())),
-
-                ),
-            )
-
-        val forventedeBegrunnelser =
-            listOf(
-                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_STANDARD,
-                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_UK_STANDARD,
-                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_UK_OG_UTLAND_STANDARD,
-            )
-
-        val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
-            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-            kompetanserIPeriode = kompetanserIPeriode,
-            kompetanserSomStopperRettFørPeriode = emptyList(),
-            minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING).tilMinimertVedtaksperiode(),
-        )
-        Assertions.assertTrue(
-            forventedeBegrunnelser.all {
-                gyldigeEØSBegrunnelserForPeriode.contains(it)
-            },
-        )
-    }
-
-    @Test
-    fun `skal finne riktige begrunnelser for kompetanse når barn bor i Norge`() {
-        val kompetanserIPeriode: List<Kompetanse> =
-            listOf(
-                lagKompetanse(
-                    annenForeldersAktivitet = KompetanseAktivitet.I_ARBEID,
-                    barnetsBostedsland = "NO",
-                    kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-                    søkersAktivitetsland = "NO",
-                    søkersAktivitet = KompetanseAktivitet.ARBEIDER,
-                    annenForeldersAktivitetsland = "SE",
-                    barnAktører = setOf(Aktør("1234567891011", mutableSetOf())),
-
-                ),
-            )
-
-        val forventedeBegrunnelser =
-            listOf(
-                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_FLYTTET_TIL_NORGE,
-                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE,
-            )
-
-        val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
-            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-            kompetanserIPeriode = kompetanserIPeriode,
-            kompetanserSomStopperRettFørPeriode = emptyList(),
-            minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING).tilMinimertVedtaksperiode(),
-        )
-
-        Assertions.assertTrue(
-            forventedeBegrunnelser.all {
-                gyldigeEØSBegrunnelserForPeriode.contains(it)
-            },
-        )
-    }
-
-    @Test
-    fun `skal finne riktige begrunnelser for EØS-avslag`() {
-        val minimertVedtaksperiode =
-            lagUtvidetVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.AVSLAG).tilMinimertVedtaksperiode()
-
-        val minimumForventedeBegrunnelser = listOf(
-            EØSStandardbegrunnelse.AVSLAG_EØS_IKKE_EØS_BORGER,
-            EØSStandardbegrunnelse.AVSLAG_EØS_IKKE_ANSVAR_FOR_BARN,
-            EØSStandardbegrunnelse.AVSLAG_EØS_SEPARASJONSAVTALEN_GJELDER_IKKE,
-        )
-        val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
-            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-            kompetanserIPeriode = emptyList(),
-            kompetanserSomStopperRettFørPeriode = emptyList(),
-            minimertVedtaksperiode = minimertVedtaksperiode,
-        )
-
-        Assertions.assertTrue(
-            minimumForventedeBegrunnelser.all {
-                gyldigeEØSBegrunnelserForPeriode.contains(it)
-            },
-        )
     }
 }

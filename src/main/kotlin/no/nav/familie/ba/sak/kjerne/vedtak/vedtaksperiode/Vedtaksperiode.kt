@@ -2,9 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import java.time.LocalDate
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "vedtaksperiodetype")
@@ -100,15 +98,4 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: Set<VedtakBegrunnel
             ENDRET_UTBETALING -> 6
         }
     }
-}
-
-fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(
-    vedtak: Vedtak,
-): VedtaksperiodeMedBegrunnelser {
-    return VedtaksperiodeMedBegrunnelser(
-        fom = this.periodeFom,
-        tom = this.periodeTom,
-        vedtak = vedtak,
-        type = this.vedtaksperiodetype,
-    )
 }
