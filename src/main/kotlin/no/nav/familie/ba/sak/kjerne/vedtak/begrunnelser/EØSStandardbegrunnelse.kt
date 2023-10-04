@@ -133,6 +133,17 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetPrimaerlandTilleggstekstVedtakFoerSed"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+
+    INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_FÅR_YTELSE_I_UTLANDET {
+        override val sanityApiNavn = "innvilgetSelvstendigRettPrimaerlandFaarYtelseIUtlandet"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+
+    INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_FÅR_YTELSE_I_UTLANDET {
+        override val sanityApiNavn = "innvilgetSelvstendigRettSekundaerlandFaarYtelseIUtlandet"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+
     INNVILGET_SEKUNDÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE {
         override val sanityApiNavn = "innvilgetSekundaerlandBeggeForeldreBosattINorge"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
@@ -394,6 +405,12 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "fortsattInnvilgetPrimaerlandUkToArbeidslandAnnetLandUtbetaler"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
     },
+
+    FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_FÅR_YTELSE_I_UTLANDET {
+        override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettPrimaerlandFaarYtelseIUtlandet"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+
     FORTSATT_INNVILGET_TILLEGGSBEGRUNNELSE_UTBETALING_TIL_ANNEN_FORELDER {
         override val sanityApiNavn = "fortsattInnvilgetTilleggsbegrunnelseUtbetalingTilAnnenForelder"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
@@ -418,6 +435,12 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "fortsattInnvilgetSekundaerlandUkStandard"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
     },
+
+    FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_FÅR_YTELSE_I_UTLANDET {
+        override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettSekundaerlandFaarYtelseIUtlandet"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+
     FORTSETT_INNVILGET_SEKUNDÆRLAND_UK_ALENEANSVAR {
         override val sanityApiNavn = "fortsattInnvilgetSekundaerlandUkAleneansvar"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
@@ -518,6 +541,8 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
             EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_STANDARD,
             EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_OG_STANDARD,
             EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UTSENDT_ARBEIDSTAKER,
+            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_FÅR_YTELSE_I_UTLANDET,
+            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_FÅR_YTELSE_I_UTLANDET,
             EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_STANDARD,
             EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_UK_STANDARD,
             EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_UK_OG_UTLAND_STANDARD,
@@ -532,6 +557,8 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
             EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_STANDARD,
             EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_UK_STANDARD,
             EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDAERLAND_UK_OG_UTLAND_STANDARD,
+            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_FÅR_YTELSE_I_UTLANDET,
+            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_FÅR_YTELSE_I_UTLANDET,
         )
     }
 }
