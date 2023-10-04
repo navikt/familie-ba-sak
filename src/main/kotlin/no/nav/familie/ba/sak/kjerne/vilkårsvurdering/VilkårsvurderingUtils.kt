@@ -261,8 +261,8 @@ object VilkårsvurderingUtils {
             val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
                 kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
             )
-            val vilkårSomSkalFjernesFraAktivt = vilkårSomFinnes - vilkårSomSkalKopieresOver
-            personsVilkårAktivt.removeAll(vilkårSomSkalFjernesFraAktivt)
+            val vilkårSomSkalFjernesFraAktivt = vilkårSomFinnes - vilkårSomSkalKopieresOver.toSet()
+            personsVilkårAktivt.removeAll(vilkårSomSkalFjernesFraAktivt.toSet())
 
             if (vilkårSomSkalKopieresOver.isEmpty()) {
                 // Legg til nytt vilkår på person
@@ -275,7 +275,7 @@ object VilkårsvurderingUtils {
                 personsVilkårOppdatert.addAll(
                     vilkårSomSkalKopieresOver.map { it.kopierMedParent(personTilOppdatert) },
                 )
-                personsVilkårAktivt.removeAll(vilkårSomSkalKopieresOver)
+                personsVilkårAktivt.removeAll(vilkårSomSkalKopieresOver.toSet())
             }
         }
         if (!kopieringSkjerFraForrigeBehandling) {
@@ -299,7 +299,7 @@ object VilkårsvurderingUtils {
                     utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling)
                         .map { it.kopierMedParent(personTilOppdatert) },
                 )
-                personsVilkårAktivt.removeAll(utvidetVilkår)
+                personsVilkårAktivt.removeAll(utvidetVilkår.toSet())
             }
         }
 

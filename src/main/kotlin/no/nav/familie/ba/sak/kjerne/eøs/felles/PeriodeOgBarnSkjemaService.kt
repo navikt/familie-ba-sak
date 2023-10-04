@@ -60,8 +60,8 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         gjeldende: Collection<S>,
         oppdaterte: Collection<S>,
     ) {
-        val skalSlettes = gjeldende - oppdaterte
-        val skalLagres = oppdaterte - gjeldende
+        val skalSlettes = gjeldende - oppdaterte.toSet()
+        val skalLagres = oppdaterte - gjeldende.toSet()
 
         periodeOgBarnSkjemaRepository.deleteAll(skalSlettes)
         periodeOgBarnSkjemaRepository.saveAll(skalLagres)
