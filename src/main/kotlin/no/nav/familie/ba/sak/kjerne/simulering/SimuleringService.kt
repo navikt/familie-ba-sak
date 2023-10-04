@@ -225,9 +225,15 @@ class SimuleringService(
         if (!finnesFeilutbetaling) return true
 
         val simuleringsperioderFørMars2023 = hentSimuleringsperioderFørMars2023(behandling.id)
-        return simuleringsperioderFørMars2023.harKunNegativeResultater() &&
+        if (
+            simuleringsperioderFørMars2023.harKunNegativeResultater() &&
             simuleringsperioderFørMars2023.harMaks1KroneIResultatPerBarn(antallBarn) &&
             simuleringsperioderFørMars2023.harTotaltAvvikUnderBeløpsgrense()
+        ) {
+            return true
+        }
+
+        return false
     }
 
     private fun hentSimuleringsperioderFørMars2023(behandlingId: Long): List<SimuleringsPeriode> {
