@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.STØTTET_I_BA_SAK
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.values
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus

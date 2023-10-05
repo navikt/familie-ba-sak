@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BrevBegrunnelse
 
 fun parseBrevPerioder(dataTable: DataTable): List<BrevPeriode> {
     return dataTable.asMaps().map { rad: Tabellrad ->

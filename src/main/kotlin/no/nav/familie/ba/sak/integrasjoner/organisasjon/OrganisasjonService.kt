@@ -8,5 +8,5 @@ import org.springframework.stereotype.Service
 class OrganisasjonService(private val integrasjonClient: IntegrasjonClient) {
 
     fun hentOrganisasjon(orgnummer: String): Organisasjon = integrasjonClient.hentOrganisasjon(orgnummer)
-    }
+
 }
