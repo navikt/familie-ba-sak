@@ -156,7 +156,6 @@ class BehandlingService(
     fun opprettOgInitierNyttVedtakForBehandling(
         behandling: Behandling,
         kopierVedtakBegrunnelser: Boolean = false,
-        begrunnelseVilkårPekere: List<OriginalOgKopiertVilkårResultat> = emptyList(),
     ) {
         behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
             ?: error("Forsøker å initiere vedtak på steg ${behandling.steg}")

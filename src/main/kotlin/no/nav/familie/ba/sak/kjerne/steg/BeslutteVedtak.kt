@@ -129,11 +129,6 @@ class BeslutteVedtak(
             behandlingService.opprettOgInitierNyttVedtakForBehandling(
                 behandling = behandling,
                 kopierVedtakBegrunnelser = true,
-                begrunnelseVilkårPekere =
-                VilkårsvurderingService.matchVilkårResultater(
-                    vilkårsvurdering,
-                    kopiertVilkårsVurdering,
-                ),
             )
 
             val behandleUnderkjentVedtakTask = OpprettOppgaveTask.opprettTask(

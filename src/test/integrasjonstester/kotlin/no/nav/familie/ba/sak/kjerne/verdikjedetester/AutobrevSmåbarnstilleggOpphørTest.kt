@@ -56,7 +56,6 @@ class AutobrevSmåbarnstilleggOpphørTest(
         fullførBehandling(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
         )
         val fagsak1behandling2: Behandling = fullførRevurderingMedOvergangstonad(
             fagsak = fagsak1,
@@ -74,7 +73,6 @@ class AutobrevSmåbarnstilleggOpphørTest(
         fullførBehandling(
             fagsak = fagsak2,
             personScenario = personScenario2,
-            barnFødselsdato = barnFødselsdato,
         )
         val fagsak2behandling2: Behandling = fullførRevurderingMedOvergangstonad(
             fagsak = fagsak2,
@@ -122,7 +120,6 @@ class AutobrevSmåbarnstilleggOpphørTest(
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
