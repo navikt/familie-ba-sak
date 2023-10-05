@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
@@ -73,6 +74,7 @@ class ForvalterService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val infotrygdService: InfotrygdService,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -414,6 +416,18 @@ class ForvalterService(
             }
         }
         return false
+    }
+
+    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(): List<Pair<Long, String>> {
+        val løpendeFagsakerMedFlereMigreringsbehandlinger =
+            fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger()
+        return løpendeFagsakerMedFlereMigreringsbehandlinger.filter { infotrygdService.harLøpendeSakIInfotrygd(listOf(it.aktør.aktivFødselsnummer())) }
+            .map { Pair(it.id, it.aktør.aktivFødselsnummer()) }
+    }
+
+    fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(): List<Pair<Long, String>> {
+        return fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger()
+            .map { Pair(it.id, it.aktør.aktivFødselsnummer()) }
     }
 }
 

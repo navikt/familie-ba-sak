@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
@@ -124,7 +123,6 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } answers { emptyList() }
         every { endretUtbetalingAndelRepository.saveAllAndFlush(any<Collection<EndretUtbetalingAndel>>()) } answers { emptyList() }
         every { andelTilkjentYtelseRepository.saveAllAndFlush(any<Collection<AndelTilkjentYtelse>>()) } answers { emptyList() }
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
     }
 
     @Test

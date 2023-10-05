@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FEILUTBETALT_VALUTA_PR_MND
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFeilutbetaltValuta
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -17,9 +16,6 @@ class FeilutbetaltValutaService(
 
     @Autowired
     private val loggService: LoggService,
-
-    @Autowired
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 
     @Autowired
     private val featureToggleService: FeatureToggleService,

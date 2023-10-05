@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
@@ -82,14 +83,17 @@ class TilbakestillBehandlingService(
      */
     @Transactional
     fun resettStegVedEndringPåVilkår(behandlingId: Long): Behandling {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
             vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId,
+                behandling.id,
             ),
         )
-        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
+        behandlingHentOgPersisterService.lagreEllerOppdater(behandling.apply { resultat = Behandlingsresultat.IKKE_VURDERT })
         return behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
-            behandlingId = behandlingId,
+            behandlingId = behandling.id,
             steg = StegType.VILKÅRSVURDERING,
         )
     }

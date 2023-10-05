@@ -76,7 +76,6 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                     utvidetAndeler = utvidetAndeler,
                     barnasAndeler = barnasAndeler,
                     barnasAktørerOgFødselsdatoer = listOf(Pair(barn3.aktør, barn3.fødselsdato)),
-                    skalBrukeNyBegrunnelseLogikk = false,
                 )
 
         Assertions.assertEquals(1, småbarnstilleggAndeler.size)
@@ -140,7 +139,6 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                     utvidetAndeler = utvidetAndeler,
                     barnasAndeler = barnasAndeler,
                     barnasAktørerOgFødselsdatoer = listOf(Pair(barn3.aktør, barn3.fødselsdato)),
-                    skalBrukeNyBegrunnelseLogikk = false,
                 )
 
         Assertions.assertEquals(2, småbarnstilleggAndeler.size)
@@ -204,7 +202,6 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                         Pair(barn1.aktør, barn1.fødselsdato),
                         Pair(barn2.aktør, barn2.fødselsdato),
                     ),
-                    skalBrukeNyBegrunnelseLogikk = false,
                 )
 
         Assertions.assertEquals(2, småbarnstilleggAndeler.size)
@@ -268,7 +265,6 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                         Pair(barn1.aktør, barn1.fødselsdato),
                         Pair(barn2.aktør, barn2.fødselsdato),
                     ),
-                    skalBrukeNyBegrunnelseLogikk = false,
                 )
 
         Assertions.assertEquals(2, småbarnstilleggAndeler.size)

@@ -17,6 +17,7 @@ import java.util.Properties
 val nbLocale = Locale("nb", "Norway")
 
 val secureLogger = LoggerFactory.getLogger("secureLogger")
+
 object Utils {
 
     fun slåSammen(values: List<String>): String = Regex("(.*),").replace(values.joinToString(", "), "$1 og")
@@ -49,6 +50,11 @@ object Utils {
 
     fun String.storForbokstav() = this.lowercase().replaceFirstChar { it.uppercase() }
     fun String.storForbokstavIHvertOrd() = this.split(" ").joinToString(" ") { it.storForbokstav() }.trimEnd()
+    fun String.storForbokstavIAlleNavn() = this.split(" ")
+        .joinToString(" ") { navn ->
+            navn.split("-").joinToString("-") { it.storForbokstav() }
+        }.trimEnd()
+
     fun Any?.nullableTilString() = this?.toString() ?: ""
 
     inline fun <reified T : Enum<T>> konverterEnumsTilString(liste: List<T>) = liste.joinToString(separator = ";")

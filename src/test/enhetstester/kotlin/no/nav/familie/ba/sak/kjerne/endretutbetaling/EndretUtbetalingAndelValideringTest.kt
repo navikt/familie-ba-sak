@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -23,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerDeltBosted
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -332,7 +335,11 @@ class EndretUtbetalingAndelValideringTest {
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
-        Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).forEach {
+        Vilkår.hentVilkårFor(
+            personType = PersonType.BARN,
+            fagsakType = FagsakType.NORMAL,
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+        ).forEach {
             if (it == Vilkår.BOR_MED_SØKER) {
                 vilkårResultaterForPerson.addAll(
                     listOf(
@@ -410,7 +417,11 @@ class EndretUtbetalingAndelValideringTest {
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
-        Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).forEach {
+        Vilkår.hentVilkårFor(
+            personType = PersonType.BARN,
+            fagsakType = FagsakType.NORMAL,
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+        ).forEach {
             if (it == Vilkår.BOR_MED_SØKER) {
                 vilkårResultaterForPerson.addAll(
                     listOf(
@@ -495,7 +506,11 @@ class EndretUtbetalingAndelValideringTest {
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
-        Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).forEach {
+        Vilkår.hentVilkårFor(
+            personType = PersonType.BARN,
+            fagsakType = FagsakType.NORMAL,
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+        ).forEach {
             if (it == Vilkår.BOR_MED_SØKER) {
                 vilkårResultaterForPerson.addAll(
                     listOf(
@@ -574,7 +589,11 @@ class EndretUtbetalingAndelValideringTest {
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
-        Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).forEach {
+        Vilkår.hentVilkårFor(
+            personType = PersonType.BARN,
+            fagsakType = FagsakType.NORMAL,
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+        ).forEach {
             if (it == Vilkår.BOR_MED_SØKER) {
                 vilkårResultaterForPerson.addAll(
                     listOf(
@@ -753,5 +772,154 @@ class EndretUtbetalingAndelValideringTest {
     @Test
     fun `Skal ikke kaste feil hvis perioden skal utbetales, men årsak er 'delt bosted'`() {
         assertDoesNotThrow { validerUtbetalingMotÅrsak(årsak = Årsak.DELT_BOSTED, skalUtbetales = true) }
+    }
+
+    @Test
+    fun `Skal kaste feil dersom endringsårsak er 'Allerede utbetalt' men tom dato er satt til etter inneværende måned`() {
+        val innværendeMåned = YearMonth.of(2022, 5)
+        mockkStatic(YearMonth::class)
+        every { YearMonth.now() } returns innværendeMåned
+
+        val endretUtbetalingAndel = EndretUtbetalingAndel(
+            behandlingId = 1,
+            person = tilfeldigPerson(),
+            fom = YearMonth.of(2022, 2),
+            tom = YearMonth.of(2022, 6),
+            årsak = Årsak.ALLEREDE_UTBETALT,
+            begrunnelse = "begrunnelse",
+            prosent = BigDecimal(100),
+            søknadstidspunkt = LocalDate.now(),
+            avtaletidspunktDeltBosted = LocalDate.now(),
+        )
+
+        val feilmelding = assertThrows<FunksjonellFeil> {
+            validerÅrsak(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                vilkårsvurdering = mockk(),
+            )
+        }.frontendFeilmelding
+
+        assertEquals(
+            "Du har valgt årsaken allerede utbetalt. Du kan ikke velge denne årsaken og en til og med dato frem i tid. Ta kontakt med superbruker om du er usikker på hva du skal gjøre.",
+            feilmelding,
+        )
+    }
+
+    @Test
+    fun `Skal kaste ikke feil dersom endringsårsak er 'Allerede utbetalt' og tom dato er satt til å være lik eller før inneværende måned`() {
+        val innværendeMåned = YearMonth.of(2022, 6)
+
+        mockkStatic(YearMonth::class)
+        every { YearMonth.now() } returns innværendeMåned
+
+        val endretUtbetalingAndel = EndretUtbetalingAndel(
+            behandlingId = 1,
+            person = tilfeldigPerson(),
+            fom = YearMonth.of(2022, 2),
+            tom = YearMonth.of(2022, 6),
+            årsak = Årsak.ALLEREDE_UTBETALT,
+            begrunnelse = "begrunnelse",
+            prosent = BigDecimal(100),
+            søknadstidspunkt = LocalDate.now(),
+            avtaletidspunktDeltBosted = LocalDate.now(),
+        )
+
+        assertDoesNotThrow {
+            validerÅrsak(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                vilkårsvurdering = mockk(),
+            )
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil dersom endringsårsak er 'Endre mottaker' og fom dato er satt til å være før inneværende måned`() {
+        val innværendeMåned = YearMonth.of(2022, 3)
+
+        mockkStatic(YearMonth::class)
+        every { YearMonth.now() } returns innværendeMåned
+
+        val endretUtbetalingAndel = EndretUtbetalingAndel(
+            behandlingId = 1,
+            person = tilfeldigPerson(),
+            fom = YearMonth.of(2022, 2),
+            tom = YearMonth.of(2022, 6),
+            årsak = Årsak.ENDRE_MOTTAKER,
+            begrunnelse = "begrunnelse",
+            prosent = BigDecimal(100),
+            søknadstidspunkt = LocalDate.now(),
+            avtaletidspunktDeltBosted = LocalDate.now(),
+        )
+
+        val feilmelding = assertThrows<FunksjonellFeil> {
+            validerÅrsak(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                vilkårsvurdering = mockk(),
+            )
+        }.frontendFeilmelding
+
+        assertEquals(
+            "Du har valgt årsaken Foreldre bor sammen, endre mottaker. Du kan ikke velge denne årsaken og en fra og med dato tilbake i tid. Ta kontakt med superbruker om du er usikker på hva du skal gjøre.",
+            feilmelding,
+        )
+    }
+
+    @Test
+    fun `Skal kaste ikke feil dersom endringsårsak er 'Endre mottaker' og fom dato er satt til å være lik eller etter inneværende måned`() {
+        val innværendeMåned = YearMonth.of(2022, 2)
+
+        mockkStatic(YearMonth::class)
+        every { YearMonth.now() } returns innværendeMåned
+
+        val endretUtbetalingAndel = EndretUtbetalingAndel(
+            behandlingId = 1,
+            person = tilfeldigPerson(),
+            fom = YearMonth.of(2022, 2),
+            tom = YearMonth.of(2022, 6),
+            årsak = Årsak.ENDRE_MOTTAKER,
+            begrunnelse = "begrunnelse",
+            prosent = BigDecimal(100),
+            søknadstidspunkt = LocalDate.now(),
+            avtaletidspunktDeltBosted = LocalDate.now(),
+        )
+
+        assertDoesNotThrow {
+            validerÅrsak(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                vilkårsvurdering = mockk(),
+            )
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil dersom endringsårsak er 'Endre mottaker' og tom dato er satt til å være lik eller før inneværende måned`() {
+        val innværendeMåned = YearMonth.of(2022, 2)
+
+        mockkStatic(YearMonth::class)
+        every { YearMonth.now() } returns innværendeMåned
+
+        val endretUtbetalingAndel = EndretUtbetalingAndel(
+            behandlingId = 1,
+            person = tilfeldigPerson(),
+            fom = YearMonth.of(2022, 2),
+            tom = YearMonth.of(2022, 2),
+            årsak = Årsak.ENDRE_MOTTAKER,
+            begrunnelse = "begrunnelse",
+            prosent = BigDecimal(100),
+            søknadstidspunkt = LocalDate.now(),
+            avtaletidspunktDeltBosted = LocalDate.now(),
+        )
+
+        val feilmelding = assertThrows<FunksjonellFeil> {
+            validerÅrsak(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                vilkårsvurdering = mockk(),
+            )
+        }.frontendFeilmelding
+
+        assertEquals(
+            "Du har valgt årsaken Foreldre bor sammen, endre mottaker. Du kan ikke velge denne årsaken og en til og med dato tilbake i tid. Ta kontakt med superbruker om du er usikker på hva du skal gjøre.",
+            feilmelding,
+        )
     }
 }
