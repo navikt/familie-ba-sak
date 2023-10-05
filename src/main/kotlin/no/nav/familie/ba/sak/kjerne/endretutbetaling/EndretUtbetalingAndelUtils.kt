@@ -20,13 +20,13 @@ fun beregnGyldigTomIFremtiden(
             it.person == endretUtbetalingAndel.person
     }.sortedBy { it.fom }.firstOrNull()
 
-    if (førsteEndringEtterDenneEndringen != null) {
-        return førsteEndringEtterDenneEndringen.fom?.minusMonths(1)
+    return if (førsteEndringEtterDenneEndringen != null) {
+        førsteEndringEtterDenneEndringen.fom?.minusMonths(1)
     } else {
         val sisteTomAndeler = andelTilkjentYtelser.filter {
             it.aktør == endretUtbetalingAndel.person?.aktør
         }.maxOf { it.stønadTom }
 
-        return sisteTomAndeler
+        sisteTomAndeler
     }
 }
