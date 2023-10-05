@@ -124,6 +124,7 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
 
 prosessering.fixedDelayString.in.milliseconds: 2000
+prosessering.rolle: "928636f4-fd0d-4149-978e-a6fb68bb19de" # 0000-GA-STDAPPS
 
 credential:
   username: "srvfamilie-ba-sak"
@@ -158,6 +159,7 @@ spring:
         format_sql=false
     hibernate:
       ddl-auto: none
+
 
 FAMILIE_INTEGRASJONER_SCOPE: "dummy"
 SANITY_DATASET: "ba-test"

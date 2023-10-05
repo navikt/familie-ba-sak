@@ -22,7 +22,7 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>4.0.0</spring.cloud.version>
-        <prosessering.version>2.20230807154047_d770f01</prosessering.version>
+        <prosessering.version>2.20230928100816_3cbdfc5</prosessering.version>
         <felles.version>2.20230905101454_06fa3d7</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20230911102049_85cefe7</felles-kontrakter.version>

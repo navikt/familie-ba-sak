@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
@@ -74,8 +73,6 @@ class RestartAvSmåbarnstilleggTest(
 
     @Test
     fun `Skal finne alle fagsaker hvor småbarnstillegg starter opp igjen inneværende måned, og ikke er begrunnet`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
-
         val restartSmåbarnstilleggMåned = LocalDate.now().plusMonths(4)
 
         // Fagsak 1 - har åpen behandling og skal ikke tas med
@@ -181,8 +178,6 @@ class RestartAvSmåbarnstilleggTest(
     fun `Skal finne en fagsak hvor småbarnstillegg starter opp igjen inneværende måned selv om det er utført satsendring`() {
         val satsendringDato = SatsService.finnSisteSatsFor(SatsType.SMA).gyldigFom.toYearMonth()
 
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
-
         mockkObject(SatsTidspunkt)
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(
             2022,
@@ -233,8 +228,6 @@ class RestartAvSmåbarnstilleggTest(
     @Test
     fun `Satsendring skal ikke restarte småbarnstillegg på allerede løpende småbarnstillegg`() {
         val satsendringDato = SatsService.finnSisteSatsFor(SatsType.SMA).gyldigFom.toYearMonth()
-
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
 
         mockkObject(SatsTidspunkt)
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(
