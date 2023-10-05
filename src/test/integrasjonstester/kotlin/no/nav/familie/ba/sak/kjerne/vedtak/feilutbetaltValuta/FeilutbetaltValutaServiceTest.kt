@@ -51,8 +51,8 @@ class FeilutbetaltValutaServiceTest(
         )
 
         feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
-            .also { Assertions.assertThat(it.get(0).id).isEqualTo(id) }
-            .also { Assertions.assertThat(it.get(0).tom).isEqualTo("2020-05-31") }
+            .also { Assertions.assertThat(it[0].id).isEqualTo(id) }
+            .also { Assertions.assertThat(it[0].tom).isEqualTo("2020-05-31") }
 
         val feilutbetaltValuta2 = RestFeilutbetaltValuta(
             id = 0,
@@ -65,7 +65,7 @@ class FeilutbetaltValutaServiceTest(
 
         feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.size).isEqualTo(2) }
-            .also { Assertions.assertThat(it.get(0).id).isEqualTo(id2) }
+            .also { Assertions.assertThat(it[0].id).isEqualTo(id2) }
 
         feilutbetaltValutaService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = behandling.id)
 

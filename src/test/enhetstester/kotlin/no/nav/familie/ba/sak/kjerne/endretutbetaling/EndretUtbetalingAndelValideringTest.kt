@@ -481,8 +481,8 @@ class EndretUtbetalingAndelValideringTest {
 
         assertTrue(deltBostedPerioder.size == 2)
 
-        val førstePeriode = deltBostedPerioder.get(0)
-        val andrePeriode = deltBostedPerioder.get(1)
+        val førstePeriode = deltBostedPerioder[0]
+        val andrePeriode = deltBostedPerioder[1]
 
         assertEquals(fom1.plusMonths(1).førsteDagIInneværendeMåned(), førstePeriode.fom)
         assertEquals(tom1.sisteDagIMåned(), førstePeriode.tom)

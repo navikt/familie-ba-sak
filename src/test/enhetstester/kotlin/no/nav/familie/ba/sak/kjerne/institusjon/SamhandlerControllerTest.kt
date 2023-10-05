@@ -66,12 +66,12 @@ internal class SamhandlerControllerTest {
     fun `Søk etter samhandlere skal returnere samhandlere på navn og slå sammen resultatene fra alle sidene ved mer enn 1 side`() {
         every { samhandlerKlientMock.søkSamhandlere("BUFETAT", null, null, 0) } returns SøkSamhandlerInfo(
             true,
-            listOf(samhandlereInfoMock.get(0)),
+            listOf(samhandlereInfoMock[0]),
         )
 
         every { samhandlerKlientMock.søkSamhandlere("BUFETAT", null, null, 1) } returns SøkSamhandlerInfo(
             false,
-            listOf(samhandlereInfoMock.get(1)),
+            listOf(samhandlereInfoMock[1]),
         )
 
         val samhandlerInfo =
