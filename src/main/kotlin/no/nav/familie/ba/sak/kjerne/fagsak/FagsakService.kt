@@ -168,7 +168,7 @@ class FagsakService(
         fagsakTyper: List<FagsakType> = FagsakType.entries,
     ): Ressurs<List<RestMinimalFagsak>> {
         val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).filter { fagsakTyper.contains(it.type) }
-        return if (!fagsaker.isEmpty()) {
+        return if (fagsaker.isNotEmpty()) {
             Ressurs.success(data = lagRestMinimalFagsaker(fagsaker))
         } else {
             Ressurs.failure(

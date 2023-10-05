@@ -60,7 +60,7 @@ class VilkårsvurderingTestController(
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService,
 ) {
 
-    @PostMapping()
+    @PostMapping
     fun opprettBehandlingMedVilkårsvurdering(
         @RequestBody personresultater: Map<LocalDate, Map<Vilkår, String>>,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
