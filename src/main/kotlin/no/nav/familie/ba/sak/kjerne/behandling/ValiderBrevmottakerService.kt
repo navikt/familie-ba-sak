@@ -14,7 +14,7 @@ class ValiderBrevmottakerService(
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
 ) {
     fun validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId: Long, nyBrevmottaker: Brevmottaker? = null) {
-        val brevmottakere = brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId).toMutableList().toMutableList()
+        val brevmottakere = brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId).toMutableList()
         nyBrevmottaker?.let {
             brevmottakere += it
         }
