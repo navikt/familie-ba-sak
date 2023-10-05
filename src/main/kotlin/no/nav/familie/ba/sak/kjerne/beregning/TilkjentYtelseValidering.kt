@@ -183,7 +183,7 @@ object TilkjentYtelseValidering {
                 barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
             )
             if (perioderMedOverlapp.isNotEmpty()) {
-                barnMedUtbetalingsikkerhetFeil.put(barn, perioderMedOverlapp)
+                barnMedUtbetalingsikkerhetFeil[barn] = perioderMedOverlapp
             }
         }
         if (barnMedUtbetalingsikkerhetFeil.isNotEmpty()) {
