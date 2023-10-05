@@ -20,7 +20,7 @@ data class DagTidspunkt internal constructor(
     }
 
     override fun flytt(tidsenheter: Long): DagTidspunkt {
-        return this.copy(dato = dato.plusDays(tidsenheter), uendelighet)
+        return this.copy(dato = dato.plusDays(tidsenheter), uendelighet = uendelighet)
     }
 
     override fun medUendelighet(uendelighet: Uendelighet): DagTidspunkt =
