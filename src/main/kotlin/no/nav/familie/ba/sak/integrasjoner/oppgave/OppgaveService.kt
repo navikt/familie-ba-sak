@@ -290,7 +290,7 @@ class OppgaveService(
             "${behandling.id};${behandleSakOppgave?.id};${behandleSakOppgave?.fristFerdigstillelse}\n"
         }.reduce { csvString, behandlingsfrist -> csvString + behandlingsfrist }
 
-        return "behandlingId;oppgaveId;frist\n" + behandlingsfrister
+        return "behandlingId;oppgaveId;frist\n$behandlingsfrister"
     }
 
     fun settFristÅpneOppgaverPåBehandlingTil(behandlingId: Long, nyFrist: LocalDate) {
