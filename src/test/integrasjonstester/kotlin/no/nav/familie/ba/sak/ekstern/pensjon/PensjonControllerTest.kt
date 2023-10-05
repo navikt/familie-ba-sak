@@ -18,7 +18,7 @@ class PensjonControllerTest : WebSpringAuthTestRunner() {
     @Test
     fun `Verifiser at pensjon-endepunkt - bestillPersonerMedBarnetrygdForGittÅrPåKafka - for henting av identer med barnetrygd - returnerer en gyldig UUID som string`() {
         val headers = HttpHeaders()
-        headers.accept = Arrays.asList(MediaType.TEXT_PLAIN)
+        headers.accept = listOf(MediaType.TEXT_PLAIN)
         headers.setBearerAuth(
             hentTokenForPsys(),
         )
