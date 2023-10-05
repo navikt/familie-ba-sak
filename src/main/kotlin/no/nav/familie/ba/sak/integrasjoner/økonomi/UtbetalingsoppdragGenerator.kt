@@ -283,7 +283,7 @@ abstract class AndelTilkjentYtelseForUtbetalingsoppdrag(private val andelTilkjen
 
     override fun equals(other: Any?): Boolean {
         return if (other is AndelTilkjentYtelseForUtbetalingsoppdrag) {
-            this.andelTilkjentYtelse.equals(other.andelTilkjentYtelse)
+            this.andelTilkjentYtelse == other.andelTilkjentYtelse
         } else {
             false
         }
