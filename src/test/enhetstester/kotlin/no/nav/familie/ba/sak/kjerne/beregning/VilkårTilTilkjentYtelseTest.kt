@@ -365,7 +365,7 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
                 val tom =
                     localDateMatch.groupValues[2].let { if (it.length == 10) LocalDate.parse(it) else null }
 
-                return TestPeriode(fom!!, tom)
+                return TestPeriode(fom, tom)
             }
             return null
         }

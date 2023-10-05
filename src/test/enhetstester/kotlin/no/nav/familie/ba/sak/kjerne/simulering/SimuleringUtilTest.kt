@@ -244,7 +244,7 @@ class SimuleringUtilTest {
         assertThat(simuleringsperioder.size).isEqualTo(1)
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(10_000.toBigDecimal())
         assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(2_000.toBigDecimal())
-        assertThat(simuleringsperioder[0].resultat).isEqualTo(-8_000.toBigDecimal())
+        assertThat(simuleringsperioder[0].resultat).isEqualTo((-8_000).toBigDecimal())
         assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(8_000.toBigDecimal())
         assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
     }

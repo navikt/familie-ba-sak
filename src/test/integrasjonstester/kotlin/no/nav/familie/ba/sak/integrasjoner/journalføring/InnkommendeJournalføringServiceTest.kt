@@ -121,7 +121,7 @@ class InnkommendeJournalføringServiceTest(
         assertEquals(2, søknadsinfo.size)
 
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)
-        assertEquals(førsteSøknad.datoMottatt!!.toLocalDate(), søknadMottattDato!!.toLocalDate())
+        assertEquals(førsteSøknad.datoMottatt.toLocalDate(), søknadMottattDato!!.toLocalDate())
     }
 
     @Test

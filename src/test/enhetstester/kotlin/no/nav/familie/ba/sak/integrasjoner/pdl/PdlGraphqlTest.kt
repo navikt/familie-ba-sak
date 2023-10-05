@@ -25,15 +25,15 @@ class PdlGraphqlTest {
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlOkResponse.json")))
         assertThat(resp.data.person!!.foedsel.first().foedselsdato).isEqualTo("1955-09-13")
-        assertThat(resp.data.person!!.navn.first().fornavn).isEqualTo("ENGASJERT")
-        assertThat(resp.data.person!!.kjoenn.first().kjoenn.toString()).isEqualTo("MANN")
-        assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsIdent).isEqualTo("12345678910")
-        assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsRolle.toString()).isEqualTo("BARN")
-        assertThat(resp.data.person!!.sivilstand.first().type).isEqualTo(SIVILSTAND.UGIFT)
-        assertThat(resp.data.person!!.bostedsadresse.first().vegadresse?.husnummer).isEqualTo("3")
-        assertThat(resp.data.person!!.bostedsadresse.first().vegadresse?.matrikkelId).isEqualTo(1234)
-        assertNull(resp.data.person!!.bostedsadresse.first().matrikkeladresse)
-        assertNull(resp.data.person!!.bostedsadresse.first().ukjentBosted)
+        assertThat(resp.data.person.navn.first().fornavn).isEqualTo("ENGASJERT")
+        assertThat(resp.data.person.kjoenn.first().kjoenn.toString()).isEqualTo("MANN")
+        assertThat(resp.data.person.forelderBarnRelasjon.first().relatertPersonsIdent).isEqualTo("12345678910")
+        assertThat(resp.data.person.forelderBarnRelasjon.first().relatertPersonsRolle.toString()).isEqualTo("BARN")
+        assertThat(resp.data.person.sivilstand.first().type).isEqualTo(SIVILSTAND.UGIFT)
+        assertThat(resp.data.person.bostedsadresse.first().vegadresse?.husnummer).isEqualTo("3")
+        assertThat(resp.data.person.bostedsadresse.first().vegadresse?.matrikkelId).isEqualTo(1234)
+        assertNull(resp.data.person.bostedsadresse.first().matrikkeladresse)
+        assertNull(resp.data.person.bostedsadresse.first().ukjentBosted)
         assertThat(resp.errorMessages()).isEqualTo("")
     }
 
@@ -52,7 +52,7 @@ class PdlGraphqlTest {
         assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsRolle).isEqualTo(
             FORELDERBARNRELASJONROLLE.BARN,
         )
-        assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsIdent).isEqualTo("32345678901")
+        assertThat(resp.data.person.forelderBarnRelasjon.first().relatertPersonsIdent).isEqualTo("32345678901")
     }
 
     @Test
@@ -60,7 +60,7 @@ class PdlGraphqlTest {
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlMatrikkelAdresseOkResponse.json")))
         assertThat(resp.data.person!!.bostedsadresse.first().matrikkeladresse?.postnummer).isEqualTo("0274")
-        assertThat(resp.data.person!!.bostedsadresse.first().matrikkeladresse?.matrikkelId).isEqualTo(2147483649)
+        assertThat(resp.data.person.bostedsadresse.first().matrikkeladresse?.matrikkelId).isEqualTo(2147483649)
     }
 
     @Test
