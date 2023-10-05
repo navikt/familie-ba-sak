@@ -148,6 +148,8 @@ spring:
 
 sentry.environment: prod
 
+prosessering.rolle: "87190cf3-b278-457d-8ab7-1a5c55a9edd7" # Gruppen teamfamilie
+
 SANITY_DATASET: "ba-brev"
 
 PDL_URL: https://pdl-api.prod-fss-pub.nais.io
