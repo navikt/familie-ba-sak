@@ -76,9 +76,10 @@ class PensjonService(
         val personidenter = personidenter(aktør)
         val allePerioderTilhørendeAktør = personidenter.flatMap { ident ->
             infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident.fødselsnummer, fraDato).fagsaker.flatMap {
-                it.barnetrygdPerioder
+                it.barnetrygdPerioder.maskerPersonidenteneIPreprod(aktør)
             }
         }
+
         return BarnetrygdTilPensjon(
             fagsakEiersIdent = aktør.aktivFødselsnummer(),
             barnetrygdPerioder = allePerioderTilhørendeAktør,
@@ -123,10 +124,10 @@ class PensjonService(
     }
 
     private fun personidenter(
-        aktør: Aktør
+        aktør: Aktør,
     ) = when {
         environment.erAktiv(Profil.Preprod) -> listOfNotNull(
-            tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer())?.let { Personident(it, aktør) }
+            tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer())?.let { Personident(it, aktør) },
         )
 
         else -> aktør.personidenter
@@ -142,6 +143,14 @@ class PensjonService(
             else -> null
         }
     }
+
+    private fun List<BarnetrygdPeriode>.maskerPersonidenteneIPreprod(aktør: Aktør) =
+        when {
+            environment.erAktiv(Profil.Preprod) -> {
+                map { it.copy(personIdent = aktør.aktivFødselsnummer()) }
+            }
+            else -> this
+        }
 
     fun YtelseType.tilPensjonYtelsesType(): YtelseTypeEkstern {
         return when (this) {
