@@ -97,7 +97,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
     private fun leggTilAvsluttetBehandling(
         fagsak: Fagsak,
         barn1: Person,
-        barnAktør: Aktør
+        barnAktør: Aktør,
     ) {
         with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))) {
             val behandling = this
@@ -129,18 +129,19 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(any(), any()) } returns BarnetrygdTilPensjonResponse(
             fagsaker = listOf(
                 BarnetrygdTilPensjon(
-                    "", listOf(
+                    "",
+                    listOf(
                         BarnetrygdPeriode(
                             personIdent = søkerAktør.aktivFødselsnummer(),
                             delingsprosentYtelse = YtelseProsent.FULL,
                             ytelseTypeEkstern = YtelseTypeEkstern.ORDINÆR_BARNETRYGD,
                             stønadFom = YearMonth.now(),
                             stønadTom = YearMonth.now(),
-                            kildesystem = "Infotrygd"
-                        )
-                    )
-                )
-            )
+                            kildesystem = "Infotrygd",
+                        ),
+                    ),
+                ),
+            ),
         )
     }
 }

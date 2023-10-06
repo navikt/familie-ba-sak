@@ -28,7 +28,7 @@ data class BarnetrygdPeriode(
     val ytelseTypeEkstern: YtelseTypeEkstern?,
     val stønadFom: YearMonth,
     val stønadTom: YearMonth,
-    val kildesystem: String = "BA"
+    val kildesystem: String = "BA",
 )
 
 enum class YtelseTypeEkstern {
@@ -40,5 +40,5 @@ enum class YtelseTypeEkstern {
 enum class YtelseProsent {
     FULL,
     DELT,
-    USIKKER
+    USIKKER,
 }

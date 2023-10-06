@@ -72,7 +72,7 @@ class PensjonService(
         }
         return BarnetrygdTilPensjon(
             fagsakEiersIdent = aktør.aktivFødselsnummer(),
-            barnetrygdPerioder = allePerioderTilhørendeAktør
+            barnetrygdPerioder = allePerioderTilhørendeAktør,
         )
     }
 
@@ -129,6 +129,7 @@ class PensjonService(
 private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon): List<BarnetrygdTilPensjon> {
     return if (fagsakEiersIdent == other.fagsakEiersIdent) {
         listOf(copy(barnetrygdPerioder = barnetrygdPerioder + other.barnetrygdPerioder))
+    } else {
+        listOf(this, other)
     }
-    else listOf(this, other)
 }

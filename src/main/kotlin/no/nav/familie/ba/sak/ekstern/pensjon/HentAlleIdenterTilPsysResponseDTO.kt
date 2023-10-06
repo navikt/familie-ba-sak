@@ -5,7 +5,7 @@ data class HentAlleIdenterTilPsysResponseDTO(
     val meldingstype: Meldingstype,
     val requestId: UUID,
     val personident: String?,
-    val antallIdenterTotalt: Int
+    val antallIdenterTotalt: Int,
 )
 
 enum class Meldingstype {
