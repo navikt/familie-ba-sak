@@ -94,6 +94,19 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         assertThat(barnetrygdTilPensjon.filter { it.barnetrygdPerioder.all { it.kildesystem == "Infotrygd" } }).hasSize(0)
     }
 
+    @Test
+    fun `skal finne og returnere perioder fra Infotrygd`() {
+        val søker = tilfeldigPerson()
+        val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
+
+        mockInfotrygdBarnetrygdResponse(søkerAktør)
+
+        val barnetrygdTilPensjon = pensjonService.hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
+        assertThat(barnetrygdTilPensjon).hasSize(1)
+        assertThat(barnetrygdTilPensjon.filter { it.barnetrygdPerioder.all { it.kildesystem == "Infotrygd" } }).hasSize(1)
+    }
+
+
     private fun leggTilAvsluttetBehandling(
         fagsak: Fagsak,
         barn1: Person,

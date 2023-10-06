@@ -40,17 +40,20 @@ class PensjonService(
 ) {
     fun hentBarnetrygd(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
-        val fagsak = fagsakRepository.finnFagsakForAktør(aktør) ?: return emptyList()
-        val barnetrygdTilPensjon = hentBarnetrygdTilPensjon(fagsak, fraDato) ?: return emptyList()
+        val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
+        val barnetrygdTilPensjon = fagsak?.let { hentBarnetrygdTilPensjon(fagsak, fraDato) }
         val barnetrygdTilPensjonFraInfotrygd = hentBarnetrygdTilPensjonFraInfotrygd(aktør, fraDato)
 
+        if (barnetrygdTilPensjon == null && barnetrygdTilPensjonFraInfotrygd.barnetrygdPerioder.isEmpty()) return emptyList()
+
         // Sjekk om det finnes relaterte saker, dvs om barna finnes i andre behandlinger
-        val barnetrygdMedRelaterteSaker = barnetrygdTilPensjon.barnetrygdPerioder
-            .filter { it.personIdent != aktør.aktivFødselsnummer() }
-            .map { it.personIdent }.distinct()
-            .map { hentBarnetrygdForRelatertPersonTilPensjon(it, fraDato, aktør) }
-            .flatten()
-        return barnetrygdMedRelaterteSaker.plus(barnetrygdTilPensjon.plus(barnetrygdTilPensjonFraInfotrygd)).distinct()
+        val barnetrygdMedRelaterteSaker = barnetrygdTilPensjon?.barnetrygdPerioder
+            ?.filter { it.personIdent != aktør.aktivFødselsnummer() }
+            ?.map { it.personIdent }?.distinct()
+            ?.map { hentBarnetrygdForRelatertPersonTilPensjon(it, fraDato, aktør) }?.flatten()
+            ?: emptyList()
+
+        return barnetrygdMedRelaterteSaker.plus(barnetrygdTilPensjonFraInfotrygd.plus(barnetrygdTilPensjon)).distinct()
     }
 
     fun lagTaskForHentingAvIdenterTilPensjon(år: Int): String {
@@ -165,10 +168,10 @@ class PensjonService(
     }
 }
 
-private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon): List<BarnetrygdTilPensjon> {
-    return if (fagsakEiersIdent == other.fagsakEiersIdent) {
+private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): List<BarnetrygdTilPensjon> {
+    return if (fagsakEiersIdent == other?.fagsakEiersIdent) {
         listOf(copy(barnetrygdPerioder = barnetrygdPerioder + other.barnetrygdPerioder))
     } else {
-        listOf(this, other)
+        listOfNotNull(this, other)
     }
 }
