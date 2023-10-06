@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.ekstern.pensjon
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
+import no.nav.familie.ba.sak.config.featureToggle.miljø.erAktiv
 import no.nav.familie.ba.sak.ekstern.bisys.BisysService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -13,13 +15,18 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.Year
 import java.util.UUID
+import kotlin.random.Random
 
 @Service
 class PensjonService(
@@ -29,6 +36,7 @@ class PensjonService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val taskRepository: TaskRepositoryWrapper,
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val environment: Environment,
 ) {
     fun hentBarnetrygd(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
@@ -65,7 +73,8 @@ class PensjonService(
     }
 
     private fun hentBarnetrygdTilPensjonFraInfotrygd(aktør: Aktør, fraDato: LocalDate): BarnetrygdTilPensjon {
-        val allePerioderTilhørendeAktør = aktør.personidenter.flatMap { ident ->
+        val personidenter = personidenter(aktør)
+        val allePerioderTilhørendeAktør = personidenter.flatMap { ident ->
             infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident.fødselsnummer, fraDato).fagsaker.flatMap {
                 it.barnetrygdPerioder
             }
@@ -111,6 +120,27 @@ class PensjonService(
                     },
                 )
             }
+    }
+
+    private fun personidenter(
+        aktør: Aktør
+    ) = when {
+        environment.erAktiv(Profil.Preprod) -> listOfNotNull(
+            tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer())?.let { Personident(it, aktør) }
+        )
+
+        else -> aktør.personidenter
+    }
+
+    @Cacheable("pensjon_testident", cacheManager = "dailyCache")
+    fun tilfeldigUttrekkInfotrygdBaQ(forIdent: String): String? {
+        require(environment.erAktiv(Profil.Preprod))
+        return when {
+            Random.nextBoolean() -> {
+                infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(Year.now().value).random()
+            }
+            else -> null
+        }
     }
 
     fun YtelseType.tilPensjonYtelsesType(): YtelseTypeEkstern {
