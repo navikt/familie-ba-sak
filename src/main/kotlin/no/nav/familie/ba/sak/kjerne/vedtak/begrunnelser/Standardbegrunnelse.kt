@@ -1402,6 +1402,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingOpphorEndreMottaker"
     },
+    ENDRET_UTBETALING_REDUKSJON_ENDRE_MOTTAKER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingReduksjonEndreMottaker"
+    },
     ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingEtterbetalingTreAarTilbakeITid"
@@ -1452,6 +1456,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     },
     ETTER_ENDRET_UTBETALING_EØS_BARNETRYGD_ALLEREDE_UTBETALT {
         override val sanityApiNavn = "etterEndretUtbetalingEosBarnetrygdAlleredeUtbetalt"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
+    },
+    ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR_KUN_UTVIDET_DEL {
+        override val sanityApiNavn = "etterEndretUtbetalingEtterbetalingTreAarKunUtvidetDel"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     },
 

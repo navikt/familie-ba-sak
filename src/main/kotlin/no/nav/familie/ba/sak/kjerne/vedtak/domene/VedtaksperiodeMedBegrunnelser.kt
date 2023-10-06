@@ -43,7 +43,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDeta
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 import java.time.YearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode as TidslinjePeriode
@@ -129,16 +128,6 @@ data class VedtaksperiodeMedBegrunnelser(
     fun harFriteksterOgStandardbegrunnelser(): Boolean {
         return fritekster.isNotEmpty() && begrunnelser.isNotEmpty()
     }
-
-    private fun hentVertikaltSegmentForVedtaksperiode(
-        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    ) = andelerTilkjentYtelse
-        .utledSegmenter()
-        .find { localDateSegment ->
-            localDateSegment.fom.isSameOrBefore(this.fom ?: TIDENES_MORGEN) &&
-                localDateSegment.tom.isSameOrAfter(this.tom ?: TIDENES_ENDE)
-        }
-        ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}")
 }
 
 fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(
@@ -148,13 +137,6 @@ fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(
     return this.any {
         it.fom?.toYearMonth() == måned && it.begrunnelser.any { standardbegrunnelse -> standardbegrunnelse.standardbegrunnelse in standardbegrunnelser }
     }
-}
-
-private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): LocalDateSegment<Int> {
-    val sorterteSegmenter = andelerTilkjentYtelse.utledSegmenter().sortedBy { it.fom }
-    return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
-        ?: sorterteSegmenter.firstOrNull()
-        ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
 }
 
 fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
@@ -223,6 +205,16 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidsl
         }.tilTidslinje()
     }.kombiner { it.takeIf { it.toList().isNotEmpty() } }
     .slåSammenLike()
+
+fun hentBrevPeriodeType(
+    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    erUtbetalingEllerDeltBostedIPeriode: Boolean,
+): BrevPeriodeType =
+    hentBrevPeriodeType(
+        vedtaksperiodetype = vedtaksperiodeMedBegrunnelser.type,
+        fom = vedtaksperiodeMedBegrunnelser.fom,
+        erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode,
+    )
 
 fun hentBrevPeriodeType(
     vedtaksperiodetype: Vedtaksperiodetype,

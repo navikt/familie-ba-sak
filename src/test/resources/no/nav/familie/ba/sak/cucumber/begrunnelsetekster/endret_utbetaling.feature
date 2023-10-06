@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Begrunnelse etter endret utbetaling
+Egenskap: Gyldige begrunnelser for endret utbetaling
 
   Bakgrunn:
     Gitt følgende behandling
@@ -101,7 +101,8 @@ Egenskap: Begrunnelse etter endret utbetaling
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
       | 01.08.2023 | 31.08.2023 | UTBETALING         |           |                         |                          |
-      | 01.09.2023 |            | OPPHØR             |           |                         |                          |
+      | 01.09.2023 | 31.07.2035 | OPPHØR             |           |                         |                          |
+      | 01.08.2035 |            | OPPHØR             |           |                         |                          |
 
 
   Scenario: Skal ikke ta med endret utbetalingsperioder som har type reduksjon dersom det ikke har vært en reduksjon

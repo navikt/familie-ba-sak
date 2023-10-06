@@ -55,10 +55,10 @@ fun parseStandardBegrunnelse(rad: Tabellrad) =
         ).sanityApiNavn,
 
         gjelderSoker = parseBoolean(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.GJELDER_SØKER, rad),
-        barnasFodselsdatoer = parseString(
-            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDAGER,
+        barnasFodselsdatoer = parseValgfriString(
+            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDATOER,
             rad,
-        ),
+        ) ?: "",
 
         fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = "",
         fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling = "",
@@ -73,7 +73,7 @@ fun parseStandardBegrunnelse(rad: Tabellrad) =
             rad,
         ),
         maalform = parseEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad).tilSanityFormat(),
-        belop = parseString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BELØP, rad),
+        belop = parseString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BELØP, rad).replace(' ', ' '),
         soknadstidspunkt = parseValgfriString(
             BrevPeriodeParser.DomenebegrepBrevBegrunnelse.SØKNADSTIDSPUNKT,
             rad,
@@ -120,7 +120,7 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
     ).sanityApiNavn
 
     val barnasFodselsdatoer = parseString(
-        BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDAGER,
+        BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDATOER,
         rad,
     )
 

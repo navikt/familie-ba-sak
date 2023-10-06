@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Begrunnelser for utdypende vilkårsvurdering med redukjson
+Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med reduksjon
 
   Bakgrunn:
     Gitt følgende behandling

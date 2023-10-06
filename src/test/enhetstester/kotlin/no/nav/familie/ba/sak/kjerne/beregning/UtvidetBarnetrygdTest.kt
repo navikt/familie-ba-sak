@@ -107,7 +107,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
-            skalBrukeNyBegrunnelseLogikk = false,
+
         )
             .andelerTilkjentYtelse.toList()
             .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
@@ -198,7 +198,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
-            skalBrukeNyBegrunnelseLogikk = false,
+
         )
             .andelerTilkjentYtelse.toList()
             .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
@@ -344,7 +344,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
-            skalBrukeNyBegrunnelseLogikk = false,
+
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
@@ -424,7 +424,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
-            skalBrukeNyBegrunnelseLogikk = false,
+
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
@@ -504,7 +504,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
-            skalBrukeNyBegrunnelseLogikk = false,
+
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
@@ -593,7 +593,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
-            skalBrukeNyBegrunnelseLogikk = false,
+
         ).andelerTilkjentYtelse.toList().sortedBy { it.type }
 
         val vedtaksperioderMedBegrunnelser = hentPerioderMedUtbetaling(
@@ -724,7 +724,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
-            skalBrukeNyBegrunnelseLogikk = false,
+
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
@@ -835,7 +835,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
-            skalBrukeNyBegrunnelseLogikk = false,
+
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
@@ -945,7 +945,7 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
-            skalBrukeNyBegrunnelseLogikk = false,
+
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 

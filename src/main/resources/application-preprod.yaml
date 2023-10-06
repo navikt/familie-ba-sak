@@ -138,6 +138,8 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+prosessering.rolle: "928636f4-fd0d-4149-978e-a6fb68bb19de" # 0000-GA-STDAPPS
+
 DEPLOY_ENV: dev
 
 logging:

@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
+import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
@@ -57,6 +58,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilVedtaksperio
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -143,6 +145,11 @@ fun leggTilVilkårResultatPåPersonResultat(
             rad,
         )
 
+        val vurderesEtterForEnRad = parseValgfriEnum<Regelverk>(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.VURDERES_ETTER,
+            rad,
+        ) ?: Regelverk.NASJONALE_REGLER
+
         val vilkårResultaterForÉnRad = vilkårForÉnRad.map { vilkår ->
             VilkårResultat(
                 sistEndretIBehandlingId = behandlingId,
@@ -160,6 +167,7 @@ fun leggTilVilkårResultatPåPersonResultat(
                 ),
                 begrunnelse = "",
                 utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingForÉnRad,
+                vurderesEtter = vurderesEtterForEnRad,
             )
         }
         personResultat.vilkårResultater.addAll(vilkårResultaterForÉnRad)
@@ -310,8 +318,6 @@ fun lagOvergangsstønad(
     tidligereBehandlinger: Map<Long, Long?>,
     dagensDato: LocalDate,
 ): Map<Long, List<InternPeriodeOvergangsstønad>> {
-    val skalBrukeNyBegrunnelseLogikk = true
-
     val overgangsstønadPeriodePåBehandlinger = dataTable.asMaps()
         .groupBy({ rad -> parseLong(Domenebegrep.BEHANDLING_ID, rad) }, { rad ->
             val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
@@ -328,10 +334,8 @@ fun lagOvergangsstønad(
         overgangsstønad.splittOgSlåSammen(
             overgangsstønadPeriodePåBehandlinger[tidligereBehandlinger[behandlingId]]?.slåSammenTidligerePerioder(
                 dagensDato,
-                skalBrukeNyBegrunnelseLogikk,
             ) ?: emptyList(),
             dagensDato,
-            skalBrukeNyBegrunnelseLogikk,
         )
     }
 }
@@ -400,7 +404,10 @@ fun leggBegrunnelserIVedtaksperiodene(
 
     val vedtaksperiode =
         vedtaksperioder.find { it.fom == fom && it.tom == tom }
-            ?: throw Feil("Ingen vedtaksperioder med Fom=$fom og Tom=$tom")
+            ?: throw Feil(
+                "Ingen vedtaksperioder med Fom=$fom og Tom=$tom. " +
+                    "Vedtaksperiodene var ${vedtaksperioder.map { "\n${it.fom?.tilddMMyyyy()} til ${it.tom?.tilddMMyyyy()}" }}",
+            )
     val vedtaksperiodeMedBegrunnelser = vedtaksperiode.tilVedtaksperiodeMedBegrunnelser(
         vedtak,
     )

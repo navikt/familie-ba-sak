@@ -13,7 +13,6 @@ class FeatureToggleConfig {
         const val EØS_INFORMASJON_OM_ÅRLIG_KONTROLL = "familie-ba-sak.eos-informasjon-om-aarlig-kontroll"
         const val ER_MANUEL_POSTERING_TOGGLE_PÅ = "familie-ba-sak.manuell-postering"
         const val FEILUTBETALT_VALUTA_PR_MND = "familie-ba-sak.feilutbetalt-valuta-pr-mnd"
-        const val BEGRUNNELSER_NY = "familie-ba-sak.begrunnelser-ny"
         const val EØS_PRAKSISENDRING_SEPTEMBER2023 =
             "familie-ba-sak.behandling.eos-annen-forelder-omfattet-av-norsk-lovgivning"
 

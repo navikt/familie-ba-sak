@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Fagsaktype
+Egenskap: Gyldige begrunnelser for fagsaktype
 
   Scenario: Skal ikke gi institusjonsbegrunnelser når vi har normal fagsak
     Gitt følgende fagsaker for begrunnelse

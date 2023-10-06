@@ -333,7 +333,7 @@ class SmåbarnstilleggUtilsTest {
                 ),
             ),
             barnasAktørerOgFødselsdatoer = listOf(Pair(barnAktør, LocalDate.now().minusYears(2))),
-            skalBrukeNyBegrunnelseLogikk = false,
+
         )
 
         assertTrue(påvirkerFagsak)
@@ -380,7 +380,7 @@ class SmåbarnstilleggUtilsTest {
                 ),
             ),
             barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
-            skalBrukeNyBegrunnelseLogikk = false,
+
         )
 
         assertFalse(påvirkerFagsak)
@@ -446,7 +446,7 @@ class SmåbarnstilleggUtilsTest {
                 ),
             ),
             barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
-            skalBrukeNyBegrunnelseLogikk = false,
+
         )
 
         assertFalse(påvirkerFagsak)
@@ -498,7 +498,7 @@ class SmåbarnstilleggUtilsTest {
                 ),
             ),
             barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
-            skalBrukeNyBegrunnelseLogikk = false,
+
         )
 
         assertFalse(påvirkerFagsak)
@@ -550,7 +550,7 @@ class SmåbarnstilleggUtilsTest {
                 ),
             ),
             barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
-            skalBrukeNyBegrunnelseLogikk = false,
+
         )
 
         assertTrue(påvirkerFagsak)

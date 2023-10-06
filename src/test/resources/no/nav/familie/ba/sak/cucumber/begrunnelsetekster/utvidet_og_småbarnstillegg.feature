@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Utvidet barnetrygd og småbarnstillegg
+Egenskap: Gyldige begrunnelser for utvidet barnetrygd og småbarnstillegg
 
   Bakgrunn:
     Gitt følgende behandling

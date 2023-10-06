@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Ulike ytelsestyper på andelene
+Egenskap: Utbetalingsoppdrag: Ulike ytelsestyper på andelene
 
 
   Scenario: Søker med utvidet og småbarnstillegg

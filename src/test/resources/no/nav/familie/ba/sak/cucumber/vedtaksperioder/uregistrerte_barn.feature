@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Behandling med uregistrert barn
+Egenskap: Vedtaksperioder for behandling med uregistrert barn
 
   Bakgrunn:
     Gitt følgende vedtak
@@ -77,6 +77,23 @@ Egenskap: Behandling med uregistrert barn
       | 01.12.2034 |            | Opphør             |           |                         |
       |            |            | Avslag             |           | AVSLAG_UREGISTRERT_BARN |
 
+  Scenario: Skal lage avslagsperiode som begrunner eksplisitt avslag i søkers vilkår dersom det bare finnes uregistrert barn
 
+    Og følgende persongrunnlag
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1234    | SØKER      | 11.01.1970  |
 
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår         | Fra dato   | Til dato | Resultat     | Er eksplisitt avslag |
+      | 1234    | BOSATT_I_RIKET | 11.01.1970 |          | Oppfylt      |                      |
+      | 1234    | LOVLIG_OPPHOLD | 11.01.1970 |          | Ikke_oppfylt | Ja                   |
 
+    Og med uregistrerte barn
+
+    Når vedtaksperioder med begrunnelser genereres for behandling 1
+
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato | Vedtaksperiodetype | Kommentar | Begrunnelser            |
+      | 01.02.1970 |          | Avslag             |           |                         |
+      |            |          | Avslag             |           | AVSLAG_UREGISTRERT_BARN |

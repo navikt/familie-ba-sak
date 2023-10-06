@@ -66,4 +66,5 @@ Egenskap: Gyldige begrunnelser for forskjellige brevperiodetyper
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                              | Ekskluderte Begrunnelser                          |
-      | 01.09.2020 |          | OPPHØR             |           | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID | ENDRET_UTBETALING_TRE_ÅR_TILBAKE_I_TID_UTBETALING |
+      | 01.09.2020 | 30.09.2020 | OPPHØR             |           | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID | ENDRET_UTBETALING_TRE_ÅR_TILBAKE_I_TID_UTBETALING |
+      | 01.10.2020 |            | OPPHØR             |           |                                                      |                                                   |

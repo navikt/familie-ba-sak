@@ -37,7 +37,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import utledEndringstidspunkt
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledEndringstidspunkt
 import java.time.LocalDate
 
 fun genererVedtaksperioder(
@@ -150,13 +150,16 @@ fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.slåSam
     val sortertePerioder = this
         .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
 
-    return sortertePerioder.fold(emptyList()) { acc: List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>, periode ->
-        val sistePeriode = acc.lastOrNull()
+    return sortertePerioder.fold(emptyList()) { acc: List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>, dennePerioden ->
+        val forrigePeriode = acc.lastOrNull()
 
-        if (sistePeriode?.periodeErIkkeInnvilget() == true && periode.periodeErIkkeInnvilget()) {
-            acc.dropLast(1) + sistePeriode.copy(tilOgMed = periode.tilOgMed)
+        if (forrigePeriode != null &&
+            !forrigePeriode.erPersonMedInnvilgedeVilkårIPeriode() &&
+            !dennePerioden.erPersonMedInnvilgedeVilkårIPeriode()
+        ) {
+            acc.dropLast(1) + forrigePeriode.copy(tilOgMed = dennePerioden.tilOgMed)
         } else {
-            acc + periode
+            acc + dennePerioden
         }
     }
 }
@@ -166,15 +169,20 @@ fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.leggTil
         .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
 
     val sistePeriode = sortertePerioder.lastOrNull()
-    return if (sistePeriode?.periodeErIkkeInnvilget() == true && sistePeriode.innhold?.any { it.gjeldende?.erEksplisittAvslag() != true } != false) {
+    val sistePeriodeInneholderEksplisittAvslag =
+        sistePeriode?.innhold?.any { it.gjeldende?.erEksplisittAvslag() == true } == true
+    return if (sistePeriode != null &&
+        !sistePeriode.erPersonMedInnvilgedeVilkårIPeriode() &&
+        !sistePeriodeInneholderEksplisittAvslag
+    ) {
         sortertePerioder.dropLast(1) + sistePeriode.copy(tilOgMed = MånedTidspunkt.uendeligLengeTil())
     } else {
         sortertePerioder
     }
 }
 
-private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.periodeErIkkeInnvilget() =
-    innhold == null || innhold.none { it.gjeldende?.erInnvilget() ?: false }
+private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.erPersonMedInnvilgedeVilkårIPeriode() =
+    innhold != null && innhold.any { it.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårInnvilget }
 
 private fun Map<AktørOgRolleBegrunnelseGrunnlag, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag>.lagOverlappendeGenerelleAvslagsPerioder() =
     map {
@@ -346,12 +354,13 @@ private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.slåSamme
     return perioder.fold(emptyList()) { acc: List<Periode<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>, periode ->
         val sistePeriode = acc.lastOrNull()
 
-        val erInnvilgetForrigePeriode = sistePeriode?.innhold?.gjeldende?.erInnvilget() ?: false
-        val erInnvilget = periode.innhold?.gjeldende?.erInnvilget() ?: false
+        val erVilkårInnvilgetForrigePeriode =
+            sistePeriode?.innhold?.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårInnvilget
+        val erVilkårInnvilget = periode.innhold?.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårInnvilget
 
         if (sistePeriode != null &&
-            !erInnvilgetForrigePeriode &&
-            !erInnvilget &&
+            !erVilkårInnvilgetForrigePeriode &&
+            !erVilkårInnvilget &&
             periode.innhold?.erReduksjonSidenForrigeBehandling != true &&
             periode.innhold?.gjeldende?.erEksplisittAvslag() != true &&
             sistePeriode.innhold?.gjeldende?.erEksplisittAvslag() != true

@@ -26,6 +26,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.YearMonth
 
 @Service
 class KontrollerNyUtbetalingsgeneratorService(
@@ -189,9 +190,13 @@ class KontrollerNyUtbetalingsgeneratorService(
         gammeltSimuleringResultat: DetaljertSimuleringResultat,
         behandling: Behandling,
     ): Boolean {
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
+        val andelerEtterDagensDato = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
+            .andelerTilkjentYtelse
+            .filter { andelTilkjentYtelse ->
+                andelTilkjentYtelse.stønadTom.isAfter(YearMonth.now())
+            }
         if (!(nyttSimuleringResultat.simuleringMottaker.isNotEmpty() && gammeltSimuleringResultat.simuleringMottaker.isNotEmpty())) {
-            secureLogger.warn("Behandling ${behandling.id} får tomt simuleringsresultat med ny eller gammel generator. Ny er tom: ${nyttSimuleringResultat.simuleringMottaker.isEmpty()}, Gammel er tom: ${gammeltSimuleringResultat.simuleringMottaker.isEmpty()}. antallAndeler=${tilkjentYtelse.andelerTilkjentYtelse.size}, resultat=${behandling.resultat}")
+            secureLogger.warn("Behandling ${behandling.id} får tomt simuleringsresultat med ny eller gammel generator. Ny er tom: ${nyttSimuleringResultat.simuleringMottaker.isEmpty()}, Gammel er tom: ${gammeltSimuleringResultat.simuleringMottaker.isEmpty()}. antallAndeler=${andelerEtterDagensDato.size}, resultat=${behandling.resultat}")
             return false
         }
         return true

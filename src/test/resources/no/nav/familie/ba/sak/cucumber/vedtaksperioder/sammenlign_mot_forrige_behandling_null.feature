@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behanlding
+Egenskap: Vedtaksperiode for behandling med opphør fra start
 
   Bakgrunn:
     Gitt følgende vedtak

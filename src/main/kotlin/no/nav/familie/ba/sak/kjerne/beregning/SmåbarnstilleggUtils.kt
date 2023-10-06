@@ -38,9 +38,8 @@ import java.time.YearMonth
 fun List<InternPeriodeOvergangsstønad>.splittOgSlåSammen(
     overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>,
     dagensDato: LocalDate,
-    skalBrukeNyBegrunnelseLogikk: Boolean,
 ) = this
-    .slåSammenTidligerePerioder(dagensDato, skalBrukeNyBegrunnelseLogikk)
+    .slåSammenTidligerePerioder(dagensDato)
     .splitFramtidigePerioderFraForrigeBehandling(overgangsstønadPerioderFraForrigeBehandling, LocalDate.now())
 
 class VedtaksperiodefinnerSmåbarnstilleggFeil(
@@ -60,7 +59,6 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     nyePerioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
-    skalBrukeNyBegrunnelseLogikk: Boolean,
 ): Boolean {
     val (forrigeSmåbarnstilleggAndeler, forrigeAndelerIkkeSmåbarnstillegg) = forrigeAndelerTilkjentYtelse.partition { it.erSmåbarnstillegg() }
 
@@ -71,7 +69,6 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
         barnasAndeler = forrigeBarnasAndeler,
         utvidetAndeler = forrigeUtvidetAndeler,
         barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer,
-        skalBrukeNyBegrunnelseLogikk = skalBrukeNyBegrunnelseLogikk,
     )
 
     return nyeSmåbarnstilleggAndeler.førerTilEndringIUtbetalingFraForrigeBehandling(
