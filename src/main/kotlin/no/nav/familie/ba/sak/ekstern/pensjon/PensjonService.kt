@@ -50,7 +50,8 @@ class PensjonService(
         val barnetrygdMedRelaterteSaker = barnetrygdTilPensjon?.barnetrygdPerioder
             ?.filter { it.personIdent != aktør.aktivFødselsnummer() }
             ?.map { it.personIdent }?.distinct()
-            ?.map { hentBarnetrygdForRelatertPersonTilPensjon(it, fraDato, aktør) }?.flatten()
+            ?.map { hentBarnetrygdForRelatertPersonTilPensjon(it, fraDato, aktør) }
+            ?.flatten()
             ?: emptyList()
 
         return barnetrygdMedRelaterteSaker.plus(barnetrygdTilPensjonFraInfotrygd.plus(barnetrygdTilPensjon)).distinct()

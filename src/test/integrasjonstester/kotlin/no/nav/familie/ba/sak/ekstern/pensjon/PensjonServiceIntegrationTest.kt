@@ -106,7 +106,6 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         assertThat(barnetrygdTilPensjon.filter { it.barnetrygdPerioder.all { it.kildesystem == "Infotrygd" } }).hasSize(1)
     }
 
-
     private fun leggTilAvsluttetBehandling(
         fagsak: Fagsak,
         barn1: Person,
