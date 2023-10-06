@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.ekstern.bisys.BisysService
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -26,11 +28,13 @@ class PensjonService(
     private val personidentService: PersonidentService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val taskRepository: TaskRepositoryWrapper,
+    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
 ) {
     fun hentBarnetrygd(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør) ?: return emptyList()
         val barnetrygdTilPensjon = hentBarnetrygdTilPensjon(fagsak, fraDato) ?: return emptyList()
+        val barnetrygdTilPensjonFraInfotrygd = hentBarnetrygdTilPensjonFraInfotrygd(aktør, fraDato)
 
         // Sjekk om det finnes relaterte saker, dvs om barna finnes i andre behandlinger
         val barnetrygdMedRelaterteSaker = barnetrygdTilPensjon.barnetrygdPerioder
@@ -38,7 +42,7 @@ class PensjonService(
             .map { it.personIdent }.distinct()
             .map { hentBarnetrygdForRelatertPersonTilPensjon(it, fraDato, aktør) }
             .flatten()
-        return barnetrygdMedRelaterteSaker.plus(barnetrygdTilPensjon).distinct()
+        return barnetrygdMedRelaterteSaker.plus(barnetrygdTilPensjon.plus(barnetrygdTilPensjonFraInfotrygd)).distinct()
     }
 
     fun lagTaskForHentingAvIdenterTilPensjon(år: Int): String {
@@ -60,6 +64,18 @@ class PensjonService(
         return fagsaker.mapNotNull { fagsak -> hentBarnetrygdTilPensjon(fagsak, fraDato) }
     }
 
+    private fun hentBarnetrygdTilPensjonFraInfotrygd(aktør: Aktør, fraDato: LocalDate): BarnetrygdTilPensjon {
+        val allePerioderTilhørendeAktør = aktør.personidenter.flatMap { ident ->
+            infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident.fødselsnummer, fraDato).fagsaker.flatMap {
+                it.barnetrygdPerioder
+            }
+        }
+        return BarnetrygdTilPensjon(
+            fagsakEiersIdent = aktør.aktivFødselsnummer(),
+            barnetrygdPerioder = allePerioderTilhørendeAktør
+        )
+    }
+
     private fun hentBarnetrygdTilPensjon(fagsak: Fagsak, fraDato: LocalDate): BarnetrygdTilPensjon? {
         val behandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id)
             ?: return null
@@ -68,7 +84,6 @@ class PensjonService(
         val perioder = hentPerioder(behandling, fraDato)
 
         return BarnetrygdTilPensjon(
-            fagsakId = fagsak.id.toString(),
             barnetrygdPerioder = perioder,
             fagsakEiersIdent = fagsak.aktør.aktivFødselsnummer(),
         )
@@ -82,14 +97,18 @@ class PensjonService(
             ?: error("Finner ikke tilkjent ytelse for behandling=${behandling.id}")
         return tilkjentYtelse.andelerTilkjentYtelse
             .filter { it.stønadTom.isSameOrAfter(fraDato.toYearMonth()) }
+            .filter { it.prosent != BigDecimal.ZERO && it.kalkulertUtbetalingsbeløp != 0 }
             .map {
                 BarnetrygdPeriode(
                     ytelseTypeEkstern = it.type.tilPensjonYtelsesType(),
                     personIdent = it.aktør.aktivFødselsnummer(),
                     stønadFom = it.stønadFom,
                     stønadTom = it.stønadTom,
-                    utbetaltPerMnd = it.kalkulertUtbetalingsbeløp,
-                    delingsprosentYtelse = it.prosent.toInt(),
+                    delingsprosentYtelse = when (it.prosent) {
+                        BigDecimal.valueOf(100L) -> YtelseProsent.FULL
+                        BigDecimal.valueOf(50L) -> YtelseProsent.DELT
+                        else -> YtelseProsent.USIKKER
+                    },
                 )
             }
     }
@@ -105,4 +124,11 @@ class PensjonService(
     companion object {
         private val logger = LoggerFactory.getLogger(BisysService::class.java)
     }
+}
+
+private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon): List<BarnetrygdTilPensjon> {
+    return if (fagsakEiersIdent == other.fagsakEiersIdent) {
+        listOf(copy(barnetrygdPerioder = barnetrygdPerioder + other.barnetrygdPerioder))
+    }
+    else listOf(this, other)
 }
