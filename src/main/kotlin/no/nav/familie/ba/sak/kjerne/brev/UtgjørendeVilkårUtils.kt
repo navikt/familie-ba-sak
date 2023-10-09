@@ -249,7 +249,7 @@ private fun erInnvilgetVilkårResultatUtgjørende(
         }
 
     return triggesAv.erUtdypendeVilkårsvurderingOppfylt(minimertVilkårResultat) &&
-        erVilkårOgVedtakFomSammeMåned &&
+        vilkårResultatFomMåned == vedtaksperiodeFomMåned.minusMonths(1) &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT
 }
 
