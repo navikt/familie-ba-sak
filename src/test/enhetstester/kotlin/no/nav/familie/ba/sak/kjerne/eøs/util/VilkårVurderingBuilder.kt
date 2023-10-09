@@ -126,7 +126,7 @@ fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse() =
         vilkårsvurdering = this.byggVilkårsvurdering(),
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
         fagsakType = FagsakType.NORMAL,
-        skalBrukeNyBegrunnelseLogikk = false,
+
     )
 
 data class UtdypendeVilkårRegelverkResultat(

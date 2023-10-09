@@ -6,9 +6,7 @@ import BrevPeriodeTestConfig
 import EØSBegrunnelseTestConfig
 import FritekstBegrunnelseTestConfig
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.testSanityKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
@@ -26,8 +24,6 @@ import org.junit.jupiter.api.TestReporter
 import java.io.File
 
 class BrevperiodeTest {
-
-    private val featureToggleService: FeatureToggleService = mockk()
 
     @Test
     @Disabled("Må sees nøyere på i forbindelse med brevperioder")
@@ -96,7 +92,6 @@ class BrevperiodeTest {
                         )
                     } ?: emptyList(),
                     dødeBarnForrigePeriode = emptyList(),
-                    featureToggleService = featureToggleService,
                 ).genererBrevPeriode()
             } catch (e: Exception) {
                 testReporter.publishEntry(
@@ -202,6 +197,5 @@ class BrevperiodeTest {
         BegrunnelseMedTriggere(
             standardbegrunnelse = this,
             triggesAv = sanityBegrunnelser[this]!!.triggesAv,
-            featureToggleService = featureToggleService,
         )
 }

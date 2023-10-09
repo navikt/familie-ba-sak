@@ -28,13 +28,7 @@ data class Utbetalingsperiode(
     val ytelseTyper: List<YtelseType>,
     val antallBarn: Int,
     val utbetaltPerMnd: Int,
-) : Vedtaksperiode {
-    fun tilTomtSegment() = LocalDateSegment(
-        this.periodeFom,
-        this.periodeTom,
-        null,
-    )
-}
+) : Vedtaksperiode
 
 data class UtbetalingsperiodeDetalj(
     val person: RestPerson,

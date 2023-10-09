@@ -8,8 +8,6 @@ import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
@@ -48,7 +46,6 @@ class BrevPeriodeGenerator(
     private val minimerteKompetanserForPeriode: List<MinimertKompetanse>,
     private val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>,
     private val dødeBarnForrigePeriode: List<String>,
-    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun genererBrevPeriode(): BrevPeriode? {
@@ -205,11 +202,9 @@ class BrevPeriodeGenerator(
             .filter { it.person.type == PersonType.BARN }
             .partition { it.utbetaltPerMnd != 0 }
 
-        val skalBrukeNyBegrunnelseLogikk = featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)
-
         val tomDato =
             if (minimertVedtaksperiode.tom?.erSenereEnnInneværendeMåned() == false) {
-                if (skalBrukeNyBegrunnelseLogikk) minimertVedtaksperiode.tom.tilMånedÅr() else minimertVedtaksperiode.tom.tilDagMånedÅr()
+                minimertVedtaksperiode.tom.tilMånedÅr()
             } else {
                 null
             }
@@ -229,25 +224,21 @@ class BrevPeriodeGenerator(
         }
 
         val utbetalingsbeløp = minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()
-        val brevPeriodeType = if (skalBrukeNyBegrunnelseLogikk) {
-            hentBrevPeriodeType(
-                vedtaksperiodetype = minimertVedtaksperiode.type,
-                fom = minimertVedtaksperiode.fom,
-                erUtbetalingEllerDeltBostedIPeriode = minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer.any { it.endringsårsak == Årsak.DELT_BOSTED || it.utbetaltPerMnd > 0 },
-            )
-        } else {
-            hentPeriodeTypeGammel(utbetalingsbeløp, minimertVedtaksperiode.fom, barnMedUtbetaling)
-        }
+        val brevPeriodeType = hentBrevPeriodeType(
+            vedtaksperiodetype = minimertVedtaksperiode.type,
+            fom = minimertVedtaksperiode.fom,
+            erUtbetalingEllerDeltBostedIPeriode = minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer.any { it.endringsårsak == Årsak.DELT_BOSTED || it.utbetaltPerMnd > 0 },
+        )
 
         val duEllerInstitusjonen = hentDuEllerInstitusjonenTekst(brevPeriodeType)
 
         return BrevPeriode(
 
-            fom = if (skalBrukeNyBegrunnelseLogikk) this.hentFomTekst() else this.hentFomTekstGammel(),
+            fom = this.hentFomTekst(),
             tom = when {
                 tomDato.isNullOrBlank() -> ""
                 minimertVedtaksperiode.type == Vedtaksperiodetype.FORTSATT_INNVILGET -> ""
-                minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG && skalBrukeNyBegrunnelseLogikk -> "til og med $tomDato "
+                minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG -> "til og med $tomDato "
                 brevPeriodeType == BrevPeriodeType.INGEN_UTBETALING -> ""
                 brevPeriodeType == BrevPeriodeType.INNVILGELSE_INGEN_UTBETALING -> " til $tomDato"
                 else -> "til $tomDato "
@@ -294,40 +285,6 @@ class BrevPeriodeGenerator(
                 }
             }
         }
-
-    @Deprecated("Erstattes av hentPeriodeType etter at ny begrunnelse logikk er produksjonsatt")
-    private fun hentPeriodeTypeGammel(
-        utbetalingsbeløp: Int,
-        fom: LocalDate?,
-        barnMedUtbetaling: List<MinimertRestPerson>,
-    ) = if (restBehandlingsgrunnlagForBrev.fagsakType == FagsakType.INSTITUSJON) {
-        when (minimertVedtaksperiode.type) {
-            Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET_INSTITUSJON
-            Vedtaksperiodetype.UTBETALING -> when (utbetalingsbeløp) {
-                0 -> BrevPeriodeType.INNVILGELSE_INGEN_UTBETALING
-                else -> BrevPeriodeType.INNVILGELSE_INSTITUSJON
-            }
-
-            Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.AVSLAG_INSTITUSJON else BrevPeriodeType.AVSLAG_UTEN_PERIODE_INSTITUSJON
-            Vedtaksperiodetype.OPPHØR -> BrevPeriodeType.OPPHOR_INSTITUSJON
-            Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.INNVILGELSE_INSTITUSJON
-            Vedtaksperiodetype.ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
-        }
-    } else {
-        when (minimertVedtaksperiode.type) {
-            Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET
-            Vedtaksperiodetype.UTBETALING -> when {
-                utbetalingsbeløp == 0 -> BrevPeriodeType.INNVILGELSE_INGEN_UTBETALING
-                barnMedUtbetaling.isEmpty() -> BrevPeriodeType.INNVILGELSE_KUN_UTBETALING_PÅ_SØKER
-                else -> BrevPeriodeType.INNVILGELSE
-            }
-
-            Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.AVSLAG else BrevPeriodeType.AVSLAG_UTEN_PERIODE
-            Vedtaksperiodetype.OPPHØR -> BrevPeriodeType.OPPHOR
-            Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.INNVILGELSE
-            Vedtaksperiodetype.ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
-        }
-    }
 
     fun finnBarnIUtbetalingPeriode(identerIBegrunnelene: List<String>): List<MinimertRestPerson> {
         val identerMedUtbetaling =

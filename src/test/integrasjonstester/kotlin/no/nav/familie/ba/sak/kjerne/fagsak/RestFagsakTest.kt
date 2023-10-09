@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
@@ -79,8 +78,6 @@ class RestFagsakTest(
 
     @Test
     fun `Skal sjekke at gjeldende utbetalingsperioder kommer med i restfagsak`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
-
         val søkerFnr = randomFnr()
         val barnFnr = ClientMocks.barnFnr[0]
 
