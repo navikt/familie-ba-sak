@@ -9,7 +9,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-next-upstream-tries: '1'
 spec:
   redis:
-    - instance: familie-baks-cache
+    - instance: familie_baks_cache
       access: readwrite
   envFrom:
     - secret: familie-ba-sak
