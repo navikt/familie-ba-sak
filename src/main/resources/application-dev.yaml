@@ -122,8 +122,14 @@ funksjonsbrytere:
   kafka:
     producer:
       enabled: false
-
 spring:
+  cache:
+    type: redis
+  data:
+    redis:
+      password:  ${ REDIS_PASSWORD_FAMILIE-BAKS-CACHE }
+      url: ${ REDIS_URI_FAMILIE-BAKS-CACHE }
+      username: ${ REDIS_USERNAME_FAMILIE-BAKS-CACHE }
   jpa:
     show-sql: false
     properties:

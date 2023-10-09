@@ -141,6 +141,13 @@ rolle:
   kode7: "9ec6487d-f37a-4aad-a027-cd221c1ac32b" # 0000-GA-Fortrolig_Adresse
 
 spring:
+  cache:
+    type: redis
+  data:
+    redis:
+      password:  ${ REDIS_PASSWORD_FAMILIE-BAKS-CACHE }
+      url: ${ REDIS_URI_FAMILIE-BAKS-CACHE }
+      username: ${ REDIS_USERNAME_FAMILIE-BAKS-CACHE }
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-ba-sak
     username: ${DB_USERNAME}

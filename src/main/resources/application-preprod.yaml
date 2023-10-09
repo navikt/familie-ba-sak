@@ -133,6 +133,13 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
 
 spring:
+  cache:
+    type: redis
+  data:
+    redis:
+      password:  ${ REDIS_PASSWORD_FAMILIE-BAKS-CACHE }
+      url: ${ REDIS_URI_FAMILIE-BAKS-CACHE }
+      username: ${ REDIS_USERNAME_FAMILIE-BAKS-CACHE }
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-ba-sak
     username: ${DB_USERNAME}

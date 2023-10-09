@@ -7,6 +7,7 @@ import no.nav.familie.valutakurs.ValutakursRestClient
 import no.nav.familie.valutakurs.domene.ExchangeRate
 import no.nav.familie.valutakurs.domene.exchangeRateForCurrency
 import no.nav.familie.valutakurs.exception.ValutakursClientException
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -22,6 +23,7 @@ class ECBService(private val ecbClient: ValutakursRestClient) {
      * @return Henter valutakurs for *utenlandskValuta* -> EUR og NOK -> EUR på *kursDato*, og returnerer en beregnet kurs for *utenlandskValuta* -> NOK.
      */
     @Throws(ECBServiceException::class)
+    @Cacheable("ecb_valutakurser", cacheManager = "redisCacheI60Dager", unless = "#result == null")
     fun hentValutakurs(utenlandskValuta: String, kursDato: LocalDate): BigDecimal {
         try {
             val exchangeRates =

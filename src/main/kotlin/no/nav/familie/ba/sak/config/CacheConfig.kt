@@ -10,6 +10,10 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.data.redis.cache.RedisCacheConfiguration
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
+import org.springframework.data.redis.serializer.RedisSerializationContext
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 @Configuration
@@ -51,6 +55,14 @@ class CacheConfig {
                 .recordStats().build<Any, Any>().asMap()
             return ConcurrentMapCache(name, concurrentMap, true)
         }
+    }
+
+    @Bean("redisCacheI60Dager")
+    fun cacheConfiguration(): RedisCacheConfiguration {
+        return RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.ofDays(60))
+            .disableCachingNullValues()
+            .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(GenericJackson2JsonRedisSerializer()))
     }
 
     @Bean("skattPersonerCache")

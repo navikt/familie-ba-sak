@@ -11,6 +11,9 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
 
 spec:
+  redis:
+    - instance: familie-baks-cache
+      access: readwrite
   envFrom:
     - secret: familie-ba-sak
     - secret: familie-ba-sak-unleash-api-token
