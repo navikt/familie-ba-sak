@@ -109,8 +109,9 @@ private fun List<MinimertVilkårResultat>.finnForeliggende(
 ): MinimertVilkårResultat? =
     minimertVilkårResultat.let { vilkårResultat ->
         this.find {
+            if (vilkårResultat.periodeFom == null) return@find false
             it.periodeTom?.isEqual(
-                vilkårResultat.periodeFom?.minusDays(
+                vilkårResultat.periodeFom.minusDays(
                     1,
                 ),
             ) == true && it.vilkårType == vilkårResultat.vilkårType
