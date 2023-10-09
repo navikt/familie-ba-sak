@@ -437,6 +437,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetOppholdPaaSvalbard"
     },
+    INNVILGET_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetUtenlandsoppholdOverTreMaaneder"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -1184,6 +1188,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_VURDERING_IKKE_BOSATT_I_NORGE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorVurderingIkkeBosattINorge"
+    },
+    OPPHØR_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorUtenlandsoppholdOverTreMaaneder"
     },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
