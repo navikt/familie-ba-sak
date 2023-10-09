@@ -137,9 +137,9 @@ spring:
     type: redis
   data:
     redis:
-      password:  ${ REDIS_PASSWORD_BAKSCACHE }
-      url: ${ REDIS_URI_BAKSCACHE }
-      username: ${ REDIS_USERNAME_BAKSCACHE }
+      password:  ${REDIS_PASSWORD_BAKSCACHE}
+      url: ${REDIS_URI_BAKSCACHE}
+      username: ${REDIS_USERNAME_BAKSCACHE}
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-ba-sak
     username: ${DB_USERNAME}
