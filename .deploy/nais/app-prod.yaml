@@ -12,7 +12,7 @@ metadata:
 
 spec:
   redis:
-    - instance: familie_baks_cache
+    - instance: bakscache
       access: readwrite
   envFrom:
     - secret: familie-ba-sak
