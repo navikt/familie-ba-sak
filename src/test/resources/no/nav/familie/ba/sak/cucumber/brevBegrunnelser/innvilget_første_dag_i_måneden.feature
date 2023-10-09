@@ -65,7 +65,7 @@ Egenskap: Brevbegrunnelser med utvidet barnetrygd
       | INNVILGET_OVERGANG_EØS_TIL_NASJONAL_NORSK_NORDISK_FAMILIE | Ja            | 10.12.16             | 1           | august 2021                          | NB      | 2 708 |                  | SØKER_FÅR_UTVIDET       |
 
 
-  Scenario: Plassholdertekst for scenario - MsOyjQ3CKi
+  Scenario: Skal flette inn barnas fødselsdatoer korrekt når vilkår er innvilget måneden før vedtaksperioden 
     Og følgende dagens dato 09.10.2023
     Og lag personresultater for begrunnelse for behandling 1
 
