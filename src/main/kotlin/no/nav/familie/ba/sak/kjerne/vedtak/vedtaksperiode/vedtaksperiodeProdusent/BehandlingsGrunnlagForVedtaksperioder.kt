@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -60,7 +61,7 @@ data class AktørOgRolleBegrunnelseGrunnlag(
 data class BehandlingsGrunnlagForVedtaksperioder(
     val persongrunnlag: PersonopplysningGrunnlag,
     val personResultater: Set<PersonResultat>,
-    val fagsakType: FagsakType,
+    val behandling: Behandling,
     val kompetanser: List<Kompetanse>,
     val endredeUtbetalinger: List<EndretUtbetalingAndel>,
     val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
@@ -81,11 +82,11 @@ data class BehandlingsGrunnlagForVedtaksperioder(
             hentOrdinæreVilkårForSøkerForskjøvetTidslinje(søker, personResultater)
 
         val erMinstEttBarnMedUtbetalingTidslinje =
-            hentErMinstEttBarnMedUtbetalingTidslinje(personResultater, fagsakType, persongrunnlag)
+            hentErMinstEttBarnMedUtbetalingTidslinje(personResultater, behandling.fagsak.type, persongrunnlag)
 
         val erUtbetalingSmåbarnstilleggTidslinje = this.andelerTilkjentYtelse.hentErUtbetalingSmåbarnstilleggTidslinje()
 
-        val personresultaterOgRolleForVilkår = if (fagsakType.erBarnSøker()) {
+        val personresultaterOgRolleForVilkår = if (behandling.fagsak.type.erBarnSøker()) {
             personResultater.single().splittOppVilkårForBarnOgSøkerRolle()
         } else {
             personResultater.map {
@@ -108,7 +109,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                     person = person,
                     erMinstEttBarnMedUtbetalingTidslinje = erMinstEttBarnMedUtbetalingTidslinje,
                     ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje,
-                    fagsakType = fagsakType,
+                    fagsakType = behandling.fagsak.type,
                     vilkårRolle = vilkårRolle,
                     bareSøkerOgUregistrertBarn = bareSøkerOgUregistrertBarn,
                 )

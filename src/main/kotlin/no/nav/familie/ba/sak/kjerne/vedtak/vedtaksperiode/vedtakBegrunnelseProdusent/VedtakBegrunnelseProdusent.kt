@@ -91,7 +91,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
             sanityBegrunnelser = grunnlag.sanityBegrunnelser,
             person = person,
             vedtaksperiode = this,
-            fagsakType = grunnlag.behandlingsGrunnlagForVedtaksperioder.fagsakType,
+            fagsakType = grunnlag.behandlingsGrunnlagForVedtaksperioder.behandling.fagsak.type,
             relevantePeriodeResultater = relevantePeriodeResultater,
             erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode,
         )
