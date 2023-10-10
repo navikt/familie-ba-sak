@@ -67,11 +67,10 @@ private fun finnUtgjørendeVilkår(
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
 ): Set<VilkårResultatForVedtaksperiode> {
     val vilkårResultater = (begrunnelseGrunnlag.dennePerioden.vilkårResultater + utvidetVilkårPåSøkerIPeriode).filterNotNull()
-    val vilkårResultaterForrigePeriode = (
+    val vilkårResultaterForrigePeriode =
         begrunnelseGrunnlag.forrigePeriode?.vilkårResultater?.plus(
             utvidetVilkårPåSøkerIForrigePeriode,
         )?.filterNotNull()
-        )
 
     val oppfylteVilkårResultaterDennePerioden =
         vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
