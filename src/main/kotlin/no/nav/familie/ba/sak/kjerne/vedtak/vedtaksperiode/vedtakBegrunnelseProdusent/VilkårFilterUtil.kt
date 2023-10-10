@@ -14,11 +14,15 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
+    utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
+    utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
 ): Boolean {
     if (this.vilkår.isEmpty()) return false
     val utgjørendeVilkårResultater = finnUtgjørendeVilkår(
         begrunnelseGrunnlag = begrunnelseGrunnlag,
         sanityBegrunnelse = this,
+        utvidetVilkårPåSøkerIPeriode = utvidetVilkårPåSøkerIPeriode,
+        utvidetVilkårPåSøkerIForrigePeriode = utvidetVilkårPåSøkerIForrigePeriode,
     )
 
     return this.erLikVilkårOgUtdypendeVilkårIPeriode(utgjørendeVilkårResultater)
@@ -59,11 +63,20 @@ private fun Collection<UtdypendeVilkårsvurdering>.erLik(
 private fun finnUtgjørendeVilkår(
     sanityBegrunnelse: ISanityBegrunnelse,
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
+    utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
+    utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
 ): Set<VilkårResultatForVedtaksperiode> {
+    val vilkårResultater = (begrunnelseGrunnlag.dennePerioden.vilkårResultater + utvidetVilkårPåSøkerIPeriode).filterNotNull()
+    val vilkårResultaterForrigePeriode = (
+        begrunnelseGrunnlag.forrigePeriode?.vilkårResultater?.plus(
+            utvidetVilkårPåSøkerIForrigePeriode,
+        )?.filterNotNull()
+        )
+
     val oppfylteVilkårResultaterDennePerioden =
-        begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
+        vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
     val oppfylteVilkårResultaterForrigePeriode =
-        begrunnelseGrunnlag.forrigePeriode?.vilkårResultater?.filter { it.resultat == Resultat.OPPFYLT }
+        vilkårResultaterForrigePeriode?.filter { it.resultat == Resultat.OPPFYLT }
             ?: emptyList()
 
     val vilkårTjent = hentVilkårResultaterTjent(
