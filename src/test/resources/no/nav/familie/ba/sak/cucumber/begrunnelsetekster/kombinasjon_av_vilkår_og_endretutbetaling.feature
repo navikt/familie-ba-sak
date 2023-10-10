@@ -71,7 +71,7 @@ Egenskap: Gyldige begrunnelser for kombinasjon av utgjørende vilkår og endret 
 
     Og med endrede utbetalinger for begrunnelse
       | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak       | Prosent |
-      | 4567    | 01.06.2022 | 28.02.2023 | 1            | DELT_BOSTED | 100     |
+      | 1234    | 01.06.2022 | 28.02.2023 | 1            | DELT_BOSTED | 100     |
 
     Når begrunnelsetekster genereres for behandling 1
 
