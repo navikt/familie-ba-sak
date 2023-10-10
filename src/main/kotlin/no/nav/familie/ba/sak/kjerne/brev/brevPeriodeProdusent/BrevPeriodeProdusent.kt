@@ -84,7 +84,7 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
         barnasFodselsdager = barnMedUtbetaling.tilBarnasFødselsdatoer(),
         duEllerInstitusjonen = hentDuEllerInstitusjonenTekst(
             brevPeriodeType = brevPeriodeType,
-            fagsakType = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioder.fagsakType,
+            fagsakType = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioder.behandling.fagsak.type,
         ),
     )
 }
