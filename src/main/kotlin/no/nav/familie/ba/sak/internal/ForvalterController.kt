@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -218,8 +219,8 @@ class ForvalterController(
         return ResponseEntity.ok(fagsakRepository.finnFagsakerSomSkalAvsluttes())
     }
 
-    @GetMapping("/hentValutakurs/{valuta}/{dato}")
-    fun finnFagsakerSomSkalAvsluttes(@PathVariable valuta: String, @PathVariable dato: LocalDate): ResponseEntity<BigDecimal> {
+    @GetMapping("/hentValutakurs/")
+    fun finnFagsakerSomSkalAvsluttes(@RequestParam valuta: String, @RequestParam dato: LocalDate): ResponseEntity<BigDecimal> {
         return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
     }
 
