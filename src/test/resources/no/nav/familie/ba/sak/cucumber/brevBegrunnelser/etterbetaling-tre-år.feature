@@ -4,50 +4,96 @@
 Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre år tilbake i tid
 
   Bakgrunn:
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
     Gitt følgende behandling
-      | BehandlingId |
-      | 1            |
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat         | Behandlingsårsak |
+      | 1            | 1        |                     | ENDRET_UTBETALING           | NYE_OPPLYSNINGER |
+      | 2            | 1        | 1                   | DELVIS_INNVILGET_OG_OPPHØRT | SØKNAD           |
 
     Og følgende persongrunnlag for begrunnelse
       | BehandlingId | AktørId | Persontype | Fødselsdato |
-      | 1            | 1       | SØKER      | 29.08.1986  |
-      | 1            | 2       | BARN       | 05.02.2005  |
-      | 1            | 3       | BARN       | 03.11.2010  |
+      | 1            | 1       | SØKER      | 09.07.1986  |
+      | 1            | 2       | BARN       | 13.02.2005  |
+      | 1            | 3       | BARN       | 06.11.2010  |
+      | 2            | 1       | SØKER      | 09.07.1986  |
+      | 2            | 2       | BARN       | 13.02.2005  |
+      | 2            | 3       | BARN       | 06.11.2010  |
 
   Scenario: Skal kunne begrunne utvidet for to barn etter endret utbetaling med etterbetaling tre år tilbake i tid
+    Og følgende dagens dato 09.10.2023
     Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
-      | AktørId | Vilkår                                        | Fra dato   | Til dato   | Resultat | Utdypende vilkår |
-      | 1       | BOSATT_I_RIKET, LOVLIG_OPPHOLD                | 01.01.2020 | 28.02.2023 | Oppfylt  |                  |
-      | 1       | UTVIDET_BARNETRYGD                            | 01.01.2020 | 20.06.2022 | Oppfylt  |                  |
-      | 2       | UNDER_18_ÅR                                   | 05.02.2005 | 04.02.2023 | Oppfylt  |                  |
-      | 2       | GIFT_PARTNERSKAP                              | 05.02.2005 |            | Oppfylt  |                  |
-      | 2       | BOR_MED_SØKER, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 01.01.2020 |            | Oppfylt  |                  |
-      | 3       | UNDER_18_ÅR                                   | 03.11.2010 | 02.11.2028 | Oppfylt  |                  |
-      | 3       | GIFT_PARTNERSKAP                              | 03.11.2010 |            | Oppfylt  |                  |
-      | 3       | BOR_MED_SØKER                                 | 01.01.2020 |            | Oppfylt  | DELT_BOSTED      |
-      | 3       | BOSATT_I_RIKET, LOVLIG_OPPHOLD                | 01.01.2020 |            | Oppfylt  |                  |
+      | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET                                |                  | 09.07.1986 |            | OPPFYLT  | Nei                  |
+
+      | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD,GIFT_PARTNERSKAP,BOR_MED_SØKER |                  | 13.02.2005 |            | OPPFYLT  | Nei                  |
+      | 2       | UNDER_18_ÅR                                                  |                  | 13.02.2005 | 12.02.2023 | OPPFYLT  | Nei                  |
+
+      | 3       | LOVLIG_OPPHOLD,BOSATT_I_RIKET,GIFT_PARTNERSKAP               |                  | 06.11.2010 |            | OPPFYLT  | Nei                  |
+      | 3       | BOR_MED_SØKER                                                |                  | 06.11.2010 | 14.03.2018 | OPPFYLT  | Nei                  |
+      | 3       | UNDER_18_ÅR                                                  |                  | 06.11.2010 | 05.11.2028 | OPPFYLT  | Nei                  |
+      | 3       | BOR_MED_SØKER                                                | DELT_BOSTED      | 15.03.2018 |            | OPPFYLT  | Nei                  |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1       | BOSATT_I_RIKET                                               |                  | 09.07.1986 | 28.02.2023 | OPPFYLT  | Nei                  |
+      | 1       | LOVLIG_OPPHOLD                                               |                  | 09.07.1986 |            | OPPFYLT  | Nei                  |
+      | 1       | UTVIDET_BARNETRYGD                                           |                  | 01.01.2020 | 20.06.2022 | OPPFYLT  | Nei                  |
+
+      | 2       | UNDER_18_ÅR                                                  |                  | 13.02.2005 | 12.02.2023 | OPPFYLT  | Nei                  |
+      | 2       | GIFT_PARTNERSKAP,BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 13.02.2005 |            | OPPFYLT  | Nei                  |
+
+      | 3       | GIFT_PARTNERSKAP,BOSATT_I_RIKET,LOVLIG_OPPHOLD               |                  | 06.11.2010 |            | OPPFYLT  | Nei                  |
+      | 3       | UNDER_18_ÅR                                                  |                  | 06.11.2010 | 05.11.2028 | OPPFYLT  | Nei                  |
+      | 3       | BOR_MED_SØKER                                                |                  | 06.11.2010 | 14.03.2018 | OPPFYLT  | Nei                  |
+      | 3       | BOR_MED_SØKER                                                | DELT_BOSTED      | 15.03.2018 |            | OPPFYLT  | Nei                  |
 
     Og med andeler tilkjent ytelse for begrunnelse
-      | BehandlingId | AktørId | Fra dato   | Til dato   | Beløp |
-      | 1            | 1       | 01.02.2020 | 31.05.2020 | 0     |
-      | 1            | 1       | 01.06.2020 | 30.06.2022 | 1054  |
-      | 1            | 2       | 01.02.2020 | 31.01.2023 | 1054  |
-      | 1            | 3       | 01.02.2020 | 28.02.2023 | 527   |
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.03.2005 | 28.02.2019 | 970   | ORDINÆR_BARNETRYGD | 100     | 970  |
+      | 2       | 1            | 01.03.2019 | 31.01.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+
+      | 3       | 1            | 01.12.2010 | 31.03.2018 | 970   | ORDINÆR_BARNETRYGD | 100     | 970  |
+      | 3       | 1            | 01.04.2018 | 28.02.2019 | 485   | ORDINÆR_BARNETRYGD | 50      | 970  |
+      | 3       | 1            | 01.03.2019 | 28.02.2023 | 527   | ORDINÆR_BARNETRYGD | 50      | 1054 |
+      | 3       | 1            | 01.03.2023 | 30.06.2023 | 542   | ORDINÆR_BARNETRYGD | 50      | 1083 |
+      | 3       | 1            | 01.07.2023 | 31.10.2028 | 655   | ORDINÆR_BARNETRYGD | 50      | 1310 |
+
+      | 1       | 2            | 01.02.2020 | 31.05.2020 | 0     | UTVIDET_BARNETRYGD | 0       | 1054 |
+      | 1       | 2            | 01.06.2020 | 30.06.2022 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
+
+      | 2       | 2            | 01.03.2005 | 28.02.2019 | 970   | ORDINÆR_BARNETRYGD | 100     | 970  |
+      | 2       | 2            | 01.03.2019 | 31.01.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+
+      | 3       | 2            | 01.12.2010 | 31.03.2018 | 970   | ORDINÆR_BARNETRYGD | 100     | 970  |
+      | 3       | 2            | 01.04.2018 | 28.02.2019 | 485   | ORDINÆR_BARNETRYGD | 50      | 970  |
+      | 3       | 2            | 01.03.2019 | 28.02.2023 | 527   | ORDINÆR_BARNETRYGD | 50      | 1054 |
 
     Og med endrede utbetalinger for begrunnelse
-      | BehandlingId | AktørId | Fra dato   | Til dato   | Årsak             | Prosent |
-      | 1            | 1       | 01.02.2020 | 01.05.2020 | ETTERBETALING_3ÅR | 0       |
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |
+      | 1       | 2            | 01.02.2020 | 31.05.2020 | ETTERBETALING_3ÅR | 0       |
 
-    Og med vedtaksperioder for behandling 1
-      | Fra dato   | Til dato   | Standardbegrunnelser                                                        | Eøsbegrunnelser | Fritekster |
-      | 01.06.2020 | 30.06.2022 | INNVILGET_BOR_ALENE_MED_BARN, ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR |                 |            |
-      | 01.07.2022 | 31.01.2023 | REDUKSJON_SAMBOER_MER_ENN_12_MÅNEDER                                        |                 |            |
-      | 01.02.2023 | 28.02.2023 | REDUKSJON_UNDER_18_ÅR                                                       |                 |            |
+    Når begrunnelsetekster genereres for behandling 2
+
+    Så forvent følgende standardBegrunnelser
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                                                         | Ekskluderte Begrunnelser |
+      | 01.02.2020 | 31.05.2020 | UTBETALING         |           | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_KUN_UTVIDET_DEL_UTBETALING |                          |
+      | 01.06.2020 | 30.06.2022 | UTBETALING         |           | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR_KUN_UTVIDET_DEL                   |                          |
+      | 01.07.2022 | 31.01.2023 | UTBETALING         |           |                                                                                 |                          |
+      | 01.02.2023 | 28.02.2023 | UTBETALING         |           |                                                                                 |                          |
+      | 01.03.2023 |            | OPPHØR             |           |                                                                                 |                          |
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.02.2020 til 30.05.2022
+      | Begrunnelse                                                                     | Gjelder søker | Barnas fødselsdatoer | Antall barn med utbetaling | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
+      | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_KUN_UTVIDET_DEL_UTBETALING | Ja            | 13.02.05 og 06.11.10 | 2                          | februar 2020                         | NB      | 1581  | 30.06.23         | SØKER_FÅR_UTVIDET       |
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.06.2020 til 30.06.2022
-      | Begrunnelse                                   | Gjelder søker | Barnas fødselsdatoer | Antall barn med utbetaling | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | INNVILGET_BOR_ALENE_MED_BARN                  | Ja            | 05.02.05 og 03.11.10 | 2                          | mai 2020                             | NB      | 2635  | 30.06.23         | SØKER_FÅR_UTVIDET       |
-      | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR | Ja            | 05.02.05 og 03.11.10 | 2                          | mai 2020                             | NB      | 2635  | 30.06.23         | SØKER_FÅR_UTVIDET       |
+      | Begrunnelse                                                   | Gjelder søker | Barnas fødselsdatoer | Antall barn med utbetaling | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
+      | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR_KUN_UTVIDET_DEL | Ja            | 13.02.05 og 06.11.10 | 2                          | mai 2020                             | NB      | 2635  | 30.06.23         | SØKER_FÅR_UTVIDET       |
+
 
