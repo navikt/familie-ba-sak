@@ -5,6 +5,7 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
+import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ValutakursCacheRepository
 import no.nav.familie.valutakurs.Frequency
 import no.nav.familie.valutakurs.ValutakursRestClient
 import no.nav.familie.valutakurs.domene.ECBExchangeRate
@@ -30,6 +31,9 @@ class ECBServiceTest {
 
     @MockK
     private lateinit var ecbClient: ValutakursRestClient
+
+    @MockK
+    private lateinit var valutakursCacheRepository: ValutakursCacheRepository
 
     @InjectMockKs
     private lateinit var ecbService: ECBService
