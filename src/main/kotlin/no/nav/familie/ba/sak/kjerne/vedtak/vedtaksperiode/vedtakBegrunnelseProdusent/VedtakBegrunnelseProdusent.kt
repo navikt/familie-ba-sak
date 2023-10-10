@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProd
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
@@ -91,7 +92,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
             sanityBegrunnelser = grunnlag.sanityBegrunnelser,
             person = person,
             vedtaksperiode = this,
-            fagsakType = grunnlag.behandlingsGrunnlagForVedtaksperioder.behandling.fagsak.type,
+            behandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.behandling,
             relevantePeriodeResultater = relevantePeriodeResultater,
             erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode,
         )
@@ -171,7 +172,7 @@ private fun hentStandardBegrunnelser(
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     person: Person,
     vedtaksperiode: VedtaksperiodeMedBegrunnelser,
-    fagsakType: FagsakType,
+    behandling: Behandling,
     relevantePeriodeResultater: List<SanityPeriodeResultat>,
     erUtbetalingEllerDeltBostedIPeriode: Boolean,
 ): Map<Standardbegrunnelse, SanityBegrunnelse> {
@@ -180,19 +181,17 @@ private fun hentStandardBegrunnelser(
     val relevantePeriodeResultaterForrigePeriode = hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode)
 
     val filtrertPåRolle = sanityBegrunnelser.filterValues { begrunnelse ->
-        begrunnelse.erGjeldendeForRolle(person, fagsakType)
+        begrunnelse.erGjeldendeForRolle(person, behandling.fagsak.type)
     }
     val filtrertPåRolleOgFagsaktype = filtrertPåRolle.filterValues {
-        it.erGjeldendeForFagsakType(fagsakType)
+        it.erGjeldendeForFagsakType(behandling.fagsak.type)
     }
     val filtrertPåRolleFagsaktypeOgPeriodetype = filtrertPåRolleOgFagsaktype.filterValues {
         it.periodeResultat in relevantePeriodeResultater
     }
 
-    val filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser =
-        filtrertPåRolleFagsaktypeOgPeriodetype.filterValues {
-            it.erManuellBegrunnelse()
-        }
+    val filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser = filtrertPåRolleFagsaktypeOgPeriodetype
+        .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
 
     val relevanteBegrunnelser = filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser
         .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
@@ -232,7 +231,7 @@ private fun hentStandardBegrunnelser(
 
     val filtrertPåRolleOgPeriodetypeForrigePeriode =
         begrunnelserFiltrertPåPeriodetypeForrigePeriode.filterValues { begrunnelse ->
-            begrunnelse.erGjeldendeForRolle(person, fagsakType)
+            begrunnelse.erGjeldendeForRolle(person, behandling.fagsak.type)
         }
 
     val filtrertPåEtterEndretUtbetaling = filtrertPåRolleOgPeriodetypeForrigePeriode.filterValues {
@@ -250,7 +249,10 @@ private fun hentStandardBegrunnelser(
     return filtrertPåVilkårOgEndretUtbetaling + filtrertPåReduksjonFraForrigeBehandling + filtrertPåOpphørFraForrigeBehandling + filtrertPåSmåbarnstillegg + filtrertPåEtterEndretUtbetaling + filtrertPåHendelser
 }
 
-private fun SanityBegrunnelse.erManuellBegrunnelse() = ØvrigTrigger.ALLTID_AUTOMATISK !in ovrigeTriggere
+private fun SanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean) =
+    this.erAutomatiskBegrunnelse() == erAutomatiskBehandling
+
+private fun SanityBegrunnelse.erAutomatiskBegrunnelse() = ØvrigTrigger.ALLTID_AUTOMATISK in ovrigeTriggere
 
 fun ISanityBegrunnelse.erGjeldendeForFagsakType(
     fagsakType: FagsakType,
