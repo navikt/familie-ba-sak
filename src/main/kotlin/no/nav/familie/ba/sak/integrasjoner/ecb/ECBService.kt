@@ -27,7 +27,7 @@ class ECBService(private val ecbClient: ValutakursRestClient) {
      * @return Henter valutakurs for *utenlandskValuta* -> EUR og NOK -> EUR på *kursDato*, og returnerer en beregnet kurs for *utenlandskValuta* -> NOK.
      */
     @Throws(ECBServiceException::class)
-    @Cacheable("ecb_valutakurser", cacheManager = "redisCacheI90Dager", unless = "#result == null")
+    @Cacheable("ecb_valutakurser", cacheManager = "redisCacheManager", unless = "#result == null")
     fun hentValutakurs(utenlandskValuta: String, kursDato: LocalDate): BigDecimal {
         logger.info("Henter valutakurs for $utenlandskValuta på $kursDato")
         try {
