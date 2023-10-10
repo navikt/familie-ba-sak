@@ -77,6 +77,9 @@ private fun hentPersonerMedUtgjørendeVilkår(
                         erVilkårResultatUtgjørende(
                             minimertVilkårResultat = minimertVilkårResultat,
                             nesteMinimerteVilkårResultat = nesteMinimerteVilkårResultatAvSammeType,
+                            forrigeMinimerteVilkårResultat = personResultat.minimerteVilkårResultater.finnForeliggende(
+                                minimertVilkårResultat,
+                            ),
                             begrunnelseType = begrunnelseType,
                             triggesAv = triggesAv,
                             vedtaksperiode = vedtaksperiode,
@@ -101,9 +104,24 @@ private fun List<MinimertVilkårResultat>.finnEtterfølgende(
 ): MinimertVilkårResultat? =
     minimertVilkårResultat.periodeTom?.let { tom -> this.find { it.periodeFom?.isEqual(tom.plusDays(1)) == true } }
 
+private fun List<MinimertVilkårResultat>.finnForeliggende(
+    minimertVilkårResultat: MinimertVilkårResultat,
+): MinimertVilkårResultat? =
+    minimertVilkårResultat.let { vilkårResultat ->
+        this.find {
+            if (vilkårResultat.periodeFom == null) return@find false
+            it.periodeTom?.isEqual(
+                vilkårResultat.periodeFom.minusDays(
+                    1,
+                ),
+            ) == true && it.vilkårType == vilkårResultat.vilkårType
+        }
+    }
+
 private fun erVilkårResultatUtgjørende(
     minimertVilkårResultat: MinimertVilkårResultat,
     nesteMinimerteVilkårResultat: MinimertVilkårResultat?,
+    forrigeMinimerteVilkårResultat: MinimertVilkårResultat?,
     begrunnelseType: VedtakBegrunnelseType,
     triggesAv: TriggesAv,
     begrunnelse: IVedtakBegrunnelse,
@@ -121,6 +139,7 @@ private fun erVilkårResultatUtgjørende(
             erInnvilgetVilkårResultatUtgjørende(
                 triggesAv,
                 minimertVilkårResultat,
+                forrigeMinimerteVilkårResultat,
                 vedtaksperiode,
             )
 
@@ -214,15 +233,35 @@ private fun erOppfyltTomMånedEtter(minimertVilkårResultat: MinimertVilkårResu
 private fun erInnvilgetVilkårResultatUtgjørende(
     triggesAv: TriggesAv,
     minimertVilkårResultat: MinimertVilkårResultat,
+    forrigeMinimerteVilkårResultat: MinimertVilkårResultat?,
     vedtaksperiode: Periode,
 ): Boolean {
     val vilkårResultatFomMåned = minimertVilkårResultat.periodeFom!!.toYearMonth()
     val vedtaksperiodeFomMåned = vedtaksperiode.fom.toYearMonth()
 
+    val erVilkårOgVedtakFomSammeMåned =
+        if (forrigeMinimerteVilkårResultat != null &&
+            erForskjøvet(forrigeMinimerteVilkårResultat, minimertVilkårResultat)
+        ) {
+            vilkårResultatFomMåned == vedtaksperiodeFomMåned
+        } else {
+            vilkårResultatFomMåned == vedtaksperiodeFomMåned.minusMonths(1)
+        }
+
     return triggesAv.erUtdypendeVilkårsvurderingOppfylt(minimertVilkårResultat) &&
         vilkårResultatFomMåned == vedtaksperiodeFomMåned.minusMonths(1) &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT
 }
+
+private fun erForskjøvet(
+    forrigeMinimerteVilkårResultat: MinimertVilkårResultat,
+    minimertVilkårResultat: MinimertVilkårResultat,
+) = (minimertVilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER && (minimertVilkårResultat.erDeltBosted())) ||
+    forrigeMinimerteVilkårResultat.resultat == Resultat.OPPFYLT && minimertVilkårResultat.resultat == Resultat.OPPFYLT
+
+private fun MinimertVilkårResultat.erDeltBosted() =
+    utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) ||
+        utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
 
 private fun vilkårResultatPasserForAvslagsperiode(
     minimertVilkårResultat: MinimertVilkårResultat,
