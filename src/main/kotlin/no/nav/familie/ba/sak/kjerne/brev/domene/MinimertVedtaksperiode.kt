@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -23,7 +22,6 @@ data class MinimertVedtaksperiode(
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
-    featureToggleService: FeatureToggleService,
 ): MinimertVedtaksperiode {
     return MinimertVedtaksperiode(
         fom = this.fom,
@@ -31,7 +29,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
         type = this.type,
         fritekster = this.fritekster,
         minimerteUtbetalingsperiodeDetaljer = this.utbetalingsperiodeDetaljer.map { it.tilMinimertUtbetalingsperiodeDetalj() },
-        begrunnelser = this.begrunnelser.map { it.tilBegrunnelseMedTriggere(sanityBegrunnelser, featureToggleService) },
+        begrunnelser = this.begrunnelser.map { it.tilBegrunnelseMedTriggere(sanityBegrunnelser) },
         eøsBegrunnelser = this.eøsBegrunnelser.mapNotNull {
             it.begrunnelse.tilEØSBegrunnelseMedTriggere(
                 sanityEØSBegrunnelser,

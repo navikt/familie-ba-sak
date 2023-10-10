@@ -27,11 +27,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.hentIPeriode
-import no.nav.familie.ba.sak.kjerne.brev.hentKompetanserSomStopperRettFørPeriode
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -41,7 +37,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -62,7 +57,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.sorter
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utbetalingsperiodemedbegrunnelser.UtbetalingsperiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.genererVedtaksperioder
@@ -71,7 +65,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import utledEndringstidspunkt
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -85,12 +78,10 @@ class VedtaksperiodeService(
     private val sanityService: SanityService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-    private val utbetalingsperiodeMedBegrunnelserService: UtbetalingsperiodeMedBegrunnelserService,
     private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val featureToggleService: FeatureToggleService,
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
-    private val brevmalService: BrevmalService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val småbarnstilleggService: SmåbarnstilleggService,
@@ -250,9 +241,9 @@ class VedtaksperiodeService(
                 val vilkårsvurdering =
                     vilkårsvurderingService.hentAktivForBehandling(behandlingId = vedtak.behandling.id)
                 secureLogger.info(
-                    vilkårsvurdering?.personResultater?.map {
+                    vilkårsvurdering?.personResultater?.joinToString("\n") {
                         "Fødselsnummer: ${it.aktør.aktivFødselsnummer()}.  Resultater: ${it.vilkårResultater}"
-                    }?.joinToString("\n"),
+                    },
                 )
                 throw Feil("Finner ikke vedtaksperiode å begrunne for barn fra hendelse")
             }
@@ -323,7 +314,7 @@ class VedtaksperiodeService(
         BehandlingsGrunnlagForVedtaksperioder(
             persongrunnlag = persongrunnlagService.hentAktivThrows(this.id),
             personResultater = vilkårsvurderingService.hentAktivForBehandling(this.id)?.personResultater ?: emptySet(),
-            fagsakType = fagsak.type,
+            behandling = this,
             kompetanser = kompetanseRepository.finnFraBehandlingId(this.id).toList(),
             endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(this.id),
             andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(this.id),
@@ -424,8 +415,6 @@ class VedtaksperiodeService(
 
         val behandling = vedtak.behandling
 
-        val endreteUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
-
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
@@ -444,9 +433,6 @@ class VedtaksperiodeService(
                 behandling = behandling,
                 utvidedeVedtaksperioderMedBegrunnelser = utvidetVedtaksperioderMedBegrunnelser,
                 vedtak = vedtak,
-                persongrunnlag = persongrunnlag,
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                endretUtbetalingAndeler = endreteUtbetalinger,
             )
         } else {
             utvidetVedtaksperioderMedBegrunnelser
@@ -457,50 +443,14 @@ class VedtaksperiodeService(
         behandling: Behandling,
         utvidedeVedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
         vedtak: Vedtak,
-        persongrunnlag: PersonopplysningGrunnlag,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     ): List<UtvidetVedtaksperiodeMedBegrunnelser> {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id)
-
-        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
-        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
-        val kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id)
         val grunnlagForBegrunnelser = hentGrunnlagForBegrunnelse(behandling)
 
         return utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
-            val kompetanserIPeriode = kompetanser.hentIPeriode(
-                fom = utvidetVedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
-                tom = utvidetVedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
-            ).toList()
-
-            val kompetanserSomStopperRettFørPeriode = hentKompetanserSomStopperRettFørPeriode(
-                kompetanser = kompetanser.toList(),
-                periodeFom = utvidetVedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
-            )
-
-            val aktørIderMedUtbetaling =
-                hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag).map { it.aktørId }
-
             utvidetVedtaksperiodeMedBegrunnelser.copy(
-                gyldigeBegrunnelser = if (featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)) {
-                    utvidetVedtaksperiodeMedBegrunnelser.tilVedtaksperiodeMedBegrunnelser(vedtak)
-                        .hentGyldigeBegrunnelserForPeriode(grunnlagForBegrunnelser).toList()
-                } else {
-                    hentGyldigeBegrunnelserForPeriodeGammel(
-                        utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                        sanityBegrunnelser = sanityBegrunnelser,
-                        persongrunnlag = persongrunnlag,
-                        vilkårsvurdering = vilkårsvurdering,
-                        aktørIderMedUtbetaling = aktørIderMedUtbetaling,
-                        endretUtbetalingAndeler = endretUtbetalingAndeler,
-                        andelerTilkjentYtelse = andelerTilkjentYtelse,
-                        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-                        kompetanserIPeriode = kompetanserIPeriode,
-                        kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode,
-                        featureToggleService = featureToggleService,
-                    )
-                },
+                gyldigeBegrunnelser =
+                utvidetVedtaksperiodeMedBegrunnelser.tilVedtaksperiodeMedBegrunnelser(vedtak)
+                    .hentGyldigeBegrunnelserForPeriode(grunnlagForBegrunnelser).toList(),
             )
         }
     }
@@ -522,17 +472,6 @@ class VedtaksperiodeService(
             nåDato = LocalDate.now(),
         )
     }
-
-    private fun hentAktørerMedUtbetaling(
-        utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
-        persongrunnlag: PersonopplysningGrunnlag,
-    ): List<Aktør> = utvidetVedtaksperiodeMedBegrunnelser
-        .utbetalingsperiodeDetaljer
-        .map { utbetalingsperiodeDetalj ->
-            val ident = utbetalingsperiodeDetalj.person.personIdent
-            persongrunnlag.personer.find { it.aktør.aktivFødselsnummer() == ident }?.aktør
-                ?: personidentService.hentAktør(ident)
-        }
 
     fun oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
         vedtak: Vedtak,

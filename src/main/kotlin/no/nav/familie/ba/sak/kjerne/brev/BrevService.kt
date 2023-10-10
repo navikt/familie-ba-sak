@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
+import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_GENERERING_AV_BREVOBJEKTER
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -237,7 +237,7 @@ class BrevService(
                         fodselsnummer = data.grunnlag.søker.aktør.aktivFødselsnummer(),
                         // Selv om det er feil å anta at alle navn er på dette formatet er det ønskelig å skrive
                         // det slik, da uppercase kan oppleves som skrikende i et brev som skal være skånsomt
-                        navnAvdode = data.grunnlag.søker.navn.storForbokstavIHvertOrd(),
+                        navnAvdode = data.grunnlag.søker.navn.storForbokstavIAlleNavn(),
                         virkningstidspunkt = hentVirkningstidspunkt(
                             opphørsperioder = vedtaksperiodeService.hentOpphørsperioder(vedtak.behandling),
                             behandlingId = vedtak.behandling.id,

@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
@@ -38,7 +37,6 @@ fun Standardbegrunnelse.triggesForPeriode(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    featureToggleService: FeatureToggleService,
 ): Boolean {
     val triggesAv = sanityBegrunnelser[this]?.triggesAv ?: return false
 
@@ -65,7 +63,6 @@ fun Standardbegrunnelse.triggesForPeriode(
         triggesAv = triggesAv,
         begrunnelse = this,
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-        featureToggleService = featureToggleService,
     )
 
     return when {

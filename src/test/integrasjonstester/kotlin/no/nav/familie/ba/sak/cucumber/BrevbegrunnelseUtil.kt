@@ -56,7 +56,7 @@ fun parseStandardBegrunnelse(rad: Tabellrad) =
 
         gjelderSoker = parseBoolean(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.GJELDER_SØKER, rad),
         barnasFodselsdatoer = parseValgfriString(
-            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDAGER,
+            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDATOER,
             rad,
         ) ?: "",
 
@@ -120,7 +120,7 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
     ).sanityApiNavn
 
     val barnasFodselsdatoer = parseString(
-        BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDAGER,
+        BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDATOER,
         rad,
     )
 

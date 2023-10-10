@@ -216,7 +216,7 @@ private fun ISanityBegrunnelse.validerBrevbegrunnelse(
     barnasFødselsdatoer: List<LocalDate>,
 ) {
     if (!gjelderSøker && barnasFødselsdatoer.isEmpty() && !this.gjelderSatsendring && !this.erAvslagUregistrerteBarnBegrunnelse()) {
-        throw IllegalStateException("Ingen personer på brevbegrunnelse")
+        throw IllegalStateException("Ingen personer på brevbegrunnelse ${this.apiNavn}")
     }
 }
 

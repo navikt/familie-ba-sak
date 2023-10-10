@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -60,7 +61,7 @@ data class AktørOgRolleBegrunnelseGrunnlag(
 data class BehandlingsGrunnlagForVedtaksperioder(
     val persongrunnlag: PersonopplysningGrunnlag,
     val personResultater: Set<PersonResultat>,
-    val fagsakType: FagsakType,
+    val behandling: Behandling,
     val kompetanser: List<Kompetanse>,
     val endredeUtbetalinger: List<EndretUtbetalingAndel>,
     val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
@@ -81,17 +82,19 @@ data class BehandlingsGrunnlagForVedtaksperioder(
             hentOrdinæreVilkårForSøkerForskjøvetTidslinje(søker, personResultater)
 
         val erMinstEttBarnMedUtbetalingTidslinje =
-            hentErMinstEttBarnMedUtbetalingTidslinje(personResultater, fagsakType, persongrunnlag)
+            hentErMinstEttBarnMedUtbetalingTidslinje(personResultater, behandling.fagsak.type, persongrunnlag)
 
         val erUtbetalingSmåbarnstilleggTidslinje = this.andelerTilkjentYtelse.hentErUtbetalingSmåbarnstilleggTidslinje()
 
-        val personresultaterOgRolleForVilkår = if (fagsakType.erBarnSøker()) {
+        val personresultaterOgRolleForVilkår = if (behandling.fagsak.type.erBarnSøker()) {
             personResultater.single().splittOppVilkårForBarnOgSøkerRolle()
         } else {
             personResultater.map {
                 Pair(persongrunnlag.personer.single { person -> it.aktør == person.aktør }.type, it)
             }
         }
+
+        val bareSøkerOgUregistrertBarn = uregistrerteBarn.isNotEmpty() && personResultater.size == 1
 
         val grunnlagForPersonTidslinjer = personresultaterOgRolleForVilkår.associate { (vilkårRolle, personResultat) ->
             val aktør = personResultat.aktør
@@ -106,8 +109,9 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                     person = person,
                     erMinstEttBarnMedUtbetalingTidslinje = erMinstEttBarnMedUtbetalingTidslinje,
                     ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje,
-                    fagsakType = fagsakType,
+                    fagsakType = behandling.fagsak.type,
                     vilkårRolle = vilkårRolle,
+                    bareSøkerOgUregistrertBarn = bareSøkerOgUregistrertBarn,
                 )
 
             AktørOgRolleBegrunnelseGrunnlag(aktør, vilkårRolle) to
@@ -311,12 +315,17 @@ private fun List<VilkårResultat>.hentForskjøvedeVilkårResultaterForPersonsAnd
     ordinæreVilkårForSøkerTidslinje: Tidslinje<List<VilkårResultat>, Måned>,
     fagsakType: FagsakType,
     vilkårRolle: PersonType,
+    bareSøkerOgUregistrertBarn: Boolean,
 ): Tidslinje<List<VilkårResultat>, Måned> {
     val forskjøvedeVilkårResultaterForPerson = this.tilForskjøvedeVilkårTidslinjer(person.fødselsdato).kombiner { it }
 
     return when (vilkårRolle) {
         PersonType.SØKER -> forskjøvedeVilkårResultaterForPerson.map { vilkårResultater ->
-            vilkårResultater?.filtrerErIkkeOrdinærtFor(vilkårRolle)?.takeIf { it.isNotEmpty() }
+            if (bareSøkerOgUregistrertBarn) {
+                vilkårResultater?.toList()?.takeIf { it.isNotEmpty() }
+            } else {
+                vilkårResultater?.filtrerErIkkeOrdinærtFor(vilkårRolle)?.takeIf { it.isNotEmpty() }
+            }
         }.kombinerMed(erMinstEttBarnMedUtbetalingTidslinje) { vilkårResultaterForSøker, erMinstEttBarnMedUtbetaling ->
             vilkårResultaterForSøker?.takeIf { erMinstEttBarnMedUtbetaling == true || vilkårResultaterForSøker.any { it.erEksplisittAvslagPåSøknad == true } }
         }

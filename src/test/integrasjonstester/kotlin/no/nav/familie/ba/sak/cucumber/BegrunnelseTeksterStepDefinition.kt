@@ -230,7 +230,7 @@ class BegrunnelseTeksterStepDefinition {
         val grunnlagForVedtaksperiode = BehandlingsGrunnlagForVedtaksperioder(
             persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
             personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
-            fagsakType = vedtak.behandling.fagsak.type,
+            behandling = vedtak.behandling,
             kompetanser = kompetanser[behandlingId] ?: emptyList(),
             endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
             andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
@@ -244,7 +244,7 @@ class BegrunnelseTeksterStepDefinition {
             BehandlingsGrunnlagForVedtaksperioder(
                 persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
                 personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
-                fagsakType = forrigeVedtak.behandling.fagsak.type,
+                behandling = forrigeVedtak.behandling,
                 kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                 endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
                 andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
@@ -296,7 +296,7 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     /**
-     * Mulige verdier: | Begrunnelse | Type | Gjelder søker | Barnas fødselsdager | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Avtale tidspunkt delt bosted | Søkers rett til utvidet |
+     * Mulige verdier: | Begrunnelse | Type | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Avtale tidspunkt delt bosted | Søkers rett til utvidet |
      */
     @Så("forvent følgende brevbegrunnelser for behandling {} i periode {} til {}")
     fun `forvent følgende brevbegrunnelser for behandling i periode`(
@@ -309,10 +309,19 @@ class BegrunnelseTeksterStepDefinition {
         val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
         val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
 
+        val vedtaksperiodeMedBegrunnelser = vedtaksperioderMedBegrunnelser.find {
+            it.fom == parseNullableDato(periodeFom) && it.tom == parseNullableDato(periodeTom)
+        } ?: throw Feil(
+            "Forventet å finne en vedtaksperiode med Fom: $periodeFom og Tom: $periodeTom. \n" +
+                "Faktiske vedtaksperioder var \n${
+                    vedtaksperioderMedBegrunnelser.joinToString("\n") {
+                        "   Fom: ${it.fom}, Tom: ${it.tom}"
+                    }
+                }",
+        )
+
         val faktiskeBegrunnelser: List<BegrunnelseMedData> =
-            vedtaksperioderMedBegrunnelser.single {
-                it.fom == parseNullableDato(periodeFom) && it.tom == parseNullableDato(periodeTom)
-            }.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)!!
+            vedtaksperiodeMedBegrunnelser.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)!!
                 .begrunnelser
                 .filterIsInstance<BegrunnelseMedData>()
 
@@ -324,7 +333,7 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     /**
-     * Mulige verdier: | Type | Fra dato | Til dato | Beløp | Antall barn | Barnas fødselsdager | Du eller institusjonen |
+     * Mulige verdier: | Brevperiodetype | Fra dato | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
      */
     @Så("forvent følgende brevperioder for behandling {}")
     fun `forvent følgende brevperioder for behandling i periode`(

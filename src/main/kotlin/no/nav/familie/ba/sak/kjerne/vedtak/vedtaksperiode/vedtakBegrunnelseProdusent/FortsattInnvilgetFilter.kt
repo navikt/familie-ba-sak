@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent
 
-import erLikVilkårOgUtdypendeVilkårIPeriode
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
@@ -13,7 +12,7 @@ fun hentFortsattInnvilgetBegrunnelserPerPerson(
     grunnlag: GrunnlagForBegrunnelse,
     vedtaksperiode: VedtaksperiodeMedBegrunnelser,
 ): Map<Person, Set<IVedtakBegrunnelse>> {
-    val fagsakType = grunnlag.behandlingsGrunnlagForVedtaksperioder.fagsakType
+    val fagsakType = grunnlag.behandlingsGrunnlagForVedtaksperioder.behandling.fagsak.type
 
     val erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson)
 

@@ -22,33 +22,33 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>4.0.0</spring.cloud.version>
-        <prosessering.version>2.20230807154047_d770f01</prosessering.version>
+        <prosessering.version>2.20231006130620_9b45ded</prosessering.version>
         <felles.version>2.20230905101454_06fa3d7</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20230911102049_85cefe7</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20230921075936_3adfc44</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230912090318_2267c05</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20230927085000_900743f</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
         <cucumber.version>7.14.0</cucumber.version>
         <mockk.version>1.13.5</mockk.version>
-        <wiremock.version>3.1.0</wiremock.version>
-        <token-validation-spring.version>3.1.3</token-validation-spring.version>
+        <wiremock.version>3.2.0</wiremock.version>
+        <token-validation-spring.version>3.1.7</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.2.0</springdoc.version>
-        <sentry.version>6.28.0</sentry.version>
+        <sentry.version>6.30.0</sentry.version>
         <kotlinx.version>1.7.3</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>1.0.0</mock-oauth2-server.version>
+        <mock-oauth2-server.version>2.0.1</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.19.0</testcontainers.postgresql.version>
-        <unleash.version>7.1.0</unleash.version>
-        <maven.model.version>3.9.4</maven.model.version>
+        <testcontainers.postgresql.version>1.19.1</testcontainers.postgresql.version>
+        <unleash.version>8.3.1</unleash.version>
+        <maven.model.version>3.9.5</maven.model.version>
         <jackson.module.kotlin.version>2.15.2</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <fpsak-tidslinje.version>2.6.8</fpsak-tidslinje.version>
@@ -514,7 +514,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.4.1</version>
                 <executions>
                     <execution>
                         <id>enforce-banned-dependencies</id>

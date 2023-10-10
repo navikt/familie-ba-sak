@@ -28,14 +28,8 @@ fun EksternPeriode.tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsst
 
 fun List<InternPeriodeOvergangsstønad>.slåSammenTidligerePerioder(
     dagensDato: LocalDate,
-    skalBrukeNyBegrunnelseLogikk: Boolean,
 ): List<InternPeriodeOvergangsstønad> {
-    val tidligerePerioder =
-        if (skalBrukeNyBegrunnelseLogikk) {
-            this.filter { it.fomDato.isSameOrBefore(dagensDato) }
-        } else {
-            this.filter { it.tomDato.isSameOrBefore(dagensDato) }
-        }
+    val tidligerePerioder = this.filter { it.fomDato.isSameOrBefore(dagensDato) }
 
     val nyePerioder = this.minus(tidligerePerioder)
     return tidligerePerioder.slåSammenSammenhengendePerioder() + nyePerioder

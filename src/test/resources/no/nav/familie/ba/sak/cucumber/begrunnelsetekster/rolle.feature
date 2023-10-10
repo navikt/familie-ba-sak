@@ -39,9 +39,9 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
     Når begrunnelsetekster genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser    | Ekskluderte Begrunnelser |
-      | 01.05.2020 | 31.05.2020 | UTBETALING         |                            |                          |
-      | 01.06.2020 |            | OPPHØR             | OPPHØR_UGYLDIG_KONTONUMMER |                          |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser |
+      | 01.05.2020 | 31.05.2020 | UTBETALING         |                                          |                          |
+      | 01.06.2020 |            | OPPHØR             | OPPHØR_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                          |
 
 
   Scenario: Skal ikke få med begrunnelse som kun gjelder søker når barn sine vilkår endrer seg
@@ -83,6 +83,6 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
     Når begrunnelsetekster genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser    | Ekskluderte Begrunnelser |
-      | 01.05.2020 | 31.05.2022 | UTBETALING         |                            |                          |
-      | 01.06.2022 |            | OPPHØR             | OPPHØR_UGYLDIG_KONTONUMMER |                          |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser |
+      | 01.05.2020 | 31.05.2022 | UTBETALING         |                                          |                          |
+      | 01.06.2022 |            | OPPHØR             | OPPHØR_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                          |

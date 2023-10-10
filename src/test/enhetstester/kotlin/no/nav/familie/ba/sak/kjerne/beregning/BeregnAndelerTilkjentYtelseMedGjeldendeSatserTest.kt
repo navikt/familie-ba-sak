@@ -338,7 +338,7 @@ private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.be
         vilkårsvurdering = this.byggVilkårsvurdering(),
         personopplysningGrunnlag = personopplysningGrunnlag,
         fagsakType = FagsakType.NORMAL,
-        skalBrukeNyBegrunnelseLogikk = false,
+
     ).andelerTilkjentYtelse.map {
         BeregnetAndel(
             person = personopplysningGrunnlag.personer.first { person -> person.aktør == it.aktør },

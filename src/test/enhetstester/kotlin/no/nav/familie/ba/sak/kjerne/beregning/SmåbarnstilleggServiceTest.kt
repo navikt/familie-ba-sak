@@ -8,7 +8,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -35,7 +34,6 @@ class SmåbarnstilleggServiceTest {
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService =
         mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
-    private val featureToggleService = mockk<FeatureToggleService>()
 
     private lateinit var småbarnstilleggService: SmåbarnstilleggService
 
@@ -48,7 +46,6 @@ class SmåbarnstilleggServiceTest {
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            featureToggleService = featureToggleService,
         )
 
         every { periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(any()) } just Runs

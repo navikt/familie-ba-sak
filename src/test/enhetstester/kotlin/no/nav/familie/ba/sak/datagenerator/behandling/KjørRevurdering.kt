@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.datagenerator.behandling
 
 import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.testSanityKlient
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -73,7 +72,6 @@ fun kjørStegprosessForBehandling(
     persongrunnlagService: PersongrunnlagService,
     andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     brevmalService: BrevmalService,
-    featureToggleService: FeatureToggleService,
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
 
@@ -127,7 +125,6 @@ fun kjørStegprosessForBehandling(
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             sanityBegrunnelser = testSanityKlient.hentBegrunnelserMap(),
             vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.id)!!,
-            featureToggleService = featureToggleService,
         )
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
@@ -186,7 +183,6 @@ private fun håndterSendtTilBeslutterSteg(
     endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     vilkårsvurdering: Vilkårsvurdering,
-    featureToggleService: FeatureToggleService,
 ): Behandling {
     val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
         .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId = behandlingEtterSimuleringSteg.id)
@@ -206,7 +202,6 @@ private fun håndterSendtTilBeslutterSteg(
         endredeUtbetalingAndeler = endredeUtbetalingAndeler,
         sanityBegrunnelser = sanityBegrunnelser,
         vilkårsvurdering = vilkårsvurdering,
-        featureToggleService = featureToggleService,
     )
     val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
     return behandlingEtterSendTilBeslutter
@@ -358,7 +353,6 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
     endredeUtbetalingAndeler: List<EndretUtbetalingAndel>,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     vilkårsvurdering: Vilkårsvurdering,
-    featureToggleService: FeatureToggleService,
 ) {
     val aktivtVedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
 
@@ -416,10 +410,7 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
                         utvidetVedtaksperiodeMedBegrunnelser,
                     )
                 },
-                featureToggleService = featureToggleService,
-            ),
-            emptyList(),
-        )
+            )
     }
 
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
