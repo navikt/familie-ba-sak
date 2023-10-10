@@ -40,5 +40,5 @@ Egenskap: Brevbegrunnelser ved automatiske behandlinger
       | 01.07.2023 | 31.05.2029 | INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE |                 |            |
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.07.2023 til 31.05.2029
-      | Begrunnelse                                  | Gjelder søker | Barnas fødselsdager | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE | Nei           | 04.06.23            | 1           | juni 2023                            | NB      | 1766  |                  | SØKER_HAR_IKKE_RETT     |
+      | Begrunnelse                                  | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
+      | INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE | Nei           | 04.06.23             | 1           | juni 2023                            | NB      | 1 766 |                  | SØKER_HAR_IKKE_RETT     |
