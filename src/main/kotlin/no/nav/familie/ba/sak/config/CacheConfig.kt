@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.data.redis.cache.RedisCacheConfiguration
+import org.springframework.data.redis.cache.RedisCacheManager
+import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import java.time.Duration
@@ -57,12 +59,18 @@ class CacheConfig {
         }
     }
 
-    @Bean("redisCacheI60Dager")
-    fun cacheConfiguration(): RedisCacheConfiguration {
-        return RedisCacheConfiguration.defaultCacheConfig()
-            .entryTtl(Duration.ofDays(60))
+    @Bean("redisCacheI90Dager")
+    fun cacheConfiguration(connectionFactory: RedisConnectionFactory): CacheManager {
+        val rediscacheconfig = RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.ofDays(90))
             .disableCachingNullValues()
             .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(GenericJackson2JsonRedisSerializer()))
+
+        val cm: RedisCacheManager = RedisCacheManager.builder(connectionFactory)
+            .cacheDefaults(rediscacheconfig)
+            .transactionAware()
+            .build()
+        return cm
     }
 
     @Bean("skattPersonerCache")
