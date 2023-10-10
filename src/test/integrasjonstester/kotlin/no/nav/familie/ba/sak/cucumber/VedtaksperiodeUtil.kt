@@ -244,7 +244,7 @@ fun lagEndredeUtbetalinger(
             )?.toBigDecimal() ?: BigDecimal.valueOf(100),
             årsak = parseValgfriEnum<Årsak>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.ÅRSAK, rad)
                 ?: Årsak.ALLEREDE_UTBETALT,
-            søknadstidspunkt = LocalDate.now(),
+            søknadstidspunkt = parseValgfriDato(Domenebegrep.SØKNADSTIDSPUNKT, rad) ?: LocalDate.now(),
             begrunnelse = "Fordi at...",
             avtaletidspunktDeltBosted = LocalDate.now(),
         )
