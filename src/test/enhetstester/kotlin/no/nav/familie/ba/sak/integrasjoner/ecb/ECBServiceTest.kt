@@ -51,6 +51,7 @@ class ECBServiceTest {
             listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))),
             valutakursDato.toString(),
         )
+        every { valutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
@@ -70,6 +71,7 @@ class ECBServiceTest {
             listOf(Pair("NOK", BigDecimal.valueOf(10.337))),
             valutakursDato.toString(),
         )
+        every { valutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
@@ -88,6 +90,7 @@ class ECBServiceTest {
             listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))),
             valutakursDato.minusDays(1).toString(),
         )
+        every { valutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
@@ -107,6 +110,7 @@ class ECBServiceTest {
             listOf(Pair("NOK", BigDecimal.valueOf(9.4567))),
             valutakursDato.toString(),
         )
+        every { valutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
