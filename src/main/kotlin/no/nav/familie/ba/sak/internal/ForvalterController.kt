@@ -219,8 +219,8 @@ class ForvalterController(
     }
 
     @GetMapping("/hentValutakurs/{valuta}/{dato}")
-    fun finnFagsakerSomSkalAvsluttes(@PathVariable kurs: String, @PathVariable dato: LocalDate): ResponseEntity<BigDecimal> {
-        return ResponseEntity.ok(ecbService.hentValutakurs(kurs, dato))
+    fun finnFagsakerSomSkalAvsluttes(@PathVariable valuta: String, @PathVariable dato: LocalDate): ResponseEntity<BigDecimal> {
+        return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
     }
 
     @PostMapping("oppdaterLøpendeStatusPåFagsaker")
