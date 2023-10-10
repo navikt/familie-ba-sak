@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent
 
-import erGjeldendeForUtgjørendeVilkår
-import erLikVilkårOgUtdypendeVilkårIPeriode
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -271,12 +269,12 @@ private fun filtrerPåVilkår(
     it: SanityBegrunnelse,
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
 ) =
-    !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag) && vilkårErIkkeVurdertEtterEøsForordningen(
+    !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag) && it.erGjeldendeForRegelverk(
         begrunnelseGrunnlag,
     )
 
-private fun vilkårErIkkeVurdertEtterEøsForordningen(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean =
-    begrunnelseGrunnlag.dennePerioden.vilkårResultater.none { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
+private fun SanityBegrunnelse.erGjeldendeForRegelverk(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean =
+    begrunnelseGrunnlag.dennePerioden.vilkårResultater.none { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } || this.tema == Tema.FELLES
 
 private fun SanityBegrunnelse.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
     if (begrunnelseGrunnlag !is BegrunnelseGrunnlagForPeriodeMedReduksjonPåTversAvBehandlinger) {

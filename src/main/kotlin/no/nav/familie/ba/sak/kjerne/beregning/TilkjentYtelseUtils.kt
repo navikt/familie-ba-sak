@@ -33,7 +33,6 @@ object TilkjentYtelseUtils {
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> = emptyList(),
         fagsakType: FagsakType,
-        skalBrukeNyBegrunnelseLogikk: Boolean,
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
         val tilkjentYtelse = TilkjentYtelse(
@@ -95,7 +94,6 @@ object TilkjentYtelseUtils {
                     ),
                     utvidetAndeler = andelerTilkjentYtelseUtvidetMedAlleEndringer,
                     barnasAndeler = barnasAndelerInkludertEtterbetaling3ÅrEndringer,
-                    skalBrukeNyBegrunnelseLogikk = skalBrukeNyBegrunnelseLogikk,
                     barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
                         Pair(
                             it.aktør,

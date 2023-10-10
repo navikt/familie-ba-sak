@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.brev.lagMinimertPerson
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
@@ -22,8 +20,6 @@ import java.time.YearMonth
 
 class BrevPeriodeUtilTest {
 
-    private val featureToggleService: FeatureToggleService = mockk()
-
     @Test
     fun `Skal sortere perioder kronologisk, med generelle avslag til slutt`() {
         val liste = listOf(
@@ -31,31 +27,31 @@ class BrevPeriodeUtilTest {
                 fom = LocalDate.now().minusMonths(12),
                 tom = LocalDate.now().minusMonths(8),
                 type = Vedtaksperiodetype.UTBETALING,
-                featureToggleService = featureToggleService,
+
             ),
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(3),
                 tom = null,
                 type = Vedtaksperiodetype.AVSLAG,
-                featureToggleService = featureToggleService,
+
             ),
             lagBrevperiodeData(
                 fom = null,
                 tom = null,
                 type = Vedtaksperiodetype.AVSLAG,
-                featureToggleService = featureToggleService,
+
             ),
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(7),
                 tom = LocalDate.now().minusMonths(4),
                 type = Vedtaksperiodetype.OPPHØR,
-                featureToggleService = featureToggleService,
+
             ),
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(3),
                 tom = LocalDate.now(),
                 type = Vedtaksperiodetype.UTBETALING,
-                featureToggleService = featureToggleService,
+
             ),
         )
 
@@ -175,7 +171,6 @@ private fun lagBrevperiodeData(
     fom: LocalDate?,
     tom: LocalDate?,
     type: Vedtaksperiodetype,
-    featureToggleService: FeatureToggleService,
 ): BrevperiodeData {
     val restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
         personerPåBehandling = emptyList(),
@@ -198,6 +193,5 @@ private fun lagBrevperiodeData(
         minimerteKompetanserForPeriode = emptyList(),
         minimerteKompetanserSomStopperRettFørPeriode = emptyList(),
         dødeBarnForrigePeriode = emptyList(),
-        featureToggleService = featureToggleService,
     )
 }

@@ -168,7 +168,10 @@ class ForvalterController(
     }
 
     @PostMapping("/sendKorrigertUtbetalingsoppdragForBehandling/{behandlingId}/{versjon}")
-    fun sendKorrigertUtbetalingsoppdragForBehandling(@PathVariable behandlingId: Long, @PathVariable versjon: Int): ResponseEntity<SendUtbetalingsoppdragPåNyttResponse> {
+    fun sendKorrigertUtbetalingsoppdragForBehandling(
+        @PathVariable behandlingId: Long,
+        @PathVariable versjon: Int,
+    ): ResponseEntity<SendUtbetalingsoppdragPåNyttResponse> {
         val harFeil = mutableSetOf<Pair<Long, String>>()
         val iverksattOk = mutableSetOf<Long>()
         try {
@@ -214,6 +217,22 @@ class ForvalterController(
     @PostMapping("oppdaterLøpendeStatusPåFagsaker")
     fun oppdaterLøpendeStatusPåFagsaker() {
         fagsakService.oppdaterLøpendeStatusPåFagsaker()
+    }
+
+    @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd")
+    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(): ResponseEntity<List<Pair<Long, String>>> {
+        val åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd =
+            forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd()
+        logger.info("Følgende fagsaker har flere migreringsbehandlinger og løpende sak i Infotrygd: $åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd")
+        return ResponseEntity.ok(åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd)
+    }
+
+    @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlinger")
+    fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(): ResponseEntity<List<Pair<Long, String>>> {
+        val åpneFagsakerMedFlereMigreringsbehandlinger =
+            forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlinger()
+        logger.info("Følgende fagsaker har flere migreringsbehandlinger og løper i ba-sak: $åpneFagsakerMedFlereMigreringsbehandlinger")
+        return ResponseEntity.ok(åpneFagsakerMedFlereMigreringsbehandlinger)
     }
 
     data class SendUtbetalingsoppdragPåNyttResponse(

@@ -318,8 +318,6 @@ fun lagOvergangsstønad(
     tidligereBehandlinger: Map<Long, Long?>,
     dagensDato: LocalDate,
 ): Map<Long, List<InternPeriodeOvergangsstønad>> {
-    val skalBrukeNyBegrunnelseLogikk = true
-
     val overgangsstønadPeriodePåBehandlinger = dataTable.asMaps()
         .groupBy({ rad -> parseLong(Domenebegrep.BEHANDLING_ID, rad) }, { rad ->
             val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
@@ -336,10 +334,8 @@ fun lagOvergangsstønad(
         overgangsstønad.splittOgSlåSammen(
             overgangsstønadPeriodePåBehandlinger[tidligereBehandlinger[behandlingId]]?.slåSammenTidligerePerioder(
                 dagensDato,
-                skalBrukeNyBegrunnelseLogikk,
             ) ?: emptyList(),
             dagensDato,
-            skalBrukeNyBegrunnelseLogikk,
         )
     }
 }

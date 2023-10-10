@@ -149,7 +149,6 @@ class VilkårsvurderingFlyttResultaterTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
-            featureToggleService = featureToggleService,
         )
 
         val vilkårsvurderingFraForrigeBehandlingFørNyRevurdering =
@@ -173,7 +172,6 @@ class VilkårsvurderingFlyttResultaterTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
-            featureToggleService = featureToggleService,
         )
 
         // Sjekker at vilkårsvurderingen fra forrige behandling ikke er endret

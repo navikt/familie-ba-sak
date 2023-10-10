@@ -47,5 +47,5 @@ Egenskap: Brevperioder: Brevperiodetype
       | 01.04.2022 | 30.06.2023 |                      | INNVILGET_SEKUNDÆRLAND_STANDARD |            |
 
     Så forvent følgende brevperioder for behandling 1
-      | Type       | Fra dato   | Til dato      | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
-      | UTBETALING | april 2022 | til juni 2023 | 0     | 0                          |                     | du                     |
+      | Brevperiodetype | Fra dato   | Til dato      | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
+      | UTBETALING      | april 2022 | til juni 2023 | 0     | 0                          |                     | du                     |
