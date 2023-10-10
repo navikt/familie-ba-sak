@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.internal
 
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.UUID
 import kotlin.concurrent.thread
 
@@ -27,6 +30,7 @@ import kotlin.concurrent.thread
 @ProtectedWithClaims(issuer = "azuread")
 class ForvalterController(
     private val oppgaveRepository: OppgaveRepository,
+    private val ecbService: ECBService,
     private val integrasjonClient: IntegrasjonClient,
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
@@ -212,6 +216,11 @@ class ForvalterController(
     @GetMapping("/finnFagsakerSomSkalAvsluttes")
     fun finnFagsakerSomSkalAvsluttes(): ResponseEntity<List<Long>> {
         return ResponseEntity.ok(fagsakRepository.finnFagsakerSomSkalAvsluttes())
+    }
+
+    @GetMapping("/hentValutakurs/{valuta}/{dato}")
+    fun finnFagsakerSomSkalAvsluttes(@PathVariable kurs: String, @PathVariable dato: LocalDate): ResponseEntity<BigDecimal> {
+        return ResponseEntity.ok(ecbService.hentValutakurs(kurs, dato))
     }
 
     @PostMapping("oppdaterLøpendeStatusPåFagsaker")
