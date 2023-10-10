@@ -65,3 +65,35 @@ Egenskap: Brevbegrunnelser med utvidet barnetrygd
       | INNVILGET_OVERGANG_EØS_TIL_NASJONAL_NORSK_NORDISK_FAMILIE | Ja            | 10.12.16             | 1           | august 2021                          | NB      | 2 708 |                  | SØKER_FÅR_UTVIDET       |
 
 
+  Scenario: Skal flette inn barnas fødselsdatoer korrekt når vilkår er innvilget måneden før vedtaksperioden 
+    Og følgende dagens dato 09.10.2023
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                        | Utdypende vilkår            | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 3456    | GIFT_PARTNERSKAP              |                             | 10.12.2016 |            | OPPFYLT  | Nei                  |
+      | 3456    | UNDER_18_ÅR                   |                             | 10.12.2016 | 09.12.2034 | OPPFYLT  | Nei                  |
+      | 3456    | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                             | 01.02.2022 |            | OPPFYLT  | Nei                  |
+      | 3456    | BOR_MED_SØKER                 |                             | 01.02.2022 | 12.03.2023 | OPPFYLT  | Nei                  |
+      | 3456    | BOR_MED_SØKER                 | DELT_BOSTED_SKAL_IKKE_DELES | 13.03.2023 |            | OPPFYLT  | Nei                  |
+
+      | 1234    | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                             | 01.02.2022 |            | OPPFYLT  | Nei                  |
+      | 1234    | UTVIDET_BARNETRYGD            |                             | 24.10.2022 |            | OPPFYLT  | Nei                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 3456    | 1            | 01.03.2022 | 30.11.2022 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 3456    | 1            | 01.12.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3456    | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 3456    | 1            | 01.07.2023 | 30.11.2034 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 1234    | 1            | 01.11.2022 | 28.02.2023 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
+      | 1234    | 1            | 01.03.2023 | 30.06.2023 | 2489  | UTVIDET_BARNETRYGD | 100     | 2489 |
+      | 1234    | 1            | 01.07.2023 | 30.11.2034 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
+
+    Og med vedtaksperioder for behandling 1
+      | Fra dato   | Til dato   | Standardbegrunnelser                                          |
+      | 01.04.2023 | 30.06.2023 | INNVILGET_ANNEN_FORELDER_IKKE_SØKT_DELT_BARNETRYGD_ENKELTBARN |
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.04.2023 til 30.06.2023
+      | Begrunnelse                                                   | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
+      | INNVILGET_ANNEN_FORELDER_IKKE_SØKT_DELT_BARNETRYGD_ENKELTBARN | Nei           | 10.12.16             | 1           | mars 2023                            | NB      | 1 083 |                  | SØKER_FÅR_UTVIDET       |
