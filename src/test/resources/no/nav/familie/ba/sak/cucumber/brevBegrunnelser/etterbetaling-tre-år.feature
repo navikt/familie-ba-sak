@@ -75,8 +75,8 @@ Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre år tilba
       | 3       | 2            | 01.03.2019 | 28.02.2023 | 527   | ORDINÆR_BARNETRYGD | 50      | 1054 |
 
     Og med endrede utbetalinger for begrunnelse
-      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |
-      | 1       | 2            | 01.02.2020 | 31.05.2020 | ETTERBETALING_3ÅR | 0       |
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt |
+      | 1       | 2            | 01.02.2020 | 31.05.2020 | ETTERBETALING_3ÅR | 0       | 30.06.2023       |
 
     Når begrunnelsetekster genereres for behandling 2
 
@@ -88,12 +88,20 @@ Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre år tilba
       | 01.02.2023 | 28.02.2023 | UTBETALING         |           |                                                                                 |                          |
       | 01.03.2023 |            | OPPHØR             |           |                                                                                 |                          |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.02.2020 til 30.05.2022
-      | Begrunnelse                                                                     | Gjelder søker | Barnas fødselsdatoer | Antall barn med utbetaling | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_KUN_UTVIDET_DEL_UTBETALING | Ja            | 13.02.05 og 06.11.10 | 2                          | februar 2020                         | NB      | 1581  | 30.06.23         | SØKER_FÅR_UTVIDET       |
+    Og med vedtaksperioder for behandling 2
+      | Fra dato   | Til dato   | Standardbegrunnelser                                                            | Eøsbegrunnelser | Fritekster |
+      | 01.02.2020 | 31.05.2020 | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_KUN_UTVIDET_DEL_UTBETALING |                 |            |
+      | 01.06.2020 | 30.06.2022 | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR_KUN_UTVIDET_DEL                   |                 |            |
+      | 01.07.2022 | 31.01.2023 |                                                                                 |                 |            |
+      | 01.02.2023 | 28.02.2023 |                                                                                 |                 |            |
+      | 01.03.2023 |            |                                                                                 |                 |            |
 
-    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.06.2020 til 30.06.2022
-      | Begrunnelse                                                   | Gjelder søker | Barnas fødselsdatoer | Antall barn med utbetaling | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR_KUN_UTVIDET_DEL | Ja            | 13.02.05 og 06.11.10 | 2                          | mai 2020                             | NB      | 2635  | 30.06.23         | SØKER_FÅR_UTVIDET       |
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.02.2020 til 31.05.2020
+      | Begrunnelse                                                                     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet     |
+      | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_KUN_UTVIDET_DEL_UTBETALING | Ja            |                      | 0           | januar 2020                          | NB      | 1 581 | 30.06.23         | SØKER_HAR_RETT_MEN_FÅR_IKKE |
+
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.06.2020 til 30.06.2022
+      | Begrunnelse                                                   | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
+      | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR_KUN_UTVIDET_DEL | Ja            |                      | 0           | mai 2020                             | NB      | 2 635 | 30.06.23         | SØKER_FÅR_UTVIDET       |
 
 
