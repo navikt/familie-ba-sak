@@ -46,7 +46,7 @@ class ECBIntegrationTest : AbstractSpringIntegrationTest() {
     fun setUp() {
         ecbService = ECBService(
             ecbClient = ecbClient,
-            ecbValutakursCacheRepository = ecbValutakursCacheRepository
+            ecbValutakursCacheRepository = ecbValutakursCacheRepository,
         )
         databaseCleanupService.truncate()
     }
@@ -63,7 +63,7 @@ class ECBIntegrationTest : AbstractSpringIntegrationTest() {
             ecbClient.hentValutakurs(
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns ecbExchangeRatesData.toExchangeRates()
 
@@ -75,7 +75,7 @@ class ECBIntegrationTest : AbstractSpringIntegrationTest() {
             ecbClient.hentValutakurs(
                 any(),
                 any(),
-                any()
+                any(),
             )
         }
     }
