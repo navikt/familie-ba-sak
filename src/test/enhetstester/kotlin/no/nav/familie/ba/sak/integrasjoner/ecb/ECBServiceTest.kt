@@ -5,6 +5,7 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
+import no.nav.familie.ba.sak.integrasjoner.ecb.domene.EcbValutakursCache
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ValutakursCacheRepository
 import no.nav.familie.valutakurs.Frequency
 import no.nav.familie.valutakurs.ValutakursRestClient
@@ -52,6 +53,7 @@ class ECBServiceTest {
             valutakursDato.toString(),
         )
         every { valutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
+        every { valutakursCacheRepository.save(any()) } returns EcbValutakursCache(kurs = BigDecimal.valueOf(10.6543), valutakode = "SEK", valutakursdato = valutakursDato)
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
@@ -111,6 +113,7 @@ class ECBServiceTest {
             valutakursDato.toString(),
         )
         every { valutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
+        every { valutakursCacheRepository.save(any()) } returns EcbValutakursCache(kurs = BigDecimal.valueOf(9.4567), valutakode = "EUR", valutakursdato = valutakursDato)
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
