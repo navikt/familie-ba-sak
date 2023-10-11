@@ -4,9 +4,6 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,9 +27,6 @@ class ForvalterController(
     private val integrasjonClient: IntegrasjonClient,
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
-    private val behandlingsRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository,
-    private val fagsakService: FagsakService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -117,108 +111,6 @@ class ForvalterController(
         return ResponseEntity.ok(Pair("callId", callId))
     }
 
-    @PostMapping("/finnBehandlingerMedPotensieltFeilUtbetalingsoppdrag")
-    fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<BehandlingerMedFeilIUtbetalingsoppdrag> {
-        logger.info("Starter identifiserBehandlingerSomKanKrevePatching")
-        val validerteUtbetalingsoppdragMedFeil =
-            forvalterService.identifiserPåvirkedeBehandlingerOgValiderOpphørsdatoIUtbetalingsoppdrag()
-        secureLogger.warn("Følgende behandlinger har ikke korrekte opphørsdatoer: [$validerteUtbetalingsoppdragMedFeil]")
-        return ResponseEntity.ok(validerteUtbetalingsoppdragMedFeil)
-    }
-
-    @PostMapping("/sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato")
-    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(@RequestBody behandlingListe: List<Long>): ResponseEntity<BehandlingerMedFeilIUtbetalingsoppdrag> {
-        val validerteUtbetalingsoppdragMedFeil: Set<ValidertUtbetalingsoppdrag> =
-            behandlingListe.fold(LinkedHashSet()) { accumulator, behandlingId ->
-                val validertUtbetalingsoppdrag =
-                    forvalterService.validerOpphørsdatoIUtbetalingsoppdragForBehandling(behandlingId)
-                if (!validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer) {
-                    accumulator.add(validertUtbetalingsoppdrag)
-                }
-                accumulator
-            }
-
-        return ResponseEntity.ok(
-            BehandlingerMedFeilIUtbetalingsoppdrag(
-                behandlinger = validerteUtbetalingsoppdragMedFeil.map { it.behandlingId },
-                validerteUtbetalingsoppdrag = validerteUtbetalingsoppdragMedFeil,
-            ),
-        )
-    }
-
-    @PostMapping("/sendKorrigertUtbetalingsoppdragForBehandlinger")
-    fun sendKorrigertUtbetalingsoppdragForBehandlinger(@RequestBody behandlinger: List<Long>): ResponseEntity<SendUtbetalingsoppdragPåNyttResponse> {
-        val harFeil = mutableSetOf<Pair<Long, String>>()
-        val iverksattOk = mutableSetOf<Long>()
-        behandlinger.forEach { behandlingId ->
-            try {
-                forvalterService.lagKorrigertUtbetalingsoppdragOgIverksettMotØkonomi(behandlingId)
-                iverksattOk.add(behandlingId)
-            } catch (e: Exception) {
-                secureLogger.warn("Feil ved iverksettelse mot økonomi. ${e.message}", e)
-                harFeil.add(
-                    Pair(
-                        behandlingId,
-                        e.message ?: "Ukjent feil ved iverksettelse av oppdrag på nytt for behandling $behandlingId",
-                    ),
-                )
-            }
-        }
-        return ResponseEntity.ok(SendUtbetalingsoppdragPåNyttResponse(iverksattOk = iverksattOk, harFeil = harFeil))
-    }
-
-    @PostMapping("/sendKorrigertUtbetalingsoppdragForBehandling/{behandlingId}/{versjon}")
-    fun sendKorrigertUtbetalingsoppdragForBehandling(
-        @PathVariable behandlingId: Long,
-        @PathVariable versjon: Int,
-    ): ResponseEntity<SendUtbetalingsoppdragPåNyttResponse> {
-        val harFeil = mutableSetOf<Pair<Long, String>>()
-        val iverksattOk = mutableSetOf<Long>()
-        try {
-            forvalterService.lagKorrigertUtbetalingsoppdragOgIverksettMotØkonomi(behandlingId, versjon)
-            iverksattOk.add(behandlingId)
-        } catch (e: Exception) {
-            secureLogger.warn("Feil ved iverksettelse mot økonomi. ${e.message}", e)
-            harFeil.add(
-                Pair(
-                    behandlingId,
-                    e.message ?: "Ukjent feil ved iverksettelse av oppdrag på nytt for behandling $behandlingId",
-                ),
-            )
-        }
-
-        return ResponseEntity.ok(SendUtbetalingsoppdragPåNyttResponse(iverksattOk = iverksattOk, harFeil = harFeil))
-    }
-
-    @PostMapping("/populer-stonad-fom-tom/{behandlingId}")
-    fun populerStønadFomTomForBehandling(@PathVariable behandlingId: Long): ResponseEntity<Boolean> {
-        return ResponseEntity.ok(forvalterService.oppdaterStønadFomTomForBehandling(behandlingId))
-    }
-
-    @PostMapping("/populer-stonad-fom-tom-alle/{limit}")
-    fun populerStønadFomTom(@PathVariable limit: Int): ResponseEntity<String> {
-        behandlingsRepository.finnAktiveBehandlingerSomManglerStønadTom(limit).forEach { behandlingId ->
-            try {
-                val harOppdatertTom = forvalterService.oppdaterStønadFomTomForBehandling(behandlingId)
-                logger.info("oppdaterStønadFomTomForBehandling for behandlingId=$behandlingId resultat=$harOppdatertTom")
-            } catch (e: Exception) {
-                logger.warn("Fikk ikke satt stønadTom for behandling=$behandlingId", e)
-            }
-        }
-
-        return ResponseEntity.ok("ok")
-    }
-
-    @GetMapping("/finnFagsakerSomSkalAvsluttes")
-    fun finnFagsakerSomSkalAvsluttes(): ResponseEntity<List<Long>> {
-        return ResponseEntity.ok(fagsakRepository.finnFagsakerSomSkalAvsluttes())
-    }
-
-    @PostMapping("oppdaterLøpendeStatusPåFagsaker")
-    fun oppdaterLøpendeStatusPåFagsaker() {
-        fagsakService.oppdaterLøpendeStatusPåFagsaker()
-    }
-
     @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd")
     fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(): ResponseEntity<List<Pair<Long, String>>> {
         val åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd =
@@ -234,9 +126,4 @@ class ForvalterController(
         logger.info("Følgende fagsaker har flere migreringsbehandlinger og løper i ba-sak: $åpneFagsakerMedFlereMigreringsbehandlinger")
         return ResponseEntity.ok(åpneFagsakerMedFlereMigreringsbehandlinger)
     }
-
-    data class SendUtbetalingsoppdragPåNyttResponse(
-        val iverksattOk: Set<Long>,
-        val harFeil: Set<Pair<Long, String>>,
-    )
 }
