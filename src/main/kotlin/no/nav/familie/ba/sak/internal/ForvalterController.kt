@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.internal
 
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
@@ -15,7 +16,10 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.UUID
 import kotlin.concurrent.thread
 
@@ -27,6 +31,7 @@ class ForvalterController(
     private val integrasjonClient: IntegrasjonClient,
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
+    private val ecbService: ECBService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -109,6 +114,11 @@ class ForvalterController(
             forvalterService.identifiserUtbetalingerOver100Prosent(callId)
         }
         return ResponseEntity.ok(Pair("callId", callId))
+    }
+
+    @GetMapping("/hentValutakurs/")
+    fun finnFagsakerSomSkalAvsluttes(@RequestParam valuta: String, @RequestParam dato: LocalDate): ResponseEntity<BigDecimal> {
+        return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
     }
 
     @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd")
