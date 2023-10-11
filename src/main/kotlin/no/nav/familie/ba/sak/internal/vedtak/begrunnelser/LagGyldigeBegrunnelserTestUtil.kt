@@ -257,7 +257,12 @@ fun hentTekstForVedtaksperioder(
         hentVedtaksperiodeRader(vedtaksperioder)
 
 fun hentVedtaksperiodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
-    vedtaksperioder.joinToString("") {
+    vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
-      | ${it.fom?.tilddMMyyyy() ?: ""} |${it.tom?.tilddMMyyyy() ?: ""} |${it.type} | | | |"""
+      | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.type} | | ${vedtaksperiode.begrunnelser.joinToString { it.standardbegrunnelse.name }} | |""" +
+            if (vedtaksperiode.eøsBegrunnelser.isNotEmpty()) {
+                """| ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.type} | EØS_FORORDNINGEN | ${vedtaksperiode.eøsBegrunnelser.joinToString { it.begrunnelse.name }} | |"""
+            } else {
+                ""
+            }
     }
