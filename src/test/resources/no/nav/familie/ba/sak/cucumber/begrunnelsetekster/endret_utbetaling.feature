@@ -61,9 +61,9 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
     Når begrunnelsetekster genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser               | Ekskluderte Begrunnelser |
-      | 01.02.2021 | 31.03.2038 | UTBETALING         | ETTER_ENDRET_UTBETALING_ETTERBETALING |                          |
-      | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                    |                          |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                       | Ekskluderte Begrunnelser |
+      | 01.02.2021 | 31.03.2038 | UTBETALING         | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR |                          |
+      | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                            |                          |
 
 
   Scenario: Skal ikke krasje dersom siste periode er endret til null prosent
