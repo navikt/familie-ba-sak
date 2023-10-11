@@ -109,7 +109,7 @@ fun Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperiodeD
 ): List<UtbetalingsperiodeDetalj> =
     this.map { andel ->
         val personForAndel =
-            personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }
+            personopplysningGrunnlag.personer.find { person -> andel.aktør == person.aktør }
                 ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
 
         UtbetalingsperiodeDetalj(
