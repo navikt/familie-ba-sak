@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
 import io.mockk.every
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
@@ -55,6 +56,9 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     lateinit var infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
+
+    @Autowired
+    lateinit var envService: EnvService
 
     @Test
     fun `skal finne en relaterte fagsaker per barn`() {
@@ -138,6 +142,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
     }
 
     private fun mockInfotrygdBarnetrygdResponse(søkerAktør: Aktør) {
+        every { envService.erPreprod() } returns false
         every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(any(), any()) } returns BarnetrygdTilPensjonResponse(
             fagsaker = listOf(
                 BarnetrygdTilPensjon(
