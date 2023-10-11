@@ -115,12 +115,12 @@ class ForvalterController(
         }
         return ResponseEntity.ok(Pair("callId", callId))
     }
-  
+
     @GetMapping("/hentValutakurs/")
     fun finnFagsakerSomSkalAvsluttes(@RequestParam valuta: String, @RequestParam dato: LocalDate): ResponseEntity<BigDecimal> {
         return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
     }
-    
+
     @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd")
     fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(): ResponseEntity<List<Pair<Long, String>>> {
         val åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd =
