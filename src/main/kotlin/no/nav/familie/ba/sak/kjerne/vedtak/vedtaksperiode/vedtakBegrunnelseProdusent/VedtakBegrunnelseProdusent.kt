@@ -181,8 +181,8 @@ private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
             .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
             .kombiner { vilkårResultaterIPeriode -> vilkårResultaterIPeriode.flatMap { it.standardbegrunnelser } }
 
-        tidslinjeMedVedtaksperioden.kombinerMed(avslagsbegrunnelserTisdlinje) { h, v ->
-            v.takeIf { h != null }
+        tidslinjeMedVedtaksperioden.kombinerMed(avslagsbegrunnelserTisdlinje) { vedtaksperiode, avslagsbegrunnelser ->
+            avslagsbegrunnelser.takeIf { vedtaksperiode != null }
         }.perioder().mapNotNull { it.innhold }.flatten().toSet()
     }
 }
