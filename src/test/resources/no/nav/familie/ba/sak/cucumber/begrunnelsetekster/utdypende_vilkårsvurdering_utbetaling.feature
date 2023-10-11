@@ -76,9 +76,9 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
     Når begrunnelsetekster genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser    | Ekskluderte Begrunnelser |
-      | 01.05.2020 | 31.03.2022 | UTBETALING         |                            |                          |
-      | 01.04.2022 |            | OPPHØR             | OPPHØR_UGYLDIG_KONTONUMMER |                          |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser |
+      | 01.05.2020 | 31.03.2022 | UTBETALING         |                                          |                          |
+      | 01.04.2022 |            | OPPHØR             | OPPHØR_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                          |
 
 
 

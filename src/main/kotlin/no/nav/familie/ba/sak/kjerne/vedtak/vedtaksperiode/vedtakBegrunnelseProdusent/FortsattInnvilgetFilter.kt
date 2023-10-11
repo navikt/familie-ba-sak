@@ -12,7 +12,7 @@ fun hentFortsattInnvilgetBegrunnelserPerPerson(
     grunnlag: GrunnlagForBegrunnelse,
     vedtaksperiode: VedtaksperiodeMedBegrunnelser,
 ): Map<Person, Set<IVedtakBegrunnelse>> {
-    val fagsakType = grunnlag.behandlingsGrunnlagForVedtaksperioder.fagsakType
+    val fagsakType = grunnlag.behandlingsGrunnlagForVedtaksperioder.behandling.fagsak.type
 
     val erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson)
 

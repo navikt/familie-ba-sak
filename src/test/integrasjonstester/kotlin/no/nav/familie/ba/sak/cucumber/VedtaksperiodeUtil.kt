@@ -93,11 +93,13 @@ fun lagVedtak(
             val fagsak = fagsaker[fagsakId] ?: defaultFagsak()
             val behandlingÅrsak = parseValgfriEnum<BehandlingÅrsak>(Domenebegrep.BEHANDLINGSÅRSAK, rad)
             val behandlingResultat = parseValgfriEnum<Behandlingsresultat>(Domenebegrep.BEHANDLINGSRESULTAT, rad)
+            val skalBehandlesAutomatisk = parseValgfriBoolean(Domenebegrep.SKAL_BEHANLDES_AUTOMATISK, rad) ?: false
 
             lagBehandling(
                 fagsak = fagsak,
                 årsak = behandlingÅrsak ?: BehandlingÅrsak.SØKNAD,
                 resultat = behandlingResultat ?: Behandlingsresultat.IKKE_VURDERT,
+                skalBehandlesAutomatisk = skalBehandlesAutomatisk,
             ).copy(id = behandlingId)
         }.associateBy { it.id },
     )
@@ -361,7 +363,7 @@ fun lagVedtaksPerioder(
     val grunnlagForVedtaksperiode = BehandlingsGrunnlagForVedtaksperioder(
         persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
         personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
-        fagsakType = vedtak.behandling.fagsak.type,
+        behandling = vedtak.behandling,
         kompetanser = kompetanser[behandlingId] ?: emptyList(),
         endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
         andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
@@ -377,7 +379,7 @@ fun lagVedtaksPerioder(
         BehandlingsGrunnlagForVedtaksperioder(
             persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
             personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
-            fagsakType = forrigeVedtak.behandling.fagsak.type,
+            behandling = forrigeVedtak.behandling,
             kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
             endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
             andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),

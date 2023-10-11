@@ -48,15 +48,15 @@ Egenskap: Gyldige begrunnelser for behandlingstema
     Når begrunnelsetekster genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                           | Regelverk Ekskluderte Begrunnelser | Ekskluderte Begrunnelser     |
-      | 01.10.2019 | 31.08.2020 | UTBETALING         | EØS_FORORDNINGEN                  | INNVILGET_PRIMÆRLAND_BARNETRYGD_ALLEREDE_UTBETALT | NASJONALE_REGLER                   | INNVILGET_NYFØDT_BARN_FØRSTE |
-      | 01.09.2020 | 31.08.2021 | UTBETALING         |                                   |                                                   |                                    |                              |
-      | 01.09.2021 | 31.12.2021 | UTBETALING         |                                   |                                                   |                                    |                              |
-      | 01.01.2022 | 28.02.2023 | UTBETALING         |                                   |                                                   |                                    |                              |
-      | 01.03.2023 | 30.06.2023 | UTBETALING         |                                   |                                                   |                                    |                              |
-      | 01.07.2023 | 31.08.2025 | UTBETALING         |                                   |                                                   |                                    |                              |
-      | 01.09.2025 | 31.08.2037 | UTBETALING         |                                   |                                                   |                                    |                              |
-      | 01.09.2037 |            | OPPHØR             |                                   |                                                   |                                    |                              |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                           | Regelverk Ekskluderte Begrunnelser | Ekskluderte Begrunnelser  |
+      | 01.10.2019 | 31.08.2020 | UTBETALING         | EØS_FORORDNINGEN                  | INNVILGET_PRIMÆRLAND_BARNETRYGD_ALLEREDE_UTBETALT | NASJONALE_REGLER                   | INNVILGET_OMSORG_FOR_BARN |
+      | 01.09.2020 | 31.08.2021 | UTBETALING         |                                   |                                                   |                                    |                           |
+      | 01.09.2021 | 31.12.2021 | UTBETALING         |                                   |                                                   |                                    |                           |
+      | 01.01.2022 | 28.02.2023 | UTBETALING         |                                   |                                                   |                                    |                           |
+      | 01.03.2023 | 30.06.2023 | UTBETALING         |                                   |                                                   |                                    |                           |
+      | 01.07.2023 | 31.08.2025 | UTBETALING         |                                   |                                                   |                                    |                           |
+      | 01.09.2025 | 31.08.2037 | UTBETALING         |                                   |                                                   |                                    |                           |
+      | 01.09.2037 |            | OPPHØR             |                                   |                                                   |                                    |                           |
 
   Scenario: Man skal ikke få eøs begrunnelser dersom vedtaksperiode ikke overlapper med nasjonale perioder
     Og følgende dagens dato 2023-09-13
