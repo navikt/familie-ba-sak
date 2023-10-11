@@ -9,6 +9,8 @@ import no.nav.familie.valutakurs.ValutakursRestClient
 import no.nav.familie.valutakurs.domene.ExchangeRate
 import no.nav.familie.valutakurs.domene.exchangeRateForCurrency
 import no.nav.familie.valutakurs.exception.ValutakursClientException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -17,6 +19,8 @@ import java.time.LocalDate
 @Service
 @Import(ValutakursRestClient::class)
 class ECBService(private val ecbClient: ValutakursRestClient, private val valutakursCacheRepository: ValutakursCacheRepository) {
+
+    private val logger: Logger = LoggerFactory.getLogger(ECBService::class.java)
 
     /**
      * @param utenlandskValuta valutaen vi skal konvertere til NOK
@@ -27,6 +31,7 @@ class ECBService(private val ecbClient: ValutakursRestClient, private val valuta
     fun hentValutakurs(utenlandskValuta: String, kursDato: LocalDate): BigDecimal {
         val valutakurs = valutakursCacheRepository.findByValutakodeAndValutakursdato(utenlandskValuta, kursDato)
         if (valutakurs == null) {
+            logger.info("Henter valutakurs for $utenlandskValuta på $kursDato")
             try {
                 val exchangeRates =
                     ecbClient.hentValutakurs(Frequency.Daily, listOf(ECBConstants.NOK, utenlandskValuta), kursDato)
@@ -52,6 +57,7 @@ class ECBService(private val ecbClient: ValutakursRestClient, private val valuta
                 throw ECBServiceException(e.message, e)
             }
         }
+        logger.info("Valutakurs ble hentet fra cache for $utenlandskValuta på $kursDato")
         return valutakurs.kurs
     }
 
