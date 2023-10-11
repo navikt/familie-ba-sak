@@ -16,7 +16,7 @@ import java.time.LocalDate
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "EcbValutakursCache")
 @Table(name = "ECBVALUTAKURSCACHE")
-data class EcbValutakursCache(
+data class ECBValutakursCache(
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ecbvalutakurscache_seq_generator")

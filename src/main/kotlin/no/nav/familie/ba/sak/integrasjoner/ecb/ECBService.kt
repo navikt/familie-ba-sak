@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.integrasjoner.ecb
 
 import no.nav.familie.ba.sak.common.del
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.integrasjoner.ecb.domene.EcbValutakursCache
-import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ValutakursCacheRepository
+import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCache
+import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCacheRepository
 import no.nav.familie.valutakurs.Frequency
 import no.nav.familie.valutakurs.ValutakursRestClient
 import no.nav.familie.valutakurs.domene.ExchangeRate
@@ -18,7 +18,7 @@ import java.time.LocalDate
 
 @Service
 @Import(ValutakursRestClient::class)
-class ECBService(private val ecbClient: ValutakursRestClient, private val valutakursCacheRepository: ValutakursCacheRepository) {
+class ECBService(private val ecbClient: ValutakursRestClient, private val ecbValutakursCacheRepository: ECBValutakursCacheRepository) {
 
     private val logger: Logger = LoggerFactory.getLogger(ECBService::class.java)
 
@@ -29,7 +29,7 @@ class ECBService(private val ecbClient: ValutakursRestClient, private val valuta
      */
     @Throws(ECBServiceException::class)
     fun hentValutakurs(utenlandskValuta: String, kursDato: LocalDate): BigDecimal {
-        val valutakurs = valutakursCacheRepository.findByValutakodeAndValutakursdato(utenlandskValuta, kursDato)
+        val valutakurs = ecbValutakursCacheRepository.findByValutakodeAndValutakursdato(utenlandskValuta, kursDato)
         if (valutakurs == null) {
             logger.info("Henter valutakurs for $utenlandskValuta på $kursDato")
             try {
@@ -38,12 +38,12 @@ class ECBService(private val ecbClient: ValutakursRestClient, private val valuta
                 validateExchangeRates(utenlandskValuta, kursDato, exchangeRates)
                 val valutakursNOK = exchangeRates.exchangeRateForCurrency(ECBConstants.NOK)!!
                 if (utenlandskValuta == ECBConstants.EUR) {
-                    valutakursCacheRepository.save(EcbValutakursCache(kurs = valutakursNOK.exchangeRate, valutakode = utenlandskValuta, valutakursdato = kursDato))
+                    ecbValutakursCacheRepository.save(ECBValutakursCache(kurs = valutakursNOK.exchangeRate, valutakode = utenlandskValuta, valutakursdato = kursDato))
                     return valutakursNOK.exchangeRate
                 }
                 val valutakursUtenlandskValuta = exchangeRates.exchangeRateForCurrency(utenlandskValuta)!!
-                valutakursCacheRepository.save(
-                    EcbValutakursCache(
+                ecbValutakursCacheRepository.save(
+                    ECBValutakursCache(
                         kurs = beregnValutakurs(
                             valutakursUtenlandskValuta.exchangeRate,
                             valutakursNOK.exchangeRate,
