@@ -281,6 +281,7 @@ fun hentTekstValgteBegrunnelser(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ) =
     """
+    
     Og med vedtaksperioder for behandling $behandlingId
         | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |""" +
         hentValgteBegrunnelserRader(vedtaksperioder)
@@ -303,7 +304,7 @@ fun hentTekstBrevPerioder(
 fun hentBrevPeriodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
-      | | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | | | | |"""
+        | | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | | | | |"""
     }
 
 fun hentBrevBegrunnelseTekster(
@@ -315,9 +316,10 @@ fun hentBrevBegrunnelseTekster(
 
     Så forvent følgende brevbegrunnelser for behandling $behandlingId i periode ${vedtaksperiode.fom?.tilddMMyyyy() ?: "-"} til ${vedtaksperiode.tom?.tilddMMyyyy() ?: "-"}
         | Begrunnelse                   | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |""" +
-            (vedtaksperiode.begrunnelser.map { it.standardbegrunnelse } + vedtaksperiode.eøsBegrunnelser.map { it.begrunnelse }).map {
-                """
+            (vedtaksperiode.begrunnelser.map { it.standardbegrunnelse } + vedtaksperiode.eøsBegrunnelser.map { it.begrunnelse })
+                .joinToString("") {
+                    """
         | $it |               |                      |             |                                      |         |       |                  |                         |"""
-            }
+                }
     }
 }
