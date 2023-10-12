@@ -28,6 +28,24 @@ fun VedtaksperiodeMedBegrunnelser.lagBrevPeriode(
 ): BrevPeriode? {
     val begrunnelsesGrunnlagPerPerson = this.finnBegrunnelseGrunnlagPerPerson(grunnlagForBegrunnelse)
 
+    val begrunnelserOgFritekster =
+        hentBegrunnelser(grunnlagForBegrunnelse, begrunnelsesGrunnlagPerPerson, landkoder)
+
+    if (begrunnelserOgFritekster.isEmpty()) return null
+
+    return this.byggBrevPeriode(
+        begrunnelserOgFritekster = begrunnelserOgFritekster,
+        begrunnelseGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+        grunnlagForBegrunnelse = grunnlagForBegrunnelse,
+
+    )
+}
+
+fun VedtaksperiodeMedBegrunnelser.hentBegrunnelser(
+    grunnlagForBegrunnelse: GrunnlagForBegrunnelse,
+    begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
+    landkoder: Map<String, String>,
+): List<BrevBegrunnelse> {
     val standardbegrunnelser =
         this.begrunnelser.map {
             it.standardbegrunnelse.lagBrevBegrunnelse(
@@ -49,17 +67,7 @@ fun VedtaksperiodeMedBegrunnelser.lagBrevPeriode(
 
     val fritekster = this.fritekster.map { FritekstBegrunnelse(it.fritekst) }
 
-    val begrunnelserOgFritekster =
-        standardbegrunnelser + eøsBegrunnelser + fritekster
-
-    if (begrunnelserOgFritekster.isEmpty()) return null
-
-    return this.byggBrevPeriode(
-        begrunnelserOgFritekster = begrunnelserOgFritekster,
-        begrunnelseGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
-        grunnlagForBegrunnelse = grunnlagForBegrunnelse,
-
-    )
+    return standardbegrunnelser + eøsBegrunnelser + fritekster
 }
 
 private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
