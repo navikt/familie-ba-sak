@@ -63,7 +63,7 @@ Egenskap: Brevbegrunnelser ved omregningsbehandlinger
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser             | Ugyldige begrunnelser |
       | 01.10.2023 | 30.09.2027 | Utbetaling         |           | REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK |                          |
 
-    Og med vedtaksperioder for behandling 2
+    Og når disse begrunnelsene er valgt for behandling 2
       | Fra dato   | Til dato   | Standardbegrunnelser             | Eøsbegrunnelser | Fritekster |
       | 01.10.2023 | 30.09.2027 | REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK |                 |            |
 
@@ -134,7 +134,7 @@ Egenskap: Brevbegrunnelser ved omregningsbehandlinger
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser            | Ugyldige begrunnelser |
       | 01.10.2023 | 30.09.2035 | UTBETALING         |           | REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK |                          |
 
-    Og med vedtaksperioder for behandling 2
+    Og når disse begrunnelsene er valgt for behandling 2
       | Fra dato   | Til dato   | Standardbegrunnelser            | Eøsbegrunnelser | Fritekster |
       | 01.10.2023 | 30.09.2035 | REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK |                 |            |
 

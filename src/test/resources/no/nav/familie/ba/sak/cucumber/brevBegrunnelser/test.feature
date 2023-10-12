@@ -51,12 +51,14 @@ Egenskap: Plassholdertekst for egenskap - JezmCIgDYB
       | 01.07.2023 | 29.02.2028 | UTBETALING         |                  | INNVILGET_SATSENDRING                                                   |                          |
       | 01.03.2028 | 29.02.2040 | UTBETALING         |                  |                                                                         |                          |
       | 01.03.2040 |            | OPPHØR             |                  |                                                                         |                          |
-    Og med vedtaksperioder for behandling 100179702
+
+    Og når disse begrunnelsene er valgt for behandling 100179702
       | Fra dato   | Til dato   | Standardbegrunnelser  | Eøsbegrunnelser                                                         | Fritekster |
       | 01.04.2022 | 30.06.2023 |                       | INNVILGET_SEKUNDÆRLAND_STANDARD, INNVILGET_TILLEGGSTEKST_NULLUTBETALING |            |
       | 01.07.2023 | 29.02.2028 | INNVILGET_SATSENDRING |                                                                         |            |
       | 01.03.2028 | 29.02.2040 |                       |                                                                         |            |
       | 01.03.2040 |            |                       |                                                                         |            |
+
     Så forvent følgende brevperioder for behandling 100179702
       | Brevperiodetype | Fra dato   | Til dato   | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
       |                 | 01.04.2022 | 30.06.2023 |       |                            |                     |                        |

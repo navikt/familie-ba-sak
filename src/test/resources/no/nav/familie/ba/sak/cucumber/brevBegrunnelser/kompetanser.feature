@@ -40,7 +40,7 @@ Egenskap: Brevbegrunnelser ved endring av kompetanse
       | 01.05.2021 | 31.03.2038 | Utbetaling         | EØS_FORORDNINGEN                  | INNVILGET_SEKUNDÆRLAND_STANDARD                    | INNVILGET_SEKUNDÆRLAND_TO_ARBEIDSLAND_NORGE_UTBETALER |
       | 01.04.2038 |            | Opphør             |                                   |                                                    |                                                       |
 
-    Og med vedtaksperioder for behandling 1
+    Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser | Eøsbegrunnelser                                    | Fritekster |
       | 01.05.2020 | 30.04.2021 |                      | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE |            |
       | 01.05.2021 | 31.03.2038 |                      | INNVILGET_SEKUNDÆRLAND_STANDARD                    |            |

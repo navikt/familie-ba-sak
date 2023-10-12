@@ -70,7 +70,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser           | Ugyldige begrunnelser |
       | 01.04.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN                  | REDUKSJON_IKKE_ANSVAR_FOR_BARN |                          |
 
-    Og med vedtaksperioder for behandling 1
+    Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser | Eøsbegrunnelser                | Fritekster |
       | 01.04.2023 | 30.06.2023 |                      | REDUKSJON_IKKE_ANSVAR_FOR_BARN |            |
 
@@ -112,7 +112,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Og med vedtaksperioder for behandling 1
+    Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser   | Eøsbegrunnelser | Fritekster |
       | 01.07.2022 | 28.02.2023 | REDUKSJON_FLYTTET_BARN |                 |            |
 

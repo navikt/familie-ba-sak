@@ -281,7 +281,7 @@ fun hentTekstValgteBegrunnelser(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ) =
     """
-    Og med vedtaksperioder for behandling $behandlingId
+    Og når disse begrunnelsene er valgt for behandling $behandlingId
         | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |""" +
         hentValgteBegrunnelserRader(vedtaksperioder)
 

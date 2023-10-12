@@ -35,7 +35,7 @@ Egenskap: Brevbegrunnelser ved automatiske behandlinger
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Og med vedtaksperioder for behandling 1
+    Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser                         | Eøsbegrunnelser | Fritekster |
       | 01.07.2023 | 31.05.2029 | INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE |                 |            |
 
@@ -100,7 +100,7 @@ Egenskap: Brevbegrunnelser ved automatiske behandlinger
       | 01.10.2027 | 30.09.2039 | UTBETALING         |           |                                                            |                          |
       | 01.10.2039 |            | OPPHØR             |           |                                                            |                          |
 
-    Og med vedtaksperioder for behandling 2
+    Og når disse begrunnelsene er valgt for behandling 2
       | Fra dato   | Til dato   | Standardbegrunnelser                                       | Eøsbegrunnelser | Fritekster |
       | 01.11.2023 | 30.09.2027 | REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD |                 |            |
 

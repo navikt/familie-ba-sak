@@ -168,8 +168,8 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | Fra dato | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |
      */
-    @Og("med vedtaksperioder for behandling {}")
-    fun `med vedtaksperioder`(behandlingId: Long, dataTable: DataTable) {
+    @Og("når disse begrunnelsene er valgt for behandling {}")
+    fun `når disse begrunnelsene er valgt for behandling`(behandlingId: Long, dataTable: DataTable) {
         val vedtaksperioder = genererVedtaksperioderForBehandling(behandlingId)
 
         vedtaksperioderMedBegrunnelser = leggBegrunnelserIVedtaksperiodene(

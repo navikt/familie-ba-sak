@@ -65,7 +65,7 @@ Egenskap: Brevbegrunnelser ved opphør der vilkår blir innvilget og opphørt in
 
     Når vedtaksperiodene genereres for behandling 2
 
-    Og med vedtaksperioder for behandling 2
+    Og når disse begrunnelsene er valgt for behandling 2
       | Fra dato   | Til dato | Standardbegrunnelser       | Eøsbegrunnelser | Fritekster |
       | 01.09.2020 |          | OPPHØR_IKKE_BOSATT_I_NORGE |                 |            |
 
