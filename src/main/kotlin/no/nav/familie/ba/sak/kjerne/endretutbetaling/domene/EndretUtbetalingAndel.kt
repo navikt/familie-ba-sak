@@ -121,7 +121,7 @@ data class EndretUtbetalingAndel(
 enum class Årsak(val visningsnavn: String) {
     DELT_BOSTED("Delt bosted"),
     ETTERBETALING_3ÅR("Etterbetaling 3 år"),
-    ENDRE_MOTTAKER("Foreldrene bor sammen, endret mottaker"),
+    ENDRE_MOTTAKER("Endre mottaker, begge foreldre rett"),
     ALLEREDE_UTBETALT("Allerede utbetalt"),
 }
 
