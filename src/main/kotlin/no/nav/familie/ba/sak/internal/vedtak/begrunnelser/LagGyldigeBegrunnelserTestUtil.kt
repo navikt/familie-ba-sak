@@ -60,7 +60,7 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
     Når begrunnelsetekster genereres for behandling ${behandling.id}""" +
-    hentTekstForVedtaksperioder(vedtaksperioder) + """
+    hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) + """
 </pre> 
     """
 
@@ -250,7 +250,7 @@ private fun hentKompetanseRader(kompetanser: Collection<Kompetanse>?): String =
             } |"""
         } ?: ""
 
-fun hentTekstForVedtaksperioder(
+fun hentTekstForGyligeBegrunnelserForVedtaksperiodene(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ) =
     """
