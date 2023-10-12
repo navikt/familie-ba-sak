@@ -256,4 +256,4 @@ private fun hentVedtaksperiodeRader(vedtaksperioder: List<VedtaksperiodeMedBegru
     }
 
 private fun Set<PersonResultat>.sorterPåFøselsdato(persongrunnlag: PersonopplysningGrunnlag) =
-    this.sortedByDescending { personresultat -> persongrunnlag.personer.single { personresultat.aktør == it.aktør }.fødselsdato }
+    this.sortedBy { personresultat -> persongrunnlag.personer.single { personresultat.aktør == it.aktør }.fødselsdato }
