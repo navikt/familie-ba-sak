@@ -60,9 +60,12 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
     Når begrunnelsetekster genereres for behandling ${behandling.id}""" +
-    hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) + """
+    hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) +
+    hentTekstValgteBegrunnelser(behandling.id, vedtaksperioder) +
+    hentTekstBrevPerioder(behandling.id, vedtaksperioder) +
+    hentBrevBegrunnelseTekster(behandling.id, vedtaksperioder) + """
 </pre> 
-    """
+"""
 
 private fun lagPersonresultaterTekst(behandling: Behandling?) = behandling?.let {
     """
@@ -257,9 +260,9 @@ fun hentTekstForGyligeBegrunnelserForVedtaksperiodene(
         
     Så forvent følgende standardBegrunnelser
       | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |""" +
-        hentVedtaksperiodeRader(vedtaksperioder)
+        hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder)
 
-fun hentVedtaksperiodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
+fun hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
       | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.type} | | ${vedtaksperiode.begrunnelser.joinToString { it.standardbegrunnelse.name }} | |""" +
@@ -272,3 +275,47 @@ fun hentVedtaksperiodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>
 
 private fun Set<PersonResultat>.sorterPåFøselsdato(persongrunnlag: PersonopplysningGrunnlag) =
     this.sortedByDescending { personresultat -> persongrunnlag.personer.single { personresultat.aktør == it.aktør }.fødselsdato }
+
+fun hentTekstValgteBegrunnelser(
+    behandlingId: Long?,
+    vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
+) =
+    """
+    Og med vedtaksperioder for behandling $behandlingId
+        | Fra dato   | Til dato | Standardbegrunnelser          | Eøsbegrunnelser | Fritekster |
+        | 01.04.2021 |          | OPPHØR_BARN_FLYTTET_FRA_SØKER |                 |            |""" +
+        hentvalgdteBegrunnelserRader(vedtaksperioder)
+
+fun hentvalgdteBegrunnelserRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
+    vedtaksperioder.joinToString("") { vedtaksperiode ->
+        """
+        | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | ${vedtaksperiode.begrunnelser.joinToString { it.standardbegrunnelse.name }} | ${vedtaksperiode.eøsBegrunnelser.joinToString { it.begrunnelse.name }} | ${vedtaksperiode.fritekster.joinToString()} |"""
+    }
+
+fun hentTekstBrevPerioder(
+    behandlingId: Long?,
+    vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
+) =
+    """
+    Så forvent følgende brevperioder for behandling $behandlingId
+        | Brevperiodetype  | Fra dato   | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |""" +
+        hentBrevPeriodeRader(vedtaksperioder)
+
+fun hentBrevPeriodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
+    vedtaksperioder.joinToString("") { vedtaksperiode ->
+        """
+      | | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | | | | |"""
+    }
+
+fun hentBrevBegrunnelseTekster(
+    behandlingId: Long?,
+    vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
+): String {
+    return vedtaksperioder.joinToString("") {
+        """
+
+    Så forvent følgende brevbegrunnelser for behandling $behandlingId i periode ${it.fom?.tilddMMyyyy() ?: "-"} til ${it.tom?.tilddMMyyyy() ?: "-"}
+      | Begrunnelse                   | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
+      |                               |               |                      |             |                                      |         |       |                  |                         |"""
+    }
+}
