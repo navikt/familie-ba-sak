@@ -48,4 +48,4 @@ Egenskap: Brevperioder: Brevperiodetype
 
     Så forvent følgende brevperioder for behandling 1
       | Brevperiodetype | Fra dato   | Til dato      | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
-      | UTBETALING      | april 2022 | til juni 2023 | 0     | 0                          |                     | du                     |
+      | UTBETALING      | april 2022 | til juni 2023 | 0     | 1                          | 16.03.22            | du                     |
