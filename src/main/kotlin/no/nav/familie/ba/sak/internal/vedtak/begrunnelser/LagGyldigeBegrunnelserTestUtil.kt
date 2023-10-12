@@ -50,8 +50,11 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     Og følgende dagens dato ${LocalDate.now().tilddMMyyyy()}""" +
     lagPersonresultaterTekst(forrigeBehandling) +
     lagPersonresultaterTekst(behandling) +
-    hentTekstForVilkårresultater(personResultaterForrigeBehandling, forrigeBehandling?.id) +
-    hentTekstForVilkårresultater(personResultater, behandling.id) +
+    hentTekstForVilkårresultater(
+        personResultaterForrigeBehandling?.sorterPåFøselsdato(persongrunnlagForrigeBehandling!!),
+        forrigeBehandling?.id,
+    ) +
+    hentTekstForVilkårresultater(personResultater.sorterPåFøselsdato(persongrunnlag), behandling.id) +
     hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
     hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
     hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
@@ -102,7 +105,7 @@ private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): 
     } ?: ""
 
 fun hentTekstForVilkårresultater(
-    personResultater: Set<PersonResultat>?,
+    personResultater: List<PersonResultat>?,
     behandlingId: Long?,
 ): String {
     if (personResultater == null || behandlingId == null) {
@@ -125,7 +128,7 @@ data class VilkårResultatRad(
     val erEksplisittAvslagPåSøknad: Boolean?,
 )
 
-private fun tilVilkårResultatRader(personResultater: Set<PersonResultat>?) =
+private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
     personResultater?.joinToString("\n") { personResultat ->
         personResultat.vilkårResultater
             .sortedBy { it.periodeFom }
@@ -266,3 +269,6 @@ fun hentVedtaksperiodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>
                 ""
             }
     }
+
+private fun Set<PersonResultat>.sorterPåFøselsdato(persongrunnlag: PersonopplysningGrunnlag) =
+    this.sortedByDescending { personresultat -> persongrunnlag.personer.single { personresultat.aktør == it.aktør }.fødselsdato }
