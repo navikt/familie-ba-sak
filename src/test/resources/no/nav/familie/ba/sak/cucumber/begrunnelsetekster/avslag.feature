@@ -32,8 +32,8 @@ Egenskap: Gyldige begrunnelser for avslag
     Og med endrede utbetalinger for begrunnelse
       | AktørId | Fra dato | Til dato | BehandlingId | Årsak | Prosent |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser |
       |          |          | AVSLAG             |           |                         |                          |

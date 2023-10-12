@@ -59,7 +59,7 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
     hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
-    Når begrunnelsetekster genereres for behandling ${behandling.id}""" +
+    Når vedtaksperiodene genereres for behandling ${behandling.id}""" +
     hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) +
     hentTekstValgteBegrunnelser(behandling.id, vedtaksperioder) +
     hentTekstBrevPerioder(behandling.id, vedtaksperioder) +
@@ -258,8 +258,8 @@ fun hentTekstForGyligeBegrunnelserForVedtaksperiodene(
 ) =
     """
         
-    Så forvent følgende standardBegrunnelser
-      | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |""" +
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser |""" +
         hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder)
 
 fun hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
@@ -281,7 +281,7 @@ fun hentTekstValgteBegrunnelser(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ) =
     """
-    Og med vedtaksperioder for behandling $behandlingId
+    Og når disse begrunnelsene er valgt for behandling $behandlingId
         | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |""" +
         hentValgteBegrunnelserRader(vedtaksperioder)
 

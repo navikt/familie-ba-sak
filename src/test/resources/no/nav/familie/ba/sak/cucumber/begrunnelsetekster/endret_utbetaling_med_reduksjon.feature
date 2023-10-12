@@ -50,10 +50,10 @@ Egenskap: Gyldige begrunnelser endret utbetaling med reduksjon
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak          | Prosent |
       | 5678    | 1            | 01.10.2023 | 31.12.2034 | ENDRE_MOTTAKER | 0       |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                    | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                       | Ugyldige begrunnelser |
       | 01.03.2022 | 31.12.2022 | UTBETALING         |           |                                            |                          |
       | 01.01.2023 | 28.02.2023 | UTBETALING         |           |                                            |                          |
       | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                                            |                          |

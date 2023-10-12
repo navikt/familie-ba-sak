@@ -58,9 +58,9 @@ Egenskap: Gyldige begrunnelser for fortsatt innvilget
       | 2       | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
       | 2       | 2            | 01.07.2023 | 31.01.2029 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato | Til dato | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser                                                                                                      |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                     | Ugyldige begrunnelser                                                                                                         |
       |          |          | FORTSATT_INNVILGET |                                   | FORTSATT_INNVILGET_MEDLEM_I_FOLKETRYGDEN | FORTSATT_INNVILGET_SØKER_BOSATT_I_RIKET, FORTSATT_INNVILGET_FORVARING_GIFT, FORTSATT_INNVILGET_FORTSATT_AVTALE_OM_DELT_BOSTED |
       |          |          | FORTSATT_INNVILGET | EØS_FORORDNINGEN                  |                                          | FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD                                                                                        |

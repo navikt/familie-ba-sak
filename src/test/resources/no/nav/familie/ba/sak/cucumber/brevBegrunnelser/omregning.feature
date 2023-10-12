@@ -57,13 +57,13 @@ Egenskap: Brevbegrunnelser ved omregningsbehandlinger
       | 3       | 2            | 01.09.2023 | 30.09.2027 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 3       | 2            | 01.10.2027 | 30.09.2039 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser          | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser             | Ugyldige begrunnelser |
       | 01.10.2023 | 30.09.2027 | Utbetaling         |           | REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK |                          |
 
-    Og med vedtaksperioder for behandling 2
+    Og når disse begrunnelsene er valgt for behandling 2
       | Fra dato   | Til dato   | Standardbegrunnelser             | Eøsbegrunnelser | Fritekster |
       | 01.10.2023 | 30.09.2027 | REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK |                 |            |
 
@@ -128,13 +128,13 @@ Egenskap: Brevbegrunnelser ved omregningsbehandlinger
       | 3       | 2            | 01.09.2023 | 30.09.2023 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 3       | 2            | 01.10.2023 | 30.09.2035 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser         | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser            | Ugyldige begrunnelser |
       | 01.10.2023 | 30.09.2035 | UTBETALING         |           | REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK |                          |
 
-    Og med vedtaksperioder for behandling 2
+    Og når disse begrunnelsene er valgt for behandling 2
       | Fra dato   | Til dato   | Standardbegrunnelser            | Eøsbegrunnelser | Fritekster |
       | 01.10.2023 | 30.09.2035 | REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK |                 |            |
 
