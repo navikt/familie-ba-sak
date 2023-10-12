@@ -269,7 +269,7 @@ fun hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder: List<Vedtaksp
             if (vedtaksperiode.eøsBegrunnelser.isNotEmpty()) {
                 """
         | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.type} | EØS_FORORDNINGEN | ${vedtaksperiode.eøsBegrunnelser.joinToString { it.begrunnelse.name }} | |
-                """.trimIndent()
+                """
             } else {
                 ""
             }
