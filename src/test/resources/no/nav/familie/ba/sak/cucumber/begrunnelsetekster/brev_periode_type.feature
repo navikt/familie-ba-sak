@@ -43,7 +43,7 @@ Egenskap: Gyldige begrunnelser for forskjellige brevperiodetyper
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |
       | 2       | 1            | 01.09.2020 | 01.09.2020 | ETTERBETALING_3ÅR | 0       |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                           | Ekskluderte Begrunnelser                             |
@@ -62,7 +62,7 @@ Egenskap: Gyldige begrunnelser for forskjellige brevperiodetyper
       | 2       | 1            | 01.09.2020 | 01.09.2020 | ETTERBETALING_3ÅR | 0       |
       | 3       | 1            | 01.09.2020 | 01.09.2020 | ETTERBETALING_3ÅR | 0       |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                              | Ekskluderte Begrunnelser                          |

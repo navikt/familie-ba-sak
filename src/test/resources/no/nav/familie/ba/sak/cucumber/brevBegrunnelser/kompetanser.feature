@@ -32,7 +32,7 @@ Egenskap: Brevbegrunnelser ved endring av kompetanse
       | 3456    | 01.05.2020 | 30.04.2021 | NORGE_ER_PRIMÆRLAND   | 1            | IKKE_AKTUELT              | NO                  |
       | 3456    | 01.05.2021 | 31.03.2038 | NORGE_ER_SEKUNDÆRLAND | 1            | I_ARBEID                  | PL                  |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                            | Ekskluderte Begrunnelser                              |

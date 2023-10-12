@@ -33,7 +33,7 @@ Egenskap: Brevbegrunnelser ved automatiske behandlinger
       | 2       | 1            | 01.07.2023 | 31.05.2029 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 2       | 1            | 01.06.2029 | 31.05.2041 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Og med vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser                         | Eøsbegrunnelser | Fritekster |
@@ -92,7 +92,7 @@ Egenskap: Brevbegrunnelser ved automatiske behandlinger
       | 1       | 2            | 01.11.2021 | 30.09.2039 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
       | 1       | 2            | 01.10.2022 | 31.10.2023 | 660   | SMÅBARNSTILLEGG    | 100     | 660  |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                                    | Ekskluderte Begrunnelser |

@@ -27,7 +27,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2021 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser |
@@ -48,7 +48,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.02.2021 | 31.03.2021 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser |
@@ -69,7 +69,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2021 | 31.03.2022 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser      |
@@ -90,7 +90,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2021 | 31.03.2022 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser |
@@ -126,7 +126,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | 2276892299373 | 100173051    | 01.02.2023 | 28.02.2023 | 1054  | UTVIDET_BARNETRYGD | 100     |
       | 2276892299373 | 100173051    | 01.03.2023 | 31.05.2023 | 2489  | UTVIDET_BARNETRYGD | 100     |
 
-    Når begrunnelsetekster genereres for behandling 100173051
+    Når vedtaksperiodene genereres for behandling 100173051
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser           |
@@ -164,7 +164,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | 2005858678161 | 100173207    | 01.04.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     |
       | 2005858678161 | 100173207    | 01.07.2023 | 31.08.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     |
 
-    Når begrunnelsetekster genereres for behandling 100173207
+    Når vedtaksperiodene genereres for behandling 100173207
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
@@ -204,7 +204,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | 1       | 1            | 01.01.2023 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 2       | 1            | 01.01.2023 | 28.02.2023 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser      | Ekskluderte Begrunnelser |

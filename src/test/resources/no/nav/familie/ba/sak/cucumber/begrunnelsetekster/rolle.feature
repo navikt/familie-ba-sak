@@ -36,7 +36,7 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser |
@@ -59,7 +59,7 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser | Ekskluderte Begrunnelser                |
@@ -80,7 +80,7 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 4567    | 01.05.2020 | 31.05.2022 | 1354  | 2            |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser |

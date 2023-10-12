@@ -63,7 +63,7 @@ Egenskap: Brevbegrunnelser ved opphør der vilkår blir innvilget og opphørt in
       | 5678    | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
       | 5678    | 1            | 01.07.2023 | 31.10.2034 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Og med vedtaksperioder for behandling 2
       | Fra dato   | Til dato | Standardbegrunnelser       | Eøsbegrunnelser | Fritekster |

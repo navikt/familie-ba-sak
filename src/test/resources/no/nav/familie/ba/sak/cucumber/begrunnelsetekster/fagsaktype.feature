@@ -31,7 +31,7 @@ Egenskap: Gyldige begrunnelser for fagsaktype
       | AktørId       | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent |
       | 2034260303343 | 100175168    | 01.08.2022 | 31.08.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     |
 
-    Når begrunnelsetekster genereres for behandling 100175168
+    Når vedtaksperiodene genereres for behandling 100175168
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser           |
@@ -63,7 +63,7 @@ Egenskap: Gyldige begrunnelser for fagsaktype
       | AktørId       | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent |
       | 2034260303343 | 100175169    | 01.08.2022 | 31.08.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     |
 
-    Når begrunnelsetekster genereres for behandling 100175169
+    Når vedtaksperiodene genereres for behandling 100175169
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser            | Ekskluderte Begrunnelser |

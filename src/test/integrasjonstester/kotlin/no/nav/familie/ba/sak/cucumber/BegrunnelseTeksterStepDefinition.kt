@@ -179,8 +179,8 @@ class BegrunnelseTeksterStepDefinition {
         )
     }
 
-    @Når("begrunnelsetekster genereres for behandling {}")
-    fun `generer begrunnelsetekst for `(behandlingId: Long) {
+    @Når("vedtaksperiodene genereres for behandling {}")
+    fun `generer vedtaksperioder for `(behandlingId: Long) {
         utvidetVedtaksperiodeMedBegrunnelser = genererVedtaksperioderForBehandling(behandlingId)
     }
 

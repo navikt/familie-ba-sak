@@ -32,7 +32,7 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | 3456    | 01.05.2020 | 31.01.2021 | 0     | 1            | 0       |
       | 3456    | 01.02.2021 | 31.03.2038 | 1354  | 1            | 100     |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                                                                                                             | Ekskluderte Begrunnelser                                          |
@@ -58,7 +58,7 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | 3456    | 01.05.2020 | 31.01.2021 | 0     | 1            | 0       |
       | 3456    | 01.02.2021 | 31.03.2038 | 1000  | 1            | 100     |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                       | Ekskluderte Begrunnelser |
@@ -96,7 +96,7 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak          | Prosent |
       | 1234    | 1            | 01.09.2023 | 01.07.2035 | ENDRE_MOTTAKER | 0       |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
@@ -134,7 +134,7 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |
       | 4567    | 1            | 01.03.2015 | 01.08.2020 | ETTERBETALING_3ÅR | 0       |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                              | Ekskluderte Begrunnelser                                                        |

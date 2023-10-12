@@ -57,7 +57,7 @@ Egenskap: Brevbegrunnelser ved omregningsbehandlinger
       | 3       | 2            | 01.09.2023 | 30.09.2027 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 3       | 2            | 01.10.2027 | 30.09.2039 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser          | Ekskluderte Begrunnelser |
@@ -128,7 +128,7 @@ Egenskap: Brevbegrunnelser ved omregningsbehandlinger
       | 3       | 2            | 01.09.2023 | 30.09.2023 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 3       | 2            | 01.10.2023 | 30.09.2035 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser         | Ekskluderte Begrunnelser |

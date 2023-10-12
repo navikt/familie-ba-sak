@@ -36,7 +36,7 @@ Egenskap: Gyldige begrunnelser for etter endret utbetaling, en mor med ett barn
       | 3456    | 01.02.2021 | 31.01.2022 | 1354  | 1            | 100     |
       | 3456    | 01.02.2022 | 31.03.2038 | 1354  | 1            | 100     |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                        | Ekskluderte Begrunnelser                       | Kommentar                                          |
@@ -63,7 +63,7 @@ Egenskap: Gyldige begrunnelser for etter endret utbetaling, en mor med ett barn
       | 3456    | 01.05.2020 | 31.01.2021 | 0     | 1            | 0       |
       | 3456    | 01.02.2021 | 31.03.2038 | 1354  | 1            | 100     |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                       | Ekskluderte Begrunnelser |

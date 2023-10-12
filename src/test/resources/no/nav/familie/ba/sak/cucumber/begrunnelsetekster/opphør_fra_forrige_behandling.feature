@@ -44,7 +44,7 @@ Egenskap: Gyldige begrunnelser for opphør fra forrige behandling
       | 3456    | 2            | 01.10.2020 | 31.08.2021 | 1354  | ORDINÆR_BARNETRYGD | 100     |
       | 3456    | 2            | 01.09.2021 | 31.12.2021 | 1654  | ORDINÆR_BARNETRYGD | 100     |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser          | Ekskluderte Begrunnelser              |
@@ -82,7 +82,7 @@ Egenskap: Gyldige begrunnelser for opphør fra forrige behandling
       | 3456    | 2            | 01.10.2020 | 31.08.2021 | 1354  | ORDINÆR_BARNETRYGD | 100     |
       | 3456    | 2            | 01.09.2021 | 31.12.2021 | 1654  | ORDINÆR_BARNETRYGD | 100     |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser               | Ekskluderte Begrunnelser         |
@@ -152,7 +152,7 @@ Egenskap: Gyldige begrunnelser for opphør fra forrige behandling
       | 5678    | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
       | 5678    | 2            | 01.07.2023 | 30.04.2028 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser    | Ekskluderte Begrunnelser |
@@ -193,7 +193,7 @@ Egenskap: Gyldige begrunnelser for opphør fra forrige behandling
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3456    | 1            | 01.12.2021 | 28.02.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser   |

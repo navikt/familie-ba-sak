@@ -51,7 +51,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 2       | 2            | 01.05.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     |
       | 3       | 2            | 01.04.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Inkluderte Begrunnelser           | Ekskluderte Begrunnelser          |
@@ -105,7 +105,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 1234    | 2            | 01.07.2023 | 31.07.2028 | 1766  | ORDINÆR_BARNETRYGD | 100     |
       | 1234    | 2            | 01.08.2028 | 31.07.2040 | 1310  | ORDINÆR_BARNETRYGD | 100     |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
@@ -176,7 +176,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 3456    | 1            | 01.07.2018 | 30.09.2018 |
       | 3456    | 1            | 01.10.2018 | 31.12.2018 |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Inkluderte Begrunnelser                         | Ekskluderte Begrunnelser |
@@ -259,7 +259,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 5678    | 2            | 01.07.2023 | 31.01.2028 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 5678    | 2            | 01.02.2028 | 31.01.2040 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Inkluderte Begrunnelser           | Ekskluderte Begrunnelser |
@@ -327,7 +327,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 3456    | 2            | 01.09.2016 | 31.12.2018 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 5678    | 2            | 01.09.2017 | 31.08.2018 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser          |

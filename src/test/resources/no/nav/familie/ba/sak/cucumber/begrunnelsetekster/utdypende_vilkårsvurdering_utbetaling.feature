@@ -29,7 +29,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
       | 3456    | 01.05.2020 | 31.03.2021 | 500   | 1            |
       | 3456    | 01.04.2021 | 31.05.2022 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                                       | Ekskluderte Begrunnelser |
@@ -51,7 +51,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2021 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                           | Ekskluderte Begrunnelser                    |
@@ -73,7 +73,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2022 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser |

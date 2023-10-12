@@ -46,7 +46,7 @@ Egenskap: Gyldige begrunnelser for overgangsstønad og småbarnstillegg
       | 4567    | 1            | 01.02.2023 | 30.04.2023 |
       | 4567    | 1            | 01.05.2023 | 31.08.2024 |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser   | Ekskluderte Begrunnelser  |
@@ -109,7 +109,7 @@ Egenskap: Gyldige begrunnelser for overgangsstønad og småbarnstillegg
       | 4567    | 2            | 01.02.2023 | 30.04.2023 |
       | 4567    | 2            | 01.05.2023 | 31.08.2024 |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser   | Ekskluderte Begrunnelser  |

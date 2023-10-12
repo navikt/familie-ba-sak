@@ -27,7 +27,7 @@ Egenskap: Gyldige begrunnelser for hendelser
       | 3456    | 01.05.2017 | 31.03.2023 | 1354  | 1            |
       | 3456    | 01.04.2023 | 31.03.2035 | 1054  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
@@ -54,7 +54,7 @@ Egenskap: Gyldige begrunnelser for hendelser
       | 5678    | 01.05.2017 | 31.03.2023 | 1354  | 1            |
       | 5678    | 01.04.2023 | 31.03.2024 | 1054  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
@@ -81,7 +81,7 @@ Egenskap: Gyldige begrunnelser for hendelser
       | 3456    | 01.05.2017 | 28.02.2023 | 1676  | 1            |
       | 3456    | 01.03.2023 | 31.03.2035 | 1083  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                     | Ekskluderte Begrunnelser |

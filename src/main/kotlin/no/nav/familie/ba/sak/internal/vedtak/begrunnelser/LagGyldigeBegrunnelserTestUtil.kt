@@ -59,7 +59,7 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
     hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
-    Når begrunnelsetekster genereres for behandling ${behandling.id}""" +
+    Når vedtaksperiodene genereres for behandling ${behandling.id}""" +
     hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) +
     hentTekstValgteBegrunnelser(behandling.id, vedtaksperioder) +
     hentTekstBrevPerioder(behandling.id, vedtaksperioder) +

@@ -36,7 +36,7 @@ Egenskap: Gyldige begrunnelser for kombinasjon av utgjørende vilkår og endret 
       | 2       | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     |
       | 2       | 1            | 01.07.2023 | 31.01.2033 | 1310  | ORDINÆR_BARNETRYGD | 100     |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser                                                          |
@@ -73,7 +73,7 @@ Egenskap: Gyldige begrunnelser for kombinasjon av utgjørende vilkår og endret 
       | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak       | Prosent |
       | 1       | 01.06.2022 | 28.02.2023 | 1            | DELT_BOSTED | 100     |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
 
     Så forvent følgende standardBegrunnelser
