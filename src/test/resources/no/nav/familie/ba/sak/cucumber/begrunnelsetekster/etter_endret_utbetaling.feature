@@ -39,7 +39,7 @@ Egenskap: Gyldige begrunnelser for etter endret utbetaling, en mor med ett barn
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                           | Ekskluderte Begrunnelser                       | Kommentar                                          |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                           | Ugyldige begrunnelser                          | Kommentar                                          |
       | 01.05.2020 | 31.01.2021 | UTBETALING         |                                                |                                                | Ingen etter endret utbetalingsbegrunnelse skal med |
       | 01.02.2021 | 31.01.2022 | UTBETALING         |                                                | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED |                                                    |
       | 01.02.2022 | 31.03.2038 | UTBETALING         | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED |                                                |                                                    |
@@ -66,7 +66,7 @@ Egenskap: Gyldige begrunnelser for etter endret utbetaling, en mor med ett barn
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                          | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                          | Ugyldige begrunnelser |
       | 01.05.2020 | 31.01.2021 | OPPHØR             |                                               |                          |
       | 01.02.2021 | 31.03.2038 | UTBETALING         | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR |                          |
       | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                            |                          |

@@ -67,7 +67,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser           | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser           | Ugyldige begrunnelser |
       | 01.04.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN                  | REDUKSJON_IKKE_ANSVAR_FOR_BARN |                          |
 
     Og med vedtaksperioder for behandling 1

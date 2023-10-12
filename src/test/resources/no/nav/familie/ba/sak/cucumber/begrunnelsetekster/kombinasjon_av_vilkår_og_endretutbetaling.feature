@@ -39,7 +39,7 @@ Egenskap: Gyldige begrunnelser for kombinasjon av utgjørende vilkår og endret 
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ekskluderte Begrunnelser                                                          |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser                                                             |
       | 01.03.2022 | 31.05.2022 | UTBETALING         |           |                         |                                                                                   |
       | 01.06.2022 | 28.02.2023 | UTBETALING         |           |                         | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY |
       | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                         |                                                                                   |
@@ -77,7 +77,7 @@ Egenskap: Gyldige begrunnelser for kombinasjon av utgjørende vilkår og endret 
 
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                                                              | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                                                              | Ugyldige begrunnelser |
       | 01.03.2022 | 31.05.2022 | UTBETALING         |           |                                                                                   |                          |
       | 01.06.2022 | 28.02.2023 | UTBETALING         |           | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY |                          |
       | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                                                                                   |                          |

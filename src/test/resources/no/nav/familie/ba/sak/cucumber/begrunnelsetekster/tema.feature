@@ -48,7 +48,7 @@ Egenskap: Gyldige begrunnelser for behandlingstema
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                              | Regelverk Ekskluderte Begrunnelser | Ekskluderte Begrunnelser  |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                              | Regelverk Ugyldige begrunnelser | Ugyldige begrunnelser     |
       | 01.10.2019 | 31.08.2020 | UTBETALING         | EØS_FORORDNINGEN                  | INNVILGET_PRIMÆRLAND_BARNETRYGD_ALLEREDE_UTBETALT | NASJONALE_REGLER                   | INNVILGET_OMSORG_FOR_BARN |
       | 01.09.2020 | 31.08.2021 | UTBETALING         |                                   |                                                   |                                    |                           |
       | 01.09.2021 | 31.12.2021 | UTBETALING         |                                   |                                                   |                                    |                           |
@@ -85,7 +85,7 @@ Egenskap: Gyldige begrunnelser for behandlingstema
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                     | Regelverk Ekskluderte Begrunnelser | Ekskluderte Begrunnelser                          |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                     | Regelverk Ugyldige begrunnelser | Ugyldige begrunnelser                             |
       | 01.10.2019 | 31.08.2020 | UTBETALING         | NASJONALE_REGLER                  | INNVILGET_BOSATT_I_RIKTET_LOVLIG_OPPHOLD | EØS_FORORDNINGEN                   | INNVILGET_PRIMÆRLAND_BARNETRYGD_ALLEREDE_UTBETALT |
       | 01.09.2020 | 31.08.2021 | UTBETALING         |                                   |                                          |                                    |                                                   |
       | 01.09.2021 | 31.12.2021 | UTBETALING         |                                   |                                          |                                    |                                                   |
@@ -153,7 +153,7 @@ Egenskap: Gyldige begrunnelser for behandlingstema
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                       | Regelverk Ekskluderte Begrunnelser | Ekskluderte Begrunnelser              |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                       | Regelverk Ugyldige begrunnelser | Ugyldige begrunnelser                 |
       | 01.06.2022 | 28.02.2023 | UTBETALING         | EØS_FORORDNINGEN                  | INNVILGET_PRIMÆRLAND_UK_OG_UTLAND_STANDARD | NASJONALE_REGLER                   | INNVILGET_EØS_BORGER_EKTEFELLE_JOBBER |
       | 01.03.2023 | 30.06.2023 | UTBETALING         |                                   |                                            |                                    |                                       |
       | 01.07.2023 | 31.08.2023 | UTBETALING         |                                   |                                            |                                    |                                       |
@@ -209,7 +209,7 @@ Egenskap: Gyldige begrunnelser for behandlingstema
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser               | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser               | Ugyldige begrunnelser |
       | 01.08.2022 | 28.02.2023 | UTBETALING         |           | INNVILGET_FLYTTET_ETTER_SEPARASJON |                          |
       | 01.03.2023 | 31.05.2023 | UTBETALING         |           |                                    |                          |
       | 01.06.2023 | 30.06.2023 | UTBETALING         |           |                                    |                          |

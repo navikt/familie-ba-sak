@@ -61,6 +61,6 @@ Egenskap: Gyldige begrunnelser for fortsatt innvilget
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                     | Ekskluderte Begrunnelser                                                                                                      |
+      | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                     | Ugyldige begrunnelser                                                                                                         |
       |          |          | FORTSATT_INNVILGET |                                   | FORTSATT_INNVILGET_MEDLEM_I_FOLKETRYGDEN | FORTSATT_INNVILGET_SØKER_BOSATT_I_RIKET, FORTSATT_INNVILGET_FORVARING_GIFT, FORTSATT_INNVILGET_FORTSATT_AVTALE_OM_DELT_BOSTED |
       |          |          | FORTSATT_INNVILGET | EØS_FORORDNINGEN                  |                                          | FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD                                                                                        |

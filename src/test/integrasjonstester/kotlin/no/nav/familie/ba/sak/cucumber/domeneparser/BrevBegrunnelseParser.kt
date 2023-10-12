@@ -65,8 +65,8 @@ object BrevBegrunnelseParser {
     enum class DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser(override val nøkkel: String) : Domenenøkkel {
         VEDTAKSPERIODE_TYPE("VedtaksperiodeType"),
         INKLUDERTE_BEGRUNNELSER("Gyldige begrunnelser"),
-        EKSKLUDERTE_BEGRUNNELSER("Ekskluderte Begrunnelser"),
+        EKSKLUDERTE_BEGRUNNELSER("Ugyldige begrunnelser"),
         REGELVERK_INKLUDERTE_BEGRUNNELSER("Regelverk Gyldige begrunnelser"),
-        REGELVERK_EKSKLUDERTE_BEGRUNNELSER("Regelverk Ekskluderte Begrunnelser"),
+        REGELVERK_EKSKLUDERTE_BEGRUNNELSER("Regelverk Ugyldige begrunnelser"),
     }
 }

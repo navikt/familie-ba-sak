@@ -39,7 +39,7 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                     | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                     | Ugyldige begrunnelser |
       | 01.05.2020 | 31.05.2020 | UTBETALING         |                                          |                          |
       | 01.06.2020 |            | OPPHØR             | OPPHØR_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                          |
 
@@ -62,7 +62,7 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser | Ekskluderte Begrunnelser                |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser | Ugyldige begrunnelser                   |
       | 01.05.2020 | 31.05.2020 | UTBETALING         |                         | FORTSATT_INNVILGET_SØKER_BOSATT_I_RIKET |
       | 01.06.2020 | 31.03.2038 | UTBETALING         |                         | FORTSATT_INNVILGET_SØKER_BOSATT_I_RIKET |
       | 01.04.2038 |            | OPPHØR             |                         |                                         |
@@ -83,6 +83,6 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                     | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                     | Ugyldige begrunnelser |
       | 01.05.2020 | 31.05.2022 | UTBETALING         |                                          |                          |
       | 01.06.2022 |            | OPPHØR             | OPPHØR_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                          |
