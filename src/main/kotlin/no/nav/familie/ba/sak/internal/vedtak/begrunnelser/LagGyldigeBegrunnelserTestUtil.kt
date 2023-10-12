@@ -282,11 +282,10 @@ fun hentTekstValgteBegrunnelser(
 ) =
     """
     Og med vedtaksperioder for behandling $behandlingId
-        | Fra dato   | Til dato | Standardbegrunnelser          | Eøsbegrunnelser | Fritekster |
-        | 01.04.2021 |          | OPPHØR_BARN_FLYTTET_FRA_SØKER |                 |            |""" +
-        hentvalgdteBegrunnelserRader(vedtaksperioder)
+        | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |""" +
+        hentValgteBegrunnelserRader(vedtaksperioder)
 
-fun hentvalgdteBegrunnelserRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
+fun hentValgteBegrunnelserRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
         | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | ${vedtaksperiode.begrunnelser.joinToString { it.standardbegrunnelse.name }} | ${vedtaksperiode.eøsBegrunnelser.joinToString { it.begrunnelse.name }} | ${vedtaksperiode.fritekster.joinToString()} |"""
