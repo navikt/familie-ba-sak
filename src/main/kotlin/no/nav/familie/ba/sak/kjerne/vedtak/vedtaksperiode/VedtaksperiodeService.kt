@@ -455,6 +455,9 @@ class VedtaksperiodeService(
         }
     }
 
+    fun hentGrunnlagForBegrunnelse(behandlingId: Long): GrunnlagForBegrunnelse =
+        hentGrunnlagForBegrunnelse(behandlingHentOgPersisterService.hent(behandlingId))
+
     fun hentGrunnlagForBegrunnelse(behandling: Behandling): GrunnlagForBegrunnelse {
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
