@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erUtbetalingEllerDeltBostedIPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.finnBegrunnelseGrunnlagPerPerson
+import java.math.BigDecimal
 
 fun VedtaksperiodeMedBegrunnelser.lagBrevPeriode(
     grunnlagForBegrunnelse: GrunnlagForBegrunnelse,
@@ -110,12 +111,13 @@ private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentTotaltUtbetaltIPerio
 
 private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling() =
     filterKeys { it.type == PersonType.BARN }
-        .filterValues {
+        .filterValues { grunnlag ->
             val endretUtbetalingAndelIPeriodeErDeltBosted =
-                it.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
-            val utbetalingssumIPeriode = it.dennePerioden.andeler.sumOf { andel -> andel.kalkulertUtbetalingsbeløp }
+                grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
+            val harAndelerSomIkkeErPåNullProsent =
+                grunnlag.dennePerioden.andeler.filter { it.prosent != BigDecimal.ZERO }.toList().isNotEmpty()
 
-            utbetalingssumIPeriode != 0 || endretUtbetalingAndelIPeriodeErDeltBosted
+            harAndelerSomIkkeErPåNullProsent || endretUtbetalingAndelIPeriodeErDeltBosted
         }
 
 fun Set<Person>.tilBarnasFødselsdatoer(): String {
