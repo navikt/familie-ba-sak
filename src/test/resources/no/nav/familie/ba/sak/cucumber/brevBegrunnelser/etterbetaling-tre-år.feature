@@ -78,17 +78,17 @@ Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre år tilba
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt |
       | 1       | 2            | 01.02.2020 | 31.05.2020 | ETTERBETALING_3ÅR | 0       | 30.06.2023       |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                                                         | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige Begrunnelser                                                            | Ugyldige Begrunnelser |
       | 01.02.2020 | 31.05.2020 | UTBETALING         |           | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_KUN_UTVIDET_DEL_UTBETALING |                          |
       | 01.06.2020 | 30.06.2022 | UTBETALING         |           | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR_KUN_UTVIDET_DEL                   |                          |
       | 01.07.2022 | 31.01.2023 | UTBETALING         |           |                                                                                 |                          |
       | 01.02.2023 | 28.02.2023 | UTBETALING         |           |                                                                                 |                          |
       | 01.03.2023 |            | OPPHØR             |           |                                                                                 |                          |
 
-    Og med vedtaksperioder for behandling 2
+    Og når disse begrunnelsene er valgt for behandling 2
       | Fra dato   | Til dato   | Standardbegrunnelser                                                            | Eøsbegrunnelser | Fritekster |
       | 01.02.2020 | 31.05.2020 | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_KUN_UTVIDET_DEL_UTBETALING |                 |            |
       | 01.06.2020 | 30.06.2022 | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR_KUN_UTVIDET_DEL                   |                 |            |
