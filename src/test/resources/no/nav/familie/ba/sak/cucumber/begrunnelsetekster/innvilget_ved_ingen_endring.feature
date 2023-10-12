@@ -44,7 +44,7 @@ Egenskap: Gyldige begrunnelser ved ingen endring
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                                | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                                | Ekskluderte Begrunnelser |
       | 01.07.2023 | 31.07.2023 | UTBETALING         |           |                                                        |                          |
       | 01.08.2023 | 31.08.2023 | UTBETALING         |           | INNVILGET_OVERGANG_EØS_TIL_NASJONAL_SEPARASJONSAVTALEN |                          |
       | 01.09.2023 |            | OPPHØR             |           |                                                        |                          |
@@ -115,7 +115,7 @@ Egenskap: Gyldige begrunnelser ved ingen endring
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                                | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                                | Ekskluderte Begrunnelser |
       | 01.02.2016 | 31.07.2019 | OPPHØR             |                                   |                                                        |                          |
       | 01.08.2019 | 31.12.2019 | UTBETALING         |                                   |                                                        |                          |
       | 01.01.2020 | 31.08.2020 | UTBETALING         | EØS_FORORDNINGEN                  | INNVILGET_TILLEGGSTEKST_SATSENDRING_OG_VALUTAJUSTERING |                          |

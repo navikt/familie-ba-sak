@@ -60,7 +60,7 @@ Egenskap: Brevbegrunnelser ved omregningsbehandlinger
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser          | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser             | Ekskluderte Begrunnelser |
       | 01.10.2023 | 30.09.2027 | Utbetaling         |           | REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK |                          |
 
     Og med vedtaksperioder for behandling 2
@@ -131,7 +131,7 @@ Egenskap: Brevbegrunnelser ved omregningsbehandlinger
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser         | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser            | Ekskluderte Begrunnelser |
       | 01.10.2023 | 30.09.2035 | UTBETALING         |           | REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK |                          |
 
     Og med vedtaksperioder for behandling 2

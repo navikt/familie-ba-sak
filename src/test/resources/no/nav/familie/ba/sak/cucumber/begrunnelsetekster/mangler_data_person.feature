@@ -48,7 +48,7 @@ Egenskap: Gyldige begrunnelser når ett barn fødes etter et annet
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ekskluderte Begrunnelser |
       | 01.03.2022 | 31.08.2022 | UTBETALING         |           |                         |                          |
       | 01.09.2022 | 30.11.2022 | UTBETALING         |           |                         |                          |
       | 01.12.2022 | 28.02.2023 | UTBETALING         |           |                         |                          |

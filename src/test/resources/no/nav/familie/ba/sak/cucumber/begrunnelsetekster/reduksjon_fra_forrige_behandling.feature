@@ -54,7 +54,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Inkluderte Begrunnelser           | Ekskluderte Begrunnelser          |
+      | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Gyldige begrunnelser              | Ekskluderte Begrunnelser          |
       | 01.04.2023 | 30.04.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_BARN_BOR_IKKE_MED_SØKER | REDUKSJON_IKKE_OPPHOLDSTILLATELSE |
       | 01.05.2023 | 30.06.2023 | UTBETALING                                              |           |                                   |                                   |
       | 01.07.2023 |            | OPPHØR                                                  |           |                                   |                                   |
@@ -108,7 +108,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Gyldige begrunnelser    | Ekskluderte Begrunnelser |
       | 01.02.2023 | 28.02.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
       | 01.03.2023 | 30.06.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
       | 01.07.2023 | 31.07.2028 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
@@ -179,7 +179,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Inkluderte Begrunnelser                         | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Gyldige begrunnelser                            | Ekskluderte Begrunnelser |
       | 01.04.2017 | 31.12.2018 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | SMÅBARNSTILLEGG_HADDE_IKKE_FULL_OVERGANGSSTØNAD |                          |
       | 01.01.2019 |            | OPPHØR                                                  |           |                                                 |                          |
 
@@ -262,7 +262,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Inkluderte Begrunnelser           | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Gyldige begrunnelser              | Ekskluderte Begrunnelser |
       | 01.06.2023 | 30.06.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_BARN_BOR_IKKE_MED_SØKER |                          |
       | 01.07.2023 | 31.08.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_BARN_BOR_IKKE_MED_SØKER |                          |
       | 01.09.2023 | 28.02.2025 | UTBETALING                                              |           |                                   |                          |
@@ -330,6 +330,6 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser          |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser   | Ekskluderte Begrunnelser          |
       | 01.09.2018 | 31.12.2018 | UTBETALING         |           | REDUKSJON_FLYTTET_BARN  | REDUKSJON_BARN_BOR_IKKE_MED_SØKER |
       | 01.01.2019 |            | OPPHØR             |           |                         |                                   |

@@ -264,7 +264,7 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     /**
-     * Mulige verdier: | Fra dato | Til dato | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser | Regelverk Ekskluderte Begrunnelser | Ekskluderte Begrunnelser |
+     * Mulige verdier: | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser | Regelverk Ekskluderte Begrunnelser | Ekskluderte Begrunnelser |
      */
     @Så("forvent at følgende begrunnelser er gyldige")
     fun `forvent at følgende begrunnelser er gyldige`(dataTable: DataTable) {

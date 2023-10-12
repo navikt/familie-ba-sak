@@ -39,7 +39,7 @@ Egenskap: Gyldige begrunnelser for utvidet barnetrygd og småbarnstillegg
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                     | Ekskluderte Begrunnelser |
       | 01.03.2022 | 31.10.2022 | UTBETALING         |           |                                          |                          |
       | 01.11.2022 | 28.02.2023 | UTBETALING         |           |                                          |                          |
       | 01.03.2023 | 31.05.2023 | UTBETALING         |           |                                          |                          |
@@ -74,7 +74,7 @@ Egenskap: Gyldige begrunnelser for utvidet barnetrygd og småbarnstillegg
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                                 | Ekskluderte Begrunnelser  |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                                    | Ekskluderte Begrunnelser  |
       | 01.03.2022 | 31.10.2022 | UTBETALING         |           |                                                         |                           |
       | 01.11.2022 | 30.11.2022 | UTBETALING         |           |                                                         | INNVILGET_SMÅBARNSTILLEGG |
       | 01.12.2022 | 28.02.2023 | UTBETALING         |           | INNVILGET_SMÅBARNSTILLEGG                               |                           |

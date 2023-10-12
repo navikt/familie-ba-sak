@@ -259,7 +259,7 @@ fun hentTekstForGyligeBegrunnelserForVedtaksperiodene(
     """
         
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |""" +
+      | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ekskluderte Begrunnelser |""" +
         hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder)
 
 fun hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =

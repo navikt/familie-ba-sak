@@ -95,7 +95,7 @@ Egenskap: Brevbegrunnelser ved automatiske behandlinger
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                                    | Ekskluderte Begrunnelser |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                                       | Ekskluderte Begrunnelser |
       | 01.11.2023 | 30.09.2027 | UTBETALING         |           | REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD |                          |
       | 01.10.2027 | 30.09.2039 | UTBETALING         |           |                                                            |                          |
       | 01.10.2039 |            | OPPHØR             |           |                                                            |                          |
