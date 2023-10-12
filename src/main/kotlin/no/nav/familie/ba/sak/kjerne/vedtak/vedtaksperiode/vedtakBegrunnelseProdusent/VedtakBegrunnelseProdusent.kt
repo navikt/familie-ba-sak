@@ -278,10 +278,11 @@ private fun hentStandardBegrunnelser(
     return filtrertPåVilkårOgEndretUtbetaling + filtrertPåReduksjonFraForrigeBehandling + filtrertPåOpphørFraForrigeBehandling + filtrertPåSmåbarnstillegg + filtrertPåEtterEndretUtbetaling + filtrertPåHendelser
 }
 
-private fun SanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean) =
-    this.erAutomatiskBegrunnelse() == erAutomatiskBehandling
-
-private fun SanityBegrunnelse.erAutomatiskBegrunnelse() = ØvrigTrigger.ALLTID_AUTOMATISK in ovrigeTriggere
+private fun SanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean): Boolean = when {
+    this.valgbarhet != Valgbarhet.AUTOMATISK -> !erAutomatiskBehandling
+    ØvrigTrigger.ALLTID_AUTOMATISK in this.ovrigeTriggere -> erAutomatiskBehandling
+    else -> true
+}
 
 fun ISanityBegrunnelse.erGjeldendeForFagsakType(
     fagsakType: FagsakType,

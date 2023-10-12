@@ -7,10 +7,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.OMREGNING_18ÅR
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.OMREGNING_6ÅR
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SMÅBARNSTILLEGG
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
@@ -46,12 +42,16 @@ fun genererVedtaksperioder(
     vedtak: Vedtak,
     nåDato: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
-    if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || vedtak.behandling.opprettetÅrsak.erOmregningsårsak()) {
-        return lagFortsattInnvilgetPeriode(
+    if (vedtak.behandling.opprettetÅrsak.erOmregningsårsak()) {
+        return lagPeriodeForOmregningsbehandling(
             vedtak = vedtak,
-            andelTilkjentYtelseer = grunnlagForVedtakPerioder.andelerTilkjentYtelse,
             nåDato = nåDato,
+            andelTilkjentYtelseer = grunnlagForVedtakPerioder.andelerTilkjentYtelse,
         )
+    }
+
+    if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
+        return lagFortsattInnvilgetPeriode(vedtak = vedtak)
     }
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
@@ -439,32 +439,38 @@ private fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>
 
 fun lagFortsattInnvilgetPeriode(
     vedtak: Vedtak,
+): List<VedtaksperiodeMedBegrunnelser> {
+    return listOf(
+        VedtaksperiodeMedBegrunnelser(
+            fom = null,
+            tom = null,
+            vedtak = vedtak,
+            type = Vedtaksperiodetype.FORTSATT_INNVILGET,
+        ),
+    )
+}
+
+fun lagPeriodeForOmregningsbehandling(
+    vedtak: Vedtak,
     andelTilkjentYtelseer: List<AndelTilkjentYtelse>,
     nåDato: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val behandling = vedtak.behandling
-    val erAutobrevFor6År18ÅrEllerSmåbarnstillegg = behandling.opprettetÅrsak in listOf(
-        OMREGNING_6ÅR,
-        OMREGNING_18ÅR,
-        SMÅBARNSTILLEGG,
-        OMREGNING_SMÅBARNSTILLEGG,
-    )
-
-    val (fom, tom) = if (erAutobrevFor6År18ÅrEllerSmåbarnstillegg) {
-        Pair(
-            nåDato.førsteDagIInneværendeMåned(),
-            finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandling.id, andelTilkjentYtelseer, nåDato),
-        )
-    } else {
-        Pair(null, null)
-    }
 
     return listOf(
         VedtaksperiodeMedBegrunnelser(
-            fom = fom,
-            tom = tom,
+            fom = nåDato.førsteDagIInneværendeMåned(),
+            tom = finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(
+                behandling.id,
+                andelTilkjentYtelseer,
+                nåDato,
+            ),
             vedtak = vedtak,
-            type = Vedtaksperiodetype.FORTSATT_INNVILGET,
+            type = if (andelTilkjentYtelseer.any { it.periodeInneholder(nåDato) }) {
+                Vedtaksperiodetype.UTBETALING
+            } else {
+                Vedtaksperiodetype.OPPHØR
+            },
         ),
     )
 }
@@ -475,6 +481,10 @@ private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(
     nåDato: LocalDate,
 ): LocalDate =
     andelTilkjentYtelses
-        .filter { it.stønadFom <= nåDato.toYearMonth() && it.stønadTom >= nåDato.toYearMonth() }
+        .filter { it.periodeInneholder(nåDato) }
         .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
         ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
+
+private fun AndelTilkjentYtelse.periodeInneholder(
+    nåDato: LocalDate,
+) = stønadFom <= nåDato.toYearMonth() && stønadTom >= nåDato.toYearMonth()

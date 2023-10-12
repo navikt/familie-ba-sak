@@ -49,8 +49,11 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     Og følgende dagens dato ${LocalDate.now().tilddMMyyyy()}""" +
     lagPersonresultaterTekst(forrigeBehandling) +
     lagPersonresultaterTekst(behandling) +
-    hentTekstForVilkårresultater(personResultaterForrigeBehandling, forrigeBehandling?.id) +
-    hentTekstForVilkårresultater(personResultater, behandling.id) +
+    hentTekstForVilkårresultater(
+        personResultaterForrigeBehandling?.sorterPåFøselsdato(persongrunnlagForrigeBehandling!!),
+        forrigeBehandling?.id,
+    ) +
+    hentTekstForVilkårresultater(personResultater.sorterPåFøselsdato(persongrunnlag), behandling.id) +
     hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
     hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
     hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
@@ -101,7 +104,7 @@ private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): 
     } ?: ""
 
 private fun hentTekstForVilkårresultater(
-    personResultater: Set<PersonResultat>?,
+    personResultater: List<PersonResultat>?,
     behandlingId: Long?,
 ): String {
     if (personResultater == null || behandlingId == null) {
@@ -115,7 +118,7 @@ private fun hentTekstForVilkårresultater(
         tilVilkårResultatRader(personResultater)
 }
 
-private fun tilVilkårResultatRader(personResultater: Set<PersonResultat>?) =
+private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
     personResultater?.joinToString("\n") { personResultat ->
         personResultat.vilkårResultater
             .sortedBy { it.periodeFom }
@@ -251,3 +254,6 @@ private fun hentVedtaksperiodeRader(vedtaksperioder: List<VedtaksperiodeMedBegru
         """
       | ${it.fom?.tilddMMyyyy() ?: ""} |${it.tom?.tilddMMyyyy() ?: ""} |${it.type} |               |"""
     }
+
+private fun Set<PersonResultat>.sorterPåFøselsdato(persongrunnlag: PersonopplysningGrunnlag) =
+    this.sortedByDescending { personresultat -> persongrunnlag.personer.single { personresultat.aktør == it.aktør }.fødselsdato }
