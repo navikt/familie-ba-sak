@@ -85,7 +85,7 @@ Egenskap: Brevbegrunnelser for reduksjon ved forskjellige tidspunkt
       | 3456    | 2            | 01.05.2006 | 28.02.2019 | 970   | ORDINÆR_BARNETRYGD | 100     | 970  |
       | 3456    | 2            | 01.03.2019 | 31.08.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
 
-    Og med vedtaksperioder for behandling 2
+    Og når disse begrunnelsene er valgt for behandling 2
       | Fra dato   | Til dato   | Standardbegrunnelser   |
       | 01.09.2022 | 30.11.2022 | REDUKSJON_FLYTTET_BARN |
       | 01.12.2022 | 28.02.2023 | REDUKSJON_FLYTTET_BARN |

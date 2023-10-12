@@ -45,7 +45,7 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
       | 5678    | 1            | 01.07.2023 | 31.08.2025 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 5678    | 1            | 01.09.2025 | 31.08.2037 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Og med vedtaksperioder for behandling 1
+    Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser      | Eøsbegrunnelser | Fritekster |
       | 01.12.2022 | 28.02.2023 | INNVILGET_BOSATT_I_RIKTET |                 |            |
 
@@ -80,7 +80,7 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
       | 5678    | 1            | 01.07.2023 | 31.08.2025 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 5678    | 1            | 01.09.2025 | 31.08.2037 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Og med vedtaksperioder for behandling 1
+    Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser      | Eøsbegrunnelser | Fritekster |
       | 01.12.2022 | 28.02.2023 | INNVILGET_BOSATT_I_RIKTET |                 |            |
 
@@ -116,7 +116,7 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
       | 5678    | 1            | 01.07.2023 | 31.08.2025 | 883   | ORDINÆR_BARNETRYGD | 50      | 1766 |
       | 5678    | 1            | 01.09.2025 | 31.08.2037 | 655   | ORDINÆR_BARNETRYGD | 50      | 1310 |
 
-    Og med vedtaksperioder for behandling 1
+    Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser                                  | Eøsbegrunnelser | Fritekster |
       | 01.12.2022 | 28.02.2023 | INNVILGET_BOR_HOS_SØKER                               |                 |            |
       | 01.06.2023 | 30.06.2023 | INNVILGET_BOR_HOS_SØKER, REDUKSJON_AVTALE_FAST_BOSTED |                 |            |
@@ -165,7 +165,7 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |
       | 3456    | 1            | 01.10.2019 | 30.09.2020 | ETTERBETALING_3ÅR | 0       |
 
-    Og med vedtaksperioder for behandling 1
+    Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser    | Eøsbegrunnelser | Fritekster |
       | 01.10.2019 | 31.08.2020 | INNVILGET_BOR_HOS_SØKER |                 |            |
 

@@ -59,7 +59,7 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
     hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
-    Når begrunnelsetekster genereres for behandling ${behandling.id}""" +
+    Når vedtaksperiodene genereres for behandling ${behandling.id}""" +
     hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) +
     hentTekstValgteBegrunnelser(behandling.id, vedtaksperioder) +
     hentTekstBrevPerioder(behandling.id, vedtaksperioder) +
@@ -258,16 +258,18 @@ fun hentTekstForGyligeBegrunnelserForVedtaksperiodene(
 ) =
     """
         
-    Så forvent følgende standardBegrunnelser
-      | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |""" +
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser |""" +
         hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder)
 
 fun hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
-      | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.type} | | ${vedtaksperiode.begrunnelser.joinToString { it.standardbegrunnelse.name }} | |""" +
+        | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.type} | | ${vedtaksperiode.begrunnelser.joinToString { it.standardbegrunnelse.name }} | |""" +
             if (vedtaksperiode.eøsBegrunnelser.isNotEmpty()) {
-                """| ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.type} | EØS_FORORDNINGEN | ${vedtaksperiode.eøsBegrunnelser.joinToString { it.begrunnelse.name }} | |"""
+                """
+        | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.type} | EØS_FORORDNINGEN | ${vedtaksperiode.eøsBegrunnelser.joinToString { it.begrunnelse.name }} | |
+                """.trimIndent()
             } else {
                 ""
             }
@@ -281,7 +283,8 @@ fun hentTekstValgteBegrunnelser(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ) =
     """
-    Og med vedtaksperioder for behandling $behandlingId
+        
+    Og når disse begrunnelsene er valgt for behandling $behandlingId
         | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |""" +
         hentValgteBegrunnelserRader(vedtaksperioder)
 
@@ -296,6 +299,7 @@ fun hentTekstBrevPerioder(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ) =
     """
+
     Så forvent følgende brevperioder for behandling $behandlingId
         | Brevperiodetype  | Fra dato   | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |""" +
         hentBrevPeriodeRader(vedtaksperioder)
@@ -303,19 +307,19 @@ fun hentTekstBrevPerioder(
 fun hentBrevPeriodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
-      | | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | | | | |"""
+        | | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | | | | |"""
     }
 
 fun hentBrevBegrunnelseTekster(
     behandlingId: Long?,
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ): String {
-    return vedtaksperioder.joinToString("") { vedtaksperiode ->
+    return vedtaksperioder.filter { it.begrunnelser.isNotEmpty() }.joinToString("") { vedtaksperiode ->
         """
 
     Så forvent følgende brevbegrunnelser for behandling $behandlingId i periode ${vedtaksperiode.fom?.tilddMMyyyy() ?: "-"} til ${vedtaksperiode.tom?.tilddMMyyyy() ?: "-"}
         | Begrunnelse                   | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |""" +
-            (vedtaksperiode.begrunnelser.map { it.standardbegrunnelse } + vedtaksperiode.eøsBegrunnelser.map { it.begrunnelse }).map {
+            vedtaksperiode.begrunnelser.map { it.standardbegrunnelse }.joinToString("") {
                 """
         | $it |               |                      |             |                                      |         |       |                  |                         |"""
             }
