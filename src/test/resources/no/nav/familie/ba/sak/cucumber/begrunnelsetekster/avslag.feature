@@ -34,6 +34,6 @@ Egenskap: Gyldige begrunnelser for avslag
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
       |          |          | AVSLAG             |           |                         |                          |

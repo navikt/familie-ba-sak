@@ -38,7 +38,7 @@ Egenskap: Gyldige begrunnelser for etter endret utbetaling, en mor med ett barn
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                        | Ekskluderte Begrunnelser                       | Kommentar                                          |
       | 01.05.2020 | 31.01.2021 | UTBETALING         |                                                |                                                | Ingen etter endret utbetalingsbegrunnelse skal med |
       | 01.02.2021 | 31.01.2022 | UTBETALING         |                                                | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED |                                                    |
@@ -65,7 +65,7 @@ Egenskap: Gyldige begrunnelser for etter endret utbetaling, en mor med ett barn
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                       | Ekskluderte Begrunnelser |
       | 01.05.2020 | 31.01.2021 | OPPHØR             |                                               |                          |
       | 01.02.2021 | 31.03.2038 | UTBETALING         | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR |                          |

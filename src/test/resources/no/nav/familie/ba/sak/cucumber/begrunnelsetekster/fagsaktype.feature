@@ -33,7 +33,7 @@ Egenskap: Gyldige begrunnelser for fagsaktype
 
     Når vedtaksperiodene genereres for behandling 100175168
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser           |
       | 01.08.2022 | 31.08.2022 | UTBETALING         |           |                         |                                    |
       | 01.09.2022 |            | OPPHØR             |           | OPPHØR_UNDER_18_ÅR      | OPPHØR_BARNET_ER_18_ÅR_INSTITUSJON |
@@ -65,7 +65,7 @@ Egenskap: Gyldige begrunnelser for fagsaktype
 
     Når vedtaksperiodene genereres for behandling 100175169
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser            | Ekskluderte Begrunnelser |
       | 01.08.2022 | 31.08.2022 | UTBETALING         |           |                                    |                          |
       | 01.09.2022 |            | OPPHØR             |           | OPPHØR_BARNET_ER_18_ÅR_INSTITUSJON |                          |

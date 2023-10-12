@@ -266,8 +266,8 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | Fra dato | Til dato | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser | Regelverk Ekskluderte Begrunnelser | Ekskluderte Begrunnelser |
      */
-    @Så("forvent følgende standardBegrunnelser")
-    fun `forvent følgende standardBegrunnelser`(dataTable: DataTable) {
+    @Så("forvent at følgende begrunnelser er gyldige")
+    fun `forvent at følgende begrunnelser er gyldige`(dataTable: DataTable) {
         val forventedeStandardBegrunnelser = mapBegrunnelser(dataTable).toSet()
 
         forventedeStandardBegrunnelser.forEach { forventet ->

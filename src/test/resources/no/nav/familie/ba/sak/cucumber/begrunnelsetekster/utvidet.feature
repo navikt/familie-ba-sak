@@ -38,7 +38,7 @@ Egenskap: Gyldige begrunnelser for utvidet barnetrygd
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser      | Ekskluderte Begrunnelser |
       | 01.05.2023 | 30.06.2023 | UTBETALING         |           | INNVILGET_BOR_ALENE_MED_BARN | INNVILGET_SKILT          |
       | 01.07.2023 |            | OPPHØR             |           |                              |                          |

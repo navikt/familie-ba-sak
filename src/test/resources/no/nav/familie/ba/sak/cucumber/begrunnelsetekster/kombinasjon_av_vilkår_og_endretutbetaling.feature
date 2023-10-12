@@ -38,7 +38,7 @@ Egenskap: Gyldige begrunnelser for kombinasjon av utgjørende vilkår og endret 
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser                                                          |
       | 01.03.2022 | 31.05.2022 | UTBETALING         |           |                         |                                                                                   |
       | 01.06.2022 | 28.02.2023 | UTBETALING         |           |                         | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY |
@@ -76,7 +76,7 @@ Egenskap: Gyldige begrunnelser for kombinasjon av utgjørende vilkår og endret 
     Når vedtaksperiodene genereres for behandling 1
 
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                                                           | Ekskluderte Begrunnelser |
       | 01.03.2022 | 31.05.2022 | UTBETALING         |           |                                                                                   |                          |
       | 01.06.2022 | 28.02.2023 | UTBETALING         |           | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY |                          |

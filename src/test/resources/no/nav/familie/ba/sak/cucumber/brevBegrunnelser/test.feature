@@ -44,7 +44,7 @@ Egenskap: Plassholdertekst for egenskap - JezmCIgDYB
 
     Når vedtaksperiodene genereres for behandling 100179702
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk        | Inkluderte Begrunnelser                                                 | Ekskluderte Begrunnelser |
       | 01.04.2022 | 30.06.2023 | UTBETALING         |                  |                                                                         |                          |
       | 01.04.2022 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN | INNVILGET_SEKUNDÆRLAND_STANDARD, INNVILGET_TILLEGGSTEKST_NULLUTBETALING |                          |

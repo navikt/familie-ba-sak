@@ -31,7 +31,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med reduksjon
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser      | Ekskluderte Begrunnelser |
       | 01.05.2020 | 31.03.2021 | UTBETALING         |                              |                          |
       | 01.04.2021 | 31.04.2022 | UTBETALING         | REDUKSJON_AVTALE_FAST_BOSTED |                          |
@@ -53,7 +53,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med reduksjon
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser   | Ekskluderte Begrunnelser |
       | 01.05.2020 | 31.03.2021 | UTBETALING         |                           |                          |
       | 01.04.2021 |            | OPPHØR             | OPPHØR_FAST_BOSTED_AVTALE |                          |
@@ -75,7 +75,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med reduksjon
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                           | Ekskluderte Begrunnelser |
       | 01.05.2020 | 31.03.2021 | UTBETALING         |                                                   |                          |
       | 01.04.2021 |            | OPPHØR             | OPPHØR_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                          |

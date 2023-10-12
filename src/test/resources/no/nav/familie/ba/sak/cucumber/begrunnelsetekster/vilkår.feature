@@ -29,7 +29,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser |
       | 01.05.2020 | 31.03.2021 | UTBETALING         |                               |                          |
       | 01.04.2021 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER |                          |
@@ -50,7 +50,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser |
       | 01.02.2021 | 31.03.2021 | UTBETALING         | INNVILGET_BOSATT_I_RIKTET_LOVLIG_OPPHOLD |                          |
       | 01.04.2021 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER            |                          |
@@ -71,7 +71,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser      |
       | 01.05.2021 | 31.03.2022 | UTBETALING         | INNVILGET_BOR_HOS_SØKER       | REDUKSJON_IKKE_BOSATT_I_NORGE |
       | 01.04.2022 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER |                               |
@@ -92,7 +92,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser |
       | 01.05.2021 | 31.03.2022 | UTBETALING         | INNVILGET_BOR_HOS_SØKER       | REDUKSJON_FLYTTET_BARN   |
       | 01.04.2022 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER |                          |
@@ -128,7 +128,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
 
     Når vedtaksperiodene genereres for behandling 100173051
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser           |
       | 01.11.2022 | 31.01.2023 | UTBETALING         |           |                         |                                    |
       | 01.02.2023 | 28.02.2023 | UTBETALING         |           |                         |                                    |
@@ -166,7 +166,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
 
     Når vedtaksperiodene genereres for behandling 100173207
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
       | 01.04.2023 | 30.06.2023 | UTBETALING         |           |                         |                          |
       | 01.07.2023 | 31.08.2023 | UTBETALING         |           |                         |                          |
@@ -206,7 +206,7 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser      | Ekskluderte Begrunnelser |
       | 01.01.2023 | 31.01.2023 | UTBETALING         |           |                              |                          |
       | 01.02.2023 | 28.02.2023 | UTBETALING         |           | INNVILGET_BOR_ALENE_MED_BARN |                          |

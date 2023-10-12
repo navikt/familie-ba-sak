@@ -31,7 +31,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                                       | Ekskluderte Begrunnelser |
       | 01.05.2020 | 31.03.2021 | UTBETALING         | INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_FLYTTETIDSPUNKT          |                          |
       | 01.04.2021 | 31.04.2022 | UTBETALING         | INNVILGET_ANNEN_FORELDER_IKKE_SØKT_DELT_BARNETRYGD_ALLE_BARNA |                          |
@@ -53,7 +53,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                           | Ekskluderte Begrunnelser                    |
       | 01.05.2020 | 31.03.2021 | UTBETALING         | INNVILGET_BOSATT_I_RIKTET                         | INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE |
       | 01.04.2021 |            | OPPHØR             | OPPHØR_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                                             |
@@ -75,7 +75,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser |
       | 01.05.2020 | 31.03.2022 | UTBETALING         |                                          |                          |
       | 01.04.2022 |            | OPPHØR             | OPPHØR_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                          |

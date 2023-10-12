@@ -45,7 +45,7 @@ Egenskap: Gyldige begrunnelser for forskjellige brevperiodetyper
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                           | Ekskluderte Begrunnelser                             |
       | 01.09.2020 | 30.09.2020 | UTBETALING         |           | ENDRET_UTBETALING_TRE_ÅR_TILBAKE_I_TID_UTBETALING | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID |
       | 01.10.2020 |            | OPPHØR             |           |                                                   |                                                      |
@@ -64,7 +64,7 @@ Egenskap: Gyldige begrunnelser for forskjellige brevperiodetyper
 
     Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
+    Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                              | Ekskluderte Begrunnelser                          |
       | 01.09.2020 | 30.09.2020 | OPPHØR             |           | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID | ENDRET_UTBETALING_TRE_ÅR_TILBAKE_I_TID_UTBETALING |
       | 01.10.2020 |            | OPPHØR             |           |                                                      |                                                   |
