@@ -299,6 +299,7 @@ fun hentTekstBrevPerioder(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ) =
     """
+
     Så forvent følgende brevperioder for behandling $behandlingId
         | Brevperiodetype  | Fra dato   | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |""" +
         hentBrevPeriodeRader(vedtaksperioder)
