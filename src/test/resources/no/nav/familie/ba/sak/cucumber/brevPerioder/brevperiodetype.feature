@@ -42,7 +42,7 @@ Egenskap: Brevperioder: Brevperiodetype
       | AktørId | Fra dato   | Til dato | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 1       | 01.04.2022 |          | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | PL                             | PL                  |
 
-    Og med vedtaksperioder for behandling 1
+    Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser | Eøsbegrunnelser                 | Fritekster |
       | 01.04.2022 | 30.06.2023 |                      | INNVILGET_SEKUNDÆRLAND_STANDARD |            |
 

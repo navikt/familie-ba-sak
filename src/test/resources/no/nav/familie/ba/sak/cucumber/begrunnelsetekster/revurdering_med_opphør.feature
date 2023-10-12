@@ -46,8 +46,8 @@ Egenskap: Gyldige begrunnelser for revurdering med opphør
       | 4567    | 2            | 01.07.2023 | 01.08.2023 | 1766  | ORDINÆR_BARNETRYGD | 100     |
       | 1234    | 2            | 01.07.2023 | 01.08.2023 | 2516  | UTVIDET_BARNETRYGD | 100     |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser |
       | 01.09.2023 |          | OPPHØR             |           | OPPHØR_BARN_FLYTTET_FRA_SØKER |                          |

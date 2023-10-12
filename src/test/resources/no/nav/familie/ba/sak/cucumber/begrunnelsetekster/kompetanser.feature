@@ -32,10 +32,10 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | 3456    | 01.05.2020 | 30.04.2021 | NORGE_ER_PRIMÆRLAND   | 1            | IKKE_AKTUELT              | NO                  |
       | 3456    | 01.05.2021 | 31.03.2038 | NORGE_ER_SEKUNDÆRLAND | 1            | I_ARBEID                  | PL                  |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                            | Ekskluderte Begrunnelser                              |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                               | Ugyldige begrunnelser                                 |
       | 01.05.2020 | 30.04.2021 | Utbetaling         | EØS_FORORDNINGEN                  | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_JOBBER_I_NORGE    |
       | 01.05.2021 | 31.03.2038 | Utbetaling         | EØS_FORORDNINGEN                  | INNVILGET_SEKUNDÆRLAND_STANDARD                    | INNVILGET_SEKUNDÆRLAND_TO_ARBEIDSLAND_NORGE_UTBETALER |
       | 01.04.2038 |            | Opphør             |                                   |                                                    |                                                       |
@@ -73,10 +73,10 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | 2013549321777 | 01.04.2023 | 01.07.2023 | NORGE_ER_PRIMÆRLAND   | 100173206    | INAKTIV                   | NO                  |
       | 2013549321777 | 01.08.2023 |            | NORGE_ER_SEKUNDÆRLAND | 100173206    | I_ARBEID                  | GB                  |
 
-    Når begrunnelsetekster genereres for behandling 100173206
+    Når vedtaksperiodene genereres for behandling 100173206
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser | Ekskluderte Begrunnelser      |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser | Ugyldige begrunnelser         |
       | 01.04.2023 | 30.06.2023 | UTBETALING         |                                   |                         |                               |
       | 01.07.2023 | 31.07.2023 | UTBETALING         | EØS_FORORDNINGEN                  |                         | INNVILGET_PRIMÆRLAND_STANDARD |
       | 01.08.2023 | 31.01.2033 | UTBETALING         |                                   |                         |                               |
@@ -113,10 +113,10 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | AktørId       | Fra dato   | Til dato   | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 2005858678161 | 01.04.2023 | 31.08.2023 | NORGE_ER_PRIMÆRLAND | 100173207    | ARBEIDER         | MOTTAR_PENSJON            | NO                    | BE                             | NO                  |
 
-    Når begrunnelsetekster genereres for behandling 100173207
+    Når vedtaksperiodene genereres for behandling 100173207
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser            | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser               | Ugyldige begrunnelser |
       | 01.04.2023 | 30.06.2023 | UTBETALING         |                                   |                                    |                          |
       | 01.07.2023 | 31.08.2023 | UTBETALING         |                                   |                                    |                          |
       | 01.09.2023 |            | OPPHØR             | EØS_FORORDNINGEN                  | OPPHØR_IKKE_STATSBORGER_I_EØS_LAND |                          |
@@ -177,10 +177,10 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | 1234    | 01.03.2021 | 30.04.2023 | NORGE_ER_PRIMÆRLAND | 2            | ARBEIDER          | INAKTIV                   | NO                    | BE                             | NO                  |
       | 1234    | 01.05.2023 |            | NORGE_ER_PRIMÆRLAND | 2            | MOTTAR_UFØRETRYGD | INAKTIV                   | NO                    | EE                             | NO                  |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                 | Ekskluderte Begrunnelser                                                                       |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                    | Ugyldige begrunnelser                                                                          |
       | 01.05.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN                  | INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE | REDUKSJON_BARN_DØD_EØS, REDUKSJON_IKKE_ANSVAR_FOR_BARN, FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD |
       | 01.07.2023 | 31.01.2033 | UTBETALING         |                                   |                                         |                                                                                                |
       | 01.02.2033 |            | OPPHØR             |                                   |                                         |                                                                                                |

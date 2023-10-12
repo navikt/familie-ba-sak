@@ -168,8 +168,8 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | Fra dato | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |
      */
-    @Og("med vedtaksperioder for behandling {}")
-    fun `med vedtaksperioder`(behandlingId: Long, dataTable: DataTable) {
+    @Og("når disse begrunnelsene er valgt for behandling {}")
+    fun `når disse begrunnelsene er valgt for behandling`(behandlingId: Long, dataTable: DataTable) {
         val vedtaksperioder = genererVedtaksperioderForBehandling(behandlingId)
 
         vedtaksperioderMedBegrunnelser = leggBegrunnelserIVedtaksperiodene(
@@ -179,8 +179,8 @@ class BegrunnelseTeksterStepDefinition {
         )
     }
 
-    @Når("begrunnelsetekster genereres for behandling {}")
-    fun `generer begrunnelsetekst for `(behandlingId: Long) {
+    @Når("vedtaksperiodene genereres for behandling {}")
+    fun `generer vedtaksperioder for `(behandlingId: Long) {
         utvidetVedtaksperiodeMedBegrunnelser = genererVedtaksperioderForBehandling(behandlingId)
     }
 
@@ -264,10 +264,10 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     /**
-     * Mulige verdier: | Fra dato | Til dato | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser | Regelverk Ekskluderte Begrunnelser | Ekskluderte Begrunnelser |
+     * Mulige verdier: | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser | Regelverk Ugyldige begrunnelser | Ugyldige begrunnelser |
      */
-    @Så("forvent følgende standardBegrunnelser")
-    fun `forvent følgende standardBegrunnelser`(dataTable: DataTable) {
+    @Så("forvent at følgende begrunnelser er gyldige")
+    fun `forvent at følgende begrunnelser er gyldige`(dataTable: DataTable) {
         val forventedeStandardBegrunnelser = mapBegrunnelser(dataTable).toSet()
 
         forventedeStandardBegrunnelser.forEach { forventet ->
