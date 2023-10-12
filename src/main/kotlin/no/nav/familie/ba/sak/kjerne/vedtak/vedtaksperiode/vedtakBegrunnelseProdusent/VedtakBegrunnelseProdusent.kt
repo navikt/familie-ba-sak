@@ -173,13 +173,16 @@ private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
     val tidslinjeMedVedtaksperioden = this.tilTidslinjeForAktuellPeriode()
 
     return behandlingsGrunnlagForVedtaksperioder.persongrunnlag.personer.associateWith { person ->
-        val avslagsbegrunnelserTisdlinje =
-            behandlingsGrunnlagForVedtaksperioder.personResultater.single { it.aktør == person.aktør }.vilkårResultater.filter { it.erEksplisittAvslagPåSøknad == true }
-                .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
-                .kombiner { vilkårResultaterIPeriode -> vilkårResultaterIPeriode.flatMap { it.standardbegrunnelser } }
+        val vilkårResultaterForPerson = behandlingsGrunnlagForVedtaksperioder
+            .personResultater.firstOrNull { it.aktør == person.aktør }?.vilkårResultater ?: emptyList()
 
-        tidslinjeMedVedtaksperioden.kombinerMed(avslagsbegrunnelserTisdlinje) { h, v ->
-            v.takeIf { h != null }
+        val avslagsbegrunnelserTisdlinje = vilkårResultaterForPerson
+            .filter { it.erEksplisittAvslagPåSøknad == true }
+            .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
+            .kombiner { vilkårResultaterIPeriode -> vilkårResultaterIPeriode.flatMap { it.standardbegrunnelser } }
+
+        tidslinjeMedVedtaksperioden.kombinerMed(avslagsbegrunnelserTisdlinje) { vedtaksperiode, avslagsbegrunnelser ->
+            avslagsbegrunnelser.takeIf { vedtaksperiode != null }
         }.perioder().mapNotNull { it.innhold }.flatten().toSet()
     }
 }
@@ -275,10 +278,11 @@ private fun hentStandardBegrunnelser(
     return filtrertPåVilkårOgEndretUtbetaling + filtrertPåReduksjonFraForrigeBehandling + filtrertPåOpphørFraForrigeBehandling + filtrertPåSmåbarnstillegg + filtrertPåEtterEndretUtbetaling + filtrertPåHendelser
 }
 
-private fun SanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean) =
-    this.erAutomatiskBegrunnelse() == erAutomatiskBehandling
-
-private fun SanityBegrunnelse.erAutomatiskBegrunnelse() = ØvrigTrigger.ALLTID_AUTOMATISK in ovrigeTriggere
+private fun SanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean): Boolean = when {
+    this.valgbarhet != Valgbarhet.AUTOMATISK -> !erAutomatiskBehandling
+    ØvrigTrigger.ALLTID_AUTOMATISK in this.ovrigeTriggere -> erAutomatiskBehandling
+    else -> true
+}
 
 fun ISanityBegrunnelse.erGjeldendeForFagsakType(
     fagsakType: FagsakType,

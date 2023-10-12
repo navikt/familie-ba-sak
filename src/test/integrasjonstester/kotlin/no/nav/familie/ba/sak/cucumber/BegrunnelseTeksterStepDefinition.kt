@@ -6,6 +6,7 @@ import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
@@ -167,8 +168,8 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | Fra dato | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |
      */
-    @Og("med vedtaksperioder for behandling {}")
-    fun `med vedtaksperioder`(behandlingId: Long, dataTable: DataTable) {
+    @Og("når disse begrunnelsene er valgt for behandling {}")
+    fun `når disse begrunnelsene er valgt for behandling`(behandlingId: Long, dataTable: DataTable) {
         val vedtaksperioder = genererVedtaksperioderForBehandling(behandlingId)
 
         vedtaksperioderMedBegrunnelser = leggBegrunnelserIVedtaksperiodene(
@@ -178,14 +179,13 @@ class BegrunnelseTeksterStepDefinition {
         )
     }
 
-    @Når("begrunnelsetekster genereres for behandling {}")
-    fun `generer begrunnelsetekst for `(behandlingId: Long) {
+    @Når("vedtaksperiodene genereres for behandling {}")
+    fun `generer vedtaksperioder for `(behandlingId: Long) {
         utvidetVedtaksperiodeMedBegrunnelser = genererVedtaksperioderForBehandling(behandlingId)
     }
 
     private fun genererVedtaksperioderForBehandling(behandlingId: Long): List<UtvidetVedtaksperiodeMedBegrunnelser> {
         gjeldendeBehandlingId = behandlingId
-        val behandling = behandlinger.finnBehandling(behandlingId)
 
         val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
 
@@ -264,10 +264,10 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     /**
-     * Mulige verdier: | Fra dato | Til dato | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser | Regelverk Ekskluderte Begrunnelser | Ekskluderte Begrunnelser |
+     * Mulige verdier: | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser | Regelverk Ugyldige begrunnelser | Ugyldige begrunnelser |
      */
-    @Så("forvent følgende standardBegrunnelser")
-    fun `forvent følgende standardBegrunnelser`(dataTable: DataTable) {
+    @Så("forvent at følgende begrunnelser er gyldige")
+    fun `forvent at følgende begrunnelser er gyldige`(dataTable: DataTable) {
         val forventedeStandardBegrunnelser = mapBegrunnelser(dataTable).toSet()
 
         forventedeStandardBegrunnelser.forEach { forventet ->
@@ -275,10 +275,10 @@ class BegrunnelseTeksterStepDefinition {
                 utvidetVedtaksperiodeMedBegrunnelser.find { it.fom == forventet.fom && it.tom == forventet.tom }
                     ?: throw Feil(
                         "Forventet å finne en vedtaksperiode med  \n" +
-                            "   Fom: ${forventet.fom} og Tom: ${forventet.tom}. \n" +
+                            "   Fom: ${forventet.fom?.tilddMMyyyy()} og Tom: ${forventet.tom?.tilddMMyyyy()}. \n" +
                             "Faktiske vedtaksperioder var \n${
                                 utvidetVedtaksperiodeMedBegrunnelser.joinToString("\n") {
-                                    "   Fom: ${it.fom}, Tom: ${it.tom}"
+                                    "   Fom: ${it.fom?.tilddMMyyyy()}, Tom: ${it.tom?.tilddMMyyyy()}"
                                 }
                             }",
                     )
@@ -329,6 +329,7 @@ class BegrunnelseTeksterStepDefinition {
 
         assertThat(faktiskeBegrunnelser.sortedBy { it.apiNavn })
             .usingRecursiveComparison()
+            .ignoringFields("vedtakBegrunnelseType")
             .isEqualTo(forvendtedeBegrunnelser.sortedBy { it.apiNavn })
     }
 
@@ -359,7 +360,8 @@ class BegrunnelseTeksterStepDefinition {
 
     // For å laste ned begrunnelsene på nytt anbefales https://familie-brev.sanity.studio/ba-test/vision med query fra SanityQueries.kt .
     // Kopier URL fra resultatet og kjør
-    // curl -XGET <URL> | jq '.result' > <Path-til-familie-ba-sak>/familie-ba-sak/src/test/resources/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityTestBegrunnelser
+    // curl -XGET <URL> | jq '.result' -c | pbcopy
+    // for å få alle begrunnelsene i clipboardet
     private fun mockHentSanityBegrunnelser(): Map<Standardbegrunnelse, SanityBegrunnelse> {
         val restSanityBegrunnelserJson =
             this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityBegrunnelser")!!

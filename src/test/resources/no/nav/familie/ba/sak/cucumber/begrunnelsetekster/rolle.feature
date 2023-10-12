@@ -36,10 +36,10 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                     | Ugyldige begrunnelser |
       | 01.05.2020 | 31.05.2020 | UTBETALING         |                                          |                          |
       | 01.06.2020 |            | OPPHØR             | OPPHØR_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                          |
 
@@ -59,10 +59,10 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser | Ekskluderte Begrunnelser                |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser | Ugyldige begrunnelser                   |
       | 01.05.2020 | 31.05.2020 | UTBETALING         |                         | FORTSATT_INNVILGET_SØKER_BOSATT_I_RIKET |
       | 01.06.2020 | 31.03.2038 | UTBETALING         |                         | FORTSATT_INNVILGET_SØKER_BOSATT_I_RIKET |
       | 01.04.2038 |            | OPPHØR             |                         |                                         |
@@ -80,9 +80,9 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 4567    | 01.05.2020 | 31.05.2022 | 1354  | 2            |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                     | Ugyldige begrunnelser |
       | 01.05.2020 | 31.05.2022 | UTBETALING         |                                          |                          |
       | 01.06.2022 |            | OPPHØR             | OPPHØR_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                          |

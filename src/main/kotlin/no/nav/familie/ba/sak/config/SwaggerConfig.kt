@@ -41,6 +41,12 @@ class SwaggerConfig(
             .build()
     }
 
+    @Bean
+    fun forvalterOpenApi(): GroupedOpenApi {
+        return GroupedOpenApi.builder().group("forvalter").packagesToScan("no.nav.familie.ba.sak.internal", "no.nav.familie.prosessering.rest")
+            .build()
+    }
+
     private fun securitySchemes(): SecurityScheme {
         return SecurityScheme()
             .name("oauth2")

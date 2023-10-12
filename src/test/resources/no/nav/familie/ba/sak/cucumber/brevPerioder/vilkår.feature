@@ -27,7 +27,7 @@ Egenskap: Brevperioder ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2021 | 1354  | 1            |
 
-    Og med vedtaksperioder for behandling 1
+    Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato | Standardbegrunnelser          | Eøsbegrunnelser | Fritekster |
       | 01.04.2021 |          | OPPHØR_BARN_FLYTTET_FRA_SØKER |                 |            |
 
