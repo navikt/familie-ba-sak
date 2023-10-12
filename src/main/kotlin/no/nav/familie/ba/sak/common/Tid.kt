@@ -199,14 +199,14 @@ fun RestVilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
     this.periodeFom,
     this.periodeTom,
     this.erEksplisittAvslagPåSøknad,
-    this.erResultatBegrunnelseEksplisittIkkeAktuell()
+    this.erResultatBegrunnelseEksplisittIkkeAktuell(),
 )
 
 fun VilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
     this.periodeFom,
     this.periodeTom,
     this.erEksplisittAvslagPåSøknad,
-    this.erResultatBegrunnelseEksplisittIkkeAktuell()
+    this.erResultatBegrunnelseEksplisittIkkeAktuell(),
 )
 
 fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean {
