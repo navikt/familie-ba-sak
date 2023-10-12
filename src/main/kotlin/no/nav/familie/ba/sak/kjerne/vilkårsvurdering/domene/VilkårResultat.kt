@@ -199,7 +199,7 @@ class VilkårResultat(
 
     fun erOppfylt() = this.resultat == Resultat.OPPFYLT
 
-    fun erResultatBegrunnelseEksplisittIkkeAktuell() = ResultatBegrunnelse.IKKE_AKTUELT.name.equals(this.resultatBegrunnelse)
+    fun erResultatBegrunnelseEksplisittIkkeAktuell() = ResultatBegrunnelse.IKKE_AKTUELT.name.equals(this.resultatBegrunnelse?.name)
 
     companion object {
 
