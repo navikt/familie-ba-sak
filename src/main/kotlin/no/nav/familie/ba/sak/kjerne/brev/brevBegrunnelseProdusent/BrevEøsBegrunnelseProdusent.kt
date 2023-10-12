@@ -44,10 +44,11 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
         null -> error("Feltet 'periodeResultat' er ikke satt for begrunnelse fra sanity '${sanityBegrunnelse.apiNavn}'.")
     }
 
+    val personerIBegrunnelse = personerGjeldeneForBegrunnelse
+    val barnPåBehandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
+    val barnIBegrunnelse = personerGjeldeneForBegrunnelse.filter { it.type == PersonType.BARN }
+
     return if (kompetanser.isEmpty() && sanityBegrunnelse.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {
-        val personerIBegrunnelse = personerGjeldeneForBegrunnelse
-        val barnPåBehandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
-        val barnIBegrunnelse = personerGjeldeneForBegrunnelse.filter { it.type == PersonType.BARN }
         val gjelderSøker = personerIBegrunnelse.any { it.type == PersonType.SØKER }
 
         val barnasFødselsdatoer = hentBarnasFødselsdatoerForAvslagsbegrunnelse(
@@ -75,12 +76,8 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
                 annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
                 annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland?.tilLandNavn(landkoder)?.navn,
                 barnetsBostedsland = kompetanse.barnetsBostedsland.tilLandNavn(landkoder).navn,
-                barnasFodselsdatoer = Utils.slåSammen(
-                    kompetanse.barnAktører.map { aktør ->
-                        grunnlag.hent(aktør).fødselsdato.tilKortString()
-                    },
-                ),
-                antallBarn = kompetanse.barnAktører.size,
+                barnasFodselsdatoer = Utils.slåSammen(barnIBegrunnelse.map { it.fødselsdato.tilKortString() }),
+                antallBarn = barnIBegrunnelse.size,
                 maalform = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform.tilSanityFormat(),
                 sokersAktivitet = kompetanse.søkersAktivitet,
                 sokersAktivitetsland = kompetanse.søkersAktivitetsland.tilLandNavn(landkoder).navn,
