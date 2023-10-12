@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilIKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -314,15 +315,17 @@ fun hentBrevBegrunnelseTekster(
     behandlingId: Long?,
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ): String {
-    return vedtaksperioder.joinToString("") { vedtaksperiode ->
+    return vedtaksperioder.filter { it.alleBegrunnelser().isNotEmpty() }.joinToString("") { vedtaksperiode ->
         """
 
     Så forvent følgende brevbegrunnelser for behandling $behandlingId i periode ${vedtaksperiode.fom?.tilddMMyyyy() ?: "-"} til ${vedtaksperiode.tom?.tilddMMyyyy() ?: "-"}
         | Begrunnelse                   | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |""" +
-            (vedtaksperiode.begrunnelser.map { it.standardbegrunnelse } + vedtaksperiode.eøsBegrunnelser.map { it.begrunnelse })
-                .joinToString("") {
-                    """
+            vedtaksperiode.alleBegrunnelser().joinToString("") {
+                """
         | $it |               |                      |             |                                      |         |       |                  |                         |"""
-                }
+            }
     }
 }
+
+private fun VedtaksperiodeMedBegrunnelser.alleBegrunnelser(): List<IVedtakBegrunnelse> =
+    begrunnelser.map { it.standardbegrunnelse } + eøsBegrunnelser.map { it.begrunnelse }
