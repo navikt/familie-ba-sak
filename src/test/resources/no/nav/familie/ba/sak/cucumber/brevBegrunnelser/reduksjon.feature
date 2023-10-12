@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Brevbegrunnelser ved reduksjon EØS
+Egenskap: Brevbegrunnelser ved reduksjon
 
   Bakgrunn:
     Gitt følgende fagsaker for begrunnelse
@@ -77,3 +77,46 @@ Egenskap: Brevbegrunnelser ved reduksjon EØS
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.04.2023 til 30.06.2023
       | Begrunnelse                    | Type | Barnas fødselsdatoer | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet |
       | REDUKSJON_IKKE_ANSVAR_FOR_BARN | EØS  | 09.04.05             | 1           | NB      | Danmark                        | Danmark             | Norge                 | I_ARBEID                  | ARBEIDER         |
+
+
+  Scenario: Reduksjon før fylt 18
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 5678    | BARN       | 18.10.2009  |
+      | 1            | 1234    | SØKER      | 30.03.1988  |
+      | 1            | 3456    | BARN       | 15.04.2005  |
+
+    Og følgende dagens dato 12.10.2023
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 3456    | GIFT_PARTNERSKAP                            |                  | 15.04.2005 |            | OPPFYLT  | Nei                  |
+      | 3456    | UNDER_18_ÅR                                 |                  | 15.04.2005 | 14.04.2023 | OPPFYLT  | Nei                  |
+      | 3456    | BOR_MED_SØKER                               |                  | 01.03.2022 | 27.06.2022 | OPPFYLT  | Nei                  |
+      | 3456    | BOSATT_I_RIKET,LOVLIG_OPPHOLD               |                  | 01.03.2022 |            | OPPFYLT  | Nei                  |
+
+      | 1234    | BOSATT_I_RIKET,LOVLIG_OPPHOLD               |                  | 01.03.2022 |            | OPPFYLT  | Nei                  |
+
+      | 5678    | GIFT_PARTNERSKAP                            |                  | 18.10.2009 |            | OPPFYLT  | Nei                  |
+      | 5678    | UNDER_18_ÅR                                 |                  | 18.10.2009 | 17.10.2027 | OPPFYLT  | Nei                  |
+      | 5678    | BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.03.2022 |            | OPPFYLT  | Nei                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 3456    | 1            | 01.04.2022 | 30.06.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 5678    | 1            | 01.04.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 5678    | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 5678    | 1            | 01.07.2023 | 30.09.2027 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+
+    Når begrunnelsetekster genereres for behandling 1
+
+    Og med vedtaksperioder for behandling 1
+      | Fra dato   | Til dato   | Standardbegrunnelser   | Eøsbegrunnelser | Fritekster |
+      | 01.07.2022 | 28.02.2023 | REDUKSJON_FLYTTET_BARN |                 |            |
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.07.2022 til 28.02.2023
+      | Begrunnelse            | Barnas fødselsdatoer | Antall barn | Målform | Beløp | Gjelder søker | Måned og år begrunnelsen gjelder for |
+      | REDUKSJON_FLYTTET_BARN | 15.04.05             | 1           | NB      | 0     | Nei           | juni 2022                            |
+
