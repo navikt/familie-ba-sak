@@ -50,16 +50,22 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     Og følgende dagens dato ${LocalDate.now().tilddMMyyyy()}""" +
     lagPersonresultaterTekst(forrigeBehandling) +
     lagPersonresultaterTekst(behandling) +
-    hentTekstForVilkårresultater(personResultaterForrigeBehandling, forrigeBehandling?.id) +
-    hentTekstForVilkårresultater(personResultater, behandling.id) +
+    hentTekstForVilkårresultater(
+        personResultaterForrigeBehandling?.sorterPåFøselsdato(persongrunnlagForrigeBehandling!!),
+        forrigeBehandling?.id,
+    ) +
+    hentTekstForVilkårresultater(personResultater.sorterPåFøselsdato(persongrunnlag), behandling.id) +
     hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
     hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
     hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
     Når begrunnelsetekster genereres for behandling ${behandling.id}""" +
-    hentTekstForVedtaksperioder(vedtaksperioder) + """
+    hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) +
+    hentTekstValgteBegrunnelser(behandling.id, vedtaksperioder) +
+    hentTekstBrevPerioder(behandling.id, vedtaksperioder) +
+    hentBrevBegrunnelseTekster(behandling.id, vedtaksperioder) + """
 </pre> 
-    """
+"""
 
 private fun lagPersonresultaterTekst(behandling: Behandling?) = behandling?.let {
     """
@@ -102,7 +108,7 @@ private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): 
     } ?: ""
 
 fun hentTekstForVilkårresultater(
-    personResultater: Set<PersonResultat>?,
+    personResultater: List<PersonResultat>?,
     behandlingId: Long?,
 ): String {
     if (personResultater == null || behandlingId == null) {
@@ -125,7 +131,7 @@ data class VilkårResultatRad(
     val erEksplisittAvslagPåSøknad: Boolean?,
 )
 
-private fun tilVilkårResultatRader(personResultater: Set<PersonResultat>?) =
+private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
     personResultater?.joinToString("\n") { personResultat ->
         personResultat.vilkårResultater
             .sortedBy { it.periodeFom }
@@ -247,16 +253,16 @@ private fun hentKompetanseRader(kompetanser: Collection<Kompetanse>?): String =
             } |"""
         } ?: ""
 
-fun hentTekstForVedtaksperioder(
+fun hentTekstForGyligeBegrunnelserForVedtaksperiodene(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ) =
     """
         
     Så forvent følgende standardBegrunnelser
       | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |""" +
-        hentVedtaksperiodeRader(vedtaksperioder)
+        hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder)
 
-fun hentVedtaksperiodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
+fun hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
       | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.type} | | ${vedtaksperiode.begrunnelser.joinToString { it.standardbegrunnelse.name }} | |""" +
@@ -266,3 +272,52 @@ fun hentVedtaksperiodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>
                 ""
             }
     }
+
+private fun Set<PersonResultat>.sorterPåFøselsdato(persongrunnlag: PersonopplysningGrunnlag) =
+    this.sortedByDescending { personresultat -> persongrunnlag.personer.single { personresultat.aktør == it.aktør }.fødselsdato }
+
+fun hentTekstValgteBegrunnelser(
+    behandlingId: Long?,
+    vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
+) =
+    """
+    Og med vedtaksperioder for behandling $behandlingId
+        | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |""" +
+        hentValgteBegrunnelserRader(vedtaksperioder)
+
+fun hentValgteBegrunnelserRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
+    vedtaksperioder.joinToString("") { vedtaksperiode ->
+        """
+        | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | ${vedtaksperiode.begrunnelser.joinToString { it.standardbegrunnelse.name }} | ${vedtaksperiode.eøsBegrunnelser.joinToString { it.begrunnelse.name }} | ${vedtaksperiode.fritekster.joinToString()} |"""
+    }
+
+fun hentTekstBrevPerioder(
+    behandlingId: Long?,
+    vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
+) =
+    """
+    Så forvent følgende brevperioder for behandling $behandlingId
+        | Brevperiodetype  | Fra dato   | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |""" +
+        hentBrevPeriodeRader(vedtaksperioder)
+
+fun hentBrevPeriodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
+    vedtaksperioder.joinToString("") { vedtaksperiode ->
+        """
+      | | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | | | | |"""
+    }
+
+fun hentBrevBegrunnelseTekster(
+    behandlingId: Long?,
+    vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
+): String {
+    return vedtaksperioder.joinToString("") { vedtaksperiode ->
+        """
+
+    Så forvent følgende brevbegrunnelser for behandling $behandlingId i periode ${vedtaksperiode.fom?.tilddMMyyyy() ?: "-"} til ${vedtaksperiode.tom?.tilddMMyyyy() ?: "-"}
+        | Begrunnelse                   | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |""" +
+            (vedtaksperiode.begrunnelser.map { it.standardbegrunnelse } + vedtaksperiode.eøsBegrunnelser.map { it.begrunnelse }).map {
+                """
+        | $it |               |                      |             |                                      |         |       |                  |                         |"""
+            }
+    }
+}
