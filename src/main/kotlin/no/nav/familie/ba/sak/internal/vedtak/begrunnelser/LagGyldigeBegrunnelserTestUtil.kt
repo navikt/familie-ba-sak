@@ -310,11 +310,14 @@ fun hentBrevBegrunnelseTekster(
     behandlingId: Long?,
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ): String {
-    return vedtaksperioder.joinToString("") {
+    return vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
 
-    Så forvent følgende brevbegrunnelser for behandling $behandlingId i periode ${it.fom?.tilddMMyyyy() ?: "-"} til ${it.tom?.tilddMMyyyy() ?: "-"}
-      | Begrunnelse                   | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      |                               |               |                      |             |                                      |         |       |                  |                         |"""
+    Så forvent følgende brevbegrunnelser for behandling $behandlingId i periode ${vedtaksperiode.fom?.tilddMMyyyy() ?: "-"} til ${vedtaksperiode.tom?.tilddMMyyyy() ?: "-"}
+        | Begrunnelse                   | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |""" +
+            (vedtaksperiode.begrunnelser.map { it.standardbegrunnelse } + vedtaksperiode.eøsBegrunnelser.map { it.begrunnelse }).map {
+                """
+        | $it |               |                      |             |                                      |         |       |                  |                         |"""
+            }
     }
 }
