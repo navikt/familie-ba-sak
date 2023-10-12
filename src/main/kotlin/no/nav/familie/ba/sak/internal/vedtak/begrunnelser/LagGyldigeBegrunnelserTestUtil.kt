@@ -265,9 +265,11 @@ fun hentTekstForGyligeBegrunnelserForVedtaksperiodene(
 fun hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
-      | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.type} | | ${vedtaksperiode.begrunnelser.joinToString { it.standardbegrunnelse.name }} | |""" +
+        | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.type} | | ${vedtaksperiode.begrunnelser.joinToString { it.standardbegrunnelse.name }} | |""" +
             if (vedtaksperiode.eøsBegrunnelser.isNotEmpty()) {
-                """| ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.type} | EØS_FORORDNINGEN | ${vedtaksperiode.eøsBegrunnelser.joinToString { it.begrunnelse.name }} | |"""
+                """
+        | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.type} | EØS_FORORDNINGEN | ${vedtaksperiode.eøsBegrunnelser.joinToString { it.begrunnelse.name }} | |
+                """.trimIndent()
             } else {
                 ""
             }
@@ -281,6 +283,7 @@ fun hentTekstValgteBegrunnelser(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ) =
     """
+        
     Og når disse begrunnelsene er valgt for behandling $behandlingId
         | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |""" +
         hentValgteBegrunnelserRader(vedtaksperioder)
@@ -296,6 +299,7 @@ fun hentTekstBrevPerioder(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ) =
     """
+
     Så forvent følgende brevperioder for behandling $behandlingId
         | Brevperiodetype  | Fra dato   | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |""" +
         hentBrevPeriodeRader(vedtaksperioder)
@@ -303,19 +307,19 @@ fun hentTekstBrevPerioder(
 fun hentBrevPeriodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
-      | | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | | | | |"""
+        | | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | | | | |"""
     }
 
 fun hentBrevBegrunnelseTekster(
     behandlingId: Long?,
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
 ): String {
-    return vedtaksperioder.joinToString("") { vedtaksperiode ->
+    return vedtaksperioder.filter { it.begrunnelser.isNotEmpty() }.joinToString("") { vedtaksperiode ->
         """
 
     Så forvent følgende brevbegrunnelser for behandling $behandlingId i periode ${vedtaksperiode.fom?.tilddMMyyyy() ?: "-"} til ${vedtaksperiode.tom?.tilddMMyyyy() ?: "-"}
         | Begrunnelse                   | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |""" +
-            (vedtaksperiode.begrunnelser.map { it.standardbegrunnelse } + vedtaksperiode.eøsBegrunnelser.map { it.begrunnelse }).map {
+            vedtaksperiode.begrunnelser.map { it.standardbegrunnelse }.joinToString("") {
                 """
         | $it |               |                      |             |                                      |         |       |                  |                         |"""
             }
