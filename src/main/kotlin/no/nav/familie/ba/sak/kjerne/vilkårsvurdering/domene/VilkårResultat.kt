@@ -199,6 +199,8 @@ class VilkårResultat(
 
     fun erOppfylt() = this.resultat == Resultat.OPPFYLT
 
+    fun erResultatBegrunnelseEksplisittIkkeAktuell() = ResultatBegrunnelse.IKKE_AKTUELT.name.equals(this.resultatBegrunnelse)
+
     companion object {
 
         val VilkårResultatComparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.resultat }, { it.vilkårType })

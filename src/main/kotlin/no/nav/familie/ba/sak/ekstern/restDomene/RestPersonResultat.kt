@@ -42,6 +42,8 @@ data class RestVilkårResultat(
     fun erAvslagUtenPeriode() =
         this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
 
+    fun erResultatBegrunnelseEksplisittIkkeAktuell() = ResultatBegrunnelse.IKKE_AKTUELT.name.equals(this.resultatBegrunnelse)
+
     fun harFremtidigTom() = this.periodeTom == null || this.periodeTom.isAfter(LocalDate.now().sisteDagIMåned())
 }
 

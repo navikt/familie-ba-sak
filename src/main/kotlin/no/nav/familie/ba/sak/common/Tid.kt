@@ -172,6 +172,7 @@ fun lagOgValiderPeriodeFraVilkår(
     periodeFom: LocalDate?,
     periodeTom: LocalDate?,
     erEksplisittAvslagPåSøknad: Boolean? = null,
+    resultatBegrunnelseErEksplisittIkkeAktuelt: Boolean,
 ): Periode {
     return when {
         periodeFom !== null -> {
@@ -181,7 +182,7 @@ fun lagOgValiderPeriodeFraVilkår(
             )
         }
 
-        erEksplisittAvslagPåSøknad == true && periodeTom == null -> {
+        (erEksplisittAvslagPåSøknad == true || resultatBegrunnelseErEksplisittIkkeAktuelt) && periodeTom == null -> {
             Periode(
                 fom = TIDENES_MORGEN,
                 tom = TIDENES_ENDE,
@@ -189,7 +190,7 @@ fun lagOgValiderPeriodeFraVilkår(
         }
 
         else -> {
-            throw FunksjonellFeil("Ugyldig periode. Periode må ha t.o.m.-dato eller være et avslag uten datoer.")
+            throw FunksjonellFeil("Ugyldig periode. Periode må ha t.o.m.-dato, eller være et avslag uten datoer eller begrunnelse ikke aktuelt.")
         }
     }
 }
@@ -198,12 +199,14 @@ fun RestVilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
     this.periodeFom,
     this.periodeTom,
     this.erEksplisittAvslagPåSøknad,
+    this.erResultatBegrunnelseEksplisittIkkeAktuell()
 )
 
 fun VilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
     this.periodeFom,
     this.periodeTom,
     this.erEksplisittAvslagPåSøknad,
+    this.erResultatBegrunnelseEksplisittIkkeAktuell()
 )
 
 fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean {
