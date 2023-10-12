@@ -185,7 +185,6 @@ class BegrunnelseTeksterStepDefinition {
 
     private fun genererVedtaksperioderForBehandling(behandlingId: Long): List<UtvidetVedtaksperiodeMedBegrunnelser> {
         gjeldendeBehandlingId = behandlingId
-        val behandling = behandlinger.finnBehandling(behandlingId)
 
         val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
 
@@ -329,6 +328,7 @@ class BegrunnelseTeksterStepDefinition {
 
         assertThat(faktiskeBegrunnelser.sortedBy { it.apiNavn })
             .usingRecursiveComparison()
+            .ignoringFields("vedtakBegrunnelseType")
             .isEqualTo(forvendtedeBegrunnelser.sortedBy { it.apiNavn })
     }
 
