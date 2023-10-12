@@ -18,6 +18,7 @@ data class MinimertVilkårResultat(
     val resultat: Resultat,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
     val erEksplisittAvslagPåSøknad: Boolean?,
+    val erResultatBegrunnelseEksplisittIkkeAktuell: Boolean,
     @JsonDeserialize(using = IVedtakBegrunnelseDeserializer::class)
     val standardbegrunnelser: List<IVedtakBegrunnelse>,
 ) {
@@ -26,6 +27,7 @@ data class MinimertVilkårResultat(
         this.periodeFom,
         this.periodeTom,
         this.erEksplisittAvslagPåSøknad,
+        this.erResultatBegrunnelseEksplisittIkkeAktuell,
     )
 }
 
@@ -38,4 +40,5 @@ fun VilkårResultat.tilMinimertVilkårResultat() =
         utdypendeVilkårsvurderinger = this.utdypendeVilkårsvurderinger,
         erEksplisittAvslagPåSøknad = this.erEksplisittAvslagPåSøknad,
         standardbegrunnelser = this.standardbegrunnelser,
+        erResultatBegrunnelseEksplisittIkkeAktuell = this.erResultatBegrunnelseEksplisittIkkeAktuell(),
     )

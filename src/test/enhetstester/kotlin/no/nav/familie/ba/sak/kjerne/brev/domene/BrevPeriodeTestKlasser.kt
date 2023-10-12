@@ -126,6 +126,7 @@ data class BrevPeriodeTestPerson(
                         utdypendeVilkårsvurderinger = emptyList(),
                         erEksplisittAvslagPåSøknad = false,
                         standardbegrunnelser = emptyList(),
+                        erResultatBegrunnelseEksplisittIkkeAktuell = false,
                     )
                 }
 }
