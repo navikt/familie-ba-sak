@@ -6,6 +6,7 @@ import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
@@ -275,10 +276,10 @@ class BegrunnelseTeksterStepDefinition {
                 utvidetVedtaksperiodeMedBegrunnelser.find { it.fom == forventet.fom && it.tom == forventet.tom }
                     ?: throw Feil(
                         "Forventet å finne en vedtaksperiode med  \n" +
-                            "   Fom: ${forventet.fom} og Tom: ${forventet.tom}. \n" +
+                            "   Fom: ${forventet.fom?.tilddMMyyyy()} og Tom: ${forventet.tom?.tilddMMyyyy()}. \n" +
                             "Faktiske vedtaksperioder var \n${
                                 utvidetVedtaksperiodeMedBegrunnelser.joinToString("\n") {
-                                    "   Fom: ${it.fom}, Tom: ${it.tom}"
+                                    "   Fom: ${it.fom?.tilddMMyyyy()}, Tom: ${it.tom?.tilddMMyyyy()}"
                                 }
                             }",
                     )
