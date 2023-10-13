@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetaling
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilIKompetanse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -33,7 +34,8 @@ fun lagGyldigeBegrunnelserTest(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
     kompetanse: Collection<Kompetanse>,
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
-) = """
+): String {
+    var test = """
 <pre>
 # language: no
 # encoding: UTF-8
@@ -41,32 +43,40 @@ fun lagGyldigeBegrunnelserTest(
 Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric(10)}
 
   Bakgrunn:""" +
-    hentTekstForFagsak(behandling) +
-    hentTekstForBehandlinger(behandling, forrigeBehandling) +
-    hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
-    """
+        hentTekstForFagsak(behandling) +
+        hentTekstForBehandlinger(behandling, forrigeBehandling) +
+        hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
+        """
       
   Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
     Og følgende dagens dato ${LocalDate.now().tilddMMyyyy()}""" +
-    lagPersonresultaterTekst(forrigeBehandling) +
-    lagPersonresultaterTekst(behandling) +
-    hentTekstForVilkårresultater(
-        personResultaterForrigeBehandling?.sorterPåFøselsdato(persongrunnlagForrigeBehandling!!),
-        forrigeBehandling?.id,
-    ) +
-    hentTekstForVilkårresultater(personResultater.sorterPåFøselsdato(persongrunnlag), behandling.id) +
-    hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
-    hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
-    hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
+        lagPersonresultaterTekst(forrigeBehandling) +
+        lagPersonresultaterTekst(behandling) +
+        hentTekstForVilkårresultater(
+            personResultaterForrigeBehandling?.sorterPåFøselsdato(persongrunnlagForrigeBehandling!!),
+            forrigeBehandling?.id,
+        ) +
+        hentTekstForVilkårresultater(personResultater.sorterPåFøselsdato(persongrunnlag), behandling.id) +
+        hentTekstForTilkjentYtelse(andeler, persongrunnlag, andelerForrigeBehandling, persongrunnlagForrigeBehandling) +
+        hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
+        hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
     Når vedtaksperiodene genereres for behandling ${behandling.id}""" +
-    hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) +
-    hentTekstValgteBegrunnelser(behandling.id, vedtaksperioder) +
-    hentTekstBrevPerioder(behandling.id, vedtaksperioder) +
-    hentBrevBegrunnelseTekster(behandling.id, vedtaksperioder) +
-    hentEØSBrevBegrunnelseTekster(behandling.id, vedtaksperioder) + """
+        hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) +
+        hentTekstValgteBegrunnelser(behandling.id, vedtaksperioder) +
+        hentTekstBrevPerioder(behandling.id, vedtaksperioder) +
+        hentBrevBegrunnelseTekster(behandling.id, vedtaksperioder) +
+        hentEØSBrevBegrunnelseTekster(behandling.id, vedtaksperioder) + """
 </pre> 
 """
+    val personerSomTestes: Set<Person> =
+        persongrunnlag.personer.toSet() + (persongrunnlagForrigeBehandling?.personer?.toSet() ?: emptySet())
+    val indekserteAktørIder =
+        personerSomTestes.sortedBy { it.fødselsdato }.mapIndexed { i, p -> Pair(p.aktør.aktørId, i + 1) }.toMap()
+
+    indekserteAktørIder.forEach { test = test.replace(it.key, it.value.toString()) }
+    return test
+}
 
 private fun lagPersonresultaterTekst(behandling: Behandling?) = behandling?.let {
     """
@@ -103,7 +113,7 @@ fun hentTekstForPersongrunnlag(
         hentPersongrunnlagRader(persongrunnlag)
 
 private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): String =
-    persongrunnlag?.personer?.joinToString("") {
+    persongrunnlag?.personer?.sortedBy { it.fødselsdato }?.joinToString("") {
         """
       | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|"""
     } ?: ""
@@ -155,25 +165,34 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
 
 fun hentTekstForTilkjentYtelse(
     andeler: List<AndelTilkjentYtelse>,
+    persongrunnlag: PersonopplysningGrunnlag,
     andelerForrigeBehandling: List<AndelTilkjentYtelse>?,
+    persongrunnlagForrigeBehandling: PersonopplysningGrunnlag?,
 ) =
     """
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats | """ +
-        hentAndelRader(andelerForrigeBehandling) +
-        hentAndelRader(andeler)
+        hentAndelRader(andelerForrigeBehandling, persongrunnlagForrigeBehandling) +
+        hentAndelRader(andeler, persongrunnlag)
 
-private fun hentAndelRader(andeler: List<AndelTilkjentYtelse>?): String = andeler
-    ?.sortedWith(compareBy({ it.aktør.aktivFødselsnummer() }, { it.stønadFom }, { it.stønadTom }))
-    ?.joinToString("") {
-        """
+private fun hentAndelRader(andeler: List<AndelTilkjentYtelse>?, persongrunnlag: PersonopplysningGrunnlag?): String =
+    andeler
+        ?.sortedWith(
+            compareBy(
+                { persongrunnlag?.personer?.single { person -> person.aktør == it.aktør }?.fødselsdato },
+                { it.stønadFom },
+                { it.stønadTom },
+            ),
+        )
+        ?.joinToString("") {
+            """
       | ${it.aktør.aktørId} |${it.behandlingId}|${
-            it.stønadFom.førsteDagIInneværendeMåned().tilddMMyyyy()
-        }|${
-            it.stønadTom.sisteDagIInneværendeMåned().tilddMMyyyy()
-        }|${it.kalkulertUtbetalingsbeløp}| ${it.type} | ${it.prosent} | ${it.sats} | """
-    } ?: ""
+                it.stønadFom.førsteDagIInneværendeMåned().tilddMMyyyy()
+            }|${
+                it.stønadTom.sisteDagIInneværendeMåned().tilddMMyyyy()
+            }|${it.kalkulertUtbetalingsbeløp}| ${it.type} | ${it.prosent} | ${it.sats} | """
+        } ?: ""
 
 fun hentTekstForEndretUtbetaling(
     endredeUtbetalinger: List<EndretUtbetalingAndel>,
