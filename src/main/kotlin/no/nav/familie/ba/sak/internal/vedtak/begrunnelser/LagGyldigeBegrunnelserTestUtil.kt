@@ -178,6 +178,7 @@ fun hentTekstForTilkjentYtelse(
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats | """ +
         hentAndelRader(andelerForrigeBehandling, persongrunnlagForrigeBehandling) +
+        "\n" +
         hentAndelRader(andeler, persongrunnlag)
 
 private fun hentAndelRader(andeler: List<AndelTilkjentYtelse>?, persongrunnlag: PersonopplysningGrunnlag?): String =
