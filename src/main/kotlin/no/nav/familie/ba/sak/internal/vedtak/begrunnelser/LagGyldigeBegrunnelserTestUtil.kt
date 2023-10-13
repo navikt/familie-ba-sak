@@ -53,10 +53,10 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
         lagPersonresultaterTekst(forrigeBehandling) +
         lagPersonresultaterTekst(behandling) +
         hentTekstForVilkårresultater(
-            personResultaterForrigeBehandling?.sorterPåFøselsdato(persongrunnlagForrigeBehandling!!),
+            personResultaterForrigeBehandling?.sorterPåFødselsdato(persongrunnlagForrigeBehandling!!),
             forrigeBehandling?.id,
         ) +
-        hentTekstForVilkårresultater(personResultater.sorterPåFøselsdato(persongrunnlag), behandling.id) +
+        hentTekstForVilkårresultater(personResultater.sorterPåFødselsdato(persongrunnlag), behandling.id) +
         hentTekstForTilkjentYtelse(andeler, persongrunnlag, andelerForrigeBehandling, persongrunnlagForrigeBehandling) +
         hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
         hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
@@ -300,7 +300,7 @@ fun hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder: List<Vedtaksp
             }
     }
 
-private fun Set<PersonResultat>.sorterPåFøselsdato(persongrunnlag: PersonopplysningGrunnlag) =
+private fun Set<PersonResultat>.sorterPåFødselsdato(persongrunnlag: PersonopplysningGrunnlag) =
     this.sortedBy { personresultat -> persongrunnlag.personer.single { personresultat.aktør == it.aktør }.fødselsdato }
 
 fun hentTekstValgteBegrunnelser(
