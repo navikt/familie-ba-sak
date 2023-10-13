@@ -74,6 +74,10 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
     val indekserteAktørIder =
         personerSomTestes.sortedBy { it.fødselsdato }.mapIndexed { i, p -> Pair(p.aktør.aktørId, i + 1) }.toMap()
 
+    val behandlinger: Map<Long, Int> =
+        listOf(forrigeBehandling?.id, behandling.id).filterNotNull().mapIndexed { i, bi -> Pair(bi, i + 1) }.toMap()
+
+    behandlinger.forEach { test = test.replace(it.key.toString(), it.value.toString()) }
     indekserteAktørIder.forEach { test = test.replace(it.key, it.value.toString()) }
     return test
 }
