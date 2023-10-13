@@ -1,10 +1,13 @@
 package no.nav.familie.ba.sak.internal
 
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,6 +35,8 @@ class ForvalterController(
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
     private val ecbService: ECBService,
+    private val testVerktøyService: TestVerktøyService,
+    private val tilgangService: TilgangService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -135,5 +140,29 @@ class ForvalterController(
             forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlinger()
         logger.info("Følgende fagsaker har flere migreringsbehandlinger og løper i ba-sak: $åpneFagsakerMedFlereMigreringsbehandlinger")
         return ResponseEntity.ok(åpneFagsakerMedFlereMigreringsbehandlinger)
+    }
+
+    @GetMapping(path = ["/behandling/{behandlingId}/begrunnelsetest"])
+    fun hentBegrunnelsetestPåBehandling(@PathVariable behandlingId: Long): String {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "hente data til test",
+        )
+
+        return testVerktøyService.hentBegrunnelsetest(behandlingId)
+            .replace("\n", System.lineSeparator())
+    }
+
+    @GetMapping(path = ["/behandling/{behandlingId}/vedtaksperiodertest"])
+    fun hentVedtaksperioderTestPåBehandling(@PathVariable behandlingId: Long): String {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "hente data til test",
+        )
+
+        return testVerktøyService.hentVedtaksperioderTest(behandlingId)
+            .replace("\n", System.lineSeparator())
     }
 }
