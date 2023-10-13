@@ -51,7 +51,7 @@ fun Standardbegrunnelse.lagBrevBegrunnelse(
         grunnlag = grunnlag,
         gjelderSøker = gjelderSøker,
         personerIBegrunnelse = personerGjeldeneForBegrunnelse,
-        personerMedUtbetaling = hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson),
+        begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
     )
 
     val antallBarn = hentAntallBarnForBegrunnelse(
@@ -125,6 +125,11 @@ private fun hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson: Map<Pers
         begrunnelseGrunnlagForPersonIPeriode.dennePerioden.andeler.toList().isNotEmpty()
     }.keys
 
+private fun hentPersonerMedAndelIForrigePeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
+    begrunnelsesGrunnlagPerPerson.filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
+        !begrunnelseGrunnlagForPersonIPeriode.forrigePeriode?.andeler?.toList().isNullOrEmpty()
+    }.keys
+
 private fun gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse: List<Person>) =
     personerGjeldeneForBegrunnelse.any { it.type == PersonType.SØKER }
 
@@ -132,19 +137,22 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     grunnlag: GrunnlagForBegrunnelse,
     gjelderSøker: Boolean,
     personerIBegrunnelse: List<Person>,
-    personerMedUtbetaling: Set<Person>,
+    begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
 ): List<LocalDate> {
     val barnPåBegrunnelse = personerIBegrunnelse.filter { it.type == PersonType.BARN }
-    val barnMedUtbetaling = personerMedUtbetaling.filter { it.type == PersonType.BARN }
-    val barnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
+    val barnMedUtbetaling =
+        hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
+    val barnMedUtbetalingIForrigeperiode =
+        hentPersonerMedAndelIForrigePeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
     val uregistrerteBarnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn
+
     return when {
-        this.erAvslagUregistrerteBarnBegrunnelse() -> grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn.mapNotNull { it.fødselsdato }
+        this.erAvslagUregistrerteBarnBegrunnelse() -> uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
 
         gjelderSøker && !this.gjelderEtterEndretUtbetaling && !this.gjelderEndretutbetaling -> {
             when (this.periodeResultat) {
                 SanityPeriodeResultat.IKKE_INNVILGET ->
-                    barnPåBehandlingen.map { it.fødselsdato } + uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
+                    barnMedUtbetalingIForrigeperiode.map { it.fødselsdato } + uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
 
                 else -> (barnMedUtbetaling + barnPåBegrunnelse).toSet().map { it.fødselsdato }
             }
