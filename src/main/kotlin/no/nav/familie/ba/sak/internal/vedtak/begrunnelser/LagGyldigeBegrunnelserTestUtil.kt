@@ -188,7 +188,7 @@ fun hentTekstForEndretUtbetaling(
         """
 
     Og med endrede utbetalinger for begrunnelse
-      | AktørId  | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |""" +
+      | AktørId  | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt |""" +
             hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
             hentEndretUtbetalingRader(endredeUtbetalinger)
     }
@@ -204,7 +204,7 @@ private fun hentEndretUtbetalingRader(endredeUtbetalinger: List<EndretUtbetaling
                 it.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
             }|${
                 it.tom.sisteDagIInneværendeMåned().tilddMMyyyy()
-            }|${it.årsak} | ${it.prosent} |"""
+            }|${it.årsak} | ${it.prosent} | ${it.søknadstidspunkt.tilddMMyyyy()} |"""
         } ?: ""
 
 fun hentTekstForKompetanse(

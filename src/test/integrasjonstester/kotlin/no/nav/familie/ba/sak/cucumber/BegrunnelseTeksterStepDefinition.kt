@@ -136,7 +136,7 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     /**
-     * Mulige verdier: | AktørId | Fra dato | Til dato | BehandlingId |  Årsak | Prosent |
+     * Mulige verdier: | AktørId | Fra dato | Til dato | BehandlingId |  Årsak | Prosent | Søknadstidspunkt |
      */
     @Og("med endrede utbetalinger for begrunnelse")
     fun `med endrede utbetalinger for begrunnelse`(dataTable: DataTable) {
