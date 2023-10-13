@@ -80,6 +80,9 @@ abstract class Tidslinje<I, T : Tidsenhet> {
             false
         }
     }
+    override fun hashCode(): Int {
+        return perioder().hashCode()
+    }
 
     override fun toString(): String =
         lagPerioder().joinToString(" | ") { it.toString() }
