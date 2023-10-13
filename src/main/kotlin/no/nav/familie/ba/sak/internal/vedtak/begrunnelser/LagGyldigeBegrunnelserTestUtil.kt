@@ -77,7 +77,7 @@ fun hentTekstForFagsak(behandling: Behandling) =
     """
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
-      | ${behandling.fagsak.id} | ${behandling.fagsak.type} |"""
+      | 1 | ${behandling.fagsak.type} |"""
 
 fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: Behandling?) =
     """
@@ -86,10 +86,10 @@ fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: Behandli
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk |${
         forrigeBehandling?.let {
             """ 
-      | ${it.id} | ${it.fagsak.id} |           | ${it.resultat} | ${it.opprettetÅrsak} | ${if (it.skalBehandlesAutomatisk) "Ja" else "Nei"} |"""
+      | ${it.id} | 1 |           | ${it.resultat} | ${it.opprettetÅrsak} | ${if (it.skalBehandlesAutomatisk) "Ja" else "Nei"} |"""
         } ?: ""
     }
-      | ${behandling.id} | ${behandling.fagsak.id} | ${forrigeBehandling?.id ?: ""} |${behandling.resultat} | ${behandling.opprettetÅrsak} | ${if (behandling.skalBehandlesAutomatisk) "Ja" else "Nei"} |"""
+      | ${behandling.id} | 1 | ${forrigeBehandling?.id ?: ""} |${behandling.resultat} | ${behandling.opprettetÅrsak} | ${if (behandling.skalBehandlesAutomatisk) "Ja" else "Nei"} |"""
 
 fun hentTekstForPersongrunnlag(
     persongrunnlag: PersonopplysningGrunnlag,
