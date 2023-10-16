@@ -23,7 +23,7 @@ object OppdragParser {
         tilkjentYtelseId: Long = 0,
     ): List<TilkjentYtelse> {
         var index = 0
-        var tilkjentYtelseId = tilkjentYtelseId
+        var tilkjentYtelseIdIterator = tilkjentYtelseId
         return dataTable.groupByBehandlingId().map { (behandlingId, rader) ->
 
             val behandling = behandlinger.getValue(behandlingId)
@@ -31,7 +31,7 @@ object OppdragParser {
             index += andeler.size
 
             val tilkjentYtelse = TilkjentYtelse(
-                id = tilkjentYtelseId++,
+                id = tilkjentYtelseIdIterator++,
                 behandling = behandling,
                 stønadFom = null,
                 stønadTom = null,
