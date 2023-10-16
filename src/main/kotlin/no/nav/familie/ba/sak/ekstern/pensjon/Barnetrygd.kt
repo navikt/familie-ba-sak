@@ -31,7 +31,7 @@ data class BarnetrygdPeriode(
     val stønadTom: YearMonth,
     val kildesystem: String = "BA",
     val pensjonstrygdet: Boolean? = null,
-    val norgeErSekundærland: Boolean? = false
+    val norgeErSekundærland: Boolean? = false,
 )
 
 enum class YtelseTypeEkstern {

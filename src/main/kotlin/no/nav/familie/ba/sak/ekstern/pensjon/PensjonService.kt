@@ -120,7 +120,7 @@ class PensjonService(
                         BigDecimal.valueOf(50L) -> YtelseProsent.DELT
                         else -> YtelseProsent.USIKKER
                     },
-                    norgeErSekundærland = andel.differanseberegnetPeriodebeløp?.let { it < 0 } ?: false
+                    norgeErSekundærland = andel.differanseberegnetPeriodebeløp?.let { it < 0 } ?: false,
                 )
             }
     }

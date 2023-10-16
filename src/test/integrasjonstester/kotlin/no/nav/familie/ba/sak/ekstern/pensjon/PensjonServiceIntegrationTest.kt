@@ -155,6 +155,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
                             stønadFom = YearMonth.now(),
                             stønadTom = YearMonth.now(),
                             kildesystem = "Infotrygd",
+                            utbetaltPerMnd = 1054,
                         ),
                     ),
                 ),
