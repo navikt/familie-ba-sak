@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Brevbegrunnelser for reduksjon ved forskjellige tidspunkt
+Egenskap: Brevbegrunnelser ved endring av utdypende vilkår
 
   Bakgrunn:
 
