@@ -26,9 +26,12 @@ data class BarnetrygdPeriode(
     val personIdent: String,
     val delingsprosentYtelse: YtelseProsent,
     val ytelseTypeEkstern: YtelseTypeEkstern?,
+    val utbetaltPerMnd: Int,
     val stønadFom: YearMonth,
     val stønadTom: YearMonth,
     val kildesystem: String = "BA",
+    val pensjonstrygdet: Boolean? = null,
+    val norgeErSekundærland: Boolean? = false
 )
 
 enum class YtelseTypeEkstern {

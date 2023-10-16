@@ -108,18 +108,19 @@ class PensjonService(
             ?: error("Finner ikke tilkjent ytelse for behandling=${behandling.id}")
         return tilkjentYtelse.andelerTilkjentYtelse
             .filter { it.stønadTom.isSameOrAfter(fraDato.toYearMonth()) }
-            .filter { it.prosent != BigDecimal.ZERO && it.kalkulertUtbetalingsbeløp != 0 }
-            .map {
+            .map { andel ->
                 BarnetrygdPeriode(
-                    ytelseTypeEkstern = it.type.tilPensjonYtelsesType(),
-                    personIdent = it.aktør.aktivFødselsnummer(),
-                    stønadFom = it.stønadFom,
-                    stønadTom = it.stønadTom,
-                    delingsprosentYtelse = when (it.prosent) {
+                    ytelseTypeEkstern = andel.type.tilPensjonYtelsesType(),
+                    personIdent = andel.aktør.aktivFødselsnummer(),
+                    utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
+                    stønadFom = andel.stønadFom,
+                    stønadTom = andel.stønadTom,
+                    delingsprosentYtelse = when (andel.prosent) {
                         BigDecimal.valueOf(100L) -> YtelseProsent.FULL
                         BigDecimal.valueOf(50L) -> YtelseProsent.DELT
                         else -> YtelseProsent.USIKKER
                     },
+                    norgeErSekundærland = andel.differanseberegnetPeriodebeløp?.let { it < 0 } ?: false
                 )
             }
     }
