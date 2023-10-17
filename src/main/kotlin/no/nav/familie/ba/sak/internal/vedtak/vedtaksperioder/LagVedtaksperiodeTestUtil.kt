@@ -70,7 +70,7 @@ private fun lagPersonresultaterTekst(behandling: Behandling?) = behandling?.let 
 
 private fun hentTekstForFagsak(behandling: Behandling) =
     """
-    Gitt følgende fagsak
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | ${behandling.fagsak.id} | ${behandling.fagsak.type} |"""
 
