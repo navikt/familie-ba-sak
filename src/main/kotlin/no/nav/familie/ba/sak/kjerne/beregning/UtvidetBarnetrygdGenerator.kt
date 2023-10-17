@@ -31,12 +31,13 @@ data class UtvidetBarnetrygdGenerator(
 
         val utvidetVilkårTidslinje = utvidetVilkår.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson(Vilkår.UTVIDET_BARNETRYGD)
 
-        val barnasAndelerFiltrertForPerioderBarnaBorMedSøker = andelerBarna.tilSeparateTidslinjerForBarna().leftJoin(tidslinjerMedPerioderBarnaBorMedSøker) { andelerBarna, barnBorMedSøker ->
-            when (barnBorMedSøker) {
-                true -> andelerBarna
-                else -> null
+        val barnasAndelerFiltrertForPerioderBarnaBorMedSøker = andelerBarna.tilSeparateTidslinjerForBarna()
+            .leftJoin(tidslinjerMedPerioderBarnaBorMedSøker) { andelBarn, barnBorMedSøker ->
+                when (barnBorMedSøker) {
+                    true -> andelBarn
+                    else -> null
+                }
             }
-        }
 
         val størsteProsentTidslinje = barnasAndelerFiltrertForPerioderBarnaBorMedSøker.values
             .kombinerUtenNullOgIkkeTom { andeler -> andeler.maxOf { it.prosent } }

@@ -14,7 +14,7 @@ import java.text.NumberFormat
 import java.util.Locale
 import java.util.Properties
 
-val nbLocale = Locale("nb", "Norway")
+val nbLocale = Locale.of("nb", "Norway")
 
 val secureLogger = LoggerFactory.getLogger("secureLogger")
 
