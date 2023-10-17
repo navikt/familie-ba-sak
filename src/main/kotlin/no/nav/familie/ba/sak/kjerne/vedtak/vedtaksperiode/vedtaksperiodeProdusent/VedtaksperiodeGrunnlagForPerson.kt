@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -103,6 +104,14 @@ data class VilkårResultatForVedtaksperiode(
 fun List<VilkårResultatForVedtaksperiode>.erLikUtenFomOgTom(other: List<VilkårResultatForVedtaksperiode>): Boolean {
     return this.map { it.copy(fom = null, tom = null) }.toSet() == other.map { it.copy(fom = null, tom = null) }.toSet()
 }
+
+fun Iterable<VilkårResultatForVedtaksperiode>.erOppfyltForBarn(): Boolean =
+    Vilkår.hentOrdinæreVilkårFor(PersonType.BARN)
+        .all { vilkår ->
+            val vilkårsresutlatet = this.find { it.vilkårType == vilkår }
+
+            vilkårsresutlatet?.resultat == Resultat.OPPFYLT
+        }
 
 data class EndretUtbetalingAndelForVedtaksperiode(
     val prosent: BigDecimal,
