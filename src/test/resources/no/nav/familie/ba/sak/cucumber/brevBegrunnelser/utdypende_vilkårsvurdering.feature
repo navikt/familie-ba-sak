@@ -5,7 +5,7 @@ Egenskap: Brevbegrunnelser ved endring av utdypende vilkår
 
   Bakgrunn:
 
-  Scenario: Skal flette inn riktige barn ved overgang til bosatt i riket med vurdert medlemskap
+  Scenario: Skal flette inn alle barna ved overgang til bosatt i riket med vurdert medlemskap for søker
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
