@@ -3,7 +3,7 @@
 
 Egenskap: Gyldige begrunnelser for fortsatt innvilget
 
-  Scenario: Skal gi begrunnelser som passer med
+  Scenario: Skal gi begrunnelser for fortsatt innvilget nasjonal, som stemmer med vilkårsvurdering
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
@@ -128,10 +128,6 @@ Egenskap: Gyldige begrunnelser for fortsatt innvilget
       | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                     | Ugyldige begrunnelser |
       |          |          | FORTSATT_INNVILGET | EØS_FORORDNINGEN               | FORTSETT_INNVILGET_SEKUNDÆRLAND_STANDARD |                       |
 
-
-    Og når disse begrunnelsene er valgt for behandling 2
-      | Fra dato | Til dato | Standardbegrunnelser | Eøsbegrunnelser                          | Fritekster |
-      |          |          |                      | FORTSETT_INNVILGET_SEKUNDÆRLAND_STANDARD |            |
 
   Scenario: Skal få tekster tilhørende EØS primærland og sekundærland ved fortsatt innvilget EØS med ulik kompetanse for barna
     Gitt følgende fagsaker for begrunnelse
