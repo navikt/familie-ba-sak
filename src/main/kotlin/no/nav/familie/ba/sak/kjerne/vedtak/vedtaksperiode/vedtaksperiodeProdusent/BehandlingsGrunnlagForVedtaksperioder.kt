@@ -290,12 +290,17 @@ private fun hentErMinstEttBarnMedUtbetalingTidslinje(
         ).map { it != null }
 
     val barnSineVilkårErOppfyltTidslinjer = personResultater
-        .filter { it.aktør != søker.aktør || søker.type == PersonType.BARN }
-        .map { personResultat ->
-            personResultat.tilTidslinjeForSplittForPerson(
-                person = persongrunnlag.barna.single { it.aktør == personResultat.aktør },
-                fagsakType = fagsakType,
-            ).map { it != null }
+        .mapNotNull { personResultat ->
+            val person = persongrunnlag.personer.single { it.aktør == personResultat.aktør }
+
+            if (person.type == PersonType.BARN) {
+                personResultat.tilTidslinjeForSplittForPerson(
+                    person = persongrunnlag.personer.single { it.aktør == personResultat.aktør },
+                    fagsakType = fagsakType,
+                ).map { it != null }
+            } else {
+                null
+            }
         }
 
     return barnSineVilkårErOppfyltTidslinjer
@@ -339,7 +344,11 @@ private fun List<VilkårResultat>.hentForskjøvedeVilkårResultaterForPersonsAnd
                 }
         }
 
-        PersonType.ANNENPART -> throw Feil("Ikke implementert for annenpart")
+        PersonType.ANNENPART -> if (this.isNotEmpty()) {
+            throw Feil("Ikke implementert for annenpart")
+        } else {
+            emptyList<Periode<List<VilkårResultat>, Måned>>().tilTidslinje()
+        }
     }
 }
 
