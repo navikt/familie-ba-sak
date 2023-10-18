@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 
 @RestController
-@RequestMapping(value = ["/internal", "/testverktoy"])
+@RequestMapping(value = ["/internal"])
 class TestVerktøyController(
     private val scheduler: AutobrevScheduler,
     private val personidentService: PersonidentService,
@@ -171,7 +171,8 @@ class TestVerktøyController(
             error("Klarer ikke å utlede miljø for redirect til fagsak")
         }
         val behandling = behandlingRepository.finnBehandling(behandlingId)
-        return ResponseEntity.status(302).location(URI.create("$hostname/fagsak/${behandling.fagsak.id}/$behandlingId/")).build()
+        return ResponseEntity.status(302)
+            .location(URI.create("$hostname/fagsak/${behandling.fagsak.id}/$behandlingId/")).build()
     }
 
     companion object {
