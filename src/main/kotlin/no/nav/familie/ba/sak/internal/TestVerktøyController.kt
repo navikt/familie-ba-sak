@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.internal
 
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
@@ -23,7 +22,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.Unprotected
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -128,34 +126,6 @@ class TestVerktøyController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
 
         return simuleringService.hentSimuleringPåBehandling(behandlingId)
-    }
-
-    @GetMapping(path = ["/behandling/{behandlingId}/begrunnelsetest"])
-    @Unprotected
-    fun hentBegrunnelsetestPåBehandling(@PathVariable behandlingId: Long): String {
-        return if (envService.erPreprod() || envService.erDev()) {
-            testVerktøyService.hentBegrunnelsetest(behandlingId)
-                .replace("\n", System.lineSeparator())
-        } else {
-            throw FunksjonellFeil(
-                httpStatus = HttpStatus.BAD_REQUEST,
-                melding = ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING,
-            )
-        }
-    }
-
-    @GetMapping(path = ["/behandling/{behandlingId}/vedtaksperiodertest"])
-    @Unprotected
-    fun hentVedtaksperioderTestPåBehandling(@PathVariable behandlingId: Long): String {
-        return if (envService.erPreprod() || envService.erDev()) {
-            testVerktøyService.hentVedtaksperioderTest(behandlingId)
-                .replace("\n", System.lineSeparator())
-        } else {
-            throw FunksjonellFeil(
-                httpStatus = HttpStatus.BAD_REQUEST,
-                melding = ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING,
-            )
-        }
     }
 
     @GetMapping("/redirect/behandling/{behandlingId}")
