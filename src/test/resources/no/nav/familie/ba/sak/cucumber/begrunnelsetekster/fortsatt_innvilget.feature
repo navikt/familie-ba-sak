@@ -3,7 +3,7 @@
 
 Egenskap: Gyldige begrunnelser for fortsatt innvilget
 
-  Bakgrunn:
+  Scenario: Skal gi begrunnelser som passer med
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
@@ -20,7 +20,6 @@ Egenskap: Gyldige begrunnelser for fortsatt innvilget
       | 2            | 1       | SØKER      | 31.10.1987  |
       | 2            | 2       | BARN       | 19.02.2011  |
 
-  Scenario: Skal gi begrunnelser som passer med
     Og følgende dagens dato 20.09.2023
     Og lag personresultater for begrunnelse for behandling 1
     Og lag personresultater for begrunnelse for behandling 2
