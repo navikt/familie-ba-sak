@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.internal.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -35,8 +36,7 @@ fun lagGyldigeBegrunnelserTest(
     kompetanse: Collection<Kompetanse>,
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
 ): String {
-    var test = """
-<pre>
+    val test = """
 # language: no
 # encoding: UTF-8
 
@@ -67,19 +67,28 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
         hentTekstBrevPerioder(behandling.id, vedtaksperioder) +
         hentBrevBegrunnelseTekster(behandling.id, vedtaksperioder) +
         hentEØSBrevBegrunnelseTekster(behandling.id, vedtaksperioder) + """
-</pre> 
 """
+    return test.anonymiser(persongrunnlag, persongrunnlagForrigeBehandling, forrigeBehandling, behandling)
+}
+
+fun String.anonymiser(
+    persongrunnlag: PersonopplysningGrunnlag,
+    persongrunnlagForrigeBehandling: PersonopplysningGrunnlag?,
+    forrigeBehandling: Behandling?,
+    behandling: Behandling,
+): String {
     val personerSomTestes: Set<Person> =
         persongrunnlag.personer.toSet() + (persongrunnlagForrigeBehandling?.personer?.toSet() ?: emptySet())
-    val indekserteAktørIder =
-        personerSomTestes.sortedBy { it.fødselsdato }.mapIndexed { i, p -> Pair(p.aktør.aktørId, i + 1) }.toMap()
+    val aktørIder = personerSomTestes.sortedBy { it.fødselsdato }.map { it.aktør.aktørId }
 
-    val behandlinger: Map<Long, Int> =
-        listOf(forrigeBehandling?.id, behandling.id).filterNotNull().mapIndexed { i, bi -> Pair(bi, i + 1) }.toMap()
+    val behandlinger = listOfNotNull(forrigeBehandling?.id, behandling.id)
 
-    behandlinger.forEach { test = test.replace(it.key.toString(), it.value.toString()) }
-    indekserteAktørIder.forEach { test = test.replace(it.key, it.value.toString()) }
-    return test
+    val testMedAnonymeAktørIder = aktørIder.foldIndexed(this) { index, acc, aktørId ->
+        acc.replace(aktørId, (index + 1).toString())
+    }
+    return behandlinger.foldIndexed(testMedAnonymeAktørIder) { index, acc, behandlingId ->
+        acc.replace(behandlingId.toString(), (index + 1).toString())
+    }
 }
 
 private fun lagPersonresultaterTekst(behandling: Behandling?) = behandling?.let {
@@ -284,7 +293,7 @@ fun hentTekstForGyligeBegrunnelserForVedtaksperiodene(
     """
         
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser |""" +
+      | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser | Ugyldige begrunnelser |""" +
         hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder)
 
 fun hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
@@ -332,7 +341,7 @@ fun hentTekstBrevPerioder(
 fun hentBrevPeriodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
-        | | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | | | | |"""
+        | | ${vedtaksperiode.fom?.tilMånedÅr() ?: ""} | ${vedtaksperiode.tom?.tilMånedÅr() ?: ""} | | | | |"""
     }
 
 fun hentBrevBegrunnelseTekster(
