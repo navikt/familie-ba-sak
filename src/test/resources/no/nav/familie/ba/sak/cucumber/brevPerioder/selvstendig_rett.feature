@@ -18,7 +18,7 @@ Egenskap: Brevperioder: Selvstendig rett
       | 1            | 2       | BARN       | 26.01.2010  |
       | 1            | 3       | BARN       | 21.04.2023  |
 
-  Scenario: Plassholdertekst for scenario - yn4WeF1lqS
+  Scenario: Skal få brevperiode og brevbegrunnelse med eldste barn flettet inn og korrekt kompetansedata
     Og følgende dagens dato 19.10.2023
     Og lag personresultater for begrunnelse for behandling 1
 
