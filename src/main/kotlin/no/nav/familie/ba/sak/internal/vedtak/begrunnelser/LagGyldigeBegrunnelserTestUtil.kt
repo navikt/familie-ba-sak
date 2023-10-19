@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.internal.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -340,7 +341,7 @@ fun hentTekstBrevPerioder(
 fun hentBrevPeriodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
-        | | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | | | | |"""
+        | | ${vedtaksperiode.fom?.tilMånedÅr() ?: ""} | ${vedtaksperiode.tom?.tilMånedÅr() ?: ""} | | | | |"""
     }
 
 fun hentBrevBegrunnelseTekster(
