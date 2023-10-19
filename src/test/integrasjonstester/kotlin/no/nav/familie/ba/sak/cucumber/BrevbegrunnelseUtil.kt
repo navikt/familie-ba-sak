@@ -68,10 +68,10 @@ fun parseStandardBegrunnelse(rad: Tabellrad) =
         antallBarnOppfyllerTriggereOgHarUtbetaling = 0,
         antallBarnOppfyllerTriggereOgHarNullutbetaling = 0,
 
-        maanedOgAarBegrunnelsenGjelderFor = parseString(
+        maanedOgAarBegrunnelsenGjelderFor = parseValgfriString(
             BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅNED_OG_ÅR_BEGRUNNELSEN_GJELDER_FOR,
             rad,
-        ),
+        ) ?: "",
         maalform = parseEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad).tilSanityFormat(),
         belop = parseString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BELØP, rad).replace(' ', ' '),
         soknadstidspunkt = parseValgfriString(
