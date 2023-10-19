@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.bisys.BisysUtvidetBarnetrygdResponse
+import no.nav.familie.ba.sak.ekstern.pensjon.BarnetrygdTilPensjonRequest
+import no.nav.familie.ba.sak.ekstern.pensjon.BarnetrygdTilPensjonResponse
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderRequest
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Component
@@ -112,6 +115,32 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
+    fun hentBarnetrygdTilPensjon(personIdent: String, fraDato: LocalDate): BarnetrygdTilPensjonResponse {
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/pensjon")
+        val body = BarnetrygdTilPensjonRequest(personIdent, fraDato)
+        return try {
+            postForEntity(uri, body)
+        } catch (ex: Exception) {
+            loggFeil(ex, uri)
+            throw RuntimeException("Henting av barnetrygd til pensjon feilet. Gav feil: ${ex.message}", ex)
+        }
+    }
+
+    @Retryable(
+        value = [Exception::class],
+        maxAttempts = 3,
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_3_MIN),
+    )
+    fun hentPersonerMedBarnetrygdTilPensjon(år: Int): List<String> {
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/pensjon?aar=$år")
+        return try {
+            getForEntity(uri)
+        } catch (ex: Exception) {
+            loggFeil(ex, uri)
+            throw RuntimeException("Henting av personer med barnetrygd feilet. Gav feil: ${ex.message}", ex)
+        }
+    }
+
     fun hentPersonerMedUtvidetBarnetrygd(år: String): SkatteetatenPersonerResponse {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet?aar=$år")
         return try {
@@ -184,7 +213,7 @@ class InfotrygdBarnetrygdClient(
     }
 
     companion object {
-
+        const val RETRY_BACKOFF_3_MIN = "\${retry.backoff.delay:180000}"
         private val logger: Logger = LoggerFactory.getLogger(InfotrygdBarnetrygdClient::class.java)
     }
 }

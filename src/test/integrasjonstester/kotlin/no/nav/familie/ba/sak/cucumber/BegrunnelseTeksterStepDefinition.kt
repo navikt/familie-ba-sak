@@ -371,7 +371,7 @@ data class SammenlignbarBegrunnelse(
 )
 
 private object SanityBegrunnelseMock {
-    // For å laste ned begrunnelsene på nytt anbefales https://familie-brev.sanity.studio/ba-test/vision med query fra SanityQueries.kt .
+    // For å laste ned begrunnelsene på nytt anbefales https://familie-brev.sanity.studio/ba-brev/vision med query fra SanityQueries.kt .
     // Kopier URL fra resultatet og kjør
     // curl -XGET <URL> | jq '.result' -c | pbcopy
     // for å få alle begrunnelsene i clipboardet
