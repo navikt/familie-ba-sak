@@ -114,7 +114,7 @@ private fun hentTekstForVilkårresultater(
     return """
         
     Og legg til nye vilkårresultater for behandling $behandlingId
-      | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag |""" +
+      | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Standardbegrunnelser |""" +
         tilVilkårResultatRader(personResultater)
 }
 
@@ -130,12 +130,13 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
                     it.periodeTom,
                     it.resultat,
                     it.erEksplisittAvslagPåSøknad,
+                    it.standardbegrunnelser,
                 )
             }.toList().joinToString("") { (vilkårResultatRad, vilkårResultater) ->
                 """
       | ${vilkårResultatRad.aktørId} |${vilkårResultater.map { it.vilkårType }.joinToString(",")}|${
                     vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")
-                }|${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""}|${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""}| ${vilkårResultatRad.resultat} | ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} |"""
+                }|${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""}|${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""}| ${vilkårResultatRad.resultat} | ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} | ${vilkårResultatRad.standardbegrunnelser}"""
             }
     } ?: ""
 

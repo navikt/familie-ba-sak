@@ -48,6 +48,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -170,12 +171,35 @@ fun leggTilVilkårResultatPåPersonResultat(
                 begrunnelse = "",
                 utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingForÉnRad,
                 vurderesEtter = vurderesEtterForEnRad,
+                standardbegrunnelser = hentStandardBegrunnelser(rad),
             )
         }
         personResultat.vilkårResultater.addAll(vilkårResultaterForÉnRad)
     }
     personResultat
 }.toSet()
+
+private fun hentStandardBegrunnelser(rad: MutableMap<String, String>): List<IVedtakBegrunnelse> {
+    val standardbegrunnelser = try {
+        parseEnumListe<Standardbegrunnelse>(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.STANDARDBEGRUNNELSER,
+            rad,
+        )
+    } catch (_: Exception) {
+        emptyList()
+    }
+
+    val eøsStandardbegrunnelser = try {
+        parseEnumListe<EØSStandardbegrunnelse>(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.EØSBEGRUNNELSER,
+            rad,
+        )
+    } catch (_: Exception) {
+        emptyList()
+    }
+
+    return standardbegrunnelser as List<IVedtakBegrunnelse> + eøsStandardbegrunnelser as List<IVedtakBegrunnelse>
+}
 
 fun lagKompetanser(
     nyeKompetanserPerBarn: MutableList<MutableMap<String, String>>,
