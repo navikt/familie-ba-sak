@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.ekstern.pensjon.HentAlleIdenterTilPsysResponseDTO
 import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype
+import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype.DATA
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask.Companion.TASK_STEP_TYPE
@@ -24,25 +26,33 @@ import java.util.UUID
 class HentAlleIdenterTilPsysTask(
     private val kafkaProducer: KafkaProducer,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
 ) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(HentAlleIdenterTilPsysTask::class.java)
 
     override fun doTask(task: Task) {
-        val hentAlleIdenterDto = objectMapper.readValue(task.payload, HentAlleIdenterTilPsysRequestDTO::class.java)
-        logger.info("Starter med å hente alle identer fra DB for request ${hentAlleIdenterDto.requestId}")
-        val identer = andelTilkjentYtelseRepository.finnIdenterMedLøpendeBarnetrygdForGittÅr(hentAlleIdenterDto.år)
-        logger.info("Ferdig med å hente alle identer fra DB for request ${hentAlleIdenterDto.requestId}")
-        logger.info("Starter på å sende alle identer til kafka for request ${hentAlleIdenterDto.requestId}")
+        objectMapper.readValue(task.payload, HentAlleIdenterTilPsysRequestDTO::class.java).run {
+            logger.info("Starter med å hente alle identer fra DB for request $requestId")
+            val identerFraDB = andelTilkjentYtelseRepository.finnIdenterMedLøpendeBarnetrygdForGittÅr(år)
+            logger.info("Ferdig med å hente alle identer fra DB for request $requestId")
 
-        kafkaProducer.sendIdentTilPSys(
-            HentAlleIdenterTilPsysResponseDTO(meldingstype = Meldingstype.START, requestId = hentAlleIdenterDto.requestId, personident = null),
-        )
-        identer.forEach { kafkaProducer.sendIdentTilPSys(HentAlleIdenterTilPsysResponseDTO(meldingstype = Meldingstype.DATA, personident = it, requestId = hentAlleIdenterDto.requestId)) }
-        kafkaProducer.sendIdentTilPSys(
-            HentAlleIdenterTilPsysResponseDTO(meldingstype = Meldingstype.SLUTT, requestId = hentAlleIdenterDto.requestId, personident = null),
-        )
-        logger.info("Ferdig med å sende alle identer til kafka for request ${hentAlleIdenterDto.requestId}")
+            logger.info("Starter med å hente alle identer fra Infotrygd for request $requestId")
+            val identerFraInfotrygd = infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
+            logger.info("Ferdig med å hente alle identer fra Infotrygd for request $requestId")
+
+            logger.info("Starter på å sende alle identer til kafka for request $requestId")
+            val identer = identerFraDB.plus(identerFraInfotrygd).distinct()
+            val dataMal =
+                HentAlleIdenterTilPsysResponseDTO(DATA, requestId, personident = null, antallIdenterTotalt = identer.size)
+
+            kafkaProducer.sendIdentTilPSys(dataMal.copy(meldingstype = Meldingstype.START))
+            identer.forEach {
+                kafkaProducer.sendIdentTilPSys(dataMal.copy(personident = it))
+            }
+            kafkaProducer.sendIdentTilPSys(dataMal.copy(meldingstype = Meldingstype.SLUTT))
+            logger.info("Ferdig med å sende alle identer til kafka for request $requestId")
+        }
     }
 
     override fun onCompletion(task: Task) {

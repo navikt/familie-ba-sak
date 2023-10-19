@@ -45,6 +45,9 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import java.time.LocalDate
 
+val sanityBegrunnelserMock = SanityBegrunnelseMock.hentSanityBegrunnelserMock()
+val sanityEØSBegrunnelserMock = SanityBegrunnelseMock.hentSanityEØSBegrunnelserMock()
+
 class BegrunnelseTeksterStepDefinition {
 
     private var fagsaker: Map<Long, Fagsak> = emptyMap()
@@ -256,8 +259,8 @@ class BegrunnelseTeksterStepDefinition {
         val grunnlagForBegrunnelse = GrunnlagForBegrunnelse(
             behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtaksperiode,
             behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
-            sanityBegrunnelser = mockHentSanityBegrunnelser(),
-            sanityEØSBegrunnelser = mockHentSanityEØSBegrunnelser(),
+            sanityBegrunnelser = sanityBegrunnelserMock,
+            sanityEØSBegrunnelser = sanityEØSBegrunnelserMock,
             nåDato = dagensDato,
         )
         return grunnlagForBegrunnelse
@@ -357,20 +360,30 @@ class BegrunnelseTeksterStepDefinition {
             .ignoringFields("begrunnelser")
             .isEqualTo(forvendtedeBrevperioder)
     }
+}
 
-    // For å laste ned begrunnelsene på nytt anbefales https://familie-brev.sanity.studio/ba-test/vision med query fra SanityQueries.kt .
+data class SammenlignbarBegrunnelse(
+    val fom: LocalDate?,
+    val tom: LocalDate?,
+    val type: Vedtaksperiodetype,
+    val inkluderteStandardBegrunnelser: Set<IVedtakBegrunnelse>,
+    val ekskluderteStandardBegrunnelser: Set<IVedtakBegrunnelse> = emptySet<IVedtakBegrunnelse>(),
+)
+
+private object SanityBegrunnelseMock {
+    // For å laste ned begrunnelsene på nytt anbefales https://familie-brev.sanity.studio/ba-brev/vision med query fra SanityQueries.kt .
     // Kopier URL fra resultatet og kjør
     // curl -XGET <URL> | jq '.result' -c | pbcopy
     // for å få alle begrunnelsene i clipboardet
-    private fun mockHentSanityBegrunnelser(): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    fun hentSanityBegrunnelserMock(): Map<Standardbegrunnelse, SanityBegrunnelse> {
         val restSanityBegrunnelserJson =
             this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityBegrunnelser")!!
 
         val restSanityBegrunnelser =
-            objectMapper.readValue(restSanityBegrunnelserJson.readText(), Array<RestSanityBegrunnelse>::class.java)
+            objectMapper.readValue(restSanityBegrunnelserJson, Array<RestSanityBegrunnelse>::class.java)
                 .toList()
 
-        val enumPåApiNavn = Standardbegrunnelse.values().associateBy { it.sanityApiNavn }
+        val enumPåApiNavn = Standardbegrunnelse.entries.associateBy { it.sanityApiNavn }
         val sanityBegrunnelser = restSanityBegrunnelser.mapNotNull { it.tilSanityBegrunnelse() }
 
         return sanityBegrunnelser
@@ -384,16 +397,15 @@ class BegrunnelseTeksterStepDefinition {
             }.toMap()
     }
 
-    private fun mockHentSanityEØSBegrunnelser(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
+    fun hentSanityEØSBegrunnelserMock(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
         val restSanityEØSBegrunnelserJson =
             this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityEØSBegrunnelser")!!
 
         val restSanityEØSBegrunnelser =
             objectMapper.readValue(
-                restSanityEØSBegrunnelserJson.readText(),
+                restSanityEØSBegrunnelserJson,
                 Array<RestSanityEØSBegrunnelse>::class.java,
-            )
-                .toList()
+            ).toList()
 
         val enumPåApiNavn = EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
         val sanityEØSBegrunnelser = restSanityEØSBegrunnelser.mapNotNull { it.tilSanityEØSBegrunnelse() }
@@ -409,11 +421,3 @@ class BegrunnelseTeksterStepDefinition {
             }.toMap()
     }
 }
-
-data class SammenlignbarBegrunnelse(
-    val fom: LocalDate?,
-    val tom: LocalDate?,
-    val type: Vedtaksperiodetype,
-    val inkluderteStandardBegrunnelser: Set<IVedtakBegrunnelse>,
-    val ekskluderteStandardBegrunnelser: Set<IVedtakBegrunnelse> = emptySet<IVedtakBegrunnelse>(),
-)

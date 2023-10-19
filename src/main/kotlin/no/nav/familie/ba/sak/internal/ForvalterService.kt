@@ -8,6 +8,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -25,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -33,8 +33,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -42,6 +40,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 
 @Service
 class ForvalterService(
@@ -192,29 +191,23 @@ class ForvalterService(
         }
     }
 
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(): List<Pair<Long, String>> {
-        val løpendeFagsakerMedFlereMigreringsbehandlinger =
-            fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger()
-        return løpendeFagsakerMedFlereMigreringsbehandlinger.filter { infotrygdService.harLøpendeSakIInfotrygd(listOf(it.aktør.aktivFødselsnummer())) }
-            .map { Pair(it.id, it.aktør.aktivFødselsnummer()) }
+    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(fraÅrMåned: YearMonth): List<Pair<Long, String>> {
+        val løpendeFagsakerMedFlereMigreringsbehandlinger = fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger(
+            fraÅrMåned.førsteDagIInneværendeMåned().atStartOfDay(),
+        )
+
+        return løpendeFagsakerMedFlereMigreringsbehandlinger.filter { infotrygdService.harLøpendeSakIInfotrygd(listOf(it.fødselsnummer)) }
+            .map { Pair(it.fagsakId, it.fødselsnummer) }
     }
 
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(): List<Pair<Long, String>> {
-        return fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger()
-            .map { Pair(it.id, it.aktør.aktivFødselsnummer()) }
+    fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(fraÅrMåned: YearMonth): List<Pair<Long, String>> {
+        return fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger(
+            fraÅrMåned.førsteDagIInneværendeMåned().atStartOfDay(),
+        ).map { Pair(it.fagsakId, it.fødselsnummer) }
     }
 }
 
-data class ValidertUtbetalingsoppdrag(
-    val harKorrekteOpphørsdatoer: Boolean,
-    val behandlingId: Long,
-    val utbetalingsperioderMedFeilOpphørsdato: List<Utbetalingsperiode>? = null,
-    val korrigerteUtbetalingsperioder: List<Utbetalingsperiode>? = null,
-    val gammeltUtbetalingsoppdrag: Utbetalingsoppdrag? = null,
-    val nyttUtbetalingsoppdrag: Utbetalingsoppdrag? = null,
-)
-
-data class BehandlingerMedFeilIUtbetalingsoppdrag(
-    val behandlinger: List<Long>,
-    val validerteUtbetalingsoppdrag: Set<ValidertUtbetalingsoppdrag>,
-)
+interface FagsakMedFlereMigreringer {
+    val fagsakId: Long
+    val fødselsnummer: String
+}
