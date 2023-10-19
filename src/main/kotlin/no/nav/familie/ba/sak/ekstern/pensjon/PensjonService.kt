@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.ekstern.bisys.BisysService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -120,7 +121,8 @@ class PensjonService(
                         BigDecimal.valueOf(50L) -> YtelseProsent.DELT
                         else -> YtelseProsent.USIKKER
                     },
-                    norgeErSekundærland = andel.differanseberegnetPeriodebeløp?.let { it < 0 } ?: false,
+                    norgeErSekundærlandMedNullUtbetaling = andel.differanseberegnetPeriodebeløp?.let { it < 0 } ?: false,
+                    sakstypeEkstern = behandling.kategori.tilPensjonSakstype(),
                 )
             }
     }
@@ -160,6 +162,13 @@ class PensjonService(
             YtelseType.ORDINÆR_BARNETRYGD -> YtelseTypeEkstern.ORDINÆR_BARNETRYGD
             YtelseType.SMÅBARNSTILLEGG -> YtelseTypeEkstern.SMÅBARNSTILLEGG
             YtelseType.UTVIDET_BARNETRYGD -> YtelseTypeEkstern.UTVIDET_BARNETRYGD
+        }
+    }
+
+    fun BehandlingKategori.tilPensjonSakstype(): SakstypeEkstern {
+        return when (this) {
+            BehandlingKategori.NASJONAL -> SakstypeEkstern.NASJONAL
+            BehandlingKategori.EØS -> SakstypeEkstern.EØS
         }
     }
 

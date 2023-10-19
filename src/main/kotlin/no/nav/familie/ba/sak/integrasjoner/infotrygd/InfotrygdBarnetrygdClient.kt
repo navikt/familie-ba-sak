@@ -128,8 +128,8 @@ class InfotrygdBarnetrygdClient(
 
     @Retryable(
         value = [Exception::class],
-        maxAttempts = 2,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_60_SEC),
+        maxAttempts = 3,
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_3_MIN),
     )
     fun hentPersonerMedBarnetrygdTilPensjon(år: Int): List<String> {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/pensjon?aar=$år")
@@ -213,7 +213,7 @@ class InfotrygdBarnetrygdClient(
     }
 
     companion object {
-        const val RETRY_BACKOFF_60_SEC = "\${retry.backoff.delay:60000}"
+        const val RETRY_BACKOFF_3_MIN = "\${retry.backoff.delay:180000}"
         private val logger: Logger = LoggerFactory.getLogger(InfotrygdBarnetrygdClient::class.java)
     }
 }

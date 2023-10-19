@@ -29,9 +29,10 @@ data class BarnetrygdPeriode(
     val utbetaltPerMnd: Int,
     val stønadFom: YearMonth,
     val stønadTom: YearMonth,
+    val sakstypeEkstern: SakstypeEkstern,
     val kildesystem: String = "BA",
     val pensjonstrygdet: Boolean? = null,
-    val norgeErSekundærland: Boolean? = false,
+    val norgeErSekundærlandMedNullUtbetaling: Boolean? = false,
 )
 
 enum class YtelseTypeEkstern {
@@ -44,4 +45,9 @@ enum class YtelseProsent {
     FULL,
     DELT,
     USIKKER,
+}
+
+enum class SakstypeEkstern {
+    NASJONAL,
+    EØS,
 }
