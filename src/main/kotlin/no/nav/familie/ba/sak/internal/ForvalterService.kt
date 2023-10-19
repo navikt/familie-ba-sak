@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.internal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
@@ -25,7 +27,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -128,15 +129,16 @@ class ForvalterService(
     fun identifiserUtbetalingerOver100Prosent(callId: String) {
         MDC.put(MDCConstants.MDC_CALL_ID, callId)
 
-        runBlocking {
-            finnOgLoggUtbetalingerOver100Prosent(callId)
-        }
+        finnOgLoggUtbetalingerOver100Prosent(callId)
 
         logger.info("Ferdig med å kjøre identifiserUtbetalingerOver100Prosent")
     }
 
-    @OptIn(InternalCoroutinesApi::class) // for å få lov til å hente CancellationException
-    suspend fun finnOgLoggUtbetalingerOver100Prosent(callId: String) {
+    @OptIn(
+        InternalCoroutinesApi::class,
+        ExperimentalCoroutinesApi::class,
+    ) // for å få lov til å hente CancellationException
+    fun finnOgLoggUtbetalingerOver100Prosent(callId: String) {
         var slice = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 10000))
         val scope = CoroutineScope(Dispatchers.Default.limitedParallelism(10))
         val deffereds = mutableListOf<Deferred<Unit>>()
@@ -156,6 +158,11 @@ class ForvalterService(
 
             slice = fagsakRepository.finnLøpendeFagsaker(slice.nextPageable())
         }
+
+        runBlocking {
+            deffereds.awaitAll()
+        }
+
         deffereds.forEach {
             if (it.isCancelled) {
                 logger.warn("Async jobb med status kansellert. Se securelog")
@@ -165,8 +172,6 @@ class ForvalterService(
                     }",
                 )
             }
-
-            it.await()
         }
 
         logger.info("Alle async jobber er kjørt. Totalt antall sider=${deffereds.size}")
