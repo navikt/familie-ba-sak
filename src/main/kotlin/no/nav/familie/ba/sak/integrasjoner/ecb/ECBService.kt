@@ -2,11 +2,15 @@ package no.nav.familie.ba.sak.integrasjoner.ecb
 
 import no.nav.familie.ba.sak.common.del
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCache
+import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCacheRepository
 import no.nav.familie.valutakurs.Frequency
 import no.nav.familie.valutakurs.ValutakursRestClient
 import no.nav.familie.valutakurs.domene.ExchangeRate
 import no.nav.familie.valutakurs.domene.exchangeRateForCurrency
 import no.nav.familie.valutakurs.exception.ValutakursClientException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -14,7 +18,9 @@ import java.time.LocalDate
 
 @Service
 @Import(ValutakursRestClient::class)
-class ECBService(private val ecbClient: ValutakursRestClient) {
+class ECBService(private val ecbClient: ValutakursRestClient, private val ecbValutakursCacheRepository: ECBValutakursCacheRepository) {
+
+    private val logger: Logger = LoggerFactory.getLogger(ECBService::class.java)
 
     /**
      * @param utenlandskValuta valutaen vi skal konvertere til NOK
@@ -23,19 +29,36 @@ class ECBService(private val ecbClient: ValutakursRestClient) {
      */
     @Throws(ECBServiceException::class)
     fun hentValutakurs(utenlandskValuta: String, kursDato: LocalDate): BigDecimal {
-        try {
-            val exchangeRates =
-                ecbClient.hentValutakurs(Frequency.Daily, listOf(ECBConstants.NOK, utenlandskValuta), kursDato)
-            validateExchangeRates(utenlandskValuta, kursDato, exchangeRates)
-            val valutakursNOK = exchangeRates.exchangeRateForCurrency(ECBConstants.NOK)!!
-            if (utenlandskValuta == ECBConstants.EUR) {
-                return valutakursNOK.exchangeRate
+        val valutakurs = ecbValutakursCacheRepository.findByValutakodeAndValutakursdato(utenlandskValuta, kursDato)
+        if (valutakurs == null) {
+            logger.info("Henter valutakurs for $utenlandskValuta på $kursDato")
+            try {
+                val exchangeRates =
+                    ecbClient.hentValutakurs(Frequency.Daily, listOf(ECBConstants.NOK, utenlandskValuta), kursDato)
+                validateExchangeRates(utenlandskValuta, kursDato, exchangeRates)
+                val valutakursNOK = exchangeRates.exchangeRateForCurrency(ECBConstants.NOK)!!
+                if (utenlandskValuta == ECBConstants.EUR) {
+                    ecbValutakursCacheRepository.save(ECBValutakursCache(kurs = valutakursNOK.exchangeRate, valutakode = utenlandskValuta, valutakursdato = kursDato))
+                    return valutakursNOK.exchangeRate
+                }
+                val valutakursUtenlandskValuta = exchangeRates.exchangeRateForCurrency(utenlandskValuta)!!
+                ecbValutakursCacheRepository.save(
+                    ECBValutakursCache(
+                        kurs = beregnValutakurs(
+                            valutakursUtenlandskValuta.exchangeRate,
+                            valutakursNOK.exchangeRate,
+                        ),
+                        valutakode = utenlandskValuta,
+                        valutakursdato = kursDato,
+                    ),
+                )
+                return beregnValutakurs(valutakursUtenlandskValuta.exchangeRate, valutakursNOK.exchangeRate)
+            } catch (e: ValutakursClientException) {
+                throw ECBServiceException(e.message, e)
             }
-            val valutakursUtenlandskValuta = exchangeRates.exchangeRateForCurrency(utenlandskValuta)!!
-            return beregnValutakurs(valutakursUtenlandskValuta.exchangeRate, valutakursNOK.exchangeRate)
-        } catch (e: ValutakursClientException) {
-            throw ECBServiceException(e.message, e)
         }
+        logger.info("Valutakurs ble hentet fra cache for $utenlandskValuta på $kursDato")
+        return valutakurs.kurs
     }
 
     private fun beregnValutakurs(valutakursUtenlandskValuta: BigDecimal, valutakursNOK: BigDecimal) =

@@ -1,12 +1,13 @@
 package no.nav.familie.ba.sak.internal
 
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -18,7 +19,11 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 import kotlin.concurrent.thread
 
@@ -30,9 +35,9 @@ class ForvalterController(
     private val integrasjonClient: IntegrasjonClient,
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
-    private val behandlingsRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository,
-    private val fagsakService: FagsakService,
+    private val ecbService: ECBService,
+    private val testVerktøyService: TestVerktøyService,
+    private val tilgangService: TilgangService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -117,126 +122,48 @@ class ForvalterController(
         return ResponseEntity.ok(Pair("callId", callId))
     }
 
-    @PostMapping("/finnBehandlingerMedPotensieltFeilUtbetalingsoppdrag")
-    fun identifiserBehandlingerSomKanKrevePatching(): ResponseEntity<BehandlingerMedFeilIUtbetalingsoppdrag> {
-        logger.info("Starter identifiserBehandlingerSomKanKrevePatching")
-        val validerteUtbetalingsoppdragMedFeil =
-            forvalterService.identifiserPåvirkedeBehandlingerOgValiderOpphørsdatoIUtbetalingsoppdrag()
-        secureLogger.warn("Følgende behandlinger har ikke korrekte opphørsdatoer: [$validerteUtbetalingsoppdragMedFeil]")
-        return ResponseEntity.ok(validerteUtbetalingsoppdragMedFeil)
+    @GetMapping("/hentValutakurs/")
+    fun finnFagsakerSomSkalAvsluttes(@RequestParam valuta: String, @RequestParam dato: LocalDate): ResponseEntity<BigDecimal> {
+        return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
     }
 
-    @PostMapping("/sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato")
-    fun sjekkOmTilkjentYtelseForBehandlingHarUkorrektOpphørsdato(@RequestBody behandlingListe: List<Long>): ResponseEntity<BehandlingerMedFeilIUtbetalingsoppdrag> {
-        val validerteUtbetalingsoppdragMedFeil: Set<ValidertUtbetalingsoppdrag> =
-            behandlingListe.fold(LinkedHashSet()) { accumulator, behandlingId ->
-                val validertUtbetalingsoppdrag =
-                    forvalterService.validerOpphørsdatoIUtbetalingsoppdragForBehandling(behandlingId)
-                if (!validertUtbetalingsoppdrag.harKorrekteOpphørsdatoer) {
-                    accumulator.add(validertUtbetalingsoppdrag)
-                }
-                accumulator
-            }
-
-        return ResponseEntity.ok(
-            BehandlingerMedFeilIUtbetalingsoppdrag(
-                behandlinger = validerteUtbetalingsoppdragMedFeil.map { it.behandlingId },
-                validerteUtbetalingsoppdrag = validerteUtbetalingsoppdragMedFeil,
-            ),
-        )
-    }
-
-    @PostMapping("/sendKorrigertUtbetalingsoppdragForBehandlinger")
-    fun sendKorrigertUtbetalingsoppdragForBehandlinger(@RequestBody behandlinger: List<Long>): ResponseEntity<SendUtbetalingsoppdragPåNyttResponse> {
-        val harFeil = mutableSetOf<Pair<Long, String>>()
-        val iverksattOk = mutableSetOf<Long>()
-        behandlinger.forEach { behandlingId ->
-            try {
-                forvalterService.lagKorrigertUtbetalingsoppdragOgIverksettMotØkonomi(behandlingId)
-                iverksattOk.add(behandlingId)
-            } catch (e: Exception) {
-                secureLogger.warn("Feil ved iverksettelse mot økonomi. ${e.message}", e)
-                harFeil.add(
-                    Pair(
-                        behandlingId,
-                        e.message ?: "Ukjent feil ved iverksettelse av oppdrag på nytt for behandling $behandlingId",
-                    ),
-                )
-            }
-        }
-        return ResponseEntity.ok(SendUtbetalingsoppdragPåNyttResponse(iverksattOk = iverksattOk, harFeil = harFeil))
-    }
-
-    @PostMapping("/sendKorrigertUtbetalingsoppdragForBehandling/{behandlingId}/{versjon}")
-    fun sendKorrigertUtbetalingsoppdragForBehandling(
-        @PathVariable behandlingId: Long,
-        @PathVariable versjon: Int,
-    ): ResponseEntity<SendUtbetalingsoppdragPåNyttResponse> {
-        val harFeil = mutableSetOf<Pair<Long, String>>()
-        val iverksattOk = mutableSetOf<Long>()
-        try {
-            forvalterService.lagKorrigertUtbetalingsoppdragOgIverksettMotØkonomi(behandlingId, versjon)
-            iverksattOk.add(behandlingId)
-        } catch (e: Exception) {
-            secureLogger.warn("Feil ved iverksettelse mot økonomi. ${e.message}", e)
-            harFeil.add(
-                Pair(
-                    behandlingId,
-                    e.message ?: "Ukjent feil ved iverksettelse av oppdrag på nytt for behandling $behandlingId",
-                ),
-            )
-        }
-
-        return ResponseEntity.ok(SendUtbetalingsoppdragPåNyttResponse(iverksattOk = iverksattOk, harFeil = harFeil))
-    }
-
-    @PostMapping("/populer-stonad-fom-tom/{behandlingId}")
-    fun populerStønadFomTomForBehandling(@PathVariable behandlingId: Long): ResponseEntity<Boolean> {
-        return ResponseEntity.ok(forvalterService.oppdaterStønadFomTomForBehandling(behandlingId))
-    }
-
-    @PostMapping("/populer-stonad-fom-tom-alle/{limit}")
-    fun populerStønadFomTom(@PathVariable limit: Int): ResponseEntity<String> {
-        behandlingsRepository.finnAktiveBehandlingerSomManglerStønadTom(limit).forEach { behandlingId ->
-            try {
-                val harOppdatertTom = forvalterService.oppdaterStønadFomTomForBehandling(behandlingId)
-                logger.info("oppdaterStønadFomTomForBehandling for behandlingId=$behandlingId resultat=$harOppdatertTom")
-            } catch (e: Exception) {
-                logger.warn("Fikk ikke satt stønadTom for behandling=$behandlingId", e)
-            }
-        }
-
-        return ResponseEntity.ok("ok")
-    }
-
-    @GetMapping("/finnFagsakerSomSkalAvsluttes")
-    fun finnFagsakerSomSkalAvsluttes(): ResponseEntity<List<Long>> {
-        return ResponseEntity.ok(fagsakRepository.finnFagsakerSomSkalAvsluttes())
-    }
-
-    @PostMapping("oppdaterLøpendeStatusPåFagsaker")
-    fun oppdaterLøpendeStatusPåFagsaker() {
-        fagsakService.oppdaterLøpendeStatusPåFagsaker()
-    }
-
-    @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd")
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(): ResponseEntity<List<Pair<Long, String>>> {
+    @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd/{fraÅrMåned}")
+    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(@PathVariable fraÅrMåned: YearMonth): ResponseEntity<List<Pair<Long, String>>> {
         val åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd =
-            forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd()
+            forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(fraÅrMåned)
         logger.info("Følgende fagsaker har flere migreringsbehandlinger og løpende sak i Infotrygd: $åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd")
         return ResponseEntity.ok(åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd)
     }
 
-    @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlinger")
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(): ResponseEntity<List<Pair<Long, String>>> {
+    @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlinger/{fraÅrMåned}")
+    fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(@PathVariable fraÅrMåned: YearMonth): ResponseEntity<List<Pair<Long, String>>> {
         val åpneFagsakerMedFlereMigreringsbehandlinger =
-            forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlinger()
+            forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlinger(fraÅrMåned)
         logger.info("Følgende fagsaker har flere migreringsbehandlinger og løper i ba-sak: $åpneFagsakerMedFlereMigreringsbehandlinger")
         return ResponseEntity.ok(åpneFagsakerMedFlereMigreringsbehandlinger)
     }
 
-    data class SendUtbetalingsoppdragPåNyttResponse(
-        val iverksattOk: Set<Long>,
-        val harFeil: Set<Pair<Long, String>>,
-    )
+    @GetMapping(path = ["/behandling/{behandlingId}/begrunnelsetest"])
+    fun hentBegrunnelsetestPåBehandling(@PathVariable behandlingId: Long): String {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "hente data til test",
+        )
+
+        return testVerktøyService.hentBegrunnelsetest(behandlingId)
+            .replace("\n", System.lineSeparator())
+    }
+
+    @GetMapping(path = ["/behandling/{behandlingId}/vedtaksperiodertest"])
+    fun hentVedtaksperioderTestPåBehandling(@PathVariable behandlingId: Long): String {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "hente data til test",
+        )
+
+        return testVerktøyService.hentVedtaksperioderTest(behandlingId)
+            .replace("\n", System.lineSeparator())
+    }
 }

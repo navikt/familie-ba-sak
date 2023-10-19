@@ -32,10 +32,10 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | 3456    | 01.05.2020 | 31.01.2021 | 0     | 1            | 0       |
       | 3456    | 01.02.2021 | 31.03.2038 | 1354  | 1            | 100     |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                                                                                                             | Ekskluderte Begrunnelser                                          |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                                                                                                                | Ugyldige begrunnelser                                             |
       | 01.05.2020 | 31.01.2021 | UTBETALING         | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALT_UTVIDET_NY                                                                    | ENDRET_UTBETALING_SEKUNDÆR_DELT_BOSTED_FULL_UTBETALING_FØR_SØKNAD |
       | 01.02.2021 | 31.03.2038 | UTBETALING         | ENDRET_UTBETALING_SEKUNDÆR_DELT_BOSTED_FULL_UTBETALING_FØR_SØKNAD, ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALT_UTVIDET_NY |                                                                   |
       | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                                                                                                                  |                                                                   |
@@ -58,12 +58,12 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | 3456    | 01.05.2020 | 31.01.2021 | 0     | 1            | 0       |
       | 3456    | 01.02.2021 | 31.03.2038 | 1000  | 1            | 100     |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser               | Ekskluderte Begrunnelser |
-      | 01.02.2021 | 31.03.2038 | UTBETALING         | ETTER_ENDRET_UTBETALING_ETTERBETALING |                          |
-      | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                    |                          |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                          | Ugyldige begrunnelser |
+      | 01.02.2021 | 31.03.2038 | UTBETALING         | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR |                          |
+      | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                            |                          |
 
 
   Scenario: Skal ikke krasje dersom siste periode er endret til null prosent
@@ -96,10 +96,10 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak          | Prosent |
       | 1234    | 1            | 01.09.2023 | 01.07.2035 | ENDRE_MOTTAKER | 0       |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser |
       | 01.08.2023 | 31.08.2023 | UTBETALING         |           |                         |                          |
       | 01.09.2023 | 31.07.2035 | OPPHØR             |           |                         |                          |
       | 01.08.2035 |            | OPPHØR             |           |                         |                          |
@@ -134,10 +134,10 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |
       | 4567    | 1            | 01.03.2015 | 01.08.2020 | ETTERBETALING_3ÅR | 0       |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                              | Ekskluderte Begrunnelser                                                        |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                                 | Ugyldige begrunnelser                                                           |
       | 01.03.2015 | 31.08.2020 | OPPHØR             |           | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID | ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_KUN_UTVIDET_DEL_UTBETALING |
       | 01.09.2020 | 31.01.2021 | UTBETALING         |           |                                                      |                                                                                 |
       | 01.02.2021 | 28.02.2023 | UTBETALING         |           |                                                      |                                                                                 |

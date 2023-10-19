@@ -30,6 +30,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriStringList
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -93,11 +94,16 @@ fun lagVedtak(
             val fagsak = fagsaker[fagsakId] ?: defaultFagsak()
             val behandlingÅrsak = parseValgfriEnum<BehandlingÅrsak>(Domenebegrep.BEHANDLINGSÅRSAK, rad)
             val behandlingResultat = parseValgfriEnum<Behandlingsresultat>(Domenebegrep.BEHANDLINGSRESULTAT, rad)
+            val skalBehandlesAutomatisk = parseValgfriBoolean(Domenebegrep.SKAL_BEHANLDES_AUTOMATISK, rad) ?: false
+            val behandlingKategori = parseValgfriEnum<BehandlingKategori>(Domenebegrep.BEHANDLINGSKATEGORI, rad)
+                ?: BehandlingKategori.NASJONAL
 
             lagBehandling(
                 fagsak = fagsak,
                 årsak = behandlingÅrsak ?: BehandlingÅrsak.SØKNAD,
                 resultat = behandlingResultat ?: Behandlingsresultat.IKKE_VURDERT,
+                skalBehandlesAutomatisk = skalBehandlesAutomatisk,
+                behandlingKategori = behandlingKategori,
             ).copy(id = behandlingId)
         }.associateBy { it.id },
     )
@@ -244,7 +250,7 @@ fun lagEndredeUtbetalinger(
             )?.toBigDecimal() ?: BigDecimal.valueOf(100),
             årsak = parseValgfriEnum<Årsak>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.ÅRSAK, rad)
                 ?: Årsak.ALLEREDE_UTBETALT,
-            søknadstidspunkt = LocalDate.now(),
+            søknadstidspunkt = parseValgfriDato(Domenebegrep.SØKNADSTIDSPUNKT, rad) ?: LocalDate.now(),
             begrunnelse = "Fordi at...",
             avtaletidspunktDeltBosted = LocalDate.now(),
         )
@@ -361,7 +367,7 @@ fun lagVedtaksPerioder(
     val grunnlagForVedtaksperiode = BehandlingsGrunnlagForVedtaksperioder(
         persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
         personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
-        fagsakType = vedtak.behandling.fagsak.type,
+        behandling = vedtak.behandling,
         kompetanser = kompetanser[behandlingId] ?: emptyList(),
         endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
         andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
@@ -377,7 +383,7 @@ fun lagVedtaksPerioder(
         BehandlingsGrunnlagForVedtaksperioder(
             persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
             personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
-            fagsakType = forrigeVedtak.behandling.fagsak.type,
+            behandling = forrigeVedtak.behandling,
             kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
             endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
             andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),

@@ -314,7 +314,7 @@ class VedtaksperiodeService(
         BehandlingsGrunnlagForVedtaksperioder(
             persongrunnlag = persongrunnlagService.hentAktivThrows(this.id),
             personResultater = vilkårsvurderingService.hentAktivForBehandling(this.id)?.personResultater ?: emptySet(),
-            fagsakType = fagsak.type,
+            behandling = this,
             kompetanser = kompetanseRepository.finnFraBehandlingId(this.id).toList(),
             endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(this.id),
             andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(this.id),
@@ -454,6 +454,9 @@ class VedtaksperiodeService(
             )
         }
     }
+
+    fun hentGrunnlagForBegrunnelse(behandlingId: Long): GrunnlagForBegrunnelse =
+        hentGrunnlagForBegrunnelse(behandlingHentOgPersisterService.hent(behandlingId))
 
     fun hentGrunnlagForBegrunnelse(behandling: Behandling): GrunnlagForBegrunnelse {
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)

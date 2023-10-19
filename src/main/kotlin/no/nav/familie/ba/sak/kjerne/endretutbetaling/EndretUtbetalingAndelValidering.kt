@@ -119,19 +119,7 @@ object EndretUtbetalingAndelValidering {
 
             Årsak.ALLEREDE_UTBETALT -> validerAlleredeUtbetalt(endretUtbetalingAndel = endretUtbetalingAndel)
 
-            Årsak.ENDRE_MOTTAKER -> validerEndreMottaker(endretUtbetalingAndel = endretUtbetalingAndel)
-        }
-    }
-
-    private fun validerEndreMottaker(endretUtbetalingAndel: EndretUtbetalingAndel) {
-        val innværendeÅrMåned = YearMonth.now()
-
-        if (endretUtbetalingAndel.fom?.isBefore(innværendeÅrMåned) == true) {
-            throw FunksjonellFeil("Du har valgt årsaken Foreldre bor sammen, endre mottaker. Du kan ikke velge denne årsaken og en fra og med dato tilbake i tid. Ta kontakt med superbruker om du er usikker på hva du skal gjøre.")
-        }
-
-        if (endretUtbetalingAndel.tom?.isSameOrBefore(innværendeÅrMåned) == true) {
-            throw FunksjonellFeil("Du har valgt årsaken Foreldre bor sammen, endre mottaker. Du kan ikke velge denne årsaken og en til og med dato tilbake i tid. Ta kontakt med superbruker om du er usikker på hva du skal gjøre.")
+            Årsak.ENDRE_MOTTAKER -> { }
         }
     }
 

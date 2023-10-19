@@ -58,9 +58,10 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagTidslinjer(): Ma
 }
 
 fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslinje(person: Person): Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned> {
+    val vilkårResultaterForPerson =
+        this.personResultater.singleOrNull { it.aktør == person.aktør }?.vilkårResultater ?: emptyList()
     val forskjøvedeVilkårResultaterForPerson =
-        this.personResultater.single { it.aktør == person.aktør }
-            .vilkårResultater
+        vilkårResultaterForPerson
             .filter { it.erEksplisittAvslagPåSøknad != true }
             .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
             .map { tidslinje -> tidslinje.map { it?.let { VilkårResultatForVedtaksperiode(it) } } }

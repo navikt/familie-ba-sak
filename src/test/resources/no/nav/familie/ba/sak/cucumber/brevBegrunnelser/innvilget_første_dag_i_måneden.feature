@@ -56,7 +56,7 @@ Egenskap: Brevbegrunnelser med utvidet barnetrygd
       | 3456    | 01.07.2019 | 31.08.2020 | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | NO                    | SE                             | SE                  |
       | 3456    | 01.09.2020 | 31.08.2021 | NORGE_ER_PRIMÆRLAND   | 1            | ARBEIDER         | I_ARBEID                             | NO                    | SE                             | NO                  |
 
-    Og med vedtaksperioder for behandling 1
+    Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser                                      |
       | 01.09.2021 | 31.12.2021 | INNVILGET_OVERGANG_EØS_TIL_NASJONAL_NORSK_NORDISK_FAMILIE |
 
@@ -90,7 +90,7 @@ Egenskap: Brevbegrunnelser med utvidet barnetrygd
       | 1234    | 1            | 01.03.2023 | 30.06.2023 | 2489  | UTVIDET_BARNETRYGD | 100     | 2489 |
       | 1234    | 1            | 01.07.2023 | 30.11.2034 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
 
-    Og med vedtaksperioder for behandling 1
+    Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser                                          |
       | 01.04.2023 | 30.06.2023 | INNVILGET_ANNEN_FORELDER_IKKE_SØKT_DELT_BARNETRYGD_ENKELTBARN |
 

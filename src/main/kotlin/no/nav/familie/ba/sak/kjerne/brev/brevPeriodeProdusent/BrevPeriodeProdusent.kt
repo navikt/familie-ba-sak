@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erUtbetalingEllerDeltBostedIPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.finnBegrunnelseGrunnlagPerPerson
+import java.math.BigDecimal
 
 fun VedtaksperiodeMedBegrunnelser.lagBrevPeriode(
     grunnlagForBegrunnelse: GrunnlagForBegrunnelse,
@@ -27,6 +28,24 @@ fun VedtaksperiodeMedBegrunnelser.lagBrevPeriode(
 ): BrevPeriode? {
     val begrunnelsesGrunnlagPerPerson = this.finnBegrunnelseGrunnlagPerPerson(grunnlagForBegrunnelse)
 
+    val begrunnelserOgFritekster =
+        hentBegrunnelser(grunnlagForBegrunnelse, begrunnelsesGrunnlagPerPerson, landkoder)
+
+    if (begrunnelserOgFritekster.isEmpty()) return null
+
+    return this.byggBrevPeriode(
+        begrunnelserOgFritekster = begrunnelserOgFritekster,
+        begrunnelseGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+        grunnlagForBegrunnelse = grunnlagForBegrunnelse,
+
+    )
+}
+
+fun VedtaksperiodeMedBegrunnelser.hentBegrunnelser(
+    grunnlagForBegrunnelse: GrunnlagForBegrunnelse,
+    begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
+    landkoder: Map<String, String>,
+): List<BrevBegrunnelse> {
     val standardbegrunnelser =
         this.begrunnelser.map {
             it.standardbegrunnelse.lagBrevBegrunnelse(
@@ -48,17 +67,7 @@ fun VedtaksperiodeMedBegrunnelser.lagBrevPeriode(
 
     val fritekster = this.fritekster.map { FritekstBegrunnelse(it.fritekst) }
 
-    val begrunnelserOgFritekster =
-        standardbegrunnelser + eøsBegrunnelser + fritekster
-
-    if (begrunnelserOgFritekster.isEmpty()) return null
-
-    return this.byggBrevPeriode(
-        begrunnelserOgFritekster = begrunnelserOgFritekster,
-        begrunnelseGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
-        grunnlagForBegrunnelse = grunnlagForBegrunnelse,
-
-    )
+    return standardbegrunnelser + eøsBegrunnelser + fritekster
 }
 
 private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
@@ -84,7 +93,7 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
         barnasFodselsdager = barnMedUtbetaling.tilBarnasFødselsdatoer(),
         duEllerInstitusjonen = hentDuEllerInstitusjonenTekst(
             brevPeriodeType = brevPeriodeType,
-            fagsakType = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioder.fagsakType,
+            fagsakType = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioder.behandling.fagsak.type,
         ),
     )
 }
@@ -110,12 +119,13 @@ private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentTotaltUtbetaltIPerio
 
 private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling() =
     filterKeys { it.type == PersonType.BARN }
-        .filterValues {
+        .filterValues { grunnlag ->
             val endretUtbetalingAndelIPeriodeErDeltBosted =
-                it.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
-            val utbetalingssumIPeriode = it.dennePerioden.andeler.sumOf { andel -> andel.kalkulertUtbetalingsbeløp }
+                grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
+            val harAndelerSomIkkeErPåNullProsent =
+                grunnlag.dennePerioden.andeler.filter { it.prosent != BigDecimal.ZERO }.toList().isNotEmpty()
 
-            utbetalingssumIPeriode != 0 || endretUtbetalingAndelIPeriodeErDeltBosted
+            harAndelerSomIkkeErPåNullProsent || endretUtbetalingAndelIPeriodeErDeltBosted
         }
 
 fun Set<Person>.tilBarnasFødselsdatoer(): String {

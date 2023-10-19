@@ -42,10 +42,10 @@ Egenskap: Brevperioder: Brevperiodetype
       | AktørId | Fra dato   | Til dato | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 1       | 01.04.2022 |          | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | PL                             | PL                  |
 
-    Og med vedtaksperioder for behandling 1
+    Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser | Eøsbegrunnelser                 | Fritekster |
       | 01.04.2022 | 30.06.2023 |                      | INNVILGET_SEKUNDÆRLAND_STANDARD |            |
 
     Så forvent følgende brevperioder for behandling 1
       | Brevperiodetype | Fra dato   | Til dato      | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
-      | UTBETALING      | april 2022 | til juni 2023 | 0     | 0                          |                     | du                     |
+      | UTBETALING      | april 2022 | til juni 2023 | 0     | 1                          | 16.03.22            | du                     |
