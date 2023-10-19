@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Plassholdertekst for egenskap - z0EmmBUzon
+Egenskap: Brevperioder: Selvstendig rett
 
   Bakgrunn:
     Gitt følgende fagsaker for begrunnelse
