@@ -184,25 +184,19 @@ fun leggTilVilkårResultatPåPersonResultat(
 }.toSet()
 
 private fun hentStandardBegrunnelser(rad: MutableMap<String, String>): List<IVedtakBegrunnelse> {
-    val standardbegrunnelser = try {
+    val standardbegrunnelser: List<IVedtakBegrunnelse> = try {
         parseEnumListe<Standardbegrunnelse>(
             VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.STANDARDBEGRUNNELSER,
             rad,
         )
     } catch (_: Exception) {
-        emptyList()
-    }
-
-    val eøsStandardbegrunnelser = try {
         parseEnumListe<EØSStandardbegrunnelse>(
             VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.EØSBEGRUNNELSER,
             rad,
         )
-    } catch (_: Exception) {
-        emptyList()
     }
 
-    return standardbegrunnelser as List<IVedtakBegrunnelse> + eøsStandardbegrunnelser as List<IVedtakBegrunnelse>
+    return standardbegrunnelser
 }
 
 fun lagKompetanser(
