@@ -128,6 +128,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
 
         val standardOgEøsBegrunnelser: Map<IVedtakBegrunnelse, ISanityBegrunnelse> =
             (standardBegrunnelser + eøsBegrunnelser)
+                .filterKeys { !it.vedtakBegrunnelseType.erAvslag() }
 
         val standardOgEøsBegrunnelserFiltrertPåTema =
             standardOgEøsBegrunnelser.filtrerPåTema(temaSomPeriodeErVurdertEtter)
@@ -303,7 +304,11 @@ private fun filtrerPåVilkår(
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
 ) =
-    !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag, utvidetVilkårPåSøkerIPeriode, utvidetVilkårPåSøkerIForrigePeriode) && it.erGjeldendeForRegelverk(
+    !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && it.erGjeldendeForUtgjørendeVilkår(
+        begrunnelseGrunnlag,
+        utvidetVilkårPåSøkerIPeriode,
+        utvidetVilkårPåSøkerIForrigePeriode,
+    ) && it.erGjeldendeForRegelverk(
         begrunnelseGrunnlag,
     )
 
