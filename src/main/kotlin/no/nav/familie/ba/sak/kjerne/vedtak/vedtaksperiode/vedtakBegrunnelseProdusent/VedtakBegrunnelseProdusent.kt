@@ -238,6 +238,7 @@ private fun hentStandardBegrunnelser(
                 utvidetVilkårPåSøkerIPeriode,
                 utvidetVilkårPåSøkerIForrigePeriode,
             )
+
             else -> it.erEndretUtbetaling(endretUtbetalingDennePerioden)
         }
     }
@@ -276,7 +277,35 @@ private fun hentStandardBegrunnelser(
         vedtaksperiode.fom,
     )
 
-    return filtrertPåVilkårOgEndretUtbetaling + filtrertPåReduksjonFraForrigeBehandling + filtrertPåOpphørFraForrigeBehandling + filtrertPåSmåbarnstillegg + filtrertPåEtterEndretUtbetaling + filtrertPåHendelser
+    val filtrertPåSkalVisesSelvOmIkkeEndring =
+        relevanteBegrunnelser.filtrerPåSkalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
+
+    return filtrertPåVilkårOgEndretUtbetaling +
+        filtrertPåReduksjonFraForrigeBehandling +
+        filtrertPåOpphørFraForrigeBehandling +
+        filtrertPåSmåbarnstillegg +
+        filtrertPåEtterEndretUtbetaling +
+        filtrertPåHendelser +
+        filtrertPåSkalVisesSelvOmIkkeEndring
+}
+
+private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSkalVisesSelvOmIkkeEndring(
+    begrunnelseGrunnlagForPersonIPeriode: BegrunnelseGrunnlagForPersonIPeriode,
+) = filterValues { begrunnelse ->
+    val begrunnelseMatcherVilkår = begrunnelse.periodeResultat != null &&
+        when (begrunnelse.periodeResultat) {
+            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING, SanityPeriodeResultat.REDUKSJON ->
+                begrunnelse.vilkår.all { vilkår ->
+                    begrunnelseGrunnlagForPersonIPeriode.vilkårResultater.any { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT }
+                }
+
+            SanityPeriodeResultat.IKKE_INNVILGET -> false
+        }
+
+    val begrunnelseSkalVisesSelvOmIkkeEndring =
+        ØvrigTrigger.SKAL_VISES_SELV_OM_IKKE_ENDRING in begrunnelse.ovrigeTriggere
+
+    begrunnelseSkalVisesSelvOmIkkeEndring && begrunnelseMatcherVilkår
 }
 
 private fun SanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean): Boolean = when {
