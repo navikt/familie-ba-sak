@@ -504,7 +504,7 @@ private fun Periode<VedtaksperiodeGrunnlagForPerson, Måned>.erInnvilgetEllerEks
 
     val erInnvilget = grunnlagForPerson is VedtaksperiodeGrunnlagForPersonVilkårInnvilget
     val erEksplisittAvslag =
-        grunnlagForPerson.vilkårResultaterForVedtaksperiode.any { it.erEksplisittAvslagPåSøknad == true }
+        grunnlagForPerson.vilkårResultaterForVedtaksperiode.any { it.erEksplisittAvslagPåSøknad }
 
     return erInnvilget || erEksplisittAvslag
 }
