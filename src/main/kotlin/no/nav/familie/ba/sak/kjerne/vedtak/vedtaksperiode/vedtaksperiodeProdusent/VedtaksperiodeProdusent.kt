@@ -272,7 +272,7 @@ private fun GrunnlagForGjeldendeOgForrigeBehandling.medVilkårSomHarEksplisitteA
         gjeldende = this.gjeldende?.kopier(
             vilkårResultaterForVedtaksperiode = this.gjeldende
                 .vilkårResultaterForVedtaksperiode
-                .filter { it.erEksplisittAvslagPåSøknad == true },
+                .filter { it.erEksplisittAvslagPåSøknad },
         ),
     )
 }

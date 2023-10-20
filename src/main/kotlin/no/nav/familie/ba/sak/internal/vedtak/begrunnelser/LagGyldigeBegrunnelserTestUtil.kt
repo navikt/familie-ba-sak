@@ -177,7 +177,7 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
                     vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")
                 }|${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""}|${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""}| ${vilkårResultatRad.resultat} | ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} | ${
                     vilkårResultatRad.standardbegrunnelser.joinToString(",")
-                }"""
+                } |"""
             }
     } ?: ""
 

@@ -73,7 +73,7 @@ data class VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
     val erEksplisittAvslag: Boolean = vilkårResultaterForVedtaksperiode.inneholderEksplisittAvslag()
 
     fun List<VilkårResultatForVedtaksperiode>.inneholderEksplisittAvslag() =
-        this.any { it.erEksplisittAvslagPåSøknad == true }
+        this.any { it.erEksplisittAvslagPåSøknad }
 }
 
 data class VilkårResultatForVedtaksperiode(
@@ -81,7 +81,7 @@ data class VilkårResultatForVedtaksperiode(
     val resultat: Resultat,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
     val vurderesEtter: Regelverk?,
-    val erEksplisittAvslagPåSøknad: Boolean?,
+    val erEksplisittAvslagPåSøknad: Boolean,
     val standardbegrunnelser: List<IVedtakBegrunnelse>,
     val aktørId: AktørId,
     val fom: LocalDate?,
@@ -92,7 +92,7 @@ data class VilkårResultatForVedtaksperiode(
         resultat = vilkårResultat.resultat,
         utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger,
         vurderesEtter = vilkårResultat.vurderesEtter,
-        erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
+        erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad == true,
         standardbegrunnelser = vilkårResultat.standardbegrunnelser,
         fom = vilkårResultat.periodeFom,
         tom = vilkårResultat.periodeTom,
