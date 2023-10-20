@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_GENERERING_AV_BREVOBJEKTER
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -23,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestUtvidetVedt
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.finnBegrunnelseGrunnlagPerPerson
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.unleash.UnleashService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -46,7 +46,7 @@ class VedtaksperiodeMedBegrunnelserController(
     private val brevPeriodeService: BrevPeriodeService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val integrasjonClient: IntegrasjonClient,
-    private val unleashService: UnleashService,
+    private val unleashService: UnleashNextMedContextService,
 ) {
 
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
@@ -144,7 +144,7 @@ class VedtaksperiodeMedBegrunnelserController(
 
         val vedtaksperiode = vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
 
-        val brevBegrunnelser = if (unleashService.isEnabled(NY_GENERERING_AV_BREVOBJEKTER)) {
+        val brevBegrunnelser = if (unleashService.isEnabled(NY_GENERERING_AV_BREVOBJEKTER, behandlingId)) {
             val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(behandlingId)
             val begrunnelsesGrunnlagPerPerson = vedtaksperiode.finnBegrunnelseGrunnlagPerPerson(grunnlagForBegrunnelser)
 

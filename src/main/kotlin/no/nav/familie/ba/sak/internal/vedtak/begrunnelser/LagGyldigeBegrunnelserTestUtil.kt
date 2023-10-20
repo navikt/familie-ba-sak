@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.internal.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilIKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -141,7 +143,7 @@ fun hentTekstForVilkårresultater(
     return """
         
     Og legg til nye vilkårresultater for begrunnelse for behandling $behandlingId
-      | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag |""" +
+      | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Standardbegrunnelser |""" +
         tilVilkårResultatRader(personResultater)
 }
 
@@ -152,6 +154,7 @@ data class VilkårResultatRad(
     val tom: LocalDate?,
     val resultat: Resultat,
     val erEksplisittAvslagPåSøknad: Boolean?,
+    val standardbegrunnelser: List<IVedtakBegrunnelse>,
 )
 
 private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
@@ -166,12 +169,15 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
                     it.periodeTom,
                     it.resultat,
                     it.erEksplisittAvslagPåSøknad,
+                    it.standardbegrunnelser,
                 )
             }.toList().joinToString("") { (vilkårResultatRad, vilkårResultater) ->
                 """
       | ${vilkårResultatRad.aktørId} |${vilkårResultater.map { it.vilkårType }.joinToString(",")}|${
                     vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")
-                }|${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""}|${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""}| ${vilkårResultatRad.resultat} | ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} |"""
+                }|${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""}|${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""}| ${vilkårResultatRad.resultat} | ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} | ${
+                    vilkårResultatRad.standardbegrunnelser.joinToString(",")
+                }"""
             }
     } ?: ""
 
@@ -340,7 +346,7 @@ fun hentTekstBrevPerioder(
 fun hentBrevPeriodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
-        | | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | | | | |"""
+        | | ${vedtaksperiode.fom?.tilMånedÅr() ?: ""} | ${vedtaksperiode.tom?.tilMånedÅr() ?: ""} | | | | |"""
     }
 
 fun hentBrevBegrunnelseTekster(
