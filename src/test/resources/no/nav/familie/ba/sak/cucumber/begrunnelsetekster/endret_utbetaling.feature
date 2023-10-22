@@ -197,3 +197,65 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | 01.09.2023 | 31.03.2024 | UTBETALING         |           |                                                              |                       |
       | 01.04.2024 | 31.03.2036 | UTBETALING         |           |                                                              |                       |
       | 01.04.2036 |            | OPPHØR             |           |                                                              |                       |
+
+
+  Scenario: Revurdering delt bosted, men den første måneden er endret til full utbetaling og har dermed ingen endring i beløp, skal begrunne delt bosted med full utbetaling før søknad
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | ENDRET_UTBETALING   | SATSENDRING      | Ja                        | NASJONAL            |
+      | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER | Nei                       | NASJONAL            |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 12.09.1978  |
+      | 1            | 2       | BARN       | 04.04.2010  |
+      | 2            | 1       | SØKER      | 12.09.1978  |
+      | 2            | 2       | BARN       | 04.04.2010  |
+    Og følgende dagens dato 22.10.2023
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
+      | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET               |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      |
+
+      | 2       | GIFT_PARTNERSKAP                            |                  | 04.04.2010 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | UNDER_18_ÅR                                 |                  | 04.04.2010 | 03.04.2028 | OPPFYLT  | Nei                  |                      |
+      | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD,BOR_MED_SØKER |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
+      | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      |
+
+      | 2       | UNDER_18_ÅR                   |                  | 04.04.2010 | 03.04.2028 | OPPFYLT  | Nei                  |                      |
+      | 2       | GIFT_PARTNERSKAP              |                  | 04.04.2010 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | BOR_MED_SØKER                 |                  | 01.02.2022 | 29.06.2023 | OPPFYLT  | Nei                  |                      |
+      | 2       | BOR_MED_SØKER                 | DELT_BOSTED      | 30.06.2023 |            | OPPFYLT  | Nei                  |                      |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.03.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 1            | 01.07.2023 | 31.03.2028 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+
+      | 2       | 2            | 01.03.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 2            | 01.07.2023 | 31.07.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 2       | 2            | 01.08.2023 | 31.03.2028 | 655   | ORDINÆR_BARNETRYGD | 50      | 1310 |
+
+    Og med endrede utbetalinger for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Søknadstidspunkt |
+      | 2       | 2            | 01.07.2023 | 31.07.2023 | DELT_BOSTED | 100     | 02.07.2023       |
+
+    Når vedtaksperiodene genereres for behandling 2
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                                                | Ugyldige begrunnelser |
+      | 01.07.2023 | 31.07.2023 | UTBETALING         |                                | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING_FØR_SOKNAD_NY |                       |
+      | 01.08.2023 | 31.03.2028 | UTBETALING         |                                | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED                      |                       |
+      | 01.04.2028 |            | OPPHØR             |                                |                                                                     |                       |

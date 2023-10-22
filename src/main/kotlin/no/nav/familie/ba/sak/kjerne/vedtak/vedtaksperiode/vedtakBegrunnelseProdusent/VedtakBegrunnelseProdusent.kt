@@ -581,6 +581,10 @@ private fun hentResultaterForPeriode(
             begrunnelseGrunnlagForPeriode,
             begrunnelseGrunnlagForrigePeriode,
         )
+        val erSatsøkning = erSatsøkningMellomPerioder(
+            begrunnelseGrunnlagForPeriode,
+            begrunnelseGrunnlagForrigePeriode,
+        )
 
         val erSøker = begrunnelseGrunnlagForPeriode.person.type == PersonType.SØKER
         val erOrdinæreVilkårOppfyltIForrigePeriode =
@@ -588,7 +592,7 @@ private fun hentResultaterForPeriode(
 
         val erIngenEndring = !erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode
         listOfNotNull(
-            if (erØkingIAndel || erSøker || erIngenEndring) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
+            if (erØkingIAndel || erSatsøkning || erSøker || erIngenEndring) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
             if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
             if (erIngenEndring) SanityPeriodeResultat.INGEN_ENDRING else null,
         )
@@ -634,9 +638,20 @@ private fun erØkningIAndelMellomPerioder(
             sammeAndelForrigePeriode == null && begrunnelseGrunnlagForPeriode.erInnvilgetEtterEndretUtbetaling()
         val harAndelenGåttOppIProsent =
             sammeAndelForrigePeriode != null && andelIPeriode.prosent > sammeAndelForrigePeriode.prosent
-        val erSatsenØkt = andelIPeriode.sats > (sammeAndelForrigePeriode?.sats ?: 0)
 
-        erAndelenTjent || harAndelenGåttOppIProsent || erSatsenØkt
+        erAndelenTjent || harAndelenGåttOppIProsent
+    }
+}
+
+private fun erSatsøkningMellomPerioder(
+    begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode,
+    begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
+): Boolean {
+    val andelerForrigePeriode = begrunnelseGrunnlagForrigePeriode?.andeler ?: emptyList()
+    val andelerDennePerioden = begrunnelseGrunnlagForPeriode.andeler
+    return andelerDennePerioden.any { andelIPeriode ->
+        val sammeAndelForrigePeriode = andelerForrigePeriode.singleOrNull { andelIPeriode.type == it.type }
+        andelIPeriode.sats > (sammeAndelForrigePeriode?.sats ?: 0)
     }
 }
 
