@@ -37,6 +37,6 @@ interface AktørIdRepository : JpaRepository<Aktør, String> {
     for å fortsatt beholde jpa metodene som immutable og ikke oppdaterbar.
      */
     @Modifying
-    @Query("update gr_periode_overgangsstonad set fk_aktoer_id = :nyAktørId where fk_behandling_id = :behandlingIdønadId and fk_aktoer_id = :gammelAktørId", nativeQuery = true)
+    @Query("update gr_periode_overgangsstonad set fk_aktoer_id = :nyAktørId where fk_behandling_id = :behandlingId and fk_aktoer_id = :gammelAktørId", nativeQuery = true)
     fun patchPeriodeOvergangstønadtMedNyAktør(gammelAktørId: String, nyAktørId: String, behandlingId: Long)
 }
