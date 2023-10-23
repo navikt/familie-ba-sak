@@ -69,7 +69,7 @@ class ForvalterService(
     private val pdlIdentRestClient: PdlIdentRestClient,
     private val personidentService: PersonidentService,
     private val aktørIdRepository: AktørIdRepository,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -213,7 +213,6 @@ class ForvalterService(
         val aktørForBarnSomSkalPatches = persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId = dto.fagsakId)
             ?.singleOrNull { it.type == PersonType.BARN && it.aktør.aktivFødselsnummer() == dto.gammelIdent.ident }?.aktør ?: error("Fant ikke ident som skal patches som barn på fagsak=${dto.fagsakId}")
 
-
         if (dto.skalSjekkeAtGammelIdentErHistoriskAvNyIdent) {
             val identer = pdlIdentRestClient.hentIdenter(personIdent = dto.nyIdent.ident, historikk = true)
             if (identer.none { it.ident == dto.gammelIdent.ident }) {
@@ -228,25 +227,25 @@ class ForvalterService(
         aktørIdRepository.patchAndelTilkjentYteleseMedNyAktør(
             gammelAktørId = aktørForBarnSomSkalPatches.aktørId,
             nyAktørId = nyAktør.aktørId,
-            behandlingId = aktivBehandling.id
+            behandlingId = aktivBehandling.id,
         )
 
         patchPersonForBarnMedNyAktørId(
             aktørForBarnSomSkalPatches = aktørForBarnSomSkalPatches,
-            nyAktør =  nyAktør,
-            behandling = aktivBehandling
+            nyAktør = nyAktør,
+            behandling = aktivBehandling,
         )
 
         patchPersonResultatMedNyAktør(
             aktørForBarnSomSkalPatches = aktørForBarnSomSkalPatches,
-            nyAktør= nyAktør,
-            behandling = aktivBehandling
+            nyAktør = nyAktør,
+            behandling = aktivBehandling,
         )
 
         aktørIdRepository.patchPeriodeOvergangstønadtMedNyAktør(
             gammelAktørId = aktørForBarnSomSkalPatches.aktørId,
             nyAktørId = nyAktør.aktørId,
-            behandlingId = aktivBehandling.id
+            behandlingId = aktivBehandling.id,
         )
     }
 
@@ -263,23 +262,25 @@ class ForvalterService(
             aktørIdRepository.patchPersonMedNyAktør(
                 gammelAktørId = aktørForBarnSomSkalPatches.aktørId,
                 nyAktørId = nyAktør.aktørId,
-                personId = person.id)
+                personId = person.id,
+            )
         }
     }
 
     private fun patchPersonResultatMedNyAktør(
         aktørForBarnSomSkalPatches: Aktør,
         nyAktør: Aktør,
-        behandling: Behandling
+        behandling: Behandling,
     ) {
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
 
-        vilkårsvurdering?.let {vilkårsvurderingId ->
+        vilkårsvurdering?.let { vilkårsvurderingId ->
             secureLogger.info("Patcher person_resultat sin aktørId=${aktørForBarnSomSkalPatches.aktørId} med ${nyAktør.aktørId} for vilkårsvurderingId=${vilkårsvurderingId.id}")
             aktørIdRepository.patchPersonResultatMedNyAktør(
                 gammelAktørId = aktørForBarnSomSkalPatches.aktørId,
                 nyAktørId = nyAktør.aktørId,
-                vilkårsvurderingId = vilkårsvurderingId.id)
+                vilkårsvurderingId = vilkårsvurderingId.id,
+            )
         }
     }
 }
@@ -293,7 +294,7 @@ data class PatchIdentForBarnPåFagsak(
     må du være sikker på at identen man ønsker å patche til er samme person.
      */
     val skalSjekkeAtGammelIdentErHistoriskAvNyIdent: Boolean = true,
-    )
+)
 
 interface FagsakMedFlereMigreringer {
     val fagsakId: Long

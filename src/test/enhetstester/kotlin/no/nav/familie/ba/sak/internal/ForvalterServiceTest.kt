@@ -78,10 +78,10 @@ class ForvalterServiceTest {
         pdlIdentRestClient,
         personidentService,
         aktørIdRepository,
-        vilkårsvurderingService
+        vilkårsvurderingService,
     )
 
-    private val barnetsGamleAktør =  tilAktør(randomFnr())
+    private val barnetsGamleAktør = tilAktør(randomFnr())
     private val barnetsNyeAktør = tilAktør(randomFnr())
     private val fagsak = defaultFagsak()
     private val behandling = lagBehandling(fagsak)
@@ -89,17 +89,15 @@ class ForvalterServiceTest {
     private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
         behandlingId = behandling.id,
         søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
-        barnasIdenter = listOf(barnetsGamleAktør.aktivFødselsnummer())
+        barnasIdenter = listOf(barnetsGamleAktør.aktivFødselsnummer()),
     )
-
-
 
     @Test
     fun `Skal kunne patche barnets ident for en fagsak hvor gammel ident er en historisk ident av ny ident`() {
         val dto = PatchIdentForBarnPåFagsak(
             fagsakId = fagsak.id,
             gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-            nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer())
+            nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
         )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
@@ -110,26 +108,29 @@ class ForvalterServiceTest {
                 IdentInformasjon(barnetsNyeAktør.aktørId, false, "AKTORID"),
                 IdentInformasjon(barnetsNyeAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
             )
-        every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id)} returns behandling
-        every { persongrunnlagService.hentBarna(behandling)} returns listOf(lagPerson(personIdent = no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-            type = PersonType.BARN))
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } returns behandling
+        every { persongrunnlagService.hentBarna(behandling) } returns listOf(
+            lagPerson(
+                personIdent = no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
+                type = PersonType.BARN,
+            ),
+        )
         every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns lagVilkårsvurdering(barnetsGamleAktør, behandling, Resultat.IKKE_VURDERT)
 
         service.patchIdentForBarnPåFagsak(dto)
     }
-
 
     @Test
     fun `Skal kaste feil ved patching av ident hvis ident på barnet ikke finnes på fagsaken`() {
         val dto = PatchIdentForBarnPåFagsak(
             fagsakId = fagsak.id,
             gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-            nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer())
+            nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
         )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns emptySet()
 
-        assertThrows<IllegalStateException> {  service.patchIdentForBarnPåFagsak(dto) }.also {
+        assertThrows<IllegalStateException> { service.patchIdentForBarnPåFagsak(dto) }.also {
             assertThat(it.message).isEqualTo("Fant ikke ident som skal patches som barn på fagsak=${fagsak.id}")
         }
     }
@@ -139,13 +140,13 @@ class ForvalterServiceTest {
         val dto = PatchIdentForBarnPåFagsak(
             fagsakId = fagsak.id,
             gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-            nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer())
+            nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
         )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
         every { pdlIdentRestClient.hentIdenter(barnetsNyeAktør.aktivFødselsnummer(), true) } returns emptyList()
 
-        assertThrows<IllegalStateException> {  service.patchIdentForBarnPåFagsak(dto) }.also {
+        assertThrows<IllegalStateException> { service.patchIdentForBarnPåFagsak(dto) }.also {
             assertThat(it.message).isEqualTo("Ident som skal patches finnes ikke som historisk ident av ny ident")
         }
     }
@@ -156,7 +157,7 @@ class ForvalterServiceTest {
             fagsakId = fagsak.id,
             gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
             nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
-            skalSjekkeAtGammelIdentErHistoriskAvNyIdent = false
+            skalSjekkeAtGammelIdentErHistoriskAvNyIdent = false,
         )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
@@ -165,15 +166,15 @@ class ForvalterServiceTest {
                 IdentInformasjon(barnetsNyeAktør.aktørId, false, "AKTORID"),
                 IdentInformasjon(barnetsNyeAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
             )
-        every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id)} returns behandling
-        every { persongrunnlagService.hentBarna(behandling)} returns listOf(lagPerson(personIdent = no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-            type = PersonType.BARN))
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } returns behandling
+        every { persongrunnlagService.hentBarna(behandling) } returns listOf(
+            lagPerson(
+                personIdent = no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
+                type = PersonType.BARN,
+            ),
+        )
         every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns lagVilkårsvurdering(barnetsGamleAktør, behandling, Resultat.IKKE_VURDERT)
 
         service.patchIdentForBarnPåFagsak(dto)
     }
-
-
-
-
 }

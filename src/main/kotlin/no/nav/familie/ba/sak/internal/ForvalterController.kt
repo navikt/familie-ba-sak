@@ -168,7 +168,6 @@ class ForvalterController(
             .replace("\n", System.lineSeparator())
     }
 
-
     @PatchMapping("/patch-fagsak-med-ny-ident-for-barn")
     fun patchIdentForBarnPåFagsak(@RequestBody patchIdentForBarnPåFagsak: PatchIdentForBarnPåFagsak): ResponseEntity<String> {
         forvalterService.patchIdentForBarnPåFagsak(patchIdentForBarnPåFagsak)
