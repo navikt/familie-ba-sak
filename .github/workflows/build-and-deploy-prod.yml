@@ -72,7 +72,7 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
-    needs: [ bygg ]
+    needs: [ bygg, deploy-preprod ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -83,7 +83,7 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/app-prod.yaml
-          IMAGE: ${{ needs.deploy-preprod.outputs.image }}
+          IMAGE: ${{ needs.bygg.outputs.image }}
 
   loggfeil:
     name: Send logg til slack ved feil
