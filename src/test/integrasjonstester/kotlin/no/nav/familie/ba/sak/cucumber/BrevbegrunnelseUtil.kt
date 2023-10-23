@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.norskDatoFormatter
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseInt
-import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
@@ -73,7 +72,7 @@ fun parseStandardBegrunnelse(rad: Tabellrad) =
             rad,
         ) ?: "",
         maalform = parseEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad).tilSanityFormat(),
-        belop = parseString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BELØP, rad).replace(' ', ' '),
+        belop = parseValgfriString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BELØP, rad)?.replace(' ', ' ') ?: "",
         soknadstidspunkt = parseValgfriString(
             BrevPeriodeParser.DomenebegrepBrevBegrunnelse.SØKNADSTIDSPUNKT,
             rad,
@@ -119,14 +118,16 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
         rad,
     ).sanityApiNavn
 
-    val barnasFodselsdatoer = parseString(
+    val barnasFodselsdatoer = parseValgfriString(
         BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDATOER,
         rad,
-    )
+    ) ?: ""
 
     val antallBarn = parseInt(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.ANTALL_BARN, rad)
 
-    val målform = parseEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad).tilSanityFormat()
+    val målform = parseValgfriEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad) ?: Målform.NB
+
+    val målformSaniytFormat = målform.tilSanityFormat()
 
     return if (gjelderSoker == null) {
         if (annenForeldersAktivitet == null ||
@@ -143,7 +144,7 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
             apiNavn = apiNavn,
             barnasFodselsdatoer = barnasFodselsdatoer,
             antallBarn = antallBarn,
-            maalform = målform,
+            maalform = målformSaniytFormat,
 
             annenForeldersAktivitet = annenForeldersAktivitet,
             annenForeldersAktivitetsland = annenForeldersAktivitetsland,
@@ -158,7 +159,7 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
             barnasFodselsdatoer = barnasFodselsdatoer,
 
             antallBarn = antallBarn,
-            maalform = målform,
+            maalform = målformSaniytFormat,
             gjelderSoker = gjelderSoker,
         )
     }
