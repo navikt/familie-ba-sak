@@ -210,12 +210,16 @@ class ForvalterService(
     fun patchIdentForBarnPåFagsak(dto: PatchIdentForBarnPåFagsak) {
         secureLogger.info("Patcher barnets ident på fagsak $dto")
 
+        if (dto.gammelIdent == dto.nyIdent) {
+            throw IllegalArgumentException("ident som skal patches er lik ident som det skal patches til")
+        }
+
         val aktørForBarnSomSkalPatches = persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId = dto.fagsakId)
             ?.singleOrNull { it.type == PersonType.BARN && it.aktør.aktivFødselsnummer() == dto.gammelIdent.ident }?.aktør ?: error("Fant ikke ident som skal patches som barn på fagsak=${dto.fagsakId}")
 
         if (dto.skalSjekkeAtGammelIdentErHistoriskAvNyIdent) {
             val identer = pdlIdentRestClient.hentIdenter(personIdent = dto.nyIdent.ident, historikk = true)
-            if (identer.none { it.ident == dto.gammelIdent.ident }) {
+            if (identer.none { it.ident == dto.gammelIdent.ident && it.historisk }) {
                 error("Ident som skal patches finnes ikke som historisk ident av ny ident")
             }
         }
