@@ -15,6 +15,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -165,5 +166,13 @@ class ForvalterController(
 
         return testVerktøyService.hentVedtaksperioderTest(behandlingId)
             .replace("\n", System.lineSeparator())
+    }
+
+
+    @PatchMapping("/patch-fagsak-med-ny-ident-for-barn")
+    fun patchIdentForBarnPåFagsak(@RequestBody patchIdentForBarnPåFagsak: PatchIdentForBarnPåFagsak): ResponseEntity<String> {
+        forvalterService.patchIdentForBarnPåFagsak(patchIdentForBarnPåFagsak)
+
+        return ResponseEntity.ok("ok")
     }
 }
