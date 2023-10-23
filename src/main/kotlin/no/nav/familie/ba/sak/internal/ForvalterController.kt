@@ -169,7 +169,15 @@ class ForvalterController(
     }
 
     @PatchMapping("/patch-fagsak-med-ny-ident-for-barn")
-    fun patchIdentForBarnPåFagsak(@RequestBody patchIdentForBarnPåFagsak: PatchIdentForBarnPåFagsak): ResponseEntity<String> {
+    fun patchIdentForBarnPåFagsak(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "skalSjekkeAtGammelIdentErHistoriskAvNyIdent - Sjekker at " +
+                "gammel ident er historisk av ny. Hvis man ønsker å patche med en ident hvor den gamle ikke er historisk av ny, så settes " +
+                "denne til false. OBS: Du må da være sikker på at identen man ønsker å patche til er samme person. Dette kan skje hvis " +
+                "identen ikke er merget av folketrygden.",
+        )
+        @RequestBody patchIdentForBarnPåFagsak: PatchIdentForBarnPåFagsak,
+    ): ResponseEntity<String> {
         forvalterService.patchIdentForBarnPåFagsak(patchIdentForBarnPåFagsak)
 
         return ResponseEntity.ok("ok")
