@@ -290,8 +290,9 @@ data class PatchIdentForBarnPåFagsak(
     val gammelIdent: PersonIdent,
     val nyIdent: PersonIdent,
     /*
-    Settes til true hvis man ønsker å patche med en ident hvor den gamle ikke er historisk av ny. I de tilfellene
-    må du være sikker på at identen man ønsker å patche til er samme person.
+    Sjekker at gammel ident er historisk av ny. Hvis man ønsker å patche med en ident hvor den gamle ikke er
+    historisk av ny, så settes denne til false. OBS: Du må da være sikker på at identen man ønsker å patche til er
+    samme person. Dette kan skje hvis identen ikke er merget av folketrygden.
      */
     val skalSjekkeAtGammelIdentErHistoriskAvNyIdent: Boolean = true,
 )
