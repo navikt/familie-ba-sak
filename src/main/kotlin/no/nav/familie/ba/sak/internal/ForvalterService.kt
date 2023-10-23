@@ -33,6 +33,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
+import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLogg
+import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLoggRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -47,6 +49,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Service
@@ -70,6 +73,7 @@ class ForvalterService(
     private val personidentService: PersonidentService,
     private val aktørIdRepository: AktørIdRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
+    private val aktørMergeLoggRepository: AktørMergeLoggRepository,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -250,6 +254,16 @@ class ForvalterService(
             gammelAktørId = aktørForBarnSomSkalPatches.aktørId,
             nyAktørId = nyAktør.aktørId,
             behandlingId = aktivBehandling.id,
+        )
+
+        aktørMergeLoggRepository.save(
+            AktørMergeLogg(
+                fagsakId = dto.fagsakId,
+                historiskAktørId = aktørForBarnSomSkalPatches.aktørId,
+                nyAktørId = nyAktør.aktørId,
+
+                mergeTidspunkt = LocalDateTime.now(),
+            ),
         )
     }
 

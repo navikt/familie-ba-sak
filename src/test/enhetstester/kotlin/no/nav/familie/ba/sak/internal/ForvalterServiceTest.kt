@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.internal
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
@@ -28,14 +29,19 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
+import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLogg
+import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLoggRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.kontrakter.felles.PersonIdent
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 class ForvalterServiceTest {
 
@@ -58,6 +64,7 @@ class ForvalterServiceTest {
     private val personidentService = mockk<PersonidentService>(relaxed = true)
     private val aktørIdRepository = mockk<AktørIdRepository>(relaxed = true)
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
+    private val aktørMergeLoggRepository = mockk<AktørMergeLoggRepository>(relaxed = true)
 
     private val service = ForvalterService(
         økonomiService,
@@ -79,6 +86,7 @@ class ForvalterServiceTest {
         personidentService,
         aktørIdRepository,
         vilkårsvurderingService,
+        aktørMergeLoggRepository,
     )
 
     private val barnetsGamleAktør = tilAktør(randomFnr())
@@ -115,9 +123,21 @@ class ForvalterServiceTest {
                 type = PersonType.BARN,
             ),
         )
+        every { personidentService.hentOgLagreAktør(barnetsNyeAktør.aktivFødselsnummer(), true) } returns barnetsNyeAktør
         every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns lagVilkårsvurdering(barnetsGamleAktør, behandling, Resultat.IKKE_VURDERT)
+        val aktørMergeLoggSlot = slot<AktørMergeLogg>()
+        every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
 
         service.patchIdentForBarnPåFagsak(dto)
+
+        val aktørMergeLogg = aktørMergeLoggSlot.captured
+        assertThat(aktørMergeLogg.nyAktørId).isEqualTo(barnetsNyeAktør.aktørId)
+        assertThat(aktørMergeLogg.fagsakId).isEqualTo(dto.fagsakId)
+        assertThat(aktørMergeLogg.historiskAktørId).isEqualTo(barnetsGamleAktør.aktørId)
+        assertThat(aktørMergeLogg.mergeTidspunkt).isCloseTo(
+            LocalDateTime.now(),
+            Assertions.within(10, ChronoUnit.SECONDS),
+        )
     }
 
     @Test
@@ -173,8 +193,20 @@ class ForvalterServiceTest {
                 type = PersonType.BARN,
             ),
         )
+        every { personidentService.hentOgLagreAktør(barnetsNyeAktør.aktivFødselsnummer(), true) } returns barnetsNyeAktør
         every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns lagVilkårsvurdering(barnetsGamleAktør, behandling, Resultat.IKKE_VURDERT)
+        val aktørMergeLoggSlot = slot<AktørMergeLogg>()
+        every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
 
         service.patchIdentForBarnPåFagsak(dto)
+
+        val aktørMergeLogg = aktørMergeLoggSlot.captured
+        assertThat(aktørMergeLogg.nyAktørId).isEqualTo(barnetsNyeAktør.aktørId)
+        assertThat(aktørMergeLogg.fagsakId).isEqualTo(dto.fagsakId)
+        assertThat(aktørMergeLogg.historiskAktørId).isEqualTo(barnetsGamleAktør.aktørId)
+        assertThat(aktørMergeLogg.mergeTidspunkt).isCloseTo(
+            LocalDateTime.now(),
+            Assertions.within(10, ChronoUnit.SECONDS),
+        )
     }
 }
