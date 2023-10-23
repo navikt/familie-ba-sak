@@ -48,7 +48,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     val barnPåBehandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
     val barnIBegrunnelse = personerGjeldeneForBegrunnelse.filter { it.type == PersonType.BARN }
 
-    return if (kompetanser.isEmpty() && sanityBegrunnelse.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {
+    return if (sanityBegrunnelse.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {
         val gjelderSøker = personerIBegrunnelse.any { it.type == PersonType.SØKER }
 
         val barnasFødselsdatoer = hentBarnasFødselsdatoerForAvslagsbegrunnelse(
