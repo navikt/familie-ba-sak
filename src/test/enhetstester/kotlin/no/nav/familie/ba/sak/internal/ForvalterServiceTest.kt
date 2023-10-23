@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -44,7 +43,6 @@ class ForvalterServiceTest {
     private val vedtakService = mockk<VedtakService>()
     private val beregningService = mockk<BeregningService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val endretUtbetalingAndelService = mockk<EndretUtbetalingAndelService>()
     private val stegService = mockk<StegService>()
     private val fagsakService = mockk<FagsakService>()
     private val behandlingService = mockk<BehandlingService>()
@@ -66,7 +64,6 @@ class ForvalterServiceTest {
         vedtakService,
         beregningService,
         behandlingHentOgPersisterService,
-        endretUtbetalingAndelService,
         stegService,
         fagsakService,
         behandlingService,

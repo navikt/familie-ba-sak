@@ -27,7 +27,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -56,7 +55,6 @@ class ForvalterService(
     private val vedtakService: VedtakService,
     private val beregningService: BeregningService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val stegService: StegService,
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
@@ -96,17 +94,6 @@ class ForvalterService(
             vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId),
             saksbehandlerId = "VL",
             andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory(),
-        )
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun kopierEndretUtbetalingFraForrigeBehandling(
-        sisteVedtatteBehandling: Behandling,
-        nestSisteVedtatteBehandling: Behandling,
-    ) {
-        endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
-            behandling = sisteVedtatteBehandling,
-            forrigeBehandling = nestSisteVedtatteBehandling,
         )
     }
 
