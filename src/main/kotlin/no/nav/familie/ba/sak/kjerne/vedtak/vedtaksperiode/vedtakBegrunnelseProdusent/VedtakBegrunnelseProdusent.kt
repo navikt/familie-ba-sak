@@ -431,22 +431,14 @@ private fun hentEØSStandardBegrunnelser(
         erEndringIKompetanse(begrunnelseGrunnlag) && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
     }
 
-    val filtrertPåPeriodeResultat = begrunnelserFiltrertPåPeriodetype.filterValues {
-        filtrerPåPeriodeResultat(relevantePeriodeResultater, it)
-    }
+    val filtrertPåIngenEndringMedLikKompetanse =
+        begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
+            SanityPeriodeResultat.INGEN_ENDRING in relevantePeriodeResultater && it.erLikKompetanseIPeriode(
+                begrunnelseGrunnlag,
+            )
+        }
 
-    return filtrertPåVilkår + filtrertPåKompetanse + filtrertPåPeriodeResultat
-}
-
-private fun filtrerPåPeriodeResultat(
-    relevantePeriodeResultater: List<SanityPeriodeResultat>,
-    sanityEøsBegrunnelse: SanityEØSBegrunnelse,
-): Boolean {
-    val periodeResultatErIngenEndring = SanityPeriodeResultat.INGEN_ENDRING in relevantePeriodeResultater
-    val periodeResultatPåBegrunnelseErInnvilgetEllerØkning =
-        sanityEøsBegrunnelse.periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING
-
-    return periodeResultatErIngenEndring && periodeResultatPåBegrunnelseErInnvilgetEllerØkning
+    return filtrertPåVilkår + filtrertPåKompetanse + filtrertPåIngenEndringMedLikKompetanse
 }
 
 fun SanityBegrunnelse.erGjeldendeForRolle(
