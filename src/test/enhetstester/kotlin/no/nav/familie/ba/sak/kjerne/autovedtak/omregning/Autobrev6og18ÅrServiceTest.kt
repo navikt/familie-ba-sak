@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -55,6 +56,7 @@ internal class Autobrev6og18ÅrServiceTest {
     private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>(relaxed = true)
     private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
     private val startSatsendring = mockk<StartSatsendring>(relaxed = true)
+    private val behandlingRepository = mockk<BehandlingRepository>(relaxed = true)
 
     private val autovedtakBrevService = AutovedtakBrevService(
         behandlingService = behandlingService,
@@ -65,6 +67,7 @@ internal class Autobrev6og18ÅrServiceTest {
         infotrygdService = infotrygdService,
         vedtaksperiodeService = vedtaksperiodeService,
         taskRepository = taskRepository,
+        behandlingRepository = behandlingRepository,
     )
 
     private val autobrev6og18ÅrService = Autobrev6og18ÅrService(
