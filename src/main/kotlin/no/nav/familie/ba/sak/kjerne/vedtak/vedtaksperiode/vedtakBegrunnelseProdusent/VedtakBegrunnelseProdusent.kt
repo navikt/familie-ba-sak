@@ -430,7 +430,7 @@ private fun hentEØSStandardBegrunnelser(
     val filtrertPåKompetanseValutakursOgUtenlandskperiodeBeløp = begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues { begrunnelse ->
         val endringIKompetanseValutakursEllerUtenlandskPeriodebeløp =
             erEndringIKompetanse(begrunnelseGrunnlag) || erEndringIValutakurs(begrunnelseGrunnlag) || erEndringIUtenlandskPeriodebeløp(
-                begrunnelseGrunnlag
+                begrunnelseGrunnlag,
             )
 
         endringIKompetanseValutakursEllerUtenlandskPeriodebeløp && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
