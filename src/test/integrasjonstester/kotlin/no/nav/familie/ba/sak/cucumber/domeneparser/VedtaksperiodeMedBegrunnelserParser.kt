@@ -72,6 +72,20 @@ object VedtaksperiodeMedBegrunnelserParser {
         RESULTAT("Resultat"),
     }
 
+    enum class DomenebegrepValutakurs(override val nøkkel: String) : Domenenøkkel {
+        VALUTAKURSDATO("Valutakursdato"),
+        VALUTA_KODE("Valuta kode"),
+        KURS("Kurs"),
+    }
+
+    enum class DomenebegrepUtenlandskPeriodebeløp(override val nøkkel: String) : Domenenøkkel {
+        BELØP("Beløp"),
+        VALUTA_KODE("Valuta kode"),
+        INTERVALL("Intervall"),
+        UTBETALINGSLAND("Utbetalingsland"),
+        KALKULERT_MÅNEDELIG_BELØP("Kalkulert månedlig beløp"),
+    }
+
     enum class DomenebegrepEndretUtbetaling(override val nøkkel: String) : Domenenøkkel {
         PROSENT("Prosent"),
         ÅRSAK("Årsak"),

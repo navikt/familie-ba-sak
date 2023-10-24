@@ -63,6 +63,8 @@ class VedtaksperiodeServiceTest {
             småbarnstilleggService = småbarnstilleggService,
             refusjonEøsRepository = refusjonEøsRepository,
             integrasjonClient = integrasjonClient,
+            valutakursRepository = mockk(),
+            utenlandskPeriodebeløpRepository = mockk(),
         ),
     )
 
