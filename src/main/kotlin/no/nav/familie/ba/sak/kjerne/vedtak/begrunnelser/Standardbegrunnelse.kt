@@ -733,6 +733,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagBosattIRiket"
     },
+    AVSLAG_BOSATT_I_RIKET_SØKER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkebosattINorgeSoker"
+    },
     AVSLAG_LOVLIG_OPPHOLD_TREDJELANDSBORGER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagLovligOppholdTredjelandsborger"
