@@ -70,17 +70,17 @@ Egenskap: Gyldige begrunnelser for kompetanser
 
     Og med kompetanser for begrunnelse
       | AktørId | Fra dato   | Til dato   | Resultat              | BehandlingId | Annen forelders aktivitet | Barnets bostedsland |
-      | 2       | 01.04.2023 | 01.07.2023 | NORGE_ER_PRIMÆRLAND   | 1            | INAKTIV                   | NO                  |
+      | 2       | 01.04.2023 | 31.07.2023 | NORGE_ER_PRIMÆRLAND   | 1            | INAKTIV                   | NO                  |
       | 2       | 01.08.2023 |            | NORGE_ER_SEKUNDÆRLAND | 1            | I_ARBEID                  | GB                  |
 
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser | Ugyldige begrunnelser         |
-      | 01.04.2023 | 30.06.2023 | UTBETALING         |                                |                      |                               |
-      | 01.07.2023 | 31.07.2023 | UTBETALING         | EØS_FORORDNINGEN               |                      | INNVILGET_PRIMÆRLAND_STANDARD |
-      | 01.08.2023 | 31.01.2033 | UTBETALING         |                                |                      |                               |
-      | 01.02.2033 |            | OPPHØR             |                                |                      |                               |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser  | Regelverk Ugyldige begrunnelser | Ugyldige begrunnelser         |
+      | 01.04.2023 | 30.06.2023 | UTBETALING         |                                |                       |                                 |                               |
+      | 01.07.2023 | 31.07.2023 | UTBETALING         |                                | INNVILGET_SATSENDRING | EØS_FORORDNINGEN                | INNVILGET_PRIMÆRLAND_STANDARD |
+      | 01.08.2023 | 31.01.2033 | UTBETALING         |                                |                       |                                 |                               |
+      | 01.02.2033 |            | OPPHØR             |                                |                       |                                 |                               |
 
   Scenario: Skal gi riktig begrunnelse ved opphør av EØS-sak
     Gitt følgende behandling
