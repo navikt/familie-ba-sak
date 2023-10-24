@@ -5,9 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -18,7 +16,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -26,11 +23,12 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLogg
 import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLoggRepository
+import no.nav.familie.ba.sak.kjerne.personident.Personident
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -65,6 +63,7 @@ class ForvalterServiceTest {
     private val aktørIdRepository = mockk<AktørIdRepository>(relaxed = true)
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val aktørMergeLoggRepository = mockk<AktørMergeLoggRepository>(relaxed = true)
+    private val personidentRepository = mockk<PersonidentRepository>()
 
     private val service = ForvalterService(
         økonomiService,
@@ -85,8 +84,8 @@ class ForvalterServiceTest {
         pdlIdentRestClient,
         personidentService,
         aktørIdRepository,
-        vilkårsvurderingService,
         aktørMergeLoggRepository,
+        personidentRepository,
     )
 
     private val barnetsGamleAktør = tilAktør(randomFnr())
@@ -116,15 +115,9 @@ class ForvalterServiceTest {
                 IdentInformasjon(barnetsNyeAktør.aktørId, false, "AKTORID"),
                 IdentInformasjon(barnetsNyeAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
             )
-        every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } returns behandling
-        every { persongrunnlagService.hentBarna(behandling) } returns listOf(
-            lagPerson(
-                personIdent = no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-                type = PersonType.BARN,
-            ),
-        )
+
         every { personidentService.hentOgLagreAktør(barnetsNyeAktør.aktivFødselsnummer(), true) } returns barnetsNyeAktør
-        every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns lagVilkårsvurdering(barnetsGamleAktør, behandling, Resultat.IKKE_VURDERT)
+        every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns null
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
 
@@ -172,6 +165,29 @@ class ForvalterServiceTest {
     }
 
     @Test
+    fun `Skal kaste feil ved patching av ident hvis ny personident allerede eksisterer i personident`() {
+        val dto = PatchIdentForBarnPåFagsak(
+            fagsakId = fagsak.id,
+            gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
+            nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
+            skalSjekkeAtGammelIdentErHistoriskAvNyIdent = false,
+        )
+
+        every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
+        every { pdlIdentRestClient.hentIdenter(barnetsNyeAktør.aktivFødselsnummer(), true) } returns
+            listOf(
+                IdentInformasjon(barnetsNyeAktør.aktørId, false, "AKTORID"),
+                IdentInformasjon(barnetsNyeAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
+            )
+
+        every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns Personident(barnetsNyeAktør.aktivFødselsnummer(), barnetsNyeAktør)
+
+        assertThrows<IllegalStateException> { service.patchIdentForBarnPåFagsak(dto) }.also {
+            assertThat(it.message).isEqualTo("Fant allerede en personident for nytt fødselsnummer")
+        }
+    }
+
+    @Test
     fun `Skal kunne patche barnets ident for en fagsak hvor gammel ident ikke er en historisk ident av ny ident, men man har valgt å overstyre`() {
         val dto = PatchIdentForBarnPåFagsak(
             fagsakId = fagsak.id,
@@ -186,15 +202,9 @@ class ForvalterServiceTest {
                 IdentInformasjon(barnetsNyeAktør.aktørId, false, "AKTORID"),
                 IdentInformasjon(barnetsNyeAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
             )
-        every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } returns behandling
-        every { persongrunnlagService.hentBarna(behandling) } returns listOf(
-            lagPerson(
-                personIdent = no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-                type = PersonType.BARN,
-            ),
-        )
+
         every { personidentService.hentOgLagreAktør(barnetsNyeAktør.aktivFødselsnummer(), true) } returns barnetsNyeAktør
-        every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns lagVilkårsvurdering(barnetsGamleAktør, behandling, Resultat.IKKE_VURDERT)
+        every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns null
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
 

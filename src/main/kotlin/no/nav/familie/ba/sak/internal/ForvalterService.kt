@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivFødselsnummer
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -20,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -31,14 +31,13 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLogg
 import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLoggRepository
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -72,8 +71,8 @@ class ForvalterService(
     private val pdlIdentRestClient: PdlIdentRestClient,
     private val personidentService: PersonidentService,
     private val aktørIdRepository: AktørIdRepository,
-    private val vilkårsvurderingService: VilkårsvurderingService,
     private val aktørMergeLoggRepository: AktørMergeLoggRepository,
+    private val personidentRepository: PersonidentRepository,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -221,40 +220,26 @@ class ForvalterService(
         val aktørForBarnSomSkalPatches = persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId = dto.fagsakId)
             ?.singleOrNull { it.type == PersonType.BARN && it.aktør.aktivFødselsnummer() == dto.gammelIdent.ident }?.aktør ?: error("Fant ikke ident som skal patches som barn på fagsak=${dto.fagsakId}")
 
+        val identer = pdlIdentRestClient.hentIdenter(personIdent = dto.nyIdent.ident, historikk = true)
         if (dto.skalSjekkeAtGammelIdentErHistoriskAvNyIdent) {
-            val identer = pdlIdentRestClient.hentIdenter(personIdent = dto.nyIdent.ident, historikk = true)
             if (identer.none { it.ident == dto.gammelIdent.ident && it.historisk }) {
                 error("Ident som skal patches finnes ikke som historisk ident av ny ident")
             }
         }
 
+        val personidentNyttFødselsnummer = personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident)
+        if (personidentNyttFødselsnummer != null) error("Fant allerede en personident for nytt fødselsnummer")
+
+        // Denne patcher med å bruke on cascade update på aktørid
+        aktørIdRepository.patchAktørMedNyAktørId(
+            gammelAktørId = aktørForBarnSomSkalPatches.aktørId,
+            nyAktørId = identer.hentAktivFødselsnummer(),
+        )
+
+        // Etter at alle fk_aktoer_id har blitt oppgradert alle steder, så vil personident ha det gamle fødselsnummeret.
+        // Ved å kalle hentOgLagre, så vil den gamle personidenten-raden bli deaktivert og ny med riktig fødselsnummer
+        // vil bli oppdatert
         val nyAktør = personidentService.hentOgLagreAktør(ident = dto.nyIdent.ident, lagre = true)
-
-        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = dto.fagsakId) ?: error("Fant ingen aktiv behandling for fagsak")
-
-        aktørIdRepository.patchAndelTilkjentYteleseMedNyAktør(
-            gammelAktørId = aktørForBarnSomSkalPatches.aktørId,
-            nyAktørId = nyAktør.aktørId,
-            behandlingId = aktivBehandling.id,
-        )
-
-        patchPersonForBarnMedNyAktørId(
-            aktørForBarnSomSkalPatches = aktørForBarnSomSkalPatches,
-            nyAktør = nyAktør,
-            behandling = aktivBehandling,
-        )
-
-        patchPersonResultatMedNyAktør(
-            aktørForBarnSomSkalPatches = aktørForBarnSomSkalPatches,
-            nyAktør = nyAktør,
-            behandling = aktivBehandling,
-        )
-
-        aktørIdRepository.patchPeriodeOvergangstønadtMedNyAktør(
-            gammelAktørId = aktørForBarnSomSkalPatches.aktørId,
-            nyAktørId = nyAktør.aktørId,
-            behandlingId = aktivBehandling.id,
-        )
 
         aktørMergeLoggRepository.save(
             AktørMergeLogg(
@@ -265,41 +250,6 @@ class ForvalterService(
                 mergeTidspunkt = LocalDateTime.now(),
             ),
         )
-    }
-
-    private fun patchPersonForBarnMedNyAktørId(
-        aktørForBarnSomSkalPatches: Aktør,
-        nyAktør: Aktør,
-        behandling: Behandling,
-    ) {
-        val personForBarnet = persongrunnlagService.hentBarna(behandling)
-            .singleOrNull { barn -> barn.aktør.aktivFødselsnummer() == aktørForBarnSomSkalPatches.aktivFødselsnummer() }
-
-        personForBarnet?.let { person ->
-            secureLogger.info("Patcher person sin aktørId=${aktørForBarnSomSkalPatches.aktørId} med ${nyAktør.aktørId} for personId=${personForBarnet.id}")
-            aktørIdRepository.patchPersonMedNyAktør(
-                gammelAktørId = aktørForBarnSomSkalPatches.aktørId,
-                nyAktørId = nyAktør.aktørId,
-                personId = person.id,
-            )
-        }
-    }
-
-    private fun patchPersonResultatMedNyAktør(
-        aktørForBarnSomSkalPatches: Aktør,
-        nyAktør: Aktør,
-        behandling: Behandling,
-    ) {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
-
-        vilkårsvurdering?.let { vilkårsvurderingId ->
-            secureLogger.info("Patcher person_resultat sin aktørId=${aktørForBarnSomSkalPatches.aktørId} med ${nyAktør.aktørId} for vilkårsvurderingId=${vilkårsvurderingId.id}")
-            aktørIdRepository.patchPersonResultatMedNyAktør(
-                gammelAktørId = aktørForBarnSomSkalPatches.aktørId,
-                nyAktørId = nyAktør.aktørId,
-                vilkårsvurderingId = vilkårsvurderingId.id,
-            )
-        }
     }
 }
 

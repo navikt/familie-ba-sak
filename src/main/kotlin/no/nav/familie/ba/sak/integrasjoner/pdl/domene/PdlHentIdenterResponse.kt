@@ -9,3 +9,13 @@ data class IdentInformasjon(
     val historisk: Boolean,
     val gruppe: String,
 )
+
+fun List<IdentInformasjon>.hentAktivFødselsnummer(): String {
+    return this.singleOrNull { it.gruppe == "AKTORID" && it.historisk == false }?.ident
+        ?: throw Error("Finner ikke aktørId i Pdl")
+}
+
+fun List<IdentInformasjon>.hentAktivAktørId(): String {
+    return this.singleOrNull { it.gruppe == "AKTORID" && it.historisk == false }?.ident
+        ?: throw Error("Finner ikke aktørId i Pdl")
+}
