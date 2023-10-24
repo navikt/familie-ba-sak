@@ -419,7 +419,7 @@ private fun hentEØSStandardBegrunnelser(
     val begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType = begrunnelserFiltrertPåPeriodetype
         .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
 
-    val filtrertPåVilkår = begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
+    val filtrertPåEndretVilkår = begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
         it.erGjeldendeForUtgjørendeVilkår(
             begrunnelseGrunnlag,
             utvidetVilkårPåSøkerIPeriode,
@@ -427,9 +427,10 @@ private fun hentEØSStandardBegrunnelser(
         )
     }
 
-    val filtrertPåKompetanse = begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues { begrunnelse ->
-        erEndringIKompetanse(begrunnelseGrunnlag) && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
-    }
+    val filtrertPåEndretKompetanse =
+        begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues { begrunnelse ->
+            erEndringIKompetanse(begrunnelseGrunnlag) && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
+        }
 
     val filtrertPåIngenEndringMedLikKompetanse =
         begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
@@ -438,7 +439,7 @@ private fun hentEØSStandardBegrunnelser(
             )
         }
 
-    return filtrertPåVilkår + filtrertPåKompetanse + filtrertPåIngenEndringMedLikKompetanse
+    return filtrertPåEndretVilkår + filtrertPåEndretKompetanse + filtrertPåIngenEndringMedLikKompetanse
 }
 
 fun SanityBegrunnelse.erGjeldendeForRolle(
