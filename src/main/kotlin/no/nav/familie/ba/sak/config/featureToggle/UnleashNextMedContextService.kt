@@ -20,6 +20,7 @@ class UnleashNextMedContextService(
             toggleId,
             properties = mapOf(
                 UnleashContextFields.FAGSAK_ID to behandling.fagsak.id.toString(),
+                UnleashContextFields.BEHANDLING_ID to behandling.id.toString(),
                 UnleashContextFields.ENHET_ID to arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId,
                 UnleashContextFields.NAV_IDENT to SikkerhetContext.hentSaksbehandler(),
                 UnleashContextFields.EPOST to SikkerhetContext.hentSaksbehandlerEpost(),
