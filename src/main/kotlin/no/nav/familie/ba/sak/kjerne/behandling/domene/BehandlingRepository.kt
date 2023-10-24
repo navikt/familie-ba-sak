@@ -4,6 +4,7 @@ import jakarta.persistence.LockModeType
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 interface BehandlingRepository : JpaRepository<Behandling, Long> {
@@ -169,4 +170,17 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         nativeQuery = true,
     )
     fun finnAktiveBehandlingerSomManglerStønadTom(limit: Int): List<Long>
+
+    @Query(
+        """
+        select vb.vedtak_begrunnelse_spesifikasjon
+        from behandling b
+                 join vedtak v on v.fk_behandling_id = b.id
+                 join vedtaksperiode vp on vp.fk_vedtak_id = v.id
+                 join vedtaksbegrunnelse vb on vb.fk_vedtaksperiode_id = vp.id
+        where b.id = :behandlingId and vp.fom = :fomVedtaksperiode
+            """,
+        nativeQuery = true,
+    )
+    fun hentBegrunnelserPåBehandlingIPeriode(behandlingId: Long, fomVedtaksperiode: LocalDate): List<String>
 }
