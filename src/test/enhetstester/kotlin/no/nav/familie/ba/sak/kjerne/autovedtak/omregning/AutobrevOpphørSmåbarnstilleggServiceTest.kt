@@ -142,6 +142,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(any()) } returns listOf(
             lagPeriodeOvergangsstønadGrunnlag(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1)),
         )
+        every { behandlingRepository.hentBegrunnelserPåBehandlingIPeriode(behandling.id, any()) } returns listOf("REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR")
 
         autobrevOpphørSmåbarnstilleggService
             .kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId = behandling.fagsak.id)
