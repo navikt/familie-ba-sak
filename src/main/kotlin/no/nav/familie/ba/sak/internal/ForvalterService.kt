@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivFødselsnummer
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -233,7 +233,7 @@ class ForvalterService(
         // Denne patcher med å bruke on cascade update på aktørid
         aktørIdRepository.patchAktørMedNyAktørId(
             gammelAktørId = aktørForBarnSomSkalPatches.aktørId,
-            nyAktørId = identer.hentAktivFødselsnummer(),
+            nyAktørId = identer.hentAktivAktørId(),
         )
 
         // Etter at alle fk_aktoer_id har blitt oppgradert alle steder, så vil personident ha det gamle fødselsnummeret.

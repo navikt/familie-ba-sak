@@ -11,7 +11,7 @@ data class IdentInformasjon(
 )
 
 fun List<IdentInformasjon>.hentAktivFødselsnummer(): String {
-    return this.singleOrNull { it.gruppe == "AKTORID" && it.historisk == false }?.ident
+    return this.singleOrNull { it.gruppe == "FOLKEREGISTERIDENT" && it.historisk == false }?.ident
         ?: throw Error("Finner ikke aktørId i Pdl")
 }
 
