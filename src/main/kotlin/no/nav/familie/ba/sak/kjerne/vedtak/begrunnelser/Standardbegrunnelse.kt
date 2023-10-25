@@ -733,6 +733,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagBosattIRiket"
     },
+    AVSLAG_BOSATT_I_RIKET_SØKER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkebosattINorgeSoker"
+    },
     AVSLAG_LOVLIG_OPPHOLD_TREDJELANDSBORGER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagLovligOppholdTredjelandsborger"
@@ -1472,6 +1476,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     },
     ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR_KUN_UTVIDET_DEL {
         override val sanityApiNavn = "etterEndretUtbetalingEtterbetalingTreAarKunUtvidetDel"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
+    },
+    ETTER_ENDRET_UTBETALING_ENDRE_MOTTAKER {
+        override val sanityApiNavn = "etterEndretUtbetalingEndreMottaker"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     },
 

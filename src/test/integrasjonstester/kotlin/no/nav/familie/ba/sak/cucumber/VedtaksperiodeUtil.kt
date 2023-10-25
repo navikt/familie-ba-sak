@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
@@ -30,6 +31,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriStringList
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -48,6 +50,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -94,12 +97,15 @@ fun lagVedtak(
             val behandlingÅrsak = parseValgfriEnum<BehandlingÅrsak>(Domenebegrep.BEHANDLINGSÅRSAK, rad)
             val behandlingResultat = parseValgfriEnum<Behandlingsresultat>(Domenebegrep.BEHANDLINGSRESULTAT, rad)
             val skalBehandlesAutomatisk = parseValgfriBoolean(Domenebegrep.SKAL_BEHANLDES_AUTOMATISK, rad) ?: false
+            val behandlingKategori = parseValgfriEnum<BehandlingKategori>(Domenebegrep.BEHANDLINGSKATEGORI, rad)
+                ?: BehandlingKategori.NASJONAL
 
             lagBehandling(
                 fagsak = fagsak,
                 årsak = behandlingÅrsak ?: BehandlingÅrsak.SØKNAD,
                 resultat = behandlingResultat ?: Behandlingsresultat.IKKE_VURDERT,
                 skalBehandlesAutomatisk = skalBehandlesAutomatisk,
+                behandlingKategori = behandlingKategori,
             ).copy(id = behandlingId)
         }.associateBy { it.id },
     )
@@ -170,12 +176,29 @@ fun leggTilVilkårResultatPåPersonResultat(
                 begrunnelse = "",
                 utdypendeVilkårsvurderinger = utdypendeVilkårsvurderingForÉnRad,
                 vurderesEtter = vurderesEtterForEnRad,
+                standardbegrunnelser = hentStandardBegrunnelser(rad),
             )
         }
         personResultat.vilkårResultater.addAll(vilkårResultaterForÉnRad)
     }
     personResultat
 }.toSet()
+
+private fun hentStandardBegrunnelser(rad: MutableMap<String, String>): List<IVedtakBegrunnelse> {
+    val standardbegrunnelser: List<IVedtakBegrunnelse> = try {
+        parseEnumListe<Standardbegrunnelse>(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.STANDARDBEGRUNNELSER,
+            rad,
+        )
+    } catch (_: Exception) {
+        parseEnumListe<EØSStandardbegrunnelse>(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.EØSBEGRUNNELSER,
+            rad,
+        )
+    }
+
+    return standardbegrunnelser
+}
 
 fun lagKompetanser(
     nyeKompetanserPerBarn: MutableList<MutableMap<String, String>>,
@@ -248,7 +271,10 @@ fun lagEndredeUtbetalinger(
                 ?: Årsak.ALLEREDE_UTBETALT,
             søknadstidspunkt = parseValgfriDato(Domenebegrep.SØKNADSTIDSPUNKT, rad) ?: LocalDate.now(),
             begrunnelse = "Fordi at...",
-            avtaletidspunktDeltBosted = LocalDate.now(),
+            avtaletidspunktDeltBosted = parseValgfriDato(
+                BrevPeriodeParser.DomenebegrepBrevBegrunnelse.AVTALETIDSPUNKT_DELT_BOSTED,
+                rad,
+            ),
         )
     }.groupBy { it.behandlingId }
         .toMutableMap()

@@ -199,7 +199,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
             .tilTidslinje().mapIkkeNull { KompetanseForVedtaksperiode(it) }
 
         val endredeUtbetalingerTidslinje = utfylteEndredeUtbetalinger.filtrerPåAktør(person.aktør)
-            .tilTidslinje().mapIkkeNull { EndretUtbetalingAndelForVedtaksperiode(it) }
+            .tilTidslinje().mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksperiode() }
 
         val overgangsstønadTidslinje =
             perioderOvergangsstønad.filtrerPåAktør(person.aktør)
@@ -290,12 +290,17 @@ private fun hentErMinstEttBarnMedUtbetalingTidslinje(
         ).map { it != null }
 
     val barnSineVilkårErOppfyltTidslinjer = personResultater
-        .filter { it.aktør != søker.aktør || søker.type == PersonType.BARN }
-        .map { personResultat ->
-            personResultat.tilTidslinjeForSplittForPerson(
-                person = persongrunnlag.barna.single { it.aktør == personResultat.aktør },
-                fagsakType = fagsakType,
-            ).map { it != null }
+        .mapNotNull { personResultat ->
+            val person = persongrunnlag.personer.single { it.aktør == personResultat.aktør }
+
+            if (person.type == PersonType.BARN) {
+                personResultat.tilTidslinjeForSplittForPerson(
+                    person = persongrunnlag.personer.single { it.aktør == personResultat.aktør },
+                    fagsakType = fagsakType,
+                ).map { it != null }
+            } else {
+                null
+            }
         }
 
     return barnSineVilkårErOppfyltTidslinjer
@@ -339,7 +344,11 @@ private fun List<VilkårResultat>.hentForskjøvedeVilkårResultaterForPersonsAnd
                 }
         }
 
-        PersonType.ANNENPART -> throw Feil("Ikke implementert for annenpart")
+        PersonType.ANNENPART -> if (this.isNotEmpty()) {
+            throw Feil("Ikke implementert for annenpart")
+        } else {
+            emptyList<Periode<List<VilkårResultat>, Måned>>().tilTidslinje()
+        }
     }
 }
 
@@ -402,7 +411,7 @@ private fun lagGrunnlagMedKompetanse(
 
 private fun lagGrunnlagMedEndretUtbetalingAndel(
     vedtaksperiodeGrunnlagForPerson: VedtaksperiodeGrunnlagForPerson?,
-    endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode?,
+    endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode?,
 ) = when (vedtaksperiodeGrunnlagForPerson) {
     is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> vedtaksperiodeGrunnlagForPerson.copy(endretUtbetalingAndel = endretUtbetalingAndel)
     is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> vedtaksperiodeGrunnlagForPerson
@@ -495,7 +504,7 @@ private fun Periode<VedtaksperiodeGrunnlagForPerson, Måned>.erInnvilgetEllerEks
 
     val erInnvilget = grunnlagForPerson is VedtaksperiodeGrunnlagForPersonVilkårInnvilget
     val erEksplisittAvslag =
-        grunnlagForPerson.vilkårResultaterForVedtaksperiode.any { it.erEksplisittAvslagPåSøknad == true }
+        grunnlagForPerson.vilkårResultaterForVedtaksperiode.any { it.erEksplisittAvslagPåSøknad }
 
     return erInnvilget || erEksplisittAvslag
 }

@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -59,7 +58,7 @@ data class VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
     val andeler: Iterable<AndelForVedtaksperiode>,
     val kompetanse: KompetanseForVedtaksperiode? = null,
-    val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
+    val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
     val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
 ) : VedtaksperiodeGrunnlagForPerson {
     fun erInnvilgetEndretUtbetaling() =
@@ -73,7 +72,7 @@ data class VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
     val erEksplisittAvslag: Boolean = vilkårResultaterForVedtaksperiode.inneholderEksplisittAvslag()
 
     fun List<VilkårResultatForVedtaksperiode>.inneholderEksplisittAvslag() =
-        this.any { it.erEksplisittAvslagPåSøknad == true }
+        this.any { it.erEksplisittAvslagPåSøknad }
 }
 
 data class VilkårResultatForVedtaksperiode(
@@ -81,7 +80,7 @@ data class VilkårResultatForVedtaksperiode(
     val resultat: Resultat,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
     val vurderesEtter: Regelverk?,
-    val erEksplisittAvslagPåSøknad: Boolean?,
+    val erEksplisittAvslagPåSøknad: Boolean,
     val standardbegrunnelser: List<IVedtakBegrunnelse>,
     val aktørId: AktørId,
     val fom: LocalDate?,
@@ -92,7 +91,7 @@ data class VilkårResultatForVedtaksperiode(
         resultat = vilkårResultat.resultat,
         utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger,
         vurderesEtter = vilkårResultat.vurderesEtter,
-        erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
+        erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad == true,
         standardbegrunnelser = vilkårResultat.standardbegrunnelser,
         fom = vilkårResultat.periodeFom,
         tom = vilkårResultat.periodeTom,
@@ -112,18 +111,6 @@ fun Iterable<VilkårResultatForVedtaksperiode>.erOppfyltForBarn(): Boolean =
 
             vilkårsresutlatet?.resultat == Resultat.OPPFYLT
         }
-
-data class EndretUtbetalingAndelForVedtaksperiode(
-    val prosent: BigDecimal,
-    val årsak: Årsak,
-    val søknadstidspunkt: LocalDate,
-) {
-    constructor(endretUtbetalingAndel: IUtfyltEndretUtbetalingAndel) : this(
-        prosent = endretUtbetalingAndel.prosent,
-        årsak = endretUtbetalingAndel.årsak,
-        søknadstidspunkt = endretUtbetalingAndel.søknadstidspunkt,
-    )
-}
 
 data class AndelForVedtaksperiode(
     val kalkulertUtbetalingsbeløp: Int,

@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -52,6 +53,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     private val periodeOvergangsstønadGrunnlagRepository = mockk<PeriodeOvergangsstønadGrunnlagRepository>()
     private val startSatsendring = mockk<StartSatsendring>(relaxed = true)
+    private val behandlingRepository = mockk<BehandlingRepository>(relaxed = true)
 
     private val autovedtakBrevService = AutovedtakBrevService(
         fagsakService = fagsakService,
@@ -62,6 +64,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         vedtakService = vedtakService,
         vedtaksperiodeService = vedtaksperiodeService,
         taskRepository = taskRepository,
+        behandlingRepository = behandlingRepository,
     )
 
     private val autobrevOpphørSmåbarnstilleggService = AutobrevOpphørSmåbarnstilleggService(
@@ -139,6 +142,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(any()) } returns listOf(
             lagPeriodeOvergangsstønadGrunnlag(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1)),
         )
+        every { behandlingRepository.hentBegrunnelserPåBehandlingIPeriode(behandling.id, any()) } returns listOf("REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR")
 
         autobrevOpphørSmåbarnstilleggService
             .kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId = behandling.fagsak.id)

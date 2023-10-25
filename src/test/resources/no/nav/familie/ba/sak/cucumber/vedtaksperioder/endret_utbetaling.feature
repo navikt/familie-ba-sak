@@ -27,8 +27,8 @@ Egenskap: Vedtaksperioder med endret utbetaling der endringstidspunkt påvirker 
       | 3456    | 01.01.2017 | 30.11.2034 | 1234  | 1            | 0       |
 
     Og med endrede utbetalinger
-      | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak             | Prosent |
-      | 3456    | 01.01.2017 | 30.11.2034 | 1            | ETTERBETALING_3ÅR | 0       |
+      | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak             | Prosent | Avtaletidspunkt delt bosted |
+      | 3456    | 01.01.2017 | 30.11.2034 | 1            | ETTERBETALING_3ÅR | 0       | 02.02.2017                  |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
@@ -51,8 +51,8 @@ Egenskap: Vedtaksperioder med endret utbetaling der endringstidspunkt påvirker 
       | 3456    | 01.01.2017 | 30.11.2034 | 1234  | 1            | 0       |
 
     Og med endrede utbetalinger
-      | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak       | prosent |
-      | 3456    | 01.01.2017 | 30.11.2034 | 1            | DELT_BOSTED | 0       |
+      | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak       | prosent | Avtaletidspunkt delt bosted |
+      | 3456    | 01.01.2017 | 30.11.2034 | 1            | DELT_BOSTED | 0       | 02.02.2017                  |
 
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1

@@ -42,7 +42,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentBrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.EndretUtbetalingAndelForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.IEndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -128,6 +128,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
 
         val standardOgEøsBegrunnelser: Map<IVedtakBegrunnelse, ISanityBegrunnelse> =
             (standardBegrunnelser + eøsBegrunnelser)
+                .filterKeys { !it.vedtakBegrunnelseType.erAvslag() }
 
         val standardOgEøsBegrunnelserFiltrertPåTema =
             standardOgEøsBegrunnelser.filtrerPåTema(temaSomPeriodeErVurdertEtter)
@@ -237,6 +238,7 @@ private fun hentStandardBegrunnelser(
                 utvidetVilkårPåSøkerIPeriode,
                 utvidetVilkårPåSøkerIForrigePeriode,
             )
+
             else -> it.erEndretUtbetaling(endretUtbetalingDennePerioden)
         }
     }
@@ -275,7 +277,35 @@ private fun hentStandardBegrunnelser(
         vedtaksperiode.fom,
     )
 
-    return filtrertPåVilkårOgEndretUtbetaling + filtrertPåReduksjonFraForrigeBehandling + filtrertPåOpphørFraForrigeBehandling + filtrertPåSmåbarnstillegg + filtrertPåEtterEndretUtbetaling + filtrertPåHendelser
+    val filtrertPåSkalVisesSelvOmIkkeEndring =
+        relevanteBegrunnelser.filtrerPåSkalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
+
+    return filtrertPåVilkårOgEndretUtbetaling +
+        filtrertPåReduksjonFraForrigeBehandling +
+        filtrertPåOpphørFraForrigeBehandling +
+        filtrertPåSmåbarnstillegg +
+        filtrertPåEtterEndretUtbetaling +
+        filtrertPåHendelser +
+        filtrertPåSkalVisesSelvOmIkkeEndring
+}
+
+private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSkalVisesSelvOmIkkeEndring(
+    begrunnelseGrunnlagForPersonIPeriode: BegrunnelseGrunnlagForPersonIPeriode,
+) = filterValues { begrunnelse ->
+    val begrunnelseMatcherVilkår = begrunnelse.periodeResultat != null &&
+        when (begrunnelse.periodeResultat) {
+            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING, SanityPeriodeResultat.REDUKSJON ->
+                begrunnelse.vilkår.all { vilkår ->
+                    begrunnelseGrunnlagForPersonIPeriode.vilkårResultater.any { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT }
+                }
+
+            SanityPeriodeResultat.IKKE_INNVILGET -> false
+        }
+
+    val begrunnelseSkalVisesSelvOmIkkeEndring =
+        ØvrigTrigger.SKAL_VISES_SELV_OM_IKKE_ENDRING in begrunnelse.ovrigeTriggere
+
+    begrunnelseSkalVisesSelvOmIkkeEndring && begrunnelseMatcherVilkår
 }
 
 private fun SanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean): Boolean = when {
@@ -294,7 +324,7 @@ fun ISanityBegrunnelse.erGjeldendeForFagsakType(
 
 private fun filtrerPåEndretUtbetaling(
     it: SanityBegrunnelse,
-    endretUtbetalingDennePerioden: EndretUtbetalingAndelForVedtaksperiode?,
+    endretUtbetalingDennePerioden: IEndretUtbetalingAndelForVedtaksperiode?,
 ) = it.erEndretUtbetaling(endretUtbetalingDennePerioden)
 
 private fun filtrerPåVilkår(
@@ -303,7 +333,11 @@ private fun filtrerPåVilkår(
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
 ) =
-    !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && it.erGjeldendeForUtgjørendeVilkår(begrunnelseGrunnlag, utvidetVilkårPåSøkerIPeriode, utvidetVilkårPåSøkerIForrigePeriode) && it.erGjeldendeForRegelverk(
+    !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && it.erGjeldendeForUtgjørendeVilkår(
+        begrunnelseGrunnlag,
+        utvidetVilkårPåSøkerIPeriode,
+        utvidetVilkårPåSøkerIForrigePeriode,
+    ) && it.erGjeldendeForRegelverk(
         begrunnelseGrunnlag,
     )
 
@@ -607,8 +641,8 @@ private fun erØkningIAndelMellomPerioder(
 }
 
 private fun SanityBegrunnelse.erEtterEndretUtbetaling(
-    endretUtbetalingDennePerioden: EndretUtbetalingAndelForVedtaksperiode?,
-    endretUtbetalingForrigePeriode: EndretUtbetalingAndelForVedtaksperiode?,
+    endretUtbetalingDennePerioden: IEndretUtbetalingAndelForVedtaksperiode?,
+    endretUtbetalingForrigePeriode: IEndretUtbetalingAndelForVedtaksperiode?,
 ): Boolean {
     if (!this.erEndringsårsakOgGjelderEtterEndretUtbetaling()) return false
 
@@ -619,8 +653,8 @@ private fun SanityBegrunnelse.erEtterEndretUtbetaling(
 }
 
 private fun SanityBegrunnelse.matcherEtterEndretUtbetaling(
-    endretUtbetalingDennePerioden: EndretUtbetalingAndelForVedtaksperiode?,
-    endretUtbetalingForrigePeriode: EndretUtbetalingAndelForVedtaksperiode?,
+    endretUtbetalingDennePerioden: IEndretUtbetalingAndelForVedtaksperiode?,
+    endretUtbetalingForrigePeriode: IEndretUtbetalingAndelForVedtaksperiode?,
 ): Boolean {
     val begrunnelseMatcherEndretUtbetalingIForrigePeriode =
         this.endringsaarsaker.all { it == endretUtbetalingForrigePeriode?.årsak }
@@ -639,7 +673,7 @@ private fun SanityBegrunnelse.erEndringsårsakOgGjelderEtterEndretUtbetaling() =
     this.endringsaarsaker.isNotEmpty() && this.gjelderEtterEndretUtbetaling()
 
 private fun SanityBegrunnelse.erEndretUtbetaling(
-    endretUtbetaling: EndretUtbetalingAndelForVedtaksperiode?,
+    endretUtbetaling: IEndretUtbetalingAndelForVedtaksperiode?,
 ): Boolean {
     return this.gjelderEndretUtbetaling() && this.erLikEndretUtbetalingIPeriode(endretUtbetaling)
 }
@@ -648,7 +682,7 @@ private fun SanityBegrunnelse.gjelderEndretUtbetaling() =
     this.endringsaarsaker.isNotEmpty() && !this.gjelderEtterEndretUtbetaling()
 
 private fun SanityBegrunnelse.erLikEndretUtbetalingIPeriode(
-    endretUtbetaling: EndretUtbetalingAndelForVedtaksperiode?,
+    endretUtbetaling: IEndretUtbetalingAndelForVedtaksperiode?,
 ): Boolean {
     if (endretUtbetaling == null) return false
 
@@ -663,7 +697,7 @@ private fun SanityBegrunnelse.erLikEndretUtbetalingIPeriode(
 }
 
 private fun SanityBegrunnelse.erDeltBostedUtbetalingstype(
-    endretUtbetaling: EndretUtbetalingAndelForVedtaksperiode,
+    endretUtbetaling: IEndretUtbetalingAndelForVedtaksperiode,
 ): Boolean {
     val inneholderAndelSomSkalUtbetales = endretUtbetaling.prosent != BigDecimal.ZERO
 

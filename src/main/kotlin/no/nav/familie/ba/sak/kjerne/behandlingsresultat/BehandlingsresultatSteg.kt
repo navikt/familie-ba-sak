@@ -152,7 +152,7 @@ class BehandlingsresultatSteg(
 
     override fun postValiderSteg(behandling: Behandling) {
         if (behandling.opprettetÅrsak.erOmregningsårsak() && behandling.resultat != FORTSATT_INNVILGET) {
-            throw Feil("Behandling ${behandling.id} er omregningssak men er ikke fortsatt innvilget.")
+            throw Feil("Behandling $behandling er omregningssak men er ikke fortsatt innvilget.")
         }
     }
 
