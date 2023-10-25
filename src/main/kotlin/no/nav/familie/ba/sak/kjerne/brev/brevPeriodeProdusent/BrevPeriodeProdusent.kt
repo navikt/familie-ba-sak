@@ -47,7 +47,7 @@ fun VedtaksperiodeMedBegrunnelser.hentBegrunnelser(
     landkoder: Map<String, String>,
 ): List<BrevBegrunnelse> {
     val standardbegrunnelser =
-        this.begrunnelser.map {
+        this.begrunnelser.flatMap {
             it.standardbegrunnelse.lagBrevBegrunnelse(
                 this,
                 grunnlagForBegrunnelse,

@@ -112,11 +112,15 @@ data class BegrunnelseData(
 
     val gjelderSoker: Boolean,
     val barnasFodselsdatoer: String,
-    val fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling: String,
-    val fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling: String,
+    @Deprecated("Brukes ikke. Kan slettes når vi har fjernet gammel begrunnelseskode.")
+    val fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling: String = "",
+    @Deprecated("Brukes ikke. Kan slettes når vi har fjernet gammel begrunnelseskode.")
+    val fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling: String = "",
     val antallBarn: Int,
-    val antallBarnOppfyllerTriggereOgHarUtbetaling: Int,
-    val antallBarnOppfyllerTriggereOgHarNullutbetaling: Int,
+    @Deprecated("Brukes ikke. Kan slettes når vi har fjernet gammel begrunnelseskode.")
+    val antallBarnOppfyllerTriggereOgHarUtbetaling: Int = 0,
+    @Deprecated("Brukes ikke. Kan slettes når vi har fjernet gammel begrunnelseskode.")
+    val antallBarnOppfyllerTriggereOgHarNullutbetaling: Int = 0,
     val maanedOgAarBegrunnelsenGjelderFor: String?,
     val maalform: String,
     val belop: String,

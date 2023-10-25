@@ -4,12 +4,12 @@ import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.norskDatoFormatter
-import no.nav.familie.ba.sak.cucumber.domeneparser.parseBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.SøkersRettTilUtvidet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
@@ -54,26 +54,21 @@ fun parseStandardBegrunnelse(rad: Tabellrad) =
             rad,
         ).sanityApiNavn,
 
-        gjelderSoker = parseBoolean(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.GJELDER_SØKER, rad),
+        gjelderSoker = parseValgfriBoolean(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.GJELDER_SØKER, rad) ?: false,
         barnasFodselsdatoer = parseValgfriString(
             BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDATOER,
             rad,
         ) ?: "",
 
-        fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = "",
-        fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling = "",
-
-        antallBarn = parseInt(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.ANTALL_BARN, rad),
-
-        antallBarnOppfyllerTriggereOgHarUtbetaling = 0,
-        antallBarnOppfyllerTriggereOgHarNullutbetaling = 0,
+        antallBarn = parseValgfriInt(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.ANTALL_BARN, rad) ?: 0,
 
         maanedOgAarBegrunnelsenGjelderFor = parseValgfriString(
             BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅNED_OG_ÅR_BEGRUNNELSEN_GJELDER_FOR,
             rad,
         ) ?: "",
-        maalform = parseEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad).tilSanityFormat(),
-        belop = parseString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BELØP, rad).replace(' ', ' '),
+        maalform = (parseValgfriEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad) ?: Målform.NB)
+            .tilSanityFormat(),
+        belop = parseValgfriString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BELØP, rad)?.replace(' ', ' ') ?: "",
         soknadstidspunkt = parseValgfriString(
             BrevPeriodeParser.DomenebegrepBrevBegrunnelse.SØKNADSTIDSPUNKT,
             rad,

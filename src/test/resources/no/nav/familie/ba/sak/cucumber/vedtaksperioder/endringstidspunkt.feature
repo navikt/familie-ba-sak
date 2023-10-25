@@ -169,8 +169,8 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | 2       | 2            | 01.01.2022 | 28.02.2023 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
 
     Og med endrede utbetalinger
-      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent |
-      | 3       | 2            | 01.02.2023 | 28.02.2023 | DELT_BOSTED | 100     |
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Avtaletidspunkt delt bosted |
+      | 3       | 2            | 01.02.2023 | 28.02.2023 | DELT_BOSTED | 100     | 02.02.2023                  |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 2
 
@@ -228,9 +228,9 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | 2       | 2            | 01.10.2020 | 31.05.2035 | 0     | ORDINÆR_BARNETRYGD | 0       | 1354 |
 
     Og med endrede utbetalinger
-      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent |
-      | 2       | 1            | 01.10.2020 | 01.05.2035 | DELT_BOSTED | 0       |
-      | 2       | 2            | 01.10.2020 | 01.05.2035 | DELT_BOSTED | 0       |
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Avtaletidspunkt delt bosted |
+      | 2       | 1            | 01.10.2020 | 01.05.2035 | DELT_BOSTED | 0       | 02.02.2020                  |
+      | 2       | 2            | 01.10.2020 | 01.05.2035 | DELT_BOSTED | 0       | 02.02.2020                  |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 2
 

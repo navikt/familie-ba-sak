@@ -94,8 +94,8 @@ Egenskap: Brevperioder: Endret utbetaling
       | 3       | 1            | 01.10.2011 | 31.10.2011 | 0     | ORDINÆR_BARNETRYGD | 0       | 970  |
 
     Og med endrede utbetalinger for begrunnelse
-      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Søknadstidspunkt |
-      | 3       | 1            | 01.10.2011 | 31.10.2011 | DELT_BOSTED | 0       | 12.10.2023       |
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
+      | 3       | 1            | 01.10.2011 | 31.10.2011 | DELT_BOSTED | 0       | 12.10.2023       | 02.02.2011                  |
 
     Når vedtaksperiodene genereres for behandling 1
 

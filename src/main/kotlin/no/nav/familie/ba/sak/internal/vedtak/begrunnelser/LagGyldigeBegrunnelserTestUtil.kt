@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.UtfyltEndretUtbetalingAndelDeltBosted
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
@@ -226,7 +227,7 @@ fun hentTekstForEndretUtbetaling(
         """
 
     Og med endrede utbetalinger for begrunnelse
-      | AktørId  | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt |""" +
+      | AktørId  | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |""" +
             hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
             hentEndretUtbetalingRader(endredeUtbetalinger)
     }
@@ -242,7 +243,7 @@ private fun hentEndretUtbetalingRader(endredeUtbetalinger: List<EndretUtbetaling
                 it.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
             }|${
                 it.tom.sisteDagIInneværendeMåned().tilddMMyyyy()
-            }|${it.årsak} | ${it.prosent} | ${it.søknadstidspunkt.tilddMMyyyy()} |"""
+            }|${it.årsak} | ${it.prosent} | ${it.søknadstidspunkt.tilddMMyyyy()} | ${if (it is UtfyltEndretUtbetalingAndelDeltBosted) it.avtaletidspunktDeltBosted else ""} |"""
         } ?: ""
 
 fun hentTekstForKompetanse(
@@ -357,10 +358,10 @@ fun hentBrevBegrunnelseTekster(
         """
 
     Så forvent følgende brevbegrunnelser for behandling $behandlingId i periode ${vedtaksperiode.fom?.tilddMMyyyy() ?: "-"} til ${vedtaksperiode.tom?.tilddMMyyyy() ?: "-"}
-        | Begrunnelse | Type | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |""" +
+        | Begrunnelse | Type | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |""" +
             vedtaksperiode.begrunnelser.map { it.standardbegrunnelse }.joinToString("") {
                 """
-        | $it | STANDARD |               |                      |             |                                      |         |       |                  |                         |"""
+        | $it | STANDARD |               |                      |             |                                      |         |       |                  |                         |                               |"""
             }
     }
 }
@@ -373,7 +374,7 @@ fun hentEØSBrevBegrunnelseTekster(
         """
 
     Så forvent følgende brevbegrunnelser for behandling $behandlingId i periode ${vedtaksperiode.fom?.tilddMMyyyy() ?: "-"} til ${vedtaksperiode.tom?.tilddMMyyyy() ?: "-"}
-        | Begrunnelse | Type | Barnas fødselsdatoer | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet |""" +
+        | Begrunnelse | Type | Barnas fødselsdatoer | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet | """ +
             vedtaksperiode.eøsBegrunnelser.map { it.begrunnelse }.joinToString("") {
                 """
         | $it | EØS | | | | | | | | |"""
