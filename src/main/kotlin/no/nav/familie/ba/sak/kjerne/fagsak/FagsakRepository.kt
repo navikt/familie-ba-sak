@@ -71,6 +71,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                              INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
                     WHERE f.status = 'LØPENDE'
                       AND f.arkivert = FALSE
+                      AND b.resultat != 'AVSLÅTT'
                     ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC)
                 
                 SELECT silp.fk_fagsak_id
