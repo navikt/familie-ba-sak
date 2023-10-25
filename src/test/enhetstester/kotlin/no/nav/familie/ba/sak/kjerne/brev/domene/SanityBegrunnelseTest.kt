@@ -19,7 +19,7 @@ class SanityBegrunnelseTest {
             listOf(
                 ØvrigTrigger.BARN_MED_6_ÅRS_DAG,
             ),
-            restSanityBegrunnelse.tilSanityBegrunnelse()!!.ovrigeTriggere?.toList(),
+            restSanityBegrunnelse.tilSanityBegrunnelse()!!.ovrigeTriggere.toList(),
         )
     }
 

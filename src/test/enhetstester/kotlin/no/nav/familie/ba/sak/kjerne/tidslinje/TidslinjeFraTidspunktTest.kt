@@ -45,7 +45,7 @@ class TidslinjeFraTidspunktTest {
 
     @Test
     fun `skal skape sammenhengende tidslinje i samme tidsrom hvis alt innhold er identisk`() {
-        val resultat = tidslinje.tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
+        val resultat = tidslinje.tidsrom().tidslinjeFraTidspunkt { _ ->
             Innhold("A")
         }
 
@@ -56,7 +56,7 @@ class TidslinjeFraTidspunktTest {
 
     @Test
     fun `skal skape tom tidslinje dersom alt innhold mangler`() {
-        val resultat = tidslinje.tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
+        val resultat = tidslinje.tidsrom().tidslinjeFraTidspunkt { _ ->
             Innhold.utenInnhold<String>()
         }
 
