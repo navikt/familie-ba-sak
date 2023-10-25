@@ -150,12 +150,12 @@ private fun Standardbegrunnelse.delOppBegrunnelsenPåAvtaletidspunkt(
     månedOgÅrBegrunnelsenGjelderFor: String?,
     grunnlag: GrunnlagForBegrunnelse,
 ): List<BegrunnelseData> {
-    val begrunnelseGrunnlagForBarnIBegrunnelseMedDeltBosted = personerGjeldeneForBegrunnelse
+    val begrunnelseGrunnlagForBarnIBegrunnelse = personerGjeldeneForBegrunnelse
         .filter { it.type == PersonType.BARN }
         .mapNotNull { begrunnelseGrunnlagPerPerson[it]?.dennePerioden }
 
     val gruppertPåAvtaletidspunkt =
-        begrunnelseGrunnlagForBarnIBegrunnelseMedDeltBosted
+        begrunnelseGrunnlagForBarnIBegrunnelse
             .mapNotNull {
                 if (it.endretUtbetalingAndel is EndretUtbetalingAndelForVedtaksperiodeDeltBosted) {
                     Pair(it.endretUtbetalingAndel.avtaletidspunktDeltBosted, it)
