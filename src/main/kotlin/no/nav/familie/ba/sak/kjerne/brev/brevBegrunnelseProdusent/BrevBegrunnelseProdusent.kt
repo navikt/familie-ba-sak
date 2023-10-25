@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.EndretUtbetalingAndelForVedtaksperiodeDeltBosted
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.IEndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.erOppfyltForBarn
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -94,7 +95,6 @@ private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
         sanityBegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(grunnlagForPersonerIBegrunnelsen)
 
     val søknadstidspunktEndretUtbetaling = endreteUtbetalingsAndelerForBegrunnelse
-        .filterIsInstance<EndretUtbetalingAndelForVedtaksperiodeDeltBosted>()
         .hentSøknadstidspunkt(sanityBegrunnelse)
 
     val barnasFødselsdatoer = sanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
@@ -137,7 +137,7 @@ private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
     )
 }
 
-private fun List<EndretUtbetalingAndelForVedtaksperiodeDeltBosted>.hentSøknadstidspunkt(
+private fun List<IEndretUtbetalingAndelForVedtaksperiode>.hentSøknadstidspunkt(
     sanityBegrunnelse: ISanityBegrunnelse,
 ) = sortedBy { it.søknadstidspunkt }
     .firstOrNull { sanityBegrunnelse is SanityBegrunnelse && it.årsak in sanityBegrunnelse.endringsaarsaker }?.søknadstidspunkt
@@ -173,7 +173,6 @@ private fun Standardbegrunnelse.delOppBegrunnelsenPåAvtaletidspunkt(
         }
 
         val søknadstidspunkt = begrunnelseGrunnlag.mapNotNull { it.endretUtbetalingAndel }
-            .filterIsInstance<EndretUtbetalingAndelForVedtaksperiodeDeltBosted>()
             .hentSøknadstidspunkt(sanityBegrunnelse)
 
         sanityBegrunnelse.validerBrevbegrunnelse(
