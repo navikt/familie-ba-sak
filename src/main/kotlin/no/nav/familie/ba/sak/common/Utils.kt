@@ -14,7 +14,8 @@ import java.text.NumberFormat
 import java.util.Locale
 import java.util.Properties
 
-val nbLocale = Locale.of("nb", "Norway")
+@Suppress("DEPRECATION") // Deprecated for Java 19 og oppover, vi bruker fortsatt java 17
+val nbLocale = Locale("nb", "Norway")
 
 val secureLogger = LoggerFactory.getLogger("secureLogger")
 
