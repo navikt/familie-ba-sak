@@ -23,9 +23,9 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.04.2020 |            | Oppfylt  |
 
     Og med endrede utbetalinger for begrunnelse
-      | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak       | Prosent |
-      | 3456    | 01.05.2020 | 31.01.2021 | 1            | DELT_BOSTED | 0       |
-      | 3456    | 01.02.2021 | 31.03.2038 | 1            | DELT_BOSTED | 100     |
+      | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak       | Prosent | Avtaletidspunkt delt bosted |
+      | 3456    | 01.05.2020 | 31.01.2021 | 1            | DELT_BOSTED | 0       | 02.02.2020                  |
+      | 3456    | 01.02.2021 | 31.03.2038 | 1            | DELT_BOSTED | 100     | 02.02.2021                  |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId | Prosent |
