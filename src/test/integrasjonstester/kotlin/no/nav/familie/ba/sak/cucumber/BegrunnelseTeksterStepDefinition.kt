@@ -155,7 +155,7 @@ class BegrunnelseTeksterStepDefinition {
 
     /**
      * Mulige felt:
-     * | AktørId | Fra dato | Til dato | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland | Kalkulert månedelig beløp
+     * | AktørId | Fra dato | Til dato | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland
      */
     @Og("med utenlandsk periodebeløp for begrunnelse")
     fun `med utenlandsk periodebeløp for begrunnelse`(dataTable: DataTable) {

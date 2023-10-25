@@ -225,7 +225,6 @@ data class UtenlandskPeriodebeløpForVedtaksperiode(
     val valutakode: String,
     val intervall: Intervall,
     val utbetalingsland: String,
-    val kalkulertMånedligBeløp: BigDecimal?,
 ) {
     constructor(utenlandskPeriodebeløp: UtfyltUtenlandskPeriodebeløp) : this(
         barnAktører = utenlandskPeriodebeløp.barnAktører,
@@ -233,7 +232,6 @@ data class UtenlandskPeriodebeløpForVedtaksperiode(
         valutakode = utenlandskPeriodebeløp.valutakode,
         intervall = utenlandskPeriodebeløp.intervall,
         utbetalingsland = utenlandskPeriodebeløp.utbetalingsland,
-        kalkulertMånedligBeløp = utenlandskPeriodebeløp.kalkulertMånedligBeløp,
     )
 }
 

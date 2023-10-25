@@ -123,7 +123,6 @@ data class UtfyltUtenlandskPeriodebeløp(
     val valutakode: String,
     val intervall: Intervall,
     val utbetalingsland: String,
-    val kalkulertMånedligBeløp: BigDecimal?,
 ) : IUtenlandskPeriodebeløp
 
 fun UtenlandskPeriodebeløp.tilIUtenlandskPeriodebeløp(): IUtenlandskPeriodebeløp {
@@ -138,7 +137,6 @@ fun UtenlandskPeriodebeløp.tilIUtenlandskPeriodebeløp(): IUtenlandskPeriodebel
             valutakode = this.valutakode!!,
             intervall = this.intervall!!,
             utbetalingsland = this.utbetalingsland!!,
-            kalkulertMånedligBeløp = kalkulertMånedligBeløp,
         )
     } else {
         TomUtenlandskPeriodebeløp(

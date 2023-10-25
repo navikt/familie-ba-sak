@@ -83,7 +83,6 @@ object VedtaksperiodeMedBegrunnelserParser {
         VALUTA_KODE("Valuta kode"),
         INTERVALL("Intervall"),
         UTBETALINGSLAND("Utbetalingsland"),
-        KALKULERT_MÅNEDELIG_BELØP("Kalkulert månedlig beløp"),
     }
 
     enum class DomenebegrepEndretUtbetaling(override val nøkkel: String) : Domenenøkkel {
