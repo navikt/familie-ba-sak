@@ -260,10 +260,10 @@ class SnikeIKøenServiceTest(
     private fun lagUtbetalingsoppdragOgAvslutt(behandling: Behandling) {
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling, utbetalingsoppdrag = "utbetalingsoppdrag")
         tilkjentYtelseRepository.saveAndFlush(tilkjentYtelse)
-        behandlingRepository.finnBehandling(behandling.id).let { behandlingIDb ->
-            leggTilSteg(behandlingIDb, StegType.BEHANDLING_AVSLUTTET)
-            behandlingIDb.status = BehandlingStatus.AVSLUTTET
-            behandlingRepository.saveAndFlush(behandlingIDb)
+        behandlingRepository.finnBehandling(behandling.id).let { behandlingFraDb ->
+            leggTilSteg(behandlingFraDb, StegType.BEHANDLING_AVSLUTTET)
+            behandlingFraDb.status = BehandlingStatus.AVSLUTTET
+            behandlingRepository.saveAndFlush(behandlingFraDb)
         }
     }
 
