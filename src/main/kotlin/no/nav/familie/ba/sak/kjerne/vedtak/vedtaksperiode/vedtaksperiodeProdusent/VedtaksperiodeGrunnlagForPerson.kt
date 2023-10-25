@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
@@ -62,9 +61,9 @@ data class VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
     val andeler: Iterable<AndelForVedtaksperiode>,
     val kompetanse: KompetanseForVedtaksperiode? = null,
+    val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
     val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
     val valutakurs: ValutakursForVedtaksperiode? = null,
-    val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
     val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
 ) : VedtaksperiodeGrunnlagForPerson {
     fun erInnvilgetEndretUtbetaling() =
@@ -117,18 +116,6 @@ fun Iterable<VilkårResultatForVedtaksperiode>.erOppfyltForBarn(): Boolean =
 
             vilkårsresutlatet?.resultat == Resultat.OPPFYLT
         }
-
-data class EndretUtbetalingAndelForVedtaksperiode(
-    val prosent: BigDecimal,
-    val årsak: Årsak,
-    val søknadstidspunkt: LocalDate,
-) {
-    constructor(endretUtbetalingAndel: IUtfyltEndretUtbetalingAndel) : this(
-        prosent = endretUtbetalingAndel.prosent,
-        årsak = endretUtbetalingAndel.årsak,
-        søknadstidspunkt = endretUtbetalingAndel.søknadstidspunkt,
-    )
-}
 
 data class AndelForVedtaksperiode(
     val kalkulertUtbetalingsbeløp: Int,

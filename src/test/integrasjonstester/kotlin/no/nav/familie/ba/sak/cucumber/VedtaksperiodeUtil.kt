@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
@@ -325,7 +326,10 @@ fun lagEndredeUtbetalinger(
                 ?: Årsak.ALLEREDE_UTBETALT,
             søknadstidspunkt = parseValgfriDato(Domenebegrep.SØKNADSTIDSPUNKT, rad) ?: LocalDate.now(),
             begrunnelse = "Fordi at...",
-            avtaletidspunktDeltBosted = LocalDate.now(),
+            avtaletidspunktDeltBosted = parseValgfriDato(
+                BrevPeriodeParser.DomenebegrepBrevBegrunnelse.AVTALETIDSPUNKT_DELT_BOSTED,
+                rad,
+            ),
         )
     }.groupBy { it.behandlingId }
         .toMutableMap()

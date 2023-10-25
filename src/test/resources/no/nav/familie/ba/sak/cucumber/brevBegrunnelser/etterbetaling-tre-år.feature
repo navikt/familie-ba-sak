@@ -75,8 +75,8 @@ Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre år tilba
       | 3       | 2            | 01.03.2019 | 28.02.2023 | 527   | ORDINÆR_BARNETRYGD | 50      | 1054 |
 
     Og med endrede utbetalinger for begrunnelse
-      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt |
-      | 1       | 2            | 01.02.2020 | 31.05.2020 | ETTERBETALING_3ÅR | 0       | 30.06.2023       |
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
+      | 1       | 2            | 01.02.2020 | 31.05.2020 | ETTERBETALING_3ÅR | 0       | 30.06.2023       | 02.02.2020                  |
 
     Når vedtaksperiodene genereres for behandling 2
 

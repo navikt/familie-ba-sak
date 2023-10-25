@@ -223,7 +223,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
             .tilTidslinje().mapIkkeNull { ValutakursForVedtaksperiode(it) }
 
         val endredeUtbetalingerTidslinje = utfylteEndredeUtbetalinger.filtrerPåAktør(person.aktør)
-            .tilTidslinje().mapIkkeNull { EndretUtbetalingAndelForVedtaksperiode(it) }
+            .tilTidslinje().mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksperiode() }
 
         val overgangsstønadTidslinje =
             perioderOvergangsstønad.filtrerPåAktør(person.aktør)
@@ -457,7 +457,7 @@ private fun lagGrunnlagMedUtenlandskPeriodebeløp(
 
 private fun lagGrunnlagMedEndretUtbetalingAndel(
     vedtaksperiodeGrunnlagForPerson: VedtaksperiodeGrunnlagForPerson?,
-    endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode?,
+    endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode?,
 ) = when (vedtaksperiodeGrunnlagForPerson) {
     is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> vedtaksperiodeGrunnlagForPerson.copy(endretUtbetalingAndel = endretUtbetalingAndel)
     is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> vedtaksperiodeGrunnlagForPerson

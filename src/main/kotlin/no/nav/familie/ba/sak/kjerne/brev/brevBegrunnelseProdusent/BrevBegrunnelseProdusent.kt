@@ -25,6 +25,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserPerPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.EndretUtbetalingAndelForVedtaksperiodeDeltBosted
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.IEndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.erOppfyltForBarn
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -41,13 +43,60 @@ fun Standardbegrunnelse.lagBrevBegrunnelse(
     vedtaksperiode: VedtaksperiodeMedBegrunnelser,
     grunnlag: GrunnlagForBegrunnelse,
     begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
-): BegrunnelseData {
+): List<BegrunnelseData> {
     val sanityBegrunnelse = hentSanityBegrunnelse(grunnlag)
 
     val personerGjeldeneForBegrunnelse = vedtaksperiode.hentGyldigeBegrunnelserPerPerson(grunnlag)
         .mapNotNull { (person, begrunnelserPåPerson) -> person.takeIf { this in begrunnelserPåPerson } }
 
     val gjelderSøker = gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse)
+
+    val månedOgÅrBegrunnelsenGjelderFor = vedtaksperiode.hentMånedOgÅrForBegrunnelse()
+
+    return if (this.kanDelesOpp) {
+        delOppBegrunnelsenPåAvtaletidspunkt(
+            sanityBegrunnelse = sanityBegrunnelse,
+            personerGjeldeneForBegrunnelse = personerGjeldeneForBegrunnelse,
+            begrunnelseGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+            gjelderSøker = gjelderSøker,
+            månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+            grunnlag = grunnlag,
+        )
+    } else {
+        lagEnkeltBegrunnelse(
+            begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+            personerGjeldeneForBegrunnelse = personerGjeldeneForBegrunnelse,
+            gjelderSøker = gjelderSøker,
+            sanityBegrunnelse = sanityBegrunnelse,
+            grunnlag = grunnlag,
+            månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+        )
+    }
+}
+
+private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
+    begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
+    personerGjeldeneForBegrunnelse: List<Person>,
+    gjelderSøker: Boolean,
+    sanityBegrunnelse: ISanityBegrunnelse,
+    grunnlag: GrunnlagForBegrunnelse,
+    månedOgÅrBegrunnelsenGjelderFor: String?,
+): List<BegrunnelseData> {
+    val grunnlagForPersonerIBegrunnelsen =
+        begrunnelsesGrunnlagPerPerson.filtrerPåErPersonIBegrunnelse(personerGjeldeneForBegrunnelse)
+
+    val beløp = hentBeløp(
+        gjelderSøker = gjelderSøker,
+        begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+        grunnlagForPersonerIBegrunnelsen = grunnlagForPersonerIBegrunnelsen,
+    )
+
+    val endreteUtbetalingsAndelerForBegrunnelse =
+        sanityBegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(grunnlagForPersonerIBegrunnelsen)
+
+    val søknadstidspunktEndretUtbetaling = endreteUtbetalingsAndelerForBegrunnelse
+        .hentSøknadstidspunkt(sanityBegrunnelse)
+
     val barnasFødselsdatoer = sanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         grunnlag = grunnlag,
         gjelderSøker = gjelderSøker,
@@ -62,54 +111,93 @@ fun Standardbegrunnelse.lagBrevBegrunnelse(
         barnasFødselsdatoer = barnasFødselsdatoer,
     )
 
-    val månedOgÅrBegrunnelsenGjelderFor = vedtaksperiode.hentMånedOgÅrForBegrunnelse()
-
-    val grunnlagForPersonerIBegrunnelsen =
-        begrunnelsesGrunnlagPerPerson.filtrerPåErPersonIBegrunnelse(personerGjeldeneForBegrunnelse)
-
-    val beløp = hentBeløp(
-        gjelderSøker = gjelderSøker,
-        begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
-        grunnlagForPersonerIBegrunnelsen = grunnlagForPersonerIBegrunnelsen,
-    )
-
-    val endreteUtbetalingsAndelerForBegrunnelse =
-        sanityBegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(grunnlagForPersonerIBegrunnelsen)
-
-    val søknadstidspunktEndretUtbetaling = endreteUtbetalingsAndelerForBegrunnelse.sortedBy { it.søknadstidspunkt }
-        .firstOrNull { sanityBegrunnelse is SanityBegrunnelse && it.årsak in sanityBegrunnelse.endringsaarsaker }?.søknadstidspunkt
-
     sanityBegrunnelse.validerBrevbegrunnelse(
         gjelderSøker,
         barnasFødselsdatoer,
     )
 
-    // Kan ikke se at "kanDelesOpp" noen gang er true i gammel løsning
-    if (this.kanDelesOpp) {
-        throw Feil("Ingen støtte for begrunnelse som kan deles opp. Gjelder $this")
-    }
-
-    return BegrunnelseData(
-        gjelderSoker = gjelderSøker,
-        barnasFodselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
-        fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = "", // TODO Kan dette fjernes?
-        fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling = "", // TODO Kan dette fjernes?
-        antallBarn = antallBarn,
-        antallBarnOppfyllerTriggereOgHarUtbetaling = 0, // TODO Kan dette fjernes?
-        antallBarnOppfyllerTriggereOgHarNullutbetaling = 0, // TODO Kan dette fjernes?
-        maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
-        maalform = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform.tilSanityFormat(),
-        apiNavn = this.sanityApiNavn,
-        belop = Utils.formaterBeløp(beløp),
-        soknadstidspunkt = søknadstidspunktEndretUtbetaling?.tilKortString() ?: "",
-        avtaletidspunktDeltBosted = "", // TODO Kan dette fjernes?
-        sokersRettTilUtvidet = hentSøkersRettTilUtvidet(
-            utvidetUtbetalingsdetaljer = hentUtvidetAndelerIPeriode(
-                begrunnelsesGrunnlagPerPerson,
-            ),
-        ).tilSanityFormat(),
-        vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET, // TODO kan denne fjernes?
+    return listOf(
+        BegrunnelseData(
+            gjelderSoker = gjelderSøker,
+            barnasFodselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
+            antallBarn = antallBarn,
+            maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+            maalform = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform.tilSanityFormat(),
+            apiNavn = this.sanityApiNavn,
+            belop = Utils.formaterBeløp(beløp),
+            soknadstidspunkt = søknadstidspunktEndretUtbetaling?.tilKortString() ?: "",
+            avtaletidspunktDeltBosted = "",
+            sokersRettTilUtvidet = hentSøkersRettTilUtvidet(
+                utvidetUtbetalingsdetaljer = hentUtvidetAndelerIPeriode(
+                    begrunnelsesGrunnlagPerPerson,
+                ),
+            ).tilSanityFormat(),
+            vedtakBegrunnelseType = this.vedtakBegrunnelseType,
+        ),
     )
+}
+
+private fun List<IEndretUtbetalingAndelForVedtaksperiode>.hentSøknadstidspunkt(
+    sanityBegrunnelse: ISanityBegrunnelse,
+) = sortedBy { it.søknadstidspunkt }
+    .firstOrNull { sanityBegrunnelse is SanityBegrunnelse && it.årsak in sanityBegrunnelse.endringsaarsaker }?.søknadstidspunkt
+
+private fun Standardbegrunnelse.delOppBegrunnelsenPåAvtaletidspunkt(
+    sanityBegrunnelse: ISanityBegrunnelse,
+    personerGjeldeneForBegrunnelse: List<Person>,
+    begrunnelseGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
+    gjelderSøker: Boolean,
+    månedOgÅrBegrunnelsenGjelderFor: String?,
+    grunnlag: GrunnlagForBegrunnelse,
+): List<BegrunnelseData> {
+    val begrunnelseGrunnlagForBarnIBegrunnelse = personerGjeldeneForBegrunnelse
+        .filter { it.type == PersonType.BARN }
+        .mapNotNull { begrunnelseGrunnlagPerPerson[it]?.dennePerioden }
+
+    val gruppertPåAvtaletidspunkt =
+        begrunnelseGrunnlagForBarnIBegrunnelse
+            .mapNotNull {
+                if (it.endretUtbetalingAndel is EndretUtbetalingAndelForVedtaksperiodeDeltBosted) {
+                    Pair(it.endretUtbetalingAndel.avtaletidspunktDeltBosted, it)
+                } else {
+                    null
+                }
+            }.sortedBy { it.first }
+            .groupBy({ it.first }, { it.second })
+
+    return gruppertPåAvtaletidspunkt.map { (avtaletidspunktDeltBosted, begrunnelseGrunnlag) ->
+        val barnaTilhørendeAvtaletidspunktFødselsdatoer = begrunnelseGrunnlag.map { it.person.fødselsdato }
+
+        val beløpUtbetaltForBarnTilhørendeAvtaletidspunkt = begrunnelseGrunnlag.sumOf { grunnlagForPersonIPeriode ->
+            grunnlagForPersonIPeriode.andeler.sumOf { it.kalkulertUtbetalingsbeløp }
+        }
+
+        val søknadstidspunkt = begrunnelseGrunnlag.mapNotNull { it.endretUtbetalingAndel }
+            .hentSøknadstidspunkt(sanityBegrunnelse)
+
+        sanityBegrunnelse.validerBrevbegrunnelse(
+            gjelderSøker,
+            barnaTilhørendeAvtaletidspunktFødselsdatoer,
+        )
+
+        BegrunnelseData(
+            gjelderSoker = gjelderSøker,
+            barnasFodselsdatoer = barnaTilhørendeAvtaletidspunktFødselsdatoer.tilBrevTekst(),
+            antallBarn = barnaTilhørendeAvtaletidspunktFødselsdatoer.size,
+            maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+            maalform = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform.tilSanityFormat(),
+            apiNavn = this.sanityApiNavn,
+            belop = Utils.formaterBeløp(beløpUtbetaltForBarnTilhørendeAvtaletidspunkt),
+            soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: "",
+            avtaletidspunktDeltBosted = avtaletidspunktDeltBosted.tilKortString(),
+            sokersRettTilUtvidet = hentSøkersRettTilUtvidet(
+                utvidetUtbetalingsdetaljer = hentUtvidetAndelerIPeriode(
+                    begrunnelseGrunnlagPerPerson,
+                ),
+            ).tilSanityFormat(),
+            vedtakBegrunnelseType = this.vedtakBegrunnelseType,
+        )
+    }
 }
 
 private fun hentUtvidetAndelerIPeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =

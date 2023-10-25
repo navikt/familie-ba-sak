@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.EndretUtbetalingAndelForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.IEndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.KompetanseForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.OvergangsstønadForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.UtenlandskPeriodebeløpForVedtaksperiode
@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.filtrerPåAktør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.hentErUtbetalingSmåbarnstilleggTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.tilAndelerForVedtaksPeriodeTidslinje
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.tilEndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.Companion.hentOrdinæreVilkårFor
@@ -37,7 +38,7 @@ data class BegrunnelseGrunnlagForPersonIPeriode(
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
     val valutakurs: ValutakursForVedtaksperiode? = null,
-    val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
+    val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
     val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
 ) {
     fun erOrdinæreVilkårInnvilget() =
@@ -83,7 +84,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
         .tilTidslinje().mapIkkeNull { ValutakursForVedtaksperiode(it) }
 
     val endredeUtbetalingerTidslinje = this.utfylteEndredeUtbetalinger.filtrerPåAktør(person.aktør)
-        .tilTidslinje().mapIkkeNull { EndretUtbetalingAndelForVedtaksperiode(it) }
+        .tilTidslinje().mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksperiode() }
 
     val andelerTilkjentYtelseTidslinje =
         this.andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForVedtaksPeriodeTidslinje()
