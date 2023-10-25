@@ -71,7 +71,7 @@ Egenskap: Gyldige begrunnelser for kombinasjon av utgjørende vilkår og endret 
 
     Og med endrede utbetalinger for begrunnelse
       | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak       | Prosent | Avtaletidspunkt delt bosted |
-      | 1       | 01.06.2022 | 28.02.2023 | 1            | DELT_BOSTED | 100     | 02.02.2020                  |
+      | 2       | 01.06.2022 | 28.02.2023 | 1            | DELT_BOSTED | 100     | 02.02.2020                  |
 
     Når vedtaksperiodene genereres for behandling 1
 
