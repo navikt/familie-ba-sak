@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -455,35 +456,20 @@ fun lagPeriodeForOmregningsbehandling(
     andelTilkjentYtelseer: List<AndelTilkjentYtelse>,
     nåDato: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
-    val behandling = vedtak.behandling
+    val nesteEndringITilkjentYtelse = andelTilkjentYtelseer
+        .filter { it.periodeInneholder(nåDato) }
+        .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
 
     return listOf(
         VedtaksperiodeMedBegrunnelser(
             fom = nåDato.førsteDagIInneværendeMåned(),
-            tom = finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(
-                behandling.id,
-                andelTilkjentYtelseer,
-                nåDato,
-            ),
+            tom = nesteEndringITilkjentYtelse
+                ?: error("Fant ingen andeler for ${nåDato.tilMånedÅr()}. Autobrev skal ikke brukes for opphør."),
             vedtak = vedtak,
-            type = if (andelTilkjentYtelseer.any { it.periodeInneholder(nåDato) }) {
-                Vedtaksperiodetype.UTBETALING
-            } else {
-                Vedtaksperiodetype.OPPHØR
-            },
+            type = Vedtaksperiodetype.UTBETALING,
         ),
     )
 }
-
-private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(
-    behandlingId: Long,
-    andelTilkjentYtelses: List<AndelTilkjentYtelse>,
-    nåDato: LocalDate,
-): LocalDate =
-    andelTilkjentYtelses
-        .filter { it.periodeInneholder(nåDato) }
-        .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
-        ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
 
 private fun AndelTilkjentYtelse.periodeInneholder(
     nåDato: LocalDate,
