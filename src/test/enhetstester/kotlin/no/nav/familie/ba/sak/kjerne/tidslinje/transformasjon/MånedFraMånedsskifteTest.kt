@@ -14,7 +14,7 @@ internal class MånedFraMånedsskifteTest {
     fun `skal gi tom tidslinje hvis alle dager er inni én måned`() {
         val daglinje = "aaaaaa".tilCharTidslinje(7.des(2021))
         val månedtidsline = daglinje
-            .tilMånedFraMånedsskifteIkkeNull { verdiSisteDagForrigeMåned, verdiFørsteDagDenneMåned -> 'b' }
+            .tilMånedFraMånedsskifteIkkeNull { _, _ -> 'b' }
 
         assertEquals(TomTidslinje<Char, Måned>(), månedtidsline)
     }
@@ -23,7 +23,7 @@ internal class MånedFraMånedsskifteTest {
     fun `skal gi én måned ved ett månedsskifte`() {
         val daglinje = "abcdefg".tilCharTidslinje(28.nov(2021))
         val månedtidsline = daglinje
-            .tilMånedFraMånedsskifteIkkeNull { verdiSisteDagForrigeMåned, verdiFørsteDagDenneMåned ->
+            .tilMånedFraMånedsskifteIkkeNull { _, verdiFørsteDagDenneMåned ->
                 verdiFørsteDagDenneMåned
             }
 
@@ -34,7 +34,7 @@ internal class MånedFraMånedsskifteTest {
     fun `skal gi to måneder ved to månedsskifter`() {
         val daglinje = "abcdefghijklmnopqrstuvwxyzæøå0123456789".tilCharTidslinje(28.nov(2021))
         val månedtidsline = daglinje
-            .tilMånedFraMånedsskifteIkkeNull { verdiSisteDagForrigeMåned, verdiFørsteDagDenneMåned ->
+            .tilMånedFraMånedsskifteIkkeNull { verdiSisteDagForrigeMåned, _ ->
                 verdiSisteDagForrigeMåned
             }
 
@@ -52,7 +52,7 @@ internal class MånedFraMånedsskifteTest {
             }
 
         val månedtidsline = daglinje
-            .tilMånedFraMånedsskifteIkkeNull { verdiSisteDagForrigeMåned, verdiFørsteDagDenneMåned -> 'A' }
+            .tilMånedFraMånedsskifteIkkeNull { _, _ -> 'A' }
 
         assertEquals(TomTidslinje<Char, Måned>(), månedtidsline)
     }
@@ -68,7 +68,7 @@ internal class MånedFraMånedsskifteTest {
             }
 
         val månedtidsline = daglinje
-            .tilMånedFraMånedsskifteIkkeNull { verdiSisteDagForrigeMåned, verdiFørsteDagDenneMåned -> 'A' }
+            .tilMånedFraMånedsskifteIkkeNull { _, _ -> 'A' }
 
         assertEquals(TomTidslinje<Char, Måned>(), månedtidsline)
     }

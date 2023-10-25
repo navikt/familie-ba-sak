@@ -93,6 +93,7 @@ class ApplicationConfig {
 
         override fun harTilgang(): Boolean = grupper().contains(prosesseringRolle)
 
+        @Suppress("UNCHECKED_CAST")
         private fun grupper(): List<String> {
             return try {
                 SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")

@@ -48,7 +48,8 @@ class UtenlandskPeriodebeløpController(
 
         val barnAktører = restUtenlandskPeriodebeløp.barnIdenter.map { personidentService.hentAktør(it) }
 
-        val eksisterendeUtenlandskPeriodeBeløp = utenlandskPeriodebeløpRepository.getById(restUtenlandskPeriodebeløp.id)
+        val eksisterendeUtenlandskPeriodeBeløp =
+            utenlandskPeriodebeløpRepository.getReferenceById(restUtenlandskPeriodebeløp.id)
 
         val utenlandskPeriodebeløp =
             restUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører, eksisterendeUtenlandskPeriodeBeløp)
