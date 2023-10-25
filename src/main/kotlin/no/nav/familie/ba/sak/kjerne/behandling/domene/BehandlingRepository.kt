@@ -156,6 +156,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query(value = "SELECT b.status FROM Behandling b WHERE b.id = :behandlingId")
     fun finnStatus(behandlingId: Long): BehandlingStatus
+
     @Query(
         """
         select vb.vedtak_begrunnelse_spesifikasjon
