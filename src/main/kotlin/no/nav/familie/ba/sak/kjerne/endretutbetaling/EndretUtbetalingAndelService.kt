@@ -36,7 +36,7 @@ class EndretUtbetalingAndelService(
         endretUtbetalingAndelId: Long,
         restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
     ) {
-        val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
+        val endretUtbetalingAndel = endretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId)
         val person =
             persongrunnlagService.hentPersonerPåBehandling(listOf(restEndretUtbetalingAndel.personIdent!!), behandling)
                 .first()

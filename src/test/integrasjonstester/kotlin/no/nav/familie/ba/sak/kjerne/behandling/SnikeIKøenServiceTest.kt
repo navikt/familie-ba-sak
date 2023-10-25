@@ -215,6 +215,7 @@ class SnikeIKøenServiceTest(
     @Nested
     inner class ValideringAvReaktiverBehandling {
 
+        @Suppress("UNUSED_VARIABLE")
         @Test
         fun `skal feile når åpen behandling er aktiv`() {
             val behandlingPåVent = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = true)
@@ -259,10 +260,10 @@ class SnikeIKøenServiceTest(
     private fun lagUtbetalingsoppdragOgAvslutt(behandling: Behandling) {
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling, utbetalingsoppdrag = "utbetalingsoppdrag")
         tilkjentYtelseRepository.saveAndFlush(tilkjentYtelse)
-        behandlingRepository.finnBehandling(behandling.id).let { behandling ->
-            leggTilSteg(behandling, StegType.BEHANDLING_AVSLUTTET)
-            behandling.status = BehandlingStatus.AVSLUTTET
-            behandlingRepository.saveAndFlush(behandling)
+        behandlingRepository.finnBehandling(behandling.id).let { behandlingIDb ->
+            leggTilSteg(behandlingIDb, StegType.BEHANDLING_AVSLUTTET)
+            behandlingIDb.status = BehandlingStatus.AVSLUTTET
+            behandlingRepository.saveAndFlush(behandlingIDb)
         }
     }
 

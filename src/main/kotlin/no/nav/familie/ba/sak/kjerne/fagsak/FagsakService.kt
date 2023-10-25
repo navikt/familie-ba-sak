@@ -74,7 +74,7 @@ class FagsakService(
     fun oppdaterLøpendeStatusPåFagsaker(): Int {
         val fagsaker = fagsakRepository.finnFagsakerSomSkalAvsluttes()
         for (fagsakId in fagsaker) {
-            val fagsak = fagsakRepository.getById(fagsakId)
+            val fagsak = fagsakRepository.getReferenceById(fagsakId)
             oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
         }
         return fagsaker.size
