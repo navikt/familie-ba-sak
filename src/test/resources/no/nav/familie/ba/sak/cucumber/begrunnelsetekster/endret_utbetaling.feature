@@ -62,8 +62,8 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                          | Ugyldige begrunnelser |
-      | 01.02.2021 | 31.03.2038 | UTBETALING         | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR |                          |
-      | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                            |                          |
+      | 01.02.2021 | 31.03.2038 | UTBETALING         | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR |                       |
+      | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                            |                       |
 
 
   Scenario: Skal ikke krasje dersom siste periode er endret til null prosent
@@ -100,9 +100,9 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser |
-      | 01.08.2023 | 31.08.2023 | UTBETALING         |           |                         |                          |
-      | 01.09.2023 | 31.07.2035 | OPPHØR             |           |                         |                          |
-      | 01.08.2035 |            | OPPHØR             |           |                         |                          |
+      | 01.08.2023 | 31.08.2023 | UTBETALING         |           |                      |                       |
+      | 01.09.2023 | 31.07.2035 | OPPHØR             |           |                      |                       |
+      | 01.08.2035 |            | OPPHØR             |           |                      |                       |
 
 
   Scenario: Skal ikke ta med endret utbetalingsperioder som har type reduksjon dersom det ikke har vært en reduksjon
