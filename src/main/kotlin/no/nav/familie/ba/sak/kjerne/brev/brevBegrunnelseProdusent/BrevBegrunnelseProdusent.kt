@@ -132,7 +132,7 @@ private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
                     begrunnelsesGrunnlagPerPerson,
                 ),
             ).tilSanityFormat(),
-            vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
+            vedtakBegrunnelseType = this.vedtakBegrunnelseType,
         ),
     )
 }
