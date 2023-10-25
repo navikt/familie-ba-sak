@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 sealed interface ISanityBegrunnelse {
@@ -24,6 +25,7 @@ sealed interface ISanityBegrunnelse {
     val tema: Tema?
     val valgbarhet: Valgbarhet?
     val periodeType: BrevPeriodeType?
+    val begrunnelseTypeForPerson: VedtakBegrunnelseType? // TODO: Fjern når migrering av ny felter er ferdig
 
     val gjelderEtterEndretUtbetaling
         get() = this is SanityBegrunnelse &&
@@ -52,6 +54,7 @@ data class SanityBegrunnelse(
     override val tema: Tema? = null,
     override val valgbarhet: Valgbarhet? = null,
     override val periodeType: BrevPeriodeType? = null,
+    override val begrunnelseTypeForPerson: VedtakBegrunnelseType? = null,
     @Deprecated("Bruk vilkår")
     val vilkaar: List<SanityVilkår> = emptyList(),
     val rolle: List<VilkårRolle> = emptyList(),
@@ -77,6 +80,7 @@ data class SanityEØSBegrunnelse(
     override val fagsakType: FagsakType?,
     override val tema: Tema?,
     override val periodeType: BrevPeriodeType?,
+    override val begrunnelseTypeForPerson: VedtakBegrunnelseType? = null,
     val annenForeldersAktivitet: List<KompetanseAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
