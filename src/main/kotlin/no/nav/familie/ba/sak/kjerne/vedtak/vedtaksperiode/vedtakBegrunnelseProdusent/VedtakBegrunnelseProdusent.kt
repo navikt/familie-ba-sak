@@ -427,15 +427,20 @@ private fun hentEØSStandardBegrunnelser(
         )
     }
 
-    val filtrertPåKompetanse = begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues { begrunnelse ->
-        erEndringIKompetanse(begrunnelseGrunnlag) && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
+    val filtrertPåKompetanseValutakursOgUtenlandskperiodeBeløp = begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues { begrunnelse ->
+        val endringIKompetanseValutakursEllerUtenlandskPeriodebeløp =
+            erEndringIKompetanse(begrunnelseGrunnlag) || erEndringIValutakurs(begrunnelseGrunnlag) || erEndringIUtenlandskPeriodebeløp(
+                begrunnelseGrunnlag,
+            )
+
+        endringIKompetanseValutakursEllerUtenlandskPeriodebeløp && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
     }
 
     val filtrertPåPeriodeResultat = begrunnelserFiltrertPåPeriodetype.filterValues {
         filtrerPåPeriodeResultat(relevantePeriodeResultater, it)
     }
 
-    return filtrertPåVilkår + filtrertPåKompetanse + filtrertPåPeriodeResultat
+    return filtrertPåVilkår + filtrertPåKompetanseValutakursOgUtenlandskperiodeBeløp + filtrertPåPeriodeResultat
 }
 
 private fun filtrerPåPeriodeResultat(
@@ -856,6 +861,12 @@ private fun SanityBegrunnelse.matcherPerioderesultat(
 
 private fun erEndringIKompetanse(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) =
     begrunnelseGrunnlag.dennePerioden.kompetanse != begrunnelseGrunnlag.forrigePeriode?.kompetanse
+
+private fun erEndringIValutakurs(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) =
+    begrunnelseGrunnlag.dennePerioden.valutakurs != begrunnelseGrunnlag.forrigePeriode?.valutakurs
+
+private fun erEndringIUtenlandskPeriodebeløp(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) =
+    begrunnelseGrunnlag.dennePerioden.utenlandskPeriodebeløp != begrunnelseGrunnlag.forrigePeriode?.utenlandskPeriodebeløp
 
 fun ISanityBegrunnelse.erGjeldendeForBrevPeriodeType(
     vedtaksperiode: VedtaksperiodeMedBegrunnelser,
