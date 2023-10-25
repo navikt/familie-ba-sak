@@ -44,9 +44,10 @@ class FerdigstillBehandling(
         }
 
         behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
+
         if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK && behandling.resultat != Behandlingsresultat.AVSLÅTT) {
             oppdaterFagsakStatus(behandling = behandling)
-        } else { // Dette betyr henleggelse.
+        } else { // Dette betyr henleggelse eller avslag
             if (behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id).size == 1) {
                 fagsakService.oppdaterStatus(behandling.fagsak, FagsakStatus.AVSLUTTET)
             }
