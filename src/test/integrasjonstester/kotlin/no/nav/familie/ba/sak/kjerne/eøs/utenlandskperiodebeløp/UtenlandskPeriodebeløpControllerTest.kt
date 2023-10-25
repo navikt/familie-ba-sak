@@ -63,7 +63,7 @@ class UtenlandskPeriodebeløpControllerTest {
 
     @Test
     fun `Skal ikke kaste feil dersom validering av input går bra`() {
-        every { utenlandskPeriodebeløpRepository.getById(any()) } returns UtenlandskPeriodebeløp.NULL
+        every { utenlandskPeriodebeløpRepository.getReferenceById(any()) } returns UtenlandskPeriodebeløp.NULL
         every { utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(any(), any()) } just runs
 
         val response = utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(

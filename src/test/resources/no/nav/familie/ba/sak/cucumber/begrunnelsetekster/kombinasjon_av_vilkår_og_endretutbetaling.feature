@@ -70,8 +70,8 @@ Egenskap: Gyldige begrunnelser for kombinasjon av utgjørende vilkår og endret 
       | 2       | 1            | 01.07.2023 | 31.01.2033 | 1310  | ORDINÆR_BARNETRYGD | 100     |
 
     Og med endrede utbetalinger for begrunnelse
-      | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak       | Prosent |
-      | 2       | 01.06.2022 | 28.02.2023 | 1            | DELT_BOSTED | 100     |
+      | AktørId | Fra dato   | Til dato   | BehandlingId | Årsak       | Prosent | Avtaletidspunkt delt bosted |
+      | 2       | 01.06.2022 | 28.02.2023 | 1            | DELT_BOSTED | 100     | 02.02.2020                  |
 
     Når vedtaksperiodene genereres for behandling 1
 

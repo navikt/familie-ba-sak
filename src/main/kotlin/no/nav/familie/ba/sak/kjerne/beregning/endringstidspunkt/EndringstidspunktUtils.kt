@@ -28,6 +28,7 @@ data class AndelTilkjentYtelseDataForÅKalkulereEndring(
     val behandlingAlder: BehandlingAlder,
 )
 
+@Suppress("UNCHECKED_CAST")
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentPerioderMedEndringerFra(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
 ): Map<AktørId, LocalDateTimeline<Beløpsdifferanse>> {

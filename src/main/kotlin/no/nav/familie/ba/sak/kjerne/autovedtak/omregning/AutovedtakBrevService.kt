@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBrevkode
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -10,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.OmregningBrevData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -34,6 +36,7 @@ class AutovedtakBrevService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val taskRepository: TaskRepositoryWrapper,
     private val infotrygdService: InfotrygdService,
+    private val behandlingRepository: BehandlingRepository,
 ) : AutovedtakBehandlingService<OmregningBrevData> {
 
     override fun kjørBehandling(
@@ -85,21 +88,22 @@ class AutovedtakBrevService(
             return false
         }
 
-        val vedtaksperioderForVedtatteBehandlinger =
-            behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId)
-                .filter { behandling ->
-                    behandling.erVedtatt()
-                }
-                .flatMap { behandling ->
-                    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
-                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-                }
+        val tidligereVedtatteBehandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId)
+            .filter { behandling -> behandling.erVedtatt() }
 
-        if (barnAlleredeBegrunnet(
-                vedtaksperioderMedBegrunnelser = vedtaksperioderForVedtatteBehandlinger,
-                standardbegrunnelser = standardbegrunnelser,
-            )
-        ) {
+        val standardbegrunnelserIPeriodeFraTidligereBehandlinger = tidligereVedtatteBehandlinger
+            .flatMap {
+                behandlingRepository.hentBegrunnelserPåBehandlingIPeriode(
+                    it.id,
+                    YearMonth.now().førsteDagIInneværendeMåned(),
+                )
+            }.toSet()
+            .mapNotNull { begrunnelse -> enumValues<Standardbegrunnelse>().find { it.name == begrunnelse } }
+
+        val erBarnAlleredeBegrunnet =
+            standardbegrunnelserIPeriodeFraTidligereBehandlinger.any { it in standardbegrunnelser }
+
+        if (erBarnAlleredeBegrunnet) {
             logger.info("Begrunnelser $standardbegrunnelser for ${behandlingsårsak.visningsnavn} har allerede kjørt for $fagsakId")
             return false
         }

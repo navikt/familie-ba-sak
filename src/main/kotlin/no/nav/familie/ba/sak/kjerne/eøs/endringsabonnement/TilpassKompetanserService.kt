@@ -90,10 +90,9 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
 
     @Transactional
     override fun endretUtbetalingAndelerOppdatert(
-        behandlingIdLong: Long,
+        behandlingId: BehandlingId,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     ) {
-        val behandlingId = BehandlingId(behandlingIdLong)
         val gjeldendeKompetanser = skjemaService.hentMedBehandlingId(behandlingId)
         val barnasRegelverkResultatTidslinjer =
             vilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId)

@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -35,7 +36,7 @@ class EndretUtbetalingAndelService(
         endretUtbetalingAndelId: Long,
         restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
     ) {
-        val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
+        val endretUtbetalingAndel = endretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId)
         val person =
             persongrunnlagService.hentPersonerPåBehandling(listOf(restEndretUtbetalingAndel.personIdent!!), behandling)
                 .first()
@@ -93,7 +94,7 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndelOppdatertAbonnementer.forEach {
             it.endretUtbetalingAndelerOppdatert(
-                behandlingId = behandling.id,
+                behandlingId = BehandlingId(behandling.id),
                 endretUtbetalingAndeler = andreEndredeAndelerPåBehandling + endretUtbetalingAndel,
             )
         }
@@ -114,7 +115,7 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndelOppdatertAbonnementer.forEach { abonnent ->
             abonnent.endretUtbetalingAndelerOppdatert(
-                behandlingId = behandling.id,
+                behandlingId = BehandlingId(behandling.id),
                 endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id),
             )
         }
@@ -145,7 +146,7 @@ class EndretUtbetalingAndelService(
 
 interface EndretUtbetalingAndelerOppdatertAbonnent {
     fun endretUtbetalingAndelerOppdatert(
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     )
 }
