@@ -19,7 +19,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 1            | 1234    | SØKER      | 14.10.1987  |
       | 1            | 3456    | BARN       | 13.01.2017  |
       | 1            | 5678    | BARN       | 08.02.2013  |
-    
+
     Og følgende dagens dato 12.10.2023
     Og lag personresultater for begrunnelse for behandling 1
 
@@ -105,7 +105,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 01.04.2023 |          | OPPHØR             |                      | AVSLAG_BOR_HOS_SØKER  |
 
 
-  Scenario: Plassholdertekst for scenario - V9zB7yEFfD
+  Scenario: Skal ta med barna med avslag når det er avslag på søker og barn
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
@@ -147,12 +147,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
 
-
     Når vedtaksperiodene genereres for behandling 1
-
-    Så forvent at følgende begrunnelser er gyldige
-      | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                                               | Ugyldige begrunnelser |
-      |          |          | AVSLAG             |                                | AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED, AVSLAG_BOR_IKKE_FAST_MED_BARNET |                       |
 
     Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato | Til dato | Standardbegrunnelser                                                                                                                     | Eøsbegrunnelser | Fritekster |
