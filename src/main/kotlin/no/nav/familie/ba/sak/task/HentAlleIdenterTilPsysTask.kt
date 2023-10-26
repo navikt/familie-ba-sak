@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.ekstern.pensjon.HentAlleIdenterTilPsysResponseDTO
 import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype
 import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype.DATA
@@ -27,6 +28,7 @@ class HentAlleIdenterTilPsysTask(
     private val kafkaProducer: KafkaProducer,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val envService: EnvService,
 ) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(HentAlleIdenterTilPsysTask::class.java)
@@ -38,7 +40,10 @@ class HentAlleIdenterTilPsysTask(
             logger.info("Ferdig med å hente alle identer fra DB for request $requestId")
 
             logger.info("Starter med å hente alle identer fra Infotrygd for request $requestId")
-            val identerFraInfotrygd = infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
+            val identerFraInfotrygd = when {
+                envService.erPreprod() -> emptyList() // Tar ikke med personer fra infotrygd i preprod siden de ikke finnes i PDL
+                else -> infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
+            }
             logger.info("Ferdig med å hente alle identer fra Infotrygd for request $requestId")
 
             logger.info("Starter på å sende alle identer til kafka for request $requestId")
