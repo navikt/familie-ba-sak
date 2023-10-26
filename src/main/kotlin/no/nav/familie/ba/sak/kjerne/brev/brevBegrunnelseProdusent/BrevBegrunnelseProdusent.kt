@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erAvslagUregistrerteBarnBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
@@ -107,6 +108,7 @@ private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
         begrunnelse = this,
         grunnlag = grunnlag,
         barnasFødselsdatoer = barnasFødselsdatoer,
+        gjelderSøker = gjelderSøker,
     )
 
     sanityBegrunnelse.validerBrevbegrunnelse(
@@ -270,6 +272,7 @@ private fun hentBarnMedOppfylteVilkår(begrunnelsesGrunnlagPerPerson: Map<Person
 fun hentAntallBarnForBegrunnelse(
     begrunnelse: IVedtakBegrunnelse,
     grunnlag: GrunnlagForBegrunnelse,
+    gjelderSøker: Boolean,
     barnasFødselsdatoer: List<LocalDate>,
 ): Int {
     val uregistrerteBarnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn
@@ -277,6 +280,7 @@ fun hentAntallBarnForBegrunnelse(
 
     return when {
         erAvslagUregistrerteBarn -> uregistrerteBarnPåBehandlingen.size
+        gjelderSøker && begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG -> 0
         else -> barnasFødselsdatoer.size
     }
 }

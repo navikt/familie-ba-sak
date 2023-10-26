@@ -156,4 +156,4 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
     Så forvent følgende brevbegrunnelser for behandling 1 i periode - til -
       | Begrunnelse                       | Type     | Gjelder søker | Barnas fødselsdatoer           | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søkers rett til utvidet |
       | AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED | STANDARD | Nei           | 28.07.12, 24.06.14 og 09.05.18 | 3           |                                      | NB      | 0     |                         |
-      | AVSLAG_BOR_IKKE_FAST_MED_BARNET   | STANDARD | Ja            | 28.07.12, 24.06.14 og 09.05.18 | 3           |                                      | NB      | 0     |                         |
+      | AVSLAG_BOR_IKKE_FAST_MED_BARNET   | STANDARD | Ja            | 28.07.12, 24.06.14 og 09.05.18 | 0           |                                      | NB      | 0     |                         |
