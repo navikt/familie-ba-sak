@@ -214,6 +214,11 @@ private fun hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson: Map<Pers
         begrunnelseGrunnlagForPersonIPeriode.dennePerioden.andeler.toList().isNotEmpty()
     }.keys
 
+private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentPersonerMedAvslagIPeriode() =
+    filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
+        !begrunnelseGrunnlagForPersonIPeriode.dennePerioden.eksplisitteAvslagForPerson.isNullOrEmpty()
+    }.keys
+
 private fun hentPersonerMedAndelIForrigePeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
     begrunnelsesGrunnlagPerPerson.filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
         !begrunnelseGrunnlagForPersonIPeriode.forrigePeriode?.andeler?.toList().isNullOrEmpty()
@@ -232,6 +237,8 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     val barnMedUtbetaling =
         hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
     val uregistrerteBarnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn
+    val barnMedEksplisitteAvslag =
+        begrunnelsesGrunnlagPerPerson.hentPersonerMedAvslagIPeriode().filter { it.type == PersonType.BARN }
 
     val barnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
 
@@ -245,10 +252,12 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         gjelderSøker && !this.gjelderEtterEndretUtbetaling && !this.gjelderEndretutbetaling -> {
             when (this.periodeResultat) {
                 SanityPeriodeResultat.IKKE_INNVILGET -> {
-                    val relevanteBarn = if (this.begrunnelseTypeForPerson == VedtakBegrunnelseType.AVSLAG) {
+                    val erGenereltAvslag = erGenereltAvslagPåSøker(begrunnelsesGrunnlagPerPerson, grunnlag)
+
+                    val relevanteBarn = if (erGenereltAvslag) {
                         barnPåBehandlingen
                     } else {
-                        (barnMedUtbetalingIForrigeperiode + barnMedOppfylteVilkår).toSet()
+                        (barnMedUtbetalingIForrigeperiode + barnMedOppfylteVilkår + barnMedEksplisitteAvslag).toSet()
                     }
 
                     relevanteBarn.map { it.fødselsdato } +
@@ -262,6 +271,21 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         else -> {
             barnPåBegrunnelse.map { it.fødselsdato }
         }
+    }
+}
+
+private fun ISanityBegrunnelse.erGenereltAvslagPåSøker(
+    begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
+    grunnlag: GrunnlagForBegrunnelse,
+): Boolean {
+    val explisitteAvslagsvilkårForSøker =
+        begrunnelsesGrunnlagPerPerson[grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker]
+            ?.dennePerioden?.eksplisitteAvslagForPerson ?: emptyList()
+
+    return explisitteAvslagsvilkårForSøker.any {
+        this.begrunnelseTypeForPerson == VedtakBegrunnelseType.AVSLAG &&
+            it.vilkårType in this.vilkår &&
+            it.fom == null && it.tom == null
     }
 }
 
@@ -285,6 +309,9 @@ fun hentAntallBarnForBegrunnelse(
         else -> barnasFødselsdatoer.size
     }
 }
+
+fun IVedtakBegrunnelse.erAvslagUregistrerteBarnBegrunnelse() =
+    this in setOf(Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN, EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN)
 
 fun VedtaksperiodeMedBegrunnelser.hentMånedOgÅrForBegrunnelse(): String? {
     return if (this.fom == null || fom == TIDENES_MORGEN) {
