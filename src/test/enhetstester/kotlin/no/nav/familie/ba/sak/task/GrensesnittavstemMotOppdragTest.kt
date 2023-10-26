@@ -37,7 +37,7 @@ class GrensesnittavstemMotOppdragTest {
         "2020-01-09, 2020-01-10, task som kjører en torsdag og oppretter task på en fredag",
         "2020-01-10, 2020-01-13, task som kjører en fredag og oppretter task på en mandag",
     )
-    fun `Skal opprette task for neste arbeidsdag`(triggerDato: LocalDate, nesteTriggerDato: LocalDate, denneTester: String) {
+    fun `Skal opprette task for neste arbeidsdag`(triggerDato: LocalDate, nesteTriggerDato: LocalDate) {
         val slot = slot<Task>()
         every { taskRepositoryMock.save(capture(slot)) } answers { slot.captured }
 

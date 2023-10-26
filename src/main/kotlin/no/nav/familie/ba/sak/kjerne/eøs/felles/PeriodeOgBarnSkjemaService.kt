@@ -15,7 +15,7 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
     }
 
     fun hentMedId(id: Long): S {
-        return periodeOgBarnSkjemaRepository.getById(id)
+        return periodeOgBarnSkjemaRepository.getReferenceById(id)
     }
 
     fun endreSkjemaer(behandlingId: BehandlingId, oppdatering: S) {
@@ -32,7 +32,7 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
     }
 
     fun slettSkjema(behandlingId: BehandlingId, skjemaId: Long) {
-        val skjemaTilSletting = periodeOgBarnSkjemaRepository.getById(skjemaId)
+        val skjemaTilSletting = periodeOgBarnSkjemaRepository.getReferenceById(skjemaId)
         feilHvis(skjemaTilSletting.behandlingId != behandlingId.id) {
             "Prøver å slette et skjema som ikke er koblet til behandlingen man sender inn"
         }

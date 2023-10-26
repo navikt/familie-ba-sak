@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.3</version>
+        <version>3.1.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -22,10 +22,10 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>4.0.0</spring.cloud.version>
-        <prosessering.version>2.20231006130620_9b45ded</prosessering.version>
-        <felles.version>2.20231019123322_0a3df34</felles.version>
+        <prosessering.version>2.20231024124045_4a3b147</prosessering.version>
+        <felles.version>2.20231023162434_fa320ce</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20230921075936_3adfc44</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20231019125348_8bd6d02</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230912090318_2267c05</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20230927085000_900743f</utbetalingsgenerator.version>
@@ -36,7 +36,7 @@
         <token-validation-spring.version>3.1.7</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.2.0</springdoc.version>
-        <sentry.version>6.30.0</sentry.version>
+        <sentry.version>6.32.0</sentry.version>
         <kotlinx.version>1.7.3</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -49,7 +49,7 @@
         <testcontainers.postgresql.version>1.19.1</testcontainers.postgresql.version>
         <unleash.version>8.4.0</unleash.version>
         <maven.model.version>3.9.5</maven.model.version>
-        <jackson.module.kotlin.version>2.15.2</jackson.module.kotlin.version>
+        <jackson.module.kotlin.version>2.15.3</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <fpsak-tidslinje.version>2.6.8</fpsak-tidslinje.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
@@ -480,7 +480,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.2.1</version>
                 <configuration>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->

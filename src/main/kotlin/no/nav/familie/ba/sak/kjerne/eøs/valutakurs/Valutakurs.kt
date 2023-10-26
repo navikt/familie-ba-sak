@@ -16,6 +16,10 @@ import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -75,7 +79,67 @@ data class Valutakurs(
             barnAktører = barnAktører,
         )
 
+    fun erObligatoriskeFelterSatt() = fom != null &&
+        erObligatoriskeFelterUtenomTidsperioderSatt()
+
+    fun erObligatoriskeFelterUtenomTidsperioderSatt() =
+        this.valutakode != null &&
+            this.kurs != null &&
+            this.valutakursdato != null &&
+            this.valutakode != null &&
+            this.barnAktører.isNotEmpty()
+
     companion object {
         val NULL = Valutakurs(null, null, emptySet())
     }
 }
+
+sealed interface IValutakurs {
+    val id: Long
+    val behandlingId: Long
+}
+
+data class TomValutakurs(
+    override val id: Long,
+    override val behandlingId: Long,
+) : IValutakurs
+
+data class UtfyltValutakurs(
+    override val id: Long,
+    override val behandlingId: Long,
+    val fom: YearMonth,
+    val tom: YearMonth?,
+    val barnAktører: Set<Aktør>,
+    val valutakursdato: LocalDate,
+    val valutakode: String,
+    val kurs: BigDecimal,
+) : IValutakurs
+
+fun Valutakurs.tilIValutakurs(): IValutakurs {
+    return if (this.erObligatoriskeFelterSatt()) {
+        UtfyltValutakurs(
+            id = this.id,
+            behandlingId = this.behandlingId,
+            fom = this.fom!!,
+            tom = this.tom,
+            barnAktører = this.barnAktører,
+            valutakursdato = this.valutakursdato!!,
+            valutakode = this.valutakode!!,
+            kurs = this.kurs!!,
+        )
+    } else {
+        TomValutakurs(
+            id = this.id,
+            behandlingId = this.behandlingId,
+        )
+    }
+}
+
+fun List<UtfyltValutakurs>.tilTidslinje() =
+    this.map {
+        Periode(
+            fraOgMed = it.fom.tilTidspunkt(),
+            tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
+            innhold = it,
+        )
+    }.tilTidslinje()

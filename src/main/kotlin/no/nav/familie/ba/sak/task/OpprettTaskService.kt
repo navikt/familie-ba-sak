@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
@@ -77,6 +78,8 @@ class OpprettTaskService(
     }
 
     fun opprettAutovedtakFor6Og18ÅrBarn(fagsakId: Long, alder: Int) {
+        val inneværendeMåned = inneværendeMåned()
+
         overstyrTaskMedNyCallId(IdUtils.generateId()) {
             taskRepository.save(
                 Task(
@@ -85,11 +88,13 @@ class OpprettTaskService(
                         Autobrev6og18ÅrDTO(
                             fagsakId = fagsakId,
                             alder = alder,
-                            årMåned = inneværendeMåned(),
+                            årMåned = inneværendeMåned,
                         ),
                     ),
                     properties = Properties().apply {
                         this["fagsak"] = fagsakId.toString()
+                        this["alder"] = alder
+                        this["månedÅr"] = inneværendeMåned.tilMånedÅr()
                     },
                 ),
             )
