@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedNullable
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilNesteMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
@@ -148,7 +147,7 @@ private fun Collection<VilkårResultat>.hentForskjøvetEksplisittAvslagTidslinje
         tidslinje.perioder().map {
             Periode(
                 it.fraOgMed.tilNesteMåned(),
-                it.tilOgMed.tilInneværendeMåned().tilNesteMåned(),
+                it.tilOgMed.tilNesteMåned(),
                 it.innhold,
             )
         }.tilTidslinje()
