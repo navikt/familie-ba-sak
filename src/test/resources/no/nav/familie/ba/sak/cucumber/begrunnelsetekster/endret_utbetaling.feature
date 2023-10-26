@@ -249,8 +249,8 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | 2       | 2            | 01.08.2023 | 31.03.2028 | 655   | ORDINÆR_BARNETRYGD | 50      | 1310 |
 
     Og med endrede utbetalinger for begrunnelse
-      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Søknadstidspunkt |
-      | 2       | 2            | 01.07.2023 | 31.07.2023 | DELT_BOSTED | 100     | 02.07.2023       |
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
+      | 2       | 2            | 01.07.2023 | 31.07.2023 | DELT_BOSTED | 100     | 02.07.2023       | 30.06.2023                  |
 
     Når vedtaksperiodene genereres for behandling 2
 
