@@ -47,8 +47,8 @@ fun VedtaksperiodeMedBegrunnelser.hentBegrunnelser(
     landkoder: Map<String, String>,
 ): List<BrevBegrunnelse> {
     val standardbegrunnelser =
-        this.begrunnelser.flatMap {
-            it.standardbegrunnelse.lagBrevBegrunnelse(
+        this.begrunnelser.map { it.standardbegrunnelse }.toSet().flatMap {
+            it.lagBrevBegrunnelse(
                 this,
                 grunnlagForBegrunnelse,
                 begrunnelsesGrunnlagPerPerson,
@@ -56,8 +56,8 @@ fun VedtaksperiodeMedBegrunnelser.hentBegrunnelser(
         }
 
     val eøsBegrunnelser =
-        this.eøsBegrunnelser.flatMap {
-            it.begrunnelse.lagBrevBegrunnelse(
+        this.eøsBegrunnelser.map { it.begrunnelse }.toSet().flatMap {
+            it.lagBrevBegrunnelse(
                 this,
                 grunnlagForBegrunnelse,
                 begrunnelsesGrunnlagPerPerson,
