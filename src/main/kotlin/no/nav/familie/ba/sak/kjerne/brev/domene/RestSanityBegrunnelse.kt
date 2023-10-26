@@ -36,11 +36,14 @@ data class RestSanityBegrunnelse(
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
     val valgbarhet: String? = null,
+    @Deprecated("Erstattes av periodeResultatForPerson")
     val vedtakResultat: String?,
     val periodeResultatForPerson: String?,
     val fagsakType: String?,
+    @Deprecated("Erstattes av regelverk")
     val tema: String?,
     val regelverk: String?,
+    @Deprecated("Erstattes brevPeriodeType")
     val periodeType: String?,
     val brevPeriodeType: String?,
     val begrunnelseTypeForPerson: String?,
