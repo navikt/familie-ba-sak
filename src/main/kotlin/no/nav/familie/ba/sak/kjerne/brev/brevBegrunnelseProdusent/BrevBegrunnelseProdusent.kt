@@ -240,6 +240,8 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     val barnMedEksplisitteAvslag =
         begrunnelsesGrunnlagPerPerson.hentPersonerMedAvslagIPeriode().filter { it.type == PersonType.BARN }
 
+    val barnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
+
     val barnMedOppfylteVilkår = hentBarnMedOppfylteVilkår(begrunnelsesGrunnlagPerPerson)
     val barnMedUtbetalingIForrigeperiode =
         hentPersonerMedAndelIForrigePeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
@@ -249,10 +251,18 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
 
         gjelderSøker && !this.gjelderEtterEndretUtbetaling && !this.gjelderEndretutbetaling -> {
             when (this.periodeResultat) {
-                SanityPeriodeResultat.IKKE_INNVILGET ->
-                    (barnMedUtbetalingIForrigeperiode + barnMedOppfylteVilkår + barnMedEksplisitteAvslag).toSet()
-                        .map { it.fødselsdato } +
+                SanityPeriodeResultat.IKKE_INNVILGET -> {
+                    val erGenereltAvslag = erGenereltAvslagPåSøker(begrunnelsesGrunnlagPerPerson, grunnlag)
+
+                    val relevanteBarn = if (erGenereltAvslag) {
+                        barnPåBehandlingen
+                    } else {
+                        (barnMedUtbetalingIForrigeperiode + barnMedOppfylteVilkår + barnMedEksplisitteAvslag).toSet()
+                    }
+
+                    relevanteBarn.map { it.fødselsdato } +
                         uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
+                }
 
                 else -> (barnMedUtbetaling + barnPåBegrunnelse).toSet().map { it.fødselsdato }
             }
@@ -261,6 +271,21 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         else -> {
             barnPåBegrunnelse.map { it.fødselsdato }
         }
+    }
+}
+
+private fun ISanityBegrunnelse.erGenereltAvslagPåSøker(
+    begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
+    grunnlag: GrunnlagForBegrunnelse,
+): Boolean {
+    val explisitteAvslagsvilkårForSøker =
+        begrunnelsesGrunnlagPerPerson[grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker]
+            ?.dennePerioden?.eksplisitteAvslagForPerson ?: emptyList()
+
+    return explisitteAvslagsvilkårForSøker.any {
+        this.begrunnelseTypeForPerson == VedtakBegrunnelseType.AVSLAG &&
+            it.vilkårType in this.vilkår &&
+            it.fom == null && it.tom == null
     }
 }
 
