@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.skalIverksettesMotOppdrag
@@ -24,13 +23,14 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
+import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.YearMonth
 
 @Service
 class KontrollerNyUtbetalingsgeneratorService(
-    private val featureToggleService: FeatureToggleService,
+    private val unleashService: UnleashService,
     private val økonomiKlient: ØkonomiKlient,
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
@@ -203,7 +203,7 @@ class KontrollerNyUtbetalingsgeneratorService(
     }
 
     private fun skalKontrollereOppMotNyUtbetalingsgenerator(): Boolean =
-        featureToggleService.isEnabled(FeatureToggleConfig.KONTROLLER_NY_UTBETALINGSGENERATOR, false)
+        unleashService.isEnabled(FeatureToggleConfig.KONTROLLER_NY_UTBETALINGSGENERATOR, true)
 
     private fun validerAtSimuleringsPerioderGammelHarResultatLikSimuleringsPerioderNyEtterFomTilNy(
         simuleringsPerioderGammelTidslinje: Tidslinje<SimuleringsPeriode, Måned>,
