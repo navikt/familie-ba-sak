@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.lagUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
@@ -39,6 +38,7 @@ import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
+import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -48,7 +48,7 @@ import java.math.BigDecimal
 class KontrollerNyUtbetalingsgeneratorServiceTest {
 
     @MockK
-    private lateinit var featureToggleService: FeatureToggleService
+    private lateinit var unleashService: UnleashService
 
     @MockK
     private lateinit var utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService
@@ -483,9 +483,9 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
         overstyrteAndeler: List<AndelTilkjentYtelse>? = null,
     ) {
         every {
-            featureToggleService.isEnabled(
+            unleashService.isEnabled(
                 FeatureToggleConfig.KONTROLLER_NY_UTBETALINGSGENERATOR,
-                false,
+                true,
             )
         } returns true
 

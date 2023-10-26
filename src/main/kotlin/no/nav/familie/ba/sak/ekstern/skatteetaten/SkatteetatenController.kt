@@ -2,8 +2,7 @@ package no.nav.familie.ba.sak.ekstern.skatteetaten
 
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotNull
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPeriode
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPeriode.Delingsprosent
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
@@ -29,7 +28,7 @@ import java.time.LocalDateTime
 @ProtectedWithClaims(issuer = "azuread")
 class SkatteetatenController(
     private val skatteetatenService: SkatteetatenService,
-    private val featureToggleService: FeatureToggleService,
+    private val envService: EnvService,
 ) {
 
     @GetMapping(
@@ -42,7 +41,7 @@ class SkatteetatenController(
         aar: String,
     ): ResponseEntity<Ressurs<SkatteetatenPersonerResponse>> {
         logger.info("Treff på finnPersonerMedUtvidetBarnetrygd")
-        val respons = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_EKTE_DATA)) {
+        val respons = if (envService.erProd()) {
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(aar)
         } else {
             SkatteetatenPersonerResponse(
@@ -77,7 +76,7 @@ class SkatteetatenController(
         perioderRequest: SkatteetatenPerioderRequest,
     ): ResponseEntity<Ressurs<SkatteetatenPerioderResponse>> {
         logger.info("Treff på hentPerioderMedUtvidetBarnetrygd")
-        val response = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_EKTE_DATA)) {
+        val response = if (envService.erProd()) {
             skatteetatenService.finnPerioderMedUtvidetBarnetrygd(perioderRequest.identer, perioderRequest.aar)
         } else {
             SkatteetatenPerioderResponse(listeMedTestdataPerioder().filter { it.sisteVedtakPaaIdent.year == perioderRequest.aar.toInt() && it.ident in perioderRequest.identer })
