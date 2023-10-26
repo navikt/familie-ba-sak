@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
@@ -11,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
+import org.springframework.context.annotation.Lazy
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.lang.Exception
@@ -22,6 +25,7 @@ class DokumentGenereringService(
     private val brevKlient: BrevKlient,
     private val integrasjonClient: IntegrasjonClient,
     private val saksbehandlerContext: SaksbehandlerContext,
+    @Lazy private val testVerktøyService: TestVerktøyService,
 ) {
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
@@ -40,6 +44,9 @@ class DokumentGenereringService(
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
         } catch (feil: Throwable) {
             if (feil is FunksjonellFeil) throw feil
+
+            secureLogger.info("Feil ved dokumentgenerering. Genererer hentBegrunnelsetest \n ${testVerktøyService.hentBegrunnelsetest(vedtak.behandling.id)}")
+            secureLogger.info("Feil ved dokumentgenerering. Genererer hentVedtaksperioderTest \n ${testVerktøyService.hentVedtaksperioderTest(vedtak.behandling.id)}")
 
             throw Feil(
                 message = "Klarte ikke generere vedtaksbrev på behandling ${vedtak.behandling}: ${feil.message}",
