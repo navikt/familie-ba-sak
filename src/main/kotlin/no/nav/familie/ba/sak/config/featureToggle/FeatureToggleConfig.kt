@@ -15,10 +15,6 @@ class FeatureToggleConfig {
         const val EØS_PRAKSISENDRING_SEPTEMBER2023 =
             "familie-ba-sak.behandling.eos-annen-forelder-omfattet-av-norsk-lovgivning"
 
-        // unleash toggles for satsendring, kan slettes etter at satsendring er skrudd på for alle satstyper
-
-        const val SATSENDRING_SNIKE_I_KØEN = "familie-ba-sak.satsendring-snike-i-koen"
-
         // Ny utbetalingsgenerator
         const val KONTROLLER_NY_UTBETALINGSGENERATOR = "familie.ba.sak.kontroller-ny-utbetalingsgenerator"
 
