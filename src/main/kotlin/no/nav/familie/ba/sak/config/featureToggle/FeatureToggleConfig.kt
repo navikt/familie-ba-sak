@@ -15,7 +15,6 @@ class FeatureToggleConfig {
         const val EØS_PRAKSISENDRING_SEPTEMBER2023 =
             "familie-ba-sak.behandling.eos-annen-forelder-omfattet-av-norsk-lovgivning"
 
-
         // Unleash Next toggles
         const val ENDRET_EØS_REGELVERKFILTER_FOR_BARN = "familie-ba-sak.endret-eos-regelverkfilter-for-barn"
         const val NY_GENERERING_AV_BREVOBJEKTER = "familie-ba-sak.ny-generering-av-brevobjekter"
