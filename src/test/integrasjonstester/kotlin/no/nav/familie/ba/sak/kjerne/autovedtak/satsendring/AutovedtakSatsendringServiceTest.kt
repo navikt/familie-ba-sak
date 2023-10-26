@@ -11,8 +11,6 @@ import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -52,9 +50,7 @@ import java.time.YearMonth
 class AutovedtakSatsendringServiceTest(
     @Autowired private val jdbcTemplate: JdbcTemplate,
     @Autowired private val mockLocalDateService: LocalDateService,
-    @Autowired private val featureToggleService: FeatureToggleService,
     @Autowired private val databaseCleanupService: DatabaseCleanupService,
-
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
     @Autowired private val behandlingRepository: BehandlingRepository,
@@ -89,7 +85,6 @@ class AutovedtakSatsendringServiceTest(
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2023, 2, 1)
 
         every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SNIKE_I_KØEN) } returns true
         fagsak = opprettLøpendeFagsak()
         aktørBarn = personidentService.hentOgLagreAktør(randomFnr(), true)
     }
@@ -154,35 +149,6 @@ class AutovedtakSatsendringServiceTest(
             val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
 
             assertThat(satsendringResultat).isEqualTo(SatsendringSvar.SATSENDRING_KJØRT_OK)
-        }
-
-        // Kan fjernes når feature toggle er fjernet
-        @Test
-        fun `Skal ikke sette behandling på vent hvis feature toggle er slått av`() {
-            every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SNIKE_I_KØEN) } returns false
-            val behandling = opprettBehandling()
-            lagTilkjentAndelOgFerdigstillBehandling(behandling)
-            satskjøringRepository.saveAndFlush(
-                Satskjøring(
-                    fagsakId = behandling.fagsak.id,
-                    satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_MARS_2023,
-                ),
-            )
-
-            // Opprett revurdering som blir liggende igjen som åpen og på behandlingsresultatsteget
-            val revurdering = opprettBehandling()
-            justerLoggTidspunktForÅKunneSatsendreNårDetFinnesÅpenBehandling(revurdering)
-
-            // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
-            unmockkObject(SatsTidspunkt)
-
-            val satsendringTaskDto = SatsendringTaskDto(
-                behandling.fagsak.id,
-                YearMonth.of(2023, 3),
-            )
-            val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
-
-            assertThat(satsendringResultat).isEqualTo(SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI)
         }
 
         @Test
