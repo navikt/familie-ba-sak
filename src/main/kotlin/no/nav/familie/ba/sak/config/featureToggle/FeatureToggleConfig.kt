@@ -16,16 +16,20 @@ class FeatureToggleConfig {
             "familie-ba-sak.behandling.eos-annen-forelder-omfattet-av-norsk-lovgivning"
 
         // unleash toggles for satsendring, kan slettes etter at satsendring er skrudd på for alle satstyper
-        const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
+
         const val SATSENDRING_SNIKE_I_KØEN = "familie-ba-sak.satsendring-snike-i-koen"
 
         // Ny utbetalingsgenerator
         const val KONTROLLER_NY_UTBETALINGSGENERATOR = "familie.ba.sak.kontroller-ny-utbetalingsgenerator"
-        const val BRUK_NY_UTBETALINGSGENERATOR = "familie.ba.sak.bruk-ny-utbetalingsgenerator"
 
         // Unleash Next toggles
         const val ENDRET_EØS_REGELVERKFILTER_FOR_BARN = "familie-ba-sak.endret-eos-regelverkfilter-for-barn"
         const val NY_GENERERING_AV_BREVOBJEKTER = "familie-ba-sak.ny-generering-av-brevobjekter"
+
+        const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
+
+        // Ny utbetalingsgenerator
+        const val BRUK_NY_UTBETALINGSGENERATOR = "familie.ba.sak.bruk-ny-utbetalingsgenerator"
     }
 }
 
