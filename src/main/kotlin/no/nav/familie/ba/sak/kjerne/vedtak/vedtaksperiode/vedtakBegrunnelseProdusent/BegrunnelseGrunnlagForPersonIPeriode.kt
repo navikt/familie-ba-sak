@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedNullable
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilNesteMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
@@ -142,9 +141,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
 
 private fun Collection<VilkårResultat>.hentForskjøvetEksplisittAvslagTidslinje(): Tidslinje<List<VilkårResultatForVedtaksperiode>, Måned> =
     filter { it.erEksplisittAvslagPåSøknad == true }.groupBy { it.vilkårType }.map { (_, vilkårResultater) ->
-        val tidslinje: Tidslinje<VilkårResultat, Dag> = vilkårResultater.tilTidslinje()
-
-        tidslinje.perioder().map {
+        vilkårResultater.tilTidslinje().perioder().map {
             Periode(
                 it.fraOgMed.tilNesteMåned(),
                 it.tilOgMed.tilNesteMåned(),
