@@ -4,6 +4,8 @@
 Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
 
   Bakgrunn:
+
+  Scenario: Når det er et avslag samtidig som et eksplisitt avslag skal kun barnet med eksplisitt avslag flettes inn i begrunnelsen
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
@@ -18,7 +20,6 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 1            | 3456    | BARN       | 13.01.2017  |
       | 1            | 5678    | BARN       | 08.02.2013  |
 
-  Scenario: Når det er et avslag samtidig som et eksplisitt avslag skal kun barnet med eksplisitt avslag flettes inn i begrunnelsen
     Og følgende dagens dato 12.10.2023
     Og lag personresultater for begrunnelse for behandling 1
 
@@ -56,6 +57,20 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
 
 
   Scenario: Når det er et avslag samtidig som et eksplisitt avslag og det ikke er valgt noen begrunnelse for avslaget skal vi ikke få opp noen avslagsbegrunnelse
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat         | Behandlingsårsak | Skal behandles automatisk |
+      | 1            | 1        |                     | DELVIS_INNVILGET_OG_OPPHØRT | SØKNAD           | Nei                       |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1234    | SØKER      | 14.10.1987  |
+      | 1            | 3456    | BARN       | 13.01.2017  |
+      | 1            | 5678    | BARN       | 08.02.2013  |
+
     Og følgende dagens dato 12.10.2023
     Og lag personresultater for begrunnelse for behandling 1
 
@@ -88,3 +103,57 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato | VedtaksperiodeType | Gyldige begrunnelser | Ugyldige begrunnelser |
       | 01.04.2023 |          | OPPHØR             |                      | AVSLAG_BOR_HOS_SØKER  |
+
+
+  Scenario: Skal ta med barna med avslag når det er avslag på søker og barn
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | AVSLÅTT             | SØKNAD           | Nei                       | NASJONAL            |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 30.07.1983  |
+      | 1            | 2       | BARN       | 28.07.2012  |
+      | 1            | 3       | BARN       | 24.06.2014  |
+      | 1            | 4       | BARN       | 09.05.2018  |
+
+    Og følgende dagens dato 25.10.2023
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser              |
+      | 1       | UTVIDET_BARNETRYGD            |                  |            |            | IKKE_OPPFYLT | Ja                   | AVSLAG_BOR_IKKE_FAST_MED_BARNET   |
+      | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 30.07.1983 |            | OPPFYLT      | Nei                  |                                   |
+
+      | 2       | BOR_MED_SØKER                 |                  |            |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED |
+      | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 28.07.2012 |            | OPPFYLT      | Nei                  |                                   |
+      | 2       | GIFT_PARTNERSKAP              |                  | 28.07.2012 |            | OPPFYLT      | Nei                  |                                   |
+      | 2       | UNDER_18_ÅR                   |                  | 28.07.2012 | 27.07.2030 | OPPFYLT      | Nei                  |                                   |
+
+      | 3       | BOR_MED_SØKER                 |                  |            |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED |
+      | 3       | LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 24.06.2014 |            | OPPFYLT      | Nei                  |                                   |
+      | 3       | GIFT_PARTNERSKAP              |                  | 24.06.2014 |            | OPPFYLT      | Nei                  |                                   |
+      | 3       | UNDER_18_ÅR                   |                  | 24.06.2014 | 23.06.2032 | OPPFYLT      | Nei                  |                                   |
+
+      | 4       | BOR_MED_SØKER                 |                  |            |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED |
+      | 4       | UNDER_18_ÅR                   |                  | 09.05.2018 | 08.05.2036 | OPPFYLT      | Nei                  |                                   |
+      | 4       | GIFT_PARTNERSKAP              |                  | 09.05.2018 |            | OPPFYLT      | Nei                  |                                   |
+      | 4       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 09.05.2018 |            | OPPFYLT      | Nei                  |                                   |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
+
+    Når vedtaksperiodene genereres for behandling 1
+
+    Og når disse begrunnelsene er valgt for behandling 1
+      | Fra dato | Til dato | Standardbegrunnelser                                                                                                                     | Eøsbegrunnelser | Fritekster |
+      |          |          | AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED, AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED, AVSLAG_BOR_IKKE_FAST_MED_BARNET, AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED |                 |            |
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode - til -
+      | Begrunnelse                       | Type     | Gjelder søker | Barnas fødselsdatoer           | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søkers rett til utvidet |
+      | AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED | STANDARD | Nei           | 28.07.12, 24.06.14 og 09.05.18 | 3           |                                      | NB      | 0     |                         |
+      | AVSLAG_BOR_IKKE_FAST_MED_BARNET   | STANDARD | Ja            | 28.07.12, 24.06.14 og 09.05.18 | 0           |                                      | NB      | 0     |                         |

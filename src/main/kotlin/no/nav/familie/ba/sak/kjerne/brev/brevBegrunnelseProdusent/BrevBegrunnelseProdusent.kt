@@ -105,10 +105,10 @@ private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
     )
 
     val antallBarn = hentAntallBarnForBegrunnelse(
-        this,
+        begrunnelse = this,
         grunnlag = grunnlag,
-        gjelderSøker = gjelderSøker,
         barnasFødselsdatoer = barnasFødselsdatoer,
+        gjelderSøker = gjelderSøker,
     )
 
     sanityBegrunnelse.validerBrevbegrunnelse(
@@ -214,6 +214,11 @@ private fun hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson: Map<Pers
         begrunnelseGrunnlagForPersonIPeriode.dennePerioden.andeler.toList().isNotEmpty()
     }.keys
 
+private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentPersonerMedAvslagIPeriode() =
+    filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
+        !begrunnelseGrunnlagForPersonIPeriode.dennePerioden.eksplisitteAvslagForPerson.isNullOrEmpty()
+    }.keys
+
 private fun hentPersonerMedAndelIForrigePeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
     begrunnelsesGrunnlagPerPerson.filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
         !begrunnelseGrunnlagForPersonIPeriode.forrigePeriode?.andeler?.toList().isNullOrEmpty()
@@ -232,6 +237,8 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     val barnMedUtbetaling =
         hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
     val uregistrerteBarnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn
+    val barnMedEksplisitteAvslag =
+        begrunnelsesGrunnlagPerPerson.hentPersonerMedAvslagIPeriode().filter { it.type == PersonType.BARN }
 
     val barnMedOppfylteVilkår = hentBarnMedOppfylteVilkår(begrunnelsesGrunnlagPerPerson)
     val barnMedUtbetalingIForrigeperiode =
@@ -243,7 +250,8 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         gjelderSøker && !this.gjelderEtterEndretUtbetaling && !this.gjelderEndretutbetaling -> {
             when (this.periodeResultat) {
                 SanityPeriodeResultat.IKKE_INNVILGET ->
-                    (barnMedUtbetalingIForrigeperiode + barnMedOppfylteVilkår).toSet().map { it.fødselsdato } +
+                    (barnMedUtbetalingIForrigeperiode + barnMedOppfylteVilkår + barnMedEksplisitteAvslag).toSet()
+                        .map { it.fødselsdato } +
                         uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
 
                 else -> (barnMedUtbetaling + barnPåBegrunnelse).toSet().map { it.fødselsdato }
