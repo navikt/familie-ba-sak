@@ -36,15 +36,9 @@ data class RestSanityBegrunnelse(
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
     val valgbarhet: String? = null,
-    @Deprecated("Erstattes av periodeResultatForPerson")
-    val vedtakResultat: String?,
     val periodeResultatForPerson: String?,
     val fagsakType: String?,
-    @Deprecated("Erstattes av regelverk")
-    val tema: String?,
     val regelverk: String?,
-    @Deprecated("Erstattes brevPeriodeType")
-    val periodeType: String?,
     val brevPeriodeType: String?,
     val begrunnelseTypeForPerson: String?,
 ) {
@@ -91,13 +85,10 @@ data class RestSanityBegrunnelse(
                 it.finnEnumverdi<UtvidetBarnetrygdTrigger>(apiNavn)
             } ?: emptyList(),
             valgbarhet = valgbarhet.finnEnumverdi<Valgbarhet>(apiNavn),
-            periodeResultat = (
-                periodeResultatForPerson
-                    ?: vedtakResultat
-                ).finnEnumverdi<SanityPeriodeResultat>(apiNavn),
+            periodeResultat = (periodeResultatForPerson).finnEnumverdi<SanityPeriodeResultat>(apiNavn),
             fagsakType = fagsakType.finnEnumverdiNullable<FagsakType>(),
-            tema = (tema ?: regelverk).finnEnumverdi<Tema>(apiNavn),
-            periodeType = (brevPeriodeType ?: periodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
+            tema = (regelverk).finnEnumverdi<Tema>(apiNavn),
+            periodeType = (brevPeriodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
             begrunnelseTypeForPerson = begrunnelseTypeForPerson.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
         )
     }
