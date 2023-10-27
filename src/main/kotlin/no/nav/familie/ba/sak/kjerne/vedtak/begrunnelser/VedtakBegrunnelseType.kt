@@ -23,8 +23,8 @@ enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
     FORTSATT_INNVILGET(5),
     EØS_FORTSATT_INNVILGET(5),
     INSTITUSJON_FORTSATT_INNVILGET(5),
-    ENDRET_UTBETALINGSPERIODE(7),
-    ETTER_ENDRET_UTBETALINGSPERIODE(6),
+    ENDRET_UTBETALING(7),
+    ETTER_ENDRET_UTBETALING(6),
     ;
 
     fun erInnvilget(): Boolean {
