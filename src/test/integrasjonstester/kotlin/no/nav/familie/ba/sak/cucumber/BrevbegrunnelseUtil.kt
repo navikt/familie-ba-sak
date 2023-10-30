@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.norskDatoFormatter
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseInt
-import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriInt
@@ -89,7 +88,7 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
     val annenForeldersAktivitet = parseValgfriEnum<KompetanseAktivitet>(
         VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITET,
         rad,
-    )
+    ) ?: KompetanseAktivitet.IKKE_AKTUELT
     val annenForeldersAktivitetsland = parseValgfriString(
         VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITETSLAND,
         rad,
@@ -97,11 +96,11 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
     val barnetsBostedsland = parseValgfriString(
         VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.BARNETS_BOSTEDSLAND,
         rad,
-    )
+    ) ?: ""
     val søkersAktivitet = parseValgfriEnum<KompetanseAktivitet>(
         VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITET,
         rad,
-    )
+    ) ?: KompetanseAktivitet.IKKE_AKTUELT
     val søkersAktivitetsland = parseValgfriString(
         VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITETSLAND,
         rad,
@@ -114,25 +113,18 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
         rad,
     ).sanityApiNavn
 
-    val barnasFodselsdatoer = parseString(
+    val barnasFodselsdatoer = parseValgfriString(
         BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDATOER,
         rad,
-    )
+    ) ?: ""
 
     val antallBarn = parseInt(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.ANTALL_BARN, rad)
 
-    val målform = parseEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad).tilSanityFormat()
+    val målform =
+        parseValgfriEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad)?.tilSanityFormat()
+            ?: "bokmaal"
 
     return if (gjelderSoker == null) {
-        if (annenForeldersAktivitet == null ||
-            annenForeldersAktivitetsland == null ||
-            barnetsBostedsland == null ||
-            søkersAktivitet == null ||
-            søkersAktivitetsland == null
-        ) {
-            error("For EØS-begrunnelser må enten 'Gjelder søker' eller kompetansefeltene settes")
-        }
-
         EØSBegrunnelseDataMedKompetanse(
             vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET,
             apiNavn = apiNavn,
