@@ -109,6 +109,7 @@ private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
         grunnlag = grunnlag,
         barnasFødselsdatoer = barnasFødselsdatoer,
         gjelderSøker = gjelderSøker,
+        antallBarnGjeldendeForBegrunnelse = personerGjeldeneForBegrunnelse.filter { it.type == PersonType.BARN }.size,
     )
 
     sanityBegrunnelse.validerBrevbegrunnelse(
@@ -299,6 +300,7 @@ fun hentAntallBarnForBegrunnelse(
     grunnlag: GrunnlagForBegrunnelse,
     gjelderSøker: Boolean,
     barnasFødselsdatoer: List<LocalDate>,
+    antallBarnGjeldendeForBegrunnelse: Int,
 ): Int {
     val uregistrerteBarnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn
     val erAvslagUregistrerteBarn = begrunnelse.erAvslagUregistrerteBarnBegrunnelse()
@@ -306,6 +308,8 @@ fun hentAntallBarnForBegrunnelse(
     return when {
         erAvslagUregistrerteBarn -> uregistrerteBarnPåBehandlingen.size
         gjelderSøker && begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG -> 0
+        gjelderSøker && begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR ->
+            antallBarnGjeldendeForBegrunnelse
         else -> barnasFødselsdatoer.size
     }
 }
