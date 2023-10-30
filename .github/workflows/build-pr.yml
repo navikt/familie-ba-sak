@@ -10,8 +10,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build
+  ktlint:
+    name: Ktlint
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -25,31 +25,6 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Build with Maven
-        run: mvn -B -DskipTests package --settings .m2/maven-settings.xml --file pom.xml
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: build-artifacts
-          path: target/
-
-  ktlint:
-    name: Ktlint
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Download build artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: build-artifacts
-          path: target/
-
       - name: Kjør ktlint
         env:
           GITHUB_USERNAME: x-access-token
@@ -58,17 +33,16 @@ jobs:
           mvn -B --no-transfer-progress antrun:run@ktlint
   enhetstester:
     name: Enhetstester
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Download build artifacts
-        uses: actions/download-artifact@v2
+      - uses: actions/setup-java@v3
         with:
-          name: build-artifacts
-          path: target/
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
 
       - name: Kjør enhetstester
         env:
@@ -78,17 +52,16 @@ jobs:
           mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -DexcludedGroups=integration,verdikjedetest
   integrasjonstester:
     name: Integrasjonstester
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Download build artifacts
-        uses: actions/download-artifact@v2
+      - uses: actions/setup-java@v3
         with:
-          name: build-artifacts
-          path: target/
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
 
       - name: Kjør integrasjonstester
         env:
@@ -98,17 +71,16 @@ jobs:
           mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -Dgroups=integration
   verdikjedetesterFeatureToggleOff:
     name: Verdikjedetester m/ feature toggles slått av
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Download build artifacts
-        uses: actions/download-artifact@v2
+      - uses: actions/setup-java@v3
         with:
-          name: build-artifacts
-          path: target/
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
 
       - name: Kjør verdikjedetester m/ feature toggles slått av
         env:
@@ -119,17 +91,16 @@ jobs:
 
   verdikjedetesterFeatureToggleOn:
     name: Verdikjedetester m/ feature toggles slått på
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Download build artifacts
-        uses: actions/download-artifact@v2
+      - uses: actions/setup-java@v3
         with:
-          name: build-artifacts
-          path: target/
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
 
       - name: Kjør verdikjedetester m/ feature toggles slått på
         env:
