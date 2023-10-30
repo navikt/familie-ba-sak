@@ -9,8 +9,6 @@ class FeatureToggleConfig {
         const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
 
         // Release
-        const val EØS_INFORMASJON_OM_ÅRLIG_KONTROLL = "familie-ba-sak.eos-informasjon-om-aarlig-kontroll"
-
         // Unleash Next toggles
         const val ENDRET_EØS_REGELVERKFILTER_FOR_BARN = "familie-ba-sak.endret-eos-regelverkfilter-for-barn"
         const val NY_GENERERING_AV_BREVOBJEKTER = "familie-ba-sak.ny-generering-av-brevobjekter"
