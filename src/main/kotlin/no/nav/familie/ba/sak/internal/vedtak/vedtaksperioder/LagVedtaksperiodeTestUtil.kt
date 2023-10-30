@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.internal.vedtak.begrunnelser.VilkårResultatRad
+import no.nav.familie.ba.sak.internal.vedtak.begrunnelser.anonymiser
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -32,33 +33,38 @@ fun lagVedtaksperioderTest(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
     kompetanse: Collection<Kompetanse>,
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
-) = """
-<pre>
+): String {
+    val test = """
 # language: no
 # encoding: UTF-8
 
 Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric(10)}
 
   Bakgrunn:""" +
-    hentTekstForFagsak(behandling) +
-    hentTekstForBehandlinger(behandling, forrigeBehandling) +
-    hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
-    """
+        hentTekstForFagsak(behandling) +
+        hentTekstForBehandlinger(behandling, forrigeBehandling) +
+        hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
+        """
       
   Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
     Og følgende dagens dato ${LocalDate.now().tilddMMyyyy()}""" +
-    lagPersonresultaterTekst(forrigeBehandling) +
-    lagPersonresultaterTekst(behandling) +
-    hentTekstForVilkårresultater(personResultaterForrigeBehandling, forrigeBehandling?.id) +
-    hentTekstForVilkårresultater(personResultater, behandling.id) +
-    hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
-    hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
-    hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
+        lagPersonresultaterTekst(forrigeBehandling) +
+        lagPersonresultaterTekst(behandling) +
+        hentTekstForVilkårresultater(
+            personResultaterForrigeBehandling?.sorterPåFøselsdato(persongrunnlagForrigeBehandling!!),
+            forrigeBehandling?.id,
+        ) +
+        hentTekstForVilkårresultater(personResultater.sorterPåFøselsdato(persongrunnlag), behandling.id) +
+        hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
+        hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
+        hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
     Når vedtaksperioder med begrunnelser genereres for behandling ${behandling.id}""" +
-    hentTekstForVedtaksperioder(vedtaksperioder) + """
-</pre> 
+        hentTekstForVedtaksperioder(vedtaksperioder) + """
     """
+
+    return test.anonymiser(persongrunnlag, persongrunnlagForrigeBehandling, forrigeBehandling, behandling)
+}
 
 private fun lagPersonresultaterTekst(behandling: Behandling?) = behandling?.let {
     """
@@ -67,9 +73,9 @@ private fun lagPersonresultaterTekst(behandling: Behandling?) = behandling?.let 
 
 private fun hentTekstForFagsak(behandling: Behandling) =
     """
-    Gitt følgende fagsak
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
-      | ${behandling.fagsak.id} | ${behandling.fagsak.type} |"""
+      | 1 | ${behandling.fagsak.type} |"""
 
 private fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: Behandling?) =
     """
@@ -78,7 +84,7 @@ private fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: 
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |${
         forrigeBehandling?.let {
             """ 
-      | ${it.id} | ${it.fagsak.id} |           | ${it.resultat} | ${it.opprettetÅrsak} |"""
+      | ${it.id} | 1 |           | ${it.resultat} | ${it.opprettetÅrsak} |"""
         } ?: ""
     }
       | ${behandling.id} | ${behandling.fagsak.id} | ${forrigeBehandling?.id ?: ""} |${behandling.resultat} | ${behandling.opprettetÅrsak} |"""
@@ -101,7 +107,7 @@ private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): 
     } ?: ""
 
 private fun hentTekstForVilkårresultater(
-    personResultater: Set<PersonResultat>?,
+    personResultater: List<PersonResultat>?,
     behandlingId: Long?,
 ): String {
     if (personResultater == null || behandlingId == null) {
@@ -111,11 +117,11 @@ private fun hentTekstForVilkårresultater(
     return """
         
     Og legg til nye vilkårresultater for behandling $behandlingId
-      | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag |""" +
+      | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Standardbegrunnelser |""" +
         tilVilkårResultatRader(personResultater)
 }
 
-private fun tilVilkårResultatRader(personResultater: Set<PersonResultat>?) =
+private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
     personResultater?.joinToString("\n") { personResultat ->
         personResultat.vilkårResultater
             .sortedBy { it.periodeFom }
@@ -127,12 +133,15 @@ private fun tilVilkårResultatRader(personResultater: Set<PersonResultat>?) =
                     it.periodeTom,
                     it.resultat,
                     it.erEksplisittAvslagPåSøknad,
+                    it.standardbegrunnelser,
                 )
             }.toList().joinToString("") { (vilkårResultatRad, vilkårResultater) ->
                 """
       | ${vilkårResultatRad.aktørId} |${vilkårResultater.map { it.vilkårType }.joinToString(",")}|${
                     vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")
-                }|${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""}|${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""}| ${vilkårResultatRad.resultat} | ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} |"""
+                }|${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""}|${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""}| ${vilkårResultatRad.resultat} | ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} | ${
+                    vilkårResultatRad.standardbegrunnelser.joinToString(",")
+                }"""
             }
     } ?: ""
 
@@ -251,3 +260,6 @@ private fun hentVedtaksperiodeRader(vedtaksperioder: List<VedtaksperiodeMedBegru
         """
       | ${it.fom?.tilddMMyyyy() ?: ""} |${it.tom?.tilddMMyyyy() ?: ""} |${it.type} |               |"""
     }
+
+private fun Set<PersonResultat>.sorterPåFøselsdato(persongrunnlag: PersonopplysningGrunnlag) =
+    this.sortedBy { personresultat -> persongrunnlag.personer.single { personresultat.aktør == it.aktør }.fødselsdato }

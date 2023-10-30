@@ -4,8 +4,6 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SATSENDRING_SNIKE_I_KØEN
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -41,7 +39,6 @@ class AutovedtakSatsendringService(
     private val behandlingService: BehandlingService,
     private val satsendringService: SatsendringService,
     private val loggService: LoggService,
-    private val featureToggleService: FeatureToggleService,
     private val snikeIKøenService: SnikeIKøenService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -84,9 +81,7 @@ class AutovedtakSatsendringService(
 
         if (aktivOgÅpenBehandling != null) {
             val brukerHarÅpenBehandlingSvar = hentBrukerHarÅpenBehandlingSvar(aktivOgÅpenBehandling)
-            if (brukerHarÅpenBehandlingSvar == SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI &&
-                featureToggleService.isEnabled(SATSENDRING_SNIKE_I_KØEN)
-            ) {
+            if (brukerHarÅpenBehandlingSvar == SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI) {
                 snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
                     aktivOgÅpenBehandling.id,
                     SettPåMaskinellVentÅrsak.SATSENDRING,

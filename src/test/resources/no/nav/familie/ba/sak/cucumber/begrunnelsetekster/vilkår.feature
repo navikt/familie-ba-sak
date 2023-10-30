@@ -27,10 +27,10 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2021 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser          | Ugyldige begrunnelser |
       | 01.05.2020 | 31.03.2021 | UTBETALING         |                               |                          |
       | 01.04.2021 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER |                          |
 
@@ -48,10 +48,10 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.02.2021 | 31.03.2021 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                  | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                     | Ugyldige begrunnelser |
       | 01.02.2021 | 31.03.2021 | UTBETALING         | INNVILGET_BOSATT_I_RIKTET_LOVLIG_OPPHOLD |                          |
       | 01.04.2021 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER            |                          |
 
@@ -69,10 +69,10 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2021 | 31.03.2022 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser      |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser          | Ugyldige begrunnelser         |
       | 01.05.2021 | 31.03.2022 | UTBETALING         | INNVILGET_BOR_HOS_SØKER       | REDUKSJON_IKKE_BOSATT_I_NORGE |
       | 01.04.2022 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER |                               |
 
@@ -90,10 +90,10 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2021 | 31.03.2022 | 1354  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser          | Ugyldige begrunnelser  |
       | 01.05.2021 | 31.03.2022 | UTBETALING         | INNVILGET_BOR_HOS_SØKER       | REDUKSJON_FLYTTET_BARN   |
       | 01.04.2022 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER |                          |
 
@@ -126,10 +126,10 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | 2276892299373 | 100173051    | 01.02.2023 | 28.02.2023 | 1054  | UTVIDET_BARNETRYGD | 100     |
       | 2276892299373 | 100173051    | 01.03.2023 | 31.05.2023 | 2489  | UTVIDET_BARNETRYGD | 100     |
 
-    Når begrunnelsetekster genereres for behandling 100173051
+    Når vedtaksperiodene genereres for behandling 100173051
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser           |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser              |
       | 01.11.2022 | 31.01.2023 | UTBETALING         |           |                         |                                    |
       | 01.02.2023 | 28.02.2023 | UTBETALING         |           |                         |                                    |
       | 01.03.2023 | 31.05.2023 | UTBETALING         |           |                         |                                    |
@@ -164,10 +164,10 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | 2005858678161 | 100173207    | 01.04.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     |
       | 2005858678161 | 100173207    | 01.07.2023 | 31.08.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     |
 
-    Når begrunnelsetekster genereres for behandling 100173207
+    Når vedtaksperiodene genereres for behandling 100173207
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser |
       | 01.04.2023 | 30.06.2023 | UTBETALING         |           |                         |                          |
       | 01.07.2023 | 31.08.2023 | UTBETALING         |           |                         |                          |
       | 01.09.2023 |            | OPPHØR             |           |                         |                          |
@@ -204,10 +204,62 @@ Egenskap: Gyldige begrunnelser ved endring av vilkår
       | 1       | 1            | 01.01.2023 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 2       | 1            | 01.01.2023 | 28.02.2023 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser      | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser         | Ugyldige begrunnelser |
       | 01.01.2023 | 31.01.2023 | UTBETALING         |           |                              |                          |
       | 01.02.2023 | 28.02.2023 | UTBETALING         |           | INNVILGET_BOR_ALENE_MED_BARN |                          |
       | 01.03.2023 |            | OPPHØR             |           |                              |                          |
+
+  Scenario: Skal gi reduksjon 18 år begrunnelse for EØS-saker
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat  | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | INNVILGET_OG_OPPHØRT | SØKNAD           | Nei                       | EØS                 |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 27.01.1978  |
+      | 1            | 2       | BARN       | 01.05.2004  |
+      | 1            | 3       | BARN       | 01.12.2005  |
+
+    Og følgende dagens dato 16.10.2023
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                          | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1       | LOVLIG_OPPHOLD                  |                              | 27.01.1978 |            | OPPFYLT  | Nei                  |
+      | 1       | BOSATT_I_RIKET                  | OMFATTET_AV_NORSK_LOVGIVNING | 27.03.2022 | 01.05.2022 | OPPFYLT  | Nei                  |
+
+      | 2       | UNDER_18_ÅR                     |                              | 01.05.2004 | 30.04.2022 | OPPFYLT  | Nei                  |
+      | 2       | BOR_MED_SØKER                   | BARN_BOR_I_EØS_MED_SØKER     | 01.05.2004 |            | OPPFYLT  | Nei                  |
+      | 2       | BOSATT_I_RIKET                  | BARN_BOR_I_NORGE             | 01.05.2004 |            | OPPFYLT  | Nei                  |
+      | 2       | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP |                              | 01.05.2004 |            | OPPFYLT  | Nei                  |
+
+      | 3       | GIFT_PARTNERSKAP,LOVLIG_OPPHOLD |                              | 01.12.2005 |            | OPPFYLT  | Nei                  |
+      | 3       | UNDER_18_ÅR                     |                              | 01.12.2005 | 30.11.2023 | OPPFYLT  | Nei                  |
+      | 3       | BOR_MED_SØKER                   | BARN_BOR_I_EØS_MED_SØKER     | 01.12.2005 |            | OPPFYLT  | Nei                  |
+      | 3       | BOSATT_I_RIKET                  | BARN_BOR_I_NORGE             | 01.12.2005 |            | OPPFYLT  | Nei                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+
+      | 2       | 1            | 01.04.2022 | 30.04.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 1            | 01.04.2022 | 31.05.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+
+    Og med kompetanser for begrunnelse
+      | AktørId | Fra dato   | Til dato   | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
+      | 3       | 01.05.2022 | 31.05.2022 | NORGE_ER_PRIMÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | NO                             | NO                  |
+      | 2, 3    | 01.04.2022 | 30.04.2022 | NORGE_ER_PRIMÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | NO                             | NO                  |
+
+    Når vedtaksperiodene genereres for behandling 1
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser  | Ugyldige begrunnelser |
+      | 01.04.2022 | 30.04.2022 | UTBETALING         |           |                       |                       |
+      | 01.05.2022 | 31.05.2022 | UTBETALING         |           | REDUKSJON_UNDER_18_ÅR |                       |
+      | 01.06.2022 |            | OPPHØR             |           |                       |                       |

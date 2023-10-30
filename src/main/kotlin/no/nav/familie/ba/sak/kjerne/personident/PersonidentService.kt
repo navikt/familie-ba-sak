@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivFødselsnummer
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -42,7 +44,7 @@ class PersonidentService(
         secureLogger.info("Håndterer ny ident ${nyIdent.ident}")
         val identerFraPdl = hentIdenter(nyIdent.ident, true)
 
-        val aktørId = filtrerAktivtAktørId(identerFraPdl)
+        val aktørId = identerFraPdl.hentAktivAktørId()
 
         validerOmAktørIdErMerget(identerFraPdl)
 
@@ -102,8 +104,8 @@ class PersonidentService(
         }
 
         val identerFraPdl = hentIdenter(ident, false)
-        val fødselsnummerAktiv = filtrerAktivtFødselsnummer(identerFraPdl)
-        val aktørIdStr = filtrerAktivtAktørId(identerFraPdl)
+        val fødselsnummerAktiv = identerFraPdl.hentAktivFødselsnummer()
+        val aktørIdStr = identerFraPdl.hentAktivAktørId()
 
         val personidentPersistert = personidentRepository.findByFødselsnummerOrNull(fødselsnummerAktiv)
         if (personidentPersistert != null) {
@@ -142,7 +144,7 @@ class PersonidentService(
         if (aktiveAktørerForHistoriskAktørIder.isNotEmpty()) {
             secureLogger.warn("Potensielt merget ident for $alleHistoriskeIdenterFraPdl")
             throw Feil(
-                message = "Mottok potensielt en hendelse på en merget ident for aktørId=${filtrerAktivtAktørId(alleHistoriskeIdenterFraPdl)}. Sjekk securelogger for liste med identer. Sjekk om identen har flere saker. Disse må løses manuelt",
+                message = "Mottok potensielt en hendelse på en merget ident for aktørId=${alleHistoriskeIdenterFraPdl.hentAktivAktørId()}. Sjekk securelogger for liste med identer. Sjekk om identen har flere saker. Disse må løses manuelt",
             )
         }
     }
@@ -181,16 +183,6 @@ class PersonidentService(
         }
         return aktør
     }
-
-    private fun filtrerAktivtFødselsnummer(identerFraPdl: List<IdentInformasjon>) =
-        (
-            identerFraPdl.singleOrNull { it.gruppe == "FOLKEREGISTERIDENT" }?.ident
-                ?: throw Error("Finner ikke aktiv ident i Pdl")
-            )
-
-    private fun filtrerAktivtAktørId(identerFraPdl: List<IdentInformasjon>): String =
-        identerFraPdl.singleOrNull { it.gruppe == "AKTORID" && it.historisk == false }?.ident
-            ?: throw Error("Finner ikke aktørId i Pdl")
 
     companion object {
         val logger = LoggerFactory.getLogger(PersonidentService::class.java)

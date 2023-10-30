@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_GENERERING_AV_BREVOBJEKTER
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -53,7 +54,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
-import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -73,7 +73,7 @@ class BrevService(
     private val saksbehandlerContext: SaksbehandlerContext,
     private val brevmalService: BrevmalService,
     private val refusjonEøsRepository: RefusjonEøsRepository,
-    private val unleashNext: UnleashService,
+    private val unleashNext: UnleashNextMedContextService,
     private val integrasjonClient: IntegrasjonClient,
 ) {
 
@@ -284,7 +284,7 @@ class BrevService(
             behandling = vedtak.behandling,
         )
 
-        val brevperioder = if (unleashNext.isEnabled(NY_GENERERING_AV_BREVOBJEKTER) && false) {
+        val brevperioder = if (unleashNext.isEnabled(NY_GENERERING_AV_BREVOBJEKTER, vedtak.behandling.id)) {
             val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
             vedtaksperioder.mapNotNull {
                 it.lagBrevPeriode(

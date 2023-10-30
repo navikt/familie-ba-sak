@@ -31,6 +31,8 @@ import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBeg
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NB
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NN
@@ -87,6 +89,8 @@ class VedtaksperiodeService(
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val refusjonEøsRepository: RefusjonEøsRepository,
     private val integrasjonClient: IntegrasjonClient,
+    private val valutakursRepository: ValutakursRepository,
+    private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -316,6 +320,8 @@ class VedtaksperiodeService(
             personResultater = vilkårsvurderingService.hentAktivForBehandling(this.id)?.personResultater ?: emptySet(),
             behandling = this,
             kompetanser = kompetanseRepository.finnFraBehandlingId(this.id).toList(),
+            valutakurs = valutakursRepository.finnFraBehandlingId(this.id).toList(),
+            utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(this.id).toList(),
             endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(this.id),
             andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(this.id),
             perioderOvergangsstønad = småbarnstilleggService.hentPerioderMedFullOvergangsstønad(this),
@@ -454,6 +460,9 @@ class VedtaksperiodeService(
             )
         }
     }
+
+    fun hentGrunnlagForBegrunnelse(behandlingId: Long): GrunnlagForBegrunnelse =
+        hentGrunnlagForBegrunnelse(behandlingHentOgPersisterService.hent(behandlingId))
 
     fun hentGrunnlagForBegrunnelse(behandling: Behandling): GrunnlagForBegrunnelse {
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)

@@ -63,13 +63,13 @@ Egenskap: Brevbegrunnelser ved opphør der vilkår blir innvilget og opphørt in
       | 5678    | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
       | 5678    | 1            | 01.07.2023 | 31.10.2034 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Når begrunnelsetekster genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Og med vedtaksperioder for behandling 2
+    Og når disse begrunnelsene er valgt for behandling 2
       | Fra dato   | Til dato | Standardbegrunnelser       | Eøsbegrunnelser | Fritekster |
       | 01.09.2020 |          | OPPHØR_IKKE_BOSATT_I_NORGE |                 |            |
 
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.09.2020 til -
       | Begrunnelse                | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | OPPHØR_IKKE_BOSATT_I_NORGE | Ja            | 16.06.15 og 30.11.16 | 2           | august 2020                          | NB      | 0     |                  | SØKER_HAR_IKKE_RETT     |
+      | OPPHØR_IKKE_BOSATT_I_NORGE | Ja            | 16.06.15 og 30.11.16 | 0           | august 2020                          | NB      | 0     |                  | SØKER_HAR_IKKE_RETT     |
 

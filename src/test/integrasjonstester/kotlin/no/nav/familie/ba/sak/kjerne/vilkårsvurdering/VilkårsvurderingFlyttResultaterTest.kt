@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -26,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -66,9 +66,7 @@ class VilkårsvurderingFlyttResultaterTest(
     @Autowired
     private val brevmalService: BrevmalService,
 
-    @Autowired
-    private val featureToggleService: FeatureToggleService,
-
+    @Autowired private val unleashService: UnleashService,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -149,6 +147,7 @@ class VilkårsvurderingFlyttResultaterTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
+            unleashService = unleashService,
         )
 
         val vilkårsvurderingFraForrigeBehandlingFørNyRevurdering =
@@ -172,6 +171,7 @@ class VilkårsvurderingFlyttResultaterTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
+            unleashService = unleashService,
         )
 
         // Sjekker at vilkårsvurderingen fra forrige behandling ikke er endret

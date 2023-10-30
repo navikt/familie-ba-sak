@@ -27,10 +27,10 @@ Egenskap: Gyldige begrunnelser for hendelser
       | 3456    | 01.05.2017 | 31.03.2023 | 1354  | 1            |
       | 3456    | 01.04.2023 | 31.03.2035 | 1054  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser | Ugyldige begrunnelser |
       | 01.05.2017 | 31.03.2023 | UTBETALING         |                         |                          |
       | 01.04.2023 | 31.03.2035 | UTBETALING         | REDUKSJON_UNDER_6_ÅR    |                          |
       | 01.04.2035 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR      |                          |
@@ -54,10 +54,10 @@ Egenskap: Gyldige begrunnelser for hendelser
       | 5678    | 01.05.2017 | 31.03.2023 | 1354  | 1            |
       | 5678    | 01.04.2023 | 31.03.2024 | 1054  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser | Ugyldige begrunnelser |
       | 01.05.2017 | 31.03.2023 | UTBETALING         |                         |                          |
       | 01.04.2023 | 31.03.2024 | UTBETALING         | REDUKSJON_UNDER_6_ÅR    |                          |
       | 01.04.2024 |            | OPPHØR             | OPPHØR_BARN_DØD         |                          |
@@ -81,10 +81,10 @@ Egenskap: Gyldige begrunnelser for hendelser
       | 3456    | 01.05.2017 | 28.02.2023 | 1676  | 1            |
       | 3456    | 01.03.2023 | 31.03.2035 | 1083  | 1            |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser                     | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                        | Ugyldige begrunnelser |
       | 01.05.2017 | 28.02.2023 | UTBETALING         |                                             |                          |
       | 01.03.2023 | 31.03.2035 | UTBETALING         | REDUKSJON_UNDER_6_ÅR, REDUKSJON_SATSENDRING |                          |
       | 01.04.2035 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                          |                          |

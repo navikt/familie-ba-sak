@@ -127,7 +127,7 @@ class FiltreringsreglerService(
             barnaFraHendelse = barnaFraHendelse,
             restenAvBarna = finnRestenAvBarnasPersonInfo(morsAktørId, barnaFraHendelse),
             morLever = !personopplysningGrunnlag.søker.erDød(),
-            barnaLever = personopplysningGrunnlag.barna.none { it.erDød() },
+            barnaLever = barnaFraHendelse.none { it.erDød() },
             morHarVerge = personopplysningerService.harVerge(morsAktørId).harVerge,
             dagensDato = localDateService.now(),
             erFagsakenMigrertEtterBarnFødt = erSakenMigrertEtterBarnFødt(

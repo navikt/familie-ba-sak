@@ -6,6 +6,7 @@ import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
@@ -22,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -44,6 +47,9 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import java.time.LocalDate
 
+val sanityBegrunnelserMock = SanityBegrunnelseMock.hentSanityBegrunnelserMock()
+val sanityEØSBegrunnelserMock = SanityBegrunnelseMock.hentSanityEØSBegrunnelserMock()
+
 class BegrunnelseTeksterStepDefinition {
 
     private var fagsaker: Map<Long, Fagsak> = emptyMap()
@@ -54,6 +60,8 @@ class BegrunnelseTeksterStepDefinition {
     private var personResultater = mutableMapOf<Long, Set<PersonResultat>>()
     private var vedtaksperioderMedBegrunnelser = listOf<VedtaksperiodeMedBegrunnelser>()
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
+    private var valutakurs = mutableMapOf<Long, List<Valutakurs>>()
+    private var utenlandskPeriodebeløp = mutableMapOf<Long, List<UtenlandskPeriodebeløp>>()
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
     private var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
@@ -135,7 +143,28 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     /**
-     * Mulige verdier: | AktørId | Fra dato | Til dato | BehandlingId |  Årsak | Prosent |
+     * Mulige felt:
+     * | AktørId | Fra dato | Til dato | BehandlingId | Valutakursdato | Valuta kode | Kurs
+     */
+
+    @Og("med valutakurs for begrunnelse")
+    fun `med valutakurs for begrunnelse`(dataTable: DataTable) {
+        val nyeValutakursPerBarn = dataTable.asMaps()
+        valutakurs = lagValutakurs(nyeValutakursPerBarn, persongrunnlag)
+    }
+
+    /**
+     * Mulige felt:
+     * | AktørId | Fra dato | Til dato | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland
+     */
+    @Og("med utenlandsk periodebeløp for begrunnelse")
+    fun `med utenlandsk periodebeløp for begrunnelse`(dataTable: DataTable) {
+        val nyeUtenlandskPeriodebeløpPerBarn = dataTable.asMaps()
+        utenlandskPeriodebeløp = lagUtenlandskperiodeBeløp(nyeUtenlandskPeriodebeløpPerBarn, persongrunnlag)
+    }
+
+    /**
+     * Mulige verdier: | AktørId | Fra dato | Til dato | BehandlingId |  Årsak | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
      */
     @Og("med endrede utbetalinger for begrunnelse")
     fun `med endrede utbetalinger for begrunnelse`(dataTable: DataTable) {
@@ -167,8 +196,8 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | Fra dato | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |
      */
-    @Og("med vedtaksperioder for behandling {}")
-    fun `med vedtaksperioder`(behandlingId: Long, dataTable: DataTable) {
+    @Og("når disse begrunnelsene er valgt for behandling {}")
+    fun `når disse begrunnelsene er valgt for behandling`(behandlingId: Long, dataTable: DataTable) {
         val vedtaksperioder = genererVedtaksperioderForBehandling(behandlingId)
 
         vedtaksperioderMedBegrunnelser = leggBegrunnelserIVedtaksperiodene(
@@ -178,14 +207,13 @@ class BegrunnelseTeksterStepDefinition {
         )
     }
 
-    @Når("begrunnelsetekster genereres for behandling {}")
-    fun `generer begrunnelsetekst for `(behandlingId: Long) {
+    @Når("vedtaksperiodene genereres for behandling {}")
+    fun `generer vedtaksperioder for `(behandlingId: Long) {
         utvidetVedtaksperiodeMedBegrunnelser = genererVedtaksperioderForBehandling(behandlingId)
     }
 
     private fun genererVedtaksperioderForBehandling(behandlingId: Long): List<UtvidetVedtaksperiodeMedBegrunnelser> {
         gjeldendeBehandlingId = behandlingId
-        val behandling = behandlinger.finnBehandling(behandlingId)
 
         val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
 
@@ -236,6 +264,8 @@ class BegrunnelseTeksterStepDefinition {
             andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
             perioderOvergangsstønad = overgangsstønadForVedtaksperiode[behandlingId] ?: emptyList(),
             uregistrerteBarn = emptyList(),
+            utenlandskPeriodebeløp = utenlandskPeriodebeløp[behandlingId] ?: emptyList(),
+            valutakurs = valutakurs[behandlingId] ?: emptyList(),
         )
 
         val grunnlagForVedtaksperiodeForrigeBehandling = forrigeBehandlingId?.let {
@@ -250,24 +280,26 @@ class BegrunnelseTeksterStepDefinition {
                 andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
                 perioderOvergangsstønad = overgangsstønadForVedtaksperiode[forrigeBehandlingId] ?: emptyList(),
                 uregistrerteBarn = emptyList(),
+                utenlandskPeriodebeløp = utenlandskPeriodebeløp[forrigeBehandlingId] ?: emptyList(),
+                valutakurs = valutakurs[forrigeBehandlingId] ?: emptyList(),
             )
         }
 
         val grunnlagForBegrunnelse = GrunnlagForBegrunnelse(
             behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtaksperiode,
             behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
-            sanityBegrunnelser = mockHentSanityBegrunnelser(),
-            sanityEØSBegrunnelser = mockHentSanityEØSBegrunnelser(),
+            sanityBegrunnelser = sanityBegrunnelserMock,
+            sanityEØSBegrunnelser = sanityEØSBegrunnelserMock,
             nåDato = dagensDato,
         )
         return grunnlagForBegrunnelse
     }
 
     /**
-     * Mulige verdier: | Fra dato | Til dato | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser | Regelverk Ekskluderte Begrunnelser | Ekskluderte Begrunnelser |
+     * Mulige verdier: | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser | Regelverk Ugyldige begrunnelser | Ugyldige begrunnelser |
      */
-    @Så("forvent følgende standardBegrunnelser")
-    fun `forvent følgende standardBegrunnelser`(dataTable: DataTable) {
+    @Så("forvent at følgende begrunnelser er gyldige")
+    fun `forvent at følgende begrunnelser er gyldige`(dataTable: DataTable) {
         val forventedeStandardBegrunnelser = mapBegrunnelser(dataTable).toSet()
 
         forventedeStandardBegrunnelser.forEach { forventet ->
@@ -275,10 +307,10 @@ class BegrunnelseTeksterStepDefinition {
                 utvidetVedtaksperiodeMedBegrunnelser.find { it.fom == forventet.fom && it.tom == forventet.tom }
                     ?: throw Feil(
                         "Forventet å finne en vedtaksperiode med  \n" +
-                            "   Fom: ${forventet.fom} og Tom: ${forventet.tom}. \n" +
+                            "   Fom: ${forventet.fom?.tilddMMyyyy()} og Tom: ${forventet.tom?.tilddMMyyyy()}. \n" +
                             "Faktiske vedtaksperioder var \n${
                                 utvidetVedtaksperiodeMedBegrunnelser.joinToString("\n") {
-                                    "   Fom: ${it.fom}, Tom: ${it.tom}"
+                                    "   Fom: ${it.fom?.tilddMMyyyy()}, Tom: ${it.tom?.tilddMMyyyy()}"
                                 }
                             }",
                     )
@@ -329,6 +361,7 @@ class BegrunnelseTeksterStepDefinition {
 
         assertThat(faktiskeBegrunnelser.sortedBy { it.apiNavn })
             .usingRecursiveComparison()
+            .ignoringFields("vedtakBegrunnelseType")
             .isEqualTo(forvendtedeBegrunnelser.sortedBy { it.apiNavn })
     }
 
@@ -356,19 +389,30 @@ class BegrunnelseTeksterStepDefinition {
             .ignoringFields("begrunnelser")
             .isEqualTo(forvendtedeBrevperioder)
     }
+}
 
-    // For å laste ned begrunnelsene på nytt anbefales https://familie-brev.sanity.studio/ba-test/vision med query fra SanityQueries.kt .
+data class SammenlignbarBegrunnelse(
+    val fom: LocalDate?,
+    val tom: LocalDate?,
+    val type: Vedtaksperiodetype,
+    val inkluderteStandardBegrunnelser: Set<IVedtakBegrunnelse>,
+    val ekskluderteStandardBegrunnelser: Set<IVedtakBegrunnelse> = emptySet<IVedtakBegrunnelse>(),
+)
+
+private object SanityBegrunnelseMock {
+    // For å laste ned begrunnelsene på nytt anbefales https://familie-brev.sanity.studio/ba-brev/vision med query fra SanityQueries.kt .
     // Kopier URL fra resultatet og kjør
-    // curl -XGET <URL> | jq '.result' > <Path-til-familie-ba-sak>/familie-ba-sak/src/test/resources/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityTestBegrunnelser
-    private fun mockHentSanityBegrunnelser(): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    // curl -XGET <URL> | jq '.result' -c | pbcopy
+    // for å få alle begrunnelsene i clipboardet
+    fun hentSanityBegrunnelserMock(): Map<Standardbegrunnelse, SanityBegrunnelse> {
         val restSanityBegrunnelserJson =
             this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityBegrunnelser")!!
 
         val restSanityBegrunnelser =
-            objectMapper.readValue(restSanityBegrunnelserJson.readText(), Array<RestSanityBegrunnelse>::class.java)
+            objectMapper.readValue(restSanityBegrunnelserJson, Array<RestSanityBegrunnelse>::class.java)
                 .toList()
 
-        val enumPåApiNavn = Standardbegrunnelse.values().associateBy { it.sanityApiNavn }
+        val enumPåApiNavn = Standardbegrunnelse.entries.associateBy { it.sanityApiNavn }
         val sanityBegrunnelser = restSanityBegrunnelser.mapNotNull { it.tilSanityBegrunnelse() }
 
         return sanityBegrunnelser
@@ -382,16 +426,15 @@ class BegrunnelseTeksterStepDefinition {
             }.toMap()
     }
 
-    private fun mockHentSanityEØSBegrunnelser(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
+    fun hentSanityEØSBegrunnelserMock(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
         val restSanityEØSBegrunnelserJson =
             this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityEØSBegrunnelser")!!
 
         val restSanityEØSBegrunnelser =
             objectMapper.readValue(
-                restSanityEØSBegrunnelserJson.readText(),
+                restSanityEØSBegrunnelserJson,
                 Array<RestSanityEØSBegrunnelse>::class.java,
-            )
-                .toList()
+            ).toList()
 
         val enumPåApiNavn = EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
         val sanityEØSBegrunnelser = restSanityEØSBegrunnelser.mapNotNull { it.tilSanityEØSBegrunnelse() }
@@ -407,11 +450,3 @@ class BegrunnelseTeksterStepDefinition {
             }.toMap()
     }
 }
-
-data class SammenlignbarBegrunnelse(
-    val fom: LocalDate?,
-    val tom: LocalDate?,
-    val type: Vedtaksperiodetype,
-    val inkluderteStandardBegrunnelser: Set<IVedtakBegrunnelse>,
-    val ekskluderteStandardBegrunnelser: Set<IVedtakBegrunnelse> = emptySet<IVedtakBegrunnelse>(),
-)

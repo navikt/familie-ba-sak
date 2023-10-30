@@ -41,10 +41,10 @@ Egenskap: Gyldige begrunnelser ved ingen endring
       | AktørId | Fra dato   | Til dato   | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 2       | 01.07.2023 | 31.07.2023 | NORGE_ER_PRIMÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | BE                             | BE                  |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Inkluderte Begrunnelser                                | Ekskluderte Begrunnelser |
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                                | Ugyldige begrunnelser |
       | 01.07.2023 | 31.07.2023 | UTBETALING         |           |                                                        |                          |
       | 01.08.2023 | 31.08.2023 | UTBETALING         |           | INNVILGET_OVERGANG_EØS_TIL_NASJONAL_SEPARASJONSAVTALEN |                          |
       | 01.09.2023 |            | OPPHØR             |           |                                                        |                          |
@@ -109,24 +109,11 @@ Egenskap: Gyldige begrunnelser ved ingen endring
 
     Og med kompetanser for begrunnelse
       | AktørId    | Fra dato   | Til dato   | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
-      | 5678, 1234 | 01.04.2021 |            | NORGE_ER_PRIMÆRLAND   | 1            | ARBEIDER         | INAKTIV                   | NO                    | LV                             | LV                  |
       | 1234       | 01.08.2019 | 31.03.2021 | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | LV                             | LV                  |
+      | 5678, 1234 | 01.04.2021 |            | NORGE_ER_PRIMÆRLAND   | 1            | ARBEIDER         | INAKTIV                   | NO                    | LV                             | LV                  |
 
-    Når begrunnelsetekster genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                                   | Ugyldige begrunnelser |
+      | 01.09.2020 | 31.12.2020 | UTBETALING         | EØS_FORORDNINGEN               | INNVILGET_TILLEGGSTEKST_SATSENDRING_OG_VALUTAJUSTERING |                       |
 
-    Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Inkluderte Begrunnelser | Inkluderte Begrunnelser                                | Ekskluderte Begrunnelser |
-      | 01.02.2016 | 31.07.2019 | OPPHØR             |                                   |                                                        |                          |
-      | 01.08.2019 | 31.12.2019 | UTBETALING         |                                   |                                                        |                          |
-      | 01.01.2020 | 31.08.2020 | UTBETALING         | EØS_FORORDNINGEN                  | INNVILGET_TILLEGGSTEKST_SATSENDRING_OG_VALUTAJUSTERING |                          |
-      | 01.09.2020 | 31.12.2020 | UTBETALING         |                                   |                                                        |                          |
-      | 01.01.2021 | 31.03.2021 | UTBETALING         |                                   |                                                        |                          |
-      | 01.04.2021 | 31.08.2021 | UTBETALING         |                                   |                                                        |                          |
-      | 01.09.2021 | 31.10.2021 | UTBETALING         |                                   |                                                        |                          |
-      | 01.11.2021 | 31.12.2021 | UTBETALING         |                                   |                                                        |                          |
-      | 01.01.2022 | 28.02.2023 | UTBETALING         |                                   |                                                        |                          |
-      | 01.03.2023 | 30.06.2023 | UTBETALING         |                                   |                                                        |                          |
-      | 01.07.2023 | 28.02.2027 | UTBETALING         |                                   |                                                        |                          |
-      | 01.03.2027 | 31.10.2033 | UTBETALING         |                                   |                                                        |                          |
-      | 01.11.2033 | 28.02.2039 | UTBETALING         |                                   |                                                        |                          |
-      | 01.03.2039 |            | OPPHØR             |                                   |                                                        |                          |

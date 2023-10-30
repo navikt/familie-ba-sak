@@ -98,7 +98,7 @@ class EndretUtbetalingAndelServiceTest {
             ),
         )
 
-        every { mockEndretUtbetalingAndelRepository.getById(any()) } returns endretUtbetalingAndel.endretUtbetalingAndel
+        every { mockEndretUtbetalingAndelRepository.getReferenceById(any()) } returns endretUtbetalingAndel.endretUtbetalingAndel
         every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), behandling) } returns listOf(barn)
         every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns lagTestPersonopplysningGrunnlag(
             behandling.id,

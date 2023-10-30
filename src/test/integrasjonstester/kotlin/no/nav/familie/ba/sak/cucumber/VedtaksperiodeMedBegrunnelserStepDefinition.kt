@@ -18,6 +18,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -36,6 +38,8 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var personResultater = mutableMapOf<Long, Set<PersonResultat>>()
     private var vedtaksperioderMedBegrunnelser = listOf<VedtaksperiodeMedBegrunnelser>()
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
+    private var valutakurs = mutableMapOf<Long, List<Valutakurs>>()
+    private var utenlandskPeriodebeløp = mutableMapOf<Long, List<UtenlandskPeriodebeløp>>()
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
     private var overstyrteEndringstidspunkt = mapOf<Long, LocalDate>()
@@ -167,6 +171,8 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             overgangsstønad = overgangsstønad,
             uregistrerteBarn = uregistrerteBarn,
             nåDato = dagensDato,
+            valutakurs = valutakurs,
+            utenlandskPeriodebeløp = utenlandskPeriodebeløp,
         )
     }
 

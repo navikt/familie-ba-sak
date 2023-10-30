@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import io.micrometer.core.annotation.Timed
 import jakarta.persistence.LockModeType
 import no.nav.familie.ba.sak.ekstern.skatteetaten.UtvidetSkatt
+import no.nav.familie.ba.sak.internal.FagsakMedFlereMigreringer
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -70,6 +71,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                              INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
                     WHERE f.status = 'LØPENDE'
                       AND f.arkivert = FALSE
+                      AND b.resultat != 'AVSLÅTT'
                     ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC)
                 
                 SELECT silp.fk_fagsak_id
@@ -184,12 +186,38 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
 
     @Query(
         """
-        SELECT distinct f FROM Fagsak f
-            JOIN Behandling b ON f.id = b.fagsak.id
-            WHERE f.status = 'LØPENDE' AND b.opprettetÅrsak in ('HELMANUELL_MIGRERING', 'MIGRERING') AND b.resultat NOT IN ('HENLAGT_FEILAKTIG_OPPRETTET', 'HENLAGT_SØKNAD_TRUKKET', 'HENLAGT_AUTOMATISK_FØDSELSHENDELSE', 'HENLAGT_TEKNISK_VEDLIKEHOLD')
-        GROUP BY f.id
-        HAVING COUNT(*) >= 2
+        WITH fagsakerMigrertFlereGanger AS (SELECT f.id
+                                    FROM Fagsak f
+                                             JOIN Behandling b ON f.id = b.fk_fagsak_id
+                                             join aktoer a on f.fk_aktoer_id = a.aktoer_id
+                                    WHERE f.status = 'LØPENDE'
+                                      AND b.opprettet_aarsak in ('HELMANUELL_MIGRERING', 'MIGRERING')
+                                      AND b.resultat NOT IN (
+                                                             'HENLAGT_FEILAKTIG_OPPRETTET',
+                                                             'HENLAGT_SØKNAD_TRUKKET',
+                                                             'HENLAGT_AUTOMATISK_FØDSELSHENDELSE',
+                                                             'HENLAGT_TEKNISK_VEDLIKEHOLD'
+                                        )
+                                      AND b.status = 'AVSLUTTET'
+                                    GROUP BY f.id
+                                    HAVING COUNT(*) >= 2)
+
+        SELECT b.fk_fagsak_id as fagsakId, p.foedselsnummer as fødselsnummer
+        FROM Behandling b
+                 JOIN fagsakerMigrertFlereGanger fmfg ON b.fk_fagsak_id = fmfg.id
+                 JOIN vedtak v ON b.id = v.fk_behandling_id
+                 JOIN fagsak f ON f.id = b.fk_fagsak_id
+                 join personident p ON p.fk_aktoer_id = f.fk_aktoer_id
+        WHERE b.opprettet_aarsak in ('HELMANUELL_MIGRERING', 'MIGRERING')
+          AND b.resultat NOT IN (
+                                 'HENLAGT_FEILAKTIG_OPPRETTET',
+                                 'HENLAGT_SØKNAD_TRUKKET',
+                                 'HENLAGT_AUTOMATISK_FØDSELSHENDELSE',
+                                 'HENLAGT_TEKNISK_VEDLIKEHOLD'
+            )
+          AND vedtaksdato > :month
         """,
+        nativeQuery = true,
     )
-    fun finnFagsakerMedFlereMigreringsbehandlinger(): List<Fagsak>
+    fun finnFagsakerMedFlereMigreringsbehandlinger(month: LocalDateTime): List<FagsakMedFlereMigreringer>
 }

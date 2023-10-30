@@ -45,9 +45,7 @@ class TidslinjeFraTidspunktTest {
 
     @Test
     fun `skal skape sammenhengende tidslinje i samme tidsrom hvis alt innhold er identisk`() {
-        val resultat = tidslinje.tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-            Innhold("A")
-        }
+        val resultat = tidslinje.tidsrom().tidslinjeFraTidspunkt { Innhold("A") }
 
         val forventet = tidslinje { listOf(Periode(mar(2018), apr(2021), "A")) }
 
@@ -56,9 +54,7 @@ class TidslinjeFraTidspunktTest {
 
     @Test
     fun `skal skape tom tidslinje dersom alt innhold mangler`() {
-        val resultat = tidslinje.tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-            Innhold.utenInnhold<String>()
-        }
+        val resultat = tidslinje.tidsrom().tidslinjeFraTidspunkt { Innhold.utenInnhold<String>() }
 
         assertEquals(TomTidslinje<String, Måned>(), resultat)
     }

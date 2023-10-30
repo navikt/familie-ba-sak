@@ -18,7 +18,7 @@ fun <S : PeriodeOgBarnSkjemaEntitet<S>> mockPeriodeBarnSkjemaRepository(): Perio
         minnebasertSkjemaRepository.hentSkjemaer(idSlot.captured)
     }
 
-    every { mockSkjemaRepository.getById(capture(idSlot)) } answers {
+    every { mockSkjemaRepository.getReferenceById(capture(idSlot)) } answers {
         minnebasertSkjemaRepository.hentSkjema(idSlot.captured)
     }
 

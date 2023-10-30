@@ -321,7 +321,7 @@ fun finnDeltBostedPerioder(
             )
         }
     } else {
-        val personensVilkår = vilkårsvurdering.personResultater.single { it.aktør == person.aktør }
+        val personensVilkår = vilkårsvurdering.personResultater.singleOrNull { it.aktør == person.aktør } ?: return emptyList()
 
         val deltBostedVilkårResultater = personensVilkår.vilkårResultater.filter {
             it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && it.resultat == Resultat.OPPFYLT

@@ -229,19 +229,19 @@ fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel {
                 søknadstidspunkt = this.søknadstidspunkt!!,
                 begrunnelse = this.begrunnelse!!,
             )
+        } else {
+            UtfyltEndretUtbetalingAndel(
+                id = this.id,
+                behandlingId = this.behandlingId,
+                person = this.person!!,
+                prosent = this.prosent!!,
+                fom = this.fom!!,
+                tom = this.tom!!,
+                årsak = this.årsak!!,
+                søknadstidspunkt = this.søknadstidspunkt!!,
+                begrunnelse = this.begrunnelse!!,
+            )
         }
-
-        UtfyltEndretUtbetalingAndel(
-            id = this.id,
-            behandlingId = this.behandlingId,
-            person = this.person!!,
-            prosent = this.prosent!!,
-            fom = this.fom!!,
-            tom = this.tom!!,
-            årsak = this.årsak!!,
-            søknadstidspunkt = this.søknadstidspunkt!!,
-            begrunnelse = this.begrunnelse!!,
-        )
     }
 }
 
