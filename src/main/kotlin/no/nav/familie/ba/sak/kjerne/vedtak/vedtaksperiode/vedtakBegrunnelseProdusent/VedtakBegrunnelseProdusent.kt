@@ -419,7 +419,7 @@ private fun hentEØSStandardBegrunnelser(
     val begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType = begrunnelserFiltrertPåPeriodetype
         .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
 
-    val filtrertPåVilkår = begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
+    val filtrertPåEndretVilkår = begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
         it.erGjeldendeForUtgjørendeVilkår(
             begrunnelseGrunnlag,
             utvidetVilkårPåSøkerIPeriode,
@@ -427,7 +427,7 @@ private fun hentEØSStandardBegrunnelser(
         )
     }
 
-    val filtrertPåKompetanseValutakursOgUtenlandskperiodeBeløp = begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues { begrunnelse ->
+    val filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp = begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues { begrunnelse ->
         val endringIKompetanseValutakursEllerUtenlandskPeriodebeløp =
             erEndringIKompetanse(begrunnelseGrunnlag) || erEndringIValutakurs(begrunnelseGrunnlag) || erEndringIUtenlandskPeriodebeløp(
                 begrunnelseGrunnlag,
@@ -436,22 +436,14 @@ private fun hentEØSStandardBegrunnelser(
         endringIKompetanseValutakursEllerUtenlandskPeriodebeløp && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
     }
 
-    val filtrertPåPeriodeResultat = begrunnelserFiltrertPåPeriodetype.filterValues {
-        filtrerPåPeriodeResultat(relevantePeriodeResultater, it)
-    }
+    val filtrertPåIngenEndringMedLikKompetanse =
+        begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
+            SanityPeriodeResultat.INGEN_ENDRING in relevantePeriodeResultater && it.erLikKompetanseIPeriode(
+                begrunnelseGrunnlag,
+            )
+        }
 
-    return filtrertPåVilkår + filtrertPåKompetanseValutakursOgUtenlandskperiodeBeløp + filtrertPåPeriodeResultat
-}
-
-private fun filtrerPåPeriodeResultat(
-    relevantePeriodeResultater: List<SanityPeriodeResultat>,
-    sanityEøsBegrunnelse: SanityEØSBegrunnelse,
-): Boolean {
-    val periodeResultatErIngenEndring = SanityPeriodeResultat.INGEN_ENDRING in relevantePeriodeResultater
-    val periodeResultatPåBegrunnelseErInnvilgetEllerØkning =
-        sanityEøsBegrunnelse.periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING
-
-    return periodeResultatErIngenEndring && periodeResultatPåBegrunnelseErInnvilgetEllerØkning
+    return filtrertPåEndretVilkår + filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp + filtrertPåIngenEndringMedLikKompetanse
 }
 
 fun SanityBegrunnelse.erGjeldendeForRolle(
@@ -586,6 +578,10 @@ private fun hentResultaterForPeriode(
             begrunnelseGrunnlagForPeriode,
             begrunnelseGrunnlagForrigePeriode,
         )
+        val erSatsøkning = erSatsøkningMellomPerioder(
+            begrunnelseGrunnlagForPeriode,
+            begrunnelseGrunnlagForrigePeriode,
+        )
 
         val erSøker = begrunnelseGrunnlagForPeriode.person.type == PersonType.SØKER
         val erOrdinæreVilkårOppfyltIForrigePeriode =
@@ -593,7 +589,7 @@ private fun hentResultaterForPeriode(
 
         val erIngenEndring = !erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode
         listOfNotNull(
-            if (erØkingIAndel || erSøker || erIngenEndring) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
+            if (erØkingIAndel || erSatsøkning || erSøker || erIngenEndring) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
             if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
             if (erIngenEndring) SanityPeriodeResultat.INGEN_ENDRING else null,
         )
@@ -639,9 +635,20 @@ private fun erØkningIAndelMellomPerioder(
             sammeAndelForrigePeriode == null && begrunnelseGrunnlagForPeriode.erInnvilgetEtterEndretUtbetaling()
         val harAndelenGåttOppIProsent =
             sammeAndelForrigePeriode != null && andelIPeriode.prosent > sammeAndelForrigePeriode.prosent
-        val erSatsenØkt = andelIPeriode.sats > (sammeAndelForrigePeriode?.sats ?: 0)
 
-        erAndelenTjent || harAndelenGåttOppIProsent || erSatsenØkt
+        erAndelenTjent || harAndelenGåttOppIProsent
+    }
+}
+
+private fun erSatsøkningMellomPerioder(
+    begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode,
+    begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
+): Boolean {
+    val andelerForrigePeriode = begrunnelseGrunnlagForrigePeriode?.andeler ?: emptyList()
+    val andelerDennePerioden = begrunnelseGrunnlagForPeriode.andeler
+    return andelerDennePerioden.any { andelIPeriode ->
+        val sammeAndelForrigePeriode = andelerForrigePeriode.singleOrNull { andelIPeriode.type == it.type }
+        sammeAndelForrigePeriode != null && andelIPeriode.sats > sammeAndelForrigePeriode.sats
     }
 }
 
