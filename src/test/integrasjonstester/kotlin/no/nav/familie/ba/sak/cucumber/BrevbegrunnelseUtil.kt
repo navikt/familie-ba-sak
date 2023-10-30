@@ -65,7 +65,7 @@ fun parseStandardBegrunnelse(rad: Tabellrad) =
         maanedOgAarBegrunnelsenGjelderFor = parseValgfriString(
             BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅNED_OG_ÅR_BEGRUNNELSEN_GJELDER_FOR,
             rad,
-        ) ?: "",
+        ),
         maalform = (parseValgfriEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad) ?: Målform.NB)
             .tilSanityFormat(),
         belop = parseValgfriString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BELØP, rad)?.replace(' ', ' ') ?: "",

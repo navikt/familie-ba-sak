@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.Logger
@@ -35,10 +36,11 @@ data class RestSanityBegrunnelse(
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
     val valgbarhet: String? = null,
-    val vedtakResultat: String?,
+    val periodeResultatForPerson: String?,
     val fagsakType: String?,
-    val tema: String?,
-    val periodeType: String?,
+    val regelverk: String?,
+    val brevPeriodeType: String?,
+    val begrunnelseTypeForPerson: String?,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
         if (apiNavn == null || apiNavn !in Standardbegrunnelse.entries.map { it.sanityApiNavn }) return null
@@ -83,10 +85,11 @@ data class RestSanityBegrunnelse(
                 it.finnEnumverdi<UtvidetBarnetrygdTrigger>(apiNavn)
             } ?: emptyList(),
             valgbarhet = valgbarhet.finnEnumverdi<Valgbarhet>(apiNavn),
-            periodeResultat = vedtakResultat.finnEnumverdi<SanityPeriodeResultat>(apiNavn),
+            periodeResultat = (periodeResultatForPerson).finnEnumverdi<SanityPeriodeResultat>(apiNavn),
             fagsakType = fagsakType.finnEnumverdiNullable<FagsakType>(),
-            tema = tema.finnEnumverdi<Tema>(apiNavn),
-            periodeType = periodeType.finnEnumverdi<BrevPeriodeType>(apiNavn),
+            tema = (regelverk).finnEnumverdi<Tema>(apiNavn),
+            periodeType = (brevPeriodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
+            begrunnelseTypeForPerson = begrunnelseTypeForPerson.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
         )
     }
 }

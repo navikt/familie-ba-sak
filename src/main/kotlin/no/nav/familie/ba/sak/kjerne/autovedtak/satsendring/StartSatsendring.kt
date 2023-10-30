@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -11,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
+import no.nav.familie.unleash.UnleashService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
@@ -24,7 +24,7 @@ class StartSatsendring(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val opprettTaskService: OpprettTaskService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val featureToggleService: FeatureToggleService,
+    private val unleashService: UnleashService,
     private val personidentService: PersonidentService,
     private val autovedtakSatsendringService: AutovedtakSatsendringService,
     private val satsendringService: SatsendringService,
@@ -36,7 +36,7 @@ class StartSatsendring(
     fun startSatsendring(
         antallFagsaker: Int,
     ) {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET, false)) {
+        if (!unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET, false)) {
             logger.info("Skipper satsendring da toggle er skrudd av.")
             return
         }

@@ -7,7 +7,6 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring.Companion.SATSENDRINGMÅNED_MARS_2023
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -17,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -31,7 +31,7 @@ internal class StartSatsendringTest {
     private val fagsakRepository: FagsakRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val satskjøringRepository: SatskjøringRepository = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
+    private val unleashService: UnleashService = mockk()
     private val personidentService: PersonidentService = mockk()
     private val autovedtakSatsendringService: AutovedtakSatsendringService = mockk()
     private val satsendringService: SatsendringService = mockk()
@@ -55,7 +55,7 @@ internal class StartSatsendringTest {
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                 opprettTaskService = opprettTaskService,
                 satskjøringRepository = satskjøringRepository,
-                featureToggleService = featureToggleService,
+                unleashService = unleashService,
                 personidentService = personidentService,
                 autovedtakSatsendringService = autovedtakSatsendringService,
                 satsendringService = satsendringService,
@@ -65,7 +65,7 @@ internal class StartSatsendringTest {
 
     @Test
     fun `start satsendring og opprett satsendringtask på sak hvis toggler er på `() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET, false) } returns true
+        every { unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET, false) } returns true
 
         val behandling = lagBehandling()
 
@@ -84,8 +84,8 @@ internal class StartSatsendringTest {
 
     @Test
     fun `finnLøpendeFagsaker har totalt antall sider 3, så den skal kalle finnLøpendeFagsaker 3 ganger for å få 5 satsendringer`() {
-        every { featureToggleService.isEnabled(any(), any()) } returns true
-        every { featureToggleService.isEnabled(any()) } returns true
+        every { unleashService.isEnabled(any(), false) } returns true
+        every { unleashService.isEnabled(any()) } returns true
 
         val behandling = lagBehandling()
 

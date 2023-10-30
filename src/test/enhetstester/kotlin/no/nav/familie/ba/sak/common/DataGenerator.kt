@@ -83,6 +83,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
@@ -1202,10 +1203,11 @@ fun lagRestSanityBegrunnelse(
     hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: String = "",
     endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
-    vedtakResultat: String? = null,
+    periodeResultatForPerson: String? = null,
     fagsakType: String? = null,
-    tema: String? = null,
-    periodeType: String? = null,
+    regelverk: String? = null,
+    brevPeriodeType: String? = null,
+    begrunnelseTypeForPerson: String? = null,
 ): RestSanityBegrunnelse = RestSanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1221,10 +1223,11 @@ fun lagRestSanityBegrunnelse(
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
-    vedtakResultat = vedtakResultat,
+    periodeResultatForPerson = periodeResultatForPerson,
     fagsakType = fagsakType,
-    tema = tema,
-    periodeType = periodeType,
+    regelverk = regelverk,
+    brevPeriodeType = brevPeriodeType,
+    begrunnelseTypeForPerson = begrunnelseTypeForPerson,
 )
 
 fun lagSanityBegrunnelse(
@@ -1245,6 +1248,7 @@ fun lagSanityBegrunnelse(
     resultat: SanityPeriodeResultat? = null,
     fagsakType: FagsakType? = null,
     periodeType: BrevPeriodeType? = null,
+    begrunnelseTypeForPerson: VedtakBegrunnelseType? = null,
 ): SanityBegrunnelse = SanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1263,6 +1267,7 @@ fun lagSanityBegrunnelse(
     periodeResultat = resultat,
     fagsakType = fagsakType,
     periodeType = periodeType,
+    begrunnelseTypeForPerson = begrunnelseTypeForPerson,
 )
 
 fun lagSanityEøsBegrunnelse(

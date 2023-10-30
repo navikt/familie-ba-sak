@@ -62,7 +62,7 @@ enum class Vilkår(
             personType: PersonType,
         ): List<Vilkår> = when (personType) {
             SØKER -> listOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD)
-            ANNENPART -> throw Feil("Ikke implementert for $ANNENPART")
+            ANNENPART -> emptyList()
             BARN -> listOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD, UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP)
         }
 
