@@ -589,10 +589,7 @@ class VedtaksperiodeService(
             Behandlingsresultat.OPPHØRT,
         )
 
-        val eøsPraksisEndringFeatureToggleErSlåttPå =
-            featureToggleService.isEnabled(FeatureToggleConfig.EØS_PRAKSISENDRING_SEPTEMBER2023)
-
-        return annenForelderOmfattetAvNorskLovgivningErSattPåBosattIRiket && passendeBehandlingsresultat && eøsPraksisEndringFeatureToggleErSlåttPå
+        return annenForelderOmfattetAvNorskLovgivningErSattPåBosattIRiket && passendeBehandlingsresultat
     }
 
     fun beskrivPerioderMedFeilutbetaltValuta(vedtak: Vedtak): Set<String>? {
