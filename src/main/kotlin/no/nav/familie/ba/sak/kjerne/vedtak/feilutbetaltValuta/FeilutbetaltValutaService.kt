@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FEILUTBETALT_VALUTA_PR_MND
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -34,7 +33,7 @@ class FeilutbetaltValutaService(
                 fom = feilutbetaltValuta.fom,
                 tom = feilutbetaltValuta.tom,
                 feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp,
-                erPerMåned = feilutbetaltValuta.erPerMåned ?: featureToggleService.isEnabled(FEILUTBETALT_VALUTA_PR_MND),
+                erPerMåned = feilutbetaltValuta.erPerMåned ?: true,
             ),
         )
         loggService.loggFeilutbetaltValutaPeriodeLagtTil(behandlingId = behandlingId, feilutbetaltValuta = lagret)
@@ -69,6 +68,6 @@ class FeilutbetaltValutaService(
         periode.fom = feilutbetaltValuta.fom
         periode.tom = feilutbetaltValuta.tom
         periode.feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp
-        periode.erPerMåned = feilutbetaltValuta.erPerMåned ?: featureToggleService.isEnabled(FEILUTBETALT_VALUTA_PR_MND)
+        periode.erPerMåned = feilutbetaltValuta.erPerMåned ?: true
     }
 }

@@ -113,12 +113,6 @@ class VedtaksperiodeServiceTest {
                 any(),
             )
         } returns true
-        every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.FEILUTBETALT_VALUTA_PR_MND,
-                any(),
-            )
-        } returns true
         every { feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(any()) } returns emptyList()
         every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any()) } returns emptyList()
         every { refusjonEøsRepository.finnRefusjonEøsForBehandling(any()) } returns emptyList()
