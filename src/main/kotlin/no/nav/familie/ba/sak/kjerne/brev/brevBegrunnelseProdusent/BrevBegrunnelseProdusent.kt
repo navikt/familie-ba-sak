@@ -307,8 +307,10 @@ fun hentAntallBarnForBegrunnelse(
 
     return when {
         erAvslagUregistrerteBarn -> uregistrerteBarnPåBehandlingen.size
-        gjelderSøker && begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG -> 0
-        gjelderSøker && begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR ->
+        gjelderSøker && begrunnelse.vedtakBegrunnelseType in listOf(
+            VedtakBegrunnelseType.AVSLAG,
+            VedtakBegrunnelseType.OPPHØR,
+        ) ->
             antallBarnGjeldendeForBegrunnelse
         else -> barnasFødselsdatoer.size
     }
