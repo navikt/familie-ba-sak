@@ -314,9 +314,6 @@ fun hentAntallBarnForBegrunnelse(
     }
 }
 
-fun IVedtakBegrunnelse.erAvslagUregistrerteBarnBegrunnelse() =
-    this in setOf(Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN, EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN)
-
 fun VedtaksperiodeMedBegrunnelser.hentMånedOgÅrForBegrunnelse(): String? {
     return if (this.fom == null || fom == TIDENES_MORGEN) {
         null
