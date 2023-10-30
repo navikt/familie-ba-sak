@@ -26,7 +26,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B -DskipTests package --file pom.xml
+        run: mvn -B -DskipTests package --settings .m2/maven-settings.xml --file pom.xml
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
