@@ -48,7 +48,7 @@ Egenskap: Brevbegrunnelser ved opphør
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.03.2023 til -
       | Begrunnelse      | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
-      | OPPHØR_UTVANDRET | STANDARD | Ja            | 17.04.17             | 1           | februar 2023                         | NB      | 0     |
+      | OPPHØR_UTVANDRET | STANDARD | Ja            | 17.04.17             | 0           | februar 2023                         | NB      | 0     |
 
   Scenario: Skal flette inn barn som har oppfylte vilkår og barn som hadde andeler i forrige periode når vi opphører for søker
     Og følgende dagens dato 13.10.2023
@@ -80,3 +80,4 @@ Egenskap: Brevbegrunnelser ved opphør
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.03.2023 til -
       | Begrunnelse      | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | OPPHØR_UTVANDRET | STANDARD | Ja            | 16.04.17 og 17.04.17 | 2           | februar 2023                         | NB      | 0     |
+      | OPPHØR_UTVANDRET | STANDARD | Ja            | 16.04.17 og 17.04.17 | 1           | februar 2023                         | NB      | 0     |

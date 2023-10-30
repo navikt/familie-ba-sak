@@ -71,5 +71,5 @@ Egenskap: Brevbegrunnelser ved opphør der vilkår blir innvilget og opphørt in
 
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.09.2020 til -
       | Begrunnelse                | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | OPPHØR_IKKE_BOSATT_I_NORGE | Ja            | 16.06.15 og 30.11.16 | 2           | august 2020                          | NB      | 0     |                  | SØKER_HAR_IKKE_RETT     |
+      | OPPHØR_IKKE_BOSATT_I_NORGE | Ja            | 16.06.15 og 30.11.16 | 0           | august 2020                          | NB      | 0     |                  | SØKER_HAR_IKKE_RETT     |
 
