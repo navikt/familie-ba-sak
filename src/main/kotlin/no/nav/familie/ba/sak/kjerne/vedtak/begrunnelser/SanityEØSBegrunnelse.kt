@@ -42,7 +42,7 @@ data class RestSanityEØSBegrunnelse(
     val regelverk: String?,
     @Deprecated("Skal bruke periodeResultatForPerson i stedet")
     val periodeType: String?,
-    val brevPeriodeType: BrevPeriodeType,
+    val brevPeriodeType: String?,
     val begrunnelseTypeForPerson: String?,
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
@@ -71,7 +71,7 @@ data class RestSanityEØSBegrunnelse(
                 ).finnEnumverdi<SanityPeriodeResultat>(apiNavn),
             fagsakType = fagsakType.finnEnumverdiNullable<FagsakType>(),
             tema = (regelverk ?: tema).finnEnumverdi<Tema>(apiNavn),
-            periodeType = (periodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
+            periodeType = (brevPeriodeType ?: periodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
         )
     }
 
