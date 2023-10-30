@@ -79,5 +79,84 @@ Egenskap: Brevbegrunnelser ved opphør
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.03.2023 til -
       | Begrunnelse      | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
-      | OPPHØR_UTVANDRET | STANDARD | Ja            | 16.04.17 og 17.04.17 | 2           | februar 2023                         | NB      | 0     |
       | OPPHØR_UTVANDRET | STANDARD | Ja            | 16.04.17 og 17.04.17 | 1           | februar 2023                         | NB      | 0     |
+
+  Scenario: Skal flette inn barnas fødselsdatoer men ikke "du og barna" når vi begrunner opphør på søkers vilkår
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | ENDRET_UTBETALING   | SATSENDRING      | Ja                        | NASJONAL            |
+      | 2            | 1        | 1                   | OPPHØRT             | NYE_OPPLYSNINGER | Nei                       | NASJONAL            |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 15.01.1988  |
+      | 1            | 2       | BARN       | 06.03.2012  |
+      | 1            | 3       | BARN       | 21.12.2016  |
+      | 2            | 1       | SØKER      | 15.01.1988  |
+      | 2            | 2       | BARN       | 06.03.2012  |
+      | 2            | 3       | BARN       | 21.12.2016  |
+    Og følgende dagens dato 30.10.2023
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
+      | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD               |                  | 01.01.2022 |            | OPPFYLT  | Nei                  |                      |
+
+      | 2       | GIFT_PARTNERSKAP                            |                  | 06.03.2012 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | UNDER_18_ÅR                                 |                  | 06.03.2012 | 05.03.2030 | OPPFYLT  | Nei                  |                      |
+      | 2       | BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.01.2022 |            | OPPFYLT  | Nei                  |                      |
+
+      | 3       | GIFT_PARTNERSKAP                            |                  | 21.12.2016 |            | OPPFYLT  | Nei                  |                      |
+      | 3       | UNDER_18_ÅR                                 |                  | 21.12.2016 | 20.12.2034 | OPPFYLT  | Nei                  |                      |
+      | 3       | BOR_MED_SØKER,LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 25.02.2022 |            | OPPFYLT  | Nei                  |                      |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser |
+      | 1       | BOSATT_I_RIKET                              |                  | 01.01.2022 | 16.07.2023 | OPPFYLT      | Nei                  |                      |
+      | 1       | LOVLIG_OPPHOLD                              |                  | 01.01.2022 |            | OPPFYLT      | Nei                  |                      |
+      | 1       | BOSATT_I_RIKET                              |                  | 17.07.2023 |            | IKKE_OPPFYLT | Nei                  |                      |
+
+      | 2       | GIFT_PARTNERSKAP                            |                  | 06.03.2012 |            | OPPFYLT      | Nei                  |                      |
+      | 2       | UNDER_18_ÅR                                 |                  | 06.03.2012 | 05.03.2030 | OPPFYLT      | Nei                  |                      |
+      | 2       | BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.01.2022 |            | OPPFYLT      | Nei                  |                      |
+
+      | 3       | GIFT_PARTNERSKAP                            |                  | 21.12.2016 |            | OPPFYLT      | Nei                  |                      |
+      | 3       | UNDER_18_ÅR                                 |                  | 21.12.2016 | 20.12.2034 | OPPFYLT      | Nei                  |                      |
+      | 3       | BOR_MED_SØKER,LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 25.02.2022 |            | OPPFYLT      | Nei                  |                      |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.02.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 1            | 01.07.2023 | 28.02.2030 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 3       | 1            | 01.03.2022 | 30.11.2022 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 3       | 1            | 01.12.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 3       | 1            | 01.07.2023 | 30.11.2034 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+
+      | 2       | 2            | 01.02.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 2            | 01.07.2023 | 31.07.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 3       | 2            | 01.03.2022 | 30.11.2022 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 3       | 2            | 01.12.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 3       | 2            | 01.07.2023 | 31.07.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+
+    Når vedtaksperiodene genereres for behandling 2
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser | Ugyldige begrunnelser |
+      | 01.08.2023 |          | OPPHØR             |                                | OPPHØR_UTVANDRET     |                       |
+
+    Og når disse begrunnelsene er valgt for behandling 2
+      | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |
+      | 01.08.2023 |          | OPPHØR_UTVANDRET     |                 |            |
+
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.08.2023 til -
+      | Begrunnelse      | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
+      | OPPHØR_UTVANDRET | STANDARD | Ja            | 06.03.12 og 21.12.16 | 0           | juli 2023                            | NB      | 0     |
