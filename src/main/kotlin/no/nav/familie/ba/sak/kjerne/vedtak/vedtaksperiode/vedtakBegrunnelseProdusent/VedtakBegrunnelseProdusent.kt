@@ -648,7 +648,7 @@ private fun erSatsøkningMellomPerioder(
     val andelerDennePerioden = begrunnelseGrunnlagForPeriode.andeler
     return andelerDennePerioden.any { andelIPeriode ->
         val sammeAndelForrigePeriode = andelerForrigePeriode.singleOrNull { andelIPeriode.type == it.type }
-        andelIPeriode.sats > (sammeAndelForrigePeriode?.sats ?: 0)
+        sammeAndelForrigePeriode != null && andelIPeriode.sats > sammeAndelForrigePeriode.sats
     }
 }
 
