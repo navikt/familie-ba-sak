@@ -17,8 +17,6 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-java@v3
         with:
           java-version: 17
@@ -36,8 +34,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-java@v3
         with:
           java-version: 17
@@ -55,8 +51,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-java@v3
         with:
           java-version: 17
@@ -74,8 +68,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-java@v3
         with:
           java-version: 17
@@ -94,8 +86,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-java@v3
         with:
           java-version: 17
