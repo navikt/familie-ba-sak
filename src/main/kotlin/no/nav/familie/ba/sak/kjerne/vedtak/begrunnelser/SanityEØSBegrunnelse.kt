@@ -72,6 +72,7 @@ data class RestSanityEØSBegrunnelse(
             fagsakType = fagsakType.finnEnumverdiNullable<FagsakType>(),
             tema = (regelverk ?: tema).finnEnumverdi<Tema>(apiNavn),
             periodeType = (brevPeriodeType ?: periodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
+            begrunnelseTypeForPerson = begrunnelseTypeForPerson.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
         )
     }
 
