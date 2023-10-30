@@ -195,4 +195,44 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode - til -
       | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Beløp |
-      | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Ja            | 07.08.20             | 0           | 0     | 
+      | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Ja            | 07.08.20             | 0           | 0     |
+
+  Scenario: Skal flette inn "du og barnet" når både søker og barn har avslag på samme vilkår
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | AVSLÅTT             | SØKNAD           | Nei                       | NASJONAL            |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 19.05.1997  |
+      | 1            | 2       | BARN       | 07.08.2020  |
+
+    Og følgende dagens dato 26.10.2023
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser                              |
+      | 1       | LOVLIG_OPPHOLD               |                  |            |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |
+      | 1       | BOSATT_I_RIKET               |                  | 30.05.2023 |            | IKKE_OPPFYLT | Nei                  |                                                   |
+
+      | 2       | GIFT_PARTNERSKAP             |                  | 07.08.2020 |            | OPPFYLT      | Nei                  |                                                   |
+      | 2       | UNDER_18_ÅR                  |                  | 07.08.2020 | 06.08.2038 | OPPFYLT      | Nei                  |                                                   |
+      | 2       | BOR_MED_SØKER,BOSATT_I_RIKET |                  | 30.05.2023 |            | OPPFYLT      | Nei                  |                                                   |
+      | 2       | LOVLIG_OPPHOLD               |                  |            |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
+
+    Når vedtaksperiodene genereres for behandling 1
+
+    Og når disse begrunnelsene er valgt for behandling 1
+      | Fra dato | Til dato | Standardbegrunnelser                              | Eøsbegrunnelser | Fritekster |
+      |          |          | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                 |            |
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode - til -
+      | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Beløp |
+      | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Ja            | 07.08.20             | 1           | 0     |
