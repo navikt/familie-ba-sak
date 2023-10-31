@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -43,7 +42,6 @@ class VurderTilbakekrevingStegTest {
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns false
         every { tilbakekrevingService.validerRestTilbakekreving(any(), any()) } returns Unit
         every { tilbakekrevingService.lagreTilbakekreving(any(), any()) } returns null
-        every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
     }
 
     @Test
