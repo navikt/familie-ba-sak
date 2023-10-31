@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -110,7 +109,6 @@ class TilbakekrevingService(
                     sumFeilutbetaling = simuleringService.hentFeilutbetaling(behandlingId).toLong(),
                     perioder = hentTilbakekrevingsperioderISimulering(
                         simuleringService.hentSimuleringPåBehandling(behandlingId),
-                        featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
                     ),
                 ),
                 fagsystem = Fagsystem.BA,
@@ -191,7 +189,6 @@ class TilbakekrevingService(
             varsel = opprettVarsel(
                 tilbakekreving,
                 simuleringService.hentSimuleringPåBehandling(behandling.id),
-                featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
             ),
             revurderingsvedtaksdato = revurderingsvedtaksdato,
             // Verge er per nå ikke støttet i familie-ba-sak.
