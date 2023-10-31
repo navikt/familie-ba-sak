@@ -26,12 +26,6 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: Set<VedtakBegrunnel
             VedtakBegrunnelseType.FORTSATT_INNVILGET,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
             VedtakBegrunnelseType.ENDRET_UTBETALING,
-            VedtakBegrunnelseType.INSTITUSJON_INNVILGET,
-            VedtakBegrunnelseType.INSTITUSJON_REDUKSJON,
-            VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET,
-            VedtakBegrunnelseType.EØS_INNVILGET,
-            VedtakBegrunnelseType.EØS_REDUKSJON,
-            VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET,
         ),
     ),
 
@@ -53,10 +47,6 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: Set<VedtakBegrunnel
             VedtakBegrunnelseType.INNVILGET,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
             VedtakBegrunnelseType.ENDRET_UTBETALING,
-            VedtakBegrunnelseType.INSTITUSJON_REDUKSJON,
-            VedtakBegrunnelseType.INSTITUSJON_INNVILGET,
-            VedtakBegrunnelseType.EØS_INNVILGET,
-            VedtakBegrunnelseType.EØS_REDUKSJON,
         ),
     ),
     OPPHØR(
@@ -64,23 +54,17 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: Set<VedtakBegrunnel
             VedtakBegrunnelseType.OPPHØR,
             VedtakBegrunnelseType.ENDRET_UTBETALING,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
-            VedtakBegrunnelseType.INSTITUSJON_OPPHØR,
-            VedtakBegrunnelseType.EØS_OPPHØR,
             VedtakBegrunnelseType.AVSLAG,
         ),
     ),
     AVSLAG(
         setOf(
             VedtakBegrunnelseType.AVSLAG,
-            VedtakBegrunnelseType.EØS_AVSLAG,
-            VedtakBegrunnelseType.INSTITUSJON_AVSLAG,
         ),
     ),
     FORTSATT_INNVILGET(
         setOf(
             VedtakBegrunnelseType.FORTSATT_INNVILGET,
-            VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET,
-            VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET,
         ),
     ),
 

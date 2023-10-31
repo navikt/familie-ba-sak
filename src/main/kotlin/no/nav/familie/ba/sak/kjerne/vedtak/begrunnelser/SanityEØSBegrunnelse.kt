@@ -33,15 +33,9 @@ data class RestSanityEØSBegrunnelse(
     val hjemlerEOSForordningen987: List<String>?,
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>?,
     val eosVilkaar: List<String>? = null,
-    @Deprecated("Skal bruke periodeResultatForPerson i stedet")
-    val vedtakResultat: String?,
     val periodeResultatForPerson: String?,
     val fagsakType: String?,
-    @Deprecated("Skal bruke regelverk i stedet")
-    val tema: String?,
     val regelverk: String?,
-    @Deprecated("Skal bruke periodeResultatForPerson i stedet")
-    val periodeType: String?,
     val brevPeriodeType: String?,
     val begrunnelseTypeForPerson: String?,
 ) {
@@ -65,13 +59,11 @@ data class RestSanityEØSBegrunnelse(
             hjemlerEØSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
             hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
             vilkår = eosVilkaar?.mapNotNull { konverterTilEnumverdi<Vilkår>(it) }?.toSet() ?: emptySet(),
-            periodeResultat = (
-                periodeResultatForPerson
-                    ?: vedtakResultat
-                ).finnEnumverdi<SanityPeriodeResultat>(apiNavn),
+            periodeResultat = (periodeResultatForPerson).finnEnumverdi<SanityPeriodeResultat>(apiNavn),
             fagsakType = fagsakType.finnEnumverdiNullable<FagsakType>(),
-            tema = (regelverk ?: tema).finnEnumverdi<Tema>(apiNavn),
-            periodeType = (brevPeriodeType ?: periodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
+            tema = (regelverk).finnEnumverdi<Tema>(apiNavn),
+            periodeType = (brevPeriodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
+            begrunnelseTypeForPerson = begrunnelseTypeForPerson.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
         )
     }
 

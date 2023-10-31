@@ -1485,67 +1485,67 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
 
     // Begrunnelser for institusjon
     INNVILGET_BOR_FAST_I_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_INNVILGET
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetBorFastIInstitusjon"
     },
     INNVILGET_SATSENDRING_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_INNVILGET
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetSatsendringInstitusjon"
     },
     REDUKSJON_BARN_6_ÅR_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_REDUKSJON
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBarn6AarInstitusjon"
     },
     REDUKSJON_SATSENDRING_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_REDUKSJON
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonSatsendringInstitusjon"
     },
     AVSLAG_IKKE_BOSATT_I_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_AVSLAG
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagIkkeBosattIInstitusjon"
     },
     AVSLAG_IKKE_OPPHOLDSTILLATELSE_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_AVSLAG
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagIkkeOppholdstillatelseInstitusjon"
     },
     OPPHØR_FLYTTET_FRA_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_OPPHØR
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorFlyttetFraInstitusjon"
     },
     OPPHØR_BARN_DØD_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_OPPHØR
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBarnDodInstitusjon"
     },
     OPPHØR_BARN_BODDE_IKKE_FAST_I_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_OPPHØR
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBarnBoddeIkkeFastIInstitusjon"
     },
     OPPHØR_BARN_HADDE_IKKE_OPPHOLDSTILLATELSE_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_OPPHØR
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBarnHaddeIkkeOppholdstillatelseInstitusjon"
     },
     OPPHØR_OPPHOLDSTILLATELSE_UTLØPT_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_OPPHØR
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorOppholdstillatelseUtloptInstitusjon"
     },
     OPPHØR_BARNET_ER_18_ÅR_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_OPPHØR
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBarnetEr18AarInstitusjon"
     },
     FORTSATT_INNVILGET_BOSATT_I_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetBosattIInstitusjon"
     },
     FORTSATT_INNVILGET_OPPHOLDSTILLATELSE_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetOppholdstillatelseInstitusjon"
     },
     FORTSATT_INNVILGET_VARIG_OPPHOLDSTILLATELSE_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetVarigOppholdstillatelseInstitusjon"
     },
     FORTSATT_INNVILGET_NORSK_STATSBORGER_INSTITUSJON {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetNorskStatsborgerInstitusjon"
     }, ;
 

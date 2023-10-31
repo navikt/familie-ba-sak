@@ -182,11 +182,11 @@ fun VedtakBegrunnelseType.periodeErOppyltForYtelseType(
     ytelserGjeldeneForSøkerForrigeMåned: List<YtelseType>,
 ): Boolean {
     return when (this) {
-        VedtakBegrunnelseType.INNVILGET, VedtakBegrunnelseType.INSTITUSJON_INNVILGET -> ytelseTyperForPeriode.contains(
+        VedtakBegrunnelseType.INNVILGET -> ytelseTyperForPeriode.contains(
             ytelseType,
         )
 
-        VedtakBegrunnelseType.REDUKSJON, VedtakBegrunnelseType.INSTITUSJON_REDUKSJON -> !ytelseTyperForPeriode.contains(
+        VedtakBegrunnelseType.REDUKSJON -> !ytelseTyperForPeriode.contains(
             ytelseType,
         ) &&
             ytelseOppfyltForrigeMåned(ytelseType, ytelserGjeldeneForSøkerForrigeMåned)
