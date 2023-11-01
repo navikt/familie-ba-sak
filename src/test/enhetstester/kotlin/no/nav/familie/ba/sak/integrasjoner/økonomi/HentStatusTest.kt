@@ -59,7 +59,7 @@ class HentStatusTest {
             kontrollerNyUtbetalingsgeneratorService = kontrollerNyUtbetalingsgeneratorService,
             utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
             unleashService = unleashService,
-            behandlingHentOgPersisterService = mockk()
+            behandlingHentOgPersisterService = mockk(),
         )
         statusFraOppdrag = StatusFraOppdrag(
             økonomiService = økonomiService,
