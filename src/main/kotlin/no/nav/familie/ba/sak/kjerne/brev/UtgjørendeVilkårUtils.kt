@@ -133,7 +133,9 @@ private fun erVilkårResultatUtgjørende(
     }
 
     return when (begrunnelseType) {
-        VedtakBegrunnelseType.INNVILGET ->
+        VedtakBegrunnelseType.INNVILGET,
+        VedtakBegrunnelseType.INSTITUSJON_INNVILGET,
+        ->
             erInnvilgetVilkårResultatUtgjørende(
                 triggesAv,
                 minimertVilkårResultat,
@@ -141,7 +143,9 @@ private fun erVilkårResultatUtgjørende(
                 vedtaksperiode,
             )
 
-        VedtakBegrunnelseType.OPPHØR -> if (triggesAv.gjelderFørstePeriode) {
+        VedtakBegrunnelseType.OPPHØR,
+        VedtakBegrunnelseType.INSTITUSJON_OPPHØR,
+        -> if (triggesAv.gjelderFørstePeriode) {
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                 vedtaksperiode = vedtaksperiode,
@@ -156,7 +160,7 @@ private fun erVilkårResultatUtgjørende(
             )
         }
 
-        VedtakBegrunnelseType.REDUKSJON -> {
+        VedtakBegrunnelseType.REDUKSJON, VedtakBegrunnelseType.INSTITUSJON_REDUKSJON -> {
             erReduksjonResultatUtgjøreneForPeriode(
                 vilkårSomAvsluttesRettFørDennePerioden = minimertVilkårResultat,
                 triggesAv = triggesAv,
@@ -165,7 +169,7 @@ private fun erVilkårResultatUtgjørende(
             )
         }
 
-        VedtakBegrunnelseType.AVSLAG ->
+        VedtakBegrunnelseType.AVSLAG, VedtakBegrunnelseType.INSTITUSJON_AVSLAG ->
             vilkårResultatPasserForAvslagsperiode(
                 minimertVilkårResultat = minimertVilkårResultat,
                 vedtaksperiode = vedtaksperiode,

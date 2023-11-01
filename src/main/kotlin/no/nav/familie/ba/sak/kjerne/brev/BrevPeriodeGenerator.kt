@@ -74,7 +74,7 @@ class BrevPeriodeGenerator(
         eøsBegrunnelserMedKompetanser.flatMap { begrunnelseMedData ->
             val begrunnelse = begrunnelseMedData.begrunnelse
 
-            if (begrunnelseMedData.kompetanser.isEmpty() && begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG) {
+            if (begrunnelseMedData.kompetanser.isEmpty() && begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.EØS_AVSLAG) {
                 val minimertePersonResultater =
                     restBehandlingsgrunnlagForBrev.minimertePersonResultater.filter { personResultat ->
                         personResultat.minimerteVilkårResultater.any {
@@ -135,12 +135,12 @@ class BrevPeriodeGenerator(
     fun hentEøsBegrunnelserMedKompetanser(): List<EØSBegrunnelseMedKompetanser> =
         minimertVedtaksperiode.eøsBegrunnelser.map { eøsBegrunnelseMedTriggere ->
             val kompetanser = when (eøsBegrunnelseMedTriggere.eøsBegrunnelse.vedtakBegrunnelseType) {
-                VedtakBegrunnelseType.INNVILGET, VedtakBegrunnelseType.FORTSATT_INNVILGET -> hentKompetanserForEØSBegrunnelse(
+                VedtakBegrunnelseType.EØS_INNVILGET, VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET -> hentKompetanserForEØSBegrunnelse(
                     eøsBegrunnelseMedTriggere,
                     minimerteKompetanserForPeriode,
                 )
 
-                VedtakBegrunnelseType.OPPHØR, VedtakBegrunnelseType.REDUKSJON -> hentKompetanserForEØSBegrunnelse(
+                VedtakBegrunnelseType.EØS_OPPHØR, VedtakBegrunnelseType.EØS_REDUKSJON -> hentKompetanserForEØSBegrunnelse(
                     eøsBegrunnelseMedTriggere,
                     minimerteKompetanserSomStopperRettFørPeriode,
                 )

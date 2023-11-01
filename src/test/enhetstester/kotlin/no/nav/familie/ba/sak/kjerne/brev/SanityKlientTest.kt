@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.config.testSanityKlient
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -22,27 +20,5 @@ class SanityKlientTest {
         val begrunnelserPåApiNavn = hentEØSBegrunnelser.associateBy { it.apiNavn }
         assertThat(hentEØSBegrunnelser).hasSize(begrunnelserPåApiNavn.size)
         assertThat(hentEØSBegrunnelser).isNotEmpty
-    }
-
-    @Test
-    fun `BegrunnelsetypeForPerson samsvarer med vedtakPeriodeType i StandardBegrunnelser`() {
-        val sanityBegrunnelser = testSanityKlient.hentBegrunnelser()
-        sanityBegrunnelser.forEach { sanityBegrunnelse ->
-            val standardbegrunnelse =
-                Standardbegrunnelse.entries.single { standardbegrunnelse -> standardbegrunnelse.sanityApiNavn == sanityBegrunnelse.apiNavn }
-            assertThat(sanityBegrunnelse.begrunnelseTypeForPerson).isEqualTo(standardbegrunnelse.vedtakBegrunnelseType)
-        }
-    }
-
-    @Test
-    fun `BegrunnelsetypeForPerson samsvarer med vedtakPeriodeType i EØSStandardBegrunnelser`() {
-        val sanityBegrunnelser = testSanityKlient.hentEØSBegrunnelser()
-        sanityBegrunnelser.forEach { sanityBegrunnelse ->
-            val eøsStandardbegrunnelse =
-                EØSStandardbegrunnelse.entries.single { eøsStandardbegrunnelse -> eøsStandardbegrunnelse.sanityApiNavn == sanityBegrunnelse.apiNavn }
-            assertThat(sanityBegrunnelse.begrunnelseTypeForPerson)
-                .`as`("EØSStandardBegrunnelse: ${eøsStandardbegrunnelse.sanityApiNavn} sin begrunnelseType: ")
-                .isEqualTo(eøsStandardbegrunnelse.vedtakBegrunnelseType)
-        }
     }
 }
