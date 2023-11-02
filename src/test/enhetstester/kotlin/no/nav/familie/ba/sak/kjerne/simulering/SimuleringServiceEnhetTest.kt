@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorS
 import no.nav.familie.ba.sak.integrasjoner.økonomi.lagUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -49,6 +50,7 @@ import org.hamcrest.CoreMatchers.`is` as Is
 internal class SimuleringServiceEnhetTest {
 
     private val økonomiKlient: ØkonomiKlient = mockk()
+    private val økonomiService: ØkonomiService = mockk()
     private val beregningService: BeregningService = mockk()
     private val økonomiSimuleringMottakerRepository: ØkonomiSimuleringMottakerRepository = mockk()
     private val tilgangService: TilgangService = mockk()
@@ -61,16 +63,17 @@ internal class SimuleringServiceEnhetTest {
     private val unleashService: UnleashService = mockk()
 
     private val simuleringService: SimuleringService = SimuleringService(
-        økonomiKlient = økonomiKlient,
-        beregningService = beregningService,
-        økonomiSimuleringMottakerRepository = økonomiSimuleringMottakerRepository,
-        tilgangService = tilgangService,
-        unleashService = unleashService,
-        vedtakRepository = vedtakRepository,
-        utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
-        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-        persongrunnlagService = persongrunnlagService,
-        kontrollerNyUtbetalingsgeneratorService = kontrollerNyUtbetalingsgeneratorService,
+        økonomiKlient,
+        beregningService,
+        økonomiSimuleringMottakerRepository,
+        tilgangService,
+        featureToggleService,
+        unleashService,
+        vedtakRepository,
+        utbetalingsoppdragGeneratorService,
+        behandlingHentOgPersisterService,
+        persongrunnlagService,
+        kontrollerNyUtbetalingsgeneratorService,
     )
 
     val februar2023 = LocalDate.of(2023, 2, 1)
@@ -103,6 +106,7 @@ internal class SimuleringServiceEnhetTest {
             lagPerson(type = PersonType.BARN).tilPersonEnkel(),
             lagPerson(type = PersonType.BARN).tilPersonEnkel(),
         )
+        every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
 
         val behandlingHarAvvikInnenforBeløpsgrenser =
             simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
@@ -152,6 +156,7 @@ internal class SimuleringServiceEnhetTest {
             lagPerson(type = PersonType.BARN).tilPersonEnkel(),
             lagPerson(type = PersonType.BARN).tilPersonEnkel(),
         )
+        every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
 
         val behandlingHarAvvikInnenforBeløpsgrenser =
             simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
@@ -186,6 +191,7 @@ internal class SimuleringServiceEnhetTest {
             lagPerson(type = PersonType.BARN).tilPersonEnkel(),
             lagPerson(type = PersonType.BARN).tilPersonEnkel(),
         )
+        every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
 
         val behandlingHarAvvikInnenforBeløpsgrenser =
             simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)

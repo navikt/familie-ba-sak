@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
@@ -565,6 +566,9 @@ class VedtaksperiodeService(
     }
 
     fun skalHaÅrligKontroll(vedtak: Vedtak): Boolean {
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.EØS_INFORMASJON_OM_ÅRLIG_KONTROLL, false)) {
+            return false
+        }
         return vedtak.behandling.kategori == BehandlingKategori.EØS &&
             hentPersisterteVedtaksperioder(vedtak).any { it.tom?.erSenereEnnInneværendeMåned() != false }
     }
@@ -585,7 +589,10 @@ class VedtaksperiodeService(
             Behandlingsresultat.OPPHØRT,
         )
 
-        return annenForelderOmfattetAvNorskLovgivningErSattPåBosattIRiket && passendeBehandlingsresultat
+        val eøsPraksisEndringFeatureToggleErSlåttPå =
+            featureToggleService.isEnabled(FeatureToggleConfig.EØS_PRAKSISENDRING_SEPTEMBER2023)
+
+        return annenForelderOmfattetAvNorskLovgivningErSattPåBosattIRiket && passendeBehandlingsresultat && eøsPraksisEndringFeatureToggleErSlåttPå
     }
 
     fun beskrivPerioderMedFeilutbetaltValuta(vedtak: Vedtak): Set<String>? {
