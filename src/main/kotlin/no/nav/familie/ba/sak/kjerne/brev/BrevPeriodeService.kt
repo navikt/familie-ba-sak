@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -54,7 +53,6 @@ class BrevPeriodeService(
     private val kompetanseService: KompetanseService,
     private val integrasjonClient: IntegrasjonClient,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun hentBrevperioderData(

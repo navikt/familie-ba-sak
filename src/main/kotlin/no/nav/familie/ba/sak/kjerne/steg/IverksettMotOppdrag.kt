@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
@@ -23,7 +22,6 @@ class IverksettMotOppdrag(
     private val økonomiService: ØkonomiService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vedtakService: VedtakService,
-    private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
 ) : BehandlingSteg<IverksettingTaskDTO> {
