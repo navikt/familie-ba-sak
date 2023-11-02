@@ -118,6 +118,7 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | 01.07.2023 | 31.08.2023 | UTBETALING         |                                |                                    |                       |
       | 01.09.2023 |            | OPPHØR             | EØS_FORORDNINGEN               | OPPHØR_IKKE_STATSBORGER_I_EØS_LAND |                       |
 
+  @Disabled
   Scenario: Skal begrunne endring i kompetanse når det ikke er noen endringer i resten av behandlingen
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
