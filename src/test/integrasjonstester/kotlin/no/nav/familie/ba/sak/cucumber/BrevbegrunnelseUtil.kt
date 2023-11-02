@@ -134,7 +134,7 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
         }
 
         EØSBegrunnelseDataMedKompetanse(
-            vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
+            vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET,
             apiNavn = apiNavn,
             barnasFodselsdatoer = barnasFodselsdatoer,
             antallBarn = antallBarn,
