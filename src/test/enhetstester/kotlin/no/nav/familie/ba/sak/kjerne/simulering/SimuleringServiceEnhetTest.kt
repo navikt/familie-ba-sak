@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilPersonEnkel
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.lagUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
@@ -51,7 +50,6 @@ internal class SimuleringServiceEnhetTest {
     private val beregningService: BeregningService = mockk()
     private val økonomiSimuleringMottakerRepository: ØkonomiSimuleringMottakerRepository = mockk()
     private val tilgangService: TilgangService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
     private val vedtakRepository: VedtakRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
