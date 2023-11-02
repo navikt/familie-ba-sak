@@ -272,7 +272,6 @@ class KontrollerNyUtbetalingsgeneratorService(
             this.simuleringMottaker.map {
                 it.tilBehandlingSimuleringMottaker(behandling)
             },
-            true,
         ).sortedBy { it.fom }
 
     data class KombinertSimuleringsResultat(
