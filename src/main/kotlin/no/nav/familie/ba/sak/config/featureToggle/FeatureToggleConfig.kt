@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.config
 class FeatureToggleConfig {
     companion object {
         // Operasjonelle
-        const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
         const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
 
         // Release
@@ -18,6 +17,7 @@ class FeatureToggleConfig {
 
         // Operasjonelle
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
+        const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
     }
 }
 
