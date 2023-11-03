@@ -44,7 +44,7 @@ class TekniskEndringAvFødselshendelseTest(
 
     @Test
     fun `Skal teknisk opphøre fødselshendelse`() {
-        every { unleashService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING) } returns true
+        every { unleashService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING, any()) } returns true
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
