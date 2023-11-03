@@ -7,7 +7,7 @@ import io.mockk.runs
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.assertThrows
 
 class BehandlingStegControllerTest {
 
-    private val featureToggleServiceMock = mockk<FeatureToggleService>()
+    private val unleashService = mockk<UnleashNextMedContextService>()
     private val tilgangServiceMock = mockk<TilgangService>()
     private val behandlingHentOgPersisterServiceMock = mockk<BehandlingHentOgPersisterService>()
     private val stegServiceMock = mockk<StegService>()
@@ -25,7 +25,7 @@ class BehandlingStegControllerTest {
         behandlingHentOgPersisterService = behandlingHentOgPersisterServiceMock,
         stegService = stegServiceMock,
         tilgangService = tilgangServiceMock,
-        featureToggleService = featureToggleServiceMock,
+        unleashService = unleashService,
         utvidetBehandlingService = utvidetBehandlingServiceMock,
     )
 
@@ -33,8 +33,13 @@ class BehandlingStegControllerTest {
     fun `Skal kaste feil hvis saksbehandler uten teknisk endring-tilgang prøver å henlegge en behandling med årsak=teknisk endring`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
 
-        every { featureToggleServiceMock.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING) } returns false
-        every { featureToggleServiceMock.isEnabled(FeatureToggleConfig.TEKNISK_VEDLIKEHOLD_HENLEGGELSE) } returns false
+        every { unleashService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING, behandling.id) } returns false
+        every {
+            unleashService.isEnabled(
+                FeatureToggleConfig.TEKNISK_VEDLIKEHOLD_HENLEGGELSE,
+                behandling.id,
+            )
+        } returns false
         every { tilgangServiceMock.verifiserHarTilgangTilHandling(any(), any()) } just runs
         every { behandlingHentOgPersisterServiceMock.hent(any()) } returns behandling
         every { stegServiceMock.håndterHenleggBehandling(any(), any()) } returns behandling

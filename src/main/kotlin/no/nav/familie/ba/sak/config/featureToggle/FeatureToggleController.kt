@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class FeatureToggleController(
     private val featureToggleService: FeatureToggleService,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -25,6 +26,16 @@ class FeatureToggleController(
         return RessursUtils.ok(
             toggles.fold(mutableMapOf()) { acc, toggleId ->
                 acc[toggleId] = featureToggleService.isEnabled(toggleId)
+                acc
+            },
+        )
+    }
+
+    @PostMapping("/er-toggler-enabled", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun erTogglerEnabled(@RequestBody toggles: List<String>): ResponseEntity<Ressurs<Map<String, Boolean>>> {
+        return RessursUtils.ok(
+            toggles.fold(mutableMapOf()) { acc, toggleId ->
+                acc[toggleId] = unleashNextMedContextService.isEnabled(toggleId)
                 acc
             },
         )

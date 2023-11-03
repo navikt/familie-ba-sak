@@ -11,8 +11,6 @@ import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilPersonEnkel
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.lagUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
@@ -52,7 +50,6 @@ internal class SimuleringServiceEnhetTest {
     private val beregningService: BeregningService = mockk()
     private val økonomiSimuleringMottakerRepository: ØkonomiSimuleringMottakerRepository = mockk()
     private val tilgangService: TilgangService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
     private val vedtakRepository: VedtakRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
@@ -120,7 +117,6 @@ internal class SimuleringServiceEnhetTest {
             årsak = behandlingÅrsak,
             førsteSteg = StegType.VURDER_TILBAKEKREVING,
         )
-        every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal(4)
 
         val fom = LocalDate.of(2021, 1, 1)
@@ -169,7 +165,6 @@ internal class SimuleringServiceEnhetTest {
             årsak = behandlingÅrsak,
             førsteSteg = StegType.VURDER_TILBAKEKREVING,
         )
-        every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
 
         // etterbetaling 200 KR
@@ -221,7 +216,6 @@ internal class SimuleringServiceEnhetTest {
             årsak = behandlingÅrsak,
             førsteSteg = StegType.VURDER_TILBAKEKREVING,
         )
-        every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
 
         // etterbetaling 200 KR
@@ -258,7 +252,6 @@ internal class SimuleringServiceEnhetTest {
             årsak = behandlingÅrsak,
             førsteSteg = StegType.VURDER_TILBAKEKREVING,
         )
-        every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
 
         // etterbetaling 200 KR

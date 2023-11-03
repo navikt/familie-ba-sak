@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import io.mockk.every
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -38,13 +36,12 @@ class TekniskEndringAvFødselshendelseTest(
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val featureToggleService: FeatureToggleService,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
 
     @Test
     fun `Skal teknisk opphøre fødselshendelse`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING) } returns true
+        this.settToggleMock(FeatureToggleConfig.TEKNISK_ENDRING, true)
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(

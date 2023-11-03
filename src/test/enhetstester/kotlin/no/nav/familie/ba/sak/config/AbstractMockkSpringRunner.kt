@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import io.mockk.every
 import io.mockk.isMockKMock
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
@@ -86,6 +87,12 @@ abstract class AbstractMockkSpringRunner {
     fun reset() {
         clearCaches()
         clearMocks()
+    }
+
+    fun settToggleMock(toggle: String, value: Boolean) {
+        every { mockUnleashService.isEnabled(toggle) } returns value
+        every { mockUnleashService.isEnabled(toggle, defaultValue = any()) } returns value
+        every { mockUnleashService.isEnabled(toggle, properties = any()) } returns value
     }
 
     private fun clearMocks() {

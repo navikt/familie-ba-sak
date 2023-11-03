@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -50,7 +50,7 @@ class BeslutteVedtakTest {
     private lateinit var taskRepository: TaskRepositoryWrapper
     private lateinit var dokumentService: DokumentService
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
-    private lateinit var featureToggleService: FeatureToggleService
+    private val unleashService = mockk<UnleashNextMedContextService>()
     private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
     private lateinit var simuleringService: SimuleringService
     private lateinit var automatiskBeslutningService: AutomatiskBeslutningService
@@ -68,7 +68,6 @@ class BeslutteVedtakTest {
         behandlingService = mockk()
         beregningService = mockk()
         vilkårsvurderingService = mockk()
-        featureToggleService = mockk()
         tilkjentYtelseValideringService = mockk()
         simuleringService = mockk()
         automatiskBeslutningService = mockk()
@@ -97,17 +96,17 @@ class BeslutteVedtakTest {
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
 
         beslutteVedtak = BeslutteVedtak(
-            toTrinnKontrollService,
-            vedtakService,
-            behandlingService,
-            beregningService,
-            taskRepository,
-            loggService,
-            vilkårsvurderingService,
-            featureToggleService,
-            tilkjentYtelseValideringService,
-            saksbehandlerContext,
-            automatiskBeslutningService,
+            totrinnskontrollService = toTrinnKontrollService,
+            vedtakService = vedtakService,
+            behandlingService = behandlingService,
+            beregningService = beregningService,
+            taskRepository = taskRepository,
+            loggService = loggService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            unleashService = unleashService,
+            tilkjentYtelseValideringService = tilkjentYtelseValideringService,
+            saksbehandlerContext = saksbehandlerContext,
+            automatiskBeslutningService = automatiskBeslutningService,
         )
     }
 
@@ -229,7 +228,12 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV) } returns false
+        every {
+            unleashService.isEnabled(
+                FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV,
+                any(),
+            )
+        } returns false
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
@@ -248,7 +252,7 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING) } returns false
+        every { unleashService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING, any()) } returns false
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
