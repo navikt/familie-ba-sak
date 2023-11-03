@@ -44,7 +44,6 @@ class TestVerktøyController(
     private val opprettTaskService: OpprettTaskService,
     private val taskService: TaskService,
     private val startSatsendring: StartSatsendring,
-    private val testVerktøyService: TestVerktøyService,
     private val behandlingRepository: BehandlingRepository,
 ) {
 
@@ -140,9 +139,13 @@ class TestVerktøyController(
         } else {
             error("Klarer ikke å utlede miljø for redirect til fagsak")
         }
-        val behandling = behandlingRepository.finnBehandling(behandlingId)
-        return ResponseEntity.status(302)
-            .location(URI.create("$hostname/fagsak/${behandling.fagsak.id}/$behandlingId/")).build()
+        val behandling = behandlingRepository.finnBehandlingNullable(behandlingId)
+        return if (behandling == null) {
+            ResponseEntity.status(200).body("Fant ikke behandling med id $behandlingId")
+        } else {
+            ResponseEntity.status(302)
+                .location(URI.create("$hostname/fagsak/${behandling.fagsak.id}/$behandlingId/")).build()
+        }
     }
 
     companion object {
