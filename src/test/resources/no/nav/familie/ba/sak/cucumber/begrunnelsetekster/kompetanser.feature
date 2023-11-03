@@ -135,7 +135,7 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | 2            | 1234    | BARN       | 02.02.2015  |
       | 2            | 5678    | SØKER      | 10.05.1985  |
 
-    Og følgende dagens dato 2023-09-12
+    Og følgende dagens dato 12.09.2023
     Og lag personresultater for begrunnelse for behandling 1
     Og lag personresultater for begrunnelse for behandling 2
 
