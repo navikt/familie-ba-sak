@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @Tag("integration")
-class unleashNextTest(
+class UnleashNextTest(
     @Autowired
     private val unleashNext: UnleashNextMedContextService,
 ) : AbstractSpringIntegrationTest() {
