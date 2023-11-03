@@ -46,9 +46,6 @@ abstract class AbstractMockkSpringRunner {
     private lateinit var mockØkonomiKlient: ØkonomiKlient
 
     @Autowired
-    private lateinit var mockFeatureToggleService: FeatureToggleService
-
-    @Autowired
     private lateinit var mockUnleashService: UnleashService
 
     @Autowired
@@ -109,10 +106,6 @@ abstract class AbstractMockkSpringRunner {
         IntegrasjonClientMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
             mockFamilieIntegrasjonerTilgangskontrollClient,
         )
-
-        if (isMockKMock(mockFeatureToggleService)) {
-            ClientMocks.clearFeatureToggleMocks(mockFeatureToggleService)
-        }
 
         if (isMockKMock(mockUnleashService)) {
             ClientMocks.clearUnleashServiceMocks(mockUnleashService)

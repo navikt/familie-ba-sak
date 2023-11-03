@@ -192,25 +192,6 @@ class ClientMocks {
     }
 
     companion object {
-        fun clearFeatureToggleMocks(
-            mockFeatureToggleService: FeatureToggleService,
-        ) {
-            clearMocks(mockFeatureToggleService)
-
-            val mockFeatureToggleServiceAnswer = System.getProperty("mockFeatureToggleAnswer")?.toBoolean() ?: true
-
-            val featureSlot = slot<String>()
-            every {
-                mockFeatureToggleService.isEnabled(capture(featureSlot))
-            } answers {
-                System.getProperty(featureSlot.captured)?.toBoolean() ?: mockFeatureToggleServiceAnswer
-            }
-            every {
-                mockFeatureToggleService.isEnabled(capture(featureSlot), any())
-            } answers {
-                System.getProperty(featureSlot.captured)?.toBoolean() ?: mockFeatureToggleServiceAnswer
-            }
-        }
 
         fun clearUnleashServiceMocks(mockUnleashService: UnleashService) {
             val mockUnleashServiceAnswer = System.getProperty("mockFeatureToggleAnswer")?.toBoolean() ?: true

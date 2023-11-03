@@ -5,7 +5,6 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
@@ -47,7 +46,6 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val featureToggleService: FeatureToggleService,
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
 ) : AbstractVerdikjedetest() {
@@ -234,7 +232,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
     @Test
     fun `Skal journalføre og behandle utvidet nasjonal sak`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING) } returns true
+        settToggleMock(FeatureToggleConfig.TEKNISK_ENDRING, true)
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
