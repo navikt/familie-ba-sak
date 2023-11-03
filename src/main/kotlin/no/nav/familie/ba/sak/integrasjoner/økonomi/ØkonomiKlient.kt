@@ -182,6 +182,17 @@ class ØkonomiKlient(
             formål = "Hent utbetalingsoppdrag for fagsaker",
         ) { postForEntity(uri = uri, payload = fagsakIder) }
     }
+
+    fun opprettManuellKvitteringPåOppdrag(oppdragId: OppdragId): OppdragStatus {
+        val uri = URI.create("$familieOppdragUri/oppdrag/manuell-kvittering")
+        return kallEksternTjenesteRessurs(
+            tjeneste = "familie-oppdrag",
+            uri = uri,
+            formål = "Oppretter kvitteringsmelding på oppdrag og setter status til KVITTERT_OK",
+        ) {
+            postForEntity(uri = uri, oppdragId)
+        }
+    }
 }
 
 data class UtbetalingsoppdragMedBehandlingOgFagsak(
