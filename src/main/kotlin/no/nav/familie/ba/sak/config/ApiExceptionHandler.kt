@@ -27,6 +27,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import java.io.PrintWriter
 import java.io.StringWriter
 
@@ -55,6 +56,16 @@ class ApiExceptionHandler {
     @ExceptionHandler(RessursException::class)
     fun handleRessursException(ressursException: RessursException): ResponseEntity<Ressurs<Any>> {
         return ResponseEntity.status(ressursException.httpStatus).body(ressursException.ressurs)
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+    fun handleMethodArgumentTypeMismatchException(e: MethodArgumentTypeMismatchException): ResponseEntity<Ressurs<Nothing>> {
+        logger.info("Ikke forventet verdi på property= ${e.propertyName} med verdi=${e.value} for metode=${e.parameter}")
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            Ressurs.failure(
+                frontendFeilmelding = "Klarer ikke å tyde verdi på ${e.propertyName}. Sjekk at url er riktig",
+            ),
+        )
     }
 
     @ExceptionHandler(HttpClientErrorException.Forbidden::class)
