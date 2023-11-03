@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -30,6 +31,7 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.time.format.DateTimeParseException
 
 @ControllerAdvice
 class ApiExceptionHandler {
@@ -61,11 +63,27 @@ class ApiExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException::class)
     fun handleMethodArgumentTypeMismatchException(e: MethodArgumentTypeMismatchException): ResponseEntity<Ressurs<Nothing>> {
         logger.info("Ikke forventet verdi på property= ${e.propertyName} med verdi=${e.value} for metode=${e.parameter}")
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
             Ressurs.failure(
                 frontendFeilmelding = "Klarer ikke å tyde verdi på ${e.propertyName}. Sjekk at url er riktig",
             ),
         )
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ResponseEntity<Ressurs<Nothing>> {
+        val mostSpecificCause = NestedExceptionUtils.getMostSpecificCause(e)
+
+        return if (mostSpecificCause is DateTimeParseException) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                Ressurs.failure(
+                    frontendFeilmelding = "Ugyldig datoformat ${mostSpecificCause.parsedString}",
+                ),
+            )
+        } else {
+            illegalState(mostSpecificCause.message.toString(), mostSpecificCause)
+        }
     }
 
     @ExceptionHandler(HttpClientErrorException.Forbidden::class)
