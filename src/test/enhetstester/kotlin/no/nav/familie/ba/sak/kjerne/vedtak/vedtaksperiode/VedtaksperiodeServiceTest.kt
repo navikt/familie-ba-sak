@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -107,18 +106,6 @@ class VedtaksperiodeServiceTest {
         every {
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
         } returns listOf(ytelseOpphørtFørEndringstidspunkt)
-        every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.EØS_INFORMASJON_OM_ÅRLIG_KONTROLL,
-                any(),
-            )
-        } returns true
-        every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.FEILUTBETALT_VALUTA_PR_MND,
-                any(),
-            )
-        } returns true
         every { feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(any()) } returns emptyList()
         every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any()) } returns emptyList()
         every { refusjonEøsRepository.finnRefusjonEøsForBehandling(any()) } returns emptyList()
@@ -157,19 +144,6 @@ class VedtaksperiodeServiceTest {
             lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null),
         )
         assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
-    }
-
-    @Test
-    fun `EØS skal ikke ha årlig kontroll når feature toggle er skrudd av`() {
-        every {
-            featureToggleService.isEnabled(FeatureToggleConfig.EØS_INFORMASJON_OM_ÅRLIG_KONTROLL, any())
-        } returns false
-
-        val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
-        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
-            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null),
-        )
-        assertFalse { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
     @Test

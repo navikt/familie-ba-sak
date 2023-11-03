@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -9,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.simulering.KontrollerNyUtbetalingsgeneratorService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
@@ -28,7 +30,7 @@ class ØkonomiService(
     private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService,
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
     private val unleashService: UnleashService,
-
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
@@ -105,6 +107,17 @@ class ØkonomiService(
         } else {
             OppdragStatus.KVITTERT_OK
         }
+
+    fun opprettManuellKvitteringPåOppdrag(behandlingId: Long) {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val oppdragId = OppdragId(
+            fagsystem = FAGSYSTEM,
+            personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+            behandlingsId = behandling.id.toString(),
+        )
+
+        økonomiKlient.opprettManuellKvitteringPåOppdrag(oppdragId)
+    }
 
     companion object {
 

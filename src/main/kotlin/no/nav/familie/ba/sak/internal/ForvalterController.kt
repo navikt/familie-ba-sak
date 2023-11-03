@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.internal
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -39,6 +43,7 @@ class ForvalterController(
     private val ecbService: ECBService,
     private val testVerktøyService: TestVerktøyService,
     private val tilgangService: TilgangService,
+    private val økonomiService: ØkonomiService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -124,7 +129,10 @@ class ForvalterController(
     }
 
     @GetMapping("/hentValutakurs/")
-    fun finnFagsakerSomSkalAvsluttes(@RequestParam valuta: String, @RequestParam dato: LocalDate): ResponseEntity<BigDecimal> {
+    fun finnFagsakerSomSkalAvsluttes(
+        @RequestParam valuta: String,
+        @RequestParam dato: LocalDate,
+    ): ResponseEntity<BigDecimal> {
         return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
     }
 
@@ -176,9 +184,30 @@ class ForvalterController(
                 "denne til false. OBS: Du må da være sikker på at identen man ønsker å patche til er samme person. Dette kan skje hvis " +
                 "identen ikke er merget av folketrygden.",
         )
-        @RequestBody patchIdentForBarnPåFagsak: PatchIdentForBarnPåFagsak,
+        @RequestBody
+        patchIdentForBarnPåFagsak: PatchIdentForBarnPåFagsak,
     ): ResponseEntity<String> {
         forvalterService.patchIdentForBarnPåFagsak(patchIdentForBarnPåFagsak)
+
+        return ResponseEntity.ok("ok")
+    }
+
+    @PostMapping("/behandling/{behandlingId}/manuell-kvittering")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Manuell kvittering ble opprettet OK"),
+            ApiResponse(responseCode = "409", description = "Oppdrag er allerede kvittert ut."),
+        ],
+    )
+    @Operation(
+        summary = "Opprett manuell kvittering på oppdrag tilhørende behandling",
+        description = "Dette endepunktet oppretter kvitteringsmelding på oppdrag og setter status til KVITTERT_OK. " +
+            "Endepunktet skal bare taas i bruk når vi ikke har mottatt kvittering på et oppdrag som økonomi bekrefter har gått gjennom. ",
+    )
+    fun opprettManuellKvitteringPåOppdrag(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<String> {
+        økonomiService.opprettManuellKvitteringPåOppdrag(behandlingId = behandlingId)
 
         return ResponseEntity.ok("ok")
     }
