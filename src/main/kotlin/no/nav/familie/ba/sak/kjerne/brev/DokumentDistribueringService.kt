@@ -10,6 +10,9 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentPåJournalpostIdTask
 import no.nav.familie.http.client.RessursException
+import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.dokdistkanal.Distribusjonskanal
+import no.nav.familie.kontrakter.felles.dokdistkanal.DokdistkanalRequest
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -69,6 +72,15 @@ class DokumentDistribueringService(
                 else -> throw ressursException
             }
         }
+    }
+
+    fun hentDistribusjonskanal(personident: String): Distribusjonskanal {
+        return integrasjonClient.hentDistribusjonskanal(
+            DokdistkanalRequest(
+                bruker = PersonIdent(personident),
+                mottaker = PersonIdent(personident),
+            ),
+        )
     }
 
     internal fun opprettLogginnslagPåBehandlingOgNyTaskSomDistribuererPåJournalpostId(distribuerDokumentDTO: DistribuerDokumentDTO) {
