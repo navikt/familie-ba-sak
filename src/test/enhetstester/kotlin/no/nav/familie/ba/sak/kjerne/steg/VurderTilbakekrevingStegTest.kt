@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -21,10 +20,9 @@ class VurderTilbakekrevingStegTest {
 
     private val tilbakekrevingService: TilbakekrevingService = mockk()
     private val simuleringService: SimuleringService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
 
     private val vurderTilbakekrevingSteg: VurderTilbakekrevingSteg =
-        VurderTilbakekrevingSteg(featureToggleService, tilbakekrevingService, simuleringService)
+        VurderTilbakekrevingSteg(tilbakekrevingService = tilbakekrevingService, simuleringService = simuleringService)
 
     private val behandling: Behandling = lagBehandling(
         behandlingType = BehandlingType.REVURDERING,

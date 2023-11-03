@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -36,7 +35,6 @@ class VedtaksperiodeServiceTest {
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService =
         mockk()
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val småbarnstilleggService: SmåbarnstilleggService = mockk()
@@ -56,7 +54,6 @@ class VedtaksperiodeServiceTest {
             endretUtbetalingAndelRepository = mockk(),
             kompetanseRepository = mockk(),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            featureToggleService = featureToggleService,
             feilutbetaltValutaRepository = feilutbetaltValutaRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             småbarnstilleggService = småbarnstilleggService,

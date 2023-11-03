@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -81,7 +80,6 @@ class VedtaksperiodeService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    private val featureToggleService: FeatureToggleService,
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårsvurderingService: VilkårsvurderingService,

@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -50,7 +49,6 @@ class TilbakekrevingService(
     private val tilbakekrevingKlient: TilbakekrevingKlient,
     private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService,
-    private val featureToggleService: FeatureToggleService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
 
