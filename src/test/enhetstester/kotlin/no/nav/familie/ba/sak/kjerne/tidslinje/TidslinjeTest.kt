@@ -116,7 +116,7 @@ internal class TidslinjeTest {
     }
 
     @Test
-    fun `tidsrom skal lage liste med alle tidspunkter opp til uendelig tidspunk`() {
+    fun `tidsrom på liste av tidslinjer skal lage liste med alle tidspunkter opp til uendelig tidspunkt`() {
         val tidslinjeMedUendelighet = listOf(
             Periode(nov(2020), des(2020), 'A'),
             Periode(jan(2021), jan(1999).somUendeligLengeTil(), 'B'),
@@ -124,6 +124,18 @@ internal class TidslinjeTest {
 
         Assertions.assertThat(tidsrom(tidslinjeMedUendelighet).toList()).isEqualTo(
             listOf(nov(2020), des(2020), jan(1999).somUendeligLengeTil()),
+        )
+    }
+
+    @Test
+    fun `tidsrom på tidslinje skal lage liste med alle tidspunkter opp til uendelig tidspunkt`() {
+        val tidslinjeMedUendelighet = listOf(
+            Periode(feb(2023), apr(2023), 'A'),
+            Periode(mai(2023), mai(2022).somUendeligLengeTil(), 'B'),
+        ).tilTidslinje()
+
+        Assertions.assertThat(tidslinjeMedUendelighet.tidsrom().toList()).isEqualTo(
+            listOf(feb(2023), mar(2023), apr(2023), mai(2023).somUendeligLengeTil()),
         )
     }
 }

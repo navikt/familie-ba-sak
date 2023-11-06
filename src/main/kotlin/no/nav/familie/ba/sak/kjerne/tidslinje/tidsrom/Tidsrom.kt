@@ -40,7 +40,15 @@ fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tilOgMed() = this
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.tidsrom(): Collection<Tidspunkt<T>> = when {
     this.perioder().isEmpty() -> emptyList()
-    else -> (perioder().first().fraOgMed.rangeTo(perioder().last().tilOgMed)).toList()
+    else -> {
+        val fraOgMed = this.fraOgMed()
+        val tilOgMed = this.tilOgMed()
+        if (fraOgMed == null || tilOgMed == null) {
+            emptyList()
+        } else {
+            (fraOgMed..tilOgMed).toList()
+        }
+    }
 }
 
 fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tidsrom(): Collection<Tidspunkt<T>> {
