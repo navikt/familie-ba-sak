@@ -215,16 +215,11 @@ data class BehandlingsGrunnlagForVedtaksperioder(
             perioderOvergangsstønad.filtrerPåAktør(person.aktør)
                 .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(erUtbetalingSmåbarnstilleggTidslinje)
 
+        val andelTilkjentYtelseTidslinje = andelerTilkjentYtelse
+            .filtrerPåAktør(person.aktør).filtrerPåRolle(vilkårRolle).tilAndelerForVedtaksPeriodeTidslinje()
+
         val grunnlagTidslinje = this.tilVilkårResultaterForVedtaksPeriodeTidslinje()
-            .kombinerMed(
-                andelerTilkjentYtelse.filtrerPåAktør(person.aktør).filter {
-                    if (vilkårRolle == PersonType.SØKER) {
-                        it.erSøkersAndel()
-                    } else {
-                        !it.erSøkersAndel()
-                    }
-                }.tilAndelerForVedtaksPeriodeTidslinje(),
-            ) { vilkårResultater, andeler ->
+            .kombinerMed(andelTilkjentYtelseTidslinje) { vilkårResultater, andeler ->
                 lagGrunnlagForVilkårOgAndel(
                     vilkårResultater = vilkårResultater,
                     person = person,
@@ -247,6 +242,16 @@ data class BehandlingsGrunnlagForVedtaksperioder(
             .perioder()
             .dropWhile { !it.erInnvilgetEllerEksplisittAvslag() }
             .tilTidslinje()
+    }
+}
+
+private fun List<AndelTilkjentYtelse>.filtrerPåRolle(
+    vilkårRolle: PersonType,
+) = filter {
+    if (vilkårRolle == PersonType.SØKER) {
+        it.erSøkersAndel()
+    } else {
+        !it.erSøkersAndel()
     }
 }
 
@@ -388,18 +393,22 @@ private fun lagGrunnlagForVilkårOgAndel(
     vilkårResultater: List<VilkårResultatForVedtaksperiode>?,
     person: Person,
     andeler: Iterable<AndelForVedtaksperiode>?,
-) = if (andeler != null) {
-    VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
-        vilkårResultaterForVedtaksperiode = vilkårResultater
-            ?: error("vilkårResultatene burde alltid finnes om vi har innvilget vedtaksperiode."),
-        person = person,
-        andeler = andeler
-    )
-} else {
-    VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
-        vilkårResultaterForVedtaksperiode = vilkårResultater ?: emptyList(),
-        person = person,
-    )
+): VedtaksperiodeGrunnlagForPerson {
+    val andelerListe = andeler?.toList()
+
+    return if (!andelerListe.isNullOrEmpty()) {
+        VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
+            vilkårResultaterForVedtaksperiode = vilkårResultater
+                ?: error("vilkårResultatene burde alltid finnes om vi andeler."),
+            person = person,
+            andeler = andeler,
+        )
+    } else {
+        VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
+            vilkårResultaterForVedtaksperiode = vilkårResultater ?: emptyList(),
+            person = person,
+        )
+    }
 }
 
 private fun lagGrunnlagMedKompetanse(
