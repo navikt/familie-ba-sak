@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
+import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdiNullable
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
@@ -44,6 +45,7 @@ data class RestSanityEØSBegrunnelse(
     val periodeType: String?,
     val brevPeriodeType: String?,
     val begrunnelseTypeForPerson: String?,
+    val valgbarhet: String?,
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
@@ -72,6 +74,7 @@ data class RestSanityEØSBegrunnelse(
             fagsakType = fagsakType.finnEnumverdiNullable<FagsakType>(),
             tema = (regelverk ?: tema).finnEnumverdi<Tema>(apiNavn),
             periodeType = (brevPeriodeType ?: periodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
+            valgbarhet = valgbarhet?.finnEnumverdi<Valgbarhet>(apiNavn),
         )
     }
 
