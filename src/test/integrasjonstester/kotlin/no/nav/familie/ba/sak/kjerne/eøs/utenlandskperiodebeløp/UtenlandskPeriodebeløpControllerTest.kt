@@ -5,7 +5,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import jakarta.validation.ConstraintViolationException
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
@@ -26,9 +25,6 @@ import org.springframework.test.context.ContextConfiguration
 @ContextConfiguration(classes = [TestConfig::class, UtenlandskPeriodebeløpController::class, ValidationAutoConfiguration::class])
 @ActiveProfiles("postgres", "integrasjonstest")
 class UtenlandskPeriodebeløpControllerTest {
-
-    @Autowired
-    lateinit var featureToggleService: FeatureToggleService
 
     @Autowired
     lateinit var utenlandskPeriodebeløpController: UtenlandskPeriodebeløpController
@@ -76,9 +72,6 @@ class UtenlandskPeriodebeløpControllerTest {
 }
 
 class TestConfig {
-
-    @Bean
-    fun featureToggleService(): FeatureToggleService = mockk()
 
     @Bean
     fun utenlandskPeriodebeløpService(): UtenlandskPeriodebeløpService = mockk()
