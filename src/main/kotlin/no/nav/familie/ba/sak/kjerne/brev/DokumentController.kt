@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokdistkanal.Distribusjonskanal
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -174,9 +175,9 @@ class DokumentController(
         return ResponseEntity.ok(Ressurs.success(fagsakService.lagRestMinimalFagsak(fagsakId = fagsakId)))
     }
 
-    @PostMapping(path = ["/distribusjonskanal/{mottakerIdent}"])
-    fun hentDistribusjonskanal(@PathVariable mottakerIdent: String): Ressurs<Distribusjonskanal> {
-        return Ressurs.success(dokumentDistribueringService.hentDistribusjonskanal(mottakerIdent))
+    @PostMapping(path = ["/distribusjonskanal"])
+    fun hentDistribusjonskanal(@RequestBody personIdent: PersonIdent): Ressurs<Distribusjonskanal> {
+        return Ressurs.success(dokumentDistribueringService.hentDistribusjonskanal(personIdent))
     }
 
     companion object {

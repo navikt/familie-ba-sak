@@ -74,11 +74,11 @@ class DokumentDistribueringService(
         }
     }
 
-    fun hentDistribusjonskanal(personident: String): Distribusjonskanal {
+    fun hentDistribusjonskanal(personIdent: PersonIdent): Distribusjonskanal {
         return integrasjonClient.hentDistribusjonskanal(
             DokdistkanalRequest(
-                bruker = PersonIdent(personident),
-                mottaker = PersonIdent(personident),
+                bruker = personIdent,
+                mottaker = personIdent,
             ),
         )
     }
