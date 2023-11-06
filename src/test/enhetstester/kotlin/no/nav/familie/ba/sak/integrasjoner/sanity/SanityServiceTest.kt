@@ -37,6 +37,7 @@ class SanityServiceTest {
                 hjemlerEØSForordningen883 = emptyList(),
                 hjemlerEØSForordningen987 = emptyList(),
                 hjemlerSeperasjonsavtalenStorbritannina = emptyList(),
+                valgbarhet = null,
             )
         }
 

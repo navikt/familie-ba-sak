@@ -443,7 +443,14 @@ private fun hentEØSStandardBegrunnelser(
             )
         }
 
-    return filtrertPåEndretVilkår + filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp + filtrertPåIngenEndringMedLikKompetanse
+    val filtrertPåTilleggstekstMedLikKompetanse =
+        begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
+            it.valgbarhet == Valgbarhet.TILLEGGSTEKST && it.erLikKompetanseIPeriode(
+                begrunnelseGrunnlag,
+            )
+        }
+
+    return filtrertPåEndretVilkår + filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp + filtrertPåIngenEndringMedLikKompetanse + filtrertPåTilleggstekstMedLikKompetanse
 }
 
 fun SanityBegrunnelse.erGjeldendeForRolle(
