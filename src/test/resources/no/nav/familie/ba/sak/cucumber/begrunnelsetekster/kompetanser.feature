@@ -117,8 +117,7 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | 01.04.2023 | 30.06.2023 | UTBETALING         |                                |                                    |                       |
       | 01.07.2023 | 31.08.2023 | UTBETALING         |                                |                                    |                       |
       | 01.09.2023 |            | OPPHØR             | EØS_FORORDNINGEN               | OPPHØR_IKKE_STATSBORGER_I_EØS_LAND |                       |
-
-  @Disabled
+    
   Scenario: Skal begrunne endring i kompetanse når det ikke er noen endringer i resten av behandlingen
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
@@ -136,7 +135,7 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | 2            | 1234    | BARN       | 02.02.2015  |
       | 2            | 5678    | SØKER      | 10.05.1985  |
 
-    Og følgende dagens dato 2023-09-12
+    Og følgende dagens dato 12.09.2023
     Og lag personresultater for begrunnelse for behandling 1
     Og lag personresultater for begrunnelse for behandling 2
 
@@ -182,4 +181,112 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | 01.05.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN               | INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE | REDUKSJON_BARN_DØD_EØS, REDUKSJON_IKKE_ANSVAR_FOR_BARN, FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD |
       | 01.07.2023 | 31.01.2033 | UTBETALING         |                                |                                         |                                                                                                |
       | 01.02.2033 |            | OPPHØR             |                                |                                         |                                                                                                |
+
+  Scenario: Skal kunne begrunne valutajustering når det er reduksjon i samme måned
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | ENDRET_UTBETALING   | SATSENDRING      | Ja                        | EØS                 |
+      | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER | Nei                       | EØS                 |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 16.01.1984  |
+      | 1            | 2       | BARN       | 28.02.2009  |
+      | 1            | 3       | BARN       | 27.08.2011  |
+      | 1            | 4       | BARN       | 20.05.2017  |
+      | 2            | 1       | SØKER      | 16.01.1984  |
+      | 2            | 2       | BARN       | 28.02.2009  |
+      | 2            | 3       | BARN       | 27.08.2011  |
+      | 2            | 4       | BARN       | 20.05.2017  |
+    Og følgende dagens dato 03.11.2023
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår           | Utdypende vilkår                    | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
+      | 1       | LOVLIG_OPPHOLD   |                                     | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING_UTLAND | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+
+      | 2       | GIFT_PARTNERSKAP |                                     | 28.02.2009 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | UNDER_18_ÅR      |                                     | 28.02.2009 | 27.02.2027 | OPPFYLT  | Nei                  |                      |
+      | 2       | LOVLIG_OPPHOLD   |                                     | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_STORBRITANNIA_MED_SØKER  | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_STORBRITANNIA            | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+
+      | 3       | GIFT_PARTNERSKAP |                                     | 27.08.2011 |            | OPPFYLT  | Nei                  |                      |
+      | 3       | UNDER_18_ÅR      |                                     | 27.08.2011 | 26.08.2029 | OPPFYLT  | Nei                  |                      |
+      | 3       | BOR_MED_SØKER    | BARN_BOR_I_STORBRITANNIA_MED_SØKER  | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 3       | LOVLIG_OPPHOLD   |                                     | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 3       | BOSATT_I_RIKET   | BARN_BOR_I_EØS                      | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+
+      | 4       | GIFT_PARTNERSKAP |                                     | 20.05.2017 |            | OPPFYLT  | Nei                  |                      |
+      | 4       | UNDER_18_ÅR      |                                     | 20.05.2017 | 19.05.2035 | OPPFYLT  | Nei                  |                      |
+      | 4       | BOR_MED_SØKER    | BARN_BOR_I_STORBRITANNIA_MED_SØKER  | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 4       | BOSATT_I_RIKET   | BARN_BOR_I_STORBRITANNIA            | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 4       | LOVLIG_OPPHOLD   |                                     | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår           | Utdypende vilkår                    | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
+      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING_UTLAND | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 1       | LOVLIG_OPPHOLD   |                                     | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+
+      | 2       | UNDER_18_ÅR      |                                     | 28.02.2009 | 27.02.2027 | OPPFYLT  | Nei                  |                      |
+      | 2       | GIFT_PARTNERSKAP |                                     | 28.02.2009 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | LOVLIG_OPPHOLD   |                                     | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_STORBRITANNIA_MED_SØKER  | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_STORBRITANNIA            | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+
+      | 3       | UNDER_18_ÅR      |                                     | 27.08.2011 | 26.08.2029 | OPPFYLT  | Nei                  |                      |
+      | 3       | GIFT_PARTNERSKAP |                                     | 27.08.2011 |            | OPPFYLT  | Nei                  |                      |
+      | 3       | LOVLIG_OPPHOLD   |                                     | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 3       | BOSATT_I_RIKET   | BARN_BOR_I_EØS                      | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 3       | BOR_MED_SØKER    | BARN_BOR_I_STORBRITANNIA_MED_SØKER  | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+
+      | 4       | UNDER_18_ÅR      |                                     | 20.05.2017 | 19.05.2035 | OPPFYLT  | Nei                  |                      |
+      | 4       | GIFT_PARTNERSKAP |                                     | 20.05.2017 |            | OPPFYLT  | Nei                  |                      |
+      | 4       | LOVLIG_OPPHOLD   |                                     | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 4       | BOR_MED_SØKER    | BARN_BOR_I_STORBRITANNIA_MED_SØKER  | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | 4       | BOSATT_I_RIKET   | BARN_BOR_I_STORBRITANNIA            | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.05.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 1            | 01.07.2023 | 31.01.2027 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 3       | 1            | 01.05.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 3       | 1            | 01.07.2023 | 31.07.2029 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 4       | 1            | 01.05.2022 | 28.02.2023 | 557   | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 4       | 1            | 01.03.2023 | 30.04.2023 | 604   | ORDINÆR_BARNETRYGD | 100     | 1723 |
+      | 4       | 1            | 01.05.2023 | 30.06.2023 | 0     | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 4       | 1            | 01.07.2023 | 30.04.2035 | 191   | ORDINÆR_BARNETRYGD | 100     | 1310 |
+
+      | 2       | 2            | 01.05.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 2            | 01.07.2023 | 31.01.2027 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 3       | 2            | 01.05.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 3       | 2            | 01.07.2023 | 31.07.2029 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 4       | 2            | 01.05.2022 | 28.02.2023 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 4       | 2            | 01.03.2023 | 30.04.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
+      | 4       | 2            | 01.05.2023 | 30.06.2023 | 144   | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 4       | 2            | 01.07.2023 | 30.04.2035 | 371   | ORDINÆR_BARNETRYGD | 100     | 1310 |
+
+    Og med kompetanser for begrunnelse
+      | AktørId | Fra dato   | Til dato | Resultat              | BehandlingId | Søkers aktivitet  | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
+      | 3, 2    | 01.05.2022 |          | NORGE_ER_PRIMÆRLAND   | 1            | MOTTAR_UFØRETRYGD | I_ARBEID                  | NO                    | NO                             | GB                  |
+      | 4       | 01.05.2022 |          | NORGE_ER_SEKUNDÆRLAND | 1            | MOTTAR_UFØRETRYGD | I_ARBEID                  | NO                    | GB                             | GB                  |
+      | 3, 2    | 01.05.2022 |          | NORGE_ER_PRIMÆRLAND   | 2            | MOTTAR_UFØRETRYGD | I_ARBEID                  | NO                    | NO                             | GB                  |
+      | 4       | 01.05.2022 |          | NORGE_ER_SEKUNDÆRLAND | 2            | MOTTAR_UFØRETRYGD | I_ARBEID                  | NO                    | GB                             | GB                  |
+
+    Når vedtaksperiodene genereres for behandling 2
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                    | Ugyldige begrunnelser |
+      | 01.05.2023 | 30.06.2023 | UTBETALING         |                                | REDUKSJON_UNDER_6_ÅR                    |                       |
+      | 01.05.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN               | REDUKSJON_TILLEGGSTEKST_VALUTAJUSTERING |                       |
 
