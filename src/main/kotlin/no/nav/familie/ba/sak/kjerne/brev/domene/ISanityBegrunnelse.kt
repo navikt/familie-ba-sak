@@ -81,6 +81,7 @@ data class SanityEØSBegrunnelse(
     override val tema: Tema?,
     override val periodeType: BrevPeriodeType?,
     override val begrunnelseTypeForPerson: VedtakBegrunnelseType? = null,
+    override val valgbarhet: Valgbarhet?,
     val annenForeldersAktivitet: List<KompetanseAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
@@ -92,7 +93,6 @@ data class SanityEØSBegrunnelse(
 ) : ISanityBegrunnelse {
     override val lovligOppholdTriggere: List<VilkårTrigger> = emptyList()
     override val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger> = emptyList()
-    override val valgbarhet = null
     override val bosattIRiketTriggere: List<VilkårTrigger> = emptyList()
     override val giftPartnerskapTriggere: List<VilkårTrigger> = emptyList()
     override val borMedSokerTriggere: List<VilkårTrigger> = emptyList()

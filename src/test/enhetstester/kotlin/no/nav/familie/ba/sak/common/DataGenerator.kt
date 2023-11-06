@@ -1285,6 +1285,7 @@ fun lagSanityEøsBegrunnelse(
     fagsakType: FagsakType? = null,
     tema: Tema? = null,
     periodeType: BrevPeriodeType? = null,
+    valgbarhet: Valgbarhet? = null,
 ): SanityEØSBegrunnelse = SanityEØSBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1300,6 +1301,7 @@ fun lagSanityEøsBegrunnelse(
     fagsakType = fagsakType,
     tema = tema,
     periodeType = periodeType,
+    valgbarhet = valgbarhet,
 )
 
 fun lagTriggesAv(
