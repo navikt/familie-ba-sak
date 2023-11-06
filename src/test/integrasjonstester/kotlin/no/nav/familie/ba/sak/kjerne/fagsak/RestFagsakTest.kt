@@ -9,13 +9,11 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -47,16 +45,10 @@ class RestFagsakTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val tilbakekrevingService: TilbakekrevingService,
-
-    @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
 
     @Autowired
     private val brevmalService: BrevmalService,
-
-    @Autowired
-    private val featureToggleService: FeatureToggleService,
 
 ) : AbstractSpringIntegrationTest() {
 
