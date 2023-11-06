@@ -295,7 +295,7 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSkalVisesSelvO
     val begrunnelseMatcherVilkår = begrunnelse.periodeResultat != null &&
         when (begrunnelse.periodeResultat) {
             SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING, SanityPeriodeResultat.REDUKSJON ->
-                begrunnelse.vilkår.all { vilkår ->
+                begrunnelse.vilkår.isNotEmpty() && begrunnelse.vilkår.all { vilkår ->
                     begrunnelseGrunnlagForPersonIPeriode.vilkårResultater.any { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT }
                 }
 
