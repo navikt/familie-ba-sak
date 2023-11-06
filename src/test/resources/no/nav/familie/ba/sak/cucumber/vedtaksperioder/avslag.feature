@@ -145,10 +145,10 @@ Egenskap: Vedtaksperioder med mor og to barn
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456    | 01.12.2016 | 31.12.2020 | 1234  | 1            |
-      | 3456    | 01.10.2021 | 30.11.2034 | 1234  | 1            |
-      | 5678    | 01.12.2016 | 31.12.2020 | 1234  | 1            |
-      | 5678    | 01.10.2021 | 30.11.2034 | 1234  | 1            |
+      | 3456    | 01.01.2017 | 31.12.2020 | 1234  | 1            |
+      | 3456    | 01.11.2021 | 30.11.2034 | 1234  | 1            |
+      | 5678    | 01.01.2017 | 31.12.2020 | 1234  | 1            |
+      | 5678    | 01.11.2021 | 30.11.2034 | 1234  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
@@ -188,10 +188,10 @@ Egenskap: Vedtaksperioder med mor og to barn
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456    | 01.12.2016 | 31.12.2020 | 1234  | 1            |
-      | 3456    | 01.10.2021 | 30.11.2034 | 1234  | 1            |
-      | 5678    | 01.12.2016 | 31.12.2020 | 1234  | 1            |
-      | 5678    | 01.10.2021 | 30.11.2034 | 1234  | 1            |
+      | 3456    | 01.01.2017 | 31.12.2020 | 1234  | 1            |
+      | 3456    | 01.11.2021 | 30.11.2034 | 1234  | 1            |
+      | 5678    | 01.01.2017 | 31.12.2020 | 1234  | 1            |
+      | 5678    | 01.11.2021 | 30.11.2034 | 1234  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
     Så forvent følgende vedtaksperioder med begrunnelser

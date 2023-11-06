@@ -18,7 +18,7 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | 2            | 3456    | BARN       | 02.12.2016  |
 
 
-  Scenario: Skal kun ta med vedtaksperioder som kommer etter
+  Scenario: Skal kun ta med vedtaksperioder som kommer etter endringstidspunktet
 
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1
@@ -47,7 +47,7 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                                     |
-      | 01.01.2021 | 31.10.2021 | Avslag             | Avslag skal alltid med, selv om de er før endringstidspunktet |
+      | 01.01.2021 | 30.09.2021 | Avslag             | Avslag skal alltid med, selv om de er før endringstidspunktet |
       | 01.11.2021 | 30.11.2034 | Utbetaling         | Etter endringstidspunktet                                     |
       | 01.12.2034 |            | Opphør             | Barn er over 18                                               |
 

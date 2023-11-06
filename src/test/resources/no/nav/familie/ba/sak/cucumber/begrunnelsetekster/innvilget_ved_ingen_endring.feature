@@ -35,7 +35,7 @@ Egenskap: Gyldige begrunnelser ved ingen endring
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
-      | 2       | 1            | 01.07.2023 | 31.08.2025 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.07.2023 | 31.08.2023 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
 
     Og med kompetanser for begrunnelse
       | AktørId | Fra dato   | Til dato   | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
