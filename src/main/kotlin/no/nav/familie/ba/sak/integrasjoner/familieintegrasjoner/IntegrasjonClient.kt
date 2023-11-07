@@ -26,6 +26,8 @@ import no.nav.familie.kontrakter.felles.dokdist.AdresseType
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
+import no.nav.familie.kontrakter.felles.dokdistkanal.Distribusjonskanal
+import no.nav.familie.kontrakter.felles.dokdistkanal.DokdistkanalRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
@@ -481,6 +483,17 @@ class IntegrasjonClient(
             formål = "Hent organisasjon $organisasjonsnummer",
         ) {
             getForEntity(uri)
+        }
+    }
+
+    fun hentDistribusjonskanal(request: DokdistkanalRequest): Distribusjonskanal {
+        val uri = URI.create("$integrasjonUri/dokdistkanal/BAR")
+        return kallEksternTjenesteRessurs(
+            tjeneste = "dokdistkanal",
+            uri = uri,
+            formål = "Hent distribusjonskanal for bruker/mottaker",
+        ) {
+            postForEntity(uri, request)
         }
     }
 

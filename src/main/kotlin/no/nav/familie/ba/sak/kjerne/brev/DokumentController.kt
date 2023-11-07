@@ -15,7 +15,9 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.dokdistkanal.Distribusjonskanal
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -41,6 +43,7 @@ class DokumentController(
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val dokumentDistribueringService: DokumentDistribueringService,
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
@@ -170,6 +173,11 @@ class DokumentController(
             fagsakId = fagsakId,
         )
         return ResponseEntity.ok(Ressurs.success(fagsakService.lagRestMinimalFagsak(fagsakId = fagsakId)))
+    }
+
+    @PostMapping(path = ["/distribusjonskanal"])
+    fun hentDistribusjonskanal(@RequestBody personIdent: PersonIdent): Ressurs<Distribusjonskanal> {
+        return Ressurs.success(dokumentDistribueringService.hentDistribusjonskanal(personIdent))
     }
 
     companion object {
