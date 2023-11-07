@@ -43,7 +43,7 @@ Egenskap: Gyldige begrunnelser for utvidet barnetrygd
       | 01.05.2023 | 30.06.2023 | UTBETALING         |           | INNVILGET_BOR_ALENE_MED_BARN | INNVILGET_SKILT       |
       | 01.07.2023 |            | OPPHØR             |           |                              |                       |
 
-  Scenario: Plassholdertekst for scenario - GblFGsLAao
+  Scenario: Skal gi riktig begrunnelser når det ikke er utvidet pga. barnet bor i eøs med annen forelder
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
@@ -117,7 +117,7 @@ Egenskap: Gyldige begrunnelser for utvidet barnetrygd
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                        | Ugyldige begrunnelser |
-      | 01.01.2030 | 31.01.2030 | Utbetaling         |           |                                             |                       |
-      | 01.02.2030 | 31.07.2031 | Utbetaling         |           | Begrunnelse-for-hvorfor-vi-ikke-får-utvidet |                       |
-      | 01.08.2031 |            | Opphør             |           |                                             |                       |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser  | Ugyldige begrunnelser |
+      | 01.01.2030 | 31.01.2030 | Utbetaling         |           |                       |                       |
+      | 01.02.2030 | 31.07.2031 | Utbetaling         |           | REDUKSJON_UNDER_18_ÅR |                       |
+      | 01.08.2031 |            | Opphør             |           |                       |                       |
