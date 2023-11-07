@@ -87,7 +87,7 @@ private fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: 
       | ${it.id} | 1 |           | ${it.resultat} | ${it.opprettetÅrsak} |"""
         } ?: ""
     }
-      | ${behandling.id} | ${behandling.fagsak.id} | ${forrigeBehandling?.id ?: ""} |${behandling.resultat} | ${behandling.opprettetÅrsak} |"""
+      | ${behandling.id} | 1 | ${forrigeBehandling?.id ?: ""} |${behandling.resultat} | ${behandling.opprettetÅrsak} |"""
 
 private fun hentTekstForPersongrunnlag(
     persongrunnlag: PersonopplysningGrunnlag,
@@ -101,7 +101,7 @@ private fun hentTekstForPersongrunnlag(
         hentPersongrunnlagRader(persongrunnlag)
 
 private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): String =
-    persongrunnlag?.personer?.joinToString("") {
+    persongrunnlag?.personer?.sortedBy { it.fødselsdato }?.joinToString("") {
         """
       | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|"""
     } ?: ""

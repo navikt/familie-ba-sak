@@ -78,10 +78,11 @@ Egenskap: Vedtaksperioder med endrede utbetalinger
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 1234    | 31.05.2022 | 31.06.2034 | 1354  | 1            |
-      | 3456    | 08.12.2021 | 31.06.2034 | 1354  | 1            |
-      | 3456    | 08.12.2021 | 31.06.2034 | 1354  | 2            |
-      | 5678    | 08.12.2021 | 31.10.2031 | 1354  | 1            |
-      | 5678    | 08.12.2021 | 31.10.2031 | 1354  | 2            |
+      | 3456    | 01.12.2021 | 31.06.2034 | 1354  | 1            |
+      | 5678    | 01.12.2021 | 31.10.2031 | 1354  | 1            |
+
+      | 3456    | 01.12.2021 | 31.12.2021 | 1354  | 2            |
+      | 5678    | 01.12.2021 | 31.12.2021 | 1354  | 2            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 2
 
@@ -121,9 +122,9 @@ Egenskap: Vedtaksperioder med endrede utbetalinger
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 1234    | 31.05.2021 | 30.10.2033 | 1354  | 1            |
-      | 3456    | 31.05.2021 | 30.10.2033 | 1354  | 1            |
-      | 3456    | 31.04.2023 | 30.10.2033 | 1354  | 2            |
+      | 1234    | 01.06.2021 | 30.09.2033 | 1354  | 1            |
+      | 3456    | 01.06.2021 | 30.09.2033 | 1354  | 1            |
+      | 3456    | 01.04.2023 | 30.09.2033 | 1354  | 2            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 2
 

@@ -47,7 +47,6 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent |
       | 2       | 1            | 01.04.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     |
       | 3       | 1            | 01.04.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     |
-      | 2       | 2            | 01.04.2023 | 30.04.2023 | 1722  | ORDINÆR_BARNETRYGD | 100     |
       | 2       | 2            | 01.05.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     |
       | 3       | 2            | 01.04.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     |
 

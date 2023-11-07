@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -35,19 +33,15 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedDatert
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedNullable
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.alleOrdinæreVilkårErOppfylt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilTidslinjeForSplittForPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -139,7 +133,6 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                     ),
                     vedtaksperiodeGrunnlagForPerson = forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
                         person = person,
-                        søker = søker,
                         erUtbetalingSmåbarnstilleggTidslinje = erUtbetalingSmåbarnstilleggTidslinje,
                         vilkårRolle = vilkårRolle,
                     ),
@@ -203,16 +196,9 @@ data class BehandlingsGrunnlagForVedtaksperioder(
 
     private fun Tidslinje<List<VilkårResultat>, Måned>.tilGrunnlagForPersonTidslinje(
         person: Person,
-        søker: Person,
         erUtbetalingSmåbarnstilleggTidslinje: Tidslinje<Boolean, Måned>,
         vilkårRolle: PersonType,
     ): Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned> {
-        val harRettPåUtbetalingTidslinje = this.tilHarRettPåUtbetalingTidslinje(
-            person = person,
-            søker = søker,
-            vilkårRolle = vilkårRolle,
-        )
-
         val kompetanseTidslinje = utfylteKompetanser.filtrerPåAktør(person.aktør)
             .tilTidslinje().mapIkkeNull { KompetanseForVedtaksperiode(it) }
 
@@ -229,17 +215,15 @@ data class BehandlingsGrunnlagForVedtaksperioder(
             perioderOvergangsstønad.filtrerPåAktør(person.aktør)
                 .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(erUtbetalingSmåbarnstilleggTidslinje)
 
-        val grunnlagTidslinje = harRettPåUtbetalingTidslinje
-            .kombinerMedDatert(
-                this.tilVilkårResultaterForVedtaksPeriodeTidslinje(),
-                andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForVedtaksPeriodeTidslinje(),
-            ) { personHarRettPåUtbetalingIPeriode, vilkårResultater, andeler, tidspunkt ->
+        val andelTilkjentYtelseTidslinje = andelerTilkjentYtelse
+            .filtrerPåAktør(person.aktør).filtrerPåRolle(vilkårRolle).tilAndelerForVedtaksPeriodeTidslinje()
+
+        val grunnlagTidslinje = this.tilVilkårResultaterForVedtaksPeriodeTidslinje()
+            .kombinerMed(andelTilkjentYtelseTidslinje) { vilkårResultater, andeler ->
                 lagGrunnlagForVilkårOgAndel(
-                    personHarRettPåUtbetalingIPeriode = personHarRettPåUtbetalingIPeriode,
                     vilkårResultater = vilkårResultater,
                     person = person,
                     andeler = andeler,
-                    tidspunkt,
                 )
             }.kombinerMedNullable(kompetanseTidslinje) { grunnlagForPerson, kompetanse ->
                 lagGrunnlagMedKompetanse(grunnlagForPerson, kompetanse)
@@ -258,6 +242,16 @@ data class BehandlingsGrunnlagForVedtaksperioder(
             .perioder()
             .dropWhile { !it.erInnvilgetEllerEksplisittAvslag() }
             .tilTidslinje()
+    }
+}
+
+private fun List<AndelTilkjentYtelse>.filtrerPåRolle(
+    vilkårRolle: PersonType,
+) = filter {
+    if (vilkårRolle == PersonType.SØKER) {
+        it.erSøkersAndel()
+    } else {
+        !it.erSøkersAndel()
     }
 }
 
@@ -396,36 +390,25 @@ private fun Iterable<VilkårResultat>.filtrerErIkkeOrdinærtFor(persontype: Pers
 }
 
 private fun lagGrunnlagForVilkårOgAndel(
-    personHarRettPåUtbetalingIPeriode: Boolean?,
     vilkårResultater: List<VilkårResultatForVedtaksperiode>?,
     person: Person,
     andeler: Iterable<AndelForVedtaksperiode>?,
-    måned: Tidspunkt<Måned>,
-) = if (personHarRettPåUtbetalingIPeriode == true) {
-    if (andeler == null) {
-        secureLogger.info(
-            "Andeler må finnes for innvilgede vedtaksperioder, men det var ikke andeler i ${
-                måned.tilYearMonthEllerNull()?.tilMånedÅr() ?: "uendelig ${måned.uendelighet}"
-            } for $person",
+): VedtaksperiodeGrunnlagForPerson {
+    val andelerListe = andeler?.toList()
+
+    return if (!andelerListe.isNullOrEmpty()) {
+        VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
+            vilkårResultaterForVedtaksperiode = vilkårResultater
+                ?: error("vilkårResultatene burde alltid finnes om vi andeler."),
+            person = person,
+            andeler = andeler,
+        )
+    } else {
+        VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
+            vilkårResultaterForVedtaksperiode = vilkårResultater ?: emptyList(),
+            person = person,
         )
     }
-
-    VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
-        vilkårResultaterForVedtaksperiode = vilkårResultater
-            ?: error("vilkårResultatene burde alltid finnes om vi har innvilget vedtaksperiode."),
-        person = person,
-        andeler = andeler
-            ?: error(
-                "Andeler må finnes for innvilgede vedtaksperioder, men det var ikke andeler i ${
-                    måned.tilYearMonthEllerNull()?.tilMånedÅr() ?: "uendelig ${måned.uendelighet}"
-                }",
-            ),
-    )
-} else {
-    VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
-        vilkårResultaterForVedtaksperiode = vilkårResultater ?: emptyList(),
-        person = person,
-    )
 }
 
 private fun lagGrunnlagMedKompetanse(
@@ -473,38 +456,6 @@ private fun lagGrunnlagMedOvergangsstønad(
     null -> null
 }
 
-// TODO: Kan dette erstattes ved å se på hvorvidt det er andeler eller ikke i stedet?
-private fun Tidslinje<List<VilkårResultat>, Måned>.tilHarRettPåUtbetalingTidslinje(
-    person: Person,
-    søker: Person,
-    vilkårRolle: PersonType,
-): Tidslinje<Boolean, Måned> = this.map { vilkårResultater ->
-    if (vilkårResultater.isNullOrEmpty()) {
-        null
-    } else {
-        when (vilkårRolle) {
-            PersonType.SØKER -> vilkårResultater.filtrerPåAktør(søker.aktør).all { it.erOppfylt() }
-
-            PersonType.BARN -> {
-                val barnSineVilkårErOppfylt = vilkårResultater.filtrerPåAktør(person.aktør)
-                    .alleOrdinæreVilkårErOppfylt(
-                        PersonType.BARN,
-                        FagsakType.NORMAL,
-                    )
-                val søkerSineVilkårErOppfylt = vilkårResultater.filtrerPåAktør(søker.aktør)
-                    .alleOrdinæreVilkårErOppfylt(
-                        PersonType.SØKER,
-                        FagsakType.NORMAL,
-                    )
-
-                barnSineVilkårErOppfylt && søkerSineVilkårErOppfylt
-            }
-
-            PersonType.ANNENPART -> throw Feil("Ikke implementert for annenpart")
-        }
-    }
-}
-
 fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje(): Tidslinje<Iterable<AndelForVedtaksperiode>, Måned> =
     this.tilTidslinjerPerAktørOgType()
         .values
@@ -548,10 +499,6 @@ fun List<UtfyltValutakurs>.filtrerPåAktør(aktør: Aktør) =
 @JvmName("utfyltUtenlandskPeriodebeløpFiltrerPåAktør")
 fun List<UtfyltUtenlandskPeriodebeløp>.filtrerPåAktør(aktør: Aktør) =
     this.filter { it.barnAktører.contains(aktør) }
-
-@JvmName("vilkårResultatFiltrerPåAktør")
-fun List<VilkårResultat>.filtrerPåAktør(aktør: Aktør) =
-    filter { it.personResultat?.aktør == aktør }
 
 private fun Periode<VedtaksperiodeGrunnlagForPerson, Måned>.erInnvilgetEllerEksplisittAvslag(): Boolean {
     val grunnlagForPerson = innhold ?: return false

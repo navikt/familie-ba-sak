@@ -29,9 +29,8 @@ Egenskap: Vedtaksperioder for opphørsperioder skal håndtere vilkårsendringer
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456    | 01.12.2016 | 31.04.2019 | 1054  | 1            |
-      | 3456    | 01.05.2019 | 31.08.2022 | 1354  | 1            |
-      | 3456    | 01.09.2022 | 30.11.2034 | 1354  | 1            |
+      | 3456    | 01.01.2017 | 31.04.2019 | 1054  | 1            |
+      | 3456    | 01.09.2022 | 31.01.2034 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
