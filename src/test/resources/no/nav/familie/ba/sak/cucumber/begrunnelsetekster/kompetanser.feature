@@ -290,6 +290,86 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | 01.05.2023 | 30.06.2023 | UTBETALING         |                                | REDUKSJON_UNDER_6_ÅR                    |                       |
       | 01.05.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN               | REDUKSJON_TILLEGGSTEKST_VALUTAJUSTERING |                       |
 
+  Scenario: Skal dele opp begrunnelse etter antall kompetanser og skal kun dra med riktige barn per kompetanse
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | ENDRET_UTBETALING   | SATSENDRING      | Ja                        | EØS                 |
+      | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER | Nei                       | EØS                 |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 17.12.1976  |
+      | 1            | 2       | BARN       | 10.08.2009  |
+      | 1            | 3       | BARN       | 07.05.2014  |
+      | 2            | 1       | SØKER      | 17.12.1976  |
+      | 2            | 2       | BARN       | 10.08.2009  |
+      | 2            | 3       | BARN       | 07.05.2014  |
+
+    Og følgende dagens dato 07.11.2023
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
+      | 1       | LOVLIG_OPPHOLD   |                              | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 15.12.2021 | 15.03.2022 | OPPFYLT  | Nei                  |                      |
+
+      | 2       | UNDER_18_ÅR      |                              | 10.08.2009 | 09.08.2027 | OPPFYLT  | Nei                  |                      |
+      | 2       | GIFT_PARTNERSKAP |                              | 10.08.2009 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | LOVLIG_OPPHOLD   |                              | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_NORGE_MED_SØKER   | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+
+      | 3       | UNDER_18_ÅR      |                              | 07.05.2014 | 06.05.2032 | OPPFYLT  | Nei                  |                      |
+      | 3       | GIFT_PARTNERSKAP |                              | 07.05.2014 |            | OPPFYLT  | Nei                  |                      |
+      | 3       | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+      | 3       | BOR_MED_SØKER    | BARN_BOR_I_NORGE_MED_SØKER   | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+      | 3       | LOVLIG_OPPHOLD   |                              | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
+      | 1       | LOVLIG_OPPHOLD   |                              | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 15.12.2021 | 15.03.2022 | OPPFYLT  | Nei                  |                      |
+
+      | 2       | UNDER_18_ÅR      |                              | 10.08.2009 | 09.08.2027 | OPPFYLT  | Nei                  |                      |
+      | 2       | GIFT_PARTNERSKAP |                              | 10.08.2009 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | LOVLIG_OPPHOLD   |                              | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_NORGE_MED_SØKER   | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+
+      | 3       | GIFT_PARTNERSKAP |                              | 07.05.2014 |            | OPPFYLT  | Nei                  |                      |
+      | 3       | UNDER_18_ÅR      |                              | 07.05.2014 | 06.05.2032 | OPPFYLT  | Nei                  |                      |
+      | 3       | BOR_MED_SØKER    | BARN_BOR_I_NORGE_MED_SØKER   | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+      | 3       | LOVLIG_OPPHOLD   |                              | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+      | 3       | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 09.08.2021 |            | OPPFYLT  | Nei                  |                      |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.01.2022 | 31.03.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 1            | 01.01.2022 | 31.03.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 2            | 01.01.2022 | 31.03.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 2            | 01.01.2022 | 31.03.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+
+    Og med kompetanser for begrunnelse
+      | AktørId | Fra dato   | Til dato   | Resultat            | BehandlingId | Søkers aktivitet                     | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
+      | 2       | 01.01.2022 | 31.03.2022 | NORGE_ER_PRIMÆRLAND | 2            | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | INAKTIV                   | NO                    | PL                             | NO                  |
+      | 3       | 01.01.2022 | 31.03.2022 | NORGE_ER_PRIMÆRLAND | 2            | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | I_ARBEID                  | NO                    | PL                             | NO                  |
+
+    Når vedtaksperiodene genereres for behandling 2
+
+    Og når disse begrunnelsene er valgt for behandling 2
+      | Fra dato   | Til dato   | Standardbegrunnelser | Eøsbegrunnelser               | Fritekster |
+      | 01.01.2022 | 31.03.2022 |                      | INNVILGET_PRIMÆRLAND_STANDARD |            |
+
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.01.2022 til 31.03.2022
+      | Begrunnelse                   | Type | Barnas fødselsdatoer | Antall barn | Målform | Søkers aktivitet                     | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
+      | INNVILGET_PRIMÆRLAND_STANDARD | EØS  | 10.08.09             | 1           | NB      | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | INAKTIV                   | Norge                 | Polen                          | Norge               |
+      | INNVILGET_PRIMÆRLAND_STANDARD | EØS  | 07.05.14             | 1           | NB      | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | I_ARBEID                  | Norge                 | Polen                          | Norge               |
+
   Scenario: Skal kunne begrunne nullutbetaling når det er reduksjon i samme måned
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |

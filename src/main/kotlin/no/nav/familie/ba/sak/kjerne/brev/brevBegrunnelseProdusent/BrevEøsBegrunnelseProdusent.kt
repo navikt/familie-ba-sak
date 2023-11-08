@@ -69,19 +69,26 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
             ),
         )
     } else {
-        kompetanser.map { kompetanse ->
-            EØSBegrunnelseDataMedKompetanse(
-                vedtakBegrunnelseType = this.vedtakBegrunnelseType,
-                apiNavn = sanityBegrunnelse.apiNavn,
-                annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
-                annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland?.tilLandNavn(landkoder)?.navn,
-                barnetsBostedsland = kompetanse.barnetsBostedsland.tilLandNavn(landkoder).navn,
-                barnasFodselsdatoer = Utils.slåSammen(barnIBegrunnelse.map { it.fødselsdato.tilKortString() }),
-                antallBarn = barnIBegrunnelse.size,
-                maalform = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform.tilSanityFormat(),
-                sokersAktivitet = kompetanse.søkersAktivitet,
-                sokersAktivitetsland = kompetanse.søkersAktivitetsland.tilLandNavn(landkoder).navn,
-            )
+        kompetanser.mapNotNull { kompetanse ->
+            val barnIBegrunnelseOgIKompetanse =
+                kompetanse.barnAktører.mapNotNull { barnAktør -> personerGjeldeneForBegrunnelse.find { it.aktør == barnAktør } }
+
+            if (barnIBegrunnelseOgIKompetanse.isNotEmpty()) {
+                EØSBegrunnelseDataMedKompetanse(
+                    vedtakBegrunnelseType = vedtakBegrunnelseType,
+                    apiNavn = sanityBegrunnelse.apiNavn,
+                    annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
+                    annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland?.tilLandNavn(landkoder)?.navn,
+                    barnetsBostedsland = kompetanse.barnetsBostedsland.tilLandNavn(landkoder).navn,
+                    barnasFodselsdatoer = Utils.slåSammen(barnIBegrunnelseOgIKompetanse.map { it.fødselsdato.tilKortString() }),
+                    antallBarn = barnIBegrunnelseOgIKompetanse.size,
+                    maalform = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform.tilSanityFormat(),
+                    sokersAktivitet = kompetanse.søkersAktivitet,
+                    sokersAktivitetsland = kompetanse.søkersAktivitetsland.tilLandNavn(landkoder).navn,
+                )
+            } else {
+                null
+            }
         }
     }
 }
