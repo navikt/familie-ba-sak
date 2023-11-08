@@ -48,7 +48,7 @@ fun genererVedtaksperioder(
         return lagPeriodeForOmregningsbehandling(
             vedtak = vedtak,
             nåDato = nåDato,
-            andelTilkjentYtelseer = grunnlagForVedtakPerioder.andelerTilkjentYtelse,
+            andelTilkjentYtelser = grunnlagForVedtakPerioder.andelerTilkjentYtelse,
         )
     }
 
@@ -454,10 +454,10 @@ fun lagFortsattInnvilgetPeriode(
 
 fun lagPeriodeForOmregningsbehandling(
     vedtak: Vedtak,
-    andelTilkjentYtelseer: List<AndelTilkjentYtelse>,
+    andelTilkjentYtelser: List<AndelTilkjentYtelse>,
     nåDato: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
-    val nesteEndringITilkjentYtelse = andelTilkjentYtelseer.tilTidslinjerPerAktørOgType().values
+    val nesteEndringITilkjentYtelse = andelTilkjentYtelser.tilTidslinjerPerAktørOgType().values
         .kombiner { it.toList() }.perioder()
         .singleOrNull { it.periodeInneholder(nåDato) }
         ?.tilOgMed?.tilYearMonth()?.sisteDagIInneværendeMåned()
