@@ -520,6 +520,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_TILLEGGSTEKST_NULLUTBETALING {
         override val sanityApiNavn = "reduksjonTilleggstekstNullutbetaling"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_UK_MIDLERTIDIG_DIFFERANSEUTBETALING {
+        override val sanityApiNavn = "reduksjonUkMidlertidigDifferanseutbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
     }, ;
 
     override val kanDelesOpp: Boolean = false
