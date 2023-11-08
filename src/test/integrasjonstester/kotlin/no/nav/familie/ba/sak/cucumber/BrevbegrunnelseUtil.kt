@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.norskDatoFormatter
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseInt
-import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriInt
@@ -114,10 +113,10 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
         rad,
     ).sanityApiNavn
 
-    val barnasFodselsdatoer = parseString(
+    val barnasFodselsdatoer = parseValgfriString(
         BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDATOER,
         rad,
-    )
+    ) ?: ""
 
     val antallBarn = parseInt(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.ANTALL_BARN, rad)
 
