@@ -457,8 +457,10 @@ fun lagPeriodeForOmregningsbehandling(
     andelTilkjentYtelser: List<AndelTilkjentYtelse>,
     nåDato: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
-    val nesteEndringITilkjentYtelse = andelTilkjentYtelser.tilTidslinjerPerAktørOgType().values
-        .kombiner { it.toList() }.perioder()
+    val andelerTidslinje: Tidslinje<List<AndelForVedtaksperiode>, Måned> =
+        andelTilkjentYtelser.tilTidslinjerPerAktørOgType().values.kombiner { it.toList() }
+
+    val nesteEndringITilkjentYtelse = andelerTidslinje.perioder()
         .singleOrNull { it.periodeInneholder(nåDato) }
         ?.tilOgMed?.tilYearMonth()?.sisteDagIInneværendeMåned()
 
