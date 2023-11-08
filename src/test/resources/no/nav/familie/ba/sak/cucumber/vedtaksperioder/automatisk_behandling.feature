@@ -5,7 +5,7 @@ Egenskap: Vedtaksperioder ved automatisk behandling
 
   Bakgrunn:
 
-  Scenario: Skal splitte vedtaksperiode på opphold i småbarnstillegg
+  Scenario: Skal splitte vedtaksperiode på oppstart av ny andel ved omregningsoppgave
     Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
