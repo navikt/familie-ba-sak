@@ -98,7 +98,7 @@ class OppgaveController(
     fun hentDataForManuellJournalføring(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<DataForManuellJournalføring>> {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val aktør = oppgave.aktoerId?.let { personidentService.hentAktør(it) }
-        
+
         val journalpost = if (oppgave.journalpostId != null) integrasjonClient.hentJournalpost(oppgave.journalpostId!!) else throw Feil("Oppgave har ingen journalpost knyttet til seg")
 
         val dataForManuellJournalføring = DataForManuellJournalføring(
@@ -113,7 +113,7 @@ class OppgaveController(
 
         return ResponseEntity.ok(
             Ressurs.success(
-                dataForManuellJournalføring
+                dataForManuellJournalføring,
             ),
         )
     }
