@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
 import no.nav.familie.http.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
@@ -31,7 +32,8 @@ class BrevKlient(
     @Cacheable("begrunnelsestekst", cacheManager = "shortCache")
     fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseMedData, behandlingId: Long): String {
         val uri = URI.create("$familieBrevUri/ba-sak/begrunnelser/${begrunnelseData.apiNavn}/tekst/")
-        secureLogger.info("Kaller familie brev($uri) med data $begrunnelseData på behandling $behandlingId")
+        secureLogger.info("Kaller familie brev($uri) med data $begrunnelseData")
+        logger.info("Kaller familie brev($uri) på behandling $behandlingId")
 
         return kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Henter begrunnelsestekst") {
             postForEntity(uri, begrunnelseData)
