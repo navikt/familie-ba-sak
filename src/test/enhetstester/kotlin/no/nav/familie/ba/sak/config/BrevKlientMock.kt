@@ -22,7 +22,7 @@ class BrevKlientMock : BrevKlient(
         return TEST_PDF
     }
 
-    override fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseMedData): String {
+    override fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseMedData, behandlingId: Long): String {
         return "Dummytekst for ${begrunnelseData.apiNavn}"
     }
 }
