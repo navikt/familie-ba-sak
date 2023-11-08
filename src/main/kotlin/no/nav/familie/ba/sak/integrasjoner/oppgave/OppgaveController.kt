@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.oppgave
 
 import jakarta.validation.Valid
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
@@ -14,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -99,9 +99,11 @@ class OppgaveController(
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val aktør = oppgave.aktoerId?.let { personidentService.hentAktør(it) }
 
+        val journalpost = if (oppgave.journalpostId != null) integrasjonClient.hentJournalpost(oppgave.journalpostId!!) else throw Feil("Oppgave har ingen journalpost knyttet til seg")
+
         val dataForManuellJournalføring = DataForManuellJournalføring(
             oppgave = oppgave,
-            journalpost = null,
+            journalpost = journalpost,
             person = aktør?.let {
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it)
                     .tilRestPersonInfo(it.aktivFødselsnummer())
@@ -109,22 +111,11 @@ class OppgaveController(
             minimalFagsak = if (aktør != null) fagsakService.hentMinimalFagsakForPerson(aktør).data else null,
         )
 
-        val journalpost: Journalpost? =
-            if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId!!)
-
-        return when (journalpost) {
-            null -> {
-                ResponseEntity.ok(Ressurs.success(dataForManuellJournalføring))
-            }
-
-            else -> ResponseEntity.ok(
-                Ressurs.success(
-                    dataForManuellJournalføring.copy(
-                        journalpost = journalpost,
-                    ),
-                ),
-            )
-        }
+        return ResponseEntity.ok(
+            Ressurs.success(
+                dataForManuellJournalføring,
+            ),
+        )
     }
 
     @GetMapping("/{oppgaveId}/ferdigstill")

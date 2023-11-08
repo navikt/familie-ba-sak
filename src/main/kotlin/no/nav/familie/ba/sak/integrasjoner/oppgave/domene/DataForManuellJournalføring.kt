@@ -8,6 +8,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 data class DataForManuellJournalføring(
     val oppgave: Oppgave,
     val person: RestPersonInfo?,
-    val journalpost: Journalpost?,
+    val journalpost: Journalpost,
     val minimalFagsak: RestMinimalFagsak?,
 )
