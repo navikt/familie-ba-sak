@@ -29,9 +29,9 @@ class BrevKlient(
     }
 
     @Cacheable("begrunnelsestekst", cacheManager = "shortCache")
-    fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseMedData): String {
+    fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseMedData, behandlingId: Long): String {
         val uri = URI.create("$familieBrevUri/ba-sak/begrunnelser/${begrunnelseData.apiNavn}/tekst/")
-        secureLogger.info("Kaller familie brev($uri) med data $begrunnelseData")
+        secureLogger.info("Kaller familie brev($uri) med data $begrunnelseData på $behandlingId")
 
         return kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Henter begrunnelsestekst") {
             postForEntity(uri, begrunnelseData)

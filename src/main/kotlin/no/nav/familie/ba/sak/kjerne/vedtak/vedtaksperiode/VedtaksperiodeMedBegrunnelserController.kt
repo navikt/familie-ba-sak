@@ -160,8 +160,8 @@ class VedtaksperiodeMedBegrunnelserController(
         val begrunnelser = brevBegrunnelser.map {
             when (it) {
                 is FritekstBegrunnelse -> it.fritekst
-                is BegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
-                is EØSBegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
+                is BegrunnelseData -> brevKlient.hentBegrunnelsestekst(it, behandlingId)
+                is EØSBegrunnelseData -> brevKlient.hentBegrunnelsestekst(it, behandlingId)
                 else -> throw Feil("Ukjent begrunnelsestype")
             }
         }
