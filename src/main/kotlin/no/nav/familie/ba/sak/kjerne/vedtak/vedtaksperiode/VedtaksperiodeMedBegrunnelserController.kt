@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_GENERERING_AV_BREVOBJEKTER
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
@@ -17,8 +16,7 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.finnBegrunnelseGrunnlagPerPerson
@@ -160,9 +158,7 @@ class VedtaksperiodeMedBegrunnelserController(
         val begrunnelser = brevBegrunnelser.map {
             when (it) {
                 is FritekstBegrunnelse -> it.fritekst
-                is BegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
-                is EØSBegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
-                else -> throw Feil("Ukjent begrunnelsestype")
+                is BegrunnelseMedData -> brevKlient.hentBegrunnelsestekst(it, vedtaksperiode)
             }
         }
 
