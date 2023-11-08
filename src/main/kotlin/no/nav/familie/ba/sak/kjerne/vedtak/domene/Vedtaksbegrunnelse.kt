@@ -86,7 +86,7 @@ enum class Begrunnelsetype {
     FRITEKST,
 }
 
-interface BrevBegrunnelse : Comparable<BrevBegrunnelse> {
+sealed interface BrevBegrunnelse : Comparable<BrevBegrunnelse> {
     val type: Begrunnelsetype
     val vedtakBegrunnelseType: VedtakBegrunnelseType?
 
