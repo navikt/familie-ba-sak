@@ -438,9 +438,9 @@
                     </executions>
                     <dependencies>
                         <dependency>
-                            <groupId>com.pinterest</groupId>
-                            <artifactId>ktlint</artifactId>
-                            <version>0.50.0</version>
+                            <groupId>com.pinterest.ktlint</groupId>
+                            <artifactId>ktlint-cli</artifactId>
+                            <version>1.0.1</version>
                         </dependency>
                     </dependencies>
                 </plugin>
