@@ -160,3 +160,73 @@ Egenskap: Brevbegrunnelser ved opphør
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.08.2023 til -
       | Begrunnelse      | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | OPPHØR_UTVANDRET | STANDARD | Ja            | 06.03.12 og 21.12.16 | 0           | juli 2023                            | NB      | 0     |
+
+  Scenario: Skal ta med barna som har mistet utbetaling fra forrige behandling på opphørsbegrunnelse som gjelder søker
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | OPPHØRT             | NYE_OPPLYSNINGER | Nei                       | NASJONAL            |
+      | 2            | 1        | 1                   | INNVILGET_OG_ENDRET | SØKNAD           | Nei                       | EØS                 |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 22.12.1977  |
+      | 1            | 2       | BARN       | 04.05.2006  |
+      | 2            | 1       | SØKER      | 22.12.1977  |
+      | 2            | 2       | BARN       | 04.05.2006  |
+
+    Og følgende dagens dato 09.11.2023
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser |
+      | 1       | LOVLIG_OPPHOLD                |                  | 01.04.2022 |            | OPPFYLT      | Nei                  |                      |
+      | 1       | BOSATT_I_RIKET                |                  | 01.04.2022 | 21.05.2022 | OPPFYLT      | Nei                  |                      |
+      | 1       | BOSATT_I_RIKET                |                  | 22.05.2022 |            | IKKE_OPPFYLT | Nei                  |                      |
+
+      | 2       | UNDER_18_ÅR                   |                  | 04.05.2006 | 03.05.2024 | OPPFYLT      | Nei                  |                      |
+      | 2       | GIFT_PARTNERSKAP              |                  | 04.05.2006 |            | OPPFYLT      | Nei                  |                      |
+      | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.04.2022 |            | OPPFYLT      | Nei                  |                      |
+      | 2       | BOR_MED_SØKER                 | DELT_BOSTED      | 01.04.2022 |            | OPPFYLT      | Nei                  |                      |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
+      | 1       | LOVLIG_OPPHOLD   |                              | 04.08.2022 | 15.09.2023 | OPPFYLT  | Nei                  |                      |
+      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 04.08.2022 | 15.09.2023 | OPPFYLT  | Nei                  |                      |
+
+      | 2       | GIFT_PARTNERSKAP |                              | 04.05.2006 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | UNDER_18_ÅR      |                              | 04.05.2006 | 03.05.2024 | OPPFYLT  | Nei                  |                      |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 04.08.2022 | 15.09.2023 | OPPFYLT  | Nei                  |                      |
+      | 2       | LOVLIG_OPPHOLD   |                              | 04.08.2022 | 15.09.2023 | OPPFYLT  | Nei                  |                      |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 04.08.2022 | 15.09.2023 | OPPFYLT  | Nei                  |                      |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.05.2022 | 31.05.2022 | 527   | ORDINÆR_BARNETRYGD | 50      | 1054 |
+
+      | 2       | 2            | 01.09.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 2            | 01.07.2023 | 30.09.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+
+    Og med kompetanser for begrunnelse
+      | AktørId | Fra dato   | Til dato   | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
+      | 2       | 01.09.2022 | 30.09.2023 | NORGE_ER_PRIMÆRLAND | 2            | ARBEIDER         | I_ARBEID                  | NO                    | NO                             | SE                  |
+
+    Når vedtaksperiodene genereres for behandling 2
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser       | Ugyldige begrunnelser |
+      | 01.05.2022 | 31.08.2022 | OPPHØR             |                                | OPPHØR_IKKE_BOSATT_I_NORGE |                       |
+
+
+    Og når disse begrunnelsene er valgt for behandling 2
+      | Fra dato   | Til dato   | Standardbegrunnelser       | Eøsbegrunnelser | Fritekster |
+      | 01.05.2022 | 31.08.2022 | OPPHØR_IKKE_BOSATT_I_NORGE |                 |            |
+
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.05.2022 til 31.08.2022
+      | Begrunnelse                | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
+      | OPPHØR_IKKE_BOSATT_I_NORGE | STANDARD | Ja            | 04.05.06             | 1           | april 2022                           | NB      | 0     |
