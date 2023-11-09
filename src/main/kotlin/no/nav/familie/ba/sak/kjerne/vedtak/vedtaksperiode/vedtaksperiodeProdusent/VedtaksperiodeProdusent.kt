@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDateEllerNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
@@ -46,7 +48,7 @@ fun genererVedtaksperioder(
         return lagPeriodeForOmregningsbehandling(
             vedtak = vedtak,
             nåDato = nåDato,
-            andelTilkjentYtelseer = grunnlagForVedtakPerioder.andelerTilkjentYtelse,
+            andelTilkjentYtelser = grunnlagForVedtakPerioder.andelerTilkjentYtelse,
         )
     }
 
@@ -452,12 +454,15 @@ fun lagFortsattInnvilgetPeriode(
 
 fun lagPeriodeForOmregningsbehandling(
     vedtak: Vedtak,
-    andelTilkjentYtelseer: List<AndelTilkjentYtelse>,
+    andelTilkjentYtelser: List<AndelTilkjentYtelse>,
     nåDato: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
-    val nesteEndringITilkjentYtelse = andelTilkjentYtelseer
-        .filter { it.periodeInneholder(nåDato) }
-        .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
+    val andelerTidslinje: Tidslinje<List<AndelForVedtaksperiode>, Måned> =
+        andelTilkjentYtelser.tilTidslinjerPerAktørOgType().values.kombiner { it.toList() }
+
+    val nesteEndringITilkjentYtelse = andelerTidslinje.perioder()
+        .singleOrNull { it.periodeInneholder(nåDato) }
+        ?.tilOgMed?.tilYearMonth()?.sisteDagIInneværendeMåned()
 
     return listOf(
         VedtaksperiodeMedBegrunnelser(
@@ -470,6 +475,6 @@ fun lagPeriodeForOmregningsbehandling(
     )
 }
 
-private fun AndelTilkjentYtelse.periodeInneholder(
+private fun <T> Periode<T, Måned>.periodeInneholder(
     nåDato: LocalDate,
-) = stønadFom <= nåDato.toYearMonth() && stønadTom >= nåDato.toYearMonth()
+) = this.fraOgMed.tilYearMonth() <= nåDato.toYearMonth() && this.tilOgMed.tilYearMonth() >= nåDato.toYearMonth()

@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import java.time.YearMonth
 
@@ -64,7 +65,18 @@ object BehandlingsresultatEndringUtils {
             forrigeEndretAndeler = forrigeEndretAndeler,
         )
 
-        val erMinstEnEndring = erEndringIBeløp || erEndringIKompetanse || erEndringIVilkårsvurdering || erEndringIEndretUtbetalingAndeler
+        val erMinstEnEndring =
+            erEndringIBeløp || erEndringIKompetanse || erEndringIVilkårsvurdering || erEndringIEndretUtbetalingAndeler
+
+        if (erMinstEnEndring) {
+            logger.info(
+                "Endringer: " +
+                    "erEndringIBeløp=$erEndringIBeløp, " +
+                    "erEndringIKompetanse=$erEndringIKompetanse, " +
+                    "erEndringIVilkårsvurdering=$erEndringIVilkårsvurdering, " +
+                    "erEndringIEndretUtbetalingAndeler=$erEndringIEndretUtbetalingAndeler",
+            )
+        }
 
         return if (erMinstEnEndring) Endringsresultat.ENDRING else Endringsresultat.INGEN_ENDRING
     }

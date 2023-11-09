@@ -4,6 +4,7 @@ import io.mockk.spyk
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -22,7 +23,10 @@ class BrevKlientMock : BrevKlient(
         return TEST_PDF
     }
 
-    override fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseMedData): String {
+    override fun hentBegrunnelsestekst(
+        begrunnelseData: BegrunnelseMedData,
+        vedtaksperiode: VedtaksperiodeMedBegrunnelser,
+    ): String {
         return "Dummytekst for ${begrunnelseData.apiNavn}"
     }
 }

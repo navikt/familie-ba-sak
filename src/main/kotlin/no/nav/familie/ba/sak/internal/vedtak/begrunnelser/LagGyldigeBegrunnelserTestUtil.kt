@@ -374,7 +374,7 @@ fun hentEØSBrevBegrunnelseTekster(
         """
 
     Så forvent følgende brevbegrunnelser for behandling $behandlingId i periode ${vedtaksperiode.fom?.tilddMMyyyy() ?: "-"} til ${vedtaksperiode.tom?.tilddMMyyyy() ?: "-"}
-        | Begrunnelse | Type | Barnas fødselsdatoer | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet | """ +
+        | Begrunnelse | Type | Barnas fødselsdatoer | Antall barn | Målform | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland | """ +
             vedtaksperiode.eøsBegrunnelser.map { it.begrunnelse }.joinToString("") {
                 """
         | $it | EØS | | | | | | | | |"""

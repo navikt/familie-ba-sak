@@ -169,7 +169,7 @@ class OppgaveService(
     fun patchOppgaverForBehandling(behandling: Behandling, copyOppgave: (oppgave: Oppgave) -> Oppgave?) {
         hentOppgaverSomIkkeErFerdigstilt(behandling).forEach { dbOppgave ->
             val oppgave = hentOppgave(dbOppgave.gsakId.toLong())
-            if (oppgave.status != FERDIGSTILT) {
+            if (oppgave.status != FERDIGSTILT && oppgave.status != FEILREGISTRERT) {
                 copyOppgave(oppgave)?.also { patchOppgave(it) }
             } else {
                 logger.warn("Kan ikke patch'e ferdigstilt oppgave ${oppgave.id}, for behandling ${behandling.id}.")

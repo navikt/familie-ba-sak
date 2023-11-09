@@ -208,6 +208,22 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetSelvstendigRettSekundaerlandUkOgUtlandStandard"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_SELVSTENDIG_RETT_TILLEGGSTEKST_VEDTAK_FØR_SED {
+        override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstVedtakForSed"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SELVSTENDIG_RETT_TILLEGGSTEKST_SEKUNDÆR_FULL_UTBETALING {
+        override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstSekundaerFullUtbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SELVSTENDIG_RETT_TILLEGGSTEKST_NULLUTBETALING {
+        override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstNullutbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SELVSTENDIG_RETT_TILLEGGSTEKST_SEKUNDÆR_IKKE_FÅTT_SVAR_PÅ_SED {
+        override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstSekundaerIkkeFaattSvarPaaSed"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
@@ -351,6 +367,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     AVSLAG_SELVSTENDIG_RETT_BOR_IKKE_FAST_MED_BARNET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagSelvstendigRettBorIkkeFastMedBarnet"
+    },
+    AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagSelvstendigRettForeldreneBorSammen"
     },
     FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD {
         override val sanityApiNavn = "fortsattInnvilgetPrimaerlandStandard"
@@ -516,6 +536,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_TILLEGGSTEKST_VALUTAJUSTERING {
         override val sanityApiNavn = "reduksjonTilleggstekstValutajustering"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_TILLEGGSTEKST_NULLUTBETALING {
+        override val sanityApiNavn = "reduksjonTilleggstekstNullutbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_UK_MIDLERTIDIG_DIFFERANSEUTBETALING {
+        override val sanityApiNavn = "reduksjonUkMidlertidigDifferanseutbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
     }, ;
 
     override val kanDelesOpp: Boolean = false
@@ -536,33 +564,6 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         return EØSBegrunnelseMedTriggere(
             eøsBegrunnelse = this,
             sanityEØSBegrunnelse = sanityEØSBegrunnelse,
-        )
-    }
-
-    companion object {
-        fun eøsPraksisendringBegrunnelser(): Set<EØSStandardbegrunnelse> = setOf(
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_STANDARD,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_OG_STANDARD,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UTSENDT_ARBEIDSTAKER,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_FÅR_YTELSE_I_UTLANDET,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_FÅR_YTELSE_I_UTLANDET,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_STANDARD,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_UK_STANDARD,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_UK_OG_UTLAND_STANDARD,
-            EØSStandardbegrunnelse.OPPHØR_SELVSTENDIG_RETT_OPPHØR,
-            EØSStandardbegrunnelse.OPPHØR_SELVSTENDIG_RETT_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EØS_LAND,
-            EØSStandardbegrunnelse.AVSLAG_SELVSTENDIG_RETT_STANDARD_AVSLAG,
-            EØSStandardbegrunnelse.AVSLAG_SELVSTENDIG_RETT_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EØS_LAND,
-            EØSStandardbegrunnelse.AVSLAG_SELVSTENDIG_RETT_BOR_IKKE_FAST_MED_BARNET,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_STANDARD,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_OG_UTLAND_STANDARD,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_STANDARD,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_UK_STANDARD,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDAERLAND_UK_OG_UTLAND_STANDARD,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_FÅR_YTELSE_I_UTLANDET,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_FÅR_YTELSE_I_UTLANDET,
         )
     }
 }
