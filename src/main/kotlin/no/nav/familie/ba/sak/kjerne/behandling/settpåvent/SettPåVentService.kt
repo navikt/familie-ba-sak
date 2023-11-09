@@ -39,7 +39,11 @@ class SettPåVentService(
     }
 
     @Transactional
-    fun settBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
+    fun settBehandlingPåVent(
+        behandlingId: Long,
+        frist: LocalDate,
+        årsak: SettPåVentÅrsak,
+    ): SettPåVent {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val gammelSettPåVent: SettPåVent? = finnAktivSettPåVentPåBehandling(behandlingId)
         validerBehandlingKanSettesPåVent(gammelSettPåVent, frist, behandling)
@@ -60,7 +64,11 @@ class SettPåVentService(
     }
 
     @Transactional
-    fun oppdaterSettBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
+    fun oppdaterSettBehandlingPåVent(
+        behandlingId: Long,
+        frist: LocalDate,
+        årsak: SettPåVentÅrsak,
+    ): SettPåVent {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val aktivSettPåVent = finnAktivSettPåVentPåBehandlingThrows(behandlingId)
 
@@ -90,7 +98,10 @@ class SettPåVentService(
     }
 
     @Transactional
-    fun gjenopptaBehandling(behandlingId: Long, nå: LocalDate = LocalDate.now()): SettPåVent {
+    fun gjenopptaBehandling(
+        behandlingId: Long,
+        nå: LocalDate = LocalDate.now(),
+    ): SettPåVent {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         val aktivSettPåVent =

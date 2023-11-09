@@ -15,7 +15,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class UtilsTest {
-
     @Test
     fun `skal regne ut prosent og gi heltall med riktig avrunding`() {
         assertEquals(200, 200.toBigDecimal().avrundetHeltallAvProsent(100.toBigDecimal()))
@@ -34,16 +33,17 @@ internal class UtilsTest {
 
     @Test
     fun `Nullable verdier blir tom string`() {
-        val adresse = GrVegadresse(
-            matrikkelId = null,
-            bruksenhetsnummer = null,
-            husnummer = "1",
-            kommunenummer = null,
-            tilleggsnavn = null,
-            adressenavn = "TEST",
-            husbokstav = null,
-            postnummer = "1234",
-        )
+        val adresse =
+            GrVegadresse(
+                matrikkelId = null,
+                bruksenhetsnummer = null,
+                husnummer = "1",
+                kommunenummer = null,
+                tilleggsnavn = null,
+                adressenavn = "TEST",
+                husbokstav = null,
+                postnummer = "1234",
+            )
 
         assertEquals("Test 1, 1234", adresse.tilFrontendString())
     }

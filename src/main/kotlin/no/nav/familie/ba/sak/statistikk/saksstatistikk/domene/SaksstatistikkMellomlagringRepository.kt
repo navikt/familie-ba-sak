@@ -6,9 +6,11 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface SaksstatistikkMellomlagringRepository : JpaRepository<SaksstatistikkMellomlagring, Long> {
-
     @Query(value = "SELECT s FROM SaksstatistikkMellomlagring s WHERE s.sendtTidspunkt IS NULL")
     fun finnMeldingerKlarForSending(): List<SaksstatistikkMellomlagring>
 
-    fun findByTypeAndTypeId(type: SaksstatistikkMellomlagringType, typeId: Long): List<SaksstatistikkMellomlagring>
+    fun findByTypeAndTypeId(
+        type: SaksstatistikkMellomlagringType,
+        typeId: Long,
+    ): List<SaksstatistikkMellomlagring>
 }

@@ -18,6 +18,7 @@ class SatsendringService(
     private val fagsakRepository: FagsakRepository,
 ) {
     private val logger = LoggerFactory.getLogger(SatsendringService::class.java)
+
     fun erFagsakOppdatertMedSisteSatser(fagsakId: Long): Boolean {
         val sisteVedtatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)

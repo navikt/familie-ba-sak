@@ -28,14 +28,17 @@ class JournalføringController(
     private val innkommendeJournalføringService: InnkommendeJournalføringService,
     private val tilgangService: TilgangService,
 ) {
-
     @GetMapping(path = ["/{journalpostId}/hent"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentJournalpost(@PathVariable journalpostId: String): ResponseEntity<Ressurs<Journalpost>> {
+    fun hentJournalpost(
+        @PathVariable journalpostId: String,
+    ): ResponseEntity<Ressurs<Journalpost>> {
         return ResponseEntity.ok(Ressurs.success(innkommendeJournalføringService.hentJournalpost(journalpostId)))
     }
 
     @PostMapping(path = ["/for-bruker"])
-    fun hentJournalposterForBruker(@RequestBody personIdentBody: PersonIdent): ResponseEntity<Ressurs<List<Journalpost>>> {
+    fun hentJournalposterForBruker(
+        @RequestBody personIdentBody: PersonIdent,
+    ): ResponseEntity<Ressurs<List<Journalpost>>> {
         return ResponseEntity.ok(
             Ressurs.success(
                 innkommendeJournalføringService.hentJournalposterForBruker(

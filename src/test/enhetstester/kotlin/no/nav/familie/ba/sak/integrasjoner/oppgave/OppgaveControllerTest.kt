@@ -28,7 +28,6 @@ import org.springframework.http.HttpStatus
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OppgaveControllerTest {
-
     @MockK
     lateinit var oppgaveService: OppgaveService
 
@@ -72,9 +71,10 @@ class OppgaveControllerTest {
 
     @Test
     fun `Tilbakestilling av tildeling på oppgave skal returnere OK og sende med Oppgave i respons`() {
-        val oppgave = Oppgave(
-            id = 1234,
-        )
+        val oppgave =
+            Oppgave(
+                id = 1234,
+            )
         every { oppgaveService.tilbakestillFordelingPåOppgave(oppgave.id!!) } returns oppgave
 
         val respons = oppgaveController.tilbakestillFordelingPåOppgave(oppgave.id!!)
@@ -94,12 +94,13 @@ class OppgaveControllerTest {
             )
         } throws IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave")
 
-        val exception = assertThrows<IntegrasjonException> {
-            oppgaveController.fordelOppgave(
-                OPPGAVE_ID.toLong(),
-                SAKSBEHANDLER_ID,
-            )
-        }
+        val exception =
+            assertThrows<IntegrasjonException> {
+                oppgaveController.fordelOppgave(
+                    OPPGAVE_ID.toLong(),
+                    SAKSBEHANDLER_ID,
+                )
+            }
 
         Assertions.assertEquals("Kall mot integrasjon feilet ved fordel oppgave", exception.message)
     }

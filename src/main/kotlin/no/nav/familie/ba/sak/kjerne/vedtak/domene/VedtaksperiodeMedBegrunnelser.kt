@@ -59,22 +59,17 @@ data class VedtaksperiodeMedBegrunnelser(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "fk_vedtak_id")
     val vedtak: Vedtak,
-
     @Column(name = "fom", updatable = false)
     val fom: LocalDate? = null,
-
     @Column(name = "tom", updatable = false)
     val tom: LocalDate? = null,
-
     @Column(name = "type", updatable = false)
     @Enumerated(EnumType.STRING)
     val type: Vedtaksperiodetype,
-
     @OneToMany(
         fetch = FetchType.EAGER,
         mappedBy = "vedtaksperiodeMedBegrunnelser",
@@ -82,7 +77,6 @@ data class VedtaksperiodeMedBegrunnelser(
         orphanRemoval = true,
     )
     val begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(),
-
     @OneToMany(
         fetch = FetchType.EAGER,
         mappedBy = "vedtaksperiodeMedBegrunnelser",
@@ -90,7 +84,6 @@ data class VedtaksperiodeMedBegrunnelser(
         orphanRemoval = true,
     )
     val eøsBegrunnelser: MutableSet<EØSBegrunnelse> = mutableSetOf(),
-
     // Bruker list for å bevare rekkefølgen som settes frontend.
     @OneToMany(
         fetch = FetchType.EAGER,
@@ -99,9 +92,7 @@ data class VedtaksperiodeMedBegrunnelser(
         orphanRemoval = true,
     )
     val fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
-
 ) : BaseEntitet() {
-
     override fun toString(): String {
         return "VedtaksperiodeMedBegrunnelser(id=$id, fom=$fom, tom=$tom, type=$type, begrunnelser=$begrunnelser, eøsBegrunnelser=$eøsBegrunnelser, fritekster=$fritekster)"
     }
@@ -150,9 +141,10 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
         -> emptyList()
 
         Vedtaksperiodetype.FORTSATT_INNVILGET -> {
-            val løpendeUtbetalingsperiode = utbetalingsperiodeDetaljer.perioder()
-                .lastOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid() <= inneværendeMåned() }
-                ?: utbetalingsperiodeDetaljer.perioder().firstOrNull()
+            val løpendeUtbetalingsperiode =
+                utbetalingsperiodeDetaljer.perioder()
+                    .lastOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid() <= inneværendeMåned() }
+                    ?: utbetalingsperiodeDetaljer.perioder().firstOrNull()
 
             løpendeUtbetalingsperiode?.innhold?.toList()
                 ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
@@ -161,12 +153,14 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
         Vedtaksperiodetype.UTBETALING,
         Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
         Vedtaksperiodetype.ENDRET_UTBETALING,
-        -> finnUtbetalingsperioderRelevantForVedtaksperiode(utbetalingsperiodeDetaljer)?.toList() ?: throw Feil(
-            "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}",
-        )
+        ->
+            finnUtbetalingsperioderRelevantForVedtaksperiode(utbetalingsperiodeDetaljer)?.toList() ?: throw Feil(
+                "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}",
+            )
 
-        Vedtaksperiodetype.OPPHØR -> finnUtbetalingsperioderRelevantForOpphørVedtaksperiode(utbetalingsperiodeDetaljer)?.toList()
-            ?: emptyList()
+        Vedtaksperiodetype.OPPHØR ->
+            finnUtbetalingsperioderRelevantForOpphørVedtaksperiode(utbetalingsperiodeDetaljer)?.toList()
+                ?: emptyList()
     }
 }
 
@@ -182,9 +176,10 @@ private fun VedtaksperiodeMedBegrunnelser.finnUtbetalingsperioderRelevantForVedt
 private fun VedtaksperiodeMedBegrunnelser.finnUtbetalingsperioderRelevantForOpphørVedtaksperiode(
     utbetalingsperiodeDetaljer: Tidslinje<Iterable<UtbetalingsperiodeDetalj>, Måned>,
 ): Iterable<UtbetalingsperiodeDetalj>? {
-    val innhold = utbetalingsperiodeDetaljer.perioder().find { andelerVertikal ->
-        andelerVertikal.fraOgMed.tilFørsteDagIMåneden().tilLocalDate() == this.fom
-    }?.innhold
+    val innhold =
+        utbetalingsperiodeDetaljer.perioder().find { andelerVertikal ->
+            andelerVertikal.fraOgMed.tilFørsteDagIMåneden().tilLocalDate() == this.fom
+        }?.innhold
 
     return innhold
 }
@@ -197,10 +192,11 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidsl
             TidslinjePeriode(
                 fraOgMed = it.stønadFom.tilTidspunkt(),
                 tilOgMed = it.stønadTom.tilTidspunkt(),
-                innhold = UtbetalingsperiodeDetalj(
-                    andel = it,
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                ),
+                innhold =
+                    UtbetalingsperiodeDetalj(
+                        andel = it,
+                        personopplysningGrunnlag = personopplysningGrunnlag,
+                    ),
             )
         }.tilTidslinje()
     }.kombiner { it.takeIf { it.toList().isNotEmpty() } }
@@ -223,10 +219,11 @@ fun hentBrevPeriodeType(
 ): BrevPeriodeType =
     when (vedtaksperiodetype) {
         Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET_NY
-        Vedtaksperiodetype.UTBETALING -> when {
-            erUtbetalingEllerDeltBostedIPeriode -> BrevPeriodeType.UTBETALING
-            else -> BrevPeriodeType.INGEN_UTBETALING
-        }
+        Vedtaksperiodetype.UTBETALING ->
+            when {
+                erUtbetalingEllerDeltBostedIPeriode -> BrevPeriodeType.UTBETALING
+                else -> BrevPeriodeType.INGEN_UTBETALING
+            }
 
         Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.INGEN_UTBETALING else BrevPeriodeType.INGEN_UTBETALING_UTEN_PERIODE
         Vedtaksperiodetype.OPPHØR -> BrevPeriodeType.INGEN_UTBETALING

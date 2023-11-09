@@ -20,10 +20,11 @@ class TilpassValutakurserTilUtenlandskePeriodebeløpService(
     private val utenlandskPeriodebeløpRepository: FinnPeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs>>,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
-    val skjemaService = PeriodeOgBarnSkjemaService(
-        valutakursRepository,
-        endringsabonnenter,
-    )
+    val skjemaService =
+        PeriodeOgBarnSkjemaService(
+            valutakursRepository,
+            endringsabonnenter,
+        )
 
     @Transactional
     fun tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId: BehandlingId) {
@@ -46,10 +47,11 @@ class TilpassValutakurserTilUtenlandskePeriodebeløpService(
     ) {
         val forrigeValutakurser = skjemaService.hentMedBehandlingId(behandlingId)
 
-        val oppdaterteValutakurser = tilpassValutakurserTilUtenlandskePeriodebeløp(
-            forrigeValutakurser,
-            gjeldendeUtenlandskePeriodebeløp,
-        ).medBehandlingId(behandlingId)
+        val oppdaterteValutakurser =
+            tilpassValutakurserTilUtenlandskePeriodebeløp(
+                forrigeValutakurser,
+                gjeldendeUtenlandskePeriodebeløp,
+            ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, forrigeValutakurser, oppdaterteValutakurser)
     }
@@ -59,8 +61,9 @@ internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
     forrigeValutakurser: Collection<Valutakurs>,
     gjeldendeUtenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
 ): Collection<Valutakurs> {
-    val barnasUtenlandskePeriodebeløpTidslinjer = gjeldendeUtenlandskePeriodebeløp
-        .tilSeparateTidslinjerForBarna()
+    val barnasUtenlandskePeriodebeløpTidslinjer =
+        gjeldendeUtenlandskePeriodebeløp
+            .tilSeparateTidslinjerForBarna()
 
     return forrigeValutakurser.tilSeparateTidslinjerForBarna()
         .outerJoin(barnasUtenlandskePeriodebeløpTidslinjer) { valutakurs, utenlandskPeriodebeløp ->

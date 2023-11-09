@@ -17,10 +17,11 @@ enum class BarnetsBostedsland {
     IKKE_NORGE,
 }
 
-fun landkodeTilBarnetsBostedsland(landkode: String): BarnetsBostedsland = when (landkode) {
-    "NO" -> BarnetsBostedsland.NORGE
-    else -> BarnetsBostedsland.IKKE_NORGE
-}
+fun landkodeTilBarnetsBostedsland(landkode: String): BarnetsBostedsland =
+    when (landkode) {
+        "NO" -> BarnetsBostedsland.NORGE
+        else -> BarnetsBostedsland.IKKE_NORGE
+    }
 
 data class RestSanityEØSBegrunnelse(
     val apiNavn: String?,
@@ -52,24 +53,28 @@ data class RestSanityEØSBegrunnelse(
         return SanityEØSBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
-            annenForeldersAktivitet = annenForeldersAktivitet?.mapNotNull {
-                konverterTilEnumverdi<KompetanseAktivitet>(it)
-            } ?: emptyList(),
-            barnetsBostedsland = barnetsBostedsland?.mapNotNull {
-                konverterTilEnumverdi<BarnetsBostedsland>(it)
-            } ?: emptyList(),
-            kompetanseResultat = kompetanseResultat?.mapNotNull {
-                konverterTilEnumverdi<KompetanseResultat>(it)
-            } ?: emptyList(),
+            annenForeldersAktivitet =
+                annenForeldersAktivitet?.mapNotNull {
+                    konverterTilEnumverdi<KompetanseAktivitet>(it)
+                } ?: emptyList(),
+            barnetsBostedsland =
+                barnetsBostedsland?.mapNotNull {
+                    konverterTilEnumverdi<BarnetsBostedsland>(it)
+                } ?: emptyList(),
+            kompetanseResultat =
+                kompetanseResultat?.mapNotNull {
+                    konverterTilEnumverdi<KompetanseResultat>(it)
+                } ?: emptyList(),
             hjemler = hjemler ?: emptyList(),
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
             hjemlerEØSForordningen883 = hjemlerEOSForordningen883 ?: emptyList(),
             hjemlerEØSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
             hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
             vilkår = eosVilkaar?.mapNotNull { konverterTilEnumverdi<Vilkår>(it) }?.toSet() ?: emptySet(),
-            periodeResultat = (
-                periodeResultatForPerson
-                    ?: vedtakResultat
+            periodeResultat =
+                (
+                    periodeResultatForPerson
+                        ?: vedtakResultat
                 ).finnEnumverdi<SanityPeriodeResultat>(apiNavn),
             fagsakType = fagsakType.finnEnumverdiNullable<FagsakType>(),
             tema = (regelverk ?: tema).finnEnumverdi<Tema>(apiNavn),

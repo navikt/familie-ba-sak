@@ -37,16 +37,13 @@ class PersonResultat(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "fk_vilkaarsvurdering_id", nullable = false, updatable = false)
     var vilkårsvurdering: Vilkårsvurdering,
-
     @OneToOne(optional = false)
     @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
-
     @OneToMany(
         fetch = FetchType.EAGER,
         mappedBy = "personResultat",
@@ -54,7 +51,6 @@ class PersonResultat(
         orphanRemoval = true,
     )
     val vilkårResultater: MutableSet<VilkårResultat> = sortedSetOf(VilkårResultatComparator),
-
     @OneToMany(
         fetch = FetchType.EAGER,
         mappedBy = "personResultat",
@@ -62,9 +58,7 @@ class PersonResultat(
         orphanRemoval = true,
     )
     val andreVurderinger: MutableSet<AnnenVurdering> = mutableSetOf(),
-
 ) : BaseEntitet() {
-
     fun setSortedVilkårResultater(nyeVilkårResultater: Set<VilkårResultat>) {
         vilkårResultater.clear()
         vilkårResultater.addAll(nyeVilkårResultater.toSortedSet(VilkårResultatComparator))
@@ -91,14 +85,16 @@ class PersonResultat(
     }
 
     fun slettEllerNullstill(vilkårResultatId: Long) {
-        val vilkårResultat = vilkårResultater.find { it.id == vilkårResultatId }
-            ?: throw Feil(
-                message = "Prøver å slette et vilkår som ikke finnes",
-                frontendFeilmelding = "Vilkåret du prøver å slette finnes ikke i systemet.",
-            )
+        val vilkårResultat =
+            vilkårResultater.find { it.id == vilkårResultatId }
+                ?: throw Feil(
+                    message = "Prøver å slette et vilkår som ikke finnes",
+                    frontendFeilmelding = "Vilkåret du prøver å slette finnes ikke i systemet.",
+                )
 
-        val perioderMedSammeVilkårType = vilkårResultater
-            .filter { it.vilkårType == vilkårResultat.vilkårType && it.id != vilkårResultat.id }
+        val perioderMedSammeVilkårType =
+            vilkårResultater
+                .filter { it.vilkårType == vilkårResultat.vilkårType && it.id != vilkårResultat.id }
 
         if (perioderMedSammeVilkårType.isEmpty()) {
             vilkårResultat.nullstill()
@@ -111,10 +107,11 @@ class PersonResultat(
         vilkårsvurdering: Vilkårsvurdering,
         inkluderAndreVurderinger: Boolean = false,
     ): PersonResultat {
-        val nyttPersonResultat = PersonResultat(
-            vilkårsvurdering = vilkårsvurdering,
-            aktør = aktør,
-        )
+        val nyttPersonResultat =
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = aktør,
+            )
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =
             vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(VilkårResultatComparator)
         nyttPersonResultat.setSortedVilkårResultater(kopierteVilkårResultater)
@@ -131,28 +128,31 @@ class PersonResultat(
     fun tilKopiForNyVilkårsvurdering(
         nyVilkårsvurdering: Vilkårsvurdering,
     ): PersonResultat {
-        val nyttPersonResultat = PersonResultat(
-            vilkårsvurdering = nyVilkårsvurdering,
-            aktør = aktør,
-            andreVurderinger = mutableSetOf(), // Vi kopierer ikke over andreVurderinger da den aldri skal være med i ny behandling
-        )
+        val nyttPersonResultat =
+            PersonResultat(
+                vilkårsvurdering = nyVilkårsvurdering,
+                aktør = aktør,
+                andreVurderinger = mutableSetOf(), // Vi kopierer ikke over andreVurderinger da den aldri skal være med i ny behandling
+            )
 
-        val nyeVilkårResultater = vilkårResultater
-            .filter { it.erOppfylt() }
-            .map {
-                it.tilKopiForNyttPersonResultat(
-                    nyttPersonResultat = nyttPersonResultat,
-                )
-            }
-            .toSet()
+        val nyeVilkårResultater =
+            vilkårResultater
+                .filter { it.erOppfylt() }
+                .map {
+                    it.tilKopiForNyttPersonResultat(
+                        nyttPersonResultat = nyttPersonResultat,
+                    )
+                }
+                .toSet()
 
         nyttPersonResultat.setSortedVilkårResultater(nyeVilkårResultater)
 
         return nyttPersonResultat
     }
 
-    fun erSøkersResultater() = vilkårResultater.none { it.vilkårType == Vilkår.UNDER_18_ÅR } ||
-        vilkårsvurdering.behandling.fagsak.type in listOf(FagsakType.BARN_ENSLIG_MINDREÅRIG, FagsakType.INSTITUSJON)
+    fun erSøkersResultater() =
+        vilkårResultater.none { it.vilkårType == Vilkår.UNDER_18_ÅR } ||
+            vilkårsvurdering.behandling.fagsak.type in listOf(FagsakType.BARN_ENSLIG_MINDREÅRIG, FagsakType.INSTITUSJON)
 
     fun erDeltBosted(segmentFom: LocalDate): Boolean =
         vilkårResultater

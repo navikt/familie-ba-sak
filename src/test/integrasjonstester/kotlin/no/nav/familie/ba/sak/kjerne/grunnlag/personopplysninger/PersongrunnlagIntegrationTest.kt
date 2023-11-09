@@ -34,23 +34,17 @@ import java.time.LocalDate
 class PersongrunnlagIntegrationTest(
     @Autowired
     private val mockIntegrasjonClient: IntegrasjonClient,
-
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
-
     @Autowired
     private val personidentService: PersonidentService,
-
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService,
-
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val behandlingService: BehandlingService,
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun `Skal lagre dødsfall på person når person er død`() {
         val søkerAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
@@ -61,50 +55,56 @@ class PersongrunnlagIntegrationTest(
         val poststedsnavn = "Oslo"
         val postnummer = "1234"
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerAktør) } returns PersonInfo(
-            fødselsdato = LocalDate.of(1990, 1, 1),
-            adressebeskyttelseGradering = null,
-            navn = "Mor",
-            kjønn = Kjønn.KVINNE,
-            forelderBarnRelasjon = emptySet(),
-            bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            dødsfall = DødsfallData(erDød = true, dødsdato = dødsdato),
-            kontaktinformasjonForDoedsbo = PdlKontaktinformasjonForDødsbo(
-                adresse = PdlKontaktinformasjonForDødsboAdresse(
-                    adresselinje1 = adresselinje1,
-                    poststedsnavn = poststedsnavn,
-                    postnummer = postnummer,
-                ),
-            ),
-        )
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerAktør) } returns
+            PersonInfo(
+                fødselsdato = LocalDate.of(1990, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Mor",
+                kjønn = Kjønn.KVINNE,
+                forelderBarnRelasjon = emptySet(),
+                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                dødsfall = DødsfallData(erDød = true, dødsdato = dødsdato),
+                kontaktinformasjonForDoedsbo =
+                    PdlKontaktinformasjonForDødsbo(
+                        adresse =
+                            PdlKontaktinformasjonForDødsboAdresse(
+                                adresselinje1 = adresselinje1,
+                                poststedsnavn = poststedsnavn,
+                                postnummer = postnummer,
+                            ),
+                    ),
+            )
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns PersonInfo(
-            fødselsdato = LocalDate.of(2009, 1, 1),
-            adressebeskyttelseGradering = null,
-            navn = "Gutt",
-            kjønn = Kjønn.MANN,
-            forelderBarnRelasjon = emptySet(),
-            bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            dødsfall = null,
-            kontaktinformasjonForDoedsbo = null,
-        )
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns
+            PersonInfo(
+                fødselsdato = LocalDate.of(2009, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Gutt",
+                kjønn = Kjønn.MANN,
+                forelderBarnRelasjon = emptySet(),
+                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                dødsfall = null,
+                kontaktinformasjonForDoedsbo = null,
+            )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
-        val behandling = behandlingService.opprettBehandling(
-            nyOrdinærBehandling(
-                søkersIdent = søkerAktør.aktivFødselsnummer(),
-                fagsakId = fagsak.data!!.id,
-            ),
-        )
+        val behandling =
+            behandlingService.opprettBehandling(
+                nyOrdinærBehandling(
+                    søkersIdent = søkerAktør.aktivFødselsnummer(),
+                    fagsakId = fagsak.data!!.id,
+                ),
+            )
 
-        val personopplysningGrunnlag = persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-            aktør = søkerAktør,
-            barnFraInneværendeBehandling = listOf(barn1Aktør),
-            behandling = behandling,
-            målform = Målform.NB,
-        )
+        val personopplysningGrunnlag =
+            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                aktør = søkerAktør,
+                barnFraInneværendeBehandling = listOf(barn1Aktør),
+                behandling = behandling,
+                målform = Målform.NB,
+            )
 
         Assertions.assertTrue(personopplysningGrunnlag.søker.erDød())
         assertEquals(LocalDate.parse(dødsdato), personopplysningGrunnlag.søker.dødsfall?.dødsfallDato)
@@ -121,49 +121,53 @@ class PersongrunnlagIntegrationTest(
         val morAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
         val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr(), true)
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morAktør) } returns PersonInfo(
-            fødselsdato = LocalDate.of(1990, 1, 1),
-            adressebeskyttelseGradering = null,
-            navn = "Mor",
-            kjønn = Kjønn.KVINNE,
-            forelderBarnRelasjon = emptySet(),
-            bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            statsborgerskap = listOf(
-                Statsborgerskap(
-                    land = "POL",
-                    gyldigFraOgMed = null,
-                    gyldigTilOgMed = null,
-                    bekreftelsesdato = null,
-                ),
-            ),
-            dødsfall = null,
-            kontaktinformasjonForDoedsbo = null,
-        )
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morAktør) } returns
+            PersonInfo(
+                fødselsdato = LocalDate.of(1990, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Mor",
+                kjønn = Kjønn.KVINNE,
+                forelderBarnRelasjon = emptySet(),
+                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                statsborgerskap =
+                    listOf(
+                        Statsborgerskap(
+                            land = "POL",
+                            gyldigFraOgMed = null,
+                            gyldigTilOgMed = null,
+                            bekreftelsesdato = null,
+                        ),
+                    ),
+                dødsfall = null,
+                kontaktinformasjonForDoedsbo = null,
+            )
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns PersonInfo(
-            fødselsdato = LocalDate.of(2009, 1, 1),
-            adressebeskyttelseGradering = null,
-            navn = "Gutt",
-            kjønn = Kjønn.MANN,
-            forelderBarnRelasjon = emptySet(),
-            bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            dødsfall = null,
-            kontaktinformasjonForDoedsbo = null,
-        )
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns
+            PersonInfo(
+                fødselsdato = LocalDate.of(2009, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Gutt",
+                kjønn = Kjønn.MANN,
+                forelderBarnRelasjon = emptySet(),
+                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                dødsfall = null,
+                kontaktinformasjonForDoedsbo = null,
+            )
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
-        val behandling = behandlingService.opprettBehandling(
-            NyBehandling(
-                skalBehandlesAutomatisk = true,
-                søkersIdent = morAktør.aktivFødselsnummer(),
-                behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                kategori = BehandlingKategori.NASJONAL, // alltid NASJONAL for fødselshendelse
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                fagsakId = fagsak.data!!.id,
-            ),
-        )
+        val behandling =
+            behandlingService.opprettBehandling(
+                NyBehandling(
+                    skalBehandlesAutomatisk = true,
+                    søkersIdent = morAktør.aktivFødselsnummer(),
+                    behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    kategori = BehandlingKategori.NASJONAL, // alltid NASJONAL for fødselshendelse
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    fagsakId = fagsak.data!!.id,
+                ),
+            )
 
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             aktør = morAktør,
@@ -180,49 +184,53 @@ class PersongrunnlagIntegrationTest(
         val morAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
         val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr(), true)
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morAktør) } returns PersonInfo(
-            fødselsdato = LocalDate.of(1990, 1, 1),
-            adressebeskyttelseGradering = null,
-            navn = "Mor",
-            kjønn = Kjønn.KVINNE,
-            forelderBarnRelasjon = emptySet(),
-            bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            statsborgerskap = listOf(
-                Statsborgerskap(
-                    land = "NOR",
-                    gyldigFraOgMed = null,
-                    gyldigTilOgMed = null,
-                    bekreftelsesdato = null,
-                ),
-            ),
-            dødsfall = null,
-            kontaktinformasjonForDoedsbo = null,
-        )
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morAktør) } returns
+            PersonInfo(
+                fødselsdato = LocalDate.of(1990, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Mor",
+                kjønn = Kjønn.KVINNE,
+                forelderBarnRelasjon = emptySet(),
+                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                statsborgerskap =
+                    listOf(
+                        Statsborgerskap(
+                            land = "NOR",
+                            gyldigFraOgMed = null,
+                            gyldigTilOgMed = null,
+                            bekreftelsesdato = null,
+                        ),
+                    ),
+                dødsfall = null,
+                kontaktinformasjonForDoedsbo = null,
+            )
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns PersonInfo(
-            fødselsdato = LocalDate.of(2009, 1, 1),
-            adressebeskyttelseGradering = null,
-            navn = "Gutt",
-            kjønn = Kjønn.MANN,
-            forelderBarnRelasjon = emptySet(),
-            bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            dødsfall = null,
-            kontaktinformasjonForDoedsbo = null,
-        )
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns
+            PersonInfo(
+                fødselsdato = LocalDate.of(2009, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Gutt",
+                kjønn = Kjønn.MANN,
+                forelderBarnRelasjon = emptySet(),
+                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                dødsfall = null,
+                kontaktinformasjonForDoedsbo = null,
+            )
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
-        val behandling = behandlingService.opprettBehandling(
-            NyBehandling(
-                skalBehandlesAutomatisk = true,
-                søkersIdent = morAktør.aktivFødselsnummer(),
-                behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                fagsakId = fagsak.data!!.id,
-            ),
-        )
+        val behandling =
+            behandlingService.opprettBehandling(
+                NyBehandling(
+                    skalBehandlesAutomatisk = true,
+                    søkersIdent = morAktør.aktivFødselsnummer(),
+                    behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    fagsakId = fagsak.data!!.id,
+                ),
+            )
 
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             aktør = morAktør,
@@ -239,40 +247,44 @@ class PersongrunnlagIntegrationTest(
         val søkerAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
         val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr(), true)
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerAktør) } returns PersonInfo(
-            fødselsdato = LocalDate.of(1990, 1, 1),
-            adressebeskyttelseGradering = null,
-            navn = "Mor",
-            kjønn = Kjønn.KVINNE,
-            forelderBarnRelasjon = emptySet(),
-            bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-        )
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerAktør) } returns
+            PersonInfo(
+                fødselsdato = LocalDate.of(1990, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Mor",
+                kjønn = Kjønn.KVINNE,
+                forelderBarnRelasjon = emptySet(),
+                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            )
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns PersonInfo(
-            fødselsdato = LocalDate.of(2009, 1, 1),
-            adressebeskyttelseGradering = null,
-            navn = "Gutt",
-            kjønn = Kjønn.MANN,
-            forelderBarnRelasjon = emptySet(),
-            bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-        )
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns
+            PersonInfo(
+                fødselsdato = LocalDate.of(2009, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Gutt",
+                kjønn = Kjønn.MANN,
+                forelderBarnRelasjon = emptySet(),
+                bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
-        val behandling = behandlingService.opprettBehandling(
-            nyOrdinærBehandling(
-                søkersIdent = søkerAktør.aktivFødselsnummer(),
-                fagsakId = fagsak.data!!.id,
-            ),
-        )
+        val behandling =
+            behandlingService.opprettBehandling(
+                nyOrdinærBehandling(
+                    søkersIdent = søkerAktør.aktivFødselsnummer(),
+                    fagsakId = fagsak.data!!.id,
+                ),
+            )
 
-        val personopplysningGrunnlag = persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-            søkerAktør,
-            listOf(barn1Aktør),
-            behandling,
-            Målform.NB,
-        )
+        val personopplysningGrunnlag =
+            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                søkerAktør,
+                listOf(barn1Aktør),
+                behandling,
+                Målform.NB,
+            )
 
         personopplysningGrunnlag.personer.forEach {
             assertEquals(defaultBostedsadresseHistorikk.size, it.bostedsadresser.size)

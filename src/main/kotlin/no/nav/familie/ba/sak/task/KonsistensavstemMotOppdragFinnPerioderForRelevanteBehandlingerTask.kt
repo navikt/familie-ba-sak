@@ -24,7 +24,6 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
     val taskService: TaskService,
 ) :
     AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val taskDto =
             objectMapper.readValue(
@@ -48,22 +47,25 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
             )
 
         logger.info("Finner perioder til avstemming for transaksjonsId ${taskDto.transaksjonsId} og chunk ${taskDto.chunkNr} med ${perioderTilAvstemming.size} løpende saker")
-        val konsistensavstemmingDataTask = Task(
-            type = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(
-                KonsistensavstemmingDataTaskDTO(
-                    transaksjonsId = taskDto.transaksjonsId,
-                    chunkNr = taskDto.chunkNr,
-                    avstemmingdato = taskDto.avstemmingsdato,
-                    perioderForBehandling = perioderTilAvstemming,
-                    sendTilØkonomi = taskDto.sendTilØkonomi,
-                ),
-            ),
-            properties = Properties().apply {
-                this["chunkNr"] = taskDto.chunkNr.toString()
-                this["transaksjonsId"] = taskDto.transaksjonsId.toString()
-            },
-        )
+        val konsistensavstemmingDataTask =
+            Task(
+                type = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE,
+                payload =
+                    objectMapper.writeValueAsString(
+                        KonsistensavstemmingDataTaskDTO(
+                            transaksjonsId = taskDto.transaksjonsId,
+                            chunkNr = taskDto.chunkNr,
+                            avstemmingdato = taskDto.avstemmingsdato,
+                            perioderForBehandling = perioderTilAvstemming,
+                            sendTilØkonomi = taskDto.sendTilØkonomi,
+                        ),
+                    ),
+                properties =
+                    Properties().apply {
+                        this["chunkNr"] = taskDto.chunkNr.toString()
+                        this["transaksjonsId"] = taskDto.transaksjonsId.toString()
+                    },
+            )
         taskService.save(konsistensavstemmingDataTask)
     }
 

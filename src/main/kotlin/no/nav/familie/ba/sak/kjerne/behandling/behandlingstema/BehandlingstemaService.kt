@@ -26,7 +26,6 @@ class BehandlingstemaService(
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 ) {
-
     @Transactional
     fun oppdaterBehandlingstema(
         behandling: Behandling,
@@ -39,17 +38,19 @@ class BehandlingstemaService(
             throw FunksjonellFeil("Du må velge behandlingstema.")
         }
 
-        val utledetKategori = bestemKategori(
-            overstyrtKategori = overstyrtKategori,
-            kategoriFraSisteIverksattBehandling = hentLøpendeKategori(behandling.fagsak.id),
-            kategoriFraInneværendeBehandling = hentKategoriFraInneværendeBehandling(behandling.fagsak.id),
-        )
+        val utledetKategori =
+            bestemKategori(
+                overstyrtKategori = overstyrtKategori,
+                kategoriFraSisteIverksattBehandling = hentLøpendeKategori(behandling.fagsak.id),
+                kategoriFraInneværendeBehandling = hentKategoriFraInneværendeBehandling(behandling.fagsak.id),
+            )
 
-        val utledetUnderkategori = bestemUnderkategori(
-            overstyrtUnderkategori = overstyrtUnderkategori,
-            underkategoriFraLøpendeBehandling = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id),
-            underkategoriFraInneværendeBehandling = hentUnderkategoriFraInneværendeBehandling(fagsakId = behandling.fagsak.id),
-        )
+        val utledetUnderkategori =
+            bestemUnderkategori(
+                overstyrtUnderkategori = overstyrtUnderkategori,
+                underkategoriFraLøpendeBehandling = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id),
+                underkategoriFraInneværendeBehandling = hentUnderkategoriFraInneværendeBehandling(fagsakId = behandling.fagsak.id),
+            )
 
         val forrigeUnderkategori = behandling.underkategori
         val forrigeKategori = behandling.kategori
@@ -68,10 +69,11 @@ class BehandlingstemaService(
                     val lagretUnderkategori = lagretBehandling.underkategori
                     if (it.behandlingstema != lagretBehandling.tilOppgaveBehandlingTema().value || it.behandlingstype != lagretBehandling.kategori.tilOppgavebehandlingType().value) {
                         it.copy(
-                            behandlingstema = when (lagretUnderkategori) {
-                                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET ->
-                                    behandling.tilOppgaveBehandlingTema().value
-                            },
+                            behandlingstema =
+                                when (lagretUnderkategori) {
+                                    BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET ->
+                                        behandling.tilOppgaveBehandlingTema().value
+                                },
                             behandlingstype = lagretBehandling.kategori.tilOppgavebehandlingType().value,
                         )
                     } else {
@@ -112,10 +114,11 @@ class BehandlingstemaService(
         val vilkårsvurdering =
             vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
                 ?: return aktivBehandling.kategori
-        val erVilkårMedEØSRegelverkBehandlet = vilkårsvurdering.personResultater
-            .flatMap { it.vilkårResultater }
-            .filter { it.sistEndretIBehandlingId == aktivBehandling.id }
-            .any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
+        val erVilkårMedEØSRegelverkBehandlet =
+            vilkårsvurdering.personResultater
+                .flatMap { it.vilkårResultater }
+                .filter { it.sistEndretIBehandlingId == aktivBehandling.id }
+                .any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
 
         return if (erVilkårMedEØSRegelverkBehandlet) {
             BehandlingKategori.EØS

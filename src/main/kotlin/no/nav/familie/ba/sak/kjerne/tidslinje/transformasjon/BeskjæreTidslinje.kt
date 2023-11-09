@@ -21,10 +21,11 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
  * Hvis ny og eksisterende grenseverdi begge er uendelige, vil den nye benyttes
  * Beskjæring mot tom tidslinje vil gi tom tidslinje
  */
-fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærEtter(tidslinje: Tidslinje<*, T>): Tidslinje<I, T> = when {
-    tidslinje.tidsrom().isEmpty() -> TomTidslinje()
-    else -> beskjær(tidslinje.fraOgMed()!!, tidslinje.tilOgMed()!!)
-}
+fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærEtter(tidslinje: Tidslinje<*, T>): Tidslinje<I, T> =
+    when {
+        tidslinje.tidsrom().isEmpty() -> TomTidslinje()
+        else -> beskjær(tidslinje.fraOgMed()!!, tidslinje.tilOgMed()!!)
+    }
 
 /**
  * Extension-metode for å beskjære (forkorte) en tidslinje etter til-og-med fra en annen tidslinje
@@ -34,10 +35,11 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærEtter(tidslinje: Tidslinje<*, T>)
  * Hvis ny og eksisterende grenseverdi begge er uendelige, vil den nye benyttes
  * Beskjæring mot tom tidslinje vil gi tom tidslinje
  */
-fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærTilOgMedEtter(tidslinje: Tidslinje<*, T>): Tidslinje<I, T> = when {
-    tidslinje.tidsrom().isEmpty() -> TomTidslinje()
-    else -> beskjær(this.fraOgMed()!!, tidslinje.tilOgMed()!!)
-}
+fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærTilOgMedEtter(tidslinje: Tidslinje<*, T>): Tidslinje<I, T> =
+    when {
+        tidslinje.tidsrom().isEmpty() -> TomTidslinje()
+        else -> beskjær(this.fraOgMed()!!, tidslinje.tilOgMed()!!)
+    }
 
 /**
  * Extension-metode for å beskjære (forkorte) en tidslinje
@@ -48,25 +50,30 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærTilOgMedEtter(tidslinje: Tidslinj
  * Endelige endepunkter som beskjæres mot uendelige endepunkter, beholdes
  * Hvis ny og eksisterende grenseverdi begge er uendelige, vil den mest ekstreme benyttes
  */
-fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjær(fraOgMed: Tidspunkt<T>, tilOgMed: Tidspunkt<T>): Tidslinje<I, T> {
+fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjær(
+    fraOgMed: Tidspunkt<T>,
+    tilOgMed: Tidspunkt<T>,
+): Tidslinje<I, T> {
     if (tidsrom().isEmpty()) {
         return this
     }
 
-    val fom: Tidspunkt<T> = when {
-        // <--A..F begrenset med <--C..F må sjekke verdier fra og med <--A
-        // <--C..F begrenset med <--A..F trenger bare å sjekke verdier fra og med <--C
-        // Dvs i tilfellet de tidslinjens fom og begrensningens fom begge peker bakover, skal tidslinjens fom brukes
-        fraOgMed()!!.erUendeligLengeSiden() && fraOgMed.erUendeligLengeSiden() -> this.fraOgMed()!!
-        else -> maxOf(fraOgMed()!!, fraOgMed)
-    }
-    val tom: Tidspunkt<T> = when {
-        // A..F--> begrenset med A..C--> må sjekke verdier frem til og med F-->
-        // A..C--> begrenset med A..F--> trenger bare å sjekke verdier frem til og med C-->
-        // Dvs i tilfellet de tidslinjens tom og begrensningens tom begge peker fremover, skal tidslinjens tom brukes
-        tilOgMed()!!.erUendeligLengeTil() && tilOgMed.erUendeligLengeTil() -> this.tilOgMed()!!
-        else -> minOf(tilOgMed()!!, tilOgMed)
-    }
+    val fom: Tidspunkt<T> =
+        when {
+            // <--A..F begrenset med <--C..F må sjekke verdier fra og med <--A
+            // <--C..F begrenset med <--A..F trenger bare å sjekke verdier fra og med <--C
+            // Dvs i tilfellet de tidslinjens fom og begrensningens fom begge peker bakover, skal tidslinjens fom brukes
+            fraOgMed()!!.erUendeligLengeSiden() && fraOgMed.erUendeligLengeSiden() -> this.fraOgMed()!!
+            else -> maxOf(fraOgMed()!!, fraOgMed)
+        }
+    val tom: Tidspunkt<T> =
+        when {
+            // A..F--> begrenset med A..C--> må sjekke verdier frem til og med F-->
+            // A..C--> begrenset med A..F--> trenger bare å sjekke verdier frem til og med C-->
+            // Dvs i tilfellet de tidslinjens tom og begrensningens tom begge peker fremover, skal tidslinjens tom brukes
+            tilOgMed()!!.erUendeligLengeTil() && tilOgMed.erUendeligLengeTil() -> this.tilOgMed()!!
+            else -> minOf(tilOgMed()!!, tilOgMed)
+        }
 
     return (fom..tom).tidslinjeFraTidspunkt { tidspunkt -> innholdForTidspunkt(tidspunkt) }
 }

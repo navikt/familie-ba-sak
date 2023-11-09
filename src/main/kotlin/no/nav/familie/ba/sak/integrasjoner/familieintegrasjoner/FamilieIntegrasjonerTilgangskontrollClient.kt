@@ -18,7 +18,6 @@ class FamilieIntegrasjonerTilgangskontrollClient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "integrasjon-tilgangskontroll") {
-
     val tilgangPersonUri: URI =
         UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANG_PERSON).build().toUri()
 
@@ -42,7 +41,6 @@ class FamilieIntegrasjonerTilgangskontrollClient(
     }
 
     companion object {
-
         private const val PATH_TILGANG_PERSON = "tilgang/v2/personer"
         private const val HEADER_NAV_TEMA = "Nav-Tema"
         private val HEADER_NAV_TEMA_BAR = Tema.BAR.name

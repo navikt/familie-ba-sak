@@ -28,7 +28,10 @@ import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost {
+fun lagTestJournalpost(
+    personIdent: String,
+    journalpostId: String,
+): Journalpost {
     return Journalpost(
         journalpostId = journalpostId,
         journalposttype = Journalposttype.I,
@@ -36,40 +39,43 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
         tema = Tema.BAR.name,
         behandlingstema = "ab00001",
         bruker = Bruker(personIdent, type = BrukerIdType.FNR),
-        avsenderMottaker = AvsenderMottaker(
-            navn = "BLÅØYD HEST",
-            erLikBruker = true,
-            id = personIdent,
-            land = "NO",
-            type = AvsenderMottakerIdType.FNR,
-        ),
+        avsenderMottaker =
+            AvsenderMottaker(
+                navn = "BLÅØYD HEST",
+                erLikBruker = true,
+                id = personIdent,
+                land = "NO",
+                type = AvsenderMottakerIdType.FNR,
+            ),
         journalforendeEnhet = DEFAULT_JOURNALFØRENDE_ENHET,
         kanal = "NAV_NO",
-        dokumenter = listOf(
-            DokumentInfo(
-                tittel = "Søknad om barnetrygd",
-                brevkode = "NAV 33-00.07",
-                dokumentstatus = null,
-                dokumentvarianter = emptyList(),
-                dokumentInfoId = "1",
-                logiskeVedlegg = listOf(LogiskVedlegg("123", "Oppholdstillatelse")),
+        dokumenter =
+            listOf(
+                DokumentInfo(
+                    tittel = "Søknad om barnetrygd",
+                    brevkode = "NAV 33-00.07",
+                    dokumentstatus = null,
+                    dokumentvarianter = emptyList(),
+                    dokumentInfoId = "1",
+                    logiskeVedlegg = listOf(LogiskVedlegg("123", "Oppholdstillatelse")),
+                ),
+                DokumentInfo(
+                    tittel = "Ekstra vedlegg",
+                    brevkode = null,
+                    dokumentstatus = null,
+                    dokumentvarianter = emptyList(),
+                    dokumentInfoId = "2",
+                    logiskeVedlegg = listOf(LogiskVedlegg("123", "Pass")),
+                ),
             ),
-            DokumentInfo(
-                tittel = "Ekstra vedlegg",
-                brevkode = null,
-                dokumentstatus = null,
-                dokumentvarianter = emptyList(),
-                dokumentInfoId = "2",
-                logiskeVedlegg = listOf(LogiskVedlegg("123", "Pass")),
+        sak =
+            Sak(
+                arkivsaksnummer = "",
+                arkivsaksystem = "GSAK",
+                sakstype = Sakstype.FAGSAK.name,
+                fagsakId = "10695768",
+                fagsaksystem = FAGSYSTEM,
             ),
-        ),
-        sak = Sak(
-            arkivsaksnummer = "",
-            arkivsaksystem = "GSAK",
-            sakstype = Sakstype.FAGSAK.name,
-            fagsakId = "10695768",
-            fagsaksystem = FAGSYSTEM,
-        ),
         tittel = "Søknad om ordinær barnetrygd",
         relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT")),
     )
@@ -107,16 +113,18 @@ fun lagTestOppgaveDTO(
         oppgavetype = oppgavetype.value,
         behandlingstema = Behandlingstema.OrdinærBarnetrygd.value,
         behandlingstype = Behandlingstype.NASJONAL.value,
-        opprettetTidspunkt = LocalDate.of(
-            2020,
-            1,
-            1,
-        ).toString(),
-        fristFerdigstillelse = LocalDate.of(
-            2020,
-            2,
-            1,
-        ).toString(),
+        opprettetTidspunkt =
+            LocalDate.of(
+                2020,
+                1,
+                1,
+            ).toString(),
+        fristFerdigstillelse =
+            LocalDate.of(
+                2020,
+                2,
+                1,
+            ).toString(),
         prioritet = OppgavePrioritet.NORM,
         status = StatusEnum.OPPRETTET,
     )

@@ -39,18 +39,18 @@ class VelgFagSystemService(
     private val personopplysningerService: PersonopplysningerService,
     private val statsborgerskapService: StatsborgerskapService,
 ) {
-
     val utfallForValgAvFagsystem = mutableMapOf<FagsystemUtfall, Counter>()
 
     init {
         values().forEach {
-            utfallForValgAvFagsystem[it] = Metrics.counter(
-                "familie.ba.sak.velgfagsystem",
-                "navn",
-                it.name,
-                "beskrivelse",
-                it.beskrivelse,
-            )
+            utfallForValgAvFagsystem[it] =
+                Metrics.counter(
+                    "familie.ba.sak.velgfagsystem",
+                    "navn",
+                    it.name,
+                    "beskrivelse",
+                    it.beskrivelse,
+                )
         }
     }
 
@@ -71,15 +71,20 @@ class VelgFagSystemService(
         return stønader.isNotEmpty()
     }
 
-    internal fun morEllerBarnHarLøpendeSakIInfotrygd(morsIdent: String, barnasIdenter: List<String>): Boolean {
-        val morsIdenter = personidentService.hentIdenter(personIdent = morsIdent, historikk = true)
-            .filter { it.gruppe == "FOLKEREGISTERIDENT" }
-            .map { it.ident }
-        val alleBarnasIdenter = barnasIdenter.flatMap {
-            personidentService.hentIdenter(personIdent = it, historikk = true)
-                .filter { identinfo -> identinfo.gruppe == "FOLKEREGISTERIDENT" }
-                .map { identinfo -> identinfo.ident }
-        }
+    internal fun morEllerBarnHarLøpendeSakIInfotrygd(
+        morsIdent: String,
+        barnasIdenter: List<String>,
+    ): Boolean {
+        val morsIdenter =
+            personidentService.hentIdenter(personIdent = morsIdent, historikk = true)
+                .filter { it.gruppe == "FOLKEREGISTERIDENT" }
+                .map { it.ident }
+        val alleBarnasIdenter =
+            barnasIdenter.flatMap {
+                personidentService.hentIdenter(personIdent = it, historikk = true)
+                    .filter { identinfo -> identinfo.gruppe == "FOLKEREGISTERIDENT" }
+                    .map { identinfo -> identinfo.ident }
+            }
 
         return infotrygdService.harLøpendeSakIInfotrygd(morsIdenter, alleBarnasIdenter)
     }
@@ -105,37 +110,44 @@ class VelgFagSystemService(
 
         val fagsak = fagsakService.hentNormalFagsak(morsAktør)
 
-        val (fagsystemUtfall: FagsystemUtfall, fagsystem: FagsystemRegelVurdering) = when {
-            morHarLøpendeEllerTidligereUtbetalinger(fagsak) -> Pair(
-                IVERKSATTE_BEHANDLINGER_I_BA_SAK,
-                SEND_TIL_BA,
-            )
-            morEllerBarnHarLøpendeSakIInfotrygd(
-                nyBehandlingHendelse.morsIdent,
-                nyBehandlingHendelse.barnasIdenter,
-            ) -> Pair(
-                LØPENDE_SAK_I_INFOTRYGD,
-                SEND_TIL_INFOTRYGD,
-            )
-            fagsak != null -> Pair(
-                FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK,
-                SEND_TIL_BA,
-            )
-            morHarSakerMenIkkeLøpendeIInfotrygd(nyBehandlingHendelse.morsIdent) -> Pair(
-                SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
-                SEND_TIL_INFOTRYGD,
-            )
-            !harMorGyldigStatsborgerskapForAutomatiskVurdering(
-                morsAktør,
-            ) -> Pair(
-                MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING,
-                SEND_TIL_INFOTRYGD,
-            )
-            else -> Pair(
-                STØTTET_I_BA_SAK,
-                SEND_TIL_BA,
-            )
-        }
+        val (fagsystemUtfall: FagsystemUtfall, fagsystem: FagsystemRegelVurdering) =
+            when {
+                morHarLøpendeEllerTidligereUtbetalinger(fagsak) ->
+                    Pair(
+                        IVERKSATTE_BEHANDLINGER_I_BA_SAK,
+                        SEND_TIL_BA,
+                    )
+                morEllerBarnHarLøpendeSakIInfotrygd(
+                    nyBehandlingHendelse.morsIdent,
+                    nyBehandlingHendelse.barnasIdenter,
+                ) ->
+                    Pair(
+                        LØPENDE_SAK_I_INFOTRYGD,
+                        SEND_TIL_INFOTRYGD,
+                    )
+                fagsak != null ->
+                    Pair(
+                        FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK,
+                        SEND_TIL_BA,
+                    )
+                morHarSakerMenIkkeLøpendeIInfotrygd(nyBehandlingHendelse.morsIdent) ->
+                    Pair(
+                        SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
+                        SEND_TIL_INFOTRYGD,
+                    )
+                !harMorGyldigStatsborgerskapForAutomatiskVurdering(
+                    morsAktør,
+                ) ->
+                    Pair(
+                        MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING,
+                        SEND_TIL_INFOTRYGD,
+                    )
+                else ->
+                    Pair(
+                        STØTTET_I_BA_SAK,
+                        SEND_TIL_BA,
+                    )
+            }
 
         secureLogger.info("Sender fødselshendelse for ${nyBehandlingHendelse.morsIdent} til $fagsystem med utfall $fagsystemUtfall")
         utfallForValgAvFagsystem[fagsystemUtfall]?.increment()

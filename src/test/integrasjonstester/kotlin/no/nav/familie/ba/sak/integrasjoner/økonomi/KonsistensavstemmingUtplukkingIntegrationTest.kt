@@ -31,7 +31,6 @@ import java.time.LocalDate
 
 @TestMethodOrder(MethodOrderer.MethodName::class)
 class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationTest() {
-
     @Autowired
     private lateinit var fagsakService: FagsakService
 
@@ -65,9 +64,10 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     fun `Skal plukke iverksatt FGB`() {
         val forelderIdent = randomFnr()
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
-            fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
-        }
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+                fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
+            }
         val førstegangsbehandling =
             opprettOgLagreBehandlingMedAndeler(
                 personIdent = forelderIdent,
@@ -89,9 +89,10 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     fun `Skal plukke både iverksatt FGB og revurdering når periode legges til`() {
         val forelderIdent = randomFnr()
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
-            fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
-        }
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+                fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
+            }
 
         val førstegangsbehandling =
             opprettOgLagreBehandlingMedAndeler(
@@ -103,10 +104,11 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         val revurdering =
             opprettOgLagreRevurderingMedAndeler(
                 personIdent = forelderIdent,
-                kildeOgOffsetPåAndeler = listOf(
-                    KildeOgOffsetPåAndel(førstegangsbehandling.id, 1L),
-                    KildeOgOffsetPåAndel(null, 2L),
-                ),
+                kildeOgOffsetPåAndeler =
+                    listOf(
+                        KildeOgOffsetPåAndel(førstegangsbehandling.id, 1L),
+                        KildeOgOffsetPåAndel(null, 2L),
+                    ),
                 fagsakId = fagsak.id,
             )
 
@@ -126,9 +128,10 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     fun `Skal kun plukke revurdering når periode på førstegangsbehandling blir erstattet`() {
         val forelderIdent = randomFnr()
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
-            fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
-        }
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+                fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
+            }
         opprettOgLagreBehandlingMedAndeler(
             personIdent = forelderIdent,
             kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
@@ -157,9 +160,10 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     fun `Skal ikke plukke noe ved opphør`() {
         val forelderIdent = randomFnr()
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
-            fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
-        }
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+                fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
+            }
 
         opprettOgLagreBehandlingMedAndeler(
             personIdent = forelderIdent,
@@ -187,9 +191,10 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     fun `Skal ikke plukke behandling som ikke er iverksatt`() {
         val forelderIdent = randomFnr()
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
-            fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
-        }
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+                fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
+            }
         val iverksattBehandling =
             opprettOgLagreBehandlingMedAndeler(
                 personIdent = forelderIdent,
@@ -268,12 +273,16 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         return behandling
     }
 
-    private fun tilkjentYtelse(behandling: Behandling, erIverksatt: Boolean) = TilkjentYtelse(
-        behandling = behandling,
-        opprettetDato = LocalDate.now(),
-        endretDato = LocalDate.now(),
-        utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
-    )
+    private fun tilkjentYtelse(
+        behandling: Behandling,
+        erIverksatt: Boolean,
+    ) =
+        TilkjentYtelse(
+            behandling = behandling,
+            opprettetDato = LocalDate.now(),
+            endretDato = LocalDate.now(),
+            utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
+        )
 
     // Kun offset og kobling til behandling/tilkjent ytelse som er relevant når man skal plukke ut til konsistensavstemming
     private fun andelPåTilkjentYtelse(
@@ -286,12 +295,14 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,
         nasjonaltPeriodebeløp = 1054,
-        stønadFom = LocalDate.now()
-            .minusMonths(12)
-            .toYearMonth(),
-        stønadTom = LocalDate.now()
-            .plusMonths(12)
-            .toYearMonth(),
+        stønadFom =
+            LocalDate.now()
+                .minusMonths(12)
+                .toYearMonth(),
+        stønadTom =
+            LocalDate.now()
+                .plusMonths(12)
+                .toYearMonth(),
         type = YtelseType.ORDINÆR_BARNETRYGD,
         kildeBehandlingId = kildeBehandlingId,
         periodeOffset = periodeOffset,

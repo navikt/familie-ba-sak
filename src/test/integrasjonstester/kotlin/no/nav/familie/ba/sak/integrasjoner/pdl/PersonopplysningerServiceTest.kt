@@ -26,18 +26,13 @@ internal class PersonopplysningerServiceTest(
     @Autowired
     @Qualifier("jwtBearer")
     private val restTemplate: RestOperations,
-
     @Autowired
     private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
-
     @Autowired
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
-
     @Autowired
     private val mockPersonidentService: PersonidentService,
-
 ) : AbstractSpringIntegrationTest() {
-
     lateinit var personopplysningerService: PersonopplysningerService
 
     @BeforeEach
@@ -73,11 +68,12 @@ internal class PersonopplysningerServiceTest(
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal returnere riktig personinfo for død person`() {
         mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(mapOf(ID_BARN_1 to true, ID_BARN_2 to false))
 
-        val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
-            tilAktør(
-                ID_DØD_MOR,
-            ),
-        )
+        val personInfo =
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+                tilAktør(
+                    ID_DØD_MOR,
+                ),
+            )
 
         assertThat(personInfo.dødsfall?.erDød).isTrue
         assertThat(personInfo.dødsfall?.dødsdato).isEqualTo("2020-04-04")
@@ -88,11 +84,12 @@ internal class PersonopplysningerServiceTest(
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal filtrere bort relasjoner med opphørte folkreregisteridenter eller uten fødselsdato`() {
         mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
 
-        val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
-            tilAktør(
-                ID_MOR_3BARN_1OPPHØRT_1UTENFØDSELSDATO,
-            ),
-        )
+        val personInfo =
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+                tilAktør(
+                    ID_MOR_3BARN_1OPPHØRT_1UTENFØDSELSDATO,
+                ),
+            )
 
         assertEquals(1, personInfo.forelderBarnRelasjon.size)
         assertEquals(ID_BARN_1, personInfo.forelderBarnRelasjon.single().aktør.aktivFødselsnummer())
@@ -153,7 +150,6 @@ internal class PersonopplysningerServiceTest(
     }
 
     companion object {
-
         const val ID_MOR = "22345678901"
         const val ID_MOR_MED_TOM_BOSTEDSADRESSE = "22345678903"
         const val ID_DØD_MOR = "44556612345"
@@ -163,7 +159,10 @@ internal class PersonopplysningerServiceTest(
         const val ID_UGRADERT_PERSON = "32345678903"
     }
 
-    private fun gyldigRequest(queryFilnavn: String, requestFilnavn: String): String {
+    private fun gyldigRequest(
+        queryFilnavn: String,
+        requestFilnavn: String,
+    ): String {
         return readfile(requestFilnavn)
             .replace(
                 "GRAPHQL-PLACEHOLDER",
@@ -179,7 +178,11 @@ internal class PersonopplysningerServiceTest(
         return StringUtils.normalizeSpace(this.replace("\n", ""))
     }
 
-    private fun lagMockForPdl(graphqlQueryFilnavn: String, requestFilnavn: String, mockResponse: String) {
+    private fun lagMockForPdl(
+        graphqlQueryFilnavn: String,
+        requestFilnavn: String,
+        mockResponse: String,
+    ) {
         wireMockServer.stubFor(
             WireMock.post(WireMock.urlEqualTo("/api/graphql"))
                 .withRequestBody(WireMock.equalToJson(gyldigRequest(graphqlQueryFilnavn, requestFilnavn)))

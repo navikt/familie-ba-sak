@@ -29,7 +29,6 @@ import java.time.LocalDate
 @ActiveProfiles("postgres", "mock-brev-klient", "integrasjonstest")
 @Tag("integration")
 class KonsistensavstemmingSchedulerTest : AbstractMockkSpringRunner() {
-
     @Autowired
     lateinit var taskRepository: TaskRepositoryWrapper
 

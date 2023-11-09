@@ -63,7 +63,6 @@ class StegService(
     private val personopplysningerService: PersonopplysningerService,
     private val automatiskBeslutningService: AutomatiskBeslutningService,
 ) {
-
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
@@ -90,28 +89,30 @@ class StegService(
 
         val behandling = behandlingService.opprettBehandling(nyBehandling)
 
-        val barnasIdenter: List<String> = when (nyBehandling.behandlingÅrsak) {
-            BehandlingÅrsak.FØDSELSHENDELSE,
-            BehandlingÅrsak.HELMANUELL_MIGRERING,
-            -> {
-                nyBehandling.barnasIdenter
-            }
-
-            else -> when (nyBehandling.behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> emptyList()
-                BehandlingType.REVURDERING,
-                BehandlingType.TEKNISK_ENDRING,
-                BehandlingType.MIGRERING_FRA_INFOTRYGD,
+        val barnasIdenter: List<String> =
+            when (nyBehandling.behandlingÅrsak) {
+                BehandlingÅrsak.FØDSELSHENDELSE,
+                BehandlingÅrsak.HELMANUELL_MIGRERING,
                 -> {
-                    if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
-                        validerMigreringFraInfotrygd(nyBehandling)
-                    }
-                    hentBarnFraForrigeAvsluttedeBehandling(behandling)
+                    nyBehandling.barnasIdenter
                 }
 
-                else -> throw Feil(hentUkjentBehandlingTypeOgÅrsakFeilMelding(nyBehandling))
+                else ->
+                    when (nyBehandling.behandlingType) {
+                        BehandlingType.FØRSTEGANGSBEHANDLING -> emptyList()
+                        BehandlingType.REVURDERING,
+                        BehandlingType.TEKNISK_ENDRING,
+                        BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                        -> {
+                            if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+                                validerMigreringFraInfotrygd(nyBehandling)
+                            }
+                            hentBarnFraForrigeAvsluttedeBehandling(behandling)
+                        }
+
+                        else -> throw Feil(hentUkjentBehandlingTypeOgÅrsakFeilMelding(nyBehandling))
+                    }
             }
-        }
 
         return håndterPersongrunnlag(
             behandling,
@@ -143,12 +144,14 @@ class StegService(
 
         if (sisteBehandlingSomErVedtatt != null && behandlingService.erLøpende(sisteBehandlingSomErVedtatt)) {
             throw FunksjonellFeil(
-                melding = "Det finnes allerede en vedtatt behandling med løpende utbetalinger på fagsak ${nyBehandling.fagsakId}." +
-                    "Behandling kan ikke opprettes med årsak " +
-                    BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
-                frontendFeilmelding = "Det finnes allerede en vedtatt behandling med løpende utbetalinger på fagsak." +
-                    "Behandling kan ikke opprettes med årsak " +
-                    BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
+                melding =
+                    "Det finnes allerede en vedtatt behandling med løpende utbetalinger på fagsak ${nyBehandling.fagsakId}." +
+                        "Behandling kan ikke opprettes med årsak " +
+                        BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
+                frontendFeilmelding =
+                    "Det finnes allerede en vedtatt behandling med løpende utbetalinger på fagsak." +
+                        "Behandling kan ikke opprettes med årsak " +
+                        BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
             )
         }
     }
@@ -170,27 +173,29 @@ class StegService(
 
     @Transactional
     fun opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
-        val fagsak = try {
-            fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true, FagsakType.NORMAL)
-        } catch (exception: Exception) {
-            if (exception is ConstraintViolationException) {
-                throw RekjørSenereException(
-                    triggerTid = LocalDateTime.now().plusMinutes(15),
-                    årsak = "Klarte ikke å opprette fagsak på grunn av krasj i databasen, prøver igjen om 15 minutter. Feilmelding: ${exception.message}.",
-                )
-            }
+        val fagsak =
+            try {
+                fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true, FagsakType.NORMAL)
+            } catch (exception: Exception) {
+                if (exception is ConstraintViolationException) {
+                    throw RekjørSenereException(
+                        triggerTid = LocalDateTime.now().plusMinutes(15),
+                        årsak = "Klarte ikke å opprette fagsak på grunn av krasj i databasen, prøver igjen om 15 minutter. Feilmelding: ${exception.message}.",
+                    )
+                }
 
-            throw exception
-        }
+                throw exception
+            }
 
         return håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
-                behandlingType = if (fagsak.status == FagsakStatus.LØPENDE) {
-                    BehandlingType.REVURDERING
-                } else {
-                    BehandlingType.FØRSTEGANGSBEHANDLING
-                },
+                behandlingType =
+                    if (fagsak.status == FagsakStatus.LØPENDE) {
+                        BehandlingType.REVURDERING
+                    } else {
+                        BehandlingType.FØRSTEGANGSBEHANDLING
+                    },
                 behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 skalBehandlesAutomatisk = true,
                 barnasIdenter = nyBehandlingHendelse.barnasIdenter,
@@ -258,9 +263,10 @@ class StegService(
         val behandlingSteg: VilkårsvurderingSteg =
             hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
 
-        val behandlingEtterVilkårsvurdering = håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, "")
-        }
+        val behandlingEtterVilkårsvurdering =
+            håndterSteg(behandling, behandlingSteg) {
+                behandlingSteg.utførStegOgAngiNeste(behandling, "")
+            }
 
         return if (behandlingEtterVilkårsvurdering.skalBehandlesAutomatisk) {
             håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
@@ -274,9 +280,10 @@ class StegService(
         val behandlingSteg: BehandlingsresultatSteg =
             hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
 
-        val behandlingEtterBehandlingsresultatSteg = håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, "")
-        }
+        val behandlingEtterBehandlingsresultatSteg =
+            håndterSteg(behandling, behandlingSteg) {
+                behandlingSteg.utførStegOgAngiNeste(behandling, "")
+            }
 
         return if (behandlingEtterBehandlingsresultatSteg.resultat == Behandlingsresultat.AVSLÅTT &&
             !behandlingEtterBehandlingsresultatSteg.skalBehandlesAutomatisk
@@ -303,12 +310,16 @@ class StegService(
     }
 
     @Transactional
-    fun håndterSendTilBeslutter(behandling: Behandling, behandlendeEnhet: String): Behandling {
+    fun håndterSendTilBeslutter(
+        behandling: Behandling,
+        behandlendeEnhet: String,
+    ): Behandling {
         val behandlingSteg: SendTilBeslutter = hentBehandlingSteg(StegType.SEND_TIL_BESLUTTER) as SendTilBeslutter
 
-        val behandlingEtterBeslutterSteg = håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet)
-        }
+        val behandlingEtterBeslutterSteg =
+            håndterSteg(behandling, behandlingSteg) {
+                behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet)
+            }
 
         if (automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)) {
             return håndterBeslutningForVedtak(
@@ -340,13 +351,14 @@ class StegService(
         val behandlingSteg: HenleggBehandling =
             hentBehandlingSteg(StegType.HENLEGG_BEHANDLING) as HenleggBehandling
 
-        val behandlingEtterHenleggeSteg = håndterSteg(
-            behandling = behandling,
-            behandlingSteg = behandlingSteg,
-            henleggÅrsak = henleggBehandlingInfo.årsak,
-        ) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, henleggBehandlingInfo)
-        }
+        val behandlingEtterHenleggeSteg =
+            håndterSteg(
+                behandling = behandling,
+                behandlingSteg = behandlingSteg,
+                henleggÅrsak = henleggBehandlingInfo.årsak,
+            ) {
+                behandlingSteg.utførStegOgAngiNeste(behandling, henleggBehandlingInfo)
+            }
 
         return håndterFerdigstillBehandling(
             behandling = behandlingEtterHenleggeSteg,
@@ -354,7 +366,10 @@ class StegService(
     }
 
     @Transactional
-    fun håndterIverksettMotØkonomi(behandling: Behandling, iverksettingTaskDTO: IverksettingTaskDTO): Behandling {
+    fun håndterIverksettMotØkonomi(
+        behandling: Behandling,
+        iverksettingTaskDTO: IverksettingTaskDTO,
+    ): Behandling {
         val behandlingSteg: IverksettMotOppdrag =
             hentBehandlingSteg(StegType.IVERKSETT_MOT_OPPDRAG) as IverksettMotOppdrag
 
@@ -377,7 +392,10 @@ class StegService(
     }
 
     @Transactional
-    fun håndterIverksettMotFamilieTilbake(behandling: Behandling, metadata: Properties): Behandling {
+    fun håndterIverksettMotFamilieTilbake(
+        behandling: Behandling,
+        metadata: Properties,
+    ): Behandling {
         val behandlingSteg: IverksettMotFamilieTilbake =
             hentBehandlingSteg(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) as IverksettMotFamilieTilbake
 
@@ -423,7 +441,10 @@ class StegService(
     }
 
     @Transactional
-    fun håndterRegistrerVerge(behandling: Behandling, vergeInfo: RestRegistrerInstitusjonOgVerge): Behandling {
+    fun håndterRegistrerVerge(
+        behandling: Behandling,
+        vergeInfo: RestRegistrerInstitusjonOgVerge,
+    ): Behandling {
         val behandlingSteg: RegistrerInstitusjonOgVerge =
             hentBehandlingSteg(StegType.REGISTRERE_INSTITUSJON_OG_VERGE) as RegistrerInstitusjonOgVerge
 
@@ -449,11 +470,12 @@ class StegService(
                 verifiserBeslutteVedtakForManuellMigrering(behandlingSteg)
             } else {
                 tilgangService.verifiserHarTilgangTilHandling(
-                    minimumBehandlerRolle = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
-                        ?: throw Feil(
-                            "${SikkerhetContext.hentSaksbehandlerNavn()} prøver " +
-                                "å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen.",
-                        ),
+                    minimumBehandlerRolle =
+                        behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
+                            ?: throw Feil(
+                                "${SikkerhetContext.hentSaksbehandlerNavn()} prøver " +
+                                    "å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen.",
+                            ),
                     handling = "utføre steg ${behandlingSteg.stegType().displayName()}",
                 )
             }
@@ -464,7 +486,8 @@ class StegService(
                 throw FunksjonellFeil("Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
-            if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType()
+            if (behandlingSteg.stegType().erSaksbehandlerSteg() &&
+                behandlingSteg.stegType()
                     .kommerEtter(behandling.steg)
             ) {
                 throw FunksjonellFeil(
@@ -576,19 +599,20 @@ class StegService(
 
     private fun initStegMetrikker(type: String): Map<StegType, Counter> {
         return steg.associate {
-            it.stegType() to Metrics.counter(
-                "behandling.steg.$type",
-                "steg",
-                it.stegType().name,
-                "beskrivelse",
-                it.stegType().rekkefølge.toString() + " " + it.stegType().displayName(),
-            )
+            it.stegType() to
+                Metrics.counter(
+                    "behandling.steg.$type",
+                    "steg",
+                    it.stegType().name,
+                    "beskrivelse",
+                    it.stegType().rekkefølge.toString() + " " + it.stegType().displayName(),
+                )
         }
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(StegService::class.java)
+
         private fun hentUkjentBehandlingTypeOgÅrsakFeilMelding(nyBehandling: NyBehandling) =
             "Ukjent oppførsel ved opprettelse av ny behandling med årsak " +
                 "${nyBehandling.behandlingÅrsak.visningsnavn} og " +

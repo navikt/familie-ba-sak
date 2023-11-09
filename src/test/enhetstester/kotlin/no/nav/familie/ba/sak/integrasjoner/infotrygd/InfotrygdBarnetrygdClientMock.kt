@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Profile
 
 @TestConfiguration
 class InfotrygdBarnetrygdClientMock {
-
     @Bean
     @Profile("mock-infotrygd-barnetrygd")
     @Primary
@@ -28,14 +27,16 @@ class InfotrygdBarnetrygdClientMock {
             clearMocks(mockInfotrygdBarnetrygdClient)
 
             every { mockInfotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(any(), any()) } returns false
-            every { mockInfotrygdBarnetrygdClient.hentSaker(any(), any()) } returns InfotrygdSøkResponse(
-                emptyList(),
-                emptyList(),
-            )
-            every { mockInfotrygdBarnetrygdClient.hentStønader(any(), any()) } returns InfotrygdSøkResponse(
-                emptyList(),
-                emptyList(),
-            )
+            every { mockInfotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
+                InfotrygdSøkResponse(
+                    emptyList(),
+                    emptyList(),
+                )
+            every { mockInfotrygdBarnetrygdClient.hentStønader(any(), any()) } returns
+                InfotrygdSøkResponse(
+                    emptyList(),
+                    emptyList(),
+                )
         }
     }
 }

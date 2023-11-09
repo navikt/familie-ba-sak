@@ -31,7 +31,6 @@ class RestartAvSmåbarnstilleggService(
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
     private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
-
     /**
      * Første dag hver måned sjekkes det om noen fagsaker har oppstart av småbarnstillegg inneværende måned, etter å ha
      * hatt et opphold. Hvis perioden ikke allerede er begrunnet, skal det opprettes en "vurder livshendelse"-oppgave
@@ -83,10 +82,11 @@ class RestartAvSmåbarnstilleggService(
         iverksatteLøpendeBehandlinger: List<Long>,
         måned: YearMonth,
     ): List<Long> {
-        val fagsaker = fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
-            iverksatteLøpendeBehandlinger = iverksatteLøpendeBehandlinger,
-            stønadFom = måned,
-        )
+        val fagsaker =
+            fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
+                iverksatteLøpendeBehandlinger = iverksatteLøpendeBehandlinger,
+                stønadFom = måned,
+            )
         if (SatsService.finnSisteSatsFor(SatsType.SMA).gyldigFom.toYearMonth() == måned) {
             return fagsaker.mapNotNull { fagsakId ->
                 val sisteVedtatteBehandling =
@@ -111,7 +111,10 @@ class RestartAvSmåbarnstilleggService(
         }
     }
 
-    internal fun periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId: Long, måned: YearMonth): Boolean {
+    internal fun periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(
+        fagsakId: Long,
+        måned: YearMonth,
+    ): Boolean {
         val vedtaksperioderForVedtatteBehandlinger =
             behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId)
                 .filter { behandling ->

@@ -20,7 +20,6 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class VilkårsvurderingTidslinjerTest {
-
     @Test
     fun `et vilkår kan ha overlappende vilkårsresultater hvis bare ett er oppfylt`() {
         val søkerFnr = randomFnr()
@@ -29,18 +28,20 @@ internal class VilkårsvurderingTidslinjerTest {
         val barnaFnr = listOf(barnFnr, barn2Fnr)
 
         val defaultBehandling = lagBehandling(defaultFagsak())
-        val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling,
-        ).also {
-            it.personResultater = lagPersonResultaterForSøkerOgToBarn(
-                it,
-                tilAktør(søkerFnr),
-                tilAktør(barnFnr),
-                tilAktør(barn2Fnr),
-                LocalDate.now().minusMonths(3),
-                LocalDate.now().minusMonths(2),
-            )
-        }
+        val vilkårsvurdering =
+            Vilkårsvurdering(
+                behandling = defaultBehandling,
+            ).also {
+                it.personResultater =
+                    lagPersonResultaterForSøkerOgToBarn(
+                        it,
+                        tilAktør(søkerFnr),
+                        tilAktør(barnFnr),
+                        tilAktør(barn2Fnr),
+                        LocalDate.now().minusMonths(3),
+                        LocalDate.now().minusMonths(2),
+                    )
+            }
 
         // Legg på et overlappende vilkårsresultat som IKKE er oppfylt
         vilkårsvurdering.personResultater.filter { it.aktør.aktivFødselsnummer() == barnFnr }.forEach {
@@ -60,8 +61,9 @@ internal class VilkårsvurderingTidslinjerTest {
         assertDoesNotThrow {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
-                søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
-                    .tilPersonEnkelSøkerOgBarn(),
+                søkerOgBarn =
+                    lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                        .tilPersonEnkelSøkerOgBarn(),
             )
         }
     }
@@ -74,18 +76,20 @@ internal class VilkårsvurderingTidslinjerTest {
         val barnaFnr = listOf(barnFnr, barn2Fnr)
 
         val defaultBehandling = lagBehandling(defaultFagsak())
-        val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling,
-        ).also {
-            it.personResultater = lagPersonResultaterForSøkerOgToBarn(
-                it,
-                tilAktør(søkerFnr),
-                tilAktør(barnFnr),
-                tilAktør(barn2Fnr),
-                LocalDate.now().minusMonths(3),
-                LocalDate.now().minusMonths(2),
-            )
-        }
+        val vilkårsvurdering =
+            Vilkårsvurdering(
+                behandling = defaultBehandling,
+            ).also {
+                it.personResultater =
+                    lagPersonResultaterForSøkerOgToBarn(
+                        it,
+                        tilAktør(søkerFnr),
+                        tilAktør(barnFnr),
+                        tilAktør(barn2Fnr),
+                        LocalDate.now().minusMonths(3),
+                        LocalDate.now().minusMonths(2),
+                    )
+            }
 
         // Legg på et overlappende vilkårsresultat som ER oppfylt
         vilkårsvurdering.personResultater.filter { it.aktør.aktivFødselsnummer() == barnFnr }.forEach {
@@ -104,8 +108,9 @@ internal class VilkårsvurderingTidslinjerTest {
         assertThrows<Tidslinje.Companion.TidslinjeFeilException> {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
-                søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
-                    .tilPersonEnkelSøkerOgBarn(),
+                søkerOgBarn =
+                    lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                        .tilPersonEnkelSøkerOgBarn(),
             )
         }
     }

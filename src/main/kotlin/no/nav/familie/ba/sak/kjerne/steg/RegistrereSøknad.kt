@@ -24,7 +24,6 @@ class RegistrereSøknad(
     private val vedtakService: VedtakService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) : BehandlingSteg<RestRegistrerSøknad> {
-
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
         data: RestRegistrerSøknad,
@@ -42,10 +41,11 @@ class RegistrereSøknad(
 
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlagFinnes)
         søknadGrunnlagService.lagreOgDeaktiverGammel(
-            søknadGrunnlag = SøknadGrunnlag(
-                behandlingId = behandling.id,
-                søknad = innsendtSøknad,
-            ),
+            søknadGrunnlag =
+                SøknadGrunnlag(
+                    behandlingId = behandling.id,
+                    søknad = innsendtSøknad,
+                ),
         )
 
         val forrigeBehandlingSomErVedtatt =

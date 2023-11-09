@@ -38,65 +38,73 @@ class DifferanseberegningsUtilsTest {
 
     @Test
     fun `Skal konvertere årlig utenlandsk periodebeløp til månedlig`() {
-        val månedligValutabeløp = 1200.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
-            .tilMånedligValutabeløp()
+        val månedligValutabeløp =
+            1200.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
+                .tilMånedligValutabeløp()
 
         Assertions.assertEquals(100.i("EUR"), månedligValutabeløp)
     }
 
     @Test
     fun `Skal konvertere kvartalsvis utenlandsk periodebeløp til månedlig`() {
-        val månedligValutabeløp = 300.i("EUR").somUtenlandskPeriodebeløp(KVARTALSVIS)
-            .tilMånedligValutabeløp()
+        val månedligValutabeløp =
+            300.i("EUR").somUtenlandskPeriodebeløp(KVARTALSVIS)
+                .tilMånedligValutabeløp()
 
         Assertions.assertEquals(100.i("EUR"), månedligValutabeløp)
     }
 
     @Test
     fun `Månedlig utenlandsk periodebeløp skal ikke endres`() {
-        val månedligValutabeløp = 100.i("EUR").somUtenlandskPeriodebeløp(MÅNEDLIG)
-            .tilMånedligValutabeløp()
+        val månedligValutabeløp =
+            100.i("EUR").somUtenlandskPeriodebeløp(MÅNEDLIG)
+                .tilMånedligValutabeløp()
 
         Assertions.assertEquals(100.i("EUR"), månedligValutabeløp)
     }
 
     @Test
     fun `Skal konvertere ukentlig utenlandsk periodebeløp til månedlig`() {
-        val månedligValutabeløp = 25.i("EUR").somUtenlandskPeriodebeløp(UKENTLIG)
-            .tilMånedligValutabeløp()
+        val månedligValutabeløp =
+            25.i("EUR").somUtenlandskPeriodebeløp(UKENTLIG)
+                .tilMånedligValutabeløp()
 
         Assertions.assertEquals(108.75.i("EUR"), månedligValutabeløp)
     }
 
     @Test
     fun `Skal ha presisjon i kronekonverteringen til norske kroner`() {
-        val månedligValutabeløp = 0.0123767453453.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
-            .tilMånedligValutabeløp()
+        val månedligValutabeløp =
+            0.0123767453453.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
+                .tilMånedligValutabeløp()
 
         Assertions.assertEquals(0.0010313954.i("EUR"), månedligValutabeløp)
     }
 
     @Test
     fun `Skal håndtere gjentakende endring og differanseberegning på andel tilkjent ytelse`() {
-        val aty1 = lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
-            100.toBigDecimal(),
-        )
+        val aty1 =
+            lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
+                100.toBigDecimal(),
+            )
 
         Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(-50, aty1?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(50, aty1?.nasjonaltPeriodebeløp)
 
-        val aty2 = aty1?.copy(nasjonaltPeriodebeløp = 1).oppdaterDifferanseberegning(
-            75.toBigDecimal(),
-        )
+        val aty2 =
+            aty1?.copy(nasjonaltPeriodebeløp = 1).oppdaterDifferanseberegning(
+                75.toBigDecimal(),
+            )
 
         Assertions.assertEquals(0, aty2?.kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(-74, aty2?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(1, aty2?.nasjonaltPeriodebeløp)
 
-        val aty3 = aty2?.copy(nasjonaltPeriodebeløp = 250).oppdaterDifferanseberegning(
-            75.toBigDecimal(),
-        )
+        val aty3 =
+            aty2?.copy(nasjonaltPeriodebeløp = 250).oppdaterDifferanseberegning(
+                75.toBigDecimal(),
+            )
 
         Assertions.assertEquals(175, aty3?.kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(175, aty3?.differanseberegnetPeriodebeløp)
@@ -105,9 +113,10 @@ class DifferanseberegningsUtilsTest {
 
     @Test
     fun `Skal fjerne desimaler i utenlandskperiodebeløp, effektivt øke den norske ytelsen med inntil én krone`() {
-        val aty1 = lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
-            100.987654.toBigDecimal(),
-        ) // Blir til rundet til 100
+        val aty1 =
+            lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
+                100.987654.toBigDecimal(),
+            ) // Blir til rundet til 100
 
         Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(-50, aty1?.differanseberegnetPeriodebeløp)
@@ -116,9 +125,10 @@ class DifferanseberegningsUtilsTest {
 
     @Test
     fun `Skal beholde originalt nasjonaltPeriodebeløp når vi oppdatererDifferanseberegning gjentatte ganger`() {
-        var aty1 = lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
-            100.987654.toBigDecimal(),
-        )
+        var aty1 =
+            lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
+                100.987654.toBigDecimal(),
+            )
 
         Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
         aty1 = aty1.oppdaterDifferanseberegning(13.6.toBigDecimal())
@@ -128,18 +138,21 @@ class DifferanseberegningsUtilsTest {
     }
 }
 
-fun lagAndelTilkjentYtelse(beløp: Int) = lagAndelTilkjentYtelse(
-    fom = YearMonth.now(),
-    tom = YearMonth.now().plusYears(1),
-    beløp = beløp,
-)
+fun lagAndelTilkjentYtelse(beløp: Int) =
+    lagAndelTilkjentYtelse(
+        fom = YearMonth.now(),
+        tom = YearMonth.now().plusYears(1),
+        beløp = beløp,
+    )
 
-fun Double.kronerPer(valuta: String) = KronerPerValutaenhet(
-    valutakode = valuta,
-    kronerPerValutaenhet = this.toBigDecimal(),
-)
+fun Double.kronerPer(valuta: String) =
+    KronerPerValutaenhet(
+        valutakode = valuta,
+        kronerPerValutaenhet = this.toBigDecimal(),
+    )
 
 fun Double.i(valuta: String) = Valutabeløp(this.toBigDecimal(), valuta)
+
 fun Int.i(valuta: String) = Valutabeløp(this.toBigDecimal(), valuta)
 
 fun Valutabeløp.somUtenlandskPeriodebeløp(intervall: Intervall): UtenlandskPeriodebeløp =

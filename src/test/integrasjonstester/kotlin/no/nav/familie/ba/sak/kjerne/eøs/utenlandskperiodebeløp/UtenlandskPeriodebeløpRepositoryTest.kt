@@ -21,7 +21,6 @@ class UtenlandskPeriodebeløpRepositoryTest(
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun `Skal lagre flere utenlandske periodebeløp med gjenbruk av flere aktører`() {
         val søker = aktørIdRepository.save(randomAktør())
@@ -31,17 +30,19 @@ class UtenlandskPeriodebeløpRepositoryTest(
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandling(fagsak))
 
-        val utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.save(
-            lagUtenlandskPeriodebeløp(
-                barnAktører = setOf(barn1, barn2),
-            ).also { it.behandlingId = behandling.id },
-        )
+        val utenlandskPeriodebeløp =
+            utenlandskPeriodebeløpRepository.save(
+                lagUtenlandskPeriodebeløp(
+                    barnAktører = setOf(barn1, barn2),
+                ).also { it.behandlingId = behandling.id },
+            )
 
-        val utenlandskPeriodebeløp2 = utenlandskPeriodebeløpRepository.save(
-            lagUtenlandskPeriodebeløp(
-                barnAktører = setOf(barn1, barn2),
-            ).also { it.behandlingId = behandling.id },
-        )
+        val utenlandskPeriodebeløp2 =
+            utenlandskPeriodebeløpRepository.save(
+                lagUtenlandskPeriodebeløp(
+                    barnAktører = setOf(barn1, barn2),
+                ).also { it.behandlingId = behandling.id },
+            )
 
         assertEquals(utenlandskPeriodebeløp.barnAktører, utenlandskPeriodebeløp2.barnAktører)
     }
@@ -54,17 +55,18 @@ class UtenlandskPeriodebeløpRepositoryTest(
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandling(fagsak))
 
-        val utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.save(
-            lagUtenlandskPeriodebeløp(
-                behandlingId = behandling.id,
-                barnAktører = setOf(barn1),
-                fom = YearMonth.of(2020, 1),
-                tom = YearMonth.of(2021, 12),
-                beløp = BigDecimal.valueOf(1_234),
-                valutakode = "EUR",
-                intervall = Intervall.UKENTLIG,
-            ),
-        )
+        val utenlandskPeriodebeløp =
+            utenlandskPeriodebeløpRepository.save(
+                lagUtenlandskPeriodebeløp(
+                    behandlingId = behandling.id,
+                    barnAktører = setOf(barn1),
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2021, 12),
+                    beløp = BigDecimal.valueOf(1_234),
+                    valutakode = "EUR",
+                    intervall = Intervall.UKENTLIG,
+                ),
+            )
 
         val hentedeUtenlandskePeriodebeløp =
             utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandling.id)

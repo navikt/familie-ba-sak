@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class StatsborgerskapServiceTest {
-
     private val integrasjonClient = mockk<IntegrasjonClient>()
 
     private lateinit var statsborgerskapService: StatsborgerskapService
@@ -33,17 +32,19 @@ internal class StatsborgerskapServiceTest {
 
     @Test
     fun `Skal generere GrStatsborgerskap med flere perioder fordi Polen ble medlem av EØS`() {
-        val statsborgerskapMedGyldigFom = Statsborgerskap(
-            "POL",
-            bekreftelsesdato = null,
-            gyldigFraOgMed = FOM_1990,
-            gyldigTilOgMed = TOM_2010,
-        )
+        val statsborgerskapMedGyldigFom =
+            Statsborgerskap(
+                "POL",
+                bekreftelsesdato = null,
+                gyldigFraOgMed = FOM_1990,
+                gyldigTilOgMed = TOM_2010,
+            )
 
-        val grStatsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskap(
-            statsborgerskap = statsborgerskapMedGyldigFom,
-            person = lagPerson(),
-        )
+        val grStatsborgerskap =
+            statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                statsborgerskap = statsborgerskapMedGyldigFom,
+                person = lagPerson(),
+            )
 
         assertEquals(2, grStatsborgerskap.size)
         assertEquals(FOM_1990, grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.first().gyldigPeriode?.fom)
@@ -62,17 +63,19 @@ internal class StatsborgerskapServiceTest {
 
     @Test
     fun `Skal evaluere polske statsborgere med ukjent periode som EØS-borgere`() {
-        val statsborgerPolenUtenPeriode = Statsborgerskap(
-            "POL",
-            gyldigFraOgMed = null,
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null,
-        )
+        val statsborgerPolenUtenPeriode =
+            Statsborgerskap(
+                "POL",
+                gyldigFraOgMed = null,
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+            )
 
-        val grStatsborgerskapUtenPeriode = statsborgerskapService.hentStatsborgerskapMedMedlemskap(
-            statsborgerskap = statsborgerPolenUtenPeriode,
-            person = lagPerson(),
-        )
+        val grStatsborgerskapUtenPeriode =
+            statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                statsborgerskap = statsborgerPolenUtenPeriode,
+                person = lagPerson(),
+            )
         assertEquals(1, grStatsborgerskapUtenPeriode.size)
         assertEquals(Medlemskap.EØS, grStatsborgerskapUtenPeriode.single().medlemskap)
         assertTrue(grStatsborgerskapUtenPeriode.single().gjeldendeNå())
@@ -80,36 +83,39 @@ internal class StatsborgerskapServiceTest {
 
     @Test
     fun `Lovlig opphold - valider at alle gjeldende medlemskap blir returnert`() {
-        val person = lagPerson()
-            .also {
-                it.statsborgerskap =
-                    mutableListOf(
-                        GrStatsborgerskap(
-                            gyldigPeriode = DatoIntervallEntitet(tom = null, fom = null),
-                            landkode = "DNK",
-                            medlemskap = Medlemskap.NORDEN,
-                            person = it,
-                        ),
-                        GrStatsborgerskap(
-                            gyldigPeriode = DatoIntervallEntitet(
-                                tom = null,
-                                fom = LocalDate.now().minusYears(1),
+        val person =
+            lagPerson()
+                .also {
+                    it.statsborgerskap =
+                        mutableListOf(
+                            GrStatsborgerskap(
+                                gyldigPeriode = DatoIntervallEntitet(tom = null, fom = null),
+                                landkode = "DNK",
+                                medlemskap = Medlemskap.NORDEN,
+                                person = it,
                             ),
-                            landkode = "DEU",
-                            medlemskap = Medlemskap.EØS,
-                            person = it,
-                        ),
-                        GrStatsborgerskap(
-                            gyldigPeriode = DatoIntervallEntitet(
-                                tom = LocalDate.now().minusYears(2),
-                                fom = LocalDate.now().minusYears(2),
+                            GrStatsborgerskap(
+                                gyldigPeriode =
+                                    DatoIntervallEntitet(
+                                        tom = null,
+                                        fom = LocalDate.now().minusYears(1),
+                                    ),
+                                landkode = "DEU",
+                                medlemskap = Medlemskap.EØS,
+                                person = it,
                             ),
-                            landkode = "POL",
-                            medlemskap = Medlemskap.EØS,
-                            person = it,
-                        ),
-                    )
-            }
+                            GrStatsborgerskap(
+                                gyldigPeriode =
+                                    DatoIntervallEntitet(
+                                        tom = LocalDate.now().minusYears(2),
+                                        fom = LocalDate.now().minusYears(2),
+                                    ),
+                                landkode = "POL",
+                                medlemskap = Medlemskap.EØS,
+                                person = it,
+                            ),
+                        )
+                }
 
         val medlemskap = finnNåværendeMedlemskap(person.statsborgerskap)
 
@@ -131,17 +137,19 @@ internal class StatsborgerskapServiceTest {
 
     @Test
     fun `Skal evaluere britiske statsborgere med ukjent periode som tredjelandsborgere`() {
-        val statsborgerStorbritanniaUtenPeriode = Statsborgerskap(
-            "GBR",
-            gyldigFraOgMed = null,
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null,
-        )
+        val statsborgerStorbritanniaUtenPeriode =
+            Statsborgerskap(
+                "GBR",
+                gyldigFraOgMed = null,
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+            )
 
-        val grStatsborgerskapUtenPeriode = statsborgerskapService.hentStatsborgerskapMedMedlemskap(
-            statsborgerskap = statsborgerStorbritanniaUtenPeriode,
-            person = lagPerson(),
-        )
+        val grStatsborgerskapUtenPeriode =
+            statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                statsborgerskap = statsborgerStorbritanniaUtenPeriode,
+                person = lagPerson(),
+            )
         assertEquals(1, grStatsborgerskapUtenPeriode.size)
         assertEquals(Medlemskap.TREDJELANDSBORGER, grStatsborgerskapUtenPeriode.single().medlemskap)
         assertTrue(grStatsborgerskapUtenPeriode.single().gjeldendeNå())
@@ -149,16 +157,18 @@ internal class StatsborgerskapServiceTest {
 
     @Test
     fun `Skal evaluere britiske statsborgere etter brexit som tredjelandsborgere`() {
-        val statsborgerStorbritanniaMedPeriodeEtterBrexit = Statsborgerskap(
-            "GBR",
-            gyldigFraOgMed = LocalDate.of(2022, 3, 1),
-            gyldigTilOgMed = LocalDate.now(),
-            bekreftelsesdato = null,
-        )
-        val grStatsborgerskapEtterBrexit = statsborgerskapService.hentStatsborgerskapMedMedlemskap(
-            statsborgerskap = statsborgerStorbritanniaMedPeriodeEtterBrexit,
-            person = lagPerson(),
-        )
+        val statsborgerStorbritanniaMedPeriodeEtterBrexit =
+            Statsborgerskap(
+                "GBR",
+                gyldigFraOgMed = LocalDate.of(2022, 3, 1),
+                gyldigTilOgMed = LocalDate.now(),
+                bekreftelsesdato = null,
+            )
+        val grStatsborgerskapEtterBrexit =
+            statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                statsborgerskap = statsborgerStorbritanniaMedPeriodeEtterBrexit,
+                person = lagPerson(),
+            )
         assertEquals(1, grStatsborgerskapEtterBrexit.size)
         assertEquals(Medlemskap.TREDJELANDSBORGER, grStatsborgerskapEtterBrexit.single().medlemskap)
         assertTrue(grStatsborgerskapEtterBrexit.single().gjeldendeNå())
@@ -169,16 +179,18 @@ internal class StatsborgerskapServiceTest {
         val datoFørBrexit = LocalDate.of(1989, 3, 1)
         val datoEtterBrexit = LocalDate.of(2020, 5, 1)
 
-        val statsborgerStorbritanniaMedPeriodeUnderBrexit = Statsborgerskap(
-            "GBR",
-            gyldigFraOgMed = datoFørBrexit,
-            gyldigTilOgMed = datoEtterBrexit,
-            bekreftelsesdato = null,
-        )
-        val grStatsborgerskapUnderBrexit = statsborgerskapService.hentStatsborgerskapMedMedlemskap(
-            statsborgerskap = statsborgerStorbritanniaMedPeriodeUnderBrexit,
-            person = lagPerson(),
-        )
+        val statsborgerStorbritanniaMedPeriodeUnderBrexit =
+            Statsborgerskap(
+                "GBR",
+                gyldigFraOgMed = datoFørBrexit,
+                gyldigTilOgMed = datoEtterBrexit,
+                bekreftelsesdato = null,
+            )
+        val grStatsborgerskapUnderBrexit =
+            statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                statsborgerskap = statsborgerStorbritanniaMedPeriodeUnderBrexit,
+                person = lagPerson(),
+            )
         assertEquals(2, grStatsborgerskapUnderBrexit.size)
         assertEquals(datoFørBrexit, grStatsborgerskapUnderBrexit.first().gyldigPeriode?.fom)
         assertEquals(TOM_2010, grStatsborgerskapUnderBrexit.first().gyldigPeriode?.tom)
@@ -191,30 +203,34 @@ internal class StatsborgerskapServiceTest {
 
     @Test
     fun `hentSterkesteMedlemskap - skal finne sterkeste medlemskap i statsborgerperioden`() {
-        val statsborgerStorbritannia = Statsborgerskap(
-            "GBR",
-            gyldigFraOgMed = LocalDate.of(1990, 4, 1),
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null,
-        )
-        val statsborgerPolen = Statsborgerskap(
-            "POL",
-            gyldigFraOgMed = LocalDate.of(1990, 4, 1),
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null,
-        )
-        val statsborgerSerbia = Statsborgerskap(
-            "SRB",
-            gyldigFraOgMed = LocalDate.of(1990, 4, 1),
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null,
-        )
-        val statsborgerNorge = Statsborgerskap(
-            "NOR",
-            gyldigFraOgMed = LocalDate.of(1990, 4, 1),
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null,
-        )
+        val statsborgerStorbritannia =
+            Statsborgerskap(
+                "GBR",
+                gyldigFraOgMed = LocalDate.of(1990, 4, 1),
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+            )
+        val statsborgerPolen =
+            Statsborgerskap(
+                "POL",
+                gyldigFraOgMed = LocalDate.of(1990, 4, 1),
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+            )
+        val statsborgerSerbia =
+            Statsborgerskap(
+                "SRB",
+                gyldigFraOgMed = LocalDate.of(1990, 4, 1),
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+            )
+        val statsborgerNorge =
+            Statsborgerskap(
+                "NOR",
+                gyldigFraOgMed = LocalDate.of(1990, 4, 1),
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+            )
 
         assertEquals(Medlemskap.EØS, statsborgerskapService.hentSterkesteMedlemskap(statsborgerStorbritannia))
         assertEquals(Medlemskap.EØS, statsborgerskapService.hentSterkesteMedlemskap(statsborgerPolen))
@@ -224,18 +240,20 @@ internal class StatsborgerskapServiceTest {
 
     @Test
     fun `hentSterkesteMedlemskap - om statsborgerperiode er ukjent vurderer vi basert på dagens medlemskap`() {
-        val statsborgerStorbritanniaMedNullDatoer = Statsborgerskap(
-            "GBR",
-            gyldigFraOgMed = null,
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null,
-        )
-        val statsborgerPolenMedNullDatoer = Statsborgerskap(
-            "POL",
-            gyldigFraOgMed = null,
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null,
-        )
+        val statsborgerStorbritanniaMedNullDatoer =
+            Statsborgerskap(
+                "GBR",
+                gyldigFraOgMed = null,
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+            )
+        val statsborgerPolenMedNullDatoer =
+            Statsborgerskap(
+                "POL",
+                gyldigFraOgMed = null,
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+            )
         assertEquals(
             Medlemskap.TREDJELANDSBORGER,
             statsborgerskapService.hentSterkesteMedlemskap(statsborgerStorbritanniaMedNullDatoer),

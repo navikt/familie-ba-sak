@@ -22,21 +22,22 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class UtenlandskPeriodebeløpServiceTest {
-
     val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> =
         mockPeriodeBarnSkjemaRepository()
     val kompetanseRepository: KompetanseRepository = mockk()
 
-    val utenlandskPeriodebeløpService = UtenlandskPeriodebeløpService(
-        utenlandskPeriodebeløpRepository,
-        emptyList(),
-    )
+    val utenlandskPeriodebeløpService =
+        UtenlandskPeriodebeløpService(
+            utenlandskPeriodebeløpRepository,
+            emptyList(),
+        )
 
-    val tilpassUtenlandskePeriodebeløpTilKompetanserService = TilpassUtenlandskePeriodebeløpTilKompetanserService(
-        utenlandskPeriodebeløpRepository,
-        emptyList(),
-        kompetanseRepository,
-    )
+    val tilpassUtenlandskePeriodebeløpTilKompetanserService =
+        TilpassUtenlandskePeriodebeløpTilKompetanserService(
+            utenlandskPeriodebeløpRepository,
+            emptyList(),
+            kompetanseRepository,
+        )
 
     @BeforeEach
     fun init() {
@@ -55,11 +56,12 @@ internal class UtenlandskPeriodebeløpServiceTest {
             .medBeløp("4444   555 666", "EUR", "N", barn1, barn2, barn3)
             .lagreTil(utenlandskPeriodebeløpRepository)
 
-        val kompetanser = KompetanseBuilder(jan(2020), behandlingId)
-            .medKompetanse("SS   SSSSS", barn1, annenForeldersAktivitetsland = "N")
-            .medKompetanse("  PPP", barn1, barn2, barn3, annenForeldersAktivitetsland = "N")
-            .medKompetanse("--   ----", barn2, barn3, annenForeldersAktivitetsland = "N")
-            .byggKompetanser()
+        val kompetanser =
+            KompetanseBuilder(jan(2020), behandlingId)
+                .medKompetanse("SS   SSSSS", barn1, annenForeldersAktivitetsland = "N")
+                .medKompetanse("  PPP", barn1, barn2, barn3, annenForeldersAktivitetsland = "N")
+                .medKompetanse("--   ----", barn2, barn3, annenForeldersAktivitetsland = "N")
+                .byggKompetanser()
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId.id) } returns kompetanser
 
@@ -68,9 +70,10 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
         val faktiskeUtenlandskePeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
 
-        val forventedeUtenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
-            .medBeløp("44   --555", "EUR", "N", barn1)
-            .bygg()
+        val forventedeUtenlandskePeriodebeløp =
+            UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
+                .medBeløp("44   --555", "EUR", "N", barn1)
+                .bygg()
 
         assertEqualsUnordered(forventedeUtenlandskePeriodebeløp, faktiskeUtenlandskePeriodebeløp)
     }
@@ -81,9 +84,10 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
 
-        val lagretUtenlandskPeriodebeløp = UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
-            .medBeløp("44444444", "EUR", "SE", barn1)
-            .lagreTil(utenlandskPeriodebeløpRepository).single()
+        val lagretUtenlandskPeriodebeløp =
+            UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
+                .medBeløp("44444444", "EUR", "SE", barn1)
+                .lagreTil(utenlandskPeriodebeløpRepository).single()
 
         utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(behandlingId, lagretUtenlandskPeriodebeløp.id)
 

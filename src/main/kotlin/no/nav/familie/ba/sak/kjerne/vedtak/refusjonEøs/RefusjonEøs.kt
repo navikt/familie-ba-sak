@@ -28,7 +28,6 @@ data class RefusjonEøs(
     var land: String,
     @Column(name = "refusjon_avklart", nullable = false)
     var refusjonAvklart: Boolean,
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "refusjon_eos_seq_generator")
     @SequenceGenerator(

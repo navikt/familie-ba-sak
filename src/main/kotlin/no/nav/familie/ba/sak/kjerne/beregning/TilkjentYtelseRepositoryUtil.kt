@@ -19,11 +19,13 @@ fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
     }
 
     // Her er det viktig å beholde de originale andelene, som styres av JPA og har alt av innhold
-    val skalBeholdes = tilkjentYtelse.andelerTilkjentYtelse
-        .filter { oppdaterteAndeler.inneholderIPraksis(it) }
+    val skalBeholdes =
+        tilkjentYtelse.andelerTilkjentYtelse
+            .filter { oppdaterteAndeler.inneholderIPraksis(it) }
 
-    val skalLeggesTil = oppdaterteAndeler
-        .filter { !tilkjentYtelse.andelerTilkjentYtelse.inneholderIPraksis(it) }
+    val skalLeggesTil =
+        oppdaterteAndeler
+            .filter { !tilkjentYtelse.andelerTilkjentYtelse.inneholderIPraksis(it) }
 
     // Forsikring: Sjekk at det ikke oppstår eller forsvinner andeler når de sjekkes for likhet
     if (oppdaterteAndeler.size != (skalBeholdes.size + skalLeggesTil.size)) {

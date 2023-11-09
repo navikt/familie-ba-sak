@@ -18,7 +18,6 @@ import java.util.Properties
 class DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
     private val dokumentDistribueringService: DokumentDistribueringService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val distribuerDokumentDTO = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
         dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
@@ -28,7 +27,6 @@ class DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
     }
 
     companion object {
-
         fun opprettDistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
             distribuerDokumentDTO: DistribuerDokumentDTO,
             properties: Properties,

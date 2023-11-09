@@ -23,7 +23,6 @@ import java.time.Duration
 )
 @Profile("mock-rest-template-config")
 class RestTemplateTestConfig {
-
     @Bean
     fun restTemplate(): RestTemplate {
         return RestTemplate(

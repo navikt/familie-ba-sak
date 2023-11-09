@@ -32,7 +32,6 @@ class EndretUtbetalingAndelController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService,
 ) {
-
     @PutMapping(path = ["{behandlingId}/{endretUtbetalingAndelId}"])
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         @PathVariable behandlingId: Long,

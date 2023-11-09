@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class SendTilBeslutterTest {
-
     @Test
     fun `Sjekk at validering er bakoverkompatibel med endring i stegrekkefølge`() {
         val behandling = lagBehandling(førsteSteg = StegType.REGISTRERE_SØKNAD)

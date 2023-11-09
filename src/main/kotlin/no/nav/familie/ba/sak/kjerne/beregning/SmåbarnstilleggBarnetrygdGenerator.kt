@@ -18,7 +18,6 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     val behandlingId: Long,
     val tilkjentYtelse: TilkjentYtelse,
 ) {
-
     fun lagSmåbarnstilleggAndeler(
         perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
         utvidetAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
@@ -36,16 +35,18 @@ data class SmåbarnstilleggBarnetrygdGenerator(
 
         val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(andelerTilkjentYtelse = utvidetAndeler)
 
-        val barnSomGirRettTilSmåbarnstilleggTidslinje = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
-            barnasAndeler = barnasAndeler,
-            barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer,
-        )
+        val barnSomGirRettTilSmåbarnstilleggTidslinje =
+            lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+                barnasAndeler = barnasAndeler,
+                barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer,
+            )
 
-        val kombinertProsentTidslinje = kombinerAlleTidslinjerTilProsentTidslinje(
-            perioderMedFullOvergangsstønadTidslinje,
-            utvidetBarnetrygdTidslinje,
-            barnSomGirRettTilSmåbarnstilleggTidslinje,
-        )
+        val kombinertProsentTidslinje =
+            kombinerAlleTidslinjerTilProsentTidslinje(
+                perioderMedFullOvergangsstønadTidslinje,
+                utvidetBarnetrygdTidslinje,
+                barnSomGirRettTilSmåbarnstilleggTidslinje,
+            )
 
         return kombinertProsentTidslinje.filtrerIkkeNull().lagSmåbarnstilleggAndeler(
             søkerAktør = søkerAktør,

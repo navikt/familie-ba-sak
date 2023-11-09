@@ -34,10 +34,10 @@ class VilkårService(
     private val personidentService: PersonidentService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
-
-    fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
-        behandlingId = behandlingId,
-    )
+    fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? =
+        vilkårsvurderingService.hentAktivForBehandling(
+            behandlingId = behandlingId,
+        )
 
     fun hentVilkårsvurderingThrows(behandlingId: Long): Vilkårsvurdering =
         hentVilkårsvurdering(behandlingId) ?: throw Feil(
@@ -53,8 +53,9 @@ class VilkårService(
     ): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
-        val restVilkårResultat = restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
-            ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved oppdatering av vilkår")
+        val restVilkårResultat =
+            restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
+                ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved oppdatering av vilkår")
 
         validerResultatBegrunnelse(restVilkårResultat)
 
@@ -63,8 +64,9 @@ class VilkårService(
 
         muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
 
-        val vilkårResultat = personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
-            ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
+        val vilkårResultat =
+            personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
+                ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
         vilkårResultat.also {
             it.standardbegrunnelser = restVilkårResultat.avslagBegrunnelser ?: emptyList()
@@ -82,7 +84,11 @@ class VilkårService(
     }
 
     @Transactional
-    fun deleteVilkårsperiode(behandlingId: Long, vilkårId: Long, aktør: Aktør): List<RestPersonResultat> {
+    fun deleteVilkårsperiode(
+        behandlingId: Long,
+        vilkårId: Long,
+        aktør: Aktør,
+    ): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
         val personResultat =
@@ -94,7 +100,10 @@ class VilkårService(
     }
 
     @Transactional
-    fun deleteVilkår(behandlingId: Long, restSlettVilkår: RestSlettVilkår): List<RestPersonResultat> {
+    fun deleteVilkår(
+        behandlingId: Long,
+        restSlettVilkår: RestSlettVilkår,
+    ): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
         val personResultat =
             finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restSlettVilkår.personIdent)
@@ -104,10 +113,12 @@ class VilkårService(
             finnesUtvidetBarnetrydIForrigeBehandling(behandling, restSlettVilkår.personIdent)
         ) {
             throw FunksjonellFeil(
-                melding = "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
-                    "for behandling $behandlingId",
-                frontendFeilmelding = "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
-                    "for behandling $behandlingId",
+                melding =
+                    "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
+                        "for behandling $behandlingId",
+                frontendFeilmelding =
+                    "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
+                        "for behandling $behandlingId",
             )
         }
 
@@ -125,7 +136,10 @@ class VilkårService(
     }
 
     @Transactional
-    fun postVilkår(behandlingId: Long, restNyttVilkår: RestNyttVilkår): List<RestPersonResultat> {
+    fun postVilkår(
+        behandlingId: Long,
+        restNyttVilkår: RestNyttVilkår,
+    ): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
         val behandling = vilkårsvurdering.behandling
@@ -154,10 +168,12 @@ class VilkårService(
     ) {
         if (!behandling.kanLeggeTilOgFjerneUtvidetVilkår() && !harUtvidetVilkår(vilkårsvurdering)) {
             throw FunksjonellFeil(
-                melding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling ${behandling.id} " +
-                    "med behandlingType ${behandling.type.visningsnavn}",
-                frontendFeilmelding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til " +
-                    "for behandling ${behandling.id} med behandlingType ${behandling.type.visningsnavn}",
+                melding =
+                    "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling ${behandling.id} " +
+                        "med behandlingType ${behandling.type.visningsnavn}",
+                frontendFeilmelding =
+                    "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til " +
+                        "for behandling ${behandling.id} med behandlingType ${behandling.type.visningsnavn}",
             )
         }
 
@@ -176,14 +192,18 @@ class VilkårService(
         vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
             ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD } == true
 
-    private fun finnesUtvidetBarnetrydIForrigeBehandling(behandling: Behandling, personIdent: String): Boolean {
+    private fun finnesUtvidetBarnetrydIForrigeBehandling(
+        behandling: Behandling,
+        personIdent: String,
+    ): Boolean {
         val forrigeBehandlingSomErVedtatt =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
         if (forrigeBehandlingSomErVedtatt != null) {
             val forrigeBehandlingsvilkårsvurdering =
                 hentVilkårsvurdering(forrigeBehandlingSomErVedtatt.id) ?: throw Feil(
-                    message = "Forrige behandling $${forrigeBehandlingSomErVedtatt.id} " +
-                        "har ikke en aktiv vilkårsvurdering",
+                    message =
+                        "Forrige behandling $${forrigeBehandlingSomErVedtatt.id} " +
+                            "har ikke en aktiv vilkårsvurdering",
                 )
             val aktør = personidentService.hentAktør(personIdent)
             return forrigeBehandlingsvilkårsvurdering.personResultater.single { it.aktør == aktør }

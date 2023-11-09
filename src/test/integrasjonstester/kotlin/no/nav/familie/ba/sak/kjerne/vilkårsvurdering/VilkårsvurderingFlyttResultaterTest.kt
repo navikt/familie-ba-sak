@@ -35,40 +35,28 @@ import java.time.LocalDate
 class VilkårsvurderingFlyttResultaterTest(
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
-
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-
     @Autowired
     private val personidentService: PersonidentService,
-
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
-
     @Autowired
     private val vedtakService: VedtakService,
-
     @Autowired
     private val stegService: StegService,
-
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
-
     @Autowired
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
-
     @Autowired
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-
     @Autowired
     private val brevmalService: BrevmalService,
-
     @Autowired private val unleashService: UnleashService,
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
@@ -86,15 +74,16 @@ class VilkårsvurderingFlyttResultaterTest(
 
         // Lager førstegangsbehandling med utvidet vilkåret avslått
         val vilkårsvurderingMedUtvidetAvslått = Vilkårsvurdering(behandling = lagBehandling())
-        val søkerPersonResultat = lagPersonResultat(
-            vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
-            person = søker,
-            periodeFom = LocalDate.now().minusMonths(8),
-            periodeTom = LocalDate.now().plusYears(2),
-            lagFullstendigVilkårResultat = true,
-            personType = PersonType.SØKER,
-            resultat = Resultat.OPPFYLT,
-        )
+        val søkerPersonResultat =
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
+                person = søker,
+                periodeFom = LocalDate.now().minusMonths(8),
+                periodeTom = LocalDate.now().plusYears(2),
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.SØKER,
+                resultat = Resultat.OPPFYLT,
+            )
 
         søkerPersonResultat.addVilkårResultat(
             lagVilkårResultat(
@@ -107,48 +96,50 @@ class VilkårsvurderingFlyttResultaterTest(
             ),
         )
 
-        val førstegangsbehandlingPersonResultater = setOf(
-            søkerPersonResultat,
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
-                person = lagPerson(type = PersonType.BARN, aktør = barn1Aktør, fødselsdato = ClientMocks.personInfo[barn1Fnr]!!.fødselsdato),
-                periodeFom = LocalDate.now().minusMonths(8),
-                periodeTom = LocalDate.now().plusYears(2),
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN,
-                resultat = Resultat.OPPFYLT,
-            ),
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
-                person = lagPerson(type = PersonType.BARN, aktør = barn2Aktør, fødselsdato = ClientMocks.personInfo[barn2Fnr]!!.fødselsdato),
-                periodeFom = LocalDate.now().minusMonths(8),
-                periodeTom = LocalDate.now().plusYears(2),
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN,
-                resultat = Resultat.OPPFYLT,
-            ),
-        )
+        val førstegangsbehandlingPersonResultater =
+            setOf(
+                søkerPersonResultat,
+                lagPersonResultat(
+                    vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
+                    person = lagPerson(type = PersonType.BARN, aktør = barn1Aktør, fødselsdato = ClientMocks.personInfo[barn1Fnr]!!.fødselsdato),
+                    periodeFom = LocalDate.now().minusMonths(8),
+                    periodeTom = LocalDate.now().plusYears(2),
+                    lagFullstendigVilkårResultat = true,
+                    personType = PersonType.BARN,
+                    resultat = Resultat.OPPFYLT,
+                ),
+                lagPersonResultat(
+                    vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
+                    person = lagPerson(type = PersonType.BARN, aktør = barn2Aktør, fødselsdato = ClientMocks.personInfo[barn2Fnr]!!.fødselsdato),
+                    periodeFom = LocalDate.now().minusMonths(8),
+                    periodeTom = LocalDate.now().plusYears(2),
+                    lagFullstendigVilkårResultat = true,
+                    personType = PersonType.BARN,
+                    resultat = Resultat.OPPFYLT,
+                ),
+            )
 
         vilkårsvurderingMedUtvidetAvslått.personResultater = førstegangsbehandlingPersonResultater
 
-        val førstegangsbehandling = kjørStegprosessForBehandling(
-            søkerFnr = søker.aktør.aktivFødselsnummer(),
-            barnasIdenter = listOf(barn1Fnr, barn2Fnr),
-            vedtakService = vedtakService,
-            underkategori = BehandlingUnderkategori.UTVIDET,
-            behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-            overstyrendeVilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
-            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
-            fagsakService = fagsakService,
-            persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            brevmalService = brevmalService,
-            unleashService = unleashService,
-        )
+        val førstegangsbehandling =
+            kjørStegprosessForBehandling(
+                søkerFnr = søker.aktør.aktivFødselsnummer(),
+                barnasIdenter = listOf(barn1Fnr, barn2Fnr),
+                vedtakService = vedtakService,
+                underkategori = BehandlingUnderkategori.UTVIDET,
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                overstyrendeVilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
+                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
+                fagsakService = fagsakService,
+                persongrunnlagService = persongrunnlagService,
+                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+                brevmalService = brevmalService,
+                unleashService = unleashService,
+            )
 
         val vilkårsvurderingFraForrigeBehandlingFørNyRevurdering =
             vilkårsvurderingService.hentAktivForBehandling(behandlingId = førstegangsbehandling.id)

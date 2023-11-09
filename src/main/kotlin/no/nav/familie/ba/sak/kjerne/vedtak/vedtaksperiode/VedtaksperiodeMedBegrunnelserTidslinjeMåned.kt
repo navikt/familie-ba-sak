@@ -13,7 +13,6 @@ import org.apache.kafka.common.Uuid
 class VedtaksperioderMedUnikIdTidslinje(
     private val vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
 ) : Tidslinje<VedtaksperiodeOgUnikId, Måned>() {
-
     override fun lagPerioder(): List<Periode<VedtaksperiodeOgUnikId, Måned>> =
         vedtaksperioderMedBegrunnelser.map {
             Periode(

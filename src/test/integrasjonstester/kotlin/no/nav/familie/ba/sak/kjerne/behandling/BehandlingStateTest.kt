@@ -23,7 +23,6 @@ class BehandlingStateTest(
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
-
     private lateinit var fagsak: Fagsak
 
     @BeforeEach
@@ -53,7 +52,6 @@ class BehandlingStateTest(
 
     @Nested
     inner class BehandlingStatuser {
-
         @Test
         fun `kan ha flere behandlinger som er avsluttet`() {
             opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = false)
@@ -88,7 +86,10 @@ class BehandlingStateTest(
         }
     }
 
-    private fun opprettBehandling(status: BehandlingStatus, aktiv: Boolean): Behandling {
+    private fun opprettBehandling(
+        status: BehandlingStatus,
+        aktiv: Boolean,
+    ): Behandling {
         return opprettBehandling(fagsak, status, aktiv)
     }
 
@@ -97,15 +98,16 @@ class BehandlingStateTest(
         status: BehandlingStatus,
         aktiv: Boolean,
     ): Behandling {
-        val behandling = Behandling(
-            fagsak = fagsak,
-            opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-            type = BehandlingType.REVURDERING,
-            kategori = BehandlingKategori.NASJONAL,
-            underkategori = BehandlingUnderkategori.ORDINÆR,
-            status = status,
-            aktiv = aktiv,
-        ).initBehandlingStegTilstand()
+        val behandling =
+            Behandling(
+                fagsak = fagsak,
+                opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                type = BehandlingType.REVURDERING,
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                status = status,
+                aktiv = aktiv,
+            ).initBehandlingStegTilstand()
         return behandlingRepository.saveAndFlush(behandling)
     }
 }

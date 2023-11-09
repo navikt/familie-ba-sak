@@ -24,20 +24,24 @@ data class VarselbrevMedÅrsakerOgBarn(
         saksbehandlerNavn: String,
     ) : this(
         mal = mal,
-        data = VarselbrevMedÅrsakerOgBarnData(
-            delmalData = VarselbrevMedÅrsakerOgBarnData.DelmalData(
-                signatur = SignaturDelmal(
-                    enhet = enhet,
-                    saksbehandlerNavn = saksbehandlerNavn,
-                ),
+        data =
+            VarselbrevMedÅrsakerOgBarnData(
+                delmalData =
+                    VarselbrevMedÅrsakerOgBarnData.DelmalData(
+                        signatur =
+                            SignaturDelmal(
+                                enhet = enhet,
+                                saksbehandlerNavn = saksbehandlerNavn,
+                            ),
+                    ),
+                flettefelter =
+                    VarselbrevMedÅrsakerOgBarnData.Flettefelter(
+                        navn = navn,
+                        fodselsnummer = fødselsnummer,
+                        varselÅrsaker = varselÅrsaker,
+                        barnasFødselsdager = barnasFødselsdager,
+                    ),
             ),
-            flettefelter = VarselbrevMedÅrsakerOgBarnData.Flettefelter(
-                navn = navn,
-                fodselsnummer = fødselsnummer,
-                varselÅrsaker = varselÅrsaker,
-                barnasFødselsdager = barnasFødselsdager,
-            ),
-        ),
     )
 }
 
@@ -45,7 +49,6 @@ data class VarselbrevMedÅrsakerOgBarnData(
     override val delmalData: DelmalData,
     override val flettefelter: Flettefelter,
 ) : BrevData {
-
     data class Flettefelter(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
@@ -53,7 +56,6 @@ data class VarselbrevMedÅrsakerOgBarnData(
         val varselAarsaker: Flettefelt,
         val barnasFodselsdatoer: Flettefelt,
     ) : FlettefelterForDokument {
-
         constructor(
             navn: String,
             fodselsnummer: String,

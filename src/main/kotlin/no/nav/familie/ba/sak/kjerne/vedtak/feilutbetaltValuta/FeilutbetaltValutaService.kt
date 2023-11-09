@@ -11,32 +11,37 @@ import org.springframework.transaction.annotation.Transactional
 class FeilutbetaltValutaService(
     @Autowired
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
-
     @Autowired
     private val loggService: LoggService,
 ) {
-
     private fun finnFeilutbetaltValutaThrows(id: Long): FeilutbetaltValuta {
         return feilutbetaltValutaRepository.finnFeilutbetaltValuta(id) ?: throw Feil("Finner ikke feilutbetalt valuta med id=$id")
     }
 
     @Transactional
-    fun leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, behandlingId: Long): Long {
-        val lagret = feilutbetaltValutaRepository.save(
-            FeilutbetaltValuta(
-                behandlingId = behandlingId,
-                fom = feilutbetaltValuta.fom,
-                tom = feilutbetaltValuta.tom,
-                feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp,
-                erPerMåned = true,
-            ),
-        )
+    fun leggTilFeilutbetaltValutaPeriode(
+        feilutbetaltValuta: RestFeilutbetaltValuta,
+        behandlingId: Long,
+    ): Long {
+        val lagret =
+            feilutbetaltValutaRepository.save(
+                FeilutbetaltValuta(
+                    behandlingId = behandlingId,
+                    fom = feilutbetaltValuta.fom,
+                    tom = feilutbetaltValuta.tom,
+                    feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp,
+                    erPerMåned = true,
+                ),
+            )
         loggService.loggFeilutbetaltValutaPeriodeLagtTil(behandlingId = behandlingId, feilutbetaltValuta = lagret)
         return lagret.id
     }
 
     @Transactional
-    fun fjernFeilutbetaltValutaPeriode(id: Long, behandlingId: Long) {
+    fun fjernFeilutbetaltValutaPeriode(
+        id: Long,
+        behandlingId: Long,
+    ) {
         loggService.loggFeilutbetaltValutaPeriodeFjernet(
             behandlingId = behandlingId,
             feilutbetaltValuta = finnFeilutbetaltValutaThrows(id),
@@ -56,7 +61,10 @@ class FeilutbetaltValutaService(
         )
 
     @Transactional
-    fun oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, id: Long) {
+    fun oppdatertFeilutbetaltValutaPeriode(
+        feilutbetaltValuta: RestFeilutbetaltValuta,
+        id: Long,
+    ) {
         val periode = feilutbetaltValutaRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
 
         periode.fom = feilutbetaltValuta.fom

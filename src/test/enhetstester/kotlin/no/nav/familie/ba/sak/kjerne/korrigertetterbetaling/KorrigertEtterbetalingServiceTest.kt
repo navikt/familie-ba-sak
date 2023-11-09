@@ -17,7 +17,6 @@ import org.hamcrest.CoreMatchers.`is` as Is
 
 @ExtendWith(MockKExtension::class)
 internal class KorrigertEtterbetalingServiceTest {
-
     @MockK
     private lateinit var korrigertEtterbetalingRepository: KorrigertEtterbetalingRepository
 
@@ -49,10 +48,11 @@ internal class KorrigertEtterbetalingServiceTest {
         val behandling = lagBehandling()
         val korrigertEtterbetaling = lagKorrigertEtterbetaling(behandling)
 
-        every { korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.id) } returns listOf(
-            korrigertEtterbetaling,
-            korrigertEtterbetaling,
-        )
+        every { korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.id) } returns
+            listOf(
+                korrigertEtterbetaling,
+                korrigertEtterbetaling,
+            )
 
         val hentetKorrigertEtterbetaling =
             korrigertEtterbetalingService.finnAlleKorrigeringerPåBehandling(behandling.id)

@@ -17,23 +17,24 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 class VurderTilbakekrevingStegTest {
-
     private val tilbakekrevingService: TilbakekrevingService = mockk()
     private val simuleringService: SimuleringService = mockk()
 
     private val vurderTilbakekrevingSteg: VurderTilbakekrevingSteg =
         VurderTilbakekrevingSteg(tilbakekrevingService = tilbakekrevingService, simuleringService = simuleringService)
 
-    private val behandling: Behandling = lagBehandling(
-        behandlingType = BehandlingType.REVURDERING,
-        årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-        førsteSteg = StegType.VURDER_TILBAKEKREVING,
-    )
-    private val restTilbakekreving: RestTilbakekreving = RestTilbakekreving(
-        valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-        varsel = "testverdi",
-        begrunnelse = "testverdi",
-    )
+    private val behandling: Behandling =
+        lagBehandling(
+            behandlingType = BehandlingType.REVURDERING,
+            årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+            førsteSteg = StegType.VURDER_TILBAKEKREVING,
+        )
+    private val restTilbakekreving: RestTilbakekreving =
+        RestTilbakekreving(
+            valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+            varsel = "testverdi",
+            begrunnelse = "testverdi",
+        )
 
     @BeforeEach
     fun setup() {
@@ -44,12 +45,13 @@ class VurderTilbakekrevingStegTest {
 
     @Test
     fun `skal utføre steg for vanlig behandling uten åpen tilbakekreving`() {
-        val stegType = assertDoesNotThrow {
-            vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling,
-                restTilbakekreving,
-            )
-        }
+        val stegType =
+            assertDoesNotThrow {
+                vurderTilbakekrevingSteg.utførStegOgAngiNeste(
+                    behandling,
+                    restTilbakekreving,
+                )
+            }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
         verify(exactly = 1) { tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id) }
         verify(exactly = 1) { tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id) }
@@ -58,12 +60,13 @@ class VurderTilbakekrevingStegTest {
     @Test
     fun `skal utføre steg for vanlig behandling med åpen tilbakekreving`() {
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns true
-        val stegType = assertDoesNotThrow {
-            vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling,
-                restTilbakekreving,
-            )
-        }
+        val stegType =
+            assertDoesNotThrow {
+                vurderTilbakekrevingSteg.utførStegOgAngiNeste(
+                    behandling,
+                    restTilbakekreving,
+                )
+            }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
         verify(exactly = 0) { tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id) }
         verify(exactly = 0) { tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id) }

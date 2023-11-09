@@ -38,66 +38,49 @@ class VilkårResultat(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     // Denne må være nullable=true slik at man kan slette vilkår fra person resultat
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "fk_person_resultat_id")
     var personResultat: PersonResultat?,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "vilkar")
     val vilkårType: Vilkår,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat")
     var resultat: Resultat,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat_begrunnelse")
     var resultatBegrunnelse: ResultatBegrunnelse? = null,
-
     @Column(name = "periode_fom")
     var periodeFom: LocalDate? = null,
-
     @Column(name = "periode_tom")
     var periodeTom: LocalDate? = null,
-
     @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
     var begrunnelse: String,
-
     @Column(name = "sist_endret_i_behandling_id", nullable = false)
     var sistEndretIBehandlingId: Long,
-
     @Column(name = "er_automatisk_vurdert", nullable = false)
     var erAutomatiskVurdert: Boolean = false,
-
     @Column(name = "er_eksplisitt_avslag_paa_soknad")
     var erEksplisittAvslagPåSøknad: Boolean? = null,
-
     @Column(name = "evaluering_aarsak")
     @Convert(converter = StringListConverter::class)
     val evalueringÅrsaker: List<String> = emptyList(),
-
     @Column(name = "regel_input", columnDefinition = "TEXT")
     var regelInput: String? = null,
-
     @Column(name = "regel_output", columnDefinition = "TEXT")
     var regelOutput: String? = null,
-
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
     @Convert(converter = IVedtakBegrunnelseListConverter::class)
     var standardbegrunnelser: List<IVedtakBegrunnelse> = emptyList(),
-
     @Enumerated(EnumType.STRING)
     @Column(name = "vurderes_etter")
     var vurderesEtter: Regelverk? = personResultat?.let { vilkårType.defaultRegelverk(it.vilkårsvurdering.behandling.kategori) },
-
     @Column(name = "utdypende_vilkarsvurderinger")
     @Convert(converter = UtdypendeVilkårsvurderingerConverter::class)
     var utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
 ) : BaseEntitet() {
-
     override fun toString(): String {
         return "VilkårResultat(" +
             "id=$id, " +
@@ -149,7 +132,11 @@ class VilkårResultat(
         )
     }
 
-    fun kopierMedNyPeriode(fom: LocalDate, tom: LocalDate, behandlingId: Long): VilkårResultat {
+    fun kopierMedNyPeriode(
+        fom: LocalDate,
+        tom: LocalDate,
+        behandlingId: Long,
+    ): VilkårResultat {
         return VilkårResultat(
             personResultat = personResultat,
             erAutomatiskVurdert = erAutomatiskVurdert,
@@ -200,13 +187,13 @@ class VilkårResultat(
     fun erOppfylt() = this.resultat == Resultat.OPPFYLT
 
     companion object {
-
         val VilkårResultatComparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.resultat }, { it.vilkårType })
     }
 }
 
 enum class Regelverk {
-    NASJONALE_REGLER, EØS_FORORDNINGEN
+    NASJONALE_REGLER,
+    EØS_FORORDNINGEN,
 }
 
 enum class ResultatBegrunnelse(

@@ -25,39 +25,41 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class VilkårsvurderingUtilsTest {
-
     private val uvesentligVilkårsvurdering =
         lagVilkårsvurdering(randomAktør(), lagBehandling(), Resultat.IKKE_VURDERT)
 
     @Test
     fun `feil kastes når det finnes løpende oppfylt ved forsøk på å legge til avslag uten periode`() {
-        val personResultat = PersonResultat(
-            vilkårsvurdering = uvesentligVilkårsvurdering,
-            aktør = randomAktør(),
-        )
-        val løpendeOppfylt = VilkårResultat(
-            personResultat = personResultat,
-            periodeFom = LocalDate.of(2020, 1, 1),
-            periodeTom = null,
-            vilkårType = Vilkår.LOVLIG_OPPHOLD,
-            resultat = Resultat.OPPFYLT,
-            begrunnelse = "",
-            sistEndretIBehandlingId = 0,
-        )
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = uvesentligVilkårsvurdering,
+                aktør = randomAktør(),
+            )
+        val løpendeOppfylt =
+            VilkårResultat(
+                personResultat = personResultat,
+                periodeFom = LocalDate.of(2020, 1, 1),
+                periodeTom = null,
+                vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                resultat = Resultat.OPPFYLT,
+                begrunnelse = "",
+                sistEndretIBehandlingId = 0,
+            )
         personResultat.vilkårResultater.add(løpendeOppfylt)
 
-        val avslagUtenPeriode = RestVilkårResultat(
-            id = 123,
-            vilkårType = Vilkår.LOVLIG_OPPHOLD,
-            resultat = Resultat.IKKE_OPPFYLT,
-            periodeFom = null,
-            periodeTom = null,
-            begrunnelse = "",
-            endretAv = "",
-            endretTidspunkt = LocalDateTime.now(),
-            behandlingId = 0,
-            erEksplisittAvslagPåSøknad = true,
-        )
+        val avslagUtenPeriode =
+            RestVilkårResultat(
+                id = 123,
+                vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                resultat = Resultat.IKKE_OPPFYLT,
+                periodeFom = null,
+                periodeTom = null,
+                begrunnelse = "",
+                endretAv = "",
+                endretTidspunkt = LocalDateTime.now(),
+                behandlingId = 0,
+                erEksplisittAvslagPåSøknad = true,
+            )
 
         assertThrows<FunksjonellFeil> {
             VilkårsvurderingUtils.validerAvslagUtenPeriodeMedLøpende(
@@ -69,33 +71,36 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `feil kastes når det finnes avslag uten periode ved forsøk på å legge til løpende oppfylt`() {
-        val personResultat = PersonResultat(
-            vilkårsvurdering = uvesentligVilkårsvurdering,
-            aktør = randomAktør(),
-        )
-        val avslagUtenPeriode = VilkårResultat(
-            personResultat = personResultat,
-            periodeFom = null,
-            periodeTom = null,
-            vilkårType = Vilkår.LOVLIG_OPPHOLD,
-            resultat = Resultat.IKKE_OPPFYLT,
-            begrunnelse = "",
-            sistEndretIBehandlingId = 0,
-            erEksplisittAvslagPåSøknad = true,
-        )
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = uvesentligVilkårsvurdering,
+                aktør = randomAktør(),
+            )
+        val avslagUtenPeriode =
+            VilkårResultat(
+                personResultat = personResultat,
+                periodeFom = null,
+                periodeTom = null,
+                vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                resultat = Resultat.IKKE_OPPFYLT,
+                begrunnelse = "",
+                sistEndretIBehandlingId = 0,
+                erEksplisittAvslagPåSøknad = true,
+            )
         personResultat.vilkårResultater.add(avslagUtenPeriode)
 
-        val løpendeOppfylt = RestVilkårResultat(
-            id = 123,
-            vilkårType = Vilkår.LOVLIG_OPPHOLD,
-            resultat = Resultat.OPPFYLT,
-            periodeFom = LocalDate.of(2020, 1, 1),
-            periodeTom = null,
-            begrunnelse = "",
-            endretAv = "",
-            endretTidspunkt = LocalDateTime.now(),
-            behandlingId = 0,
-        )
+        val løpendeOppfylt =
+            RestVilkårResultat(
+                id = 123,
+                vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2020, 1, 1),
+                periodeTom = null,
+                begrunnelse = "",
+                endretAv = "",
+                endretTidspunkt = LocalDateTime.now(),
+                behandlingId = 0,
+            )
 
         assertThrows<FunksjonellFeil> {
             VilkårsvurderingUtils.validerAvslagUtenPeriodeMedLøpende(
@@ -107,33 +112,36 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `skal ikke kaste feil hvis vilkåret er bor med søker`() {
-        val personResultat = PersonResultat(
-            vilkårsvurdering = uvesentligVilkårsvurdering,
-            aktør = randomAktør(),
-        )
-        val løpendeOppfylt = VilkårResultat(
-            personResultat = personResultat,
-            periodeFom = LocalDate.of(2020, 1, 1),
-            periodeTom = null,
-            vilkårType = Vilkår.BOR_MED_SØKER,
-            resultat = Resultat.OPPFYLT,
-            begrunnelse = "",
-            sistEndretIBehandlingId = 0,
-        )
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = uvesentligVilkårsvurdering,
+                aktør = randomAktør(),
+            )
+        val løpendeOppfylt =
+            VilkårResultat(
+                personResultat = personResultat,
+                periodeFom = LocalDate.of(2020, 1, 1),
+                periodeTom = null,
+                vilkårType = Vilkår.BOR_MED_SØKER,
+                resultat = Resultat.OPPFYLT,
+                begrunnelse = "",
+                sistEndretIBehandlingId = 0,
+            )
         personResultat.vilkårResultater.add(løpendeOppfylt)
 
-        val avslagUtenPeriode = RestVilkårResultat(
-            id = 123,
-            vilkårType = Vilkår.BOR_MED_SØKER,
-            resultat = Resultat.IKKE_OPPFYLT,
-            periodeFom = null,
-            periodeTom = null,
-            begrunnelse = "",
-            endretAv = "",
-            endretTidspunkt = LocalDateTime.now(),
-            behandlingId = 0,
-            erEksplisittAvslagPåSøknad = true,
-        )
+        val avslagUtenPeriode =
+            RestVilkårResultat(
+                id = 123,
+                vilkårType = Vilkår.BOR_MED_SØKER,
+                resultat = Resultat.IKKE_OPPFYLT,
+                periodeFom = null,
+                periodeTom = null,
+                begrunnelse = "",
+                endretAv = "",
+                endretTidspunkt = LocalDateTime.now(),
+                behandlingId = 0,
+                erEksplisittAvslagPåSøknad = true,
+            )
 
         assertDoesNotThrow {
             VilkårsvurderingUtils.validerAvslagUtenPeriodeMedLøpende(
@@ -145,33 +153,36 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `feil kastes ikke når når ingen periode er løpende`() {
-        val personResultat = PersonResultat(
-            vilkårsvurdering = uvesentligVilkårsvurdering,
-            aktør = randomAktør(),
-        )
-        val avslagUtenPeriode = VilkårResultat(
-            personResultat = personResultat,
-            periodeFom = null,
-            periodeTom = null,
-            vilkårType = Vilkår.BOR_MED_SØKER,
-            resultat = Resultat.IKKE_OPPFYLT,
-            begrunnelse = "",
-            sistEndretIBehandlingId = 0,
-            erEksplisittAvslagPåSøknad = true,
-        )
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = uvesentligVilkårsvurdering,
+                aktør = randomAktør(),
+            )
+        val avslagUtenPeriode =
+            VilkårResultat(
+                personResultat = personResultat,
+                periodeFom = null,
+                periodeTom = null,
+                vilkårType = Vilkår.BOR_MED_SØKER,
+                resultat = Resultat.IKKE_OPPFYLT,
+                begrunnelse = "",
+                sistEndretIBehandlingId = 0,
+                erEksplisittAvslagPåSøknad = true,
+            )
         personResultat.vilkårResultater.add(avslagUtenPeriode)
 
-        val løpendeOppfylt = RestVilkårResultat(
-            id = 123,
-            vilkårType = Vilkår.BOR_MED_SØKER,
-            resultat = Resultat.OPPFYLT,
-            periodeFom = LocalDate.of(2020, 1, 1),
-            periodeTom = LocalDate.of(2020, 6, 1),
-            begrunnelse = "",
-            endretAv = "",
-            endretTidspunkt = LocalDateTime.now(),
-            behandlingId = 0,
-        )
+        val løpendeOppfylt =
+            RestVilkårResultat(
+                id = 123,
+                vilkårType = Vilkår.BOR_MED_SØKER,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2020, 1, 1),
+                periodeTom = LocalDate.of(2020, 6, 1),
+                begrunnelse = "",
+                endretAv = "",
+                endretTidspunkt = LocalDateTime.now(),
+                behandlingId = 0,
+            )
 
         assertDoesNotThrow {
             VilkårsvurderingUtils.validerAvslagUtenPeriodeMedLøpende(
@@ -183,13 +194,15 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `skal liste opp begrunnelser uten vilkår`() {
-        val sanityBegrunnelser = mapOf(
-            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to SanityBegrunnelse(
-                vilkaar = emptyList(),
-                apiNavn = "innvilgetBosattIRiket",
-                navnISystem = "",
-            ),
-        )
+        val sanityBegrunnelser =
+            mapOf(
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                    SanityBegrunnelse(
+                        vilkaar = emptyList(),
+                        apiNavn = "innvilgetBosattIRiket",
+                        navnISystem = "",
+                    ),
+            )
         val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
 
         val restVedtakBegrunnelserTilknyttetVilkår =
@@ -200,13 +213,15 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `skal liste opp begrunnelsene en gang per vilkår`() {
-        val sanityBegrunnelser = mapOf(
-            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to SanityBegrunnelse(
-                vilkaar = listOf(SanityVilkår.BOSATT_I_RIKET, SanityVilkår.LOVLIG_OPPHOLD),
-                apiNavn = "innvilgetBosattIRiket",
-                navnISystem = "",
-            ),
-        )
+        val sanityBegrunnelser =
+            mapOf(
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                    SanityBegrunnelse(
+                        vilkaar = listOf(SanityVilkår.BOSATT_I_RIKET, SanityVilkår.LOVLIG_OPPHOLD),
+                        apiNavn = "innvilgetBosattIRiket",
+                        navnISystem = "",
+                    ),
+            )
         val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
 
         val restVedtakBegrunnelserTilknyttetVilkår =
@@ -222,10 +237,11 @@ class VilkårsvurderingUtilsTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
         val dødtBarn = lagPerson(type = PersonType.BARN).apply { dødsfall = lagDødsfallFraPdl(this, "2012-12-12", null) }
 
-        val personResultatForDødtBarn = genererPersonResultatForPerson(
-            vilkårsvurdering = vilkårsvurdering,
-            person = dødtBarn,
-        )
+        val personResultatForDødtBarn =
+            genererPersonResultatForPerson(
+                vilkårsvurdering = vilkårsvurdering,
+                person = dødtBarn,
+            )
 
         Assertions.assertTrue(personResultatForDødtBarn.vilkårResultater.all { it.begrunnelse == "Dødsfall" })
         Assertions.assertTrue(
@@ -242,10 +258,11 @@ class VilkårsvurderingUtilsTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
         val levendeBarn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 10, 10))
 
-        val personResultatForLevendeBarn = genererPersonResultatForPerson(
-            vilkårsvurdering = vilkårsvurdering,
-            person = levendeBarn,
-        )
+        val personResultatForLevendeBarn =
+            genererPersonResultatForPerson(
+                vilkårsvurdering = vilkårsvurdering,
+                person = levendeBarn,
+            )
 
         val under18ÅrVilkår =
             personResultatForLevendeBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }!!

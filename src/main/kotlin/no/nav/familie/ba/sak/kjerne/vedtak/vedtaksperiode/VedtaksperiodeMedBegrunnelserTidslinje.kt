@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 open class VedtaksperiodeMedBegrunnelserTidslinje(
     private val vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
 ) : Tidslinje<VedtaksperiodeMedBegrunnelser, Dag>() {
-
     override fun lagPerioder(): List<Periode<VedtaksperiodeMedBegrunnelser, Dag>> =
         vedtaksperioderMedBegrunnelser.map {
             Periode(

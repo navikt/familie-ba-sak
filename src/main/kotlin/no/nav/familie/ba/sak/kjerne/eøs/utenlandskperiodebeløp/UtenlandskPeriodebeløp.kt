@@ -34,11 +34,9 @@ data class UtenlandskPeriodebeløp(
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
     override val fom: YearMonth?,
-
     @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
     override val tom: YearMonth?,
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "AKTOER_TIL_UTENLANDSK_PERIODEBELOEP",
@@ -46,20 +44,15 @@ data class UtenlandskPeriodebeløp(
         inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")],
     )
     override val barnAktører: Set<Aktør> = emptySet(),
-
     @Column(name = "beloep")
     val beløp: BigDecimal? = null,
-
     @Column(name = "valutakode")
     val valutakode: String? = null,
-
     @Column(name = "intervall")
     @Enumerated(EnumType.STRING)
     val intervall: Intervall? = null,
-
     @Column(name = "utbetalingsland")
     val utbetalingsland: String? = null,
-
     @Column(name = "kalkulert_maanedlig_beloep")
     val kalkulertMånedligBeløp: BigDecimal? = null,
 ) : PeriodeOgBarnSkjemaEntitet<UtenlandskPeriodebeløp>() {
@@ -75,21 +68,28 @@ data class UtenlandskPeriodebeløp(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     override var behandlingId: Long = 0
 
-    override fun utenInnhold(): UtenlandskPeriodebeløp = copy(
-        beløp = null,
-        valutakode = null,
-        intervall = null,
-        kalkulertMånedligBeløp = null,
-    )
+    override fun utenInnhold(): UtenlandskPeriodebeløp =
+        copy(
+            beløp = null,
+            valutakode = null,
+            intervall = null,
+            kalkulertMånedligBeløp = null,
+        )
 
-    override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) = copy(
-        fom = fom,
-        tom = tom,
-        barnAktører = barnAktører.toSet(), // .toSet() brukes for at det skal bli et nytt sett (to objekter kan ikke ha referanse til samme sett)
-    )
+    override fun kopier(
+        fom: YearMonth?,
+        tom: YearMonth?,
+        barnAktører: Set<Aktør>,
+    ) =
+        copy(
+            fom = fom,
+            tom = tom,
+            barnAktører = barnAktører.toSet(), // .toSet() brukes for at det skal bli et nytt sett (to objekter kan ikke ha referanse til samme sett)
+        )
 
-    fun erObligatoriskeFelterSatt() = fom != null &&
-        erObligatoriskeFelterUtenomTidsperioderSatt()
+    fun erObligatoriskeFelterSatt() =
+        fom != null &&
+            erObligatoriskeFelterUtenomTidsperioderSatt()
 
     fun erObligatoriskeFelterUtenomTidsperioderSatt() =
         this.valutakode != null &&

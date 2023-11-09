@@ -7,7 +7,6 @@ data class EnkeltInformasjonsbrev(
     override val mal: Brevmal,
     override val data: EnkeltInformasjonsbrevData,
 ) : Brev {
-
     constructor(
         navn: String,
         fodselsnummer: String,
@@ -16,18 +15,21 @@ data class EnkeltInformasjonsbrev(
         saksbehandlerNavn: String,
     ) : this(
         mal = mal,
-        data = EnkeltInformasjonsbrevData(
-            flettefelter = EnkeltInformasjonsbrevData.Flettefelter(
-                navn = navn,
-                fodselsnummer = fodselsnummer,
+        data =
+            EnkeltInformasjonsbrevData(
+                flettefelter =
+                    EnkeltInformasjonsbrevData.Flettefelter(
+                        navn = navn,
+                        fodselsnummer = fodselsnummer,
+                    ),
+                delmalData =
+                    EnkeltInformasjonsbrevData.DelmalData(
+                        SignaturDelmal(
+                            enhet = enhet,
+                            saksbehandlerNavn = saksbehandlerNavn,
+                        ),
+                    ),
             ),
-            delmalData = EnkeltInformasjonsbrevData.DelmalData(
-                SignaturDelmal(
-                    enhet = enhet,
-                    saksbehandlerNavn = saksbehandlerNavn,
-                ),
-            ),
-        ),
     )
 }
 
@@ -35,13 +37,11 @@ data class EnkeltInformasjonsbrevData(
     override val delmalData: DelmalData,
     override val flettefelter: Flettefelter,
 ) : BrevData {
-
     data class Flettefelter(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
     ) : FlettefelterForDokument {
-
         constructor(
             navn: String,
             fodselsnummer: String,

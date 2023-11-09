@@ -18,7 +18,6 @@ import java.time.LocalDate
 import java.util.Properties
 
 class GrensesnittavstemMotOppdragTest {
-
     private lateinit var grensesnittavstemMotOppdrag: GrensesnittavstemMotOppdrag
     private lateinit var taskRepositoryMock: TaskRepositoryWrapper
 
@@ -37,21 +36,24 @@ class GrensesnittavstemMotOppdragTest {
         "2020-01-09, 2020-01-10, task som kjører en torsdag og oppretter task på en fredag",
         "2020-01-10, 2020-01-13, task som kjører en fredag og oppretter task på en mandag",
     )
-    fun `Skal opprette task for neste arbeidsdag`(triggerDato: LocalDate, nesteTriggerDato: LocalDate) {
+    fun `Skal opprette task for neste arbeidsdag`(
+        triggerDato: LocalDate,
+        nesteTriggerDato: LocalDate,
+    ) {
         val slot = slot<Task>()
         every { taskRepositoryMock.save(capture(slot)) } answers { slot.captured }
 
         grensesnittavstemMotOppdrag.onCompletion(
             Task(
-                payload = objectMapper.writeValueAsString(
-                    GrensesnittavstemmingTaskDTO(
-                        fomDato = triggerDato.minusDays(1).atStartOfDay(),
-                        tomDato = triggerDato.atStartOfDay(),
+                payload =
+                    objectMapper.writeValueAsString(
+                        GrensesnittavstemmingTaskDTO(
+                            fomDato = triggerDato.minusDays(1).atStartOfDay(),
+                            tomDato = triggerDato.atStartOfDay(),
+                        ),
                     ),
-                ),
                 properties = Properties(),
                 type = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
-
             ).medTriggerTid(triggerDato.atTime(8, 0, 0)),
         )
 
@@ -106,17 +108,19 @@ class GrensesnittavstemMotOppdragTest {
     @Test
     fun skalLageNyAvstemmingstaskEtterJobb() {
         val iDag = LocalDate.of(2020, 1, 15).atStartOfDay()
-        val testTask = Task(
-            type = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(
-                GrensesnittavstemmingTaskDTO(
-                    iDag.minusDays(1),
-                    iDag,
-                ),
-            ),
-        ).medTriggerTid(
-            iDag.toLocalDate().atTime(8, 0),
-        )
+        val testTask =
+            Task(
+                type = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
+                payload =
+                    objectMapper.writeValueAsString(
+                        GrensesnittavstemmingTaskDTO(
+                            iDag.minusDays(1),
+                            iDag,
+                        ),
+                    ),
+            ).medTriggerTid(
+                iDag.toLocalDate().atTime(8, 0),
+            )
         val slot = slot<Task>()
         every { taskRepositoryMock.save(any()) } returns testTask
 

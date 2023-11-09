@@ -46,7 +46,6 @@ class TestVerktøyController(
     private val startSatsendring: StartSatsendring,
     private val behandlingRepository: BehandlingRepository,
 ) {
-
     @GetMapping(path = ["/autobrev"])
     @Unprotected
     fun kjørSchedulerForAutobrev(): ResponseEntity<Ressurs<String>> {
@@ -60,7 +59,9 @@ class TestVerktøyController(
 
     @GetMapping(path = ["/test-satsendring/{fagsakId}"])
     @Unprotected
-    fun utførSatsendringPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
+    fun utførSatsendringPåFagsak(
+        @PathVariable fagsakId: Long,
+    ): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
             opprettTaskService.opprettSatsendringTask(fagsakId, startSatsendring.hentAktivSatsendringstidspunkt())
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsak $fagsakId"))
@@ -71,13 +72,16 @@ class TestVerktøyController(
 
     @PostMapping(path = ["/vedtak-om-overgangsstønad"])
     @Unprotected
-    fun mottaHendelseOmVedtakOmOvergangsstønad(@RequestBody personIdent: PersonIdent): ResponseEntity<Ressurs<String>> {
+    fun mottaHendelseOmVedtakOmOvergangsstønad(
+        @RequestBody personIdent: PersonIdent,
+    ): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
             val aktør = personidentService.hentAktør(personIdent.ident)
-            val melding = autovedtakStegService.kjørBehandlingSmåbarnstillegg(
-                mottakersAktør = aktør,
-                aktør = aktør,
-            )
+            val melding =
+                autovedtakStegService.kjørBehandlingSmåbarnstillegg(
+                    mottakersAktør = aktør,
+                    aktør = aktør,
+                )
             ResponseEntity.ok(Ressurs.success(melding))
         } else {
             ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
@@ -86,7 +90,9 @@ class TestVerktøyController(
 
     @PostMapping(path = ["/foedselshendelse"])
     @Unprotected
-    fun mottaFødselshendelse(@RequestBody nyBehandlingHendelse: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
+    fun mottaFødselshendelse(
+        @RequestBody nyBehandlingHendelse: NyBehandlingHendelse,
+    ): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
             val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
             taskRepository.save(task)
@@ -98,7 +104,9 @@ class TestVerktøyController(
 
     @GetMapping(path = ["/kjor-intern-konsistensavstemming/{maksAntallTasker}"])
     @Unprotected
-    fun kjørInternKonsistensavstemming(@PathVariable maksAntallTasker: Int): ResponseEntity<Ressurs<String>> {
+    fun kjørInternKonsistensavstemming(
+        @PathVariable maksAntallTasker: Int,
+    ): ResponseEntity<Ressurs<String>> {
         if (!envService.erPreprod() && !envService.erDev()) {
             return ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
@@ -121,7 +129,9 @@ class TestVerktøyController(
     }
 
     @GetMapping(path = ["/hent-simulering-pa-behandling/{behandlingId}"])
-    fun hentSimuleringPåBehandling(@PathVariable behandlingId: Long): List<ØkonomiSimuleringMottaker> {
+    fun hentSimuleringPåBehandling(
+        @PathVariable behandlingId: Long,
+    ): List<ØkonomiSimuleringMottaker> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
 
         return simuleringService.hentSimuleringPåBehandling(behandlingId)
@@ -129,16 +139,19 @@ class TestVerktøyController(
 
     @GetMapping("/redirect/behandling/{behandlingId}")
     @Unprotected
-    fun redirectTilBarnetrygd(@PathVariable behandlingId: Long): ResponseEntity<Any> {
-        val hostname = if (envService.erDev()) {
-            "http://localhost:8000"
-        } else if (envService.erPreprod()) {
-            "https://barnetrygd.intern.dev.nav.no"
-        } else if (envService.erProd()) {
-            "https://barnetrygd.intern.nav.no"
-        } else {
-            error("Klarer ikke å utlede miljø for redirect til fagsak")
-        }
+    fun redirectTilBarnetrygd(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Any> {
+        val hostname =
+            if (envService.erDev()) {
+                "http://localhost:8000"
+            } else if (envService.erPreprod()) {
+                "https://barnetrygd.intern.dev.nav.no"
+            } else if (envService.erProd()) {
+                "https://barnetrygd.intern.nav.no"
+            } else {
+                error("Klarer ikke å utlede miljø for redirect til fagsak")
+            }
         val behandling = behandlingRepository.finnBehandlingNullable(behandlingId)
         return if (behandling == null) {
             ResponseEntity.status(200).body("Fant ikke behandling med id $behandlingId")

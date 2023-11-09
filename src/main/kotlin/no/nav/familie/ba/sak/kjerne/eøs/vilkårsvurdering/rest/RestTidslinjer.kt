@@ -21,39 +21,48 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
     val barnasTidslinjer = this.barnasTidslinjer()
     val søkersTidslinjer = this.søkersTidslinjer()
 
-    val erNoenAvBarnaMellom0Og18ÅrTidslinje: Tidslinje<Boolean, Måned> = barnasTidslinjer.values
-        .map { it.erUnder18ÅrVilkårTidslinje }
-        .kombinerUtenNull { barnaEr0Til18ÅrListe -> barnaEr0Til18ÅrListe.any { it } }
+    val erNoenAvBarnaMellom0Og18ÅrTidslinje: Tidslinje<Boolean, Måned> =
+        barnasTidslinjer.values
+            .map { it.erUnder18ÅrVilkårTidslinje }
+            .kombinerUtenNull { barnaEr0Til18ÅrListe -> barnaEr0Til18ÅrListe.any { it } }
 
     return RestTidslinjer(
-        barnasTidslinjer = barnasTidslinjer.entries.associate {
-            val erUnder18årTidslinje = it.value.erUnder18ÅrVilkårTidslinje
-            it.key.aktivFødselsnummer() to RestTidslinjerForBarn(
-                vilkårTidslinjer = it.value.vilkårsresultatTidslinjer.map {
-                    it.beskjærEtter(erUnder18årTidslinje.tilDag())
-                        .tilRestTidslinje()
-                },
-                oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje = it.value
-                    .regelverkResultatTidslinje
-                    .map { it?.kombinertResultat?.resultat }
-                    .beskjærEtter(erUnder18årTidslinje)
-                    .tilRestTidslinje(),
-                regelverkTidslinje = it.value.regelverkResultatTidslinje
-                    .map { it?.kombinertResultat?.regelverk }
-                    .beskjærEtter(erUnder18årTidslinje)
-                    .tilRestTidslinje(),
-            )
-        },
-        søkersTidslinjer = RestTidslinjerForSøker(
-            vilkårTidslinjer = søkersTidslinjer.vilkårsresultatTidslinjer.map {
-                it.beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje.tilDag())
-                    .tilRestTidslinje()
+        barnasTidslinjer =
+            barnasTidslinjer.entries.associate {
+                val erUnder18årTidslinje = it.value.erUnder18ÅrVilkårTidslinje
+                it.key.aktivFødselsnummer() to
+                    RestTidslinjerForBarn(
+                        vilkårTidslinjer =
+                            it.value.vilkårsresultatTidslinjer.map {
+                                it.beskjærEtter(erUnder18årTidslinje.tilDag())
+                                    .tilRestTidslinje()
+                            },
+                        oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje =
+                            it.value
+                                .regelverkResultatTidslinje
+                                .map { it?.kombinertResultat?.resultat }
+                                .beskjærEtter(erUnder18årTidslinje)
+                                .tilRestTidslinje(),
+                        regelverkTidslinje =
+                            it.value.regelverkResultatTidslinje
+                                .map { it?.kombinertResultat?.regelverk }
+                                .beskjærEtter(erUnder18årTidslinje)
+                                .tilRestTidslinje(),
+                    )
             },
-            oppfyllerEgneVilkårTidslinje = søkersTidslinjer
-                .regelverkResultatTidslinje.map { it?.resultat }
-                .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje)
-                .tilRestTidslinje(),
-        ),
+        søkersTidslinjer =
+            RestTidslinjerForSøker(
+                vilkårTidslinjer =
+                    søkersTidslinjer.vilkårsresultatTidslinjer.map {
+                        it.beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje.tilDag())
+                            .tilRestTidslinje()
+                    },
+                oppfyllerEgneVilkårTidslinje =
+                    søkersTidslinjer
+                        .regelverkResultatTidslinje.map { it?.resultat }
+                        .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje)
+                        .tilRestTidslinje(),
+            ),
     )
 }
 

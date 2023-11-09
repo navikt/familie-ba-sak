@@ -38,25 +38,30 @@ infix fun TilkjentYtelse.der(andelTilkjentYtelse: AndelTilkjentYtelse): Tilkjent
 
 infix fun TilkjentYtelse.og(andelTilkjentYtelse: AndelTilkjentYtelse) = this.der(andelTilkjentYtelse)
 
-infix fun Person.har(sats: Int) = AndelTilkjentYtelse(
-    aktør = this.aktør,
-    sats = sats,
-    kalkulertUtbetalingsbeløp = sats,
-    behandlingId = 0,
-    tilkjentYtelse = lagInitiellTilkjentYtelse(),
-    stønadFom = YearMonth.now(),
-    stønadTom = YearMonth.now(),
-    type = YtelseType.ORDINÆR_BARNETRYGD,
-    prosent = BigDecimal.valueOf(100),
-    nasjonaltPeriodebeløp = sats,
-)
+infix fun Person.har(sats: Int) =
+    AndelTilkjentYtelse(
+        aktør = this.aktør,
+        sats = sats,
+        kalkulertUtbetalingsbeløp = sats,
+        behandlingId = 0,
+        tilkjentYtelse = lagInitiellTilkjentYtelse(),
+        stønadFom = YearMonth.now(),
+        stønadTom = YearMonth.now(),
+        type = YtelseType.ORDINÆR_BARNETRYGD,
+        prosent = BigDecimal.valueOf(100),
+        nasjonaltPeriodebeløp = sats,
+    )
 
 infix fun AndelTilkjentYtelse.fom(tidspunkt: Tidspunkt<Måned>) = this.copy(stønadFom = tidspunkt.tilYearMonth())
+
 infix fun AndelTilkjentYtelse.tom(tidspunkt: Tidspunkt<Måned>) = this.copy(stønadTom = tidspunkt.tilYearMonth())
+
 infix fun AndelTilkjentYtelse.i(ytelseType: YtelseType) = this.copy(type = ytelseType)
-infix fun AndelTilkjentYtelse.og(utenlandskBeløp: Int) = this.copy(
-    differanseberegnetPeriodebeløp = sats - utenlandskBeløp,
-    kalkulertUtbetalingsbeløp = maxOf(sats - utenlandskBeløp, 0),
-)
+
+infix fun AndelTilkjentYtelse.og(utenlandskBeløp: Int) =
+    this.copy(
+        differanseberegnetPeriodebeløp = sats - utenlandskBeløp,
+        kalkulertUtbetalingsbeløp = maxOf(sats - utenlandskBeløp, 0),
+    )
 
 infix fun AndelTilkjentYtelse.minus(utenlandskBeløp: Int) = this.og(utenlandskBeløp)

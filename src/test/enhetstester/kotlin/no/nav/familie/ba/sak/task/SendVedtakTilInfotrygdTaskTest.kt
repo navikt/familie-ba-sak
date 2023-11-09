@@ -18,13 +18,13 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 internal class SendVedtakTilInfotrygdTaskTest {
-
     val infotrygdFeedClient: InfotrygdFeedClient = mockk()
     val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService = mockk()
-    private val sendVedtakTilInfotrygdTask = SendVedtakTilInfotrygdTask(
-        infotrygdFeedClient,
-        andelerTilkjentYtelseOgEndreteUtbetalingerService,
-    )
+    private val sendVedtakTilInfotrygdTask =
+        SendVedtakTilInfotrygdTask(
+            infotrygdFeedClient,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService,
+        )
 
     @Test
     fun `skal sende vedtak til infotrygd ved første gang behandling`() {
@@ -40,24 +40,29 @@ internal class SendVedtakTilInfotrygdTaskTest {
         assertThat(slot.captured.datoStartNyBa).isEqualTo(fom.atDay(1))
     }
 
-    private fun lagAndelerMedFom(behandling: Behandling, fom: YearMonth): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
-        val andel1 = lagAndelTilkjentYtelseUtvidet(
-            fom.toString(),
-            fom.plusYears(6).toString(),
-            YtelseType.ORDINÆR_BARNETRYGD,
-            behandling = behandling,
-            person = lagPerson(),
-            periodeIdOffset = 1,
-        )
+    private fun lagAndelerMedFom(
+        behandling: Behandling,
+        fom: YearMonth,
+    ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
+        val andel1 =
+            lagAndelTilkjentYtelseUtvidet(
+                fom.toString(),
+                fom.plusYears(6).toString(),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                behandling = behandling,
+                person = lagPerson(),
+                periodeIdOffset = 1,
+            )
 
-        val andel2 = lagAndelTilkjentYtelseUtvidet(
-            fom.plusYears(6).toString(),
-            fom.plusYears(12).toString(),
-            YtelseType.ORDINÆR_BARNETRYGD,
-            behandling = behandling,
-            person = lagPerson(),
-            periodeIdOffset = 2,
-        )
+        val andel2 =
+            lagAndelTilkjentYtelseUtvidet(
+                fom.plusYears(6).toString(),
+                fom.plusYears(12).toString(),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                behandling = behandling,
+                person = lagPerson(),
+                periodeIdOffset = 2,
+            )
         return listOf(AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andel1), AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andel2))
     }
 }

@@ -39,12 +39,13 @@ internal class PersonidentServiceTest {
     private val aktørIdRepository: AktørIdRepository = mockk()
     private val personIdentSlot = slot<Personident>()
     private val aktørSlot = slot<Aktør>()
-    private val personidentService = PersonidentService(
-        personidentRepository,
-        aktørIdRepository,
-        pdlIdentRestClient,
-        mockk(),
-    )
+    private val personidentService =
+        PersonidentService(
+            personidentRepository,
+            aktørIdRepository,
+            pdlIdentRestClient,
+            mockk(),
+        )
 
     @BeforeAll
     fun init() {
@@ -117,12 +118,13 @@ internal class PersonidentServiceTest {
                 null
             }
 
-            val personidentService = PersonidentService(
-                personidentRepository,
-                aktørIdRepository,
-                pdlIdentRestClient,
-                mockk(),
-            )
+            val personidentService =
+                PersonidentService(
+                    personidentRepository,
+                    aktørIdRepository,
+                    pdlIdentRestClient,
+                    mockk(),
+                )
 
             val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
 
@@ -152,12 +154,13 @@ internal class PersonidentServiceTest {
                 ).personidenter.first()
             }
 
-            val personidentService = PersonidentService(
-                personidentRepository,
-                aktørIdRepository,
-                pdlIdentRestClient,
-                mockk(),
-            )
+            val personidentService =
+                PersonidentService(
+                    personidentRepository,
+                    aktørIdRepository,
+                    pdlIdentRestClient,
+                    mockk(),
+                )
 
             val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomFinnes))
 
@@ -193,12 +196,13 @@ internal class PersonidentServiceTest {
                 aktørIdent1
             }
 
-            val personidentService = PersonidentService(
-                personidentRepository,
-                aktørIdRepository,
-                pdlIdentRestClient,
-                mockk(),
-            )
+            val personidentService =
+                PersonidentService(
+                    personidentRepository,
+                    aktørIdRepository,
+                    pdlIdentRestClient,
+                    mockk(),
+                )
 
             val feil = assertThrows<Feil> { personidentService.håndterNyIdent(nyIdent = PersonIdent(aktivFnrIdent2)) }
             assertThat(feil.message).contains("Mottok potensielt en hendelse på en merget ident for aktørId=${aktivAktørIdent2.aktørId}. Sjekk securelogger for liste med identer. Sjekk om identen har flere saker. Disse må løses manuelt")
@@ -229,12 +233,13 @@ internal class PersonidentServiceTest {
                 null
             }
 
-            val personidentService = PersonidentService(
-                personidentRepository,
-                aktørIdRepository,
-                pdlIdentRestClient,
-                mockk(),
-            )
+            val personidentService =
+                PersonidentService(
+                    personidentRepository,
+                    aktørIdRepository,
+                    pdlIdentRestClient,
+                    mockk(),
+                )
 
             val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(aktivFnrIdent2))
             assertEquals(aktivAktørIdent2.aktørId, aktør?.aktørId)
@@ -356,12 +361,13 @@ internal class PersonidentServiceTest {
             )
 
             val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
-            val personidentService = PersonidentService(
-                personidentRepository,
-                aktørIdRepository,
-                pdlIdentRestClient,
-                taskRepositoryMock,
-            )
+            val personidentService =
+                PersonidentService(
+                    personidentRepository,
+                    aktørIdRepository,
+                    pdlIdentRestClient,
+                    taskRepositoryMock,
+                )
 
             every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
                 listOf(
@@ -405,12 +411,13 @@ internal class PersonidentServiceTest {
             )
 
             val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
-            val personidentService = PersonidentService(
-                personidentRepository,
-                aktørIdRepository,
-                pdlIdentRestClient,
-                taskRepositoryMock,
-            )
+            val personidentService =
+                PersonidentService(
+                    personidentRepository,
+                    aktørIdRepository,
+                    pdlIdentRestClient,
+                    taskRepositoryMock,
+                )
 
             every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
                 listOf(
@@ -457,12 +464,13 @@ internal class PersonidentServiceTest {
             )
 
             val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
-            val personidentService = PersonidentService(
-                personidentRepository,
-                aktørIdRepository,
-                pdlIdentRestClient,
-                taskRepositoryMock,
-            )
+            val personidentService =
+                PersonidentService(
+                    personidentRepository,
+                    aktørIdRepository,
+                    pdlIdentRestClient,
+                    taskRepositoryMock,
+                )
 
             every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
                 listOf(

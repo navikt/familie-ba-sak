@@ -31,7 +31,6 @@ import java.time.YearMonth
 class UtbetalingsoppdragGenerator(
     private val beregningService: BeregningService,
 ) {
-
     fun lagUtbetalingsoppdrag(
         saksbehandlerId: String,
         vedtak: Vedtak,
@@ -42,22 +41,24 @@ class UtbetalingsoppdragGenerator(
         endretMigreringsDato: YearMonth? = null,
     ): BeregnetUtbetalingsoppdragLongId {
         return Utbetalingsgenerator().lagUtbetalingsoppdrag(
-            behandlingsinformasjon = Behandlingsinformasjon(
-                saksbehandlerId = saksbehandlerId,
-                behandlingId = vedtak.behandling.id.toString(),
-                eksternBehandlingId = vedtak.behandling.id,
-                eksternFagsakId = vedtak.behandling.fagsak.id,
-                fagsystem = FagsystemBA.BARNETRYGD,
-                personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
-                vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
-                opphørAlleKjederFra = finnOpphørsdatoForAlleKjeder(
-                    forrigeTilkjentYtelse = forrigeTilkjentYtelse,
-                    sisteAndelPerKjede = sisteAndelPerKjede,
-                    endretMigreringsDato = endretMigreringsDato,
+            behandlingsinformasjon =
+                Behandlingsinformasjon(
+                    saksbehandlerId = saksbehandlerId,
+                    behandlingId = vedtak.behandling.id.toString(),
+                    eksternBehandlingId = vedtak.behandling.id,
+                    eksternFagsakId = vedtak.behandling.fagsak.id,
+                    fagsystem = FagsystemBA.BARNETRYGD,
+                    personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
+                    vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
+                    opphørAlleKjederFra =
+                        finnOpphørsdatoForAlleKjeder(
+                            forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                            sisteAndelPerKjede = sisteAndelPerKjede,
+                            endretMigreringsDato = endretMigreringsDato,
+                        ),
+                    utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
+                    opphørKjederFraFørsteUtbetaling = if (endretMigreringsDato != null) false else erSimulering, // Ved simulering når migreringsdato er endret, skal vi opphøre fra den nye datoen og ikke fra første utbetaling per kjede.
                 ),
-                utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
-                opphørKjederFraFørsteUtbetaling = if (endretMigreringsDato != null) false else erSimulering, // Ved simulering når migreringsdato er endret, skal vi opphøre fra den nye datoen og ikke fra første utbetaling per kjede.
-            ),
             forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData() ?: emptyList(),
             nyeAndeler = nyTilkjentYtelse.tilAndelData(),
             sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
@@ -144,15 +145,16 @@ class UtbetalingsoppdragGenerator(
         val erEndretMigreringsDato = endretMigreringsDato != null
 
         // Generer et komplett nytt eller bare endringer på et eksisterende betalingsoppdrag.
-        val sisteBeståenAndelIHverKjede = if (erSimulering || erEndretMigreringsDato) {
-            // Gjennom å sette andeler til null markeres at alle perioder i kjeden skal opphøres.
-            sisteAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
-        } else {
-            // For å kunne behandling alle forlengelser/forkortelser av perioder likt har vi valgt å konsekvent opphøre og erstatte.
-            // Det vil si at vi alltid gjenoppbygger kjede fra første endring, selv om vi i realiteten av og til kun endrer datoer
-            // på en eksisterende linje (endring på 150 linjenivå).
-            sisteBeståendeAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
-        }
+        val sisteBeståenAndelIHverKjede =
+            if (erSimulering || erEndretMigreringsDato) {
+                // Gjennom å sette andeler til null markeres at alle perioder i kjeden skal opphøres.
+                sisteAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
+            } else {
+                // For å kunne behandling alle forlengelser/forkortelser av perioder likt har vi valgt å konsekvent opphøre og erstatte.
+                // Det vil si at vi alltid gjenoppbygger kjede fra første endring, selv om vi i realiteten av og til kun endrer datoer
+                // på en eksisterende linje (endring på 150 linjenivå).
+                sisteBeståendeAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
+            }
 
         val andelerTilOpphør =
             andelerTilOpphørMedDato(
@@ -164,29 +166,31 @@ class UtbetalingsoppdragGenerator(
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelseForUtbetalingsoppdrag>> =
             andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
-        val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty()) {
-            val sisteOffsetIKjedeOversikt =
-                sisteAndelPerIdent.map { it.key to it.value.periodeOffset!!.toInt() }.toMap()
-            lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(
-                andeler = andelerTilOpprettelse,
-                erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
-                vedtak = vedtak,
-                sisteOffsetIKjedeOversikt = sisteOffsetIKjedeOversikt,
-                sisteOffsetPåFagsak = sisteOffsetIKjedeOversikt.maxOfOrNull { it.value },
-                skalOppdatereTilkjentYtelse = !erSimulering,
-            )
-        } else {
-            emptyList()
-        }
+        val opprettes: List<Utbetalingsperiode> =
+            if (andelerTilOpprettelse.isNotEmpty()) {
+                val sisteOffsetIKjedeOversikt =
+                    sisteAndelPerIdent.map { it.key to it.value.periodeOffset!!.toInt() }.toMap()
+                lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(
+                    andeler = andelerTilOpprettelse,
+                    erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
+                    vedtak = vedtak,
+                    sisteOffsetIKjedeOversikt = sisteOffsetIKjedeOversikt,
+                    sisteOffsetPåFagsak = sisteOffsetIKjedeOversikt.maxOfOrNull { it.value },
+                    skalOppdatereTilkjentYtelse = !erSimulering,
+                )
+            } else {
+                emptyList()
+            }
 
-        val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty()) {
-            lagUtbetalingsperioderForOpphør(
-                andeler = andelerTilOpphør,
-                vedtak = vedtak,
-            )
-        } else {
-            emptyList()
-        }
+        val opphøres: List<Utbetalingsperiode> =
+            if (andelerTilOpphør.isNotEmpty()) {
+                lagUtbetalingsperioderForOpphør(
+                    andeler = andelerTilOpphør,
+                    vedtak = vedtak,
+                )
+            } else {
+                emptyList()
+            }
 
         return Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
@@ -202,10 +206,11 @@ class UtbetalingsoppdragGenerator(
         andeler: List<Pair<AndelTilkjentYtelseForUtbetalingsoppdrag, YearMonth>>,
         vedtak: Vedtak,
     ): List<Utbetalingsperiode> {
-        val utbetalingsperiodeMal = UtbetalingsperiodeMal(
-            vedtak = vedtak,
-            erEndringPåEksisterendePeriode = true,
-        )
+        val utbetalingsperiodeMal =
+            UtbetalingsperiodeMal(
+                vedtak = vedtak,
+                erEndringPåEksisterendePeriode = true,
+            )
 
         return andeler.map { (sisteAndelIKjede, opphørKjedeFom) ->
             utbetalingsperiodeMal.lagPeriodeFraAndel(
@@ -233,35 +238,38 @@ class UtbetalingsoppdragGenerator(
                 0
             }
 
-        val utbetalingsperiodeMal = UtbetalingsperiodeMal(
-            vedtak = vedtak,
-        )
+        val utbetalingsperiodeMal =
+            UtbetalingsperiodeMal(
+                vedtak = vedtak,
+            )
 
-        val utbetalingsperioder = andeler.filter { kjede -> kjede.isNotEmpty() }
-            .flatMap { kjede: List<AndelTilkjentYtelseForUtbetalingsoppdrag> ->
-                val ident = kjede.first().aktør.aktivFødselsnummer()
-                val ytelseType = kjede.first().type
-                var forrigeOffsetIKjede: Int? = null
-                if (!erFørsteBehandlingPåFagsak) {
-                    forrigeOffsetIKjede = sisteOffsetIKjedeOversikt[IdentOgYtelse(ident, ytelseType)]
-                }
-                kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
-                    val forrigeOffset = if (index == 0) forrigeOffsetIKjede else offset - 1
-                    utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
-                        andel.periodeOffset = offset.toLong()
-                        andel.forrigePeriodeOffset = forrigeOffset?.toLong()
-                        andel.kildeBehandlingId =
-                            andel.behandlingId // Trengs for å finne tilbake ved konsistensavstemming
-                        offset++
+        val utbetalingsperioder =
+            andeler.filter { kjede -> kjede.isNotEmpty() }
+                .flatMap { kjede: List<AndelTilkjentYtelseForUtbetalingsoppdrag> ->
+                    val ident = kjede.first().aktør.aktivFødselsnummer()
+                    val ytelseType = kjede.first().type
+                    var forrigeOffsetIKjede: Int? = null
+                    if (!erFørsteBehandlingPåFagsak) {
+                        forrigeOffsetIKjede = sisteOffsetIKjedeOversikt[IdentOgYtelse(ident, ytelseType)]
+                    }
+                    kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
+                        val forrigeOffset = if (index == 0) forrigeOffsetIKjede else offset - 1
+                        utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
+                            andel.periodeOffset = offset.toLong()
+                            andel.forrigePeriodeOffset = forrigeOffset?.toLong()
+                            andel.kildeBehandlingId =
+                                andel.behandlingId // Trengs for å finne tilbake ved konsistensavstemming
+                            offset++
+                        }
                     }
                 }
-            }
 
         // TODO Vi bør se om vi kan flytte ut denne side effecten
         if (skalOppdatereTilkjentYtelse) {
-            val oppdatertTilkjentYtelse = andeler.flatten().firstOrNull()?.tilkjentYtelse ?: throw Feil(
-                "Andeler mangler ved generering av utbetalingsperioder. Får tom liste.",
-            )
+            val oppdatertTilkjentYtelse =
+                andeler.flatten().firstOrNull()?.tilkjentYtelse ?: throw Feil(
+                    "Andeler mangler ved generering av utbetalingsperioder. Får tom liste.",
+                )
             beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
         }
 

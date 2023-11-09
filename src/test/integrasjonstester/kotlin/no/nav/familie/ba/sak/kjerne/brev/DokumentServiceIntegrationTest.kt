@@ -54,59 +54,41 @@ import java.time.LocalDate
 class DokumentServiceIntegrationTest(
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val behandlingService: BehandlingService,
-
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-
     @Autowired
     private val personidentService: PersonidentService,
-
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
-
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
-
     @Autowired
     private val vedtakService: VedtakService,
-
     @Autowired
     private val dokumentService: DokumentService,
-
     @Autowired
     private val totrinnskontrollService: TotrinnskontrollService,
-
     @Autowired
     private val stegService: StegService,
-
     @Autowired
     private val brevService: BrevService,
-
     @Autowired
     private val integrasjonClient: IntegrasjonClient,
-
     @Autowired
     private val arbeidsfordelingService: ArbeidsfordelingService,
-
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
-
     @Autowired
     private val brevKlient: BrevKlient,
-
     @Autowired
     private val dokumentGenereringService: DokumentGenereringService,
-
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-
     @Autowired
     private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeEach
     fun setup() {
         databaseCleanupService.truncate()
@@ -114,18 +96,19 @@ class DokumentServiceIntegrationTest(
 
     @Test
     fun `Hent vedtaksbrev`() {
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-            tilSteg = StegType.VURDER_TILBAKEKREVING,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandlingEtterVilkårsvurderingSteg =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VURDER_TILBAKEKREVING,
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
             behandlingEtterVilkårsvurderingSteg,
@@ -149,18 +132,19 @@ class DokumentServiceIntegrationTest(
 
     @Test
     fun `Skal generere vedtaksbrev`() {
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-            tilSteg = StegType.VURDER_TILBAKEKREVING,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandlingEtterVilkårsvurderingSteg =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VURDER_TILBAKEKREVING,
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
             behandlingEtterVilkårsvurderingSteg,
@@ -188,18 +172,19 @@ class DokumentServiceIntegrationTest(
         val mockBeslutter = "Mock Beslutter"
         val mockBeslutterId = "mock.beslutter@nav.no"
 
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-            tilSteg = StegType.VURDER_TILBAKEKREVING,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandlingEtterVilkårsvurderingSteg =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VURDER_TILBAKEKREVING,
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
 
         val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelter(vedtak)
@@ -247,23 +232,25 @@ class DokumentServiceIntegrationTest(
 
     @Test
     fun `Skal verifisere at man ikke får generert brev etter at behandlingen er sendt fra beslutter`() {
-        val behandlingEtterVedtakBesluttet = kjørStegprosessForFGB(
-            tilSteg = StegType.BESLUTTE_VEDTAK,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandlingEtterVedtakBesluttet =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.BESLUTTE_VEDTAK,
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
-        val feil = assertThrows<FunksjonellFeil> {
-            dokumentGenereringService.genererBrevForVedtak(vedtak)
-        }
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                dokumentGenereringService.genererBrevForVedtak(vedtak)
+            }
 
         assert(
             feil.message!!.contains("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter"),
@@ -290,14 +277,15 @@ class DokumentServiceIntegrationTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val manueltBrevRequest = ManueltBrevRequest(
-            brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
-            mottakerIdent = fnr,
-        ).byggMottakerdata(
-            behandling,
-            persongrunnlagService,
-            arbeidsfordelingService,
-        )
+        val manueltBrevRequest =
+            ManueltBrevRequest(
+                brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
+                mottakerIdent = fnr,
+            ).byggMottakerdata(
+                behandling,
+                persongrunnlagService,
+                arbeidsfordelingService,
+            )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
         verify(exactly = 1) {
@@ -310,17 +298,19 @@ class DokumentServiceIntegrationTest(
         val fnr = "09121079074"
         val orgNummer = "998765432"
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(
-            fødselsnummer = fnr,
-            fagsakType = FagsakType.INSTITUSJON,
-            institusjon = InstitusjonInfo(orgNummer = orgNummer, tssEksternId = "8000000"),
-        )
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(
+                fødselsnummer = fnr,
+                fagsakType = FagsakType.INSTITUSJON,
+                institusjon = InstitusjonInfo(orgNummer = orgNummer, tssEksternId = "8000000"),
+            )
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlagForInstitusjon(
-            behandlingId = behandling.id,
-            barnasIdenter = listOf(fnr),
-        )
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlagForInstitusjon(
+                behandlingId = behandling.id,
+                barnasIdenter = listOf(fnr),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(
@@ -331,14 +321,15 @@ class DokumentServiceIntegrationTest(
             ),
         )
 
-        val manueltBrevRequest = ManueltBrevRequest(
-            brevmal = Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON,
-            mottakerIdent = orgNummer,
-        ).byggMottakerdata(
-            behandling,
-            persongrunnlagService,
-            arbeidsfordelingService,
-        )
+        val manueltBrevRequest =
+            ManueltBrevRequest(
+                brevmal = Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON,
+                mottakerIdent = orgNummer,
+            ).byggMottakerdata(
+                behandling,
+                persongrunnlagService,
+                arbeidsfordelingService,
+            )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
         verify(exactly = 1) {
@@ -362,17 +353,19 @@ class DokumentServiceIntegrationTest(
         val fnr = randomFnr()
         val orgNummer = "998765432"
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(
-            fødselsnummer = fnr,
-            fagsakType = FagsakType.INSTITUSJON,
-            institusjon = InstitusjonInfo(orgNummer = orgNummer, tssEksternId = "8000000"),
-        )
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(
+                fødselsnummer = fnr,
+                fagsakType = FagsakType.INSTITUSJON,
+                institusjon = InstitusjonInfo(orgNummer = orgNummer, tssEksternId = "8000000"),
+            )
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlagForInstitusjon(
-            behandlingId = behandling.id,
-            barnasIdenter = listOf(fnr),
-        )
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlagForInstitusjon(
+                behandlingId = behandling.id,
+                barnasIdenter = listOf(fnr),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(
@@ -383,14 +376,15 @@ class DokumentServiceIntegrationTest(
             ),
         )
 
-        val manueltBrevRequest = ManueltBrevRequest(
-            brevmal = Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
-            mottakerIdent = orgNummer,
-        ).byggMottakerdata(
-            behandling,
-            persongrunnlagService,
-            arbeidsfordelingService,
-        )
+        val manueltBrevRequest =
+            ManueltBrevRequest(
+                brevmal = Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
+                mottakerIdent = orgNummer,
+            ).byggMottakerdata(
+                behandling,
+                persongrunnlagService,
+                arbeidsfordelingService,
+            )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
         verify(exactly = 1) {
@@ -405,17 +399,19 @@ class DokumentServiceIntegrationTest(
         val fnr = "10121079074"
         val orgNummer = "998765432"
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(
-            fødselsnummer = fnr,
-            fagsakType = FagsakType.INSTITUSJON,
-            institusjon = InstitusjonInfo(orgNummer = orgNummer, tssEksternId = "8000000"),
-        )
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(
+                fødselsnummer = fnr,
+                fagsakType = FagsakType.INSTITUSJON,
+                institusjon = InstitusjonInfo(orgNummer = orgNummer, tssEksternId = "8000000"),
+            )
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlagForInstitusjon(
-            behandlingId = behandling.id,
-            barnasIdenter = listOf(fnr),
-        )
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlagForInstitusjon(
+                behandlingId = behandling.id,
+                barnasIdenter = listOf(fnr),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(
@@ -426,14 +422,15 @@ class DokumentServiceIntegrationTest(
             ),
         )
 
-        val manueltBrevRequest = ManueltBrevRequest(
-            brevmal = Brevmal.SVARTIDSBREV_INSTITUSJON,
-            mottakerIdent = orgNummer,
-        ).byggMottakerdata(
-            behandling,
-            persongrunnlagService,
-            arbeidsfordelingService,
-        )
+        val manueltBrevRequest =
+            ManueltBrevRequest(
+                brevmal = Brevmal.SVARTIDSBREV_INSTITUSJON,
+                mottakerIdent = orgNummer,
+            ).byggMottakerdata(
+                behandling,
+                persongrunnlagService,
+                arbeidsfordelingService,
+            )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
         verify(exactly = 1) {
@@ -448,17 +445,19 @@ class DokumentServiceIntegrationTest(
         val fnr = "11121079074"
         val orgNummer = "998765432"
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(
-            fødselsnummer = fnr,
-            fagsakType = FagsakType.INSTITUSJON,
-            institusjon = InstitusjonInfo(orgNummer = orgNummer, tssEksternId = "8000000"),
-        )
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(
+                fødselsnummer = fnr,
+                fagsakType = FagsakType.INSTITUSJON,
+                institusjon = InstitusjonInfo(orgNummer = orgNummer, tssEksternId = "8000000"),
+            )
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlagForInstitusjon(
-            behandlingId = behandling.id,
-            barnasIdenter = listOf(fnr),
-        )
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlagForInstitusjon(
+                behandlingId = behandling.id,
+                barnasIdenter = listOf(fnr),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(
@@ -469,15 +468,16 @@ class DokumentServiceIntegrationTest(
             ),
         )
 
-        val manueltBrevRequest = ManueltBrevRequest(
-            brevmal = Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
-            mottakerIdent = orgNummer,
-            antallUkerSvarfrist = 3,
-        ).byggMottakerdata(
-            behandling,
-            persongrunnlagService,
-            arbeidsfordelingService,
-        )
+        val manueltBrevRequest =
+            ManueltBrevRequest(
+                brevmal = Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
+                mottakerIdent = orgNummer,
+                antallUkerSvarfrist = 3,
+            ).byggMottakerdata(
+                behandling,
+                persongrunnlagService,
+                arbeidsfordelingService,
+            )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
         verify(exactly = 1) {
@@ -491,26 +491,28 @@ class DokumentServiceIntegrationTest(
         behandlingId: Long,
         barnasIdenter: List<String>,
         barnasFødselsdatoer: List<LocalDate> = barnasIdenter.map { LocalDate.of(2019, 1, 1) },
-        barnAktør: List<Aktør> = barnasIdenter.map { fødselsnummer ->
-            tilAktør(fødselsnummer).also {
-                it.personidenter.add(
-                    Personident(
-                        fødselsnummer = fødselsnummer,
-                        aktør = it,
-                        aktiv = fødselsnummer == it.personidenter.first().fødselsnummer,
-                    ),
-                )
-            }
-        },
+        barnAktør: List<Aktør> =
+            barnasIdenter.map { fødselsnummer ->
+                tilAktør(fødselsnummer).also {
+                    it.personidenter.add(
+                        Personident(
+                            fødselsnummer = fødselsnummer,
+                            aktør = it,
+                            aktiv = fødselsnummer == it.personidenter.first().fødselsnummer,
+                        ),
+                    )
+                }
+            },
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
-        val bostedsadresse = GrMatrikkeladresse(
-            matrikkelId = null,
-            bruksenhetsnummer = "H301",
-            tilleggsnavn = "navn",
-            postnummer = "0202",
-            kommunenummer = "2231",
-        )
+        val bostedsadresse =
+            GrMatrikkeladresse(
+                matrikkelId = null,
+                bruksenhetsnummer = "H301",
+                tilleggsnavn = "navn",
+                postnummer = "0202",
+                kommunenummer = "2231",
+            )
 
         barnAktør.mapIndexed { index, aktør ->
             personopplysningGrunnlag.personer.add(
@@ -522,20 +524,22 @@ class DokumentServiceIntegrationTest(
                     navn = "institusjonsbarnets navn",
                     kjønn = Kjønn.MANN,
                 ).also { barn ->
-                    barn.statsborgerskap = mutableListOf(
-                        GrStatsborgerskap(
-                            landkode = "NOR",
-                            medlemskap = Medlemskap.NORDEN,
-                            person = barn,
-                        ),
-                    )
+                    barn.statsborgerskap =
+                        mutableListOf(
+                            GrStatsborgerskap(
+                                landkode = "NOR",
+                                medlemskap = Medlemskap.NORDEN,
+                                person = barn,
+                            ),
+                        )
                     barn.bostedsadresser = mutableListOf(bostedsadresse.apply { person = barn })
-                    barn.sivilstander = mutableListOf(
-                        GrSivilstand(
-                            type = SIVILSTAND.UGIFT,
-                            person = barn,
-                        ),
-                    )
+                    barn.sivilstander =
+                        mutableListOf(
+                            GrSivilstand(
+                                type = SIVILSTAND.UGIFT,
+                                person = barn,
+                            ),
+                        )
                 },
             )
         }

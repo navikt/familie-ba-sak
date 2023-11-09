@@ -25,28 +25,21 @@ data class Dødsfall(
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "po_doedsfall_seq_generator")
     @SequenceGenerator(name = "po_doedsfall_seq_generator", sequenceName = "po_doedsfall_seq", allocationSize = 50)
     val id: Long = 0,
-
     @JsonIgnore
     @OneToOne
     @JoinColumn(name = "fk_po_person_id", referencedColumnName = "id", nullable = false)
     val person: Person,
-
     @Column(name = "doedsfall_dato", nullable = false)
     val dødsfallDato: LocalDate,
-
     @Column(name = "doedsfall_adresse", nullable = true)
     val dødsfallAdresse: String? = null,
-
     @Column(name = "doedsfall_postnummer", nullable = true)
     val dødsfallPostnummer: String? = null,
-
     @Column(name = "doedsfall_poststed", nullable = true)
     val dødsfallPoststed: String? = null,
-
     @Column(name = "manuell_registrert", nullable = false)
     val manuellRegistrert: Boolean = false,
 ) : BaseEntitet() {
-
     fun tilKopiForNyPerson(nyPerson: Person): Dødsfall =
         copy(id = 0, person = nyPerson)
 
@@ -54,11 +47,12 @@ data class Dødsfall(
         return """$dødsfallAdresse, $dødsfallPostnummer $dødsfallPoststed"""
     }
 
-    fun tilRestRegisteropplysning() = RestRegisteropplysning(
-        fom = this.dødsfallDato,
-        tom = null,
-        verdi = if (dødsfallAdresse == null) "-" else hentAdresseToString(),
-    )
+    fun tilRestRegisteropplysning() =
+        RestRegisteropplysning(
+            fom = this.dødsfallDato,
+            tom = null,
+            verdi = if (dødsfallAdresse == null) "-" else hentAdresseToString(),
+        )
 }
 
 fun lagDødsfallFraPdl(
@@ -85,7 +79,6 @@ fun lagDødsfall(
     dødsfallAdresse: String? = null,
     dødsfallPostnummer: String? = null,
     dødsfallPoststed: String? = null,
-
 ): Dødsfall {
     return Dødsfall(
         person = person,

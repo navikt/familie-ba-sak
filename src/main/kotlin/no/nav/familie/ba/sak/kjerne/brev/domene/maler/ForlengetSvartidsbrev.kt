@@ -19,22 +19,26 @@ data class ForlengetSvartidsbrev(
         saksbehandlerNavn: String,
     ) : this(
         mal = mal,
-        data = ForlengetSvartidsbrevData(
-            delmalData = ForlengetSvartidsbrevData.DelmalData(
-                signatur = SignaturDelmal(
-                    enhet = enhetNavn,
-                    saksbehandlerNavn = saksbehandlerNavn,
-                ),
+        data =
+            ForlengetSvartidsbrevData(
+                delmalData =
+                    ForlengetSvartidsbrevData.DelmalData(
+                        signatur =
+                            SignaturDelmal(
+                                enhet = enhetNavn,
+                                saksbehandlerNavn = saksbehandlerNavn,
+                            ),
+                    ),
+                flettefelter =
+                    ForlengetSvartidsbrevData.Flettefelter(
+                        navn = flettefelt(navn),
+                        fodselsnummer = flettefelt(fodselsnummer),
+                        antallUkerSvarfrist = flettefelt(antallUkerSvarfrist.toString()),
+                        aarsakerSvartidsbrev = flettefelt(årsaker),
+                        organisasjonsnummer = flettefelt(organisasjonsnummer),
+                        gjelder = flettefelt(gjelder),
+                    ),
             ),
-            flettefelter = ForlengetSvartidsbrevData.Flettefelter(
-                navn = flettefelt(navn),
-                fodselsnummer = flettefelt(fodselsnummer),
-                antallUkerSvarfrist = flettefelt(antallUkerSvarfrist.toString()),
-                aarsakerSvartidsbrev = flettefelt(årsaker),
-                organisasjonsnummer = flettefelt(organisasjonsnummer),
-                gjelder = flettefelt(gjelder),
-            ),
-        ),
     )
 }
 

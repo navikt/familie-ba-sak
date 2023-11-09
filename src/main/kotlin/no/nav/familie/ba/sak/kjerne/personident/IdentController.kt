@@ -17,9 +17,10 @@ import org.springframework.web.bind.annotation.RestController
 class IdentController(
     private val personidentService: PersonidentService,
 ) {
-
     @PostMapping
-    fun håndterPdlHendelse(@RequestBody nyIdent: PersonIdent): ResponseEntity<Ressurs<String>> {
+    fun håndterPdlHendelse(
+        @RequestBody nyIdent: PersonIdent,
+    ): ResponseEntity<Ressurs<String>> {
         personidentService.opprettTaskForIdentHendelse(nyIdent)
         return ResponseEntity.ok(Ressurs.success("Håndtert ny ident"))
     }

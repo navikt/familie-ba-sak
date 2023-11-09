@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class JournalføringUtilsTest {
-
     val ordinærJournalpostTittel = "Søknad om ordinær barnetrygd"
     val utvidetJournalpostTittel = "Søknad om utvidet barnetrygd"
 

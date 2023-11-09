@@ -29,11 +29,17 @@ class AvstemmingService(
     private val batchRepository: BatchRepository,
     private val dataChunkRepository: DataChunkRepository,
 ) {
-    fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime) {
+    fun grensesnittavstemOppdrag(
+        fraDato: LocalDateTime,
+        tilDato: LocalDateTime,
+    ) {
         økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato)
     }
 
-    fun sendKonsistensavstemmingStart(avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
+    fun sendKonsistensavstemmingStart(
+        avstemmingsdato: LocalDateTime,
+        transaksjonsId: UUID,
+    ) {
         økonomiKlient.konsistensavstemOppdragStart(
             avstemmingsdato,
             transaksjonsId,
@@ -49,12 +55,18 @@ class AvstemmingService(
         return dataChunkRepository.findByTransaksjonsId(transaksjonsId).isNotEmpty()
     }
 
-    fun skalOppretteFinnPerioderForRelevanteBehandlingerTask(transaksjonsId: UUID, chunkNr: Int): Boolean {
+    fun skalOppretteFinnPerioderForRelevanteBehandlingerTask(
+        transaksjonsId: UUID,
+        chunkNr: Int,
+    ): Boolean {
         logger.info("Sjekker om konsistensavstemming er gjort for=$transaksjonsId og chunkNr=$chunkNr")
         return dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr) == null
     }
 
-    fun erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(transaksjonsId: UUID, chunkNr: Int): Boolean {
+    fun erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(
+        transaksjonsId: UUID,
+        chunkNr: Int,
+    ): Boolean {
         val dataChunk = dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
         return dataChunk?.erSendt == true
     }
@@ -67,8 +79,9 @@ class AvstemmingService(
         sendTilØkonomi: Boolean,
     ) {
         logger.info("Utfører konsistensavstemOppdragData: Sender perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr")
-        val dataChunk = dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
-            ?: error("Finner ingen datachunk for $transaksjonsId og $chunkNr")
+        val dataChunk =
+            dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
+                ?: error("Finner ingen datachunk for $transaksjonsId og $chunkNr")
 
         if (dataChunk.erSendt) {
             logger.info("Utfører konsistensavstemOppdragData: Perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr er allerede sendt.")
@@ -88,7 +101,10 @@ class AvstemmingService(
         dataChunkRepository.save(dataChunk.also { it.erSendt = true })
     }
 
-    fun konsistensavstemOppdragAvslutt(avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
+    fun konsistensavstemOppdragAvslutt(
+        avstemmingsdato: LocalDateTime,
+        transaksjonsId: UUID,
+    ) {
         logger.info("Avslutter konsistensavstemming for $transaksjonsId")
 
         økonomiKlient.konsistensavstemOppdragAvslutt(avstemmingsdato, transaksjonsId)
@@ -99,13 +115,15 @@ class AvstemmingService(
         konsistensavstemmingAvsluttTaskDTO: KonsistensavstemmingAvsluttTaskDTO,
     ) {
         logger.info("Oppretter avsluttingstask for transaksjonsId=${konsistensavstemmingAvsluttTaskDTO.transaksjonsId}")
-        val konsistensavstemmingAvsluttTask = Task(
-            type = KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(konsistensavstemmingAvsluttTaskDTO),
-            properties = Properties().apply {
-                this["transaksjonsId"] = konsistensavstemmingAvsluttTaskDTO.transaksjonsId.toString()
-            },
-        )
+        val konsistensavstemmingAvsluttTask =
+            Task(
+                type = KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(konsistensavstemmingAvsluttTaskDTO),
+                properties =
+                    Properties().apply {
+                        this["transaksjonsId"] = konsistensavstemmingAvsluttTaskDTO.transaksjonsId.toString()
+                    },
+            )
         taskService.save(konsistensavstemmingAvsluttTask)
     }
 
@@ -128,17 +146,20 @@ class AvstemmingService(
         )
 
         logger.info("Oppretter task for å finne perioder for relevante behandlinger. transaksjonsId=${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.transaksjonsId} og chunk=${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr} for ${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.relevanteBehandlinger.size} behandlinger")
-        val task = Task(
-            type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(
-                konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO,
-            ),
-            properties = Properties().apply {
-                this["transaksjonsId"] =
-                    konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.transaksjonsId.toString()
-                this["chunkNr"] = konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr.toString()
-            },
-        ).medTriggerTid(triggerTid)
+        val task =
+            Task(
+                type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE,
+                payload =
+                    objectMapper.writeValueAsString(
+                        konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO,
+                    ),
+                properties =
+                    Properties().apply {
+                        this["transaksjonsId"] =
+                            konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.transaksjonsId.toString()
+                        this["chunkNr"] = konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr.toString()
+                    },
+            ).medTriggerTid(triggerTid)
         taskService.save(task)
     }
 
@@ -149,10 +170,11 @@ class AvstemmingService(
         return relevanteBehandlinger
             .chunked(1000)
             .map { chunk ->
-                val relevanteAndeler = beregningService.hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
-                    behandlingIder = chunk,
-                    avstemmingstidspunkt = avstemmingstidspunkt,
-                )
+                val relevanteAndeler =
+                    beregningService.hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
+                        behandlingIder = chunk,
+                        avstemmingstidspunkt = avstemmingstidspunkt,
+                    )
                 val aktiveFødselsnummere =
                     behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(
                         relevanteAndeler.mapNotNull { it.kildeBehandlingId },
@@ -170,14 +192,16 @@ class AvstemmingService(
                         }
                         PerioderForBehandling(
                             behandlingId = kildeBehandlingId.toString(),
-                            aktivFødselsnummer = aktiveFødselsnummere[kildeBehandlingId]
-                                ?: error("Finnes ikke et aktivt fødselsnummer for behandling $kildeBehandlingId"),
-                            perioder = andeler
-                                .map {
-                                    it.periodeOffset
-                                        ?: error("Andel ${it.id} på iverksatt behandling på løpende fagsak mangler periodeOffset")
-                                }
-                                .toSet(),
+                            aktivFødselsnummer =
+                                aktiveFødselsnummere[kildeBehandlingId]
+                                    ?: error("Finnes ikke et aktivt fødselsnummer for behandling $kildeBehandlingId"),
+                            perioder =
+                                andeler
+                                    .map {
+                                        it.periodeOffset
+                                            ?: error("Andel ${it.id} på iverksatt behandling på løpende fagsak mangler periodeOffset")
+                                    }
+                                    .toSet(),
                             utebetalesTil = tssEksternIdForBehandlinger[kildeBehandlingId],
                         )
                     }

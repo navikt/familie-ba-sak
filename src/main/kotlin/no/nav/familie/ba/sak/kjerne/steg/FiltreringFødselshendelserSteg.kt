@@ -11,17 +11,17 @@ import org.springframework.stereotype.Service
 class FiltreringFødselshendelserSteg(
     private val filtreringsreglerService: FiltreringsreglerService,
 ) : BehandlingSteg<NyBehandlingHendelse> {
-
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
         data: NyBehandlingHendelse,
     ): StegType {
         logger.info("Kjører filtreringsregler for behandling ${behandling.id}")
 
-        val fødselshendelsefiltreringResultat = filtreringsreglerService.kjørFiltreringsregler(
-            data,
-            behandling,
-        )
+        val fødselshendelsefiltreringResultat =
+            filtreringsreglerService.kjørFiltreringsregler(
+                data,
+                behandling,
+            )
 
         return if (!fødselshendelsefiltreringResultat.erOppfylt()) {
             StegType.HENLEGG_BEHANDLING
@@ -35,7 +35,6 @@ class FiltreringFødselshendelserSteg(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(FiltreringFødselshendelserSteg::class.java)
     }
 }

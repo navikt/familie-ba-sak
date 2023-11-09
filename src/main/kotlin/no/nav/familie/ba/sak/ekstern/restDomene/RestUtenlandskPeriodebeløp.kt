@@ -21,10 +21,11 @@ data class RestUtenlandskPeriodebeløp(
 ) : AbstractUtfyltStatus<RestUtenlandskPeriodebeløp>() {
     override fun medUtfyltStatus(): RestUtenlandskPeriodebeløp {
         return this.copy(
-            status = utfyltStatus(
-                finnAntallUtfylt(listOf(this.beløp, this.valutakode, this.intervall)),
-                3,
-            ),
+            status =
+                utfyltStatus(
+                    finnAntallUtfylt(listOf(this.beløp, this.valutakode, this.intervall)),
+                    3,
+                ),
         )
     }
 }
@@ -59,13 +60,14 @@ fun UtenlandskPeriodebeløp.tilKalkulertMånedligBeløp(): BigDecimal? {
     return this.intervall.konverterBeløpTilMånedlig(this.beløp)
 }
 
-fun UtenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp() = RestUtenlandskPeriodebeløp(
-    id = this.id,
-    fom = this.fom,
-    tom = this.tom,
-    barnIdenter = this.barnAktører.map { it.aktivFødselsnummer() },
-    beløp = this.beløp,
-    valutakode = this.valutakode,
-    intervall = this.intervall,
-    kalkulertMånedligBeløp = this.kalkulertMånedligBeløp,
-).medUtfyltStatus()
+fun UtenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp() =
+    RestUtenlandskPeriodebeløp(
+        id = this.id,
+        fom = this.fom,
+        tom = this.tom,
+        barnIdenter = this.barnAktører.map { it.aktivFødselsnummer() },
+        beløp = this.beløp,
+        valutakode = this.valutakode,
+        intervall = this.intervall,
+        kalkulertMånedligBeløp = this.kalkulertMånedligBeløp,
+    ).medUtfyltStatus()

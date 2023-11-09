@@ -20,7 +20,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class TilkjentYtelseValideringTest {
-
     val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDate.now())
 
     @Test
@@ -28,22 +27,24 @@ class TilkjentYtelseValideringTest {
         val person1 = tilfeldigPerson()
         val person2 = tilfeldigPerson()
 
-        val andeler1 = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned(),
-                beløp = 2108,
-                person = person1,
-            ),
-        )
-        val forrigeAndeler1 = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned(),
-                beløp = 2108,
-                person = person1,
-            ),
-        )
+        val andeler1 =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(4),
+                    tom = inneværendeMåned(),
+                    beløp = 2108,
+                    person = person1,
+                ),
+            )
+        val forrigeAndeler1 =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(4),
+                    tom = inneværendeMåned(),
+                    beløp = 2108,
+                    person = person1,
+                ),
+            )
 
         Assertions.assertFalse(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
@@ -67,22 +68,24 @@ class TilkjentYtelseValideringTest {
             ),
         )
 
-        val forrigeAndeler2 = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned(),
-                beløp = 1054,
-                person = person2,
-            ),
-        )
-        val andeler2 = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned(),
-                beløp = 2108,
-                person = person2,
-            ),
-        )
+        val forrigeAndeler2 =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(4),
+                    tom = inneværendeMåned(),
+                    beløp = 1054,
+                    person = person2,
+                ),
+            )
+        val andeler2 =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(4),
+                    tom = inneværendeMåned(),
+                    beløp = 2108,
+                    person = person2,
+                ),
+            )
         Assertions.assertTrue(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = forrigeAndeler2,
@@ -110,14 +113,15 @@ class TilkjentYtelseValideringTest {
     fun `Skal returnere false ved uendret tilkjent ytelse andel mer enn 3 år tilbake`() {
         val person1 = tilfeldigPerson()
 
-        val andeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned(),
-                beløp = 2108,
-                person = person1,
-            ),
-        )
+        val andeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(4),
+                    tom = inneværendeMåned(),
+                    beløp = 2108,
+                    person = person1,
+                ),
+            )
 
         Assertions.assertFalse(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
@@ -132,23 +136,25 @@ class TilkjentYtelseValideringTest {
     fun `Skal returnere false ved reduksjon av beløp mer enn 3 år tilbake`() {
         val person1 = tilfeldigPerson()
 
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned(),
-                beløp = 2108,
-                person = person1,
-            ),
-        )
+        val forrigeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(4),
+                    tom = inneværendeMåned(),
+                    beløp = 2108,
+                    person = person1,
+                ),
+            )
 
-        val andeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned(),
-                beløp = 1054,
-                person = person1,
-            ),
-        )
+        val andeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(4),
+                    tom = inneværendeMåned(),
+                    beløp = 1054,
+                    person = person1,
+                ),
+            )
 
         Assertions.assertFalse(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
@@ -170,23 +176,25 @@ class TilkjentYtelseValideringTest {
     fun `Skal returnere false ved endring av tilkjent ytelse andel som er mindre enn 3 år tilbake i tid`() {
         val person1 = tilfeldigPerson()
 
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned().minusYears(2),
-                beløp = 2108,
-                person = person1,
-            ),
-        )
+        val forrigeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(4),
+                    tom = inneværendeMåned().minusYears(2),
+                    beløp = 2108,
+                    person = person1,
+                ),
+            )
 
-        val andeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned().minusYears(2),
-                beløp = 2108,
-                person = person1,
-            ),
-        )
+        val andeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(4),
+                    tom = inneværendeMåned().minusYears(2),
+                    beløp = 2108,
+                    person = person1,
+                ),
+            )
 
         Assertions.assertFalse(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
@@ -224,34 +232,36 @@ class TilkjentYtelseValideringTest {
     @Test
     fun `Skal finne overlappende perioder og returnere periode med første fom og siste tom`() {
         val barn = tilfeldigPerson()
-        val andeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(1),
-                tom = inneværendeMåned(),
-                beløp = 2108,
-                person = barn,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().plusMonths(1),
-                tom = inneværendeMåned().plusYears(1),
-                beløp = 2108,
-                person = barn,
-            ),
-        )
-        val andelerFraTidligere = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(1).plusMonths(1),
-                tom = inneværendeMåned().plusMonths(2),
-                beløp = 2108,
-                person = barn,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().plusMonths(3),
-                tom = inneværendeMåned().plusYears(1).minusMonths(1),
-                beløp = 2108,
-                person = barn,
-            ),
-        )
+        val andeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(1),
+                    tom = inneværendeMåned(),
+                    beløp = 2108,
+                    person = barn,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().plusMonths(1),
+                    tom = inneværendeMåned().plusYears(1),
+                    beløp = 2108,
+                    person = barn,
+                ),
+            )
+        val andelerFraTidligere =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(1).plusMonths(1),
+                    tom = inneværendeMåned().plusMonths(2),
+                    beløp = 2108,
+                    person = barn,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().plusMonths(3),
+                    tom = inneværendeMåned().plusYears(1).minusMonths(1),
+                    beløp = 2108,
+                    person = barn,
+                ),
+            )
 
         Assertions.assertEquals(
             listOf(
@@ -271,42 +281,44 @@ class TilkjentYtelseValideringTest {
     @Test
     fun `Skal håndtere overlappende tidligere andeler fra flere enn 1 behandling`() {
         val barn = tilfeldigPerson()
-        val andeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(1),
-                tom = inneværendeMåned(),
-                beløp = 2108,
-                person = barn,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().plusMonths(1),
-                tom = inneværendeMåned().plusYears(1),
-                beløp = 2108,
-                person = barn,
-            ),
-        )
+        val andeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(1),
+                    tom = inneværendeMåned(),
+                    beløp = 2108,
+                    person = barn,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().plusMonths(1),
+                    tom = inneværendeMåned().plusYears(1),
+                    beløp = 2108,
+                    person = barn,
+                ),
+            )
 
         // 3 Behandlinger med identiske perioder.
-        val andelerFraTidligere = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(1).plusMonths(1),
-                tom = inneværendeMåned().plusMonths(2),
-                beløp = 2108,
-                person = barn,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(1).plusMonths(1),
-                tom = inneværendeMåned().plusMonths(2),
-                beløp = 2108,
-                person = barn,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(1).plusMonths(1),
-                tom = inneværendeMåned().plusMonths(2),
-                beløp = 2108,
-                person = barn,
-            ),
-        )
+        val andelerFraTidligere =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(1).plusMonths(1),
+                    tom = inneværendeMåned().plusMonths(2),
+                    beløp = 2108,
+                    person = barn,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(1).plusMonths(1),
+                    tom = inneværendeMåned().plusMonths(2),
+                    beløp = 2108,
+                    person = barn,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(1).plusMonths(1),
+                    tom = inneværendeMåned().plusMonths(2),
+                    beløp = 2108,
+                    person = barn,
+                ),
+            )
 
         Assertions.assertEquals(
             listOf(
@@ -328,32 +340,34 @@ class TilkjentYtelseValideringTest {
         @Test
         fun `Skal kaste feil hvis person har lagt til andel som ikke hadde utbetaling i forrige behandling`() {
             val person = lagPerson(type = PersonType.BARN)
-            val forrigeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2022, 1),
-                    tom = YearMonth.of(2023, 5),
-                    beløp = 1054,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-            )
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2022, 1),
+                        tom = YearMonth.of(2023, 5),
+                        beløp = 1054,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                )
 
-            val nåværendeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.of(2023, 2),
-                    beløp = 1054,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2023, 3),
-                    tom = YearMonth.of(2023, 5),
-                    beløp = 1083,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-            )
+            val nåværendeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2023, 2),
+                        beløp = 1054,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 3),
+                        tom = YearMonth.of(2023, 5),
+                        beløp = 1083,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                )
 
             assertThatThrownBy {
                 TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
@@ -367,25 +381,27 @@ class TilkjentYtelseValideringTest {
         @Test
         fun `Skal kaste feil hvis person har fått fjernet andel i periode som hadde utbetaling før`() {
             val person = lagPerson(type = PersonType.BARN)
-            val forrigeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.of(2023, 2),
-                    beløp = 1054,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-            )
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2023, 2),
+                        beløp = 1054,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                )
 
-            val nåværendeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2022, 1),
-                    tom = YearMonth.of(2023, 2),
-                    beløp = 1054,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-            )
+            val nåværendeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2022, 1),
+                        tom = YearMonth.of(2023, 2),
+                        beløp = 1054,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                )
 
             assertThatThrownBy {
                 TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
@@ -399,27 +415,29 @@ class TilkjentYtelseValideringTest {
         @Test
         fun `Skal kaste feil hvis person har fått endret prosent på andel`() {
             val person = lagPerson(type = PersonType.BARN)
-            val forrigeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2022, 1),
-                    tom = YearMonth.of(2023, 2),
-                    beløp = 1054,
-                    prosent = BigDecimal(100),
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-            )
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2022, 1),
+                        tom = YearMonth.of(2023, 2),
+                        beløp = 1054,
+                        prosent = BigDecimal(100),
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                )
 
-            val nåværendeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2022, 1),
-                    tom = YearMonth.of(2023, 2),
-                    beløp = 527,
-                    prosent = BigDecimal(50),
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-            )
+            val nåværendeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2022, 1),
+                        tom = YearMonth.of(2023, 2),
+                        beløp = 527,
+                        prosent = BigDecimal(50),
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                )
 
             assertThatThrownBy {
                 TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
@@ -433,32 +451,34 @@ class TilkjentYtelseValideringTest {
         @Test
         fun `Skal ikke kaste feil hvis det eneste som er gjort er å oppdatere sats`() {
             val person = lagPerson(type = PersonType.BARN)
-            val forrigeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2022, 1),
-                    tom = YearMonth.of(2023, 5),
-                    beløp = 1054,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-            )
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2022, 1),
+                        tom = YearMonth.of(2023, 5),
+                        beløp = 1054,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                )
 
-            val nåværendeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2022, 1),
-                    tom = YearMonth.of(2023, 2),
-                    beløp = 1054,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2023, 3),
-                    tom = YearMonth.of(2023, 5),
-                    beløp = 1083,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-            )
+            val nåværendeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2022, 1),
+                        tom = YearMonth.of(2023, 2),
+                        beløp = 1054,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 3),
+                        tom = YearMonth.of(2023, 5),
+                        beløp = 1083,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                )
 
             assertDoesNotThrow {
                 TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
@@ -473,22 +493,23 @@ class TilkjentYtelseValideringTest {
             val person = lagPerson(type = PersonType.BARN)
             val forrigeAndeler = emptyList<AndelTilkjentYtelse>()
 
-            val nåværendeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2022, 1),
-                    tom = YearMonth.of(2023, 2),
-                    beløp = 1054,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2023, 3),
-                    tom = YearMonth.of(2023, 5),
-                    beløp = 1083,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-            )
+            val nåværendeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2022, 1),
+                        tom = YearMonth.of(2023, 2),
+                        beløp = 1054,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 3),
+                        tom = YearMonth.of(2023, 5),
+                        beløp = 1083,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                )
 
             assertThatThrownBy {
                 TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
@@ -503,22 +524,23 @@ class TilkjentYtelseValideringTest {
         fun `Skal kaste feil hvis det eksisterte andeler forrige gang men ikke gjør det nå`() {
             val person = lagPerson(type = PersonType.BARN)
 
-            val forrigeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2022, 1),
-                    tom = YearMonth.of(2023, 2),
-                    beløp = 1054,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2023, 3),
-                    tom = YearMonth.of(2023, 5),
-                    beløp = 1083,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = person.aktør,
-                ),
-            )
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2022, 1),
+                        tom = YearMonth.of(2023, 2),
+                        beløp = 1054,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 3),
+                        tom = YearMonth.of(2023, 5),
+                        beløp = 1083,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = person.aktør,
+                    ),
+                )
 
             val nåværendeAndeler = emptyList<AndelTilkjentYtelse>()
 
@@ -535,25 +557,27 @@ class TilkjentYtelseValideringTest {
         fun `Skal kaste feil hvis det eksisterer andeler i lik periode som forrige gang men av ulik type`() {
             val barn = lagPerson(type = PersonType.BARN)
 
-            val forrigeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2023, 1),
-                    tom = YearMonth.of(2023, 2),
-                    beløp = 1054,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = barn.aktør,
-                ),
-            )
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        beløp = 1054,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = barn.aktør,
+                    ),
+                )
 
-            val nåværendeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2023, 1),
-                    tom = YearMonth.of(2023, 2),
-                    beløp = 1054,
-                    ytelseType = YtelseType.UTVIDET_BARNETRYGD, // barn kan ha utvidet på enslig mindreårig-saker
-                    aktør = barn.aktør,
-                ),
-            )
+            val nåværendeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        beløp = 1054,
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD, // barn kan ha utvidet på enslig mindreårig-saker
+                        aktør = barn.aktør,
+                    ),
+                )
 
             assertThrows<Feil> {
                 TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
@@ -568,25 +592,27 @@ class TilkjentYtelseValideringTest {
             val barn1 = lagPerson(type = PersonType.BARN)
             val barn2 = lagPerson(type = PersonType.BARN)
 
-            val forrigeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2023, 1),
-                    tom = YearMonth.of(2023, 2),
-                    beløp = 1054,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = barn1.aktør,
-                ),
-            )
+            val forrigeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        beløp = 1054,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = barn1.aktør,
+                    ),
+                )
 
-            val nåværendeAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2023, 1),
-                    tom = YearMonth.of(2023, 2),
-                    beløp = 1054,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    aktør = barn2.aktør,
-                ),
-            )
+            val nåværendeAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        beløp = 1054,
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        aktør = barn2.aktør,
+                    ),
+                )
 
             assertThrows<Feil> {
                 TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(

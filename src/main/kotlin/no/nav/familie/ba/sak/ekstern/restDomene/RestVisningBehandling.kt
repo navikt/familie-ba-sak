@@ -23,31 +23,34 @@ class RestVisningBehandling(
     val vedtaksdato: LocalDateTime?,
 )
 
-fun Behandling.tilRestVisningBehandling(vedtaksdato: LocalDateTime?) = RestVisningBehandling(
-    behandlingId = this.id,
-    opprettetTidspunkt = this.opprettetTidspunkt,
-    aktivertTidspunkt = this.aktivertTidspunkt,
-    kategori = this.kategori,
-    underkategori = this.underkategori.tilDto(),
-    aktiv = this.aktiv,
-    årsak = this.opprettetÅrsak,
-    type = this.type,
-    status = this.status,
-    resultat = this.resultat,
-    vedtaksdato = vedtaksdato,
-)
+fun Behandling.tilRestVisningBehandling(vedtaksdato: LocalDateTime?) =
+    RestVisningBehandling(
+        behandlingId = this.id,
+        opprettetTidspunkt = this.opprettetTidspunkt,
+        aktivertTidspunkt = this.aktivertTidspunkt,
+        kategori = this.kategori,
+        underkategori = this.underkategori.tilDto(),
+        aktiv = this.aktiv,
+        årsak = this.opprettetÅrsak,
+        type = this.type,
+        status = this.status,
+        resultat = this.resultat,
+        vedtaksdato = vedtaksdato,
+    )
 
 enum class BehandlingUnderkategoriDTO {
     ORDINÆR,
     UTVIDET,
 }
 
-fun BehandlingUnderkategoriDTO.tilDomene() = when (this) {
-    BehandlingUnderkategoriDTO.ORDINÆR -> BehandlingUnderkategori.ORDINÆR
-    BehandlingUnderkategoriDTO.UTVIDET -> BehandlingUnderkategori.UTVIDET
-}
+fun BehandlingUnderkategoriDTO.tilDomene() =
+    when (this) {
+        BehandlingUnderkategoriDTO.ORDINÆR -> BehandlingUnderkategori.ORDINÆR
+        BehandlingUnderkategoriDTO.UTVIDET -> BehandlingUnderkategori.UTVIDET
+    }
 
-fun BehandlingUnderkategori.tilDto() = when (this) {
-    BehandlingUnderkategori.ORDINÆR -> BehandlingUnderkategoriDTO.ORDINÆR
-    BehandlingUnderkategori.UTVIDET -> BehandlingUnderkategoriDTO.UTVIDET
-}
+fun BehandlingUnderkategori.tilDto() =
+    when (this) {
+        BehandlingUnderkategori.ORDINÆR -> BehandlingUnderkategoriDTO.ORDINÆR
+        BehandlingUnderkategori.UTVIDET -> BehandlingUnderkategoriDTO.UTVIDET
+    }

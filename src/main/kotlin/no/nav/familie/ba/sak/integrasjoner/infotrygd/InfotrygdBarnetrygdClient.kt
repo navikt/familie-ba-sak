@@ -34,8 +34,10 @@ class InfotrygdBarnetrygdClient(
     @Value("\${FAMILIE_BA_INFOTRYGD_API_URL}") private val clientUri: URI,
     @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "infotrygd") {
-
-    fun harLøpendeSakIInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
+    fun harLøpendeSakIInfotrygd(
+        søkersIdenter: List<String>,
+        barnasIdenter: List<String> = emptyList(),
+    ): Boolean {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/lopende-barnetrygd")
 
         val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
@@ -48,7 +50,10 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    fun harÅpenSakIInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
+    fun harÅpenSakIInfotrygd(
+        søkersIdenter: List<String>,
+        barnasIdenter: List<String> = emptyList(),
+    ): Boolean {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/aapen-sak")
 
         val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
@@ -61,7 +66,10 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    fun hentSaker(søkersIdenter: List<String>, barnasIdenter: List<String> = emptyList()): InfotrygdSøkResponse<Sak> {
+    fun hentSaker(
+        søkersIdenter: List<String>,
+        barnasIdenter: List<String> = emptyList(),
+    ): InfotrygdSøkResponse<Sak> {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/saker")
 
         return try {
@@ -104,7 +112,10 @@ class InfotrygdBarnetrygdClient(
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
-    fun hentUtvidetBarnetrygd(personIdent: String, fraDato: YearMonth): BisysUtvidetBarnetrygdResponse {
+    fun hentUtvidetBarnetrygd(
+        personIdent: String,
+        fraDato: YearMonth,
+    ): BisysUtvidetBarnetrygdResponse {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet")
         val body = HentUtvidetBarnetrygdRequest(personIdent, fraDato)
         return try {
@@ -115,7 +126,10 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    fun hentBarnetrygdTilPensjon(personIdent: String, fraDato: LocalDate): BarnetrygdTilPensjonResponse {
+    fun hentBarnetrygdTilPensjon(
+        personIdent: String,
+        fraDato: LocalDate,
+    ): BarnetrygdTilPensjonResponse {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/pensjon")
         val body = BarnetrygdTilPensjonRequest(personIdent, fraDato)
         return try {
@@ -151,7 +165,10 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    fun hentPerioderMedUtvidetBarnetrygdForPersoner(identer: List<String>, år: String): List<SkatteetatenPerioder> {
+    fun hentPerioderMedUtvidetBarnetrygdForPersoner(
+        identer: List<String>,
+        år: String,
+    ): List<SkatteetatenPerioder> {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet/skatteetaten/perioder")
 
         val request = SkatteetatenPerioderRequest(identer = identer, aar = år)
@@ -163,7 +180,10 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    fun harNyligSendtBrevFor(søkersIdenter: List<String>, brevkoder: List<InfotrygdBrevkode>): SendtBrevResponse {
+    fun harNyligSendtBrevFor(
+        søkersIdenter: List<String>,
+        brevkoder: List<InfotrygdBrevkode>,
+    ): SendtBrevResponse {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/brev")
         return try {
             postForEntity(
@@ -201,12 +221,16 @@ class InfotrygdBarnetrygdClient(
         val region: String,
     )
 
-    private fun loggFeil(ex: Exception, uri: URI) {
+    private fun loggFeil(
+        ex: Exception,
+        uri: URI,
+    ) {
         when (ex) {
-            is HttpClientErrorException -> secureLogger.warn(
-                "Http feil mot ${uri.path}: httpkode: ${ex.statusCode}, feilmelding ${ex.message}",
-                ex,
-            )
+            is HttpClientErrorException ->
+                secureLogger.warn(
+                    "Http feil mot ${uri.path}: httpkode: ${ex.statusCode}, feilmelding ${ex.message}",
+                    ex,
+                )
             else -> secureLogger.warn("Feil mot ${uri.path}; melding ${ex.message}", ex)
         }
         logger.warn("Feil mot ${uri.path}.")

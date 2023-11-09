@@ -18,8 +18,10 @@ class BrevKlientMock : BrevKlient(
     restTemplate = RestTemplate(),
     sanityDataset = "",
 ) {
-
-    override fun genererBrev(målform: String, brev: Brev): ByteArray {
+    override fun genererBrev(
+        målform: String,
+        brev: Brev,
+    ): ByteArray {
         return TEST_PDF
     }
 
@@ -33,7 +35,6 @@ class BrevKlientMock : BrevKlient(
 
 @TestConfiguration
 class BrevKlientTestFactory {
-
     @Bean
     @Profile("mock-brev-klient")
     @Primary

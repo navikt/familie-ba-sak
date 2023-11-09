@@ -27,7 +27,6 @@ class KonsistensavstemmingController(
     private val taskService: TaskService,
     private val batchRepository: BatchRepository,
 ) {
-
     @PostMapping(path = ["/dryrun"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Transactional
     fun kjørKonsistensavstemmingUtenSendingTilØkonomi(): ResponseEntity<Ressurs<String>> {
@@ -38,7 +37,9 @@ class KonsistensavstemmingController(
 
     @PostMapping(path = ["/run"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Transactional
-    fun kjørKonsistensavstemming(@RequestBody request: StartKonsistensavstemming): ResponseEntity<Ressurs<String>> {
+    fun kjørKonsistensavstemming(
+        @RequestBody request: StartKonsistensavstemming,
+    ): ResponseEntity<Ressurs<String>> {
         val (transaksjonsId, task) = opprettKonsistensavstemMotOppdragStartTask(true, request.triggerTid)
 
         return ResponseEntity.ok(Ressurs.success("Kjører konsistensavstemming. transaksjonsId=$transaksjonsId callId=${task.callId}"))
@@ -52,20 +53,22 @@ class KonsistensavstemmingController(
     ): Pair<UUID, Task> {
         val transaksjonsId = UUID.randomUUID()
         val batch = batchRepository.saveAndFlush(Batch(kjøreDato = LocalDate.now(), status = KjøreStatus.MANUELL))
-        val task = taskService.save(
-            Task(
-                type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(
-                    KonsistensavstemmingStartTaskDTO(
-                        batchId = batch.id,
-                        avstemmingdato = triggerTid,
-                        transaksjonsId = transaksjonsId,
-                        sendTilØkonomi = sendTilØkonomi,
-                    ),
+        val task =
+            taskService.save(
+                Task(
+                    type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE,
+                    payload =
+                        objectMapper.writeValueAsString(
+                            KonsistensavstemmingStartTaskDTO(
+                                batchId = batch.id,
+                                avstemmingdato = triggerTid,
+                                transaksjonsId = transaksjonsId,
+                                sendTilØkonomi = sendTilØkonomi,
+                            ),
+                        ),
+                    triggerTid = triggerTid,
                 ),
-                triggerTid = triggerTid,
-            ),
-        )
+            )
         return Pair(transaksjonsId, task)
     }
 }

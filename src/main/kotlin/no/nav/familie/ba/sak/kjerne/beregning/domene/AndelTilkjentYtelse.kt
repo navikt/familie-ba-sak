@@ -52,62 +52,44 @@ data class AndelTilkjentYtelse(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandlingId: Long,
-
     @ManyToOne(cascade = [CascadeType.MERGE])
     @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
     var tilkjentYtelse: TilkjentYtelse,
-
     @OneToOne(optional = false)
     @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
-
     @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
     val kalkulertUtbetalingsbeløp: Int,
-
     @Column(name = "stonad_fom", nullable = false, columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
     val stønadFom: YearMonth,
-
     @Column(name = "stonad_tom", nullable = false, columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
     val stønadTom: YearMonth,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     val type: YtelseType,
-
     @Column(name = "sats", nullable = false)
     val sats: Int,
-
     @Column(name = "prosent", nullable = false)
     val prosent: BigDecimal,
-
     // kildeBehandlingId, periodeOffset og forrigePeriodeOffset trengs kun i forbindelse med
     // iverksetting/konsistensavstemming, og settes først ved generering av selve oppdraget mot økonomi.
-
     // Samme informasjon finnes i utbetalingsoppdraget på hver enkelt sak, men for å gjøre operasjonene mer forståelig
     // og enklere å jobbe med har vi valgt å trekke det ut hit.
-
     @Column(name = "kilde_behandling_id")
     var kildeBehandlingId: Long? = null, // Brukes til å finne hvilke behandlinger som skal konsistensavstemmes
-
     @Column(name = "periode_offset")
     var periodeOffset: Long? = null, // Brukes for å koble seg på tidligere kjeder sendt til økonomi
-
     @Column(name = "forrige_periode_offset")
     var forrigePeriodeOffset: Long? = null,
-
     @Column(name = "nasjonalt_periodebelop")
     val nasjonaltPeriodebeløp: Int?,
-
     @Column(name = "differanseberegnet_periodebelop")
     val differanseberegnetPeriodebeløp: Int? = null,
-
 ) : BaseEntitet() {
-
     val periode
         get() = MånedPeriode(stønadFom, stønadTom)
 
@@ -190,9 +172,10 @@ data class AndelTilkjentYtelse(
         return this.kalkulertUtbetalingsbeløp != 0
     }
 
-    fun erAndelSomharNullutbetaling() = this.kalkulertUtbetalingsbeløp == 0 &&
-        this.differanseberegnetPeriodebeløp != null &&
-        this.differanseberegnetPeriodebeløp <= 0
+    fun erAndelSomharNullutbetaling() =
+        this.kalkulertUtbetalingsbeløp == 0 &&
+            this.differanseberegnetPeriodebeløp != null &&
+            this.differanseberegnetPeriodebeløp <= 0
 
     private fun finnRelevanteVilkårsresulaterForRegelverk(
         personResultater: Set<PersonResultat>,
@@ -217,18 +200,20 @@ fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp():
     var andel = sorterteAndeler.firstOrNull()
     sorterteAndeler.forEach { andelTilkjentYtelse ->
         andel = andel ?: andelTilkjentYtelse
-        val back2BackAndelsperiodeMedSammeBeløp = this.singleOrNull {
-            andel!!.stønadTom.plusMonths(1).equals(it.stønadFom) &&
-                andel!!.aktør == it.aktør &&
-                andel!!.kalkulertUtbetalingsbeløp == it.kalkulertUtbetalingsbeløp &&
-                andel!!.type == it.type
-        }
-        andel = if (back2BackAndelsperiodeMedSammeBeløp != null) {
-            andel!!.copy(stønadTom = back2BackAndelsperiodeMedSammeBeløp.stønadTom)
-        } else {
-            sammenslåtteAndeler.add(andel!!)
-            null
-        }
+        val back2BackAndelsperiodeMedSammeBeløp =
+            this.singleOrNull {
+                andel!!.stønadTom.plusMonths(1).equals(it.stønadFom) &&
+                    andel!!.aktør == it.aktør &&
+                    andel!!.kalkulertUtbetalingsbeløp == it.kalkulertUtbetalingsbeløp &&
+                    andel!!.type == it.type
+            }
+        andel =
+            if (back2BackAndelsperiodeMedSammeBeløp != null) {
+                andel!!.copy(stønadTom = back2BackAndelsperiodeMedSammeBeløp.stønadTom)
+            } else {
+                sammenslåtteAndeler.add(andel!!)
+                null
+            }
     }
     if (andel != null) sammenslåtteAndeler.add(andel!!)
     return sammenslåtteAndeler
@@ -237,14 +222,15 @@ fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp():
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>, List<AndelTilkjentYtelseMedEndreteUtbetalinger>> {
     return this.utledSegmenter()
         .fold(mutableMapOf()) { acc, segment ->
-            val andelerForSegment = this.filter {
-                segment.localDateInterval.overlaps(
-                    LocalDateInterval(
-                        it.stønadFom.førsteDagIInneværendeMåned(),
-                        it.stønadTom.sisteDagIInneværendeMåned(),
-                    ),
-                )
-            }
+            val andelerForSegment =
+                this.filter {
+                    segment.localDateInterval.overlaps(
+                        LocalDateInterval(
+                            it.stønadFom.førsteDagIInneværendeMåned(),
+                            it.stønadTom.sisteDagIInneværendeMåned(),
+                        ),
+                    )
+                }
             acc[segment] = andelerForSegment
             acc
         }
@@ -258,28 +244,35 @@ enum class YtelseType(val klassifisering: String) {
 
     fun erKnyttetTilSøker() = this == SMÅBARNSTILLEGG || this == UTVIDET_BARNETRYGD
 
-    fun hentSatsTyper(): List<SatsType> = when (this) {
-        ORDINÆR_BARNETRYGD -> listOf(SatsType.ORBA, SatsType.TILLEGG_ORBA)
-        UTVIDET_BARNETRYGD -> listOf(SatsType.UTVIDET_BARNETRYGD)
-        SMÅBARNSTILLEGG -> listOf(SatsType.SMA)
-    }
-
-    fun tilYtelseType(): YtelsetypeBA = when (this) {
-        ORDINÆR_BARNETRYGD -> YtelsetypeBA.ORDINÆR_BARNETRYGD
-        UTVIDET_BARNETRYGD -> YtelsetypeBA.UTVIDET_BARNETRYGD
-        SMÅBARNSTILLEGG -> YtelsetypeBA.SMÅBARNSTILLEGG
-    }
-
-    fun tilSatsType(person: Person, ytelseDato: LocalDate) = when (this) {
-        ORDINÆR_BARNETRYGD -> if (ytelseDato.toYearMonth() < person.hentSeksårsdag().toYearMonth()) {
-            SatsType.TILLEGG_ORBA
-        } else {
-            SatsType.ORBA
+    fun hentSatsTyper(): List<SatsType> =
+        when (this) {
+            ORDINÆR_BARNETRYGD -> listOf(SatsType.ORBA, SatsType.TILLEGG_ORBA)
+            UTVIDET_BARNETRYGD -> listOf(SatsType.UTVIDET_BARNETRYGD)
+            SMÅBARNSTILLEGG -> listOf(SatsType.SMA)
         }
 
-        UTVIDET_BARNETRYGD -> SatsType.UTVIDET_BARNETRYGD
-        SMÅBARNSTILLEGG -> SatsType.SMA
-    }
+    fun tilYtelseType(): YtelsetypeBA =
+        when (this) {
+            ORDINÆR_BARNETRYGD -> YtelsetypeBA.ORDINÆR_BARNETRYGD
+            UTVIDET_BARNETRYGD -> YtelsetypeBA.UTVIDET_BARNETRYGD
+            SMÅBARNSTILLEGG -> YtelsetypeBA.SMÅBARNSTILLEGG
+        }
+
+    fun tilSatsType(
+        person: Person,
+        ytelseDato: LocalDate,
+    ) =
+        when (this) {
+            ORDINÆR_BARNETRYGD ->
+                if (ytelseDato.toYearMonth() < person.hentSeksårsdag().toYearMonth()) {
+                    SatsType.TILLEGG_ORBA
+                } else {
+                    SatsType.ORBA
+                }
+
+            UTVIDET_BARNETRYGD -> SatsType.UTVIDET_BARNETRYGD
+            SMÅBARNSTILLEGG -> SatsType.SMA
+        }
 }
 
 private fun regelverkavhenigeVilkår(): List<Vilkår> {

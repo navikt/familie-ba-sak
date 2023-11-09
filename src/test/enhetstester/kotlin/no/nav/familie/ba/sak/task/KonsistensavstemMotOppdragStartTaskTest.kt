@@ -117,13 +117,14 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         val avstemmingdato = LocalDateTime.of(2022, 4, 1, 0, 0)
         val batchId = 123L
         val transaksjonsId = UUID.randomUUID()
-        val payload = objectMapper.writeValueAsString(
-            KonsistensavstemmingStartTaskDTO(
-                batchId = batchId,
-                avstemmingdato = avstemmingdato,
-                transaksjonsId = transaksjonsId,
-            ),
-        )
+        val payload =
+            objectMapper.writeValueAsString(
+                KonsistensavstemmingStartTaskDTO(
+                    batchId = batchId,
+                    avstemmingdato = avstemmingdato,
+                    transaksjonsId = transaksjonsId,
+                ),
+            )
         val task = Task(payload = payload, type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE)
         return Pair(transaksjonsId, task)
     }

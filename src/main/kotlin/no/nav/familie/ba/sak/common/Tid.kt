@@ -21,15 +21,25 @@ private val FORMAT_DATO_DAG_MÅNED_ÅR = DateTimeFormatter.ofPattern("d. MMMM yy
 private val FORMAT_DATO_MÅNED_ÅR = DateTimeFormatter.ofPattern("MMMM yyyy", nbLocale)
 
 fun LocalDate.tilddMMyy() = this.format(FORMAT_DATE_DDMMYY)
+
 fun LocalDate.tilyyyyMMdd() = this.format(FORMAT_DATE_ISO)
+
 fun LocalDate.tilKortString() = this.format(FORMAT_DATO_NORSK_KORT_ÅR)
+
 fun LocalDate.tilddMMyyyy() = this.format(FORMAT_DATO_NORSK)
+
 fun YearMonth.tilKortString() = this.format(FORMAT_DATO_MÅNED_ÅR_KORT)
+
 fun LocalDate.tilDagMånedÅr() = this.format(FORMAT_DATO_DAG_MÅNED_ÅR)
+
 fun LocalDate.tilMånedÅr() = this.format(FORMAT_DATO_MÅNED_ÅR)
+
 fun YearMonth.tilMånedÅr() = this.format(FORMAT_DATO_MÅNED_ÅR)
 
-fun erBack2BackIMånedsskifte(tilOgMed: LocalDate?, fraOgMed: LocalDate?): Boolean {
+fun erBack2BackIMånedsskifte(
+    tilOgMed: LocalDate?,
+    fraOgMed: LocalDate?,
+): Boolean {
     return tilOgMed?.erDagenFør(fraOgMed) == true &&
         tilOgMed.toYearMonth() != fraOgMed?.toYearMonth()
 }
@@ -40,9 +50,11 @@ fun LocalDate.sisteDagIForrigeMåned(): LocalDate {
 }
 
 fun LocalDate.toYearMonth() = YearMonth.from(this)
+
 fun YearMonth.toLocalDate() = LocalDate.of(this.year, this.month, 1)
 
 fun YearMonth.førsteDagIInneværendeMåned() = this.atDay(1)
+
 fun YearMonth.sisteDagIInneværendeMåned() = this.atEndOfMonth()
 
 fun LocalDate.forrigeMåned(): YearMonth {
@@ -65,7 +77,10 @@ fun inneværendeMåned(): YearMonth {
     return now().toYearMonth()
 }
 
-fun senesteDatoAv(dato1: LocalDate, dato2: LocalDate): LocalDate {
+fun senesteDatoAv(
+    dato1: LocalDate,
+    dato2: LocalDate,
+): LocalDate {
     return maxOf(dato1, dato2)
 }
 
@@ -76,6 +91,7 @@ fun LocalDate.sisteDagIMåned(): LocalDate {
 }
 
 fun LocalDate.førsteDagINesteMåned() = this.plusMonths(1).withDayOfMonth(1)
+
 fun LocalDate.førsteDagIInneværendeMåned() = this.withDayOfMonth(1)
 
 fun LocalDate.erSenereEnnInneværendeMåned(): Boolean = this.isAfter(now().sisteDagIMåned())
@@ -157,6 +173,7 @@ fun Periode.tilMånedPeriode(): MånedPeriode = MånedPeriode(fom = this.fom.toY
 data class Periode(val fom: LocalDate, val tom: LocalDate)
 
 data class MånedPeriode(val fom: YearMonth, val tom: YearMonth)
+
 data class NullablePeriode(val fom: LocalDate?, val tom: LocalDate?) {
     fun tilNullableMånedPeriode() = NullableMånedPeriode(fom?.toYearMonth(), tom?.toYearMonth())
 }
@@ -194,17 +211,19 @@ fun lagOgValiderPeriodeFraVilkår(
     }
 }
 
-fun RestVilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
-    this.periodeFom,
-    this.periodeTom,
-    this.erEksplisittAvslagPåSøknad,
-)
+fun RestVilkårResultat.toPeriode(): Periode =
+    lagOgValiderPeriodeFraVilkår(
+        this.periodeFom,
+        this.periodeTom,
+        this.erEksplisittAvslagPåSøknad,
+    )
 
-fun VilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
-    this.periodeFom,
-    this.periodeTom,
-    this.erEksplisittAvslagPåSøknad,
-)
+fun VilkårResultat.toPeriode(): Periode =
+    lagOgValiderPeriodeFraVilkår(
+        this.periodeFom,
+        this.periodeTom,
+        this.erEksplisittAvslagPåSøknad,
+    )
 
 fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean {
     return when {
@@ -228,26 +247,28 @@ fun slåSammenOverlappendePerioder(input: Collection<DatoIntervallEntitet>): Lis
     val result = mutableListOf<DatoIntervallEntitet>()
     var prevIntervall: DatoIntervallEntitet? = null
     for ((key, value) in map) {
-        prevIntervall = if (prevIntervall != null && prevIntervall.erInnenfor(key)) {
-            val fom = prevIntervall.fom
-            val tom = if (prevIntervall.tom == null) {
-                null
+        prevIntervall =
+            if (prevIntervall != null && prevIntervall.erInnenfor(key)) {
+                val fom = prevIntervall.fom
+                val tom =
+                    if (prevIntervall.tom == null) {
+                        null
+                    } else {
+                        if (value != null && prevIntervall.tom!!.isAfter(value)) {
+                            prevIntervall.tom
+                        } else {
+                            value
+                        }
+                    }
+                result.remove(prevIntervall)
+                val nyttIntervall = DatoIntervallEntitet(fom, tom)
+                result.add(nyttIntervall)
+                nyttIntervall
             } else {
-                if (value != null && prevIntervall.tom!!.isAfter(value)) {
-                    prevIntervall.tom
-                } else {
-                    value
-                }
+                val nyttIntervall = DatoIntervallEntitet(key, value)
+                result.add(nyttIntervall)
+                nyttIntervall
             }
-            result.remove(prevIntervall)
-            val nyttIntervall = DatoIntervallEntitet(fom, tom)
-            result.add(nyttIntervall)
-            nyttIntervall
-        } else {
-            val nyttIntervall = DatoIntervallEntitet(key, value)
-            result.add(nyttIntervall)
-            nyttIntervall
-        }
     }
     return result
 }
@@ -257,7 +278,6 @@ class YearMonthIterator(
     val tilOgMedMåned: YearMonth,
     val hoppMåneder: Long,
 ) : Iterator<YearMonth> {
-
     private var gjeldendeMåned = startMåned
 
     override fun hasNext() =
@@ -282,7 +302,6 @@ class YearMonthProgression(
     val hoppMåneder: Long = 1,
 ) : Iterable<YearMonth>,
     ClosedRange<YearMonth> {
-
     override fun iterator(): Iterator<YearMonth> =
         YearMonthIterator(start, endInclusive, hoppMåneder)
 

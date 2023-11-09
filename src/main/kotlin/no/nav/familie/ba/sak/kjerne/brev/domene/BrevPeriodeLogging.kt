@@ -18,9 +18,7 @@ data class BrevPeriodeForLogging(
     val vedtaksperiodetype: Vedtaksperiodetype,
     val begrunnelser: List<BrevBegrunnelseGrunnlagForLogging>,
     val fritekster: List<String>,
-
     val personerPåBehandling: List<BrevPeriodePersonForLogging>,
-
     val uregistrerteBarn: List<MinimertUregistrertBarn>,
     val erFørsteVedtaksperiodePåFagsak: Boolean = false,
     val brevMålform: Målform,

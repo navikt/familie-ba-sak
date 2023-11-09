@@ -19,7 +19,6 @@ import java.util.Optional
 
 @Repository
 interface FagsakRepository : JpaRepository<Fagsak, Long> {
-
     @Lock(LockModeType.PESSIMISTIC_FORCE_INCREMENT)
     fun save(fagsak: Fagsak): Fagsak
 
@@ -32,11 +31,17 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør = :aktør and f.type = :type and f.arkivert = false")
-    fun finnFagsakForAktør(aktør: Aktør, type: FagsakType = FagsakType.NORMAL): Fagsak?
+    fun finnFagsakForAktør(
+        aktør: Aktør,
+        type: FagsakType = FagsakType.NORMAL,
+    ): Fagsak?
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør = :aktør and f.type = 'INSTITUSJON' and f.status <> 'AVSLUTTET' and f.arkivert = false and f.institusjon.orgNummer = :orgNummer")
-    fun finnFagsakForInstitusjonOgOrgnummer(aktør: Aktør, orgNummer: String): Fagsak?
+    fun finnFagsakForInstitusjonOgOrgnummer(
+        aktør: Aktør,
+        orgNummer: String,
+    ): Fagsak?
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør = :aktør and f.arkivert = false")
@@ -61,7 +66,10 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 ) AND f.status = 'LØPENDE' AND f.arkivert = false""",
         nativeQuery = true,
     )
-    fun finnLøpendeFagsakerForSatsendring(satsTidspunkt: LocalDate, page: Pageable): Page<Long>
+    fun finnLøpendeFagsakerForSatsendring(
+        satsTidspunkt: LocalDate,
+        page: Pageable,
+    ): Page<Long>
 
     @Query(
         value = """WITH sisteiverksatte AS (
@@ -103,7 +111,10 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         )
         """,
     )
-    fun finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): Set<Fagsak>
+    fun finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(
+        fom: LocalDate,
+        tom: LocalDate,
+    ): Set<Fagsak>
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT count(*) from Fagsak where arkivert = false")
@@ -134,7 +145,10 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         nativeQuery = true,
     )
     @Timed
-    fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: LocalDateTime, tom: LocalDateTime): List<UtvidetSkatt>
+    fun finnFagsakerMedUtvidetBarnetrygdInnenfor(
+        fom: LocalDateTime,
+        tom: LocalDateTime,
+    ): List<UtvidetSkatt>
 
     @Query(
         """

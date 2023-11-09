@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class TidslinjeTest {
-
     @Test
     fun `skal validere at perioder ikke kan ha fra-og-med etter til-og-med`() {
         assertThatExceptionOfType(TidslinjeFeilException::class.java).isThrownBy {
@@ -98,14 +97,16 @@ internal class TidslinjeTest {
 
     @Test
     fun `Skal kunne kombinere tidslinje med uendelighet der det uendelige tidspunktet er satt tilbake i tid`() {
-        val tidslinjeMedUendelighet = listOf(
-            Periode(jan(2020), des(2020), 'A'),
-            Periode(jan(2021), feb(1999).somUendeligLengeTil(), 'B'),
-        ).tilTidslinje()
+        val tidslinjeMedUendelighet =
+            listOf(
+                Periode(jan(2020), des(2020), 'A'),
+                Periode(jan(2021), feb(1999).somUendeligLengeTil(), 'B'),
+            ).tilTidslinje()
 
-        val kombinertMedSegSelv = tidslinjeMedUendelighet.kombinerMed(tidslinjeMedUendelighet) { v, h ->
-            "$v$h"
-        }
+        val kombinertMedSegSelv =
+            tidslinjeMedUendelighet.kombinerMed(tidslinjeMedUendelighet) { v, h ->
+                "$v$h"
+            }
 
         Assertions.assertThat(kombinertMedSegSelv).isEqualTo(
             listOf(
@@ -117,10 +118,11 @@ internal class TidslinjeTest {
 
     @Test
     fun `tidsrom på liste av tidslinjer skal lage liste med alle tidspunkter opp til uendelig tidspunkt`() {
-        val tidslinjeMedUendelighet = listOf(
-            Periode(nov(2020), des(2020), 'A'),
-            Periode(jan(2021), jan(1999).somUendeligLengeTil(), 'B'),
-        ).tilTidslinje()
+        val tidslinjeMedUendelighet =
+            listOf(
+                Periode(nov(2020), des(2020), 'A'),
+                Periode(jan(2021), jan(1999).somUendeligLengeTil(), 'B'),
+            ).tilTidslinje()
 
         Assertions.assertThat(tidsrom(tidslinjeMedUendelighet).toList()).isEqualTo(
             listOf(nov(2020), des(2020), jan(1999).somUendeligLengeTil()),
@@ -129,10 +131,11 @@ internal class TidslinjeTest {
 
     @Test
     fun `tidsrom på tidslinje skal lage liste med alle tidspunkter opp til uendelig tidspunkt`() {
-        val tidslinjeMedUendelighet = listOf(
-            Periode(feb(2023), apr(2023), 'A'),
-            Periode(mai(2023), mai(2022).somUendeligLengeTil(), 'B'),
-        ).tilTidslinje()
+        val tidslinjeMedUendelighet =
+            listOf(
+                Periode(feb(2023), apr(2023), 'A'),
+                Periode(mai(2023), mai(2022).somUendeligLengeTil(), 'B'),
+            ).tilTidslinje()
 
         Assertions.assertThat(tidslinjeMedUendelighet.tidsrom().toList()).isEqualTo(
             listOf(feb(2023), mar(2023), apr(2023), mai(2023).somUendeligLengeTil()),

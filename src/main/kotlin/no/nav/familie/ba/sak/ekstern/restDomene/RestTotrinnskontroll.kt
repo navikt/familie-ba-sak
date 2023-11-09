@@ -10,9 +10,10 @@ data class RestTotrinnskontroll(
     val opprettetTidspunkt: LocalDateTime,
 )
 
-fun Totrinnskontroll.tilRestTotrinnskontroll() = RestTotrinnskontroll(
-    saksbehandler = this.saksbehandler,
-    beslutter = this.beslutter,
-    godkjent = this.godkjent,
-    opprettetTidspunkt = this.opprettetTidspunkt,
-)
+fun Totrinnskontroll.tilRestTotrinnskontroll() =
+    RestTotrinnskontroll(
+        saksbehandler = this.saksbehandler,
+        beslutter = this.beslutter,
+        godkjent = this.godkjent,
+        opprettetTidspunkt = this.opprettetTidspunkt,
+    )

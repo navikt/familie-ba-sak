@@ -9,9 +9,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class DeserializeTest {
-    private val mapper = ObjectMapper()
-        .registerKotlinModule()
-        .registerModule(JavaTimeModule())
+    private val mapper =
+        ObjectMapper()
+            .registerKotlinModule()
+            .registerModule(JavaTimeModule())
 
     @Test
     fun testDeserializaPersoninfo() {
@@ -23,12 +24,13 @@ class DeserializeTest {
     }
 
     private fun getPersoninfo(kjønn: String): PersonInfo {
-        val json = """
+        val json =
+            """
             {
                 "kjønn": "$kjønn",
                 "fødselsdato": "1982-08-05"
               }
-        """.trimIndent()
+            """.trimIndent()
         return mapper.readValue(json, PersonInfo::class.java)
     }
 }

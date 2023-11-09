@@ -20,40 +20,44 @@ class SentryConfiguration(
         Sentry.init { options ->
             options.dsn = if (enabled) dsn else "" // Tom streng betryr at Sentry er disabled
             options.environment = environment
-            options.beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
-                Sentry.configureScope { scope ->
-                    scope.user = User().apply {
-                        id = SikkerhetContext.hentSaksbehandler()
-                        email = SikkerhetContext.hentSaksbehandlerEpost()
-                        username = SikkerhetContext.hentSaksbehandler()
+            options.beforeSend =
+                SentryOptions.BeforeSendCallback { event, _ ->
+                    Sentry.configureScope { scope ->
+                        scope.user =
+                            User().apply {
+                                id = SikkerhetContext.hentSaksbehandler()
+                                email = SikkerhetContext.hentSaksbehandlerEpost()
+                                username = SikkerhetContext.hentSaksbehandler()
+                            }
                     }
+
+                    val mostSpecificThrowable =
+                        if (event.throwable != null) NestedExceptionUtils.getMostSpecificCause(event.throwable!!) else event.throwable
+                    val metodeSomFeiler = finnMetodeSomFeiler(mostSpecificThrowable)
+                    val prosess = MDC.get("prosess")
+
+                    event.setTag("metodeSomFeier", metodeSomFeiler)
+                    event.setTag("bruker", SikkerhetContext.hentSaksbehandlerEpost())
+                    event.setTag("kibanalenke", hentKibanalenke(MDC.get("callId")))
+                    event.setTag("prosess", prosess)
+
+                    event.fingerprints =
+                        listOf(
+                            "{{ default }}",
+                            prosess,
+                            event.transaction,
+                            mostSpecificThrowable?.message,
+                        )
+
+                    if (metodeSomFeiler != UKJENT_METODE_SOM_FEILER) {
+                        event.fingerprints = (event.fingerprints ?: emptyList()) +
+                            listOf(
+                                metodeSomFeiler,
+                            )
+                    }
+
+                    event
                 }
-
-                val mostSpecificThrowable =
-                    if (event.throwable != null) NestedExceptionUtils.getMostSpecificCause(event.throwable!!) else event.throwable
-                val metodeSomFeiler = finnMetodeSomFeiler(mostSpecificThrowable)
-                val prosess = MDC.get("prosess")
-
-                event.setTag("metodeSomFeier", metodeSomFeiler)
-                event.setTag("bruker", SikkerhetContext.hentSaksbehandlerEpost())
-                event.setTag("kibanalenke", hentKibanalenke(MDC.get("callId")))
-                event.setTag("prosess", prosess)
-
-                event.fingerprints = listOf(
-                    "{{ default }}",
-                    prosess,
-                    event.transaction,
-                    mostSpecificThrowable?.message,
-                )
-
-                if (metodeSomFeiler != UKJENT_METODE_SOM_FEILER) {
-                    event.fingerprints = (event.fingerprints ?: emptyList()) + listOf(
-                        metodeSomFeiler,
-                    )
-                }
-
-                event
-            }
         }
     }
 
@@ -61,10 +65,11 @@ class SentryConfiguration(
         "https://logs.adeo.no/app/discover#/?_g=(time:(from:now-1M,to:now))&_a=(filters:!((query:(match_phrase:(x_callId:'$callId')))))"
 
     fun finnMetodeSomFeiler(e: Throwable?): String {
-        val firstElement = e?.stackTrace?.firstOrNull {
-            it.className.startsWith("no.nav.familie.ba.sak") &&
-                !it.className.contains("$")
-        }
+        val firstElement =
+            e?.stackTrace?.firstOrNull {
+                it.className.startsWith("no.nav.familie.ba.sak") &&
+                    !it.className.contains("$")
+            }
         if (firstElement != null) {
             val className = firstElement.className.split(".").lastOrNull()
             return "$className::${firstElement.methodName}(${firstElement.lineNumber})"

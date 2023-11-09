@@ -48,19 +48,20 @@ class SaksstatistikkService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val settPåVentService: SettPåVentService,
 ) {
-
     fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val forrigeBehandlingId = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-            .takeIf { erRevurderingEllerTekniskBehandling(behandling) }?.id
+        val forrigeBehandlingId =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+                .takeIf { erRevurderingEllerTekniskBehandling(behandling) }?.id
 
-        val datoMottatt = when (behandling.opprettetÅrsak) {
-            BehandlingÅrsak.SØKNAD -> {
-                behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId) ?: behandling.opprettetTidspunkt
+        val datoMottatt =
+            when (behandling.opprettetÅrsak) {
+                BehandlingÅrsak.SØKNAD -> {
+                    behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId) ?: behandling.opprettetTidspunkt
+                }
+
+                else -> behandling.opprettetTidspunkt
             }
-
-            else -> behandling.opprettetTidspunkt
-        }
 
         val behandlendeEnhetsKode =
             arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
@@ -81,15 +82,17 @@ class SaksstatistikkService(
             sakId = behandling.fagsak.id.toString(),
             behandlingType = behandling.type.name,
             behandlingStatus = behandling.status.name,
-            behandlingKategori = when (behandling.underkategori) { // Gjøres pga. tilpasning til DVH-modell
-                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET ->
-                    behandling.underkategori.name
-            },
-            behandlingUnderkategori = when (behandling.fagsak.type) { // <-'
-                NORMAL -> null
-                BARN_ENSLIG_MINDREÅRIG -> ENSLIG_MINDREÅRIG_KODE
-                INSTITUSJON -> INSTITUSJON.name
-            },
+            behandlingKategori =
+                when (behandling.underkategori) { // Gjøres pga. tilpasning til DVH-modell
+                    BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET ->
+                        behandling.underkategori.name
+                },
+            behandlingUnderkategori =
+                when (behandling.fagsak.type) { // <-'
+                    NORMAL -> null
+                    BARN_ENSLIG_MINDREÅRIG -> ENSLIG_MINDREÅRIG_KODE
+                    INSTITUSJON -> INSTITUSJON.name
+                },
             behandlingAarsak = behandling.opprettetÅrsak.name,
             automatiskBehandlet = behandling.skalBehandlesAutomatisk,
             utenlandstilsnitt = behandling.kategori.name, // Gjøres pga. tilpasning til DVH-modell
@@ -131,21 +134,22 @@ class SaksstatistikkService(
 
         var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE
 
-        val deltagere = if (aktivBehandling != null) {
-            val personer = persongrunnlagService.hentAktiv(behandlingId = aktivBehandling.id)?.søkerOgBarn ?: emptySet()
-            personer.map {
-                if (it.type == PersonType.SØKER) {
-                    landkodeSøker = hentLandkode(it)
+        val deltagere =
+            if (aktivBehandling != null) {
+                val personer = persongrunnlagService.hentAktiv(behandlingId = aktivBehandling.id)?.søkerOgBarn ?: emptySet()
+                personer.map {
+                    if (it.type == PersonType.SØKER) {
+                        landkodeSøker = hentLandkode(it)
+                    }
+                    AktørDVH(
+                        it.aktør.aktørId.toLong(),
+                        it.type.name,
+                    )
                 }
-                AktørDVH(
-                    it.aktør.aktørId.toLong(),
-                    it.type.name,
-                )
+            } else {
+                landkodeSøker = hentLandkode(fagsak.aktør)
+                listOf(AktørDVH(fagsak.aktør.aktørId.toLong(), PersonType.SØKER.name))
             }
-        } else {
-            landkodeSøker = hentLandkode(fagsak.aktør)
-            listOf(AktørDVH(fagsak.aktør.aktørId.toLong(), PersonType.SØKER.name))
-        }
 
         return SakDVH(
             funksjonellTid = ZonedDateTime.now(),
@@ -213,7 +217,6 @@ class SaksstatistikkService(
     }
 
     companion object {
-
         val TIMEZONE: ZoneId = ZoneId.systemDefault()
         val ENSLIG_MINDREÅRIG_KODE = "ENSLIG_MINDREÅRIG"
     }

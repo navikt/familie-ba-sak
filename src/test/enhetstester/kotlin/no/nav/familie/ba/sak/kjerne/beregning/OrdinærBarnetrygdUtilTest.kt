@@ -28,16 +28,16 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class OrdinærBarnetrygdUtilTest {
-
     @Test
     fun `Skal lage riktig tidslinje med rett til prosent for person med start og stopp av delt bosted`() {
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(9))
         val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
-        val personResultat = PersonResultat(
-            vilkårsvurdering = vilkårsvurdering,
-            aktør = barn.aktør,
-        )
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = barn.aktør,
+            )
 
         val generellVilkårFom = LocalDate.now().minusYears(3)
         val borMedSøkerVilkårFom = LocalDate.now().minusYears(2)
@@ -47,51 +47,54 @@ class OrdinærBarnetrygdUtilTest {
         val rettTilDeltTom = borMedSøkerVilkårTom.toYearMonth()
         val månedFørFylte18År = barn.fødselsdato.plusYears(18).forrigeMåned()
 
-        val vilkårResulater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).mapNotNull {
-            if (it == Vilkår.BOR_MED_SØKER) {
-                null
-            } else {
+        val vilkårResulater =
+            Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).mapNotNull {
+                if (it == Vilkår.BOR_MED_SØKER) {
+                    null
+                } else {
+                    lagVilkårResultat(
+                        personResultat = personResultat,
+                        periodeFom = if (it.gjelderAlltidFraBarnetsFødselsdato()) barn.fødselsdato else generellVilkårFom,
+                        periodeTom = null,
+                        resultat = Resultat.OPPFYLT,
+                        vilkårType = it,
+                    )
+                }
+            }.toSet()
+
+        val borMedSøkerVilkår =
+            listOf(
                 lagVilkårResultat(
                     personResultat = personResultat,
-                    periodeFom = if (it.gjelderAlltidFraBarnetsFødselsdato()) barn.fødselsdato else generellVilkårFom,
+                    periodeFom = generellVilkårFom,
+                    periodeTom = borMedSøkerVilkårFom.minusMonths(1).sisteDagIMåned(),
+                    resultat = Resultat.OPPFYLT,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                ),
+                lagVilkårResultat(
+                    personResultat = personResultat,
+                    periodeFom = borMedSøkerVilkårFom.førsteDagIInneværendeMåned(),
+                    periodeTom = borMedSøkerVilkårTom.sisteDagIMåned(),
+                    resultat = Resultat.OPPFYLT,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                ),
+                lagVilkårResultat(
+                    personResultat = personResultat,
+                    periodeFom = borMedSøkerVilkårTom.plusMonths(1).førsteDagIInneværendeMåned(),
                     periodeTom = null,
                     resultat = Resultat.OPPFYLT,
-                    vilkårType = it,
-                )
-            }
-        }.toSet()
-
-        val borMedSøkerVilkår = listOf(
-            lagVilkårResultat(
-                personResultat = personResultat,
-                periodeFom = generellVilkårFom,
-                periodeTom = borMedSøkerVilkårFom.minusMonths(1).sisteDagIMåned(),
-                resultat = Resultat.OPPFYLT,
-                vilkårType = Vilkår.BOR_MED_SØKER,
-            ),
-            lagVilkårResultat(
-                personResultat = personResultat,
-                periodeFom = borMedSøkerVilkårFom.førsteDagIInneværendeMåned(),
-                periodeTom = borMedSøkerVilkårTom.sisteDagIMåned(),
-                resultat = Resultat.OPPFYLT,
-                vilkårType = Vilkår.BOR_MED_SØKER,
-                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
-            ),
-            lagVilkårResultat(
-                personResultat = personResultat,
-                periodeFom = borMedSøkerVilkårTom.plusMonths(1).førsteDagIInneværendeMåned(),
-                periodeTom = null,
-                resultat = Resultat.OPPFYLT,
-                vilkårType = Vilkår.BOR_MED_SØKER,
-            ),
-        )
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                ),
+            )
 
         personResultat.setSortedVilkårResultater(vilkårResulater + borMedSøkerVilkår)
 
-        val tidslinje = personResultat.tilTidslinjeMedRettTilProsentForPerson(
-            person = barn,
-            fagsakType = FagsakType.NORMAL,
-        )
+        val tidslinje =
+            personResultat.tilTidslinjeMedRettTilProsentForPerson(
+                person = barn,
+                fagsakType = FagsakType.NORMAL,
+            )
 
         val perioder = tidslinje.perioder().toList()
 
@@ -124,60 +127,13 @@ class OrdinærBarnetrygdUtilTest {
     @Test
     fun `Skal returnere 50 prosent hvis vilkårsvurderingen har delt bosted i perioden`() {
         val barn = lagPerson(type = PersonType.BARN)
-        val personResultat = PersonResultat(
-            vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
-            aktør = barn.aktør,
-        )
-        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).map {
-            lagVilkårResultat(
-                vilkårType = it,
-                periodeFom = LocalDate.now().minusMonths(5),
-                periodeTom = null,
-                resultat = Resultat.OPPFYLT,
-                utdypendeVilkårsvurderinger = if (it == Vilkår.BOR_MED_SØKER) listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) else emptyList(),
-                personResultat = personResultat,
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+                aktør = barn.aktør,
             )
-        }
-
-        val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
-
-        assertEquals(BigDecimal(50), prosent)
-    }
-
-    @Test
-    fun `Skal returnere 100 prosent hvis vilkårsvurderingen ikke har delt bosted i perioden`() {
-        val barn = lagPerson(type = PersonType.BARN)
-        val personResultat = PersonResultat(
-            vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
-            aktør = barn.aktør,
-        )
-        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).map {
-            lagVilkårResultat(
-                vilkårType = it,
-                periodeFom = LocalDate.now().minusMonths(5),
-                periodeTom = null,
-                resultat = Resultat.OPPFYLT,
-                utdypendeVilkårsvurderinger = emptyList(),
-                personResultat = personResultat,
-            )
-        }
-
-        val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
-
-        assertEquals(BigDecimal(100), prosent)
-    }
-
-    @Test
-    fun `Skal returnere null hvis ikke alle vilkår for barn er oppfylt`() {
-        val barn = lagPerson(type = PersonType.BARN)
-        val personResultat = PersonResultat(
-            vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
-            aktør = barn.aktør,
-        )
-        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).mapNotNull {
-            if (it == Vilkår.LOVLIG_OPPHOLD) {
-                null
-            } else {
+        val vilkårResultater =
+            Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).map {
                 lagVilkårResultat(
                     vilkårType = it,
                     periodeFom = LocalDate.now().minusMonths(5),
@@ -187,24 +143,22 @@ class OrdinærBarnetrygdUtilTest {
                     personResultat = personResultat,
                 )
             }
-        }
 
         val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
 
-        assertEquals(null, prosent)
+        assertEquals(BigDecimal(50), prosent)
     }
 
     @Test
-    fun `Skal returnere null hvis ikke alle vilkår for søker er oppfylt`() {
-        val søker = lagPerson(type = PersonType.SØKER)
-        val personResultat = PersonResultat(
-            vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
-            aktør = søker.aktør,
-        )
-        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).mapNotNull {
-            if (it == Vilkår.LOVLIG_OPPHOLD) {
-                null
-            } else {
+    fun `Skal returnere 100 prosent hvis vilkårsvurderingen ikke har delt bosted i perioden`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+                aktør = barn.aktør,
+            )
+        val vilkårResultater =
+            Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).map {
                 lagVilkårResultat(
                     vilkårType = it,
                     periodeFom = LocalDate.now().minusMonths(5),
@@ -214,7 +168,64 @@ class OrdinærBarnetrygdUtilTest {
                     personResultat = personResultat,
                 )
             }
-        }
+
+        val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
+
+        assertEquals(BigDecimal(100), prosent)
+    }
+
+    @Test
+    fun `Skal returnere null hvis ikke alle vilkår for barn er oppfylt`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+                aktør = barn.aktør,
+            )
+        val vilkårResultater =
+            Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).mapNotNull {
+                if (it == Vilkår.LOVLIG_OPPHOLD) {
+                    null
+                } else {
+                    lagVilkårResultat(
+                        vilkårType = it,
+                        periodeFom = LocalDate.now().minusMonths(5),
+                        periodeTom = null,
+                        resultat = Resultat.OPPFYLT,
+                        utdypendeVilkårsvurderinger = if (it == Vilkår.BOR_MED_SØKER) listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) else emptyList(),
+                        personResultat = personResultat,
+                    )
+                }
+            }
+
+        val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
+
+        assertEquals(null, prosent)
+    }
+
+    @Test
+    fun `Skal returnere null hvis ikke alle vilkår for søker er oppfylt`() {
+        val søker = lagPerson(type = PersonType.SØKER)
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+                aktør = søker.aktør,
+            )
+        val vilkårResultater =
+            Vilkår.hentVilkårFor(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).mapNotNull {
+                if (it == Vilkår.LOVLIG_OPPHOLD) {
+                    null
+                } else {
+                    lagVilkårResultat(
+                        vilkårType = it,
+                        periodeFom = LocalDate.now().minusMonths(5),
+                        periodeTom = null,
+                        resultat = Resultat.OPPFYLT,
+                        utdypendeVilkårsvurderinger = emptyList(),
+                        personResultat = personResultat,
+                    )
+                }
+            }
 
         val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL)
 

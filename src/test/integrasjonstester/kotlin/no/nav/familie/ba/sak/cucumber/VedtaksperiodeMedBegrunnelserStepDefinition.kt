@@ -29,7 +29,6 @@ import org.assertj.core.api.Assertions
 import java.time.LocalDate
 
 class VedtaksperiodeMedBegrunnelserStepDefinition {
-
     private var fagsaker: Map<Long, Fagsak> = emptyMap()
     private var behandlinger = mutableMapOf<Long, Behandling>()
     private var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
@@ -90,10 +89,14 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
      * Mulige verdier: | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag |
      */
     @Og("legg til nye vilkårresultater for behandling {}")
-    fun `legg til nye vilkårresultater for behandling`(behandlingId: Long, dataTable: DataTable) {
+    fun `legg til nye vilkårresultater for behandling`(
+        behandlingId: Long,
+        dataTable: DataTable,
+    ) {
         val vilkårResultaterPerPerson = dataTable.asMaps().groupBy { parseAktørId(it) }
-        val personResultatForBehandling = personResultater[behandlingId]
-            ?: error("Finner ikke personresultater for behandling med id $behandlingId")
+        val personResultatForBehandling =
+            personResultater[behandlingId]
+                ?: error("Finner ikke personresultater for behandling med id $behandlingId")
 
         personResultater[behandlingId] =
             leggTilVilkårResultatPåPersonResultat(personResultatForBehandling, vilkårResultaterPerPerson, behandlingId)
@@ -104,10 +107,11 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
      */
     @Og("med overstyrt endringstidspunkt")
     fun settEndringstidspunkt(dataTable: DataTable) {
-        overstyrteEndringstidspunkt = dataTable.asMaps().associate { rad ->
-            parseLong(Domenebegrep.BEHANDLING_ID, rad) to
-                parseDato(DomenebegrepVedtaksperiodeMedBegrunnelser.ENDRINGSTIDSPUNKT, rad)
-        }
+        overstyrteEndringstidspunkt =
+            dataTable.asMaps().associate { rad ->
+                parseLong(Domenebegrep.BEHANDLING_ID, rad) to
+                    parseDato(DomenebegrepVedtaksperiodeMedBegrunnelser.ENDRINGSTIDSPUNKT, rad)
+            }
     }
 
     /**
@@ -141,12 +145,13 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
      */
     @Og("med overgangsstønad")
     fun `med overgangsstønad`(dataTable: DataTable) {
-        overgangsstønad = lagOvergangsstønad(
-            dataTable = dataTable,
-            persongrunnlag = persongrunnlag,
-            tidligereBehandlinger = behandlingTilForrigeBehandling,
-            dagensDato = LocalDate.now(),
-        )
+        overgangsstønad =
+            lagOvergangsstønad(
+                dataTable = dataTable,
+                persongrunnlag = persongrunnlag,
+                tidligereBehandlinger = behandlingTilForrigeBehandling,
+                dagensDato = LocalDate.now(),
+            )
     }
 
     @Og("med uregistrerte barn")
@@ -158,31 +163,34 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     fun `generer vedtaksperiode med begrunnelse`(behandlingId: Long) {
         gjeldendeBehandlingId = behandlingId
 
-        vedtaksperioderMedBegrunnelser = lagVedtaksPerioder(
-            behandlingId = behandlingId,
-            vedtaksListe = vedtaksliste,
-            behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
-            personGrunnlag = persongrunnlag,
-            personResultater = personResultater,
-            kompetanser = kompetanser,
-            endredeUtbetalinger = endredeUtbetalinger,
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
-            overstyrteEndringstidspunkt = overstyrteEndringstidspunkt,
-            overgangsstønad = overgangsstønad,
-            uregistrerteBarn = uregistrerteBarn,
-            nåDato = dagensDato,
-            valutakurs = valutakurs,
-            utenlandskPeriodebeløp = utenlandskPeriodebeløp,
-        )
+        vedtaksperioderMedBegrunnelser =
+            lagVedtaksPerioder(
+                behandlingId = behandlingId,
+                vedtaksListe = vedtaksliste,
+                behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
+                personGrunnlag = persongrunnlag,
+                personResultater = personResultater,
+                kompetanser = kompetanser,
+                endredeUtbetalinger = endredeUtbetalinger,
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                overstyrteEndringstidspunkt = overstyrteEndringstidspunkt,
+                overgangsstønad = overgangsstønad,
+                uregistrerteBarn = uregistrerteBarn,
+                nåDato = dagensDato,
+                valutakurs = valutakurs,
+                utenlandskPeriodebeløp = utenlandskPeriodebeløp,
+            )
     }
 
     @Så("forvent følgende vedtaksperioder med begrunnelser")
     fun `forvent følgende vedtaksperioder med begrunnelser`(dataTable: DataTable) {
-        val forventedeVedtaksperioder = mapForventetVedtaksperioderMedBegrunnelser(
-            dataTable = dataTable,
-            vedtak = vedtaksliste.find { it.behandling.id == gjeldendeBehandlingId }
-                ?: throw Feil("Fant ingen vedtak for behandling $gjeldendeBehandlingId"),
-        )
+        val forventedeVedtaksperioder =
+            mapForventetVedtaksperioderMedBegrunnelser(
+                dataTable = dataTable,
+                vedtak =
+                    vedtaksliste.find { it.behandling.id == gjeldendeBehandlingId }
+                        ?: throw Feil("Fant ingen vedtak for behandling $gjeldendeBehandlingId"),
+            )
 
         val vedtaksperioderComparator = compareBy<VedtaksperiodeMedBegrunnelser>({ it.type }, { it.fom }, { it.tom })
         Assertions.assertThat(vedtaksperioderMedBegrunnelser.sortedWith(vedtaksperioderComparator))

@@ -9,31 +9,34 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class UtbetalingsperiodeTest {
-
     val søker = tilfeldigSøker()
     val fomDato1 = LocalDate.now().minusMonths(2).withDayOfMonth(1)
     val fomDato2 = LocalDate.now().minusMonths(1).withDayOfMonth(1)
     val fomDato3 = LocalDate.now().withDayOfMonth(1)
-    val utbetalingsperiode1 = lagUtbetalingsperiode(
-        periodeFom = fomDato1,
-        periodeTom = fomDato1.let { it.withDayOfMonth(it.lengthOfMonth()) },
-        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson())),
-    )
-    val utbetalingsperiode2 = lagUtbetalingsperiode(
-        periodeFom = fomDato2,
-        periodeTom = fomDato2.let { it.withDayOfMonth(it.lengthOfMonth()) },
-        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson())),
-    )
-    val utbetalingsperiode3 = lagUtbetalingsperiode(
-        periodeFom = fomDato3,
-        periodeTom = fomDato3.let { it.withDayOfMonth(it.lengthOfMonth()) },
-        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson())),
-    )
-    val utbetalingsperioder = listOf(
-        utbetalingsperiode1,
-        utbetalingsperiode2,
-        utbetalingsperiode3,
-    )
+    val utbetalingsperiode1 =
+        lagUtbetalingsperiode(
+            periodeFom = fomDato1,
+            periodeTom = fomDato1.let { it.withDayOfMonth(it.lengthOfMonth()) },
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson())),
+        )
+    val utbetalingsperiode2 =
+        lagUtbetalingsperiode(
+            periodeFom = fomDato2,
+            periodeTom = fomDato2.let { it.withDayOfMonth(it.lengthOfMonth()) },
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson())),
+        )
+    val utbetalingsperiode3 =
+        lagUtbetalingsperiode(
+            periodeFom = fomDato3,
+            periodeTom = fomDato3.let { it.withDayOfMonth(it.lengthOfMonth()) },
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson())),
+        )
+    val utbetalingsperioder =
+        listOf(
+            utbetalingsperiode1,
+            utbetalingsperiode2,
+            utbetalingsperiode3,
+        )
 
     @Test
     fun `Skal gi riktig siste utbetalingsperiode som er tidligere eller samme måned som inneværende måned`() {

@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Profile
 
 @TestConfiguration
 class TaskRepositoryTestConfig {
-
     @Bean
     @Profile("mock-task-repository")
     fun mockTaskRepository(): TaskRepositoryWrapper {

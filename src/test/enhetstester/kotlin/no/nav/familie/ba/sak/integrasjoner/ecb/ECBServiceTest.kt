@@ -29,7 +29,6 @@ import java.time.LocalDate
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ECBServiceTest {
-
     @MockK
     private lateinit var ecbClient: ValutakursRestClient
 
@@ -47,11 +46,12 @@ class ECBServiceTest {
     @Test
     fun `Hent valutakurs for utenlandsk valuta til NOK og sjekk at beregning av kurs er riktig`() {
         val valutakursDato = LocalDate.of(2022, 6, 28)
-        val ecbExchangeRatesData = createECBResponse(
-            Frequency.Daily,
-            listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))),
-            valutakursDato.toString(),
-        )
+        val ecbExchangeRatesData =
+            createECBResponse(
+                Frequency.Daily,
+                listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))),
+                valutakursDato.toString(),
+            )
         every { ECBValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
         every { ECBValutakursCacheRepository.save(any()) } returns ECBValutakursCache(kurs = BigDecimal.valueOf(10.6543), valutakode = "SEK", valutakursdato = valutakursDato)
         every {
@@ -68,11 +68,12 @@ class ECBServiceTest {
     @Test
     fun `Test at ECBService kaster ESBServiceException dersom de returnerte kursene ikke inneholder kurs for forespurt valuta`() {
         val valutakursDato = LocalDate.of(2022, 7, 22)
-        val ecbExchangeRatesData = createECBResponse(
-            Frequency.Daily,
-            listOf(Pair("NOK", BigDecimal.valueOf(10.337))),
-            valutakursDato.toString(),
-        )
+        val ecbExchangeRatesData =
+            createECBResponse(
+                Frequency.Daily,
+                listOf(Pair("NOK", BigDecimal.valueOf(10.337))),
+                valutakursDato.toString(),
+            )
         every { ECBValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
         every {
             ecbClient.hentValutakurs(
@@ -87,11 +88,12 @@ class ECBServiceTest {
     @Test
     fun `Test at ECBService kaster ESBServiceException dersom de returnerte kursene ikke inneholder kurser med forespurt dato`() {
         val valutakursDato = LocalDate.of(2022, 7, 20)
-        val ecbExchangeRatesData = createECBResponse(
-            Frequency.Daily,
-            listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))),
-            valutakursDato.minusDays(1).toString(),
-        )
+        val ecbExchangeRatesData =
+            createECBResponse(
+                Frequency.Daily,
+                listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))),
+                valutakursDato.minusDays(1).toString(),
+            )
         every { ECBValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
         every {
             ecbClient.hentValutakurs(
@@ -107,11 +109,12 @@ class ECBServiceTest {
     fun `Test at ECBService returnerer NOK til EUR dersom den forespurte valutaen er EUR`() {
         val nokTilEur = BigDecimal.valueOf(9.4567)
         val valutakursDato = LocalDate.of(2022, 7, 20)
-        val ecbExchangeRatesData = createECBResponse(
-            Frequency.Daily,
-            listOf(Pair("NOK", BigDecimal.valueOf(9.4567))),
-            valutakursDato.toString(),
-        )
+        val ecbExchangeRatesData =
+            createECBResponse(
+                Frequency.Daily,
+                listOf(Pair("NOK", BigDecimal.valueOf(9.4567))),
+                valutakursDato.toString(),
+            )
         every { ECBValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
         every { ECBValutakursCacheRepository.save(any()) } returns ECBValutakursCache(kurs = BigDecimal.valueOf(9.4567), valutakode = "EUR", valutakursdato = valutakursDato)
         every {

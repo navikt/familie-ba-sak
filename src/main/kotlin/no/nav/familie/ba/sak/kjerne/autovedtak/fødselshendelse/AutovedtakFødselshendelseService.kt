@@ -62,7 +62,6 @@ class AutovedtakFødselshendelseService(
     private val opprettTaskService: OpprettTaskService,
     private val oppgaveService: OppgaveService,
 ) : AutovedtakBehandlingService<FødselshendelseData> {
-
     val stansetIAutomatiskFiltreringCounter =
         Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
     val stansetIAutomatiskVilkårsvurderingCounter =
@@ -93,10 +92,11 @@ class AutovedtakFødselshendelseService(
             }
         }
 
-        val (barnSomSkalBehandlesForMor, alleBarnSomKanBehandles) = finnBarnSomSkalBehandlesForMor(
-            fagsak = fagsakService.hentNormalFagsak(aktør = morsAktør),
-            nyBehandlingHendelse = nyBehandlingHendelse,
-        )
+        val (barnSomSkalBehandlesForMor, alleBarnSomKanBehandles) =
+            finnBarnSomSkalBehandlesForMor(
+                fagsak = fagsakService.hentNormalFagsak(aktør = morsAktør),
+                nyBehandlingHendelse = nyBehandlingHendelse,
+            )
 
         if (barnSomSkalBehandlesForMor.isEmpty()) {
             logger.info("Ignorere fødselshendelse, alle barna fra hendelse er allerede behandlet")
@@ -114,16 +114,18 @@ class AutovedtakFødselshendelseService(
         val nyBehandling = behandlingsdata.nyBehandlingHendelse
         val morsAktør = personidentService.hentAktør(nyBehandling.morsIdent)
 
-        val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
-            fagsak = fagsakService.hentNormalFagsak(aktør = morsAktør),
-            nyBehandlingHendelse = nyBehandling,
-        )
+        val (barnSomSkalBehandlesForMor, _) =
+            finnBarnSomSkalBehandlesForMor(
+                fagsak = fagsakService.hentNormalFagsak(aktør = morsAktør),
+                nyBehandlingHendelse = nyBehandling,
+            )
 
-        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(
-            nyBehandling.copy(
-                barnasIdenter = barnSomSkalBehandlesForMor,
-            ),
-        )
+        val behandling =
+            stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(
+                nyBehandling.copy(
+                    barnasIdenter = barnSomSkalBehandlesForMor,
+                ),
+            )
 
         val behandlingEtterFiltrering =
             stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
@@ -133,15 +135,19 @@ class AutovedtakFødselshendelseService(
 
             henleggBehandlingOgOpprettManuellOppgave(
                 behandling = behandlingEtterFiltrering,
-                begrunnelse = filtreringsreglerService.hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
-                    .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
+                begrunnelse =
+                    filtreringsreglerService.hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
+                        .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
             )
         } else {
             vurderVilkår(behandling = behandlingEtterFiltrering, barnaSomVurderes = barnSomSkalBehandlesForMor)
         }
     }
 
-    private fun vurderVilkår(behandling: Behandling, barnaSomVurderes: List<String>): String {
+    private fun vurderVilkår(
+        behandling: Behandling,
+        barnaSomVurderes: List<String>,
+    ): String {
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
 
         return if (behandlingEtterVilkårsvurdering.resultat == Behandlingsresultat.INNVILGET) {
@@ -151,11 +157,12 @@ class AutovedtakFødselshendelseService(
             val vedtakEtterToTrinn =
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsvurdering)
 
-            val task = IverksettMotOppdragTask.opprettTask(
-                behandling,
-                vedtakEtterToTrinn,
-                SikkerhetContext.hentSaksbehandler(),
-            )
+            val task =
+                IverksettMotOppdragTask.opprettTask(
+                    behandling,
+                    vedtakEtterToTrinn,
+                    SikkerhetContext.hentSaksbehandler(),
+                )
             taskRepository.save(task)
 
             opprettFremleggsoppgaveDersomEØSMedlem(behandling)
@@ -196,9 +203,10 @@ class AutovedtakFødselshendelseService(
         nyBehandlingHendelse: NyBehandlingHendelse,
     ): Pair<List<String>, List<String>> {
         val morsAktør = personidentService.hentAktør(nyBehandlingHendelse.morsIdent)
-        val barnaTilMor = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
-            aktør = morsAktør,
-        ).forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }
+        val barnaTilMor =
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+                aktør = morsAktør,
+            ).forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }
 
         val barnaSomHarBlittBehandlet =
             if (fagsak != null) {
@@ -222,18 +230,20 @@ class AutovedtakFødselshendelseService(
         behandling: Behandling,
         begrunnelse: String = "",
     ): String {
-        val begrunnelseForManuellOppgave = if (begrunnelse == "") {
-            hentBegrunnelseFraVilkårsvurdering(behandlingId = behandling.id)
-        } else {
-            begrunnelse
-        }
+        val begrunnelseForManuellOppgave =
+            if (begrunnelse == "") {
+                hentBegrunnelseFraVilkårsvurdering(behandlingId = behandling.id)
+            } else {
+                begrunnelse
+            }
 
         stegService.håndterHenleggBehandling(
             behandling = behandling,
-            henleggBehandlingInfo = RestHenleggBehandlingInfo(
-                årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
-                begrunnelse = begrunnelseForManuellOppgave,
-            ),
+            henleggBehandlingInfo =
+                RestHenleggBehandlingInfo(
+                    årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
+                    begrunnelse = begrunnelseForManuellOppgave,
+                ),
         )
 
         oppgaveService.opprettOppgaveForManuellBehandling(
@@ -253,7 +263,8 @@ class AutovedtakFødselshendelseService(
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
         val lovligOppholdResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
-        if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT && bosattIRiketResultat.evalueringÅrsaker.any {
+        if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT &&
+            bosattIRiketResultat.evalueringÅrsaker.any {
                 VilkårIkkeOppfyltÅrsak.valueOf(
                     it,
                 ) == VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM

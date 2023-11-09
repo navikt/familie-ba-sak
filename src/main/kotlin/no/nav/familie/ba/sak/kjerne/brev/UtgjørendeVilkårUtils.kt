@@ -40,16 +40,17 @@ fun hentPersonerForAlleUtgjørendeVilkår(
     erFørsteVedtaksperiodePåFagsak: Boolean,
 ): Set<MinimertRestPerson> {
     return triggesAv.vilkår.fold(setOf()) { acc, vilkår ->
-        acc + hentPersonerMedUtgjørendeVilkår(
-            minimertRestPersonResultater = minimertePersonResultater,
-            vedtaksperiode = vedtaksperiode,
-            begrunnelseType = oppdatertBegrunnelseType,
-            vilkårGjeldendeForBegrunnelse = vilkår,
-            aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
-            triggesAv = triggesAv,
-            begrunnelse = begrunnelse,
-            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-        )
+        acc +
+            hentPersonerMedUtgjørendeVilkår(
+                minimertRestPersonResultater = minimertePersonResultater,
+                vedtaksperiode = vedtaksperiode,
+                begrunnelseType = oppdatertBegrunnelseType,
+                vilkårGjeldendeForBegrunnelse = vilkår,
+                aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
+                triggesAv = triggesAv,
+                begrunnelse = begrunnelse,
+                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+            )
     }
 }
 
@@ -77,9 +78,10 @@ private fun hentPersonerMedUtgjørendeVilkår(
                         erVilkårResultatUtgjørende(
                             minimertVilkårResultat = minimertVilkårResultat,
                             nesteMinimerteVilkårResultat = nesteMinimerteVilkårResultatAvSammeType,
-                            forrigeMinimerteVilkårResultat = personResultat.minimerteVilkårResultater.finnForeliggende(
-                                minimertVilkårResultat,
-                            ),
+                            forrigeMinimerteVilkårResultat =
+                                personResultat.minimerteVilkårResultater.finnForeliggende(
+                                    minimertVilkårResultat,
+                                ),
                             begrunnelseType = begrunnelseType,
                             triggesAv = triggesAv,
                             vedtaksperiode = vedtaksperiode,
@@ -88,9 +90,10 @@ private fun hentPersonerMedUtgjørendeVilkår(
                         )
                     }
 
-            val person = aktuellePersonerForVedtaksperiode.firstOrNull { person ->
-                person.personIdent == personResultat.personIdent
-            }
+            val person =
+                aktuellePersonerForVedtaksperiode.firstOrNull { person ->
+                    person.personIdent == personResultat.personIdent
+                }
 
             if (utgjørendeVilkårResultat != null && person != null) {
                 acc.add(person)
@@ -145,20 +148,21 @@ private fun erVilkårResultatUtgjørende(
 
         VedtakBegrunnelseType.OPPHØR,
         VedtakBegrunnelseType.INSTITUSJON_OPPHØR,
-        -> if (triggesAv.gjelderFørstePeriode) {
-            erFørstePeriodeOgVilkårIkkeOppfylt(
-                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-                vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv,
-                vilkårResultat = minimertVilkårResultat,
-            )
-        } else {
-            erOpphørResultatUtgjøreneForPeriode(
-                minimertVilkårResultat = minimertVilkårResultat,
-                triggesAv = triggesAv,
-                vedtaksperiode = vedtaksperiode,
-            )
-        }
+        ->
+            if (triggesAv.gjelderFørstePeriode) {
+                erFørstePeriodeOgVilkårIkkeOppfylt(
+                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                    vedtaksperiode = vedtaksperiode,
+                    triggesAv = triggesAv,
+                    vilkårResultat = minimertVilkårResultat,
+                )
+            } else {
+                erOpphørResultatUtgjøreneForPeriode(
+                    minimertVilkårResultat = minimertVilkårResultat,
+                    triggesAv = triggesAv,
+                    vedtaksperiode = vedtaksperiode,
+                )
+            }
 
         VedtakBegrunnelseType.REDUKSJON, VedtakBegrunnelseType.INSTITUSJON_REDUKSJON -> {
             erReduksjonResultatUtgjøreneForPeriode(
@@ -187,9 +191,10 @@ private fun erOpphørResultatUtgjøreneForPeriode(
 ): Boolean {
     val erOppfyltTomMånedEtter = erOppfyltTomMånedEtter(minimertVilkårResultat)
 
-    val vilkårsluttForForrigePeriode = vedtaksperiode.fom.minusMonths(
-        if (erOppfyltTomMånedEtter) 1 else 0,
-    )
+    val vilkårsluttForForrigePeriode =
+        vedtaksperiode.fom.minusMonths(
+            if (erOppfyltTomMånedEtter) 1 else 0,
+        )
     return triggesAv.erUtdypendeVilkårsvurderingOppfylt(minimertVilkårResultat) &&
         minimertVilkårResultat.periodeTom != null &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
@@ -214,9 +219,10 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
             vilkårSomStarterIDennePerioden?.utdypendeVilkårsvurderinger?.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) == true &&
             triggesAv.deltbosted
 
-    val startNestePeriodeEtterVilkår = vilkårSomAvsluttesRettFørDennePerioden.periodeTom
-        .plusDays(if (erStartPåDeltBosted) 1 else 0)
-        .plusMonths(if (erOppfyltTomMånedEtter) 1 else 0)
+    val startNestePeriodeEtterVilkår =
+        vilkårSomAvsluttesRettFørDennePerioden.periodeTom
+            .plusDays(if (erStartPåDeltBosted) 1 else 0)
+            .plusMonths(if (erOppfyltTomMånedEtter) 1 else 0)
 
     return triggesAv.erUtdypendeVilkårsvurderingOppfyltReduksjon(
         vilkårSomAvsluttesRettFørDennePerioden = vilkårSomAvsluttesRettFørDennePerioden,

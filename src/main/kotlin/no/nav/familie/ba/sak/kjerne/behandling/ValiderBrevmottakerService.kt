@@ -13,17 +13,21 @@ class ValiderBrevmottakerService(
     private val persongrunnlagService: PersongrunnlagService,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
 ) {
-    fun validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId: Long, nyBrevmottaker: Brevmottaker? = null) {
+    fun validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+        behandlingId: Long,
+        nyBrevmottaker: Brevmottaker? = null,
+    ) {
         var brevmottakere = brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId)
         nyBrevmottaker?.let {
             brevmottakere += it
         }
         brevmottakere.takeIf { it.isNotEmpty() } ?: return
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandlingId) ?: return
-        val personIdenter = personopplysningGrunnlag.søkerOgBarn
-            .takeIf { it.isNotEmpty() }
-            ?.map { it.aktør.aktivFødselsnummer() }
-            ?: return
+        val personIdenter =
+            personopplysningGrunnlag.søkerOgBarn
+                .takeIf { it.isNotEmpty() }
+                ?.map { it.aktør.aktivFødselsnummer() }
+                ?: return
         val strengtFortroligePersonIdenter =
             familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter)
         if (strengtFortroligePersonIdenter.isNotEmpty()) {

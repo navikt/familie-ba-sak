@@ -25,23 +25,17 @@ import org.springframework.beans.factory.annotation.Autowired
 class TotrinnskontrollTest(
     @Autowired
     private val behandlingService: BehandlingService,
-
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-
     @Autowired
     private val totrinnskontrollService: TotrinnskontrollService,
-
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
-
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
@@ -134,28 +128,30 @@ class TotrinnskontrollTest(
 
     @Test
     fun `Skal ikke kunne godkjenne eget vedtak`() {
-        val totrinnskontroll = Totrinnskontroll(
-            behandling = lagBehandling(),
-            saksbehandler = "Mock Saksbehandler",
-            saksbehandlerId = "Mock.Saksbehandler",
-            beslutter = "Mock Saksbehandler",
-            beslutterId = "Mock.Saksbehandler",
-            godkjent = true,
-        )
+        val totrinnskontroll =
+            Totrinnskontroll(
+                behandling = lagBehandling(),
+                saksbehandler = "Mock Saksbehandler",
+                saksbehandlerId = "Mock.Saksbehandler",
+                beslutter = "Mock Saksbehandler",
+                beslutterId = "Mock.Saksbehandler",
+                godkjent = true,
+            )
 
         assertTrue(totrinnskontroll.erUgyldig())
     }
 
     @Test
     fun `Skal kunne underkjenne eget vedtak`() {
-        val totrinnskontroll = Totrinnskontroll(
-            behandling = lagBehandling(),
-            saksbehandler = "Mock Saksbehandler",
-            saksbehandlerId = "Mock.Saksbehandler",
-            beslutter = "Mock Saksbehandler",
-            beslutterId = "Mock.Saksbehandler",
-            godkjent = false,
-        )
+        val totrinnskontroll =
+            Totrinnskontroll(
+                behandling = lagBehandling(),
+                saksbehandler = "Mock Saksbehandler",
+                saksbehandlerId = "Mock.Saksbehandler",
+                beslutter = "Mock Saksbehandler",
+                beslutterId = "Mock.Saksbehandler",
+                godkjent = false,
+            )
 
         assertFalse(totrinnskontroll.erUgyldig())
     }

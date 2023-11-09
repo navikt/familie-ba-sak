@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query
 import java.time.LocalDate
 
 interface BehandlingMigreringsinfoRepository : JpaRepository<BehandlingMigreringsinfo, Long> {
-
     @Query(
         """SELECT MIN(bm.migreringsdato) FROM BehandlingMigreringsinfo bm 
             INNER JOIN Behandling b ON bm.behandling.id = b.id 

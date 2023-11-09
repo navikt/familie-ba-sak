@@ -26,7 +26,6 @@ class KonsistensavstemMotOppdragAvsluttTask(
     val dataChunkRepository: DataChunkRepository,
     val batchService: BatchService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val konsistensavstemmingAvsluttTask =
             objectMapper.readValue(task.payload, KonsistensavstemmingAvsluttTaskDTO::class.java)

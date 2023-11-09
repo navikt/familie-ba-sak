@@ -10,7 +10,6 @@ import org.springframework.core.env.Environment
 import java.time.LocalDateTime
 
 class TaskUtilsTest {
-
     @ParameterizedTest
     @CsvSource(
         "2020-06-09T13:37:00, 2020-06-09T14:37:00", // Innenfor dagtid
@@ -27,7 +26,10 @@ class TaskUtilsTest {
         "2020-05-17T22:37:00, 2020-05-18T06:37:00", // Etter dagtid 17 mai. Venter til morgenen etter
         "2021-05-14T21:30:00, 2021-05-18T06:30:00", // 14 mai er fredag, 17 mai er mandag og fridag. Venter til 18 mai klokken 6
     )
-    fun `skal returnere neste arbeidsdag `(input: LocalDateTime, expected: LocalDateTime) {
+    fun `skal returnere neste arbeidsdag `(
+        input: LocalDateTime,
+        expected: LocalDateTime,
+    ) {
         mockkStatic(LocalDateTime::class)
         mockk<Environment>(relaxed = true)
 
