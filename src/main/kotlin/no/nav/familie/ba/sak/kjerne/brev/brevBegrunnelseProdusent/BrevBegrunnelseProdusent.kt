@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erAvslagUregistrerteBarn
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.BegrunnelseGrunnlagForPeriodeMedOpphør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserPerPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
@@ -225,6 +226,12 @@ private fun hentPersonerMedAndelIForrigePeriode(begrunnelsesGrunnlagPerPerson: M
         !begrunnelseGrunnlagForPersonIPeriode.forrigePeriode?.andeler?.toList().isNullOrEmpty()
     }.keys
 
+private fun hentPersonerMistetUtbetalingFraForrigeBehandling(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
+    begrunnelsesGrunnlagPerPerson.filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
+        begrunnelseGrunnlagForPersonIPeriode is BegrunnelseGrunnlagForPeriodeMedOpphør &&
+            !begrunnelseGrunnlagForPersonIPeriode.sammePeriodeForrigeBehandling?.andeler?.toList().isNullOrEmpty()
+    }.keys
+
 private fun gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse: List<Person>) =
     personerGjeldeneForBegrunnelse.any { it.type == PersonType.SØKER }
 
@@ -246,6 +253,8 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     val barnMedOppfylteVilkår = hentBarnMedOppfylteVilkår(begrunnelsesGrunnlagPerPerson)
     val barnMedUtbetalingIForrigeperiode =
         hentPersonerMedAndelIForrigePeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
+    val barnMistetUtbetalingFraForrigeBehandling =
+        hentPersonerMistetUtbetalingFraForrigeBehandling(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
 
     return when {
         this.erAvslagUregistrerteBarnBegrunnelse() -> uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
@@ -258,8 +267,11 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                     val relevanteBarn = if (erGenereltAvslag) {
                         barnPåBehandlingen
                     } else {
-                        (barnMedUtbetalingIForrigeperiode + barnMedOppfylteVilkår + barnMedEksplisitteAvslag).toSet()
-                    }
+                        barnMedUtbetalingIForrigeperiode +
+                            barnMedOppfylteVilkår +
+                            barnMedEksplisitteAvslag +
+                            barnMistetUtbetalingFraForrigeBehandling
+                    }.toSet()
 
                     relevanteBarn.map { it.fødselsdato } +
                         uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
@@ -312,6 +324,7 @@ fun hentAntallBarnForBegrunnelse(
             VedtakBegrunnelseType.OPPHØR,
         ) ->
             antallBarnGjeldendeForBegrunnelse
+
         else -> barnasFødselsdatoer.size
     }
 }
