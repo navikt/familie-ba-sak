@@ -14,7 +14,6 @@ class BehandlingHentOgPersisterServiceTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val fagsakService: FagsakService,
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun `skal hente aktiv fødselsnummere`() {
         val fødselsnummere = listOf(randomFnr(), randomFnr())
@@ -26,12 +25,13 @@ class BehandlingHentOgPersisterServiceTest(
         fagsakService.oppdaterStatus(fagsak2, FagsakStatus.LØPENDE)
         val behandling2 = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak2), false)
 
-        val aktivFødselsnummere = behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(
-            listOf(
-                behandling1.id,
-                behandling2.id,
-            ),
-        )
+        val aktivFødselsnummere =
+            behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(
+                listOf(
+                    behandling1.id,
+                    behandling2.id,
+                ),
+            )
         assertEquals(fødselsnummere[0], aktivFødselsnummere[behandling1.id])
         assertEquals(fødselsnummere[1], aktivFødselsnummere[behandling2.id])
     }

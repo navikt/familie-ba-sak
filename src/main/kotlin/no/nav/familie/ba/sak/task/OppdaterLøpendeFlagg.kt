@@ -17,14 +17,12 @@ import org.springframework.stereotype.Service
     triggerTidVedFeilISekunder = 60,
 )
 class OppdaterLøpendeFlagg(val fagsakService: FagsakService) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val antallOppdaterte = fagsakService.oppdaterLøpendeStatusPåFagsaker()
         logger.info("Oppdatert status på $antallOppdaterte fagsaker til ${FagsakStatus.AVSLUTTET.name}")
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "oppdaterLøpendeFlagg"
         private val logger: Logger = LoggerFactory.getLogger(OppdaterLøpendeFlagg::class.java)
     }

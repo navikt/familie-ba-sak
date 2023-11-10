@@ -24,7 +24,6 @@ class VedtaksperiodeRepositoryTest(
     @Autowired private val vedtakRepository: VedtakRepository,
     @Autowired private val vedtaksperiodeRepository: VedtaksperiodeRepository,
 ) : AbstractSpringIntegrationTest() {
-
     @Nested
     inner class FinnBehandlingIdForVedtaksperiode {
         @Test

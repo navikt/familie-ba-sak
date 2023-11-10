@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Profile
 
 @TestConfiguration
 class InfotrygdFeedClientMock {
-
     @Bean
     @Profile("mock-infotrygd-feed")
     @Primary

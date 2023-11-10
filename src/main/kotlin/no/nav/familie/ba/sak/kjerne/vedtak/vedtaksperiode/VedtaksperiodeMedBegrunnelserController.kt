@@ -46,7 +46,6 @@ class VedtaksperiodeMedBegrunnelserController(
     private val integrasjonClient: IntegrasjonClient,
     private val unleashService: UnleashNextMedContextService,
 ) {
-
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
     fun oppdaterVedtaksperiodeStandardbegrunnelser(
         @PathVariable
@@ -61,9 +60,10 @@ class VedtaksperiodeMedBegrunnelserController(
             handling = OPPDATERE_BEGRUNNELSER_HANDLING,
         )
 
-        val standardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
-            IVedtakBegrunnelse.konverterTilEnumVerdi(it)
-        }
+        val standardbegrunnelser =
+            restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
+                IVedtakBegrunnelse.konverterTilEnumVerdi(it)
+            }
 
         val nasjonalebegrunnelser = standardbegrunnelser.filterIsInstance<Standardbegrunnelse>()
         val eøsStandardbegrunnelser = standardbegrunnelser.filterIsInstance<EØSStandardbegrunnelse>()
@@ -132,7 +132,9 @@ class VedtaksperiodeMedBegrunnelserController(
     }
 
     @GetMapping("/brevbegrunnelser/{vedtaksperiodeId}")
-    fun genererBrevBegrunnelserForPeriode(@PathVariable vedtaksperiodeId: Long): ResponseEntity<Ressurs<Set<String>>> {
+    fun genererBrevBegrunnelserForPeriode(
+        @PathVariable vedtaksperiodeId: Long,
+    ): ResponseEntity<Ressurs<Set<String>>> {
         val behandlingId = vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId)
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -142,25 +144,27 @@ class VedtaksperiodeMedBegrunnelserController(
 
         val vedtaksperiode = vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
 
-        val brevBegrunnelser = if (unleashService.isEnabled(NY_GENERERING_AV_BREVOBJEKTER, behandlingId)) {
-            val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(behandlingId)
-            val begrunnelsesGrunnlagPerPerson = vedtaksperiode.finnBegrunnelseGrunnlagPerPerson(grunnlagForBegrunnelser)
+        val brevBegrunnelser =
+            if (unleashService.isEnabled(NY_GENERERING_AV_BREVOBJEKTER, behandlingId)) {
+                val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(behandlingId)
+                val begrunnelsesGrunnlagPerPerson = vedtaksperiode.finnBegrunnelseGrunnlagPerPerson(grunnlagForBegrunnelser)
 
-            vedtaksperiode.hentBegrunnelser(
-                grunnlagForBegrunnelse = grunnlagForBegrunnelser,
-                begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
-                landkoder = integrasjonClient.hentLandkoderISO2(),
-            )
-        } else {
-            brevPeriodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId)
-        }
-
-        val begrunnelser = brevBegrunnelser.map {
-            when (it) {
-                is FritekstBegrunnelse -> it.fritekst
-                is BegrunnelseMedData -> brevKlient.hentBegrunnelsestekst(it, vedtaksperiode)
+                vedtaksperiode.hentBegrunnelser(
+                    grunnlagForBegrunnelse = grunnlagForBegrunnelser,
+                    begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+                    landkoder = integrasjonClient.hentLandkoderISO2(),
+                )
+            } else {
+                brevPeriodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId)
             }
-        }
+
+        val begrunnelser =
+            brevBegrunnelser.map {
+                when (it) {
+                    is FritekstBegrunnelse -> it.fritekst
+                    is BegrunnelseMedData -> brevKlient.hentBegrunnelsestekst(it, vedtaksperiode)
+                }
+            }
 
         return ResponseEntity.ok(Ressurs.Companion.success(begrunnelser.toSet()))
     }
@@ -168,11 +172,12 @@ class VedtaksperiodeMedBegrunnelserController(
     @GetMapping(path = ["/behandling/{behandlingId}/hent-vedtaksperioder"])
     fun hentRestUtvidetVedtaksperiodeMedBegrunnelser(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> = ResponseEntity.ok(
-        Ressurs.success(
-            vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId),
-        ),
-    )
+    ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> =
+        ResponseEntity.ok(
+            Ressurs.success(
+                vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId),
+            ),
+        )
 
     companion object {
         const val OPPDATERE_BEGRUNNELSER_HANDLING = "oppdatere vedtaksperiode med begrunnelser"

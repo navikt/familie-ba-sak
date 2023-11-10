@@ -36,25 +36,19 @@ data class PeriodeOvergangsstønadGrunnlag(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandlingId: Long,
-
     @OneToOne(optional = false)
     @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
-
     @Column(name = "fom", nullable = false, columnDefinition = "DATE")
     val fom: LocalDate,
-
     @Column(name = "tom", nullable = false, columnDefinition = "DATE")
     val tom: LocalDate,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "datakilde", nullable = false)
     val datakilde: Datakilde,
 ) : BaseEntitet() {
-
     override fun toString(): String {
         return "PeriodeOvergangsstønadGrunnlag(" +
             "id=$id, " +
@@ -64,14 +58,19 @@ data class PeriodeOvergangsstønadGrunnlag(
             "tom=$tom, " +
             "datakilde=$datakilde)"
     }
-    fun tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsstønad(
-        personIdent = this.aktør.aktivFødselsnummer(),
-        fomDato = this.fom,
-        tomDato = this.tom,
-    )
+
+    fun tilInternPeriodeOvergangsstønad() =
+        InternPeriodeOvergangsstønad(
+            personIdent = this.aktør.aktivFødselsnummer(),
+            fomDato = this.fom,
+            tomDato = this.tom,
+        )
 }
 
-fun EksternPeriode.tilPeriodeOvergangsstønadGrunnlag(behandlingId: Long, aktør: Aktør) =
+fun EksternPeriode.tilPeriodeOvergangsstønadGrunnlag(
+    behandlingId: Long,
+    aktør: Aktør,
+) =
     PeriodeOvergangsstønadGrunnlag(
         behandlingId = behandlingId,
         aktør = aktør,

@@ -24,17 +24,15 @@ import java.time.YearMonth
 @RequestMapping("/api/bisys")
 @ProtectedWithClaims(issuer = "azuread")
 class BisysController(private val bisysService: BisysService) {
-
     @Operation(
         description = "Tjeneste for BISYS for å hente utvidet barnetrygd og småbarnstillegg for en gitt person.",
-
     )
     @ApiResponses(
         value = [
             ApiResponse(
                 responseCode = "200",
                 description =
-                """Liste over perioder som brukeren har hatt innvilget ytelse. Returnerer både fra Infotrygd og BA-SAK 
+                    """Liste over perioder som brukeren har hatt innvilget ytelse. Returnerer både fra Infotrygd og BA-SAK 
                                         
                    stønadstype:     Hva slags type stønad. UTVIDET eller SMÅBARNSTILLEGG
                    fomMåned:        Første måned i perioden
@@ -49,9 +47,9 @@ class BisysController(private val bisysService: BisysService) {
                             mediaType = "application/json",
                             array = (
                                 ArraySchema(schema = Schema(implementation = UtvidetBarnetrygdPeriode::class))
-                                ),
+                            ),
                         )
-                        ),
+                    ),
                 ],
             ),
             ApiResponse(
@@ -114,6 +112,7 @@ data class BisysUtvidetBarnetrygdRequest(
 )
 
 class BisysUtvidetBarnetrygdResponse(val perioder: List<UtvidetBarnetrygdPeriode>)
+
 data class UtvidetBarnetrygdPeriode(
     val stønadstype: BisysStønadstype,
     @Schema(implementation = String::class, example = "2020-12") val fomMåned: YearMonth,

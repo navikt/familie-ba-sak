@@ -53,8 +53,10 @@ class BehandlingsresultatSteg(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) : BehandlingSteg<String> {
-
-    override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
+    override fun preValiderSteg(
+        behandling: Behandling,
+        stegService: StegService?,
+    ) {
         if (!behandling.erSatsendring() && behandling.skalBehandlesAutomatisk) return
 
         val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
@@ -75,8 +77,9 @@ class BehandlingsresultatSteg(
             søkerOgBarn = søkerOgBarn,
         )
 
-        val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
+        val endreteUtbetalingerMedAndeler =
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
+                .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
 
         validerAtAlleOpprettedeEndringerErUtfylt(endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel })
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endreteUtbetalingerMedAndeler)
@@ -100,7 +103,10 @@ class BehandlingsresultatSteg(
     }
 
     @Transactional
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
+    override fun utførStegOgAngiNeste(
+        behandling: Behandling,
+        data: String,
+    ): StegType {
         val behandlingMedOppdatertBehandlingsresultat =
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
                 settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
@@ -118,9 +124,10 @@ class BehandlingsresultatSteg(
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
             behandlingService.nullstillEndringstidspunkt(behandling.id)
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
-                vedtak = vedtakService.hentAktivForBehandlingThrows(
-                    behandlingId = behandling.id,
-                ),
+                vedtak =
+                    vedtakService.hentAktivForBehandlingThrows(
+                        behandlingId = behandling.id,
+                    ),
             )
         }
 
@@ -129,11 +136,13 @@ class BehandlingsresultatSteg(
 
         if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting(
                 endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi == ENDRING_I_UTBETALING,
-            ) || beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
+            ) ||
+            beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
                 behandling = behandlingMedOppdatertBehandlingsresultat,
-                sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
-                    behandling = behandlingMedOppdatertBehandlingsresultat,
-                ),
+                sistIverksatteBehandling =
+                    behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
+                        behandling = behandlingMedOppdatertBehandlingsresultat,
+                    ),
             )
         ) {
             behandlingService.oppdaterStatusPåBehandling(
@@ -165,7 +174,7 @@ class BehandlingsresultatSteg(
             (
                 behandlingMedOppdatertBehandlingsresultat.resultat.erAvslått() ||
                     behandlingMedOppdatertBehandlingsresultat.resultat == Behandlingsresultat.DELVIS_INNVILGET
-                )
+            )
         ) {
             throw FunksjonellFeil(
                 "Du har fått behandlingsresultatet " +
@@ -176,7 +185,10 @@ class BehandlingsresultatSteg(
         }
     }
 
-    private fun settBehandlingsresultat(behandling: Behandling, resultat: Behandlingsresultat): Behandling {
+    private fun settBehandlingsresultat(
+        behandling: Behandling,
+        resultat: Behandlingsresultat,
+    ): Behandling {
         behandling.resultat = resultat
         return behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
     }
@@ -187,13 +199,15 @@ class BehandlingsresultatSteg(
         val endringIUtbetalingTidslinje =
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomiTidslinje(behandling)
 
-        val migreringsdatoForrigeIverksatteBehandling = beregningService
-            .hentAndelerFraForrigeIverksattebehandling(behandling)
-            .minOfOrNull { it.stønadFom }
+        val migreringsdatoForrigeIverksatteBehandling =
+            beregningService
+                .hentAndelerFraForrigeIverksattebehandling(behandling)
+                .minOfOrNull { it.stønadFom }
 
         endringIUtbetalingTidslinje.kastFeilVedEndringEtter(
-            migreringsdatoForrigeIverksatteBehandling = migreringsdatoForrigeIverksatteBehandling
-                ?: TIDENES_ENDE.toYearMonth(),
+            migreringsdatoForrigeIverksatteBehandling =
+                migreringsdatoForrigeIverksatteBehandling
+                    ?: TIDENES_ENDE.toYearMonth(),
             behandling = behandling,
         )
     }

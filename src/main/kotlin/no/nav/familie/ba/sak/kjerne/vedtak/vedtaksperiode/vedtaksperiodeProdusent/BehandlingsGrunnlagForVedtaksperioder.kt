@@ -72,21 +72,25 @@ data class BehandlingsGrunnlagForVedtaksperioder(
     val utenlandskPeriodebeløp: List<UtenlandskPeriodebeløp>,
     val valutakurs: List<Valutakurs>,
 ) {
-    val utfylteEndredeUtbetalinger = endredeUtbetalinger
-        .map { it.tilIEndretUtbetalingAndel() }
-        .filterIsInstance<IUtfyltEndretUtbetalingAndel>()
+    val utfylteEndredeUtbetalinger =
+        endredeUtbetalinger
+            .map { it.tilIEndretUtbetalingAndel() }
+            .filterIsInstance<IUtfyltEndretUtbetalingAndel>()
 
-    val utfylteKompetanser = kompetanser
-        .map { it.tilIKompetanse() }
-        .filterIsInstance<UtfyltKompetanse>()
+    val utfylteKompetanser =
+        kompetanser
+            .map { it.tilIKompetanse() }
+            .filterIsInstance<UtfyltKompetanse>()
 
-    val utfylteValutakurs = valutakurs
-        .map { it.tilIValutakurs() }
-        .filterIsInstance<UtfyltValutakurs>()
+    val utfylteValutakurs =
+        valutakurs
+            .map { it.tilIValutakurs() }
+            .filterIsInstance<UtfyltValutakurs>()
 
-    val utfylteUtenlandskPeriodebeløp = utenlandskPeriodebeløp
-        .map { it.tilIUtenlandskPeriodebeløp() }
-        .filterIsInstance<UtfyltUtenlandskPeriodebeløp>()
+    val utfylteUtenlandskPeriodebeløp =
+        utenlandskPeriodebeløp
+            .map { it.tilIUtenlandskPeriodebeløp() }
+            .filterIsInstance<UtfyltUtenlandskPeriodebeløp>()
 
     fun utledGrunnlagTidslinjePerPerson(): Map<AktørOgRolleBegrunnelseGrunnlag, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag> {
         val søker = persongrunnlag.søker
@@ -98,46 +102,51 @@ data class BehandlingsGrunnlagForVedtaksperioder(
 
         val erUtbetalingSmåbarnstilleggTidslinje = this.andelerTilkjentYtelse.hentErUtbetalingSmåbarnstilleggTidslinje()
 
-        val personresultaterOgRolleForVilkår = if (behandling.fagsak.type.erBarnSøker()) {
-            personResultater.single().splittOppVilkårForBarnOgSøkerRolle()
-        } else {
-            personResultater.map {
-                Pair(persongrunnlag.personer.single { person -> it.aktør == person.aktør }.type, it)
+        val personresultaterOgRolleForVilkår =
+            if (behandling.fagsak.type.erBarnSøker()) {
+                personResultater.single().splittOppVilkårForBarnOgSøkerRolle()
+            } else {
+                personResultater.map {
+                    Pair(persongrunnlag.personer.single { person -> it.aktør == person.aktør }.type, it)
+                }
             }
-        }
 
         val bareSøkerOgUregistrertBarn = uregistrerteBarn.isNotEmpty() && personResultater.size == 1
 
-        val grunnlagForPersonTidslinjer = personresultaterOgRolleForVilkår.associate { (vilkårRolle, personResultat) ->
-            val aktør = personResultat.aktør
-            val person = persongrunnlag.personer.single { person -> aktør == person.aktør }
+        val grunnlagForPersonTidslinjer =
+            personresultaterOgRolleForVilkår.associate { (vilkårRolle, personResultat) ->
+                val aktør = personResultat.aktør
+                val person = persongrunnlag.personer.single { person -> aktør == person.aktør }
 
-            val (overlappendeGenerelleAvslag, vilkårResultaterUtenGenerelleAvslag) = splittOppPåErOverlappendeGenerelleAvslag(
-                personResultat,
-            )
+                val (overlappendeGenerelleAvslag, vilkårResultaterUtenGenerelleAvslag) =
+                    splittOppPåErOverlappendeGenerelleAvslag(
+                        personResultat,
+                    )
 
-            val forskjøvedeVilkårResultaterForPersonsAndeler: Tidslinje<List<VilkårResultat>, Måned> =
-                vilkårResultaterUtenGenerelleAvslag.hentForskjøvedeVilkårResultaterForPersonsAndelerTidslinje(
-                    person = person,
-                    erMinstEttBarnMedUtbetalingTidslinje = erMinstEttBarnMedUtbetalingTidslinje,
-                    ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje,
-                    fagsakType = behandling.fagsak.type,
-                    vilkårRolle = vilkårRolle,
-                    bareSøkerOgUregistrertBarn = bareSøkerOgUregistrertBarn,
-                )
-
-            AktørOgRolleBegrunnelseGrunnlag(aktør, vilkårRolle) to
-                GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag(
-                    overlappendeGenerelleAvslagVedtaksperiodeGrunnlagForPerson = overlappendeGenerelleAvslag.generelleAvslagTilGrunnlagForPersonTidslinje(
-                        person,
-                    ),
-                    vedtaksperiodeGrunnlagForPerson = forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
+                val forskjøvedeVilkårResultaterForPersonsAndeler: Tidslinje<List<VilkårResultat>, Måned> =
+                    vilkårResultaterUtenGenerelleAvslag.hentForskjøvedeVilkårResultaterForPersonsAndelerTidslinje(
                         person = person,
-                        erUtbetalingSmåbarnstilleggTidslinje = erUtbetalingSmåbarnstilleggTidslinje,
+                        erMinstEttBarnMedUtbetalingTidslinje = erMinstEttBarnMedUtbetalingTidslinje,
+                        ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje,
+                        fagsakType = behandling.fagsak.type,
                         vilkårRolle = vilkårRolle,
-                    ),
-                )
-        }
+                        bareSøkerOgUregistrertBarn = bareSøkerOgUregistrertBarn,
+                    )
+
+                AktørOgRolleBegrunnelseGrunnlag(aktør, vilkårRolle) to
+                    GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag(
+                        overlappendeGenerelleAvslagVedtaksperiodeGrunnlagForPerson =
+                            overlappendeGenerelleAvslag.generelleAvslagTilGrunnlagForPersonTidslinje(
+                                person,
+                            ),
+                        vedtaksperiodeGrunnlagForPerson =
+                            forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
+                                person = person,
+                                erUtbetalingSmåbarnstilleggTidslinje = erUtbetalingSmåbarnstilleggTidslinje,
+                                vilkårRolle = vilkårRolle,
+                            ),
+                    )
+            }
 
         return grunnlagForPersonTidslinjer
     }
@@ -164,78 +173,87 @@ data class BehandlingsGrunnlagForVedtaksperioder(
         return personResultaterVilkårForSøker
     }
 
-    private fun Vilkår.gjelder(persontype: PersonType) = when (this) {
-        Vilkår.UNDER_18_ÅR -> listOf(PersonType.BARN).contains(persontype)
-        Vilkår.BOR_MED_SØKER -> listOf(PersonType.BARN).contains(persontype)
-        Vilkår.GIFT_PARTNERSKAP -> listOf(PersonType.BARN).contains(persontype)
-        Vilkår.BOSATT_I_RIKET -> listOf(PersonType.BARN, PersonType.SØKER).contains(persontype)
-        Vilkår.LOVLIG_OPPHOLD -> listOf(PersonType.BARN, PersonType.SØKER).contains(persontype)
-        Vilkår.UTVIDET_BARNETRYGD -> listOf(PersonType.SØKER).contains(persontype)
-    }
+    private fun Vilkår.gjelder(persontype: PersonType) =
+        when (this) {
+            Vilkår.UNDER_18_ÅR -> listOf(PersonType.BARN).contains(persontype)
+            Vilkår.BOR_MED_SØKER -> listOf(PersonType.BARN).contains(persontype)
+            Vilkår.GIFT_PARTNERSKAP -> listOf(PersonType.BARN).contains(persontype)
+            Vilkår.BOSATT_I_RIKET -> listOf(PersonType.BARN, PersonType.SØKER).contains(persontype)
+            Vilkår.LOVLIG_OPPHOLD -> listOf(PersonType.BARN, PersonType.SØKER).contains(persontype)
+            Vilkår.UTVIDET_BARNETRYGD -> listOf(PersonType.SØKER).contains(persontype)
+        }
 
     private fun List<VilkårResultat>.generelleAvslagTilGrunnlagForPersonTidslinje(
         person: Person,
-    ): Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned> = this
-        .map {
-            listOf(månedPeriodeAv(null, null, it))
-                .tilTidslinje()
-        }
-        .kombinerUtenNull { it.toList() }
-        .map { vilkårResultater ->
-            vilkårResultater?.let {
-                VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
-                    person = person,
-                    vilkårResultaterForVedtaksperiode = it.map { vilkårResultat ->
-                        VilkårResultatForVedtaksperiode(
-                            vilkårResultat,
-                        )
-                    },
-                )
+    ): Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned> =
+        this
+            .map {
+                listOf(månedPeriodeAv(null, null, it))
+                    .tilTidslinje()
             }
-        }
+            .kombinerUtenNull { it.toList() }
+            .map { vilkårResultater ->
+                vilkårResultater?.let {
+                    VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
+                        person = person,
+                        vilkårResultaterForVedtaksperiode =
+                            it.map { vilkårResultat ->
+                                VilkårResultatForVedtaksperiode(
+                                    vilkårResultat,
+                                )
+                            },
+                    )
+                }
+            }
 
     private fun Tidslinje<List<VilkårResultat>, Måned>.tilGrunnlagForPersonTidslinje(
         person: Person,
         erUtbetalingSmåbarnstilleggTidslinje: Tidslinje<Boolean, Måned>,
         vilkårRolle: PersonType,
     ): Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned> {
-        val kompetanseTidslinje = utfylteKompetanser.filtrerPåAktør(person.aktør)
-            .tilTidslinje().mapIkkeNull { KompetanseForVedtaksperiode(it) }
+        val kompetanseTidslinje =
+            utfylteKompetanser.filtrerPåAktør(person.aktør)
+                .tilTidslinje().mapIkkeNull { KompetanseForVedtaksperiode(it) }
 
-        val utenlandskPeriodebeløpTidslinje = utfylteUtenlandskPeriodebeløp.filtrerPåAktør(person.aktør)
-            .tilTidslinje().mapIkkeNull { UtenlandskPeriodebeløpForVedtaksperiode(it) }
+        val utenlandskPeriodebeløpTidslinje =
+            utfylteUtenlandskPeriodebeløp.filtrerPåAktør(person.aktør)
+                .tilTidslinje().mapIkkeNull { UtenlandskPeriodebeløpForVedtaksperiode(it) }
 
-        val valutakursTidslinje = utfylteValutakurs.filtrerPåAktør(person.aktør)
-            .tilTidslinje().mapIkkeNull { ValutakursForVedtaksperiode(it) }
+        val valutakursTidslinje =
+            utfylteValutakurs.filtrerPåAktør(person.aktør)
+                .tilTidslinje().mapIkkeNull { ValutakursForVedtaksperiode(it) }
 
-        val endredeUtbetalingerTidslinje = utfylteEndredeUtbetalinger.filtrerPåAktør(person.aktør)
-            .tilTidslinje().mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksperiode() }
+        val endredeUtbetalingerTidslinje =
+            utfylteEndredeUtbetalinger.filtrerPåAktør(person.aktør)
+                .tilTidslinje().mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksperiode() }
 
         val overgangsstønadTidslinje =
             perioderOvergangsstønad.filtrerPåAktør(person.aktør)
                 .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(erUtbetalingSmåbarnstilleggTidslinje)
 
-        val andelTilkjentYtelseTidslinje = andelerTilkjentYtelse
-            .filtrerPåAktør(person.aktør).filtrerPåRolle(vilkårRolle).tilAndelerForVedtaksPeriodeTidslinje()
+        val andelTilkjentYtelseTidslinje =
+            andelerTilkjentYtelse
+                .filtrerPåAktør(person.aktør).filtrerPåRolle(vilkårRolle).tilAndelerForVedtaksPeriodeTidslinje()
 
-        val grunnlagTidslinje = this.tilVilkårResultaterForVedtaksPeriodeTidslinje()
-            .kombinerMed(andelTilkjentYtelseTidslinje) { vilkårResultater, andeler ->
-                lagGrunnlagForVilkårOgAndel(
-                    vilkårResultater = vilkårResultater,
-                    person = person,
-                    andeler = andeler,
-                )
-            }.kombinerMedNullable(kompetanseTidslinje) { grunnlagForPerson, kompetanse ->
-                lagGrunnlagMedKompetanse(grunnlagForPerson, kompetanse)
-            }.kombinerMedNullable(valutakursTidslinje) { grunnlagForPerson, valutakurs ->
-                lagGrunnlagMedValutakurs(grunnlagForPerson, valutakurs)
-            }.kombinerMedNullable(utenlandskPeriodebeløpTidslinje) { grunnlagForPerson, utenlandskPeriodebeløp ->
-                lagGrunnlagMedUtenlandskPeriodebeløp(grunnlagForPerson, utenlandskPeriodebeløp)
-            }.kombinerMedNullable(endredeUtbetalingerTidslinje) { grunnlagForPerson, endretUtbetalingAndel ->
-                lagGrunnlagMedEndretUtbetalingAndel(grunnlagForPerson, endretUtbetalingAndel)
-            }.kombinerMedNullable(overgangsstønadTidslinje) { grunnlagForPerson, overgangsstønad ->
-                lagGrunnlagMedOvergangsstønad(grunnlagForPerson, overgangsstønad)
-            }.filtrerIkkeNull()
+        val grunnlagTidslinje =
+            this.tilVilkårResultaterForVedtaksPeriodeTidslinje()
+                .kombinerMed(andelTilkjentYtelseTidslinje) { vilkårResultater, andeler ->
+                    lagGrunnlagForVilkårOgAndel(
+                        vilkårResultater = vilkårResultater,
+                        person = person,
+                        andeler = andeler,
+                    )
+                }.kombinerMedNullable(kompetanseTidslinje) { grunnlagForPerson, kompetanse ->
+                    lagGrunnlagMedKompetanse(grunnlagForPerson, kompetanse)
+                }.kombinerMedNullable(valutakursTidslinje) { grunnlagForPerson, valutakurs ->
+                    lagGrunnlagMedValutakurs(grunnlagForPerson, valutakurs)
+                }.kombinerMedNullable(utenlandskPeriodebeløpTidslinje) { grunnlagForPerson, utenlandskPeriodebeløp ->
+                    lagGrunnlagMedUtenlandskPeriodebeløp(grunnlagForPerson, utenlandskPeriodebeløp)
+                }.kombinerMedNullable(endredeUtbetalingerTidslinje) { grunnlagForPerson, endretUtbetalingAndel ->
+                    lagGrunnlagMedEndretUtbetalingAndel(grunnlagForPerson, endretUtbetalingAndel)
+                }.kombinerMedNullable(overgangsstønadTidslinje) { grunnlagForPerson, overgangsstønad ->
+                    lagGrunnlagMedOvergangsstønad(grunnlagForPerson, overgangsstønad)
+                }.filtrerIkkeNull()
 
         return grunnlagTidslinje
             .slåSammenLike()
@@ -286,9 +304,10 @@ fun hentOrdinæreVilkårForSøkerForskjøvetTidslinje(
 ): Tidslinje<List<VilkårResultat>, Måned> {
     val søkerPersonResultater = personResultater.single { it.aktør == søker.aktør }
 
-    val (_, vilkårResultaterUtenOverlappendeGenerelleAvslag) = splittOppPåErOverlappendeGenerelleAvslag(
-        søkerPersonResultater,
-    )
+    val (_, vilkårResultaterUtenOverlappendeGenerelleAvslag) =
+        splittOppPåErOverlappendeGenerelleAvslag(
+            søkerPersonResultater,
+        )
 
     return vilkårResultaterUtenOverlappendeGenerelleAvslag
         .tilForskjøvedeVilkårTidslinjer(søker.fødselsdato)
@@ -311,19 +330,20 @@ private fun hentErMinstEttBarnMedUtbetalingTidslinje(
             fagsakType = fagsakType,
         ).map { it != null }
 
-    val barnSineVilkårErOppfyltTidslinjer = personResultater
-        .mapNotNull { personResultat ->
-            val person = persongrunnlag.personer.single { it.aktør == personResultat.aktør }
+    val barnSineVilkårErOppfyltTidslinjer =
+        personResultater
+            .mapNotNull { personResultat ->
+                val person = persongrunnlag.personer.single { it.aktør == personResultat.aktør }
 
-            if (person.type == PersonType.BARN) {
-                personResultat.tilTidslinjeForSplittForPerson(
-                    person = persongrunnlag.personer.single { it.aktør == personResultat.aktør },
-                    fagsakType = fagsakType,
-                ).map { it != null }
-            } else {
-                null
+                if (person.type == PersonType.BARN) {
+                    personResultat.tilTidslinjeForSplittForPerson(
+                        person = persongrunnlag.personer.single { it.aktør == personResultat.aktør },
+                        fagsakType = fagsakType,
+                    ).map { it != null }
+                } else {
+                    null
+                }
             }
-        }
 
     return barnSineVilkårErOppfyltTidslinjer
         .map {
@@ -347,30 +367,33 @@ private fun List<VilkårResultat>.hentForskjøvedeVilkårResultaterForPersonsAnd
     val forskjøvedeVilkårResultaterForPerson = this.tilForskjøvedeVilkårTidslinjer(person.fødselsdato).kombiner { it }
 
     return when (vilkårRolle) {
-        PersonType.SØKER -> forskjøvedeVilkårResultaterForPerson.map { vilkårResultater ->
-            if (bareSøkerOgUregistrertBarn) {
-                vilkårResultater?.toList()?.takeIf { it.isNotEmpty() }
-            } else {
-                vilkårResultater?.filtrerErIkkeOrdinærtFor(vilkårRolle)?.takeIf { it.isNotEmpty() }
-            }
-        }.kombinerMed(erMinstEttBarnMedUtbetalingTidslinje) { vilkårResultaterForSøker, erMinstEttBarnMedUtbetaling ->
-            vilkårResultaterForSøker?.takeIf { erMinstEttBarnMedUtbetaling == true || vilkårResultaterForSøker.any { it.erEksplisittAvslagPåSøknad == true } }
-        }
-
-        PersonType.BARN -> if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG || fagsakType == FagsakType.INSTITUSJON) {
-            forskjøvedeVilkårResultaterForPerson.map { it?.toList() }
-        } else {
-            forskjøvedeVilkårResultaterForPerson
-                .kombinerMed(ordinæreVilkårForSøkerTidslinje) { vilkårResultaterBarn, vilkårResultaterSøker ->
-                    slåSammenHvisMulig(vilkårResultaterBarn, vilkårResultaterSøker)?.toList()
+        PersonType.SØKER ->
+            forskjøvedeVilkårResultaterForPerson.map { vilkårResultater ->
+                if (bareSøkerOgUregistrertBarn) {
+                    vilkårResultater?.toList()?.takeIf { it.isNotEmpty() }
+                } else {
+                    vilkårResultater?.filtrerErIkkeOrdinærtFor(vilkårRolle)?.takeIf { it.isNotEmpty() }
                 }
-        }
+            }.kombinerMed(erMinstEttBarnMedUtbetalingTidslinje) { vilkårResultaterForSøker, erMinstEttBarnMedUtbetaling ->
+                vilkårResultaterForSøker?.takeIf { erMinstEttBarnMedUtbetaling == true || vilkårResultaterForSøker.any { it.erEksplisittAvslagPåSøknad == true } }
+            }
 
-        PersonType.ANNENPART -> if (this.isNotEmpty()) {
-            throw Feil("Ikke implementert for annenpart")
-        } else {
-            emptyList<Periode<List<VilkårResultat>, Måned>>().tilTidslinje()
-        }
+        PersonType.BARN ->
+            if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG || fagsakType == FagsakType.INSTITUSJON) {
+                forskjøvedeVilkårResultaterForPerson.map { it?.toList() }
+            } else {
+                forskjøvedeVilkårResultaterForPerson
+                    .kombinerMed(ordinæreVilkårForSøkerTidslinje) { vilkårResultaterBarn, vilkårResultaterSøker ->
+                        slåSammenHvisMulig(vilkårResultaterBarn, vilkårResultaterSøker)?.toList()
+                    }
+            }
+
+        PersonType.ANNENPART ->
+            if (this.isNotEmpty()) {
+                throw Feil("Ikke implementert for annenpart")
+            } else {
+                emptyList<Periode<List<VilkårResultat>, Måned>>().tilTidslinje()
+            }
     }
 }
 
@@ -398,8 +421,9 @@ private fun lagGrunnlagForVilkårOgAndel(
 
     return if (!andelerListe.isNullOrEmpty()) {
         VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
-            vilkårResultaterForVedtaksperiode = vilkårResultater
-                ?: error("vilkårResultatene burde alltid finnes om vi andeler."),
+            vilkårResultaterForVedtaksperiode =
+                vilkårResultater
+                    ?: error("vilkårResultatene burde alltid finnes om vi andeler."),
             person = person,
             andeler = andeler,
         )

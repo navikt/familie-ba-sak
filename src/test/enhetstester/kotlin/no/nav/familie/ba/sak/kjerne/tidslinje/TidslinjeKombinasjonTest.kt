@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class TidslinjeKombinasjonTest {
-
     val kombinator = { venstre: Char?, høyre: Char? ->
         (venstre?.toString() ?: "").trim() + (høyre?.toString() ?: "").trim()
     }
@@ -65,7 +64,11 @@ class TidslinjeKombinasjonTest {
         )
     }
 
-    private fun assertTidslinjer(linje1: String, linje2: String, vararg forventet: String) {
+    private fun assertTidslinjer(
+        linje1: String,
+        linje2: String,
+        vararg forventet: String,
+    ) {
         val fom = jan(2020)
         val char1 = linje1.tilCharTidslinje(fom)
         val char2 = linje2.tilCharTidslinje(fom)

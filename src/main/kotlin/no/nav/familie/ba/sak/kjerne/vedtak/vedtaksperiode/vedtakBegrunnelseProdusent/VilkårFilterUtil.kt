@@ -16,12 +16,13 @@ fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
 ): Boolean {
     if (this.vilkår.isEmpty()) return false
-    val utgjørendeVilkårResultater = finnUtgjørendeVilkår(
-        begrunnelseGrunnlag = begrunnelseGrunnlag,
-        sanityBegrunnelse = this,
-        utvidetVilkårPåSøkerIPeriode = utvidetVilkårPåSøkerIPeriode,
-        utvidetVilkårPåSøkerIForrigePeriode = utvidetVilkårPåSøkerIForrigePeriode,
-    )
+    val utgjørendeVilkårResultater =
+        finnUtgjørendeVilkår(
+            begrunnelseGrunnlag = begrunnelseGrunnlag,
+            sanityBegrunnelse = this,
+            utvidetVilkårPåSøkerIPeriode = utvidetVilkårPåSøkerIPeriode,
+            utvidetVilkårPåSøkerIForrigePeriode = utvidetVilkårPåSøkerIForrigePeriode,
+        )
 
     return this.erLikVilkårOgUtdypendeVilkårIPeriode(utgjørendeVilkårResultater)
 }
@@ -76,18 +77,21 @@ private fun finnUtgjørendeVilkår(
         vilkårResultaterForrigePeriode?.filter { it.resultat == Resultat.OPPFYLT }
             ?: emptyList()
 
-    val vilkårTjent = hentVilkårResultaterTjent(
-        oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
-        oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
-    )
-    val vilkårEndret = hentOppfylteVilkårResultaterEndret(
-        oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
-        oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
-    )
-    val vilkårTapt = hentVilkårResultaterTapt(
-        oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
-        oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
-    )
+    val vilkårTjent =
+        hentVilkårResultaterTjent(
+            oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
+            oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
+        )
+    val vilkårEndret =
+        hentOppfylteVilkårResultaterEndret(
+            oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
+            oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
+        )
+    val vilkårTapt =
+        hentVilkårResultaterTapt(
+            oppfylteVilkårResultaterDennePerioden = oppfylteVilkårResultaterDennePerioden,
+            oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
+        )
 
     return if (begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget()) {
         when (sanityBegrunnelse.periodeResultat) {
@@ -101,10 +105,11 @@ private fun finnUtgjørendeVilkår(
         }
     } else {
         vilkårTapt.takeIf {
-            sanityBegrunnelse.periodeResultat in listOf(
-                SanityPeriodeResultat.IKKE_INNVILGET,
-                SanityPeriodeResultat.REDUKSJON,
-            )
+            sanityBegrunnelse.periodeResultat in
+                listOf(
+                    SanityPeriodeResultat.IKKE_INNVILGET,
+                    SanityPeriodeResultat.REDUKSJON,
+                )
         } ?: emptyList()
     }.toSet()
 }

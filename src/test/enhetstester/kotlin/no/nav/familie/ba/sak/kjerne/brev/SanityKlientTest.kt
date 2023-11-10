@@ -5,7 +5,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class SanityKlientTest {
-
     @Test
     fun `Skal teste at vi klarer å hente begrunnelser fra sanity-apiet`() {
         val hentBegrunnelser = testSanityKlient.hentBegrunnelser()

@@ -39,7 +39,6 @@ class VilkårController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
-
     @PutMapping(path = ["/{behandlingId}/{vilkaarId}"])
     fun endreVilkår(
         @PathVariable behandlingId: Long,
@@ -128,7 +127,10 @@ class VilkårController(
     }
 
     @PostMapping(path = ["/{behandlingId}"])
-    fun nyttVilkår(@PathVariable behandlingId: Long, @RequestBody restNyttVilkår: RestNyttVilkår): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    fun nyttVilkår(
+        @PathVariable behandlingId: Long,
+        @RequestBody restNyttVilkår: RestNyttVilkår,
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,

@@ -6,7 +6,6 @@ data class DagTidspunkt internal constructor(
     internal val dato: LocalDate,
     override val uendelighet: Uendelighet,
 ) : Tidspunkt<Dag>(uendelighet) {
-
     fun tilLocalDateEllerNull(): LocalDate? {
         return if (uendelighet != Uendelighet.INGEN) {
             null
@@ -30,10 +29,11 @@ data class DagTidspunkt internal constructor(
         return when (uendelighet) {
             Uendelighet.FORTID -> "<--"
             else -> ""
-        } + dato + when (uendelighet) {
-            Uendelighet.FREMTID -> "-->"
-            else -> ""
-        }
+        } + dato +
+            when (uendelighet) {
+                Uendelighet.FREMTID -> "-->"
+                else -> ""
+            }
     }
 
     override fun sammenliknMed(tidspunkt: Tidspunkt<Dag>): Int {
@@ -58,8 +58,11 @@ data class DagTidspunkt internal constructor(
 
     companion object {
         fun nå() = DagTidspunkt(LocalDate.now(), Uendelighet.INGEN)
+
         fun uendeligLengeSiden(dato: LocalDate = LocalDate.now()) = DagTidspunkt(dato, uendelighet = Uendelighet.FORTID)
+
         fun uendeligLengeTil(dato: LocalDate = LocalDate.now()) = DagTidspunkt(dato, uendelighet = Uendelighet.FREMTID)
+
         fun med(dato: LocalDate) = DagTidspunkt(dato, Uendelighet.INGEN)
 
         internal fun LocalDate?.tilTidspunktEllerUendeligTidlig(defaultUendelighetDato: LocalDate? = null) =
@@ -68,7 +71,10 @@ data class DagTidspunkt internal constructor(
         internal fun LocalDate?.tilTidspunktEllerUendeligSent(defaultUendelighetDato: LocalDate? = null) =
             this.tilTidspunktEllerUendelig(defaultUendelighetDato, Uendelighet.FREMTID)
 
-        private fun LocalDate?.tilTidspunktEllerUendelig(default: LocalDate?, uendelighet: Uendelighet) =
+        private fun LocalDate?.tilTidspunktEllerUendelig(
+            default: LocalDate?,
+            uendelighet: Uendelighet,
+        ) =
             this?.let { DagTidspunkt(it, Uendelighet.INGEN) } ?: DagTidspunkt(
                 default ?: LocalDate.now(),
                 uendelighet,

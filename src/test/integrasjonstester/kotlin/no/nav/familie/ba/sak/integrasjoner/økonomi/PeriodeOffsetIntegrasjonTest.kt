@@ -32,33 +32,23 @@ import java.time.LocalDateTime
 class PeriodeOffsetIntegrasjonTest(
     @Autowired
     private val behandlingService: BehandlingService,
-
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
-
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-
     @Autowired
     private val beregningService: BeregningService,
-
     @Autowired
     private val personidentService: PersonidentService,
-
     @Autowired
     private val vedtakService: VedtakService,
-
     @Autowired
     private val simuleringService: SimuleringService,
-
     @Autowired
     private val iverksettMotOppdrag: IverksettMotOppdrag,
-
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     @Tag("integration")
     fun `Sjekk at offset settes på andel tilkjent ytelse når behandlingen iverksettes`() {
@@ -189,26 +179,27 @@ class PeriodeOffsetIntegrasjonTest(
     ): Vilkårsvurdering {
         val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
-        vilkårsvurdering.personResultater = setOf(
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                person = lagPerson(type = PersonType.SØKER, aktør = søkerAktør),
-                resultat = Resultat.OPPFYLT,
-                periodeFom = stønadFom,
-                periodeTom = stønadTom,
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.SØKER,
-            ),
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                person = lagPerson(type = PersonType.BARN, aktør = barnAktør, fødselsdato = stønadFom),
-                resultat = Resultat.OPPFYLT,
-                periodeFom = stønadFom,
-                periodeTom = stønadTom,
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN,
-            ),
-        )
+        vilkårsvurdering.personResultater =
+            setOf(
+                lagPersonResultat(
+                    vilkårsvurdering = vilkårsvurdering,
+                    person = lagPerson(type = PersonType.SØKER, aktør = søkerAktør),
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = stønadFom,
+                    periodeTom = stønadTom,
+                    lagFullstendigVilkårResultat = true,
+                    personType = PersonType.SØKER,
+                ),
+                lagPersonResultat(
+                    vilkårsvurdering = vilkårsvurdering,
+                    person = lagPerson(type = PersonType.BARN, aktør = barnAktør, fødselsdato = stønadFom),
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = stønadFom,
+                    periodeTom = stønadTom,
+                    lagFullstendigVilkårResultat = true,
+                    personType = PersonType.BARN,
+                ),
+            )
         return vilkårsvurdering
     }
 }

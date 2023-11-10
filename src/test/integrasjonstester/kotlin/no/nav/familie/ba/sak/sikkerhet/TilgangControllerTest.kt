@@ -14,14 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired
 class TilgangControllerTest(
     @Autowired
     private val tilgangController: TilgangController,
-
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService,
-
     @Autowired
     private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun testHarTilgangTilKode6Person() {
         val fnr = FnrGenerator.generer()

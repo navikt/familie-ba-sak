@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query
 import java.time.LocalDateTime
 
 interface VedtakRepository : JpaRepository<Vedtak, Long> {
-
     @Query(value = "SELECT v FROM Vedtak v WHERE v.behandling.id = :behandlingId")
     fun finnVedtakForBehandling(behandlingId: Long): List<Vedtak>
 

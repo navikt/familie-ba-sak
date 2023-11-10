@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class OppdaterVilkårsvurderingTest {
-
     @Test
     fun `Skal legge til nytt vilkår`() {
         val fnr1 = randomFnr()
@@ -70,10 +69,11 @@ class OppdaterVilkårsvurderingTest {
         val aktørId2 = randomAktør()
         val behandling = lagBehandling()
         val resA = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
-        val resB = lagVilkårsvurdering(
-            behandling = behandling,
-            fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2)),
-        )
+        val resB =
+            lagVilkårsvurdering(
+                behandling = behandling,
+                fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2)),
+            )
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(2, oppdatert.personResultater.size)
@@ -87,10 +87,11 @@ class OppdaterVilkårsvurderingTest {
         val aktørId1 = randomAktør()
         val aktørId2 = randomAktør()
         val behandling = lagBehandling()
-        val resA = lagVilkårsvurdering(
-            behandling = behandling,
-            fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2)),
-        )
+        val resA =
+            lagVilkårsvurdering(
+                behandling = behandling,
+                fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2)),
+            )
         val resB = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
@@ -105,10 +106,11 @@ class OppdaterVilkårsvurderingTest {
         val aktørId1 = tilAktør(fnr1)
         val aktørId2 = tilAktør(fnr2)
         val behandling = lagBehandling()
-        val resultat1 = lagVilkårsvurdering(
-            behandling = behandling,
-            fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2)),
-        )
+        val resultat1 =
+            lagVilkårsvurdering(
+                behandling = behandling,
+                fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2)),
+            )
         val resultat2 = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr2, aktørId2)))
 
         val resterende = flyttResultaterTilInitielt(resultat2, resultat1).second
@@ -133,10 +135,11 @@ class OppdaterVilkårsvurderingTest {
         val init =
             lagBasicVilkårsvurdering(
                 behandling = nyBehandling,
-                personer = listOf(
-                    lagPerson(type = PersonType.SØKER, aktør = søkerAktørId),
-                    lagPerson(type = PersonType.BARN),
-                ),
+                personer =
+                    listOf(
+                        lagPerson(type = PersonType.SØKER, aktør = søkerAktørId),
+                        lagPerson(type = PersonType.BARN),
+                    ),
             )
         val aktivMedBosattIRiketIkkeOppfylt = Vilkårsvurdering(behandling = forrigeBehandling)
         val personResultat =
@@ -157,10 +160,11 @@ class OppdaterVilkårsvurderingTest {
         personResultat.setSortedVilkårResultater(bosattIRiketVilkårResultater)
         aktivMedBosattIRiketIkkeOppfylt.personResultater = setOf(personResultat)
 
-        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
-            initiellVilkårsvurdering = init,
-            aktivVilkårsvurdering = aktivMedBosattIRiketIkkeOppfylt,
-        )
+        val (nyInit, nyAktiv) =
+            flyttResultaterTilInitielt(
+                initiellVilkårsvurdering = init,
+                aktivVilkårsvurdering = aktivMedBosattIRiketIkkeOppfylt,
+            )
 
         val nyInitBosattIRiketVilkår =
             nyInit.personResultater.find { it.aktør == søkerAktørId }?.vilkårResultater?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
@@ -180,10 +184,11 @@ class OppdaterVilkårsvurderingTest {
         val init =
             lagBasicVilkårsvurdering(
                 behandling = nyBehandling,
-                personer = listOf(
-                    lagPerson(type = PersonType.SØKER, aktør = søkerAktørId),
-                    lagPerson(type = PersonType.BARN),
-                ),
+                personer =
+                    listOf(
+                        lagPerson(type = PersonType.SØKER, aktør = søkerAktørId),
+                        lagPerson(type = PersonType.BARN),
+                    ),
             )
         val aktivMedBosattIRiketDelvisIkkeOppfylt = Vilkårsvurdering(behandling = forrigeBehandling)
         val personResultat =
@@ -211,10 +216,11 @@ class OppdaterVilkårsvurderingTest {
         personResultat.setSortedVilkårResultater(bosattIRiketVilkårResultater)
         aktivMedBosattIRiketDelvisIkkeOppfylt.personResultater = setOf(personResultat)
 
-        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
-            initiellVilkårsvurdering = init,
-            aktivVilkårsvurdering = aktivMedBosattIRiketDelvisIkkeOppfylt,
-        )
+        val (nyInit, nyAktiv) =
+            flyttResultaterTilInitielt(
+                initiellVilkårsvurdering = init,
+                aktivVilkårsvurdering = aktivMedBosattIRiketDelvisIkkeOppfylt,
+            )
 
         val nyInitBosattIRiketVilkår =
             nyInit.personResultater.find { it.aktør == søkerAktørId }?.vilkårResultater?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
@@ -239,12 +245,13 @@ class OppdaterVilkårsvurderingTest {
                 listOf(Vilkår.UTVIDET_BARNETRYGD),
             )
 
-        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
-            initiellVilkårsvurdering = initUtenUtvidetVilkår,
-            aktivVilkårsvurdering = aktivMedUtvidetVilkår,
-            aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
-            løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-        )
+        val (nyInit, nyAktiv) =
+            flyttResultaterTilInitielt(
+                initiellVilkårsvurdering = initUtenUtvidetVilkår,
+                aktivVilkårsvurdering = aktivMedUtvidetVilkår,
+                aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
+                løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
+            )
 
         val nyInitInnholderUtvidetVilkår =
             nyInit.personResultater.first().vilkårResultater.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
@@ -267,11 +274,12 @@ class OppdaterVilkårsvurderingTest {
                 listOf(Vilkår.UTVIDET_BARNETRYGD),
             )
 
-        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
-            initiellVilkårsvurdering = initUtenUtvidetVilkår,
-            aktivVilkårsvurdering = aktivMedUtvidetVilkår,
-            løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-        )
+        val (nyInit, nyAktiv) =
+            flyttResultaterTilInitielt(
+                initiellVilkårsvurdering = initUtenUtvidetVilkår,
+                aktivVilkårsvurdering = aktivMedUtvidetVilkår,
+                løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
+            )
 
         val nyInitInnholderUtvidetVilkår =
             nyInit.personResultater.first().vilkårResultater.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
@@ -294,12 +302,13 @@ class OppdaterVilkårsvurderingTest {
                 listOf(Vilkår.UTVIDET_BARNETRYGD),
             )
 
-        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
-            initiellVilkårsvurdering = initUtenUtvidetVilkår,
-            aktivVilkårsvurdering = aktivMedUtvidetVilkår,
-            løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR,
-            aktørerMedUtvidetAndelerIForrigeBehandling = emptyList(),
-        )
+        val (nyInit, nyAktiv) =
+            flyttResultaterTilInitielt(
+                initiellVilkårsvurdering = initUtenUtvidetVilkår,
+                aktivVilkårsvurdering = aktivMedUtvidetVilkår,
+                løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                aktørerMedUtvidetAndelerIForrigeBehandling = emptyList(),
+            )
 
         val nyInitInnholderIkkeUtvidetVilkår =
             nyInit.personResultater.first().vilkårResultater.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
@@ -345,12 +354,13 @@ class OppdaterVilkårsvurderingTest {
         personResultat.setSortedVilkårResultater(utvidetVilkårResultater)
         aktivVilkårsvurderingMedUtvidet.personResultater = setOf(personResultat)
 
-        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
-            initiellVilkårsvurdering = initUtenUtvidetVilkår,
-            aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
-            løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-            aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
-        )
+        val (nyInit, nyAktiv) =
+            flyttResultaterTilInitielt(
+                initiellVilkårsvurdering = initUtenUtvidetVilkår,
+                aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
+                løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
+                aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
+            )
 
         val nyInitUtvidetVilkår =
             nyInit.personResultater.first().vilkårResultater.single { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
@@ -393,12 +403,13 @@ class OppdaterVilkårsvurderingTest {
         personResultat.setSortedVilkårResultater(utvidetVilkårResultater)
         aktivVilkårsvurderingMedUtvidet.personResultater = setOf(personResultat)
 
-        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
-            initiellVilkårsvurdering = initUtenUtvidetVilkår,
-            aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
-            løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-            aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
-        )
+        val (nyInit, nyAktiv) =
+            flyttResultaterTilInitielt(
+                initiellVilkårsvurdering = initUtenUtvidetVilkår,
+                aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
+                løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
+                aktørerMedUtvidetAndelerIForrigeBehandling = listOf(søkerAktørId),
+            )
 
         val nyInitUtvidetVilkår =
             nyInit.personResultater.first().vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
@@ -442,12 +453,13 @@ class OppdaterVilkårsvurderingTest {
         personResultat.setSortedVilkårResultater(utvidetVilkårResultater)
         aktivVilkårsvurderingMedUtvidetIkkeOppfylt.personResultater = setOf(personResultat)
 
-        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
-            initiellVilkårsvurdering = initUtenUtvidetVilkår,
-            aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidetIkkeOppfylt,
-            løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-            aktørerMedUtvidetAndelerIForrigeBehandling = emptyList(),
-        )
+        val (nyInit, nyAktiv) =
+            flyttResultaterTilInitielt(
+                initiellVilkårsvurdering = initUtenUtvidetVilkår,
+                aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidetIkkeOppfylt,
+                løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
+                aktørerMedUtvidetAndelerIForrigeBehandling = emptyList(),
+            )
 
         val nyInitInneholderIkkeUtvidetVilkår =
             nyInit.personResultater.first().vilkårResultater.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
@@ -464,22 +476,25 @@ class OppdaterVilkårsvurderingTest {
         val initiellVilkårsvurderingUtenAndreVurderinger =
             lagBasicVilkårsvurdering(
                 behandling = nyBehandling,
-                personer = listOf(
-                    lagPerson(type = PersonType.SØKER, aktør = søkerAktørId),
-                    lagPerson(type = PersonType.BARN),
-                ),
+                personer =
+                    listOf(
+                        lagPerson(type = PersonType.SØKER, aktør = søkerAktørId),
+                        lagPerson(type = PersonType.BARN),
+                    ),
             )
         val aktivVilkårsvurdering = initiellVilkårsvurderingUtenAndreVurderinger.copy()
         aktivVilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
             .leggTilBlankAnnenVurdering(AnnenVurderingType.OPPLYSNINGSPLIKT)
 
-        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
-            initiellVilkårsvurdering = initiellVilkårsvurderingUtenAndreVurderinger,
-            aktivVilkårsvurdering = aktivVilkårsvurdering,
-        )
+        val (nyInit, nyAktiv) =
+            flyttResultaterTilInitielt(
+                initiellVilkårsvurdering = initiellVilkårsvurderingUtenAndreVurderinger,
+                aktivVilkårsvurdering = aktivVilkårsvurdering,
+            )
 
-        val nyInitInnholderOpplysningspliktVilkår = nyInit.personResultater.find { it.erSøkersResultater() }!!.andreVurderinger
-            .any { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
+        val nyInitInnholderOpplysningspliktVilkår =
+            nyInit.personResultater.find { it.erSøkersResultater() }!!.andreVurderinger
+                .any { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
 
         Assertions.assertTrue(nyInitInnholderOpplysningspliktVilkår)
         Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
@@ -500,105 +515,122 @@ class OppdaterVilkårsvurderingTest {
         return vilkårsvurdering
     }
 
-    fun lagVilkårsvurdering(fnrAktør: List<Pair<String, Aktør>>, behandling: Behandling): Vilkårsvurdering {
-        val vilkårsvurdering = Vilkårsvurdering(
-            behandling = behandling,
-        )
-
-        vilkårsvurdering.personResultater = fnrAktør.map {
-            val personResultat = PersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = it.second,
+    fun lagVilkårsvurdering(
+        fnrAktør: List<Pair<String, Aktør>>,
+        behandling: Behandling,
+    ): Vilkårsvurdering {
+        val vilkårsvurdering =
+            Vilkårsvurdering(
+                behandling = behandling,
             )
 
-            personResultat.setSortedVilkårResultater(
-                setOf(
-                    VilkårResultat(
-                        personResultat = personResultat,
-                        vilkårType = Vilkår.BOSATT_I_RIKET,
-                        resultat = Resultat.OPPFYLT,
-                        periodeFom = LocalDate.now(),
-                        periodeTom = LocalDate.now(),
-                        begrunnelse = "",
-                        sistEndretIBehandlingId = behandling.id,
-                    ),
-                    VilkårResultat(
-                        personResultat = personResultat,
-                        vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                        resultat = Resultat.OPPFYLT,
-                        periodeFom = LocalDate.now(),
-                        periodeTom = LocalDate.now(),
-                        begrunnelse = "",
-                        sistEndretIBehandlingId = behandling.id,
-                    ),
-                ),
-            )
+        vilkårsvurdering.personResultater =
+            fnrAktør.map {
+                val personResultat =
+                    PersonResultat(
+                        vilkårsvurdering = vilkårsvurdering,
+                        aktør = it.second,
+                    )
 
-            personResultat
-        }.toSet()
+                personResultat.setSortedVilkårResultater(
+                    setOf(
+                        VilkårResultat(
+                            personResultat = personResultat,
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.now(),
+                            periodeTom = LocalDate.now(),
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = behandling.id,
+                        ),
+                        VilkårResultat(
+                            personResultat = personResultat,
+                            vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.now(),
+                            periodeTom = LocalDate.now(),
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = behandling.id,
+                        ),
+                    ),
+                )
+
+                personResultat
+            }.toSet()
 
         return vilkårsvurdering
     }
 
-    fun lagVilkårsvurderingResultatB(fnrAktør: List<Pair<String, Aktør>>, behandling: Behandling): Vilkårsvurdering {
-        val vilkårsvurdering = Vilkårsvurdering(
-            behandling = behandling,
-        )
-
-        vilkårsvurdering.personResultater = fnrAktør.map {
-            val personResultat = PersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = it.second,
+    fun lagVilkårsvurderingResultatB(
+        fnrAktør: List<Pair<String, Aktør>>,
+        behandling: Behandling,
+    ): Vilkårsvurdering {
+        val vilkårsvurdering =
+            Vilkårsvurdering(
+                behandling = behandling,
             )
 
-            personResultat.setSortedVilkårResultater(
-                setOf(
-                    VilkårResultat(
-                        personResultat = personResultat,
-                        vilkårType = Vilkår.BOSATT_I_RIKET,
-                        resultat = Resultat.OPPFYLT,
-                        periodeFom = LocalDate.now(),
-                        periodeTom = LocalDate.now(),
-                        begrunnelse = "",
-                        sistEndretIBehandlingId = behandling.id,
+        vilkårsvurdering.personResultater =
+            fnrAktør.map {
+                val personResultat =
+                    PersonResultat(
+                        vilkårsvurdering = vilkårsvurdering,
+                        aktør = it.second,
+                    )
+
+                personResultat.setSortedVilkårResultater(
+                    setOf(
+                        VilkårResultat(
+                            personResultat = personResultat,
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.now(),
+                            periodeTom = LocalDate.now(),
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = behandling.id,
+                        ),
+                        VilkårResultat(
+                            personResultat = personResultat,
+                            vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.now(),
+                            periodeTom = LocalDate.now(),
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = behandling.id,
+                        ),
+                        VilkårResultat(
+                            personResultat = personResultat,
+                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.now(),
+                            periodeTom = LocalDate.now(),
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = behandling.id,
+                        ),
                     ),
-                    VilkårResultat(
-                        personResultat = personResultat,
-                        vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                        resultat = Resultat.OPPFYLT,
-                        periodeFom = LocalDate.now(),
-                        periodeTom = LocalDate.now(),
-                        begrunnelse = "",
-                        sistEndretIBehandlingId = behandling.id,
-                    ),
-                    VilkårResultat(
-                        personResultat = personResultat,
-                        vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                        resultat = Resultat.OPPFYLT,
-                        periodeFom = LocalDate.now(),
-                        periodeTom = LocalDate.now(),
-                        begrunnelse = "",
-                        sistEndretIBehandlingId = behandling.id,
-                    ),
-                ),
-            )
-            personResultat
-        }.toSet()
+                )
+                personResultat
+            }.toSet()
 
         return vilkårsvurdering
     }
 
-    fun lagBasicVilkårsvurdering(behandling: Behandling, personer: List<Person>): Vilkårsvurdering {
-        val vilkårsvurdering = Vilkårsvurdering(
-            behandling = behandling,
-        )
-
-        val personResultater = personer.map { person ->
-            genererPersonResultatForPerson(
-                vilkårsvurdering = vilkårsvurdering,
-                person = person,
+    fun lagBasicVilkårsvurdering(
+        behandling: Behandling,
+        personer: List<Person>,
+    ): Vilkårsvurdering {
+        val vilkårsvurdering =
+            Vilkårsvurdering(
+                behandling = behandling,
             )
-        }.toSet()
+
+        val personResultater =
+            personer.map { person ->
+                genererPersonResultatForPerson(
+                    vilkårsvurdering = vilkårsvurdering,
+                    person = person,
+                )
+            }.toSet()
 
         vilkårsvurdering.personResultater = personResultater
 

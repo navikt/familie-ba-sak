@@ -27,7 +27,6 @@ class StatusFraOppdrag(
     private val økonomiService: ØkonomiService,
     private val taskRepository: TaskRepositoryWrapper,
 ) : BehandlingSteg<StatusFraOppdragMedTask> {
-
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
         data: StatusFraOppdragMedTask,
@@ -55,14 +54,16 @@ class StatusFraOppdrag(
             }
 
             when (nesteSteg) {
-                StegType.JOURNALFØR_VEDTAKSBREV -> opprettTaskJournalførVedtaksbrev(
-                    statusFraOppdragDTO.vedtaksId,
-                    task,
-                )
-                StegType.IVERKSETT_MOT_FAMILIE_TILBAKE -> opprettTaskIverksettMotTilbake(
-                    statusFraOppdragDTO.behandlingsId,
-                    task.metadata,
-                )
+                StegType.JOURNALFØR_VEDTAKSBREV ->
+                    opprettTaskJournalførVedtaksbrev(
+                        statusFraOppdragDTO.vedtaksId,
+                        task,
+                    )
+                StegType.IVERKSETT_MOT_FAMILIE_TILBAKE ->
+                    opprettTaskIverksettMotTilbake(
+                        statusFraOppdragDTO.behandlingsId,
+                        task.metadata,
+                    )
                 StegType.FERDIGSTILLE_BEHANDLING -> opprettFerdigstillBehandling(statusFraOppdragDTO)
                 else -> error("Neste task er ikke implementert.")
             }
@@ -72,27 +73,36 @@ class StatusFraOppdrag(
     }
 
     private fun opprettFerdigstillBehandling(statusFraOppdragDTO: StatusFraOppdragDTO) {
-        val ferdigstillBehandling = FerdigstillBehandlingTask.opprettTask(
-            søkerIdent = statusFraOppdragDTO.aktørId,
-            behandlingsId = statusFraOppdragDTO.behandlingsId,
-        )
+        val ferdigstillBehandling =
+            FerdigstillBehandlingTask.opprettTask(
+                søkerIdent = statusFraOppdragDTO.aktørId,
+                behandlingsId = statusFraOppdragDTO.behandlingsId,
+            )
         taskRepository.save(ferdigstillBehandling)
     }
 
-    private fun opprettTaskIverksettMotTilbake(behandlingsId: Long, metadata: Properties) {
-        val ferdigstillBehandling = IverksettMotFamilieTilbakeTask.opprettTask(
-            behandlingsId,
-            metadata,
-        )
+    private fun opprettTaskIverksettMotTilbake(
+        behandlingsId: Long,
+        metadata: Properties,
+    ) {
+        val ferdigstillBehandling =
+            IverksettMotFamilieTilbakeTask.opprettTask(
+                behandlingsId,
+                metadata,
+            )
         taskRepository.save(ferdigstillBehandling)
     }
 
-    private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, gammelTask: Task) {
-        val task = Task(
-            type = JournalførVedtaksbrevTask.TASK_STEP_TYPE,
-            payload = "$vedtakId",
-            properties = gammelTask.metadata,
-        )
+    private fun opprettTaskJournalførVedtaksbrev(
+        vedtakId: Long,
+        gammelTask: Task,
+    ) {
+        val task =
+            Task(
+                type = JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+                payload = "$vedtakId",
+                properties = gammelTask.metadata,
+            )
         taskRepository.save(task)
     }
 
@@ -101,7 +111,6 @@ class StatusFraOppdrag(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(StatusFraOppdrag::class.java)
     }
 }

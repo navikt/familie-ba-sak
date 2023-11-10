@@ -13,7 +13,6 @@ import java.time.LocalDateTime
 
 @Component
 class AutobrevScheduler(val taskRepository: TaskRepositoryWrapper) {
-
     /**
      * Denne funksjonen kjøres kl.7 den første dagen i måneden og setter triggertid på tasken til kl.8 den første virkedagen i måneden.
      * For testformål kan funksjonen opprettTask også kalles direkte via et restendepunkt.
@@ -26,9 +25,10 @@ class AutobrevScheduler(val taskRepository: TaskRepositoryWrapper) {
                 // Timen for triggertid økes med en. Det er nødvendig å sette klokkeslettet litt frem dersom den 1. i
                 // måneden også er en virkedag (slik at både denne skeduleren og tasken som opprettes vil kjøre på samme dato).
                 opprettTask(
-                    triggerTid = VirkedagerProvider.nesteVirkedag(
-                        LocalDate.now().minusDays(1),
-                    ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0),
+                    triggerTid =
+                        VirkedagerProvider.nesteVirkedag(
+                            LocalDate.now().minusDays(1),
+                        ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0),
                 )
             }
 
@@ -50,7 +50,6 @@ class AutobrevScheduler(val taskRepository: TaskRepositoryWrapper) {
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(AutobrevScheduler::class.java)
         const val KLOKKETIME_SCHEDULER_TRIGGES = 6
     }

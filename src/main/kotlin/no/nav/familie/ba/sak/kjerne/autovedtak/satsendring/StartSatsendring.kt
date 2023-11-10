@@ -29,7 +29,6 @@ class StartSatsendring(
     private val autovedtakSatsendringService: AutovedtakSatsendringService,
     private val satsendringService: SatsendringService,
 ) {
-
     private val ignorerteFagsaker = mutableSetOf<Long>()
 
     @Transactional
@@ -44,10 +43,11 @@ class StartSatsendring(
         var antallSatsendringerStartet = 0
         var startSide = 0
         while (antallSatsendringerStartet < antallFagsaker) {
-            val page = fagsakRepository.finnLøpendeFagsakerForSatsendring(
-                hentAktivSatsendringstidspunkt().atDay(1),
-                Pageable.ofSize(antallFagsaker + 200).withPage(startSide),
-            )
+            val page =
+                fagsakRepository.finnLøpendeFagsakerForSatsendring(
+                    hentAktivSatsendringstidspunkt().atDay(1),
+                    Pageable.ofSize(antallFagsaker + 200).withPage(startSide),
+                )
 
             val fagsakerForSatsendring = page.toList()
             logger.info("Fant ${fagsakerForSatsendring.size} personer for satsendring på side $startSide")
@@ -86,7 +86,10 @@ class StartSatsendring(
         return antallFagsakerSatsendring
     }
 
-    private fun skalTriggeSatsendring(fagsakId: Long, satsTidspunkt: YearMonth): Boolean {
+    private fun skalTriggeSatsendring(
+        fagsakId: Long,
+        satsTidspunkt: YearMonth,
+    ): Boolean {
         if (ignorerteFagsaker.contains(fagsakId)) {
             return false
         }
@@ -104,8 +107,9 @@ class StartSatsendring(
 
     fun sjekkOgOpprettSatsendringVedGammelSats(ident: String): Boolean {
         val aktør = personidentService.hentAktør(ident)
-        val løpendeFagsakerForAktør = fagsakRepository.finnFagsakerForAktør(aktør)
-            .filter { !it.arkivert && it.status == FagsakStatus.LØPENDE }
+        val løpendeFagsakerForAktør =
+            fagsakRepository.finnFagsakerForAktør(aktør)
+                .filter { !it.arkivert && it.status == FagsakStatus.LØPENDE }
 
         var harOpprettetSatsendring = false
         løpendeFagsakerForAktør.forEach { fagsak ->
@@ -143,9 +147,10 @@ class StartSatsendring(
             throw Feil("Kan ikke starte Satsendring på fagsak=$fagsakId")
         }
 
-        val resultatSatsendringBehandling = autovedtakSatsendringService.kjørBehandling(
-            SatsendringTaskDto(fagsakId = fagsakId, hentAktivSatsendringstidspunkt()),
-        )
+        val resultatSatsendringBehandling =
+            autovedtakSatsendringService.kjørBehandling(
+                SatsendringTaskDto(fagsakId = fagsakId, hentAktivSatsendringstidspunkt()),
+            )
 
         when (resultatSatsendringBehandling) {
             SatsendringSvar.SATSENDRING_KJØRT_OK -> Unit

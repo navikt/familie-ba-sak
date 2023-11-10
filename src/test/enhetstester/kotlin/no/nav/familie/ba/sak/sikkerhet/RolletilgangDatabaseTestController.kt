@@ -25,9 +25,10 @@ class RolletilgangDatabaseTestController(
     private val behandlingService: BehandlingService,
     private val environment: Environment,
 ) {
-
     @PostMapping(path = ["test-behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<Behandling>> {
+    fun opprettBehandling(
+        @RequestBody nyBehandling: NyBehandling,
+    ): ResponseEntity<Ressurs<Behandling>> {
         if (environment.erAktiv(Profil.Prod) || environment.erAktiv(Profil.Preprod)) {
             error("Controller feilaktig aktivert i miljø")
         }

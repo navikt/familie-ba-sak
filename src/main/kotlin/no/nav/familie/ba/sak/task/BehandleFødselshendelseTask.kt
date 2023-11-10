@@ -39,7 +39,6 @@ class BehandleFødselshendelseTask(
     private val startSatsendring: StartSatsendring,
     private val taskRepositoryWrapper: TaskRepositoryWrapper,
 ) : AsyncTaskStep {
-
     private val dagerSidenBarnBleFødt: DistributionSummary = Metrics.summary("foedselshendelse.dagersidenbarnfoedt")
 
     override fun doTask(task: Task) {
@@ -73,9 +72,10 @@ class BehandleFødselshendelseTask(
                         )
                     }
                     autovedtakStegService.kjørBehandlingFødselshendelse(
-                        mottakersAktør = personidentService.hentAktør(
-                            nyBehandling.morsIdent,
-                        ),
+                        mottakersAktør =
+                            personidentService.hentAktør(
+                                nyBehandling.morsIdent,
+                            ),
                         nyBehandlingHendelse = nyBehandling,
                     )
                 }
@@ -97,7 +97,6 @@ class BehandleFødselshendelseTask(
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "behandleFødselshendelseTask"
         private val logger = LoggerFactory.getLogger(BehandleFødselshendelseTask::class.java)
 
@@ -106,9 +105,10 @@ class BehandleFødselshendelseTask(
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
-                properties = Properties().apply {
-                    this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
-                },
+                properties =
+                    Properties().apply {
+                        this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
+                    },
             ).copy(
                 triggerTid = triggerTid.plusDays(7),
             )

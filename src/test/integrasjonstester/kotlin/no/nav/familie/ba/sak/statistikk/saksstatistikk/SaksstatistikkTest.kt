@@ -34,20 +34,15 @@ import org.springframework.data.repository.findByIdOrNull
 class SaksstatistikkTest(
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val fagsakController: FagsakController,
-
     @Autowired
     private val behandlingService: BehandlingService,
-
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-
     @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 ) : AbstractSpringIntegrationTest() {
-
     private lateinit var saksstatistikkScheduler: SaksstatistikkScheduler
 
     @BeforeEach
@@ -99,12 +94,13 @@ class SaksstatistikkTest(
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr, false)
-        val behandling = behandlingService.opprettBehandling(
-            nyOrdinærBehandling(
-                søkersIdent = fnr,
-                fagsakId = fagsak.id,
-            ),
-        )
+        val behandling =
+            behandlingService.opprettBehandling(
+                nyOrdinærBehandling(
+                    søkersIdent = fnr,
+                    fagsakId = fagsak.id,
+                ),
+            )
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, BehandlingStatus.AVSLUTTET)
 

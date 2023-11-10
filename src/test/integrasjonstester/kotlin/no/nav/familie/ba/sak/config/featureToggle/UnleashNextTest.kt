@@ -11,7 +11,6 @@ class UnleashNextTest(
     @Autowired
     private val unleashNext: UnleashNextMedContextService,
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun `skal svare true ved dummy impl i tester`() {
         Assertions.assertEquals(true, unleashNext.isEnabled("sull-bala-tull"))

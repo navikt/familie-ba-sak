@@ -16,7 +16,6 @@ class PersonopplysningGrunnlagForNyBehandlingService(
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
-
     fun opprettKopiEllerNyttPersonopplysningGrunnlag(
         behandling: Behandling,
         forrigeBehandlingSomErVedtatt: Behandling?,
@@ -57,9 +56,10 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         val aktør = personidentService.hentOgLagreAktør(søkerIdent, true)
         val barnaAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
 
-        val målform = forrigeBehandlingSomErVedtatt
-            ?.let { persongrunnlagService.hentSøkersMålform(behandlingId = it.id) }
-            ?: Målform.NB
+        val målform =
+            forrigeBehandlingSomErVedtatt
+                ?.let { persongrunnlagService.hentSøkersMålform(behandlingId = it.id) }
+                ?: Målform.NB
 
         val barnMedTilkjentYtelseIForrigeBehandling =
             finnBarnMedTilkjentYtelseIForrigeBehandling(behandling, forrigeBehandlingSomErVedtatt)

@@ -40,30 +40,32 @@ data class RestJournalføring(
     val fagsakType: FagsakType,
     val institusjon: InstitusjonInfo? = null,
 ) {
-
     fun oppdaterMedDokumentOgSak(sak: Sak): OppdaterJournalpostRequest {
         return OppdaterJournalpostRequest(
-            avsenderMottaker = AvsenderMottaker(
-                id = this.avsender.id,
-                idType = if (this.avsender.id != "") BrukerIdType.FNR else null,
-                navn = this.avsender.navn,
-            ),
-            bruker = Bruker(
-                this.bruker.id,
-                navn = this.bruker.navn,
-            ),
+            avsenderMottaker =
+                AvsenderMottaker(
+                    id = this.avsender.id,
+                    idType = if (this.avsender.id != "") BrukerIdType.FNR else null,
+                    navn = this.avsender.navn,
+                ),
+            bruker =
+                Bruker(
+                    this.bruker.id,
+                    navn = this.bruker.navn,
+                ),
             sak = sak,
             tittel = this.journalpostTittel,
-            dokumenter = dokumenter.map { dokument ->
-                DokumentInfo(
-                    dokumentInfoId = dokument.dokumentInfoId,
-                    tittel = dokument.dokumentTittel,
-                    brevkode = dokument.brevkode,
-                    dokumentstatus = Dokumentstatus.FERDIGSTILT,
-                    dokumentvarianter = null,
-                    logiskeVedlegg = null,
-                )
-            },
+            dokumenter =
+                dokumenter.map { dokument ->
+                    DokumentInfo(
+                        dokumentInfoId = dokument.dokumentInfoId,
+                        tittel = dokument.dokumentTittel,
+                        brevkode = dokument.brevkode,
+                        dokumentstatus = Dokumentstatus.FERDIGSTILT,
+                        dokumentvarianter = null,
+                        logiskeVedlegg = null,
+                    )
+                },
         )
     }
 

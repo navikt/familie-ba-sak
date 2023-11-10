@@ -7,7 +7,6 @@ data class VarselbrevÅrlegKontrollEøs(
     override val mal: Brevmal,
     override val data: VarselbrevÅrlegKontrollEøsData,
 ) : Brev {
-
     constructor(
         mal: Brevmal,
         navn: String,
@@ -18,20 +17,24 @@ data class VarselbrevÅrlegKontrollEøs(
         saksbehandlerNavn: String,
     ) : this(
         mal = mal,
-        data = VarselbrevÅrlegKontrollEøsData(
-            delmalData = VarselbrevÅrlegKontrollEøsData.DelmalData(
-                signatur = SignaturDelmal(
-                    enhet = enhet,
-                    saksbehandlerNavn = saksbehandlerNavn,
-                ),
+        data =
+            VarselbrevÅrlegKontrollEøsData(
+                delmalData =
+                    VarselbrevÅrlegKontrollEøsData.DelmalData(
+                        signatur =
+                            SignaturDelmal(
+                                enhet = enhet,
+                                saksbehandlerNavn = saksbehandlerNavn,
+                            ),
+                    ),
+                flettefelter =
+                    VarselbrevÅrlegKontrollEøsData.Flettefelter(
+                        navn = navn,
+                        fodselsnummer = fødselsnummer,
+                        mottakerlandSed = mottakerlandSed,
+                        dokumentliste = dokumentliste,
+                    ),
             ),
-            flettefelter = VarselbrevÅrlegKontrollEøsData.Flettefelter(
-                navn = navn,
-                fodselsnummer = fødselsnummer,
-                mottakerlandSed = mottakerlandSed,
-                dokumentliste = dokumentliste,
-            ),
-        ),
     )
 }
 
@@ -39,7 +42,6 @@ data class VarselbrevÅrlegKontrollEøsData(
     override val delmalData: DelmalData,
     override val flettefelter: Flettefelter,
 ) : BrevData {
-
     data class Flettefelter(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
@@ -47,7 +49,6 @@ data class VarselbrevÅrlegKontrollEøsData(
         val mottakerlandSed: Flettefelt,
         val dokumentliste: Flettefelt,
     ) : FlettefelterForDokument {
-
         constructor(
             navn: String,
             fodselsnummer: String,

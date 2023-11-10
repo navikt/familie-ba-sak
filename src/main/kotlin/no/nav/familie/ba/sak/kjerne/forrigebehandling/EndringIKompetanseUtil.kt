@@ -10,15 +10,15 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import java.time.YearMonth
 
 object EndringIKompetanseUtil {
-
     fun utledEndringstidspunktForKompetanse(
         nåværendeKompetanser: List<Kompetanse>,
         forrigeKompetanser: List<Kompetanse>,
     ): YearMonth? {
-        val endringIKompetanseTidslinje = lagEndringIKompetanseTidslinje(
-            nåværendeKompetanser = nåværendeKompetanser,
-            forrigeKompetanser = forrigeKompetanser,
-        )
+        val endringIKompetanseTidslinje =
+            lagEndringIKompetanseTidslinje(
+                nåværendeKompetanser = nåværendeKompetanser,
+                forrigeKompetanser = forrigeKompetanser,
+            )
 
         return endringIKompetanseTidslinje.tilFørsteEndringstidspunkt()
     }
@@ -29,12 +29,13 @@ object EndringIKompetanseUtil {
     ): Tidslinje<Boolean, Måned> {
         val allePersonerMedKompetanser = (nåværendeKompetanser.flatMap { it.barnAktører } + forrigeKompetanser.flatMap { it.barnAktører }).distinct()
 
-        val endringstidslinjerPrPerson = allePersonerMedKompetanser.map { aktør ->
-            lagEndringIKompetanseForPersonTidslinje(
-                nåværendeKompetanserForPerson = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) },
-                forrigeKompetanserForPerson = forrigeKompetanser.filter { it.barnAktører.contains(aktør) },
-            )
-        }
+        val endringstidslinjerPrPerson =
+            allePersonerMedKompetanser.map { aktør ->
+                lagEndringIKompetanseForPersonTidslinje(
+                    nåværendeKompetanserForPerson = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) },
+                    forrigeKompetanserForPerson = forrigeKompetanser.filter { it.barnAktører.contains(aktør) },
+                )
+            }
 
         return endringstidslinjerPrPerson.kombiner { finnesMinstEnEndringIPeriode(it) }
     }
@@ -50,9 +51,10 @@ object EndringIKompetanseUtil {
         val nåværendeTidslinje = nåværendeKompetanserForPerson.tilTidslinje()
         val forrigeTidslinje = forrigeKompetanserForPerson.tilTidslinje()
 
-        val endringerTidslinje = nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
-            forrige.erObligatoriskeFelterUtenomTidsperioderSatt() && nåværende.felterHarEndretSegSidenForrigeBehandling(forrigeKompetanse = forrige)
-        }
+        val endringerTidslinje =
+            nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
+                forrige.erObligatoriskeFelterUtenomTidsperioderSatt() && nåværende.felterHarEndretSegSidenForrigeBehandling(forrigeKompetanse = forrige)
+            }
 
         return endringerTidslinje
     }

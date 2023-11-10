@@ -9,7 +9,8 @@ data class RestSettPåVent(
     val årsak: SettPåVentÅrsak,
 )
 
-fun SettPåVent.tilRestSettPåVent(): RestSettPåVent = RestSettPåVent(
-    frist = this.frist,
-    årsak = this.årsak,
-)
+fun SettPåVent.tilRestSettPåVent(): RestSettPåVent =
+    RestSettPåVent(
+        frist = this.frist,
+        årsak = this.årsak,
+    )

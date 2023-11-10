@@ -24,7 +24,6 @@ class DokumentDistribueringService(
     private val integrasjonClient: IntegrasjonClient,
     private val loggService: LoggService,
 ) {
-
     fun prøvDistribuerBrevOgLoggHendelse(
         distribuerDokumentDTO: DistribuerDokumentDTO,
         loggBehandlerRolle: BehandlerRolle,
@@ -129,13 +128,14 @@ class DokumentDistribueringService(
         antallBrevSendt[brevmal]?.increment()
     }
 
-    private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
-        Metrics.counter(
-            "brev.sendt",
-            "brevtype",
-            it.visningsTekst,
-        )
-    }
+    private val antallBrevSendt: Map<Brevmal, Counter> =
+        mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
+            Metrics.counter(
+                "brev.sendt",
+                "brevtype",
+                it.visningsTekst,
+            )
+        }
 
     private val antallBrevIkkeDistribuertUkjentAndresse: Map<Brevmal, Counter> =
         mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
@@ -146,7 +146,10 @@ class DokumentDistribueringService(
             )
         }
 
-    fun alleredeDistribuertMelding(journalpostId: String, behandlingId: Long?) =
+    fun alleredeDistribuertMelding(
+        journalpostId: String,
+        behandlingId: Long?,
+    ) =
         "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering." +
             if (behandlingId != null) " BehandlingId=$behandlingId." else ""
 

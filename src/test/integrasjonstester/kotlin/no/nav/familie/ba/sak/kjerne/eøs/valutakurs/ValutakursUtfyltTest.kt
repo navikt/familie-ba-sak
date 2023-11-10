@@ -9,13 +9,13 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 class ValutakursUtfyltTest {
-
     @Test
     fun `Skal sette UtfyltStatus til OK når alle felter er utfylt`() {
-        val valutakurs = lagValutakurs(
-            valutakursdato = LocalDate.now(),
-            kurs = BigDecimal.valueOf(10),
-        )
+        val valutakurs =
+            lagValutakurs(
+                valutakursdato = LocalDate.now(),
+                kurs = BigDecimal.valueOf(10),
+            )
 
         val restValutakurs = valutakurs.tilRestValutakurs()
 
@@ -24,17 +24,19 @@ class ValutakursUtfyltTest {
 
     @Test
     fun `Skal sette UtfyltStatus til UFULLSTENDIG når ett felt er utfylt`() {
-        var valutakurs = lagValutakurs(
-            valutakursdato = LocalDate.now(),
-        )
+        var valutakurs =
+            lagValutakurs(
+                valutakursdato = LocalDate.now(),
+            )
 
         var restValutakurs = valutakurs.tilRestValutakurs()
 
         Assertions.assertEquals(UtfyltStatus.UFULLSTENDIG, restValutakurs.status)
 
-        valutakurs = lagValutakurs(
-            kurs = BigDecimal.valueOf(10),
-        )
+        valutakurs =
+            lagValutakurs(
+                kurs = BigDecimal.valueOf(10),
+            )
 
         restValutakurs = valutakurs.tilRestValutakurs()
 

@@ -34,7 +34,6 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RegistrerInstitusjonOgVergeStegTest {
-
     private val vergeRepositoryMock: VergeRepository = mockk()
     private val fagsakRepositoryMock: FagsakRepository = mockk()
     private val loggServiceMock: LoggService = mockk()
@@ -81,24 +80,28 @@ class RegistrerInstitusjonOgVergeStegTest {
         every { vergeRepositoryMock.save(capture(vergeSlot)) } returns Verge(1L, "", behandling)
         every { loggServiceMock.opprettRegistrerVergeLogg(any()) } just runs
         every { loggServiceMock.opprettRegistrerInstitusjonLogg(any()) } just runs
-        every { institusjonRepositoryMock.findByOrgNummer(any()) } returns Institusjon(
-            orgNummer = "12345",
-            tssEksternId = "cool tsr",
-        )
-        every { loggServiceMock.lagre(any()) } returns Logg(
-            behandlingId = behandling.id,
-            type = LoggType.VERGE_REGISTRERT,
-            tittel = "tittel",
-            rolle = BehandlerRolle.SYSTEM,
-            tekst = "",
-        )
+        every { institusjonRepositoryMock.findByOrgNummer(any()) } returns
+            Institusjon(
+                orgNummer = "12345",
+                tssEksternId = "cool tsr",
+            )
+        every { loggServiceMock.lagre(any()) } returns
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.VERGE_REGISTRERT,
+                tittel = "tittel",
+                rolle = BehandlerRolle.SYSTEM,
+                tekst = "",
+            )
         every { behandlingHentOgPersisterServiceMock.hent(any()) } returns behandling
-        val restRegistrerInstitusjonOgVerge = RestRegistrerInstitusjonOgVerge(
-            vergeInfo = VergeInfo(
-                "12345678910",
-            ),
-            institusjonInfo = InstitusjonInfo("12345", "cool tsr"),
-        )
+        val restRegistrerInstitusjonOgVerge =
+            RestRegistrerInstitusjonOgVerge(
+                vergeInfo =
+                    VergeInfo(
+                        "12345678910",
+                    ),
+                institusjonInfo = InstitusjonInfo("12345", "cool tsr"),
+            )
 
         registrerInstitusjonOgVerge.utførStegOgAngiNeste(
             behandling,
@@ -117,12 +120,14 @@ class RegistrerInstitusjonOgVergeStegTest {
 
     @Test
     fun `utførStegOgAngiNeste() skal returnere REGISTRERE_SØKNAD som neste steg`() {
-        val behandling = lagBehandling(
-            fagsak = defaultFagsak().copy(
-                type = FagsakType.INSTITUSJON,
-                institusjon = Institusjon(orgNummer = "12345", tssEksternId = "tss"),
-            ),
-        )
+        val behandling =
+            lagBehandling(
+                fagsak =
+                    defaultFagsak().copy(
+                        type = FagsakType.INSTITUSJON,
+                        institusjon = Institusjon(orgNummer = "12345", tssEksternId = "tss"),
+                    ),
+            )
         every { fagsakRepositoryMock.finnFagsak(any()) } returns behandling.fagsak
         every { fagsakRepositoryMock.save(any()) } returns behandling.fagsak
         every { vergeRepositoryMock.findByBehandling(any()) } returns null
@@ -130,23 +135,26 @@ class RegistrerInstitusjonOgVergeStegTest {
         every { loggServiceMock.opprettRegistrerVergeLogg(any()) } just runs
         every { loggServiceMock.opprettRegistrerInstitusjonLogg(any()) } just runs
         every { institusjonRepositoryMock.findByOrgNummer("12345") } returns behandling.fagsak.institusjon
-        every { loggServiceMock.lagre(any()) } returns Logg(
-            behandlingId = behandling.id,
-            type = LoggType.VERGE_REGISTRERT,
-            tittel = "tittel",
-            rolle = BehandlerRolle.SYSTEM,
-            tekst = "",
-        )
+        every { loggServiceMock.lagre(any()) } returns
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.VERGE_REGISTRERT,
+                tittel = "tittel",
+                rolle = BehandlerRolle.SYSTEM,
+                tekst = "",
+            )
         every { behandlingHentOgPersisterServiceMock.hent(any()) } returns behandling
-        val restRegistrerInstitusjonOgVerge = RestRegistrerInstitusjonOgVerge(
-            vergeInfo = VergeInfo("12345678910"),
-            institusjonInfo = InstitusjonInfo("12345", "cool tsr"),
-        )
+        val restRegistrerInstitusjonOgVerge =
+            RestRegistrerInstitusjonOgVerge(
+                vergeInfo = VergeInfo("12345678910"),
+                institusjonInfo = InstitusjonInfo("12345", "cool tsr"),
+            )
 
-        val nesteSteg = registrerInstitusjonOgVerge.utførStegOgAngiNeste(
-            behandling,
-            restRegistrerInstitusjonOgVerge,
-        )
+        val nesteSteg =
+            registrerInstitusjonOgVerge.utførStegOgAngiNeste(
+                behandling,
+                restRegistrerInstitusjonOgVerge,
+            )
 
         assertThat(nesteSteg).isEqualTo(StegType.REGISTRERE_SØKNAD)
     }

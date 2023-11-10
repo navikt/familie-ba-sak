@@ -28,21 +28,16 @@ class KorrigertEtterbetaling(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "aarsak")
     val årsak: KorrigertEtterbetalingÅrsak,
-
     @Column(name = "begrunnelse")
     val begrunnelse: String?,
-
     @Column(name = "belop")
     val beløp: Int,
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_behandling_id")
     val behandling: Behandling,
-
     @Column(name = "aktiv")
     var aktiv: Boolean,
 ) : BaseEntitet()

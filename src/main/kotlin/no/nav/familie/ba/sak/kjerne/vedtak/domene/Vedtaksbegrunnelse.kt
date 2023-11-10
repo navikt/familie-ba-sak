@@ -53,32 +53,31 @@ class Vedtaksbegrunnelse(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "fk_vedtaksperiode_id", nullable = false, updatable = false)
     val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "vedtak_begrunnelse_spesifikasjon", updatable = false)
     val standardbegrunnelse: Standardbegrunnelse,
 ) {
-
-    fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse = Vedtaksbegrunnelse(
-        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        standardbegrunnelse = this.standardbegrunnelse,
-    )
+    fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse =
+        Vedtaksbegrunnelse(
+            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            standardbegrunnelse = this.standardbegrunnelse,
+        )
 
     override fun toString(): String {
         return "Vedtaksbegrunnelse(id=$id, standardbegrunnelse=$standardbegrunnelse)"
     }
 }
 
-fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
-    standardbegrunnelse = this.standardbegrunnelse.enumnavnTilString(),
-    vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
-    vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse.enumnavnTilString(),
-)
+fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() =
+    RestVedtaksbegrunnelse(
+        standardbegrunnelse = this.standardbegrunnelse.enumnavnTilString(),
+        vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
+        vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse.enumnavnTilString(),
+    )
 
 enum class Begrunnelsetype {
     STANDARD_BEGRUNNELSE,
@@ -109,7 +108,6 @@ interface BegrunnelseMedData : BrevBegrunnelse {
 data class BegrunnelseData(
     override val vedtakBegrunnelseType: VedtakBegrunnelseType,
     override val apiNavn: String,
-
     val gjelderSoker: Boolean,
     val barnasFodselsdatoer: String,
     @Deprecated("Brukes ikke. Kan slettes når vi har fjernet gammel begrunnelseskode.")
@@ -143,7 +141,6 @@ sealed class EØSBegrunnelseData : BegrunnelseMedData
 data class EØSBegrunnelseDataMedKompetanse(
     override val vedtakBegrunnelseType: VedtakBegrunnelseType,
     override val apiNavn: String,
-
     val annenForeldersAktivitet: KompetanseAktivitet,
     val annenForeldersAktivitetsland: String?,
     val barnetsBostedsland: String,
@@ -159,7 +156,6 @@ data class EØSBegrunnelseDataMedKompetanse(
 data class EØSBegrunnelseDataUtenKompetanse(
     override val vedtakBegrunnelseType: VedtakBegrunnelseType,
     override val apiNavn: String,
-
     val barnasFodselsdatoer: String,
     val antallBarn: Int,
     val maalform: String,
@@ -179,50 +175,57 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     val personerPåBegrunnelse =
         personerIPersongrunnlag.filter { person -> this.personIdenter.contains(person.personIdent) }
 
-    val barnSomOppfyllerTriggereOgHarUtbetaling = personerPåBegrunnelse.filter { person ->
-        person.type == PersonType.BARN && minimerteUtbetalingsperiodeDetaljer.any { it.utbetaltPerMnd > 0 && it.person.personIdent == person.personIdent }
-    }
-    val barnSomOppfyllerTriggereOgHarNullutbetaling = personerPåBegrunnelse.filter { person ->
-        person.type == PersonType.BARN && minimerteUtbetalingsperiodeDetaljer.any { it.utbetaltPerMnd == 0 && it.person.personIdent == person.personIdent }
-    }
+    val barnSomOppfyllerTriggereOgHarUtbetaling =
+        personerPåBegrunnelse.filter { person ->
+            person.type == PersonType.BARN && minimerteUtbetalingsperiodeDetaljer.any { it.utbetaltPerMnd > 0 && it.person.personIdent == person.personIdent }
+        }
+    val barnSomOppfyllerTriggereOgHarNullutbetaling =
+        personerPåBegrunnelse.filter { person ->
+            person.type == PersonType.BARN && minimerteUtbetalingsperiodeDetaljer.any { it.utbetaltPerMnd == 0 && it.person.personIdent == person.personIdent }
+        }
 
     val gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER }
 
-    val barnasFødselsdatoer = this.hentBarnasFødselsdagerForBegrunnelse(
-        uregistrerteBarn = uregistrerteBarn,
-        personerIBehandling = personerIPersongrunnlag,
-        personerPåBegrunnelse = personerPåBegrunnelse,
-        personerMedUtbetaling = minimerteUtbetalingsperiodeDetaljer.map { it.person },
-        gjelderSøker = gjelderSøker,
-    )
+    val barnasFødselsdatoer =
+        this.hentBarnasFødselsdagerForBegrunnelse(
+            uregistrerteBarn = uregistrerteBarn,
+            personerIBehandling = personerIPersongrunnlag,
+            personerPåBegrunnelse = personerPåBegrunnelse,
+            personerMedUtbetaling = minimerteUtbetalingsperiodeDetaljer.map { it.person },
+            gjelderSøker = gjelderSøker,
+        )
 
-    val antallBarn = this.hentAntallBarnForBegrunnelse(
-        uregistrerteBarn = uregistrerteBarn,
-        gjelderSøker = gjelderSøker,
-        barnasFødselsdatoer = barnasFødselsdatoer,
-    )
+    val antallBarn =
+        this.hentAntallBarnForBegrunnelse(
+            uregistrerteBarn = uregistrerteBarn,
+            gjelderSøker = gjelderSøker,
+            barnasFødselsdatoer = barnasFødselsdatoer,
+        )
 
     val månedOgÅrBegrunnelsenGjelderFor =
         if (vedtaksperiode.fom == null) {
             null
         } else {
             this.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
-                periode = Periode(
-                    fom = vedtaksperiode.fom,
-                    tom = vedtaksperiode.tom ?: TIDENES_ENDE,
-                ),
+                periode =
+                    Periode(
+                        fom = vedtaksperiode.fom,
+                        tom = vedtaksperiode.tom ?: TIDENES_ENDE,
+                    ),
             )
         }
 
     val beløp = this.hentBeløp(gjelderSøker, minimerteUtbetalingsperiodeDetaljer)
 
-    val endringsperioder = this.standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
-        minimerteRestEndredeAndeler = minimerteRestEndredeAndeler,
-        vedtaksperiode = vedtaksperiode,
-    )
+    val endringsperioder =
+        this.standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
+            minimerteRestEndredeAndeler = minimerteRestEndredeAndeler,
+            vedtaksperiode = vedtaksperiode,
+        )
 
-    val søknadstidspunkt = endringsperioder.sortedBy { it.søknadstidspunkt }
-        .firstOrNull { this.triggesAv.endringsaarsaker.contains(it.årsak) }?.søknadstidspunkt
+    val søknadstidspunkt =
+        endringsperioder.sortedBy { it.søknadstidspunkt }
+            .firstOrNull { this.triggesAv.endringsaarsaker.contains(it.årsak) }?.søknadstidspunkt
 
     val søkersRettTilUtvidet =
         finnUtOmSøkerFårUtbetaltEllerHarRettPåUtvidet(minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer)
@@ -235,10 +238,12 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     return BegrunnelseData(
         gjelderSoker = gjelderSøker,
         barnasFodselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
-        fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = barnSomOppfyllerTriggereOgHarUtbetaling.map { it.fødselsdato }
-            .tilBrevTekst(),
-        fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling = barnSomOppfyllerTriggereOgHarNullutbetaling.map { it.fødselsdato }
-            .tilBrevTekst(),
+        fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling =
+            barnSomOppfyllerTriggereOgHarUtbetaling.map { it.fødselsdato }
+                .tilBrevTekst(),
+        fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling =
+            barnSomOppfyllerTriggereOgHarNullutbetaling.map { it.fødselsdato }
+                .tilBrevTekst(),
         antallBarn = antallBarn,
         antallBarnOppfyllerTriggereOgHarUtbetaling = barnSomOppfyllerTriggereOgHarUtbetaling.size,
         antallBarnOppfyllerTriggereOgHarNullutbetaling = barnSomOppfyllerTriggereOgHarNullutbetaling.size,
@@ -272,11 +277,12 @@ enum class SøkersRettTilUtvidet {
     SØKER_HAR_IKKE_RETT,
     ;
 
-    fun tilSanityFormat() = when (this) {
-        SØKER_FÅR_UTVIDET -> "sokerFaarUtvidet"
-        SØKER_HAR_RETT_MEN_FÅR_IKKE -> "sokerHarRettMenFaarIkke"
-        SØKER_HAR_IKKE_RETT -> "sokerHarIkkeRett"
-    }
+    fun tilSanityFormat() =
+        when (this) {
+            SØKER_FÅR_UTVIDET -> "sokerFaarUtvidet"
+            SØKER_HAR_RETT_MEN_FÅR_IKKE -> "sokerHarRettMenFaarIkke"
+            SØKER_HAR_IKKE_RETT -> "sokerHarIkkeRett"
+        }
 }
 
 fun IVedtakBegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(

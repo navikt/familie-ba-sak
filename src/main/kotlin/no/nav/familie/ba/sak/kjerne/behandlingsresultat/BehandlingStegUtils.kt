@@ -12,8 +12,9 @@ fun Tidslinje<Boolean, Måned>.kastFeilVedEndringEtter(
     migreringsdatoForrigeIverksatteBehandling: YearMonth,
     behandling: Behandling,
 ) {
-    val endringIUtbetalingEtterDato = perioder()
-        .filter { it.tilOgMed.tilYearMonth().isSameOrAfter(migreringsdatoForrigeIverksatteBehandling) }
+    val endringIUtbetalingEtterDato =
+        perioder()
+            .filter { it.tilOgMed.tilYearMonth().isSameOrAfter(migreringsdatoForrigeIverksatteBehandling) }
 
     val erEndringIUtbetalingEtterMigreringsdato = endringIUtbetalingEtterDato.any { it.innhold == true }
 

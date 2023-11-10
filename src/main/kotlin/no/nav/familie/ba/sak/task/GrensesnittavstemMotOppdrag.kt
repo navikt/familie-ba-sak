@@ -21,7 +21,6 @@ import java.time.LocalDate
 )
 class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val taskRepository: TaskRepositoryWrapper) :
     AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val avstemmingTask = objectMapper.readValue(task.payload, GrensesnittavstemmingTaskDTO::class.java)
         logger.info("Gjør avstemming mot oppdrag fra og med ${avstemmingTask.fomDato} til og med ${avstemmingTask.tomDato}")
@@ -32,12 +31,13 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
     override fun onCompletion(task: Task) {
         val nesteAvstemmingTaskDTO = nesteAvstemmingDTO(task.triggerTid.toLocalDate())
 
-        val nesteAvstemmingTask = Task(
-            type = TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(nesteAvstemmingTaskDTO),
-        ).medTriggerTid(
-            nesteAvstemmingTaskDTO.tomDato.toLocalDate().atTime(8, 0),
-        )
+        val nesteAvstemmingTask =
+            Task(
+                type = TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(nesteAvstemmingTaskDTO),
+            ).medTriggerTid(
+                nesteAvstemmingTaskDTO.tomDato.toLocalDate().atTime(8, 0),
+            )
 
         taskRepository.save(nesteAvstemmingTask)
     }
@@ -49,7 +49,6 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
         )
 
     companion object {
-
         const val TASK_STEP_TYPE = "avstemMotOppdrag"
 
         private val logger: Logger = LoggerFactory.getLogger(GrensesnittavstemMotOppdrag::class.java)

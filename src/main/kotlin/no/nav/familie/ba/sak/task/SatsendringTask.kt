@@ -17,7 +17,6 @@ import java.time.YearMonth
 class SatsendringTask(
     val autovedtakSatsendringService: AutovedtakSatsendringService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val dto = objectMapper.readValue(task.payload, SatsendringTaskDto::class.java)
 
@@ -27,7 +26,6 @@ class SatsendringTask(
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "satsendring"
     }
 }

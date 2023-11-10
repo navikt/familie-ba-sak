@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 class ForvalterSchedulerTest {
-
     private val taskRepository = mockk<TaskRepositoryWrapper>()
     private val envService = mockk<EnvService>()
     private val service = ForvalterScheduler(taskRepository, envService)

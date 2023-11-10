@@ -18,7 +18,6 @@ class RegistrerInstitusjonOgVerge(
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     val fagsakService: FagsakService,
 ) : BehandlingSteg<RestRegistrerInstitusjonOgVerge> {
-
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
         data: RestRegistrerInstitusjonOgVerge,

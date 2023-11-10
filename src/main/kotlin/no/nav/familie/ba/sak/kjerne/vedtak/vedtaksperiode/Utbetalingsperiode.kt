@@ -42,8 +42,9 @@ data class UtbetalingsperiodeDetalj(
         andel: AndelTilkjentYtelseMedEndreteUtbetalinger,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) : this(
-        person = personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }?.tilRestPerson()
-            ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel"),
+        person =
+            personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }?.tilRestPerson()
+                ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel"),
         ytelseType = andel.type,
         utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
         erPåvirketAvEndring = andel.endreteUtbetalinger.isNotEmpty(),
@@ -76,20 +77,22 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
 ): List<Utbetalingsperiode> {
     val andelerTidslinjePerAktørOgType = this.tilKombinertTidslinjePerAktørOgType()
 
-    val utbetalingsPerioder = andelerTidslinjePerAktørOgType.perioder()
-        .filter { !it.innhold.isNullOrEmpty() }
-        .map { periode ->
-            Utbetalingsperiode(
-                periodeFom = periode.fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDate(),
-                periodeTom = periode.tilOgMed.tilDagEllerSisteDagIPerioden().tilLocalDate(),
-                ytelseTyper = periode.innhold!!.map { andelTilkjentYtelse -> andelTilkjentYtelse.type },
-                utbetaltPerMnd = periode.innhold.sumOf { andelTilkjentYtelse -> andelTilkjentYtelse.kalkulertUtbetalingsbeløp },
-                antallBarn = periode.innhold
-                    .map { it.aktør }.toSet()
-                    .count { aktør -> personopplysningGrunnlag.barna.any { barn -> barn.aktør == aktør } },
-                utbetalingsperiodeDetaljer = periode.innhold.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag),
-            )
-        }
+    val utbetalingsPerioder =
+        andelerTidslinjePerAktørOgType.perioder()
+            .filter { !it.innhold.isNullOrEmpty() }
+            .map { periode ->
+                Utbetalingsperiode(
+                    periodeFom = periode.fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDate(),
+                    periodeTom = periode.tilOgMed.tilDagEllerSisteDagIPerioden().tilLocalDate(),
+                    ytelseTyper = periode.innhold!!.map { andelTilkjentYtelse -> andelTilkjentYtelse.type },
+                    utbetaltPerMnd = periode.innhold.sumOf { andelTilkjentYtelse -> andelTilkjentYtelse.kalkulertUtbetalingsbeløp },
+                    antallBarn =
+                        periode.innhold
+                            .map { it.aktør }.toSet()
+                            .count { aktør -> personopplysningGrunnlag.barna.any { barn -> barn.aktør == aktør } },
+                    utbetalingsperiodeDetaljer = periode.innhold.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag),
+                )
+            }
 
     return utbetalingsPerioder
 }

@@ -38,37 +38,38 @@ fun lagGyldigeBegrunnelserTest(
     kompetanse: Collection<Kompetanse>,
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
 ): String {
-    val test = """
+    val test =
+        """
 # language: no
 # encoding: UTF-8
 
 Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric(10)}
 
   Bakgrunn:""" +
-        hentTekstForFagsak(behandling) +
-        hentTekstForBehandlinger(behandling, forrigeBehandling) +
-        hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
-        """
+            hentTekstForFagsak(behandling) +
+            hentTekstForBehandlinger(behandling, forrigeBehandling) +
+            hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
+            """
       
   Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
     Og følgende dagens dato ${LocalDate.now().tilddMMyyyy()}""" +
-        lagPersonresultaterTekst(forrigeBehandling) +
-        lagPersonresultaterTekst(behandling) +
-        hentTekstForVilkårresultater(
-            personResultaterForrigeBehandling?.sorterPåFødselsdato(persongrunnlagForrigeBehandling!!),
-            forrigeBehandling?.id,
-        ) +
-        hentTekstForVilkårresultater(personResultater.sorterPåFødselsdato(persongrunnlag), behandling.id) +
-        hentTekstForTilkjentYtelse(andeler, persongrunnlag, andelerForrigeBehandling, persongrunnlagForrigeBehandling) +
-        hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
-        hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
+            lagPersonresultaterTekst(forrigeBehandling) +
+            lagPersonresultaterTekst(behandling) +
+            hentTekstForVilkårresultater(
+                personResultaterForrigeBehandling?.sorterPåFødselsdato(persongrunnlagForrigeBehandling!!),
+                forrigeBehandling?.id,
+            ) +
+            hentTekstForVilkårresultater(personResultater.sorterPåFødselsdato(persongrunnlag), behandling.id) +
+            hentTekstForTilkjentYtelse(andeler, persongrunnlag, andelerForrigeBehandling, persongrunnlagForrigeBehandling) +
+            hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
+            hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
     Når vedtaksperiodene genereres for behandling ${behandling.id}""" +
-        hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) +
-        hentTekstValgteBegrunnelser(behandling.id, vedtaksperioder) +
-        hentTekstBrevPerioder(behandling.id, vedtaksperioder) +
-        hentBrevBegrunnelseTekster(behandling.id, vedtaksperioder) +
-        hentEØSBrevBegrunnelseTekster(behandling.id, vedtaksperioder) + """
+            hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) +
+            hentTekstValgteBegrunnelser(behandling.id, vedtaksperioder) +
+            hentTekstBrevPerioder(behandling.id, vedtaksperioder) +
+            hentBrevBegrunnelseTekster(behandling.id, vedtaksperioder) +
+            hentEØSBrevBegrunnelseTekster(behandling.id, vedtaksperioder) + """
 """
     return test.anonymiser(persongrunnlag, persongrunnlagForrigeBehandling, forrigeBehandling, behandling)
 }
@@ -85,18 +86,20 @@ fun String.anonymiser(
 
     val behandlinger = listOfNotNull(forrigeBehandling?.id, behandling.id)
 
-    val testMedAnonymeAktørIder = aktørIder.foldIndexed(this) { index, acc, aktørId ->
-        acc.replace(aktørId, (index + 1).toString())
-    }
+    val testMedAnonymeAktørIder =
+        aktørIder.foldIndexed(this) { index, acc, aktørId ->
+            acc.replace(aktørId, (index + 1).toString())
+        }
     return behandlinger.foldIndexed(testMedAnonymeAktørIder) { index, acc, behandlingId ->
         acc.replace(behandlingId.toString(), (index + 1).toString())
     }
 }
 
-private fun lagPersonresultaterTekst(behandling: Behandling?) = behandling?.let {
-    """
+private fun lagPersonresultaterTekst(behandling: Behandling?) =
+    behandling?.let {
+        """
     Og lag personresultater for begrunnelse for behandling ${it.id}"""
-} ?: ""
+    } ?: ""
 
 fun hentTekstForFagsak(behandling: Behandling) =
     """
@@ -104,7 +107,10 @@ fun hentTekstForFagsak(behandling: Behandling) =
       | FagsakId | Fagsaktype |
       | 1 | ${behandling.fagsak.type} |"""
 
-fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: Behandling?) =
+fun hentTekstForBehandlinger(
+    behandling: Behandling,
+    forrigeBehandling: Behandling?,
+) =
     """
 
     Gitt følgende behandling
@@ -196,7 +202,10 @@ fun hentTekstForTilkjentYtelse(
         "\n" +
         hentAndelRader(andeler, persongrunnlag)
 
-private fun hentAndelRader(andeler: List<AndelTilkjentYtelse>?, persongrunnlag: PersonopplysningGrunnlag?): String =
+private fun hentAndelRader(
+    andeler: List<AndelTilkjentYtelse>?,
+    persongrunnlag: PersonopplysningGrunnlag?,
+): String =
     andeler
         ?.sortedWith(
             compareBy(
@@ -218,8 +227,9 @@ fun hentTekstForEndretUtbetaling(
     endredeUtbetalinger: List<EndretUtbetalingAndel>,
     endredeUtbetalingerForrigeBehandling: List<EndretUtbetalingAndel>?,
 ): String {
-    val rader = hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
-        hentEndretUtbetalingRader(endredeUtbetalinger)
+    val rader =
+        hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
+            hentEndretUtbetalingRader(endredeUtbetalinger)
 
     return if (rader.isEmpty()) {
         ""
@@ -250,8 +260,9 @@ fun hentTekstForKompetanse(
     kompetanse: Collection<Kompetanse>,
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
 ): String {
-    val rader = hentKompetanseRader(kompetanseForrigeBehandling) +
-        hentKompetanseRader(kompetanse)
+    val rader =
+        hentKompetanseRader(kompetanseForrigeBehandling) +
+            hentKompetanseRader(kompetanse)
 
     return if (rader.isEmpty()) {
         ""

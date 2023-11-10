@@ -14,19 +14,23 @@ data class InformasjonsbrevKanSøke(
         enhet: String,
         saksbehandlerNavn: String,
     ) : this(
-        data = InformasjonsbrevKanSøkeData(
-            delmalData = InformasjonsbrevKanSøkeData.DelmalData(
-                signatur = SignaturDelmal(
-                    enhet = enhet,
-                    saksbehandlerNavn = saksbehandlerNavn,
-                ),
+        data =
+            InformasjonsbrevKanSøkeData(
+                delmalData =
+                    InformasjonsbrevKanSøkeData.DelmalData(
+                        signatur =
+                            SignaturDelmal(
+                                enhet = enhet,
+                                saksbehandlerNavn = saksbehandlerNavn,
+                            ),
+                    ),
+                flettefelter =
+                    InformasjonsbrevKanSøkeData.Flettefelter(
+                        navn = navn,
+                        fodselsnummer = fodselsnummer,
+                        dokumentliste = dokumentliste,
+                    ),
             ),
-            flettefelter = InformasjonsbrevKanSøkeData.Flettefelter(
-                navn = navn,
-                fodselsnummer = fodselsnummer,
-                dokumentliste = dokumentliste,
-            ),
-        ),
     )
 }
 
@@ -34,14 +38,12 @@ data class InformasjonsbrevKanSøkeData(
     override val delmalData: DelmalData,
     override val flettefelter: Flettefelter,
 ) : BrevData {
-
     data class Flettefelter(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
         val dokumentliste: Flettefelt,
     ) : FlettefelterForDokument {
-
         constructor(
             navn: String,
             fodselsnummer: String,

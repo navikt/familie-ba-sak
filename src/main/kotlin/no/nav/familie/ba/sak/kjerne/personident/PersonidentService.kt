@@ -20,17 +20,20 @@ class PersonidentService(
     private val pdlIdentRestClient: PdlIdentRestClient,
     private val taskRepository: TaskRepositoryWrapper,
 ) {
-
-    fun hentIdenter(personIdent: String, historikk: Boolean): List<IdentInformasjon> {
+    fun hentIdenter(
+        personIdent: String,
+        historikk: Boolean,
+    ): List<IdentInformasjon> {
         return pdlIdentRestClient.hentIdenter(personIdent, historikk)
     }
 
     fun identSkalLeggesTil(nyIdent: PersonIdent): Boolean {
         val identerFraPdl = hentIdenter(nyIdent.ident, true)
-        val aktører = identerFraPdl
-            .filter { it.gruppe == "AKTORID" }
-            .map { it.ident }
-            .mapNotNull { aktørIdRepository.findByAktørIdOrNull(it) }
+        val aktører =
+            identerFraPdl
+                .filter { it.gruppe == "AKTORID" }
+                .map { it.ident }
+                .mapNotNull { aktørIdRepository.findByAktørIdOrNull(it) }
 
         if (aktører.isNotEmpty()) {
             return aktører.firstOrNull { it.harIdent(nyIdent.ident) } == null
@@ -86,14 +89,18 @@ class PersonidentService(
         return aktør
     }
 
-    fun hentOgLagreAktør(ident: String, lagre: Boolean): Aktør {
+    fun hentOgLagreAktør(
+        ident: String,
+        lagre: Boolean,
+    ): Aktør {
         // Noter at ident kan være både av typen aktørid eller fødselsnummer (d- og f nummer)
-        val personident = try {
-            personidentRepository.findByFødselsnummerOrNull(ident)
-        } catch (e: Exception) {
-            secureLogger.info("Feil ved henting av ident=$ident, lagre=$lagre", e)
-            throw e
-        }
+        val personident =
+            try {
+                personidentRepository.findByFødselsnummerOrNull(ident)
+            } catch (e: Exception) {
+                secureLogger.info("Feil ved henting av ident=$ident, lagre=$lagre", e)
+                throw e
+            }
         if (personident != null) {
             return personident.aktør
         }
@@ -120,7 +127,10 @@ class PersonidentService(
         return opprettAktørIdOgPersonident(aktørIdStr, fødselsnummerAktiv, lagre)
     }
 
-    fun hentOgLagreAktørIder(barnasFødselsnummer: List<String>, lagre: Boolean): List<Aktør> {
+    fun hentOgLagreAktørIder(
+        barnasFødselsnummer: List<String>,
+        lagre: Boolean,
+    ): List<Aktør> {
         return barnasFødselsnummer.map { hentOgLagreAktør(it, lagre) }
     }
 
@@ -137,9 +147,10 @@ class PersonidentService(
     private fun validerOmAktørIdErMerget(alleHistoriskeIdenterFraPdl: List<IdentInformasjon>) {
         val alleHistoriskeAktørIder = alleHistoriskeIdenterFraPdl.filter { it.gruppe == "AKTORID" && it.historisk == true }.map { it.ident }
 
-        val aktiveAktørerForHistoriskAktørIder = alleHistoriskeAktørIder
-            .mapNotNull { aktørId -> aktørIdRepository.findByAktørIdOrNull(aktørId) }
-            .filter { aktør -> aktør.personidenter.any { personident -> personident.aktiv } }
+        val aktiveAktørerForHistoriskAktørIder =
+            alleHistoriskeAktørIder
+                .mapNotNull { aktørId -> aktørIdRepository.findByAktørIdOrNull(aktørId) }
+                .filter { aktør -> aktør.personidenter.any { personident -> personident.aktiv } }
 
         if (aktiveAktørerForHistoriskAktørIder.isNotEmpty()) {
             secureLogger.warn("Potensielt merget ident for $alleHistoriskeIdenterFraPdl")
@@ -149,13 +160,18 @@ class PersonidentService(
         }
     }
 
-    private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String, lagre: Boolean): Aktør {
+    private fun opprettAktørIdOgPersonident(
+        aktørIdStr: String,
+        fødselsnummer: String,
+        lagre: Boolean,
+    ): Aktør {
         secureLogger.info("Oppretter aktør og personIdent. aktørIdStr=$aktørIdStr fødselsnummer=$fødselsnummer lagre=$lagre")
-        val aktør = Aktør(aktørId = aktørIdStr).also {
-            it.personidenter.add(
-                Personident(fødselsnummer = fødselsnummer, aktør = it),
-            )
-        }
+        val aktør =
+            Aktør(aktørId = aktørIdStr).also {
+                it.personidenter.add(
+                    Personident(fødselsnummer = fødselsnummer, aktør = it),
+                )
+            }
 
         return if (lagre) {
             aktørIdRepository.saveAndFlush(aktør)
@@ -164,7 +180,11 @@ class PersonidentService(
         }
     }
 
-    private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String, lagre: Boolean = true): Aktør {
+    private fun opprettPersonIdent(
+        aktør: Aktør,
+        fødselsnummer: String,
+        lagre: Boolean = true,
+    ): Aktør {
         secureLogger.info("Oppretter personIdent. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre, personidenter=${aktør.personidenter}")
         val eksisterendePersonIdent = aktør.personidenter.filter { it.fødselsnummer == fødselsnummer && it.aktiv }
         secureLogger.info("Aktøren har fødselsnummer ${aktør.personidenter.map { it.fødselsnummer } }")

@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType.VILKÅRSVURDERING
 import no.nav.familie.ba.sak.kjerne.steg.StegType.VURDER_TILBAKEKREVING
 
 interface BehandlingSteg<T> {
-
     fun utførStegOgAngiNeste(
         behandling: Behandling,
         data: T,
@@ -52,7 +51,10 @@ interface BehandlingSteg<T> {
         )
     }
 
-    fun preValiderSteg(behandling: Behandling, stegService: StegService? = null) {}
+    fun preValiderSteg(
+        behandling: Behandling,
+        stegService: StegService? = null,
+    ) {}
 
     fun postValiderSteg(behandling: Behandling) {}
 }
@@ -71,16 +73,16 @@ enum class StegType(
     val tillattFor: List<BehandlerRolle>,
     private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>,
 ) {
-
     // Henlegg søknad går utenfor den normale stegflyten og går direkte til ferdigstilt.
     // Denne typen av steg skal bli endret til å bli av type aksjonspunkt isteden for steg.
     HENLEGG_BEHANDLING(
         rekkefølge = 0,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-        gyldigIKombinasjonMedStatus = listOf(
-            BehandlingStatus.UTREDES,
-            BehandlingStatus.IVERKSETTER_VEDTAK,
-        ),
+        gyldigIKombinasjonMedStatus =
+            listOf(
+                BehandlingStatus.UTREDES,
+                BehandlingStatus.IVERKSETTER_VEDTAK,
+            ),
     ),
     REGISTRERE_INSTITUSJON_OG_VERGE(
         rekkefølge = 1,
@@ -155,11 +157,12 @@ enum class StegType(
     FERDIGSTILLE_BEHANDLING(
         rekkefølge = 13,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-        gyldigIKombinasjonMedStatus = listOf(
-            BehandlingStatus.IVERKSETTER_VEDTAK,
-            BehandlingStatus.UTREDES,
-            BehandlingStatus.FATTER_VEDTAK,
-        ),
+        gyldigIKombinasjonMedStatus =
+            listOf(
+                BehandlingStatus.IVERKSETTER_VEDTAK,
+                BehandlingStatus.UTREDES,
+                BehandlingStatus.FATTER_VEDTAK,
+            ),
     ),
     BEHANDLING_AVSLUTTET(
         rekkefølge = 14,
@@ -317,7 +320,11 @@ fun hentNesteSteg(
                 BEHANDLINGSRESULTAT -> {
                     if (!behandling.skalBehandlesAutomatisk) {
                         VURDER_TILBAKEKREVING
-                    } else if (behandling.skalBehandlesAutomatisk && behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) IVERKSETT_MOT_OPPDRAG else VURDER_TILBAKEKREVING
+                    } else if (behandling.skalBehandlesAutomatisk && behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
+                        IVERKSETT_MOT_OPPDRAG
+                    } else {
+                        VURDER_TILBAKEKREVING
+                    }
                 }
 
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
@@ -338,13 +345,14 @@ fun hentNesteSteg(
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> if (endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING) {
-                    IVERKSETT_MOT_OPPDRAG
-                } else if (behandling.kategori == BehandlingKategori.EØS && endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING) {
-                    FERDIGSTILLE_BEHANDLING
-                } else {
-                    throw Feil("Satsendringsbehandling har ingen endringer i utbetaling.")
-                }
+                BEHANDLINGSRESULTAT ->
+                    if (endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING) {
+                        IVERKSETT_MOT_OPPDRAG
+                    } else if (behandling.kategori == BehandlingKategori.EØS && endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING) {
+                        FERDIGSTILLE_BEHANDLING
+                    } else {
+                        throw Feil("Satsendringsbehandling har ingen endringer i utbetaling.")
+                    }
 
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING

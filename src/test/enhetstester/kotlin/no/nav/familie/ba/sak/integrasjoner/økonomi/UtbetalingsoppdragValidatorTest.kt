@@ -21,20 +21,20 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class UtbetalingsoppdragValidatorTest {
-
     @Test
     fun `nasjonalt utbetalingsoppdrag må ha utbetalingsperiode`() {
         val utbetalingsoppdrag = lagUtbetalingsoppdrag()
         assertThrows<FunksjonellFeil> {
             utbetalingsoppdrag.validerNullutbetaling(
                 behandlingskategori = BehandlingKategori.NASJONAL,
-                andelerTilkjentYtelse = listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = inneværendeMåned().minusYears(4),
-                        tom = inneværendeMåned(),
-                        beløp = 1054,
+                andelerTilkjentYtelse =
+                    listOf(
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusYears(4),
+                            tom = inneværendeMåned(),
+                            beløp = 1054,
+                        ),
                     ),
-                ),
             )
         }
     }
@@ -45,13 +45,14 @@ internal class UtbetalingsoppdragValidatorTest {
         assertDoesNotThrow {
             utbetalingsoppdrag.validerNullutbetaling(
                 behandlingskategori = BehandlingKategori.EØS,
-                andelerTilkjentYtelse = listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = inneværendeMåned().minusYears(4),
-                        tom = inneværendeMåned(),
-                        beløp = 0,
-                    ).medDifferanseberegning(BigDecimal("10")),
-                ),
+                andelerTilkjentYtelse =
+                    listOf(
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusYears(4),
+                            tom = inneværendeMåned(),
+                            beløp = 0,
+                        ).medDifferanseberegning(BigDecimal("10")),
+                    ),
             )
         }
     }
@@ -62,45 +63,49 @@ internal class UtbetalingsoppdragValidatorTest {
         assertThrows<FunksjonellFeil> {
             utbetalingsoppdrag.validerNullutbetaling(
                 behandlingskategori = BehandlingKategori.EØS,
-                andelerTilkjentYtelse = listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = inneværendeMåned().minusYears(4),
-                        tom = inneværendeMåned(),
-                        beløp = 1054,
+                andelerTilkjentYtelse =
+                    listOf(
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusYears(4),
+                            tom = inneværendeMåned(),
+                            beløp = 1054,
+                        ),
                     ),
-                ),
             )
         }
     }
 
     @Test
     fun `innvilget EØS-utbetalingsoppdrag hvor Norge er sekundærland ikke kaster feil når finnes utbetalingsperiode`() {
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(
-            utbetalingsperioder = listOf(
-                Utbetalingsperiode(
-                    erEndringPåEksisterendePeriode = false,
-                    periodeId = 0,
-                    datoForVedtak = LocalDate.now(),
-                    klassifisering = "",
-                    vedtakdatoFom = inneværendeMåned().førsteDagIInneværendeMåned(),
-                    vedtakdatoTom = inneværendeMåned().atEndOfMonth(),
-                    sats = BigDecimal(100),
-                    satsType = Utbetalingsperiode.SatsType.MND,
-                    utbetalesTil = "",
-                    behandlingId = 123,
-                ),
-            ),
-        )
+        val utbetalingsoppdrag =
+            lagUtbetalingsoppdrag(
+                utbetalingsperioder =
+                    listOf(
+                        Utbetalingsperiode(
+                            erEndringPåEksisterendePeriode = false,
+                            periodeId = 0,
+                            datoForVedtak = LocalDate.now(),
+                            klassifisering = "",
+                            vedtakdatoFom = inneværendeMåned().førsteDagIInneværendeMåned(),
+                            vedtakdatoTom = inneværendeMåned().atEndOfMonth(),
+                            sats = BigDecimal(100),
+                            satsType = Utbetalingsperiode.SatsType.MND,
+                            utbetalesTil = "",
+                            behandlingId = 123,
+                        ),
+                    ),
+            )
         assertDoesNotThrow {
             utbetalingsoppdrag.validerNullutbetaling(
                 behandlingskategori = BehandlingKategori.EØS,
-                andelerTilkjentYtelse = listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = inneværendeMåned().minusYears(4),
-                        tom = inneværendeMåned(),
-                        beløp = 1024,
-                    ).medDifferanseberegning(BigDecimal("10")),
-                ),
+                andelerTilkjentYtelse =
+                    listOf(
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusYears(4),
+                            tom = inneværendeMåned(),
+                            beløp = 1024,
+                        ).medDifferanseberegning(BigDecimal("10")),
+                    ),
             )
         }
     }
@@ -111,21 +116,22 @@ internal class UtbetalingsoppdragValidatorTest {
         val tom = LocalDate.now().sisteDagIMåned()
         val opphørDato = LocalDate.now().sisteDagIMåned()
 
-        val utbetalingsPeriode = listOf(
-            lagEksternUtbetalingsperiode(
-                opphør = Opphør(opphørDato),
-                fom = fom.minusMonths(10),
-                tom = tom.minusMonths(8),
-            ),
-            lagEksternUtbetalingsperiode(
-                fom = fom.minusMonths(7),
-                tom = tom.minusMonths(6),
-            ),
-            lagEksternUtbetalingsperiode(
-                fom = fom.minusMonths(5),
-                tom = tom.minusMonths(4),
-            ),
-        )
+        val utbetalingsPeriode =
+            listOf(
+                lagEksternUtbetalingsperiode(
+                    opphør = Opphør(opphørDato),
+                    fom = fom.minusMonths(10),
+                    tom = tom.minusMonths(8),
+                ),
+                lagEksternUtbetalingsperiode(
+                    fom = fom.minusMonths(7),
+                    tom = tom.minusMonths(6),
+                ),
+                lagEksternUtbetalingsperiode(
+                    fom = fom.minusMonths(5),
+                    tom = tom.minusMonths(4),
+                ),
+            )
 
         // Test at validering ikke feiler.
         lagEksternUtbetalingsoppdrag(utbetalingsPeriode).validerOpphørsoppdrag()
@@ -137,21 +143,22 @@ internal class UtbetalingsoppdragValidatorTest {
         val tom = LocalDate.now().sisteDagIMåned()
         val opphørDato = LocalDate.now().sisteDagIMåned()
 
-        val utbetalingsPeriode = listOf(
-            lagEksternUtbetalingsperiode(
-                opphør = Opphør(opphørDato),
-                fom = fom.minusMonths(10),
-                tom = tom.minusMonths(8),
-            ),
-            lagEksternUtbetalingsperiode(
-                fom = fom.minusMonths(7),
-                tom = tom.minusMonths(6),
-            ),
-            lagEksternUtbetalingsperiode(
-                fom = fom.minusMonths(5),
-                tom = tom.plusMonths(1),
-            ),
-        )
+        val utbetalingsPeriode =
+            listOf(
+                lagEksternUtbetalingsperiode(
+                    opphør = Opphør(opphørDato),
+                    fom = fom.minusMonths(10),
+                    tom = tom.minusMonths(8),
+                ),
+                lagEksternUtbetalingsperiode(
+                    fom = fom.minusMonths(7),
+                    tom = tom.minusMonths(6),
+                ),
+                lagEksternUtbetalingsperiode(
+                    fom = fom.minusMonths(5),
+                    tom = tom.plusMonths(1),
+                ),
+            )
         assertThrows<IllegalStateException> {
             lagEksternUtbetalingsoppdrag(utbetalingsPeriode).validerOpphørsoppdrag()
         }
@@ -168,7 +175,11 @@ internal class UtbetalingsoppdragValidatorTest {
             utbetalingsperiode = utbetalingsPeriode,
         )
 
-    private fun lagEksternUtbetalingsperiode(opphør: Opphør? = null, fom: LocalDate, tom: LocalDate) =
+    private fun lagEksternUtbetalingsperiode(
+        opphør: Opphør? = null,
+        fom: LocalDate,
+        tom: LocalDate,
+    ) =
         Utbetalingsperiode(
             false,
             opphør,
@@ -184,13 +195,14 @@ internal class UtbetalingsoppdragValidatorTest {
             lagBehandling().id,
         )
 
-    private fun lagUtbetalingsoppdrag(utbetalingsperioder: List<Utbetalingsperiode> = emptyList()) = Utbetalingsoppdrag(
-        kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
-        fagSystem = "BA",
-        saksnummer = "",
-        aktoer = UUID.randomUUID().toString(),
-        saksbehandlerId = "",
-        avstemmingTidspunkt = LocalDateTime.now(),
-        utbetalingsperiode = utbetalingsperioder,
-    )
+    private fun lagUtbetalingsoppdrag(utbetalingsperioder: List<Utbetalingsperiode> = emptyList()) =
+        Utbetalingsoppdrag(
+            kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
+            fagSystem = "BA",
+            saksnummer = "",
+            aktoer = UUID.randomUUID().toString(),
+            saksbehandlerId = "",
+            avstemmingTidspunkt = LocalDateTime.now(),
+            utbetalingsperiode = utbetalingsperioder,
+        )
 }

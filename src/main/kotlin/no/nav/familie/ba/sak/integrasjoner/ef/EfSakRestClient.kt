@@ -18,7 +18,6 @@ class EfSakRestClient(
     @Value("\${FAMILIE_EF_SAK_API_URL}") private val efSakBaseUrl: URI,
     @Qualifier("jwtBearer") restTemplate: RestOperations,
 ) : AbstractRestClient(restTemplate, "ef-sak") {
-
     fun hentPerioderMedFullOvergangsstønad(personIdent: String): EksternePerioderResponse {
         val uri = UriUtil.uri(efSakBaseUrl, "ekstern/perioder/full-overgangsstonad")
 

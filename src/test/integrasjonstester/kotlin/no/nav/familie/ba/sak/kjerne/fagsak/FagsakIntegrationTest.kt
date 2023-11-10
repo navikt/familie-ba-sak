@@ -11,17 +11,17 @@ class FagsakIntegrationTest(
     @Autowired
     val fagsakService: FagsakService,
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun `hentMinimalFagsakerForPerson() skal return begge fagsaker for en person`() {
         val personFnr = randomFnr()
         val fagsakOmsorgperson = fagsakService.hentEllerOpprettFagsak(personFnr)
-        val fagsakInstitusjon = fagsakService.hentEllerOpprettFagsak(
-            personFnr,
-            false,
-            FagsakType.INSTITUSJON,
-            InstitusjonInfo("orgnr", null),
-        )
+        val fagsakInstitusjon =
+            fagsakService.hentEllerOpprettFagsak(
+                personFnr,
+                false,
+                FagsakType.INSTITUSJON,
+                InstitusjonInfo("orgnr", null),
+            )
         val fagsakEnsligMindreÅrig =
             fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakType.BARN_ENSLIG_MINDREÅRIG)
 
@@ -35,12 +35,13 @@ class FagsakIntegrationTest(
     fun `hentMinimalFagsakForPerson() skal return riktig fagsak for en person`() {
         val personFnr = randomFnr()
         val fagsakOmsorgperson = fagsakService.hentEllerOpprettFagsak(personFnr)
-        val fagsakInstitusjon = fagsakService.hentEllerOpprettFagsak(
-            personFnr,
-            false,
-            FagsakType.INSTITUSJON,
-            InstitusjonInfo("orgnr", null),
-        )
+        val fagsakInstitusjon =
+            fagsakService.hentEllerOpprettFagsak(
+                personFnr,
+                false,
+                FagsakType.INSTITUSJON,
+                InstitusjonInfo("orgnr", null),
+            )
         val fagsakEnsligMindreÅrig =
             fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakType.BARN_ENSLIG_MINDREÅRIG)
 

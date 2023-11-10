@@ -27,7 +27,6 @@ data class Aktør(
     // Validator kommer virke først i Spring 3.0 grunnet at hibernate tatt i bruke Jakarta.
     @Pattern(regexp = VALID_REGEXP)
     val aktørId: String,
-
     @OneToMany(
         fetch = FetchType.EAGER,
         mappedBy = "aktør",
@@ -35,7 +34,6 @@ data class Aktør(
     )
     val personidenter: MutableSet<Personident> = mutableSetOf(),
 ) : BaseEntitet() {
-
     init {
         require(VALID.matcher(aktørId).matches()) {
             // skal ikke skje, funksjonelle feilmeldinger håndteres ikke her.

@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Profile
 @Configuration
 @Profile("dev")
 class AuditLoggerMock {
-
     @Bean
     @Primary
     fun auditLogger(): AuditLogger = mockk(relaxed = true)

@@ -26,7 +26,6 @@ class EndretUtbetalingAndelTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AbstractVerdikjedetest() {
-
     @Test
     fun `Skal teste at endret utbetalingsandel overskriver eksisterende utbetalingsandel`() {
         val (scenario, restUtvidetBehandling) = genererBehandlingsresultat()
@@ -34,17 +33,18 @@ class EndretUtbetalingAndelTest(
         val endretFom = YearMonth.of(2021, 9)
         val endretTom = YearMonth.of(2021, 11)
 
-        val restEndretUtbetalingAndel = RestEndretUtbetalingAndel(
-            id = null,
-            personIdent = scenario.barna.first().ident,
-            prosent = BigDecimal(0),
-            fom = endretFom,
-            tom = endretTom,
-            årsak = Årsak.DELT_BOSTED, avtaletidspunktDeltBosted = LocalDate.now(),
-            søknadstidspunkt = LocalDate.now(),
-            begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true,
-        )
+        val restEndretUtbetalingAndel =
+            RestEndretUtbetalingAndel(
+                id = null,
+                personIdent = scenario.barna.first().ident,
+                prosent = BigDecimal(0),
+                fom = endretFom,
+                tom = endretTom,
+                årsak = Årsak.DELT_BOSTED, avtaletidspunktDeltBosted = LocalDate.now(),
+                søknadstidspunkt = LocalDate.now(),
+                begrunnelse = "begrunnelse",
+                erTilknyttetAndeler = true,
+            )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
             restUtvidetBehandling.data!!.behandlingId,
@@ -86,23 +86,25 @@ class EndretUtbetalingAndelTest(
         val endretFom = YearMonth.of(2021, 9)
         val endretTom = YearMonth.of(2021, 11)
 
-        val restEndretUtbetalingAndel = RestEndretUtbetalingAndel(
-            id = null,
-            personIdent = scenario.barna.first().ident,
-            prosent = BigDecimal(0),
-            fom = endretFom,
-            tom = endretTom,
-            årsak = Årsak.DELT_BOSTED,
-            avtaletidspunktDeltBosted = LocalDate.now(),
-            søknadstidspunkt = LocalDate.now(),
-            begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true,
-        )
+        val restEndretUtbetalingAndel =
+            RestEndretUtbetalingAndel(
+                id = null,
+                personIdent = scenario.barna.first().ident,
+                prosent = BigDecimal(0),
+                fom = endretFom,
+                tom = endretTom,
+                årsak = Årsak.DELT_BOSTED,
+                avtaletidspunktDeltBosted = LocalDate.now(),
+                søknadstidspunkt = LocalDate.now(),
+                begrunnelse = "begrunnelse",
+                erTilknyttetAndeler = true,
+            )
 
-        val restUtvidetBehandlingEtterEndretPeriode = familieBaSakKlient().leggTilEndretUtbetalingAndel(
-            restUtvidetBehandling.data!!.behandlingId,
-            restEndretUtbetalingAndel,
-        )
+        val restUtvidetBehandlingEtterEndretPeriode =
+            familieBaSakKlient().leggTilEndretUtbetalingAndel(
+                restUtvidetBehandling.data!!.behandlingId,
+                restEndretUtbetalingAndel,
+            )
 
         val endretUtbetalingAndelId =
             restUtvidetBehandlingEtterEndretPeriode.data!!.endretUtbetalingAndeler.first().id
@@ -127,37 +129,41 @@ class EndretUtbetalingAndelTest(
     private fun genererBehandlingsresultat(): Pair<RestScenario, Ressurs<RestUtvidetBehandling>> {
         val barnFødselsdato = LocalDate.of(2020, 1, 3)
 
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = barnFødselsdato.toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                        bostedsadresser = emptyList(),
-                    ),
+        val scenario =
+            mockServerKlient().lagScenario(
+                RestScenario(
+                    søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                    barna =
+                        listOf(
+                            RestScenarioPerson(
+                                fødselsdato = barnFødselsdato.toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen",
+                                bostedsadresser = emptyList(),
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         val søkersIdent = scenario.søker.ident!!
 
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
-        val restFagsakMedBehandling = familieBaSakKlient().opprettBehandling(
-            søkersIdent = søkersIdent,
-            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-            fagsakId = fagsak.data!!.id,
-        )
+        val restFagsakMedBehandling =
+            familieBaSakKlient().opprettBehandling(
+                søkersIdent = søkersIdent,
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                fagsakId = fagsak.data!!.id,
+            )
 
         val behandling = behandlingHentOgPersisterService.hent(restFagsakMedBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
             RestRegistrerSøknad(
-                søknad = lagSøknadDTO(
-                    søkerIdent = scenario.søker.ident,
-                    barnasIdenter = scenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.ORDINÆR,
-                ),
+                søknad =
+                    lagSøknadDTO(
+                        søkerIdent = scenario.søker.ident,
+                        barnasIdenter = scenario.barna.map { it.ident!! },
+                        underkategori = BehandlingUnderkategori.ORDINÆR,
+                    ),
                 bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
@@ -172,18 +178,20 @@ class EndretUtbetalingAndelTest(
                     behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,
                     restPersonResultat =
-                    RestPersonResultat(
-                        personIdent = restPersonResultat.personIdent,
-                        vilkårResultater = listOf(
-                            it.copy(
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = barnFødselsdato,
-                                utdypendeVilkårsvurderinger = listOfNotNull(
-                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                        RestPersonResultat(
+                            personIdent = restPersonResultat.personIdent,
+                            vilkårResultater =
+                                listOf(
+                                    it.copy(
+                                        resultat = Resultat.OPPFYLT,
+                                        periodeFom = barnFødselsdato,
+                                        utdypendeVilkårsvurderinger =
+                                            listOfNotNull(
+                                                if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                                            ),
+                                    ),
                                 ),
-                            ),
                         ),
-                    ),
                 )
             }
         }

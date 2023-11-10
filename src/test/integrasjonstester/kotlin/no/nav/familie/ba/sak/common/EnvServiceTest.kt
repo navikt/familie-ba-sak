@@ -11,7 +11,6 @@ class EnvServiceTest(
     @Autowired
     private val environment: Environment,
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun `erDev skal returnere true dersom appen er startet med dev-profil`() {
         val envService = EnvService(environment)

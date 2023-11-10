@@ -23,10 +23,8 @@ data class Verge(
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "verge_seq_generator")
     @SequenceGenerator(name = "verge_seq_generator", sequenceName = "verge_seq", allocationSize = 50)
     val id: Long = 0,
-
     @Column(name = "ident", updatable = true, length = 20)
     var ident: String,
-
     @OneToOne(optional = false)
     @JoinColumn(
         name = "fk_behandling_id",

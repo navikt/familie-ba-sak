@@ -29,7 +29,10 @@ class SmåbarnstilleggKorrigeringService(
     private val loggService: LoggService,
 ) {
     @Transactional
-    fun leggTilSmåbarnstilleggPåBehandling(årMåned: YearMonth, behandling: Behandling): List<AndelTilkjentYtelse> {
+    fun leggTilSmåbarnstilleggPåBehandling(
+        årMåned: YearMonth,
+        behandling: Behandling,
+    ): List<AndelTilkjentYtelse> {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
         val andelTilkjentYtelser = tilkjentYtelse.andelerTilkjentYtelse
 
@@ -40,16 +43,17 @@ class SmåbarnstilleggKorrigeringService(
             throw FunksjonellFeil("Det er ikke mulig å legge til småbarnstillegg for ${årMåned.tilMånedÅr()} fordi det allerede finnes småbarnstillegg for denne perioden")
         }
 
-        val nyeSmåbarnstillegg = skalOpprettesTidslinje
-            .kombinerUtenNullMed(satstypeTidslinje(SatsType.SMA)) { _, sats ->
-                AndelTilkjentYtelseForTidslinje(
-                    aktør = behandling.fagsak.aktør,
-                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
-                    prosent = BigDecimal(100),
-                    sats = sats,
-                    beløp = sats,
-                )
-            }.tilAndelerTilkjentYtelse(tilkjentYtelse)
+        val nyeSmåbarnstillegg =
+            skalOpprettesTidslinje
+                .kombinerUtenNullMed(satstypeTidslinje(SatsType.SMA)) { _, sats ->
+                    AndelTilkjentYtelseForTidslinje(
+                        aktør = behandling.fagsak.aktør,
+                        ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                        prosent = BigDecimal(100),
+                        sats = sats,
+                        beløp = sats,
+                    )
+                }.tilAndelerTilkjentYtelse(tilkjentYtelse)
 
         andelTilkjentYtelser.addAll(nyeSmåbarnstillegg)
 
@@ -59,11 +63,15 @@ class SmåbarnstilleggKorrigeringService(
     }
 
     @Transactional
-    fun fjernSmåbarnstilleggPåBehandling(årMåned: YearMonth, behandling: Behandling): List<AndelTilkjentYtelse> {
+    fun fjernSmåbarnstilleggPåBehandling(
+        årMåned: YearMonth,
+        behandling: Behandling,
+    ): List<AndelTilkjentYtelse> {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
 
-        val småbarnstilleggTidslinje = tilkjentYtelse.andelerTilkjentYtelse
-            .tilTryggTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
+        val småbarnstilleggTidslinje =
+            tilkjentYtelse.andelerTilkjentYtelse
+                .tilTryggTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
         val skalFjernesTidslinje = opprettBooleanTidslinje(årMåned, årMåned)
 
         if (småbarnstilleggTidslinje.harIkkeOverlappMed(skalFjernesTidslinje)) {
@@ -78,8 +86,9 @@ class SmåbarnstilleggKorrigeringService(
                 }
             }.tilAndelerTilkjentYtelse(tilkjentYtelse)
 
-        val andelerTilkjentYtelserUtenomSmåbarnstillegg = tilkjentYtelse.andelerTilkjentYtelse
-            .filter { it.type != YtelseType.SMÅBARNSTILLEGG }
+        val andelerTilkjentYtelserUtenomSmåbarnstillegg =
+            tilkjentYtelse.andelerTilkjentYtelse
+                .filter { it.type != YtelseType.SMÅBARNSTILLEGG }
 
         val oppdaterteAndeler = andelerTilkjentYtelserUtenomSmåbarnstillegg + nyeSmåbarnstilleggAndeler
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)

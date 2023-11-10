@@ -25,10 +25,11 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp>>,
     private val kompetanseRepository: FinnPeriodeOgBarnSkjemaRepository<Kompetanse>,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse> {
-    val skjemaService = PeriodeOgBarnSkjemaService(
-        utenlandskPeriodebeløpRepository,
-        endringsabonnenter,
-    )
+    val skjemaService =
+        PeriodeOgBarnSkjemaService(
+            utenlandskPeriodebeløpRepository,
+            endringsabonnenter,
+        )
 
     @Transactional
     fun tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId: BehandlingId) {
@@ -38,7 +39,10 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
     }
 
     @Transactional
-    override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<Kompetanse>) {
+    override fun skjemaerEndret(
+        behandlingId: BehandlingId,
+        endretTil: Collection<Kompetanse>,
+    ) {
         tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId, endretTil)
     }
 
@@ -48,10 +52,11 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
     ) {
         val forrigeUtenlandskePeriodebeløp = skjemaService.hentMedBehandlingId(behandlingId)
 
-        val oppdaterteUtenlandskPeriodebeløp = tilpassUtenlandskePeriodebeløpTilKompetanser(
-            forrigeUtenlandskePeriodebeløp,
-            gjeldendeKompetanser,
-        ).medBehandlingId(behandlingId)
+        val oppdaterteUtenlandskPeriodebeløp =
+            tilpassUtenlandskePeriodebeløpTilKompetanser(
+                forrigeUtenlandskePeriodebeløp,
+                gjeldendeKompetanser,
+            ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(
             behandlingId,
@@ -65,9 +70,10 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
     forrigeUtenlandskePeriodebeløp: Iterable<UtenlandskPeriodebeløp>,
     gjeldendeKompetanser: Iterable<Kompetanse>,
 ): Collection<UtenlandskPeriodebeløp> {
-    val barnasKompetanseTidslinjer = gjeldendeKompetanser
-        .tilSeparateTidslinjerForBarna()
-        .filtrerSekundærland()
+    val barnasKompetanseTidslinjer =
+        gjeldendeKompetanser
+            .tilSeparateTidslinjerForBarna()
+            .filtrerSekundærland()
 
     return forrigeUtenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
         .outerJoin(barnasKompetanseTidslinjer) { upb, kompetanse ->

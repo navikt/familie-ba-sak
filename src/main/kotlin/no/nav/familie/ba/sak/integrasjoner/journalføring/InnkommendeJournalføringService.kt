@@ -54,8 +54,10 @@ class InnkommendeJournalføringService(
     private val journalføringMetrikk: JournalføringMetrikk,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
 ) {
-
-    fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
+    fun hentDokument(
+        journalpostId: String,
+        dokumentInfoId: String,
+    ): ByteArray {
         return integrasjonClient.hentDokument(dokumentInfoId, journalpostId)
     }
 
@@ -80,10 +82,11 @@ class InnkommendeJournalføringService(
         behandlendeEnhet: String,
         oppgaveId: String,
     ): String {
-        val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(
-            request.tilknyttedeBehandlingIder,
-            journalpostId,
-        )
+        val (sak, behandlinger) =
+            lagreJournalpostOgKnyttFagsakTilJournalpost(
+                request.tilknyttedeBehandlingIder,
+                journalpostId,
+            )
 
         håndterLogiskeVedlegg(request, journalpostId)
 
@@ -105,11 +108,13 @@ class InnkommendeJournalføringService(
 
     private fun oppdaterLogiskeVedlegg(request: RestJournalføring) {
         request.dokumenter.forEach { dokument ->
-            val fjernedeVedlegg = (dokument.eksisterendeLogiskeVedlegg ?: emptyList())
-                .partition { (dokument.logiskeVedlegg ?: emptyList()).contains(it) }.second
-            val nyeVedlegg = (dokument.logiskeVedlegg ?: emptyList()).partition {
-                (dokument.eksisterendeLogiskeVedlegg ?: emptyList()).contains(it)
-            }.second
+            val fjernedeVedlegg =
+                (dokument.eksisterendeLogiskeVedlegg ?: emptyList())
+                    .partition { (dokument.logiskeVedlegg ?: emptyList()).contains(it) }.second
+            val nyeVedlegg =
+                (dokument.logiskeVedlegg ?: emptyList()).partition {
+                    (dokument.eksisterendeLogiskeVedlegg ?: emptyList()).contains(it)
+                }.second
             fjernedeVedlegg.forEach {
                 integrasjonClient.slettLogiskVedlegg(it.logiskVedleggId, dokument.dokumentInfoId)
             }
@@ -168,13 +173,14 @@ class InnkommendeJournalføringService(
                     kategori = request.kategori,
                     underkategori = request.underkategori,
                     søknadMottattDato = request.datoMottatt?.toLocalDate(),
-                    søknadsinfo = brevkode?.let {
-                        Søknadsinfo(
-                            journalpostId = journalpost.journalpostId,
-                            brevkode = it,
-                            erDigital = journalpost.kanal == NAV_NO,
-                        )
-                    },
+                    søknadsinfo =
+                        brevkode?.let {
+                            Søknadsinfo(
+                                journalpostId = journalpost.journalpostId,
+                                brevkode = it,
+                                erDigital = journalpost.kanal == NAV_NO,
+                            )
+                        },
                     fagsakType = request.fagsakType,
                     institusjon = request.institusjon,
                 )
@@ -225,13 +231,14 @@ class InnkommendeJournalføringService(
                     kategori = request.kategori,
                     underkategori = request.underkategori,
                     søknadMottattDato = request.datoMottatt?.toLocalDate(),
-                    søknadsinfo = brevkode?.let {
-                        Søknadsinfo(
-                            journalpostId = journalpost.journalpostId,
-                            brevkode = it,
-                            erDigital = journalpost.kanal == NAV_NO,
-                        )
-                    },
+                    søknadsinfo =
+                        brevkode?.let {
+                            Søknadsinfo(
+                                journalpostId = journalpost.journalpostId,
+                                brevkode = it,
+                                erDigital = journalpost.kanal == NAV_NO,
+                            )
+                        },
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
@@ -247,9 +254,10 @@ class InnkommendeJournalføringService(
         tilknyttedeBehandlingIder: List<String>,
         journalpostId: String,
     ): Pair<Sak, List<Behandling>> {
-        val behandlinger = tilknyttedeBehandlingIder.map {
-            behandlingHentOgPersisterService.hent(it.toLong())
-        }
+        val behandlinger =
+            tilknyttedeBehandlingIder.map {
+                behandlingHentOgPersisterService.hent(it.toLong())
+            }
 
         val journalpost = hentJournalpost(journalpostId)
         behandlinger.forEach {
@@ -262,37 +270,43 @@ class InnkommendeJournalføringService(
             )
         }
 
-        val fagsak = when (tilknyttedeBehandlingIder.isNotEmpty()) {
-            true -> {
-                behandlinger.map { it.fagsak }.toSet().firstOrNull()
-                    ?: throw FunksjonellFeil(
-                        melding = "Behandlings'idene tilhørerer ikke samme fagsak, eller vi fant ikke fagsaken.",
-                        frontendFeilmelding = "Oppslag på fagsak feilet med behandlingene som ble sendt inn.",
-                    )
+        val fagsak =
+            when (tilknyttedeBehandlingIder.isNotEmpty()) {
+                true -> {
+                    behandlinger.map { it.fagsak }.toSet().firstOrNull()
+                        ?: throw FunksjonellFeil(
+                            melding = "Behandlings'idene tilhørerer ikke samme fagsak, eller vi fant ikke fagsaken.",
+                            frontendFeilmelding = "Oppslag på fagsak feilet med behandlingene som ble sendt inn.",
+                        )
+                }
+
+                false -> null
             }
 
-            false -> null
-        }
-
-        val sak = Sak(
-            fagsakId = fagsak?.id?.toString(),
-            fagsaksystem = fagsak?.let { FagsakSystem.BA.name },
-            sakstype = fagsak?.let { FAGSAK.type } ?: GENERELL_SAK.type,
-            arkivsaksystem = null,
-            arkivsaksnummer = null,
-        )
+        val sak =
+            Sak(
+                fagsakId = fagsak?.id?.toString(),
+                fagsaksystem = fagsak?.let { FagsakSystem.BA.name },
+                sakstype = fagsak?.let { FAGSAK.type } ?: GENERELL_SAK.type,
+                arkivsaksystem = null,
+                arkivsaksnummer = null,
+            )
 
         return Pair(sak, behandlinger)
     }
 
-    private fun håndterLogiskeVedlegg(request: RestOppdaterJournalpost, journalpostId: String) {
+    private fun håndterLogiskeVedlegg(
+        request: RestOppdaterJournalpost,
+        journalpostId: String,
+    ) {
         val fjernedeVedlegg =
             request.eksisterendeLogiskeVedlegg.partition { request.logiskeVedlegg.contains(it) }.second
         val nyeVedlegg = request.logiskeVedlegg.partition { request.eksisterendeLogiskeVedlegg.contains(it) }.second
 
-        val dokumentInfoId = request.dokumentInfoId.takeIf { it.isNotEmpty() }
-            ?: hentJournalpost(journalpostId).dokumenter?.first()?.dokumentInfoId
-            ?: error("Fant ikke dokumentInfoId på journalpost")
+        val dokumentInfoId =
+            request.dokumentInfoId.takeIf { it.isNotEmpty() }
+                ?: hentJournalpost(journalpostId).dokumenter?.first()?.dokumentInfoId
+                ?: error("Fant ikke dokumentInfoId på journalpost")
 
         fjernedeVedlegg.forEach {
             integrasjonClient.slettLogiskVedlegg(it.logiskVedleggId, dokumentInfoId)
@@ -330,7 +344,10 @@ class InnkommendeJournalføringService(
         }
     }
 
-    private fun opprettOppgaveFor(behandling: Behandling, navIdent: String) {
+    private fun opprettOppgaveFor(
+        behandling: Behandling,
+        navIdent: String,
+    ) {
         OpprettOppgaveTask.opprettTask(
             behandlingId = behandling.id,
             oppgavetype = Oppgavetype.BehandleSak,
@@ -339,24 +356,29 @@ class InnkommendeJournalføringService(
         )
     }
 
-    private fun genererOgOpprettLogg(journalpostId: String, behandlinger: List<Behandling>) {
+    private fun genererOgOpprettLogg(
+        journalpostId: String,
+        behandlinger: List<Behandling>,
+    ) {
         val journalpost = hentJournalpost(journalpostId)
-        val loggTekst = journalpost.dokumenter?.fold("") { loggTekst, dokumentInfo ->
-            loggTekst +
-                "${dokumentInfo.tittel}" +
-                dokumentInfo.logiskeVedlegg?.fold("") { logiskeVedleggTekst, logiskVedlegg ->
-                    logiskeVedleggTekst +
-                        "\n\u2002\u2002${logiskVedlegg.tittel}"
-                } + "\n"
-        } ?: throw FunksjonellFeil(
-            "Fant ingen dokumenter",
-            frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer.",
-        )
+        val loggTekst =
+            journalpost.dokumenter?.fold("") { loggTekst, dokumentInfo ->
+                loggTekst +
+                    "${dokumentInfo.tittel}" +
+                    dokumentInfo.logiskeVedlegg?.fold("") { logiskeVedleggTekst, logiskVedlegg ->
+                        logiskeVedleggTekst +
+                            "\n\u2002\u2002${logiskVedlegg.tittel}"
+                    } + "\n"
+            } ?: throw FunksjonellFeil(
+                "Fant ingen dokumenter",
+                frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer.",
+            )
 
-        val datoMottatt = journalpost.datoMottatt ?: throw FunksjonellFeil(
-            "Fant ingen dokumenter",
-            frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer.",
-        )
+        val datoMottatt =
+            journalpost.datoMottatt ?: throw FunksjonellFeil(
+                "Fant ingen dokumenter",
+                frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer.",
+            )
         behandlinger.forEach {
             loggService.opprettMottattDokument(
                 behandling = it,
@@ -373,17 +395,17 @@ class InnkommendeJournalføringService(
     ) {
         behandlingSøknadsinfoService.lagreNedSøknadsinfo(
             mottattDato = journalpost.datoMottatt?.toLocalDate() ?: LocalDate.now(),
-            søknadsinfo = Søknadsinfo(
-                journalpostId = journalpost.journalpostId,
-                brevkode = brevkode,
-                erDigital = journalpost.kanal == NAV_NO,
-            ),
+            søknadsinfo =
+                Søknadsinfo(
+                    journalpostId = journalpost.journalpostId,
+                    brevkode = brevkode,
+                    erDigital = journalpost.kanal == NAV_NO,
+                ),
             behandling = behandling,
         )
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(InnkommendeJournalføringService::class.java)
         const val NAV_NO = "NAV_NO"
     }

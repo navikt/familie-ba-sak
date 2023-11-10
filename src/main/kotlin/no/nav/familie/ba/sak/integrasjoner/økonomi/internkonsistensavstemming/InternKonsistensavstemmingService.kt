@@ -28,10 +28,11 @@ class InternKonsistensavstemmingService(
     val taskService: TaskService,
 ) {
     fun validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(maksAntallTasker: Int = Int.MAX_VALUE) {
-        val fagsakerSomIkkeErArkivert = fagsakRepository
-            .hentFagsakerSomIkkeErArkivert()
-            .map { it.id }
-            .sortedBy { it }
+        val fagsakerSomIkkeErArkivert =
+            fagsakRepository
+                .hentFagsakerSomIkkeErArkivert()
+                .map { it.id }
+                .sortedBy { it }
 
         val startTid = LocalDateTime.now()
 
@@ -53,13 +54,14 @@ class InternKonsistensavstemmingService(
         val fagsakTilSisteUtbetalingsoppdragOgSisteAndelerMap =
             hentFagsakTilSisteUtbetalingsoppdragOgSisteAndelerMap(fagsaker)
 
-        val fagsakerMedFeil = fagsakTilSisteUtbetalingsoppdragOgSisteAndelerMap.mapNotNull { entry ->
-            val fagsakId = entry.key
-            val andeler = entry.value.first
-            val utbetalingsoppdrag = entry.value.second
+        val fagsakerMedFeil =
+            fagsakTilSisteUtbetalingsoppdragOgSisteAndelerMap.mapNotNull { entry ->
+                val fagsakId = entry.key
+                val andeler = entry.value.first
+                val utbetalingsoppdrag = entry.value.second
 
-            fagsakId.takeIf { erForskjellMellomAndelerOgOppdrag(andeler, utbetalingsoppdrag, fagsakId) }
-        }
+                fagsakId.takeIf { erForskjellMellomAndelerOgOppdrag(andeler, utbetalingsoppdrag, fagsakId) }
+            }
 
         if (fagsakerMedFeil.isNotEmpty()) {
             throw Feil(
@@ -72,15 +74,17 @@ class InternKonsistensavstemmingService(
 
     private fun hentFagsakTilSisteUtbetalingsoppdragOgSisteAndelerMap(fagsakIder: Set<Long>): Map<Long, Pair<List<AndelTilkjentYtelse>, Utbetalingsoppdrag?>> {
         val scope = CoroutineScope(SupervisorJob())
-        val utbetalingsoppdragDeferred = scope.async {
-            økonomiKlient.hentSisteUtbetalingsoppdragForFagsaker(fagsakIder)
-        }
+        val utbetalingsoppdragDeferred =
+            scope.async {
+                økonomiKlient.hentSisteUtbetalingsoppdragForFagsaker(fagsakIder)
+            }
 
         val fagsakTilAndelerISisteBehandlingSendTilØkonomiMap =
             hentFagsakTilAndelerISisteBehandlingSendtTilØkonomiMap(fagsakIder)
 
-        val fagsakTilSisteUtbetalingsoppdragMap = runBlocking { utbetalingsoppdragDeferred.await() }
-            .associate { it.fagsakId to it.utbetalingsoppdrag }
+        val fagsakTilSisteUtbetalingsoppdragMap =
+            runBlocking { utbetalingsoppdragDeferred.await() }
+                .associate { it.fagsakId to it.utbetalingsoppdrag }
 
         val fagsakTilSisteUtbetalingsoppdragOgSisteAndeler =
             fagsakTilAndelerISisteBehandlingSendTilØkonomiMap.mapValues { (fagsakId, andel) ->

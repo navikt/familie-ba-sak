@@ -30,16 +30,12 @@ data class GrArbeidsforhold(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Embedded
     val periode: DatoIntervallEntitet? = null,
-
     @Column(name = "arbeidsgiver_id")
     val arbeidsgiverId: String?,
-
     @Column(name = "arbeidsgiver_type")
     val arbeidsgiverType: String?,
-
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
@@ -49,6 +45,7 @@ data class GrArbeidsforhold(
         copy(id = 0, person = nyPerson)
 }
 
-fun List<GrArbeidsforhold>.harLøpendeArbeidsforhold(): Boolean = this.any {
-    it.periode?.tom == null || it.periode.tom >= LocalDate.now()
-}
+fun List<GrArbeidsforhold>.harLøpendeArbeidsforhold(): Boolean =
+    this.any {
+        it.periode?.tom == null || it.periode.tom >= LocalDate.now()
+    }

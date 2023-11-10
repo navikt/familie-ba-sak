@@ -29,7 +29,6 @@ class SmåbarnstilleggService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
-
     @Transactional
     fun hentOgLagrePerioderMedOvergangsstønadForBehandling(
         søkerAktør: Aktør,
@@ -128,24 +127,27 @@ class SmåbarnstilleggService(
             hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør).map { it.tilInternPeriodeOvergangsstønad() }
                 .slåSammenTidligerePerioder(dagensDato)
 
-        val andelerMedEndringerFraSistIverksatteBehandling = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sistIverksatteBehandling.id)
+        val andelerMedEndringerFraSistIverksatteBehandling =
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sistIverksatteBehandling.id)
 
         secureLogger.info("Perioder med overgangsstønad fra EF: ${nyePerioderMedFullOvergangsstønad.map { "Periode(fom=${it.fomDato}, tom=${it.tomDato})" }}")
 
         return vedtakOmOvergangsstønadPåvirkerFagsak(
-            småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
-                behandlingId = sistIverksatteBehandling.id,
-                tilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling,
-            ),
+            småbarnstilleggBarnetrygdGenerator =
+                SmåbarnstilleggBarnetrygdGenerator(
+                    behandlingId = sistIverksatteBehandling.id,
+                    tilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling,
+                ),
             nyePerioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
             forrigeAndelerTilkjentYtelse = andelerMedEndringerFraSistIverksatteBehandling,
-            barnasAktørerOgFødselsdatoer = persongrunnlagFraSistIverksatteBehandling.barna.map {
-                Pair(
-                    it.aktør,
-                    it.fødselsdato,
-                )
-            },
+            barnasAktørerOgFødselsdatoer =
+                persongrunnlagFraSistIverksatteBehandling.barna.map {
+                    Pair(
+                        it.aktør,
+                        it.fødselsdato,
+                    )
+                },
         )
     }
 

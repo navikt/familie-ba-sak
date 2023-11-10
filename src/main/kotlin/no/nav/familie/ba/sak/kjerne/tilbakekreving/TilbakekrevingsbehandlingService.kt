@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class TilbakekrevingsbehandlingService(private val tilbakekrevingKlient: TilbakekrevingKlient) {
-
     fun hentRestTilbakekrevingsbehandlinger(fagsakId: Long): List<RestTilbakekrevingsbehandling> {
         val behandlinger = tilbakekrevingKlient.hentTilbakekrevingsbehandlinger(fagsakId)
         return behandlinger.map {

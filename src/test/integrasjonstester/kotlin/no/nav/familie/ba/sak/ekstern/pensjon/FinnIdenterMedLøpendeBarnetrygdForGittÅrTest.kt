@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest() : AbstractSpringIntegrationTest() {
-
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService
 
@@ -58,16 +57,17 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest() : AbstractSpringIntegrati
         with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))) {
             val behandling = this
             with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
-                val andel = lagAndelTilkjentYtelse(
-                    årMnd("2019-04"),
-                    årMnd("2023-03"),
-                    no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD,
-                    660,
-                    behandling,
-                    person = barn1,
-                    aktør = barnAktør,
-                    tilkjentYtelse = this,
-                )
+                val andel =
+                    lagAndelTilkjentYtelse(
+                        årMnd("2019-04"),
+                        årMnd("2023-03"),
+                        no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD,
+                        660,
+                        behandling,
+                        person = barn1,
+                        aktør = barnAktør,
+                        tilkjentYtelse = this,
+                    )
                 andelerTilkjentYtelse.add(andel)
                 tilkjentYtelseRepository.save(this)
             }
@@ -89,16 +89,17 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest() : AbstractSpringIntegrati
         with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))) {
             val behandling = this
             with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
-                val andel = lagAndelTilkjentYtelse(
-                    årMnd("2019-04"),
-                    årMnd("2023-03"),
-                    no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD,
-                    660,
-                    behandling,
-                    person = barn1,
-                    aktør = barnAktør,
-                    tilkjentYtelse = this,
-                )
+                val andel =
+                    lagAndelTilkjentYtelse(
+                        årMnd("2019-04"),
+                        årMnd("2023-03"),
+                        no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD,
+                        660,
+                        behandling,
+                        person = barn1,
+                        aktør = barnAktør,
+                        tilkjentYtelse = this,
+                    )
                 andelerTilkjentYtelse.add(andel)
                 tilkjentYtelseRepository.save(this)
             }

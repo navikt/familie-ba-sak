@@ -9,5 +9,9 @@ interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
     fun countByFerdigTidspunktIsNotNullAndSatsTidspunkt(satsTidspunkt: YearMonth): Long
 
     fun countBySatsTidspunkt(satsTidspunkt: YearMonth): Long
-    fun findByFagsakIdAndSatsTidspunkt(fagsakId: Long, satsTidspunkt: YearMonth): Satskjøring?
+
+    fun findByFagsakIdAndSatsTidspunkt(
+        fagsakId: Long,
+        satsTidspunkt: YearMonth,
+    ): Satskjøring?
 }

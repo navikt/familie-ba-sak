@@ -52,7 +52,9 @@ class ForvalterController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun ferdigstillListeMedOppgaver(@RequestBody oppgaveListe: List<Long>): ResponseEntity<String> {
+    fun ferdigstillListeMedOppgaver(
+        @RequestBody oppgaveListe: List<Long>,
+    ): ResponseEntity<String> {
         var antallFeil = 0
         oppgaveListe.forEach { oppgaveId ->
             Result.runCatching {
@@ -73,7 +75,9 @@ class ForvalterController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun triggManuellStartAvSmåbarnstillegg(@PathVariable skalOppretteOppgaver: Boolean = true): ResponseEntity<String> {
+    fun triggManuellStartAvSmåbarnstillegg(
+        @PathVariable skalOppretteOppgaver: Boolean = true,
+    ): ResponseEntity<String> {
         restartAvSmåbarnstilleggService.finnOgOpprettetOppgaveForSmåbarnstilleggSomSkalRestartesIDenneMåned(
             skalOppretteOppgaver,
         )
@@ -91,7 +95,9 @@ class ForvalterController(
     }
 
     @PostMapping(path = ["/lag-og-send-utbetalingsoppdrag-til-økonomi"])
-    fun lagOgSendUtbetalingsoppdragTilØkonomi(@RequestBody behandlinger: Set<Long>): ResponseEntity<String> {
+    fun lagOgSendUtbetalingsoppdragTilØkonomi(
+        @RequestBody behandlinger: Set<Long>,
+    ): ResponseEntity<String> {
         behandlinger.forEach {
             try {
                 forvalterService.lagOgSendUtbetalingsoppdragTilØkonomiForBehandling(it)
@@ -108,7 +114,9 @@ class ForvalterController(
 
     @PostMapping("/kjor-satsendring-uten-validering")
     @Transactional
-    fun kjørSatsendringFor(@RequestBody fagsakListe: List<Long>) {
+    fun kjørSatsendringFor(
+        @RequestBody fagsakListe: List<Long>,
+    ) {
         fagsakListe.parallelStream().forEach { fagsakId ->
             try {
                 logger.info("Kjører satsendring uten validering for $fagsakId")
@@ -137,7 +145,9 @@ class ForvalterController(
     }
 
     @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd/{fraÅrMåned}")
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(@PathVariable fraÅrMåned: YearMonth): ResponseEntity<List<Pair<Long, String>>> {
+    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(
+        @PathVariable fraÅrMåned: YearMonth,
+    ): ResponseEntity<List<Pair<Long, String>>> {
         val åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd =
             forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(fraÅrMåned)
         logger.info("Følgende fagsaker har flere migreringsbehandlinger og løpende sak i Infotrygd: $åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd")
@@ -145,7 +155,9 @@ class ForvalterController(
     }
 
     @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlinger/{fraÅrMåned}")
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(@PathVariable fraÅrMåned: YearMonth): ResponseEntity<List<Pair<Long, String>>> {
+    fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(
+        @PathVariable fraÅrMåned: YearMonth,
+    ): ResponseEntity<List<Pair<Long, String>>> {
         val åpneFagsakerMedFlereMigreringsbehandlinger =
             forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlinger(fraÅrMåned)
         logger.info("Følgende fagsaker har flere migreringsbehandlinger og løper i ba-sak: $åpneFagsakerMedFlereMigreringsbehandlinger")
@@ -153,7 +165,9 @@ class ForvalterController(
     }
 
     @GetMapping(path = ["/behandling/{behandlingId}/begrunnelsetest"])
-    fun hentBegrunnelsetestPåBehandling(@PathVariable behandlingId: Long): String {
+    fun hentBegrunnelsetestPåBehandling(
+        @PathVariable behandlingId: Long,
+    ): String {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
@@ -165,7 +179,9 @@ class ForvalterController(
     }
 
     @GetMapping(path = ["/behandling/{behandlingId}/vedtaksperiodertest"])
-    fun hentVedtaksperioderTestPåBehandling(@PathVariable behandlingId: Long): String {
+    fun hentVedtaksperioderTestPåBehandling(
+        @PathVariable behandlingId: Long,
+    ): String {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
@@ -179,10 +195,11 @@ class ForvalterController(
     @PatchMapping("/patch-fagsak-med-ny-ident-for-barn")
     fun patchIdentForBarnPåFagsak(
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "skalSjekkeAtGammelIdentErHistoriskAvNyIdent - Sjekker at " +
-                "gammel ident er historisk av ny. Hvis man ønsker å patche med en ident hvor den gamle ikke er historisk av ny, så settes " +
-                "denne til false. OBS: Du må da være sikker på at identen man ønsker å patche til er samme person. Dette kan skje hvis " +
-                "identen ikke er merget av folketrygden.",
+            description =
+                "skalSjekkeAtGammelIdentErHistoriskAvNyIdent - Sjekker at " +
+                    "gammel ident er historisk av ny. Hvis man ønsker å patche med en ident hvor den gamle ikke er historisk av ny, så settes " +
+                    "denne til false. OBS: Du må da være sikker på at identen man ønsker å patche til er samme person. Dette kan skje hvis " +
+                    "identen ikke er merget av folketrygden.",
         )
         @RequestBody
         patchIdentForBarnPåFagsak: PatchIdentForBarnPåFagsak,
@@ -201,8 +218,9 @@ class ForvalterController(
     )
     @Operation(
         summary = "Opprett manuell kvittering på oppdrag tilhørende behandling",
-        description = "Dette endepunktet oppretter kvitteringsmelding på oppdrag og setter status til KVITTERT_OK. " +
-            "Endepunktet skal bare taas i bruk når vi ikke har mottatt kvittering på et oppdrag som økonomi bekrefter har gått gjennom. ",
+        description =
+            "Dette endepunktet oppretter kvitteringsmelding på oppdrag og setter status til KVITTERT_OK. " +
+                "Endepunktet skal bare taas i bruk når vi ikke har mottatt kvittering på et oppdrag som økonomi bekrefter har gått gjennom. ",
     )
     fun opprettManuellKvitteringPåOppdrag(
         @PathVariable behandlingId: Long,

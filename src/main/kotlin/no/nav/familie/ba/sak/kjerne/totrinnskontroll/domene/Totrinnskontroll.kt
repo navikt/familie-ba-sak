@@ -29,34 +29,25 @@ data class Totrinnskontroll(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandling: Behandling,
-
     @Column(name = "aktiv", nullable = false)
     var aktiv: Boolean = true,
-
     @Column(name = "saksbehandler", nullable = false)
     val saksbehandler: String,
-
     @Column(name = "saksbehandler_id", nullable = false)
     val saksbehandlerId: String,
-
     @Column(name = "beslutter")
     var beslutter: String? = null,
-
     @Column(name = "beslutter_id")
     var beslutterId: String? = null,
-
     @Column(name = "godkjent")
     var godkjent: Boolean = false,
-
     @Column(name = "kontrollerte_sider")
     @Convert(converter = StringListConverter::class)
     var kontrollerteSider: List<String> = emptyList(),
 ) : BaseEntitet() {
-
     fun erBesluttet(): Boolean {
         return beslutter != null
     }

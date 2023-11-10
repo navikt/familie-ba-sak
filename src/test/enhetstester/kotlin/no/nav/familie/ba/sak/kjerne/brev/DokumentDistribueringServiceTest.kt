@@ -21,7 +21,6 @@ import org.springframework.web.client.RestClientResponseException
 
 @ExtendWith(MockKExtension::class)
 internal class DokumentDistribueringServiceTest {
-
     @MockK(relaxed = true)
     private lateinit var taskService: TaskService
 
@@ -38,11 +37,12 @@ internal class DokumentDistribueringServiceTest {
     fun `Skal kalle 'loggBrevIkkeDistribuertUkjentAdresse' ved 400 kode og 'Mottaker har ukjent adresse' melding`() {
         every {
             integrasjonClient.distribuerBrev(any())
-        } throws RessursException(
-            httpStatus = HttpStatus.BAD_REQUEST,
-            ressurs = Ressurs.failure(),
-            cause = RestClientResponseException("Mottaker har ukjent adresse", 400, "", null, null, null),
-        )
+        } throws
+            RessursException(
+                httpStatus = HttpStatus.BAD_REQUEST,
+                ressurs = Ressurs.failure(),
+                cause = RestClientResponseException("Mottaker har ukjent adresse", 400, "", null, null, null),
+            )
 
         dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
             distribuerDokumentDTO = lagDistribuerDokumentDTO(),
@@ -56,11 +56,12 @@ internal class DokumentDistribueringServiceTest {
     fun `Skal kalle 'håndterMottakerDødIngenAdressePåBehandling' ved 410 Gone svar under distribuering`() {
         every {
             integrasjonClient.distribuerBrev(any())
-        } throws RessursException(
-            httpStatus = HttpStatus.GONE,
-            ressurs = Ressurs.failure(),
-            cause = RestClientResponseException("", 410, "", null, null, null),
-        )
+        } throws
+            RessursException(
+                httpStatus = HttpStatus.GONE,
+                ressurs = Ressurs.failure(),
+                cause = RestClientResponseException("", 410, "", null, null, null),
+            )
 
         dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
             distribuerDokumentDTO = lagDistribuerDokumentDTO(),
@@ -76,11 +77,12 @@ internal class DokumentDistribueringServiceTest {
     fun `Skal hoppe over distribuering ved 409 Conflict mot dokdist`() {
         every {
             integrasjonClient.distribuerBrev(any())
-        } throws RessursException(
-            httpStatus = HttpStatus.CONFLICT,
-            ressurs = Ressurs.failure(),
-            cause = RestClientResponseException("", 409, "", null, null, null),
-        )
+        } throws
+            RessursException(
+                httpStatus = HttpStatus.CONFLICT,
+                ressurs = Ressurs.failure(),
+                cause = RestClientResponseException("", 409, "", null, null, null),
+            )
 
         assertDoesNotThrow {
             dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
@@ -90,11 +92,12 @@ internal class DokumentDistribueringServiceTest {
         }
     }
 
-    private fun lagDistribuerDokumentDTO() = DistribuerDokumentDTO(
-        journalpostId = "testId",
-        behandlingId = 1L,
-        brevmal = Brevmal.SVARTIDSBREV,
-        personEllerInstitusjonIdent = "test",
-        erManueltSendt = true,
-    )
+    private fun lagDistribuerDokumentDTO() =
+        DistribuerDokumentDTO(
+            journalpostId = "testId",
+            behandlingId = 1L,
+            brevmal = Brevmal.SVARTIDSBREV,
+            personEllerInstitusjonIdent = "test",
+            erManueltSendt = true,
+        )
 }

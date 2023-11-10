@@ -12,7 +12,6 @@ import java.time.LocalDate
 
 @TestConfiguration
 class LocalDateServiceTestConfig {
-
     @Bean
     @Profile("mock-localdate-service")
     @Primary

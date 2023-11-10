@@ -28,30 +28,21 @@ import java.time.LocalDate
 class RestFagsakTest(
     @Autowired
     private val stegService: StegService,
-
     @Autowired
     private val vedtakService: VedtakService,
-
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
-
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
-
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
-
     @Autowired
     private val brevmalService: BrevmalService,
-
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
@@ -73,18 +64,19 @@ class RestFagsakTest(
         val søkerFnr = randomFnr()
         val barnFnr = ClientMocks.barnFnr[0]
 
-        val førstegangsbehandling = kjørStegprosessForFGB(
-            tilSteg = StegType.BEHANDLING_AVSLUTTET,
-            søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val førstegangsbehandling =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.BEHANDLING_AVSLUTTET,
+                søkerFnr = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         kjørStegprosessForRevurderingÅrligKontroll(
             tilSteg = StegType.BEHANDLINGSRESULTAT,
