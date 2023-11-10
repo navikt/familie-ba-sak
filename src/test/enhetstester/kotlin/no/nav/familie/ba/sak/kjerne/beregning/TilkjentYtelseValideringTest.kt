@@ -574,7 +574,8 @@ class TilkjentYtelseValideringTest {
                         fom = YearMonth.of(2023, 1),
                         tom = YearMonth.of(2023, 2),
                         beløp = 1054,
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD, // barn kan ha utvidet på enslig mindreårig-saker
+                        // barn kan ha utvidet på enslig mindreårig-saker
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                         aktør = barn.aktør,
                     ),
                 )

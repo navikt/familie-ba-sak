@@ -24,7 +24,8 @@ object BehandlingsresultatUtils {
     }
 
     internal fun kombinerResultaterTilBehandlingsresultat(
-        søknadsresultat: Søknadsresultat?, // Søknadsresultat er null hvis det ikke er en søknad/fødselshendelse/manuell migrering
+        // Søknadsresultat er null hvis det ikke er en søknad/fødselshendelse/manuell migrering
+        søknadsresultat: Søknadsresultat?,
         endringsresultat: Endringsresultat,
         opphørsresultat: Opphørsresultat,
     ): Behandlingsresultat {

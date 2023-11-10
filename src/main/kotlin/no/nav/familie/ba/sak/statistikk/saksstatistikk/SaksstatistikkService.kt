@@ -83,7 +83,8 @@ class SaksstatistikkService(
             behandlingType = behandling.type.name,
             behandlingStatus = behandling.status.name,
             behandlingKategori =
-                when (behandling.underkategori) { // Gjøres pga. tilpasning til DVH-modell
+                when (behandling.underkategori) {
+                    // Gjøres pga. tilpasning til DVH-modell
                     BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET ->
                         behandling.underkategori.name
                 },
@@ -95,7 +96,8 @@ class SaksstatistikkService(
                 },
             behandlingAarsak = behandling.opprettetÅrsak.name,
             automatiskBehandlet = behandling.skalBehandlesAutomatisk,
-            utenlandstilsnitt = behandling.kategori.name, // Gjøres pga. tilpasning til DVH-modell
+            // Gjøres pga. tilpasning til DVH-modell
+            utenlandstilsnitt = behandling.kategori.name,
             ansvarligEnhetKode = ansvarligEnhetKode,
             behandlendeEnhetKode = behandlendeEnhetsKode,
             ansvarligEnhetType = "NORG",

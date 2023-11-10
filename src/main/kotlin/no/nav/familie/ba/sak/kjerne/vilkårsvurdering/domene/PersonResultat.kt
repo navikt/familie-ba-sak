@@ -132,7 +132,8 @@ class PersonResultat(
             PersonResultat(
                 vilkårsvurdering = nyVilkårsvurdering,
                 aktør = aktør,
-                andreVurderinger = mutableSetOf(), // Vi kopierer ikke over andreVurderinger da den aldri skal være med i ny behandling
+                // Vi kopierer ikke over andreVurderinger da den aldri skal være med i ny behandling
+                andreVurderinger = mutableSetOf(),
             )
 
         val nyeVilkårResultater =

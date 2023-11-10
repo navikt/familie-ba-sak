@@ -57,7 +57,8 @@ class UtbetalingsoppdragGenerator(
                             endretMigreringsDato = endretMigreringsDato,
                         ),
                     utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
-                    opphørKjederFraFørsteUtbetaling = if (endretMigreringsDato != null) false else erSimulering, // Ved simulering når migreringsdato er endret, skal vi opphøre fra den nye datoen og ikke fra første utbetaling per kjede.
+                    // Ved simulering når migreringsdato er endret, skal vi opphøre fra den nye datoen og ikke fra første utbetaling per kjede.
+                    opphørKjederFraFørsteUtbetaling = if (endretMigreringsDato != null) false else erSimulering,
                 ),
             forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData() ?: emptyList(),
             nyeAndeler = nyTilkjentYtelse.tilAndelData(),

@@ -215,31 +215,36 @@ class SimuleringUtilTest {
     fun `ytelse på 10000 korrigert til 2000`() {
         val redusertYtelseTil2000 =
             listOf(
+                // Forrige
                 mockVedtakSimuleringPostering(
                     beløp = -10_000,
                     posteringType = PosteringType.YTELSE,
                     betalingType = BetalingType.KREDIT,
-                ), // Forrige
+                ),
+                // Ny
                 mockVedtakSimuleringPostering(
                     beløp = 2_000,
                     posteringType = PosteringType.YTELSE,
                     betalingType = BetalingType.DEBIT,
-                ), // Ny
+                ),
+                // Feilutbetaling
                 mockVedtakSimuleringPostering(
                     beløp = 8_000,
                     posteringType = PosteringType.FEILUTBETALING,
                     betalingType = BetalingType.DEBIT,
-                ), // Feilutbetaling
+                ),
+                // "Nuller ut" Feilutbetalingen
                 mockVedtakSimuleringPostering(
                     beløp = -8_000,
                     posteringType = PosteringType.MOTP,
                     betalingType = BetalingType.KREDIT,
-                ), // "Nuller ut" Feilutbetalingen
+                ),
+                // "Nuller ut" forrige og ny
                 mockVedtakSimuleringPostering(
                     beløp = 8_000,
                     posteringType = PosteringType.YTELSE,
                     betalingType = BetalingType.DEBIT,
-                ), // "Nuller ut" forrige og ny
+                ),
             )
 
         val økonomiSimuleringMottakere =
@@ -313,11 +318,12 @@ class SimuleringUtilTest {
                     posteringType = PosteringType.YTELSE,
                     betalingType = BetalingType.DEBIT,
                 ),
+                // Reduser feilutbetaling
                 mockVedtakSimuleringPostering(
                     beløp = -1_000,
                     posteringType = PosteringType.FEILUTBETALING,
                     betalingType = BetalingType.KREDIT,
-                ), // Reduser feilutbetaling
+                ),
                 mockVedtakSimuleringPostering(
                     beløp = 1_000,
                     posteringType = PosteringType.MOTP,
@@ -506,11 +512,12 @@ class SimuleringUtilTest {
                     posteringType = PosteringType.YTELSE,
                     betalingType = BetalingType.DEBIT,
                 ),
+                // Reduser feilutb
                 mockVedtakSimuleringPostering(
                     beløp = -7_000,
                     posteringType = PosteringType.FEILUTBETALING,
                     betalingType = BetalingType.KREDIT,
-                ), // Reduser feilutb
+                ),
                 mockVedtakSimuleringPostering(
                     beløp = 7_000,
                     posteringType = PosteringType.MOTP,

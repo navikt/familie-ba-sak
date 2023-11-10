@@ -199,8 +199,10 @@ class StegService(
                 behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 skalBehandlesAutomatisk = true,
                 barnasIdenter = nyBehandlingHendelse.barnasIdenter,
-                kategori = BehandlingKategori.NASJONAL, // alltid NASJONAL for fødselshendelse
-                underkategori = BehandlingUnderkategori.ORDINÆR, // alltid ORDINÆR for fødselshendelse
+                // alltid NASJONAL for fødselshendelse
+                kategori = BehandlingKategori.NASJONAL,
+                // alltid ORDINÆR for fødselshendelse
+                underkategori = BehandlingUnderkategori.ORDINÆR,
                 fagsakId = fagsak.id,
             ),
         )

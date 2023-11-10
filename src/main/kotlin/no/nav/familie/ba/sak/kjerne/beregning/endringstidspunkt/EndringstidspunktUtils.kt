@@ -140,7 +140,8 @@ private fun kombinerOverlappendeAndelerForSøker(
                 AndelTilkjentYtelseDataForÅKalkulereEndring(
                     aktørId = aktørId,
                     behandlingAlder = behandlingAlder,
-                    endretUtbetalingÅrsaker = emptyList(), // TODO() her bør man nok prøve å hente overstyringer på søker også, men haster mest å fikse endringstidspunkt pga overstyringer på barn.
+                    // TODO() her bør man nok prøve å hente overstyringer på søker også, men haster mest å fikse endringstidspunkt pga overstyringer på barn.
+                    endretUtbetalingÅrsaker = emptyList(),
                     kalkulertBeløp = it.value,
                 ),
             )

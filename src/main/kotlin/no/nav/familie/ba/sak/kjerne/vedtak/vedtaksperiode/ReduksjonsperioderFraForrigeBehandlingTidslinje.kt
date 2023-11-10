@@ -14,7 +14,8 @@ class ReduksjonsperioderFraForrigeBehandlingTidslinje(
             Periode(
                 fraOgMed = it.fom.tilTidspunktEllerUendeligTidlig(it.tom),
                 tilOgMed = it.tom.tilTidspunktEllerUendeligSent(it.fom),
-                innhold = it.copy(fom = null, tom = null), // Gjør at perioder med samme innhold blir slått sammen
+                // Gjør at perioder med samme innhold blir slått sammen
+                innhold = it.copy(fom = null, tom = null),
             )
         }
 }

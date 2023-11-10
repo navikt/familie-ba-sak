@@ -120,11 +120,15 @@ class TilkjentYtelseBuilder(
                                     aktør = person.aktør,
                                     stønadFom = MIN_MÅNED,
                                     stønadTom = MAX_MÅNED,
-                                    kalkulertUtbetalingsbeløp = 0, // Overskrives under
-                                    nasjonaltPeriodebeløp = 0, // Overskrives under
-                                    differanseberegnetPeriodebeløp = null, // Overskrives under
+                                    // Overskrives under
+                                    kalkulertUtbetalingsbeløp = 0,
+                                    // Overskrives under
+                                    nasjonaltPeriodebeløp = 0,
+                                    // Overskrives under
+                                    differanseberegnetPeriodebeløp = null,
                                     prosent = BigDecimal.valueOf(prosent),
-                                    sats = 0, // Overskrives under
+                                    // Overskrives under
+                                    sats = 0,
                                     type = type,
                                 )
                             }

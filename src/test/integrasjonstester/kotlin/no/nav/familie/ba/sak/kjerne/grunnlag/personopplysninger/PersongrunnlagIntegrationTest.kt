@@ -163,7 +163,8 @@ class PersongrunnlagIntegrationTest(
                     søkersIdent = morAktør.aktivFødselsnummer(),
                     behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    kategori = BehandlingKategori.NASJONAL, // alltid NASJONAL for fødselshendelse
+                    // alltid NASJONAL for fødselshendelse
+                    kategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     fagsakId = fagsak.data!!.id,
                 ),

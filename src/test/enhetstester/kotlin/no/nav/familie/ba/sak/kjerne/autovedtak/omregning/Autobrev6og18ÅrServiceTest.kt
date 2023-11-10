@@ -211,7 +211,8 @@ internal class Autobrev6og18ÅrServiceTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     fom = inneværendeMåned().minusYears(4),
-                    tom = YearMonth.now().minusMonths(1), // en gammel ytelse
+                    // en gammel ytelse
+                    tom = YearMonth.now().minusMonths(1),
                     beløp = 1054,
                     person = barn6årUtenAktivTilkjentYtelse,
                 ),
@@ -219,7 +220,8 @@ internal class Autobrev6og18ÅrServiceTest {
                     fom = inneværendeMåned().minusYears(4),
                     tom = YearMonth.now().plusYears(4),
                     beløp = 1054,
-                    person = barn10årMedAktivTilkjentYtelse, // den aktive er på et annet barn
+                    // den aktive er på et annet barn
+                    person = barn10årMedAktivTilkjentYtelse,
                 ),
             )
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
@@ -260,7 +262,8 @@ internal class Autobrev6og18ÅrServiceTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     fom = inneværendeMåned().minusYears(4),
-                    tom = YearMonth.now().minusMonths(2), // en gammel ytelse
+                    // en gammel ytelse
+                    tom = YearMonth.now().minusMonths(2),
                     beløp = 1054,
                     person = barnIBrytningsalder,
                 ),
@@ -268,7 +271,8 @@ internal class Autobrev6og18ÅrServiceTest {
                     fom = inneværendeMåned().minusYears(4),
                     tom = YearMonth.now().plusYears(4),
                     beløp = 1054,
-                    person = barn10årMedAktivTilkjentYtelse, // den aktive er på et annet barn
+                    // den aktive er på et annet barn
+                    person = barn10årMedAktivTilkjentYtelse,
                 ),
             )
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs

@@ -140,11 +140,16 @@ class InternKonsistensavstemmingUtilTest {
     fun `skal ikke si det er forskjell ved riktig utbetalingsoppdrag når kun ett barn ble endret i siste behandling som iverksatte`() {
         val andelStringer =
             listOf(
-                "2022-05,2022-06,1676,ORDINÆR_BARNETRYGD,2554733867704", // barn 1, ble laget i siste behandling som iverksatte
-                "2022-07,2028-03,838,ORDINÆR_BARNETRYGD,2554733867704", // barn 1, ble laget i siste behandling som iverksatte
-                "2028-04,2040-03,527,ORDINÆR_BARNETRYGD,2554733867704", // barn 1, ble laget i siste behandling som iverksatte
-                "2022-07,2028-05,1676,ORDINÆR_BARNETRYGD,2909658383415", // barn 2, ble laget før siste behandling som iverksatte
-                "2028-06,2040-05,1054,ORDINÆR_BARNETRYGD,2909658383415", // barn 2, ble laget før siste behandling som iverksatte
+                // barn 1, ble laget i siste behandling som iverksatte
+                "2022-05,2022-06,1676,ORDINÆR_BARNETRYGD,2554733867704",
+                // barn 1, ble laget i siste behandling som iverksatte
+                "2022-07,2028-03,838,ORDINÆR_BARNETRYGD,2554733867704",
+                // barn 1, ble laget i siste behandling som iverksatte
+                "2028-04,2040-03,527,ORDINÆR_BARNETRYGD,2554733867704",
+                // barn 2, ble laget før siste behandling som iverksatte
+                "2022-07,2028-05,1676,ORDINÆR_BARNETRYGD,2909658383415",
+                // barn 2, ble laget før siste behandling som iverksatte
+                "2028-06,2040-05,1054,ORDINÆR_BARNETRYGD,2909658383415",
             )
 
         val andelerSisteVedtatteBehandling =

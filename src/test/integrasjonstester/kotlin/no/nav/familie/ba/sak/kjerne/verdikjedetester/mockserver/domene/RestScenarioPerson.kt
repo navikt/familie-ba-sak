@@ -11,11 +11,16 @@ import java.time.Month
 import java.time.Period
 
 data class RestScenarioPerson(
-    val ident: String? = null, // Settes av mock-server
-    val aktørId: String? = null, // Settes av mock-server
-    val forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(), // Settes av mock-server
-    val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator> = emptyList(), // Settes av mock-server
-    val fødselsdato: String, // yyyy-mm-dd
+    // Settes av mock-server
+    val ident: String? = null,
+    // Settes av mock-server
+    val aktørId: String? = null,
+    // Settes av mock-server
+    val forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
+    // Settes av mock-server
+    val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator> = emptyList(),
+    // yyyy-mm-dd
+    val fødselsdato: String,
     val fornavn: String,
     val etternavn: String,
     val infotrygdSaker: InfotrygdSøkResponse<Sak>? = null,

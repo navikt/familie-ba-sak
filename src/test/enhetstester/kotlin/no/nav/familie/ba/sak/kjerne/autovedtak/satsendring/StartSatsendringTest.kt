@@ -93,7 +93,8 @@ internal class StartSatsendringTest {
         every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) } returns
             PageImpl(
                 listOf(behandling.fagsak.id, behandling.fagsak.id),
-                Pageable.ofSize(2), // 5/2 gir totalt 3 sider, så finnLøpendeFagsakerForSatsendring skal trigges 3 ganger
+                // 5/2 gir totalt 3 sider, så finnLøpendeFagsakerForSatsendring skal trigges 3 ganger
+                Pageable.ofSize(2),
                 5,
             )
 

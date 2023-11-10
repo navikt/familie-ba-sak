@@ -42,7 +42,8 @@ data class Kompetanse(
         joinColumns = [JoinColumn(name = "fk_kompetanse_id")],
         inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")],
     )
-    override val barnAktører: Set<Aktør> = emptySet(), // kan ikke være tom
+    // kan ikke være tom
+    override val barnAktører: Set<Aktør> = emptySet(),
     @Enumerated(EnumType.STRING)
     @Column(name = "soekers_aktivitet")
     val søkersAktivitet: KompetanseAktivitet? = null,

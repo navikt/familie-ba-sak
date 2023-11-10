@@ -71,7 +71,8 @@ class StønadsstatistikkService(
             behandlingsId = behandlingId.toString(),
             tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
             personV2 = hentSøkerV2(persongrunnlag),
-            ensligForsørger = utledEnsligForsørger(behandlingId), // TODO implementere støtte for dette
+            // TODO implementere støtte for dette
+            ensligForsørger = utledEnsligForsørger(behandlingId),
             kategoriV2 = KategoriV2.valueOf(behandling.kategori.name),
             underkategoriV2 =
                 when (behandling.underkategori) {

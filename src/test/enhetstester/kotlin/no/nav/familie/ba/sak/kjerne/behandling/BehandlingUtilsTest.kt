@@ -309,7 +309,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
             ),
         )
     }
@@ -322,7 +322,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
             ),
         )
     }
@@ -336,7 +336,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = overstyrtKategori,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
             ),
         )
     }
@@ -349,7 +349,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.NASJONAL,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.MIGRERING,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
             ),
         )
     }
@@ -362,7 +362,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.MIGRERING,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
             ),
         )
     }

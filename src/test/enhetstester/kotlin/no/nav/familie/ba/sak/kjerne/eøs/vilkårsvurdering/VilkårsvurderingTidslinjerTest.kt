@@ -51,8 +51,10 @@ internal class VilkårsvurderingTidslinjerTest {
                     personResultat = it,
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     behandlingId = defaultBehandling.id,
-                    periodeFom = null, // uendelig lenge siden
-                    periodeTom = null, // uendelig lenge til
+                    // uendelig lenge siden
+                    periodeFom = null,
+                    // uendelig lenge til
+                    periodeTom = null,
                     resultat = Resultat.IKKE_OPPFYLT,
                 ),
             )

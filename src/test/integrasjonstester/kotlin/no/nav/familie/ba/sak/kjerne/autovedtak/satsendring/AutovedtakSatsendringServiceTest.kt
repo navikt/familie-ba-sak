@@ -227,7 +227,8 @@ class AutovedtakSatsendringServiceTest(
         with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
             val andel =
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2021, 1), // Tidspunkt før siste satsendring
+                    // Tidspunkt før siste satsendring
+                    fom = YearMonth.of(2021, 1),
                     tom =
                         YearMonth.of(
                             2026,

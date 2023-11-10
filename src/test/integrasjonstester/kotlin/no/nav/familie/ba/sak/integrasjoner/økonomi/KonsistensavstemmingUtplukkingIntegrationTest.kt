@@ -314,6 +314,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
 }
 
 data class KildeOgOffsetPåAndel(
-    val kilde: Long?, // Hvis denne er null setter vi til behandling som opprettes, for å unngå loop-avhengighet
+    // Hvis denne er null setter vi til behandling som opprettes, for å unngå loop-avhengighet
+    val kilde: Long?,
     val offset: Long,
 )
