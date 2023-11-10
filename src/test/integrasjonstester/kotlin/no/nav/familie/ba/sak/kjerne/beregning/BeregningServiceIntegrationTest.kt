@@ -238,7 +238,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val søkerAktørId = personidentService.hentOgLagreAktør(søkerFnr, true)
         val barn1AktørId = personidentService.hentOgLagreAktør(barn1Fnr, true)
         val barn2AktørId = personidentService.hentOgLagreAktør(barn2Fnr, true)
-        val dato_2021_11_01 = LocalDate.of(2021, 11, 1)
+        val dato20211101 = LocalDate.of(2021, 11, 1)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -266,8 +266,8 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 søkerAktørId,
                 barn1AktørId,
                 barn2AktørId,
-                dato_2021_11_01,
-                dato_2021_11_01.plusYears(17),
+                dato20211101,
+                dato20211101.plusYears(17),
             )
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 

@@ -33,7 +33,7 @@ class ECBServiceTest {
     private lateinit var ecbClient: ValutakursRestClient
 
     @MockK
-    private lateinit var ECBValutakursCacheRepository: ECBValutakursCacheRepository
+    private lateinit var evbValutakursCacheRepository: ECBValutakursCacheRepository
 
     @InjectMockKs
     private lateinit var ecbService: ECBService
@@ -52,8 +52,8 @@ class ECBServiceTest {
                 listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))),
                 valutakursDato.toString(),
             )
-        every { ECBValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
-        every { ECBValutakursCacheRepository.save(any()) } returns ECBValutakursCache(kurs = BigDecimal.valueOf(10.6543), valutakode = "SEK", valutakursdato = valutakursDato)
+        every { evbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
+        every { evbValutakursCacheRepository.save(any()) } returns ECBValutakursCache(kurs = BigDecimal.valueOf(10.6543), valutakode = "SEK", valutakursdato = valutakursDato)
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
@@ -61,8 +61,8 @@ class ECBServiceTest {
                 valutakursDato,
             )
         } returns ecbExchangeRatesData.toExchangeRates()
-        val SEKtilNOKValutakurs = ecbService.hentValutakurs("SEK", valutakursDato)
-        assertEquals(BigDecimal.valueOf(0.9702185972), SEKtilNOKValutakurs)
+        val sekTilNOKValutakurs = ecbService.hentValutakurs("SEK", valutakursDato)
+        assertEquals(BigDecimal.valueOf(0.9702185972), sekTilNOKValutakurs)
     }
 
     @Test
@@ -74,7 +74,7 @@ class ECBServiceTest {
                 listOf(Pair("NOK", BigDecimal.valueOf(10.337))),
                 valutakursDato.toString(),
             )
-        every { ECBValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
+        every { evbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
@@ -94,7 +94,7 @@ class ECBServiceTest {
                 listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))),
                 valutakursDato.minusDays(1).toString(),
             )
-        every { ECBValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
+        every { evbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
@@ -115,8 +115,8 @@ class ECBServiceTest {
                 listOf(Pair("NOK", BigDecimal.valueOf(9.4567))),
                 valutakursDato.toString(),
             )
-        every { ECBValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
-        every { ECBValutakursCacheRepository.save(any()) } returns ECBValutakursCache(kurs = BigDecimal.valueOf(9.4567), valutakode = "EUR", valutakursdato = valutakursDato)
+        every { evbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
+        every { evbValutakursCacheRepository.save(any()) } returns ECBValutakursCache(kurs = BigDecimal.valueOf(9.4567), valutakode = "EUR", valutakursdato = valutakursDato)
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,

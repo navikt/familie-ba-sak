@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
 class SatsendringUtilTest {
-    private val UGYLDIG_SATS = 1000
+    private val ugyldigSats = 1000
 
     @Test
     fun `Skal returnere true dersom vi har siste sats`() {
@@ -167,7 +167,7 @@ class SatsendringUtilTest {
                 SatsType.SMA,
                 behandling,
                 YtelseType.SMÅBARNSTILLEGG,
-                UGYLDIG_SATS,
+                ugyldigSats,
             )
 
         Assertions.assertThat(atyMedUgyldigSatsSmåbarnstillegg.erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -177,7 +177,7 @@ class SatsendringUtilTest {
                 SatsType.UTVIDET_BARNETRYGD,
                 behandling,
                 YtelseType.UTVIDET_BARNETRYGD,
-                UGYLDIG_SATS,
+                ugyldigSats,
             )
 
         Assertions.assertThat(atyMedUglydligSatsUtvidet.erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -187,7 +187,7 @@ class SatsendringUtilTest {
                 SatsType.ORBA,
                 behandling,
                 YtelseType.ORDINÆR_BARNETRYGD,
-                UGYLDIG_SATS,
+                ugyldigSats,
             )
 
         Assertions.assertThat(atyMedUgyldigSatsBareOrba.erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -197,7 +197,7 @@ class SatsendringUtilTest {
                 SatsType.TILLEGG_ORBA,
                 behandling,
                 YtelseType.ORDINÆR_BARNETRYGD,
-                UGYLDIG_SATS,
+                ugyldigSats,
             )
 
         Assertions.assertThat(atyMedUgyldigSatsTilleggOrba.erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -211,7 +211,7 @@ class SatsendringUtilTest {
                 SatsType.SMA,
                 behandling,
                 YtelseType.SMÅBARNSTILLEGG,
-                UGYLDIG_SATS,
+                ugyldigSats,
             )
 
         val atyMedGyldigUtvidet =
@@ -259,7 +259,7 @@ class SatsendringUtilTest {
                 person = lagPerson(),
                 aktør = lagPerson().aktør,
                 periodeIdOffset = 1,
-                beløp = UGYLDIG_SATS,
+                beløp = ugyldigSats,
             )
 
         Assertions.assertThat(listOf(atySomGårUtPåSatstidspunktUgyldig).erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -313,7 +313,7 @@ class SatsendringUtilTest {
                 person = lagPerson(),
                 aktør = lagPerson().aktør,
                 periodeIdOffset = 1,
-                beløp = UGYLDIG_SATS,
+                beløp = ugyldigSats,
             )
 
         Assertions.assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatser()).isEqualTo(false)

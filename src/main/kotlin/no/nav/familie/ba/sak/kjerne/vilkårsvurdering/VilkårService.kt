@@ -42,7 +42,7 @@ class VilkårService(
     fun hentVilkårsvurderingThrows(behandlingId: Long): Vilkårsvurdering =
         hentVilkårsvurdering(behandlingId) ?: throw Feil(
             message = "Fant ikke aktiv vilkårsvurdering for behandling $behandlingId",
-            frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding,
+            frontendFeilmelding = FANT_IKKE_AKTIV_VILKÅRSVURDERING_FEILMELDING,
         )
 
     @Transactional
@@ -218,14 +218,14 @@ class VilkårService(
     ): PersonResultat {
         val aktør = personidentService.hentAktør(personIdent)
         return personResultater.find { it.aktør == aktør } ?: throw Feil(
-            message = fantIkkeVilkårsvurderingForPersonFeilmelding,
+            message = FANT_IKKE_VILKÅRSVURDERING_FOR_PERSON_FEILMELDING,
             frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident $personIdent",
         )
     }
 
     companion object {
-        const val fantIkkeAktivVilkårsvurderingFeilmelding = "Fant ikke aktiv vilkårsvurdering"
-        const val fantIkkeVilkårsvurderingForPersonFeilmelding = "Fant ikke vilkårsvurdering for person"
+        const val FANT_IKKE_AKTIV_VILKÅRSVURDERING_FEILMELDING = "Fant ikke aktiv vilkårsvurdering"
+        const val FANT_IKKE_VILKÅRSVURDERING_FOR_PERSON_FEILMELDING = "Fant ikke vilkårsvurdering for person"
     }
 }
 

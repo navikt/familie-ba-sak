@@ -213,7 +213,7 @@ class SimuleringUtilTest {
      */
     @Test
     fun `ytelse på 10000 korrigert til 2000`() {
-        val redusertYtelseTil2_000 =
+        val redusertYtelseTil2000 =
             listOf(
                 mockVedtakSimuleringPostering(
                     beløp = -10_000,
@@ -243,7 +243,7 @@ class SimuleringUtilTest {
             )
 
         val økonomiSimuleringMottakere =
-            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = redusertYtelseTil2_000))
+            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = redusertYtelseTil2000))
         val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
         val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
 
@@ -301,7 +301,7 @@ class SimuleringUtilTest {
 
     @Test
     fun `ytelse på 2000 korrigert til 3000`() {
-        val øktYtelseFra2_000Til3_000 =
+        val øktYtelseFra2000Til3000 =
             listOf(
                 mockVedtakSimuleringPostering(
                     beløp = -2_000,
@@ -331,7 +331,7 @@ class SimuleringUtilTest {
             )
 
         val økonomiSimuleringMottakere =
-            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = øktYtelseFra2_000Til3_000))
+            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = øktYtelseFra2000Til3000))
         val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
         val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
 
@@ -345,7 +345,7 @@ class SimuleringUtilTest {
 
     @Test
     fun `ytelse med manuellt trekk av valutajustering deler er trukket`() {
-        val YtelsefraBA =
+        val ytelsefraBA =
             listOf(
                 mockVedtakSimuleringPostering(
                     beløp = 305,
@@ -379,7 +379,7 @@ class SimuleringUtilTest {
             )
 
         val økonomiSimuleringMottakere =
-            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = YtelsefraBA))
+            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = ytelsefraBA))
         val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
         val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
 
@@ -394,7 +394,7 @@ class SimuleringUtilTest {
 
     @Test
     fun `ytelse med manuellt trekk av valutajustering trukket på fagområdekode MBA`() {
-        val YtelsefraBA =
+        val ytelsefraBA =
             listOf(
                 mockVedtakSimuleringPostering(
                     beløp = 305,
@@ -428,7 +428,7 @@ class SimuleringUtilTest {
             )
 
         val økonomiSimuleringMottakere =
-            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = YtelsefraBA))
+            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = ytelsefraBA))
         val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
         val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
 
@@ -443,7 +443,7 @@ class SimuleringUtilTest {
 
     @Test
     fun `ytelse med manuellt trekk av valutajustering alt er trukket`() {
-        val YtelsefraBA =
+        val ytelsefraBA =
             listOf(
                 mockVedtakSimuleringPostering(
                     beløp = 305,
@@ -478,7 +478,7 @@ class SimuleringUtilTest {
             )
 
         val økonomiSimuleringMottakere =
-            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = YtelsefraBA))
+            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = ytelsefraBA))
         val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
         val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
 
@@ -494,7 +494,7 @@ class SimuleringUtilTest {
 
     @Test
     fun `ytelse på 3000 korrigert til 12000`() {
-        val øktYtelseFra3_000Til12_000 =
+        val øktYtelseFra3000Til12000 =
             listOf(
                 mockVedtakSimuleringPostering(
                     beløp = -3_000,
@@ -524,7 +524,7 @@ class SimuleringUtilTest {
             )
 
         val økonomiSimuleringMottakere =
-            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = øktYtelseFra3_000Til12_000))
+            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = øktYtelseFra3000Til12000))
         val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
         val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
 
@@ -546,12 +546,12 @@ class SimuleringUtilTest {
 
     @Test
     fun `førstegangsbehandling 18 nov`() {
-        val førstegangsbehandling_18_nov =
+        val førstegangsbehandling18Nov =
             mockVedtakSimuleringPosteringer(YearMonth.of(2021, 2), 3, 17_153, PosteringType.YTELSE) +
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 6, 18_195, PosteringType.YTELSE)
 
         val økonomiSimuleringMottakere =
-            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = førstegangsbehandling_18_nov))
+            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = førstegangsbehandling18Nov))
         val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
 
         assertThat(oppsummering.feilutbetaling).isEqualTo(0.toBigDecimal())
@@ -560,7 +560,7 @@ class SimuleringUtilTest {
 
     @Test
     fun `revurdering 22 nov`() {
-        val revurering_22_nov =
+        val revurering22Nov =
             // Forrige ytelse
             mockVedtakSimuleringPosteringer(YearMonth.of(2021, 2), 3, -17_153, PosteringType.YTELSE) +
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 6, -18_195, PosteringType.YTELSE) +
@@ -576,7 +576,7 @@ class SimuleringUtilTest {
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 4, 938, PosteringType.YTELSE)
 
         val økonomiSimuleringMottakere =
-            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = revurering_22_nov))
+            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = revurering22Nov))
         val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
 
         assertThat(oppsummering.feilutbetaling).isEqualTo(3_752.toBigDecimal())
@@ -585,7 +585,7 @@ class SimuleringUtilTest {
 
     @Test
     fun `revurdering 23 nov`() {
-        val revurdering_23_nov =
+        val revurdering23Nov =
             // Forrige ytelse
             mockVedtakSimuleringPosteringer(YearMonth.of(2021, 2), 3, -17_153, PosteringType.YTELSE) +
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 4, -17_257, PosteringType.YTELSE) +
@@ -601,7 +601,7 @@ class SimuleringUtilTest {
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 4, 938, PosteringType.MOTP)
 
         val økonomiSimuleringMottakere =
-            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = revurdering_23_nov))
+            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = revurdering23Nov))
         val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
         val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
 

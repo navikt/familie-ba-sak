@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.getForEntity
 import java.net.URI
 
-const val sanityBaseUrl = "https://xsrv1mh6.api.sanity.io/v2021-06-07/data/query"
+const val SANITY_BASE_URL = "https://xsrv1mh6.api.sanity.io/v2021-06-07/data/query"
 
 @Component
 class SanityKlient(
@@ -28,8 +28,8 @@ class SanityKlient(
         backoff = Backoff(delayExpression = OpprettTaskService.RETRY_BACKOFF_5000MS),
     )
     fun hentBegrunnelser(): List<SanityBegrunnelse> {
-        val sanityUrl = "$sanityBaseUrl/$datasett"
-        val hentBegrunnelserQuery = java.net.URLEncoder.encode(hentBegrunnelser, "utf-8")
+        val sanityUrl = "$SANITY_BASE_URL/$datasett"
+        val hentBegrunnelserQuery = java.net.URLEncoder.encode(HENT_BEGRUNNELSER, "utf-8")
 
         val uri = URI.create("$sanityUrl?query=$hentBegrunnelserQuery")
 
@@ -52,8 +52,8 @@ class SanityKlient(
         backoff = Backoff(delayExpression = OpprettTaskService.RETRY_BACKOFF_5000MS),
     )
     fun hentEØSBegrunnelser(): List<SanityEØSBegrunnelse> {
-        val sanityUrl = "$sanityBaseUrl/$datasett"
-        val hentEØSBegrunnelserQuery = java.net.URLEncoder.encode(hentEØSBegrunnelser, "utf-8")
+        val sanityUrl = "$SANITY_BASE_URL/$datasett"
+        val hentEØSBegrunnelserQuery = java.net.URLEncoder.encode(HENT_EØS_BEGRUNNELSER, "utf-8")
 
         val uri = URI.create("$sanityUrl?query=$hentEØSBegrunnelserQuery")
 

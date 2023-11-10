@@ -59,14 +59,14 @@ class OppgaveControllerTest {
 
     @Test
     fun `Tildeling av oppgave til saksbehandler skal returnere OK og sende med OppgaveId i respons`() {
-        val OPPGAVE_ID = "1234"
-        val SAKSBEHANDLER_ID = "Z999999"
-        every { oppgaveService.fordelOppgave(any(), any()) } returns OPPGAVE_ID
+        val oppgaveId = "1234"
+        val saksbehandlerId = "Z999999"
+        every { oppgaveService.fordelOppgave(any(), any()) } returns oppgaveId
 
-        val respons = oppgaveController.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
+        val respons = oppgaveController.fordelOppgave(oppgaveId.toLong(), saksbehandlerId)
 
         Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
-        Assertions.assertEquals(OPPGAVE_ID, respons.body?.data)
+        Assertions.assertEquals(oppgaveId, respons.body?.data)
     }
 
     @Test
@@ -85,8 +85,8 @@ class OppgaveControllerTest {
 
     @Test
     fun `Tildeling av oppgave skal returnere feil ved feil fra integrasjonsklienten`() {
-        val OPPGAVE_ID = "1234"
-        val SAKSBEHANDLER_ID = "Z999998"
+        val oppgaveId = "1234"
+        val saksbehandlerId = "Z999998"
         every {
             oppgaveService.fordelOppgave(
                 any(),
@@ -97,8 +97,8 @@ class OppgaveControllerTest {
         val exception =
             assertThrows<IntegrasjonException> {
                 oppgaveController.fordelOppgave(
-                    OPPGAVE_ID.toLong(),
-                    SAKSBEHANDLER_ID,
+                    oppgaveId.toLong(),
+                    saksbehandlerId,
                 )
             }
 
