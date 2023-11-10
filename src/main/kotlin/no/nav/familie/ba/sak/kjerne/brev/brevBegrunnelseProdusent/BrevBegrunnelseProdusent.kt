@@ -277,14 +277,15 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                 SanityPeriodeResultat.IKKE_INNVILGET -> {
                     val erGenereltAvslag = erGenereltAvslagPåSøker(begrunnelsesGrunnlagPerPerson, grunnlag)
 
-                    val relevanteBarn = if (erGenereltAvslag) {
-                        barnPåBehandlingen
-                    } else {
-                        barnMedUtbetalingIForrigeperiode +
-                            barnMedOppfylteVilkår +
-                            barnMedEksplisitteAvslag +
-                            barnMistetUtbetalingFraForrigeBehandling
-                    }.toSet()
+                    val relevanteBarn =
+                        if (erGenereltAvslag) {
+                            barnPåBehandlingen
+                        } else {
+                            barnMedUtbetalingIForrigeperiode +
+                                barnMedOppfylteVilkår +
+                                barnMedEksplisitteAvslag +
+                                barnMistetUtbetalingFraForrigeBehandling
+                        }.toSet()
 
                     relevanteBarn.map { it.fødselsdato } +
                         uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
