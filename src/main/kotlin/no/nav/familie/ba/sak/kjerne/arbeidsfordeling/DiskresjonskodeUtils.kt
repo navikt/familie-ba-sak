@@ -6,6 +6,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADE
 fun finnPersonMedStrengesteAdressebeskyttelse(personer: List<IdentMedAdressebeskyttelse>): String? {
     return personer.fold(
         null,
+        @Suppress("ktlint:standard:blank-line-before-declaration")
         fun(
             person: IdentMedAdressebeskyttelse?,
             neste: IdentMedAdressebeskyttelse,
@@ -14,22 +15,27 @@ fun finnPersonMedStrengesteAdressebeskyttelse(personer: List<IdentMedAdressebesk
                 person?.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG -> {
                     person
                 }
+
                 neste.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG -> {
                     neste
                 }
+
                 person?.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND -> {
                     person
                 }
+
                 neste.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND -> {
                     neste
                 }
+
                 person?.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.FORTROLIG -> {
                     person
                 }
-                neste.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.FORTROLIG
-                -> {
+
+                neste.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.FORTROLIG -> {
                     neste
                 }
+
                 else -> null
             }
         },
