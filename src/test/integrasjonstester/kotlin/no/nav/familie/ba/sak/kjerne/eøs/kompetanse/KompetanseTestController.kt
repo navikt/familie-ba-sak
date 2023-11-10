@@ -32,7 +32,6 @@ class KompetanseTestController(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val kompetanseService: KompetanseService,
 ) {
-
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun endreKompetanser(
         @PathVariable behandlingId: Long,

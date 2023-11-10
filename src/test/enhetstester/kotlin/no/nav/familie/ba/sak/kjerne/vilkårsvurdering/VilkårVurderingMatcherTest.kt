@@ -10,12 +10,14 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class VilkårVurderingMatcherTest {
-
     private val randomBehandling = lagBehandling()
     private val søkerFnr = randomFnr()
     private val søkerAktørId = randomAktør()
 
-    private fun likeVilkårResultater(a: VilkårResultat?, b: VilkårResultat?): Boolean =
+    private fun likeVilkårResultater(
+        a: VilkårResultat?,
+        b: VilkårResultat?,
+    ): Boolean =
         a?.vilkårType == b?.vilkårType &&
             a?.resultat == b?.resultat &&
             a?.periodeFom == b?.periodeFom &&

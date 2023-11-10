@@ -8,13 +8,15 @@ import org.junit.jupiter.api.Test
 class SanityBegrunnelseTest {
     @Test
     fun `skal fjerne ugyldige enumverdier`() {
-        val restSanityBegrunnelse = lagRestSanityBegrunnelse(
-            apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-            ovrigeTriggere = listOf(
-                ØvrigTrigger.BARN_MED_6_ÅRS_DAG.name,
-                "IKKE_GYLDIG_ØVRIG_TRIGGER",
-            ),
-        )
+        val restSanityBegrunnelse =
+            lagRestSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                ovrigeTriggere =
+                    listOf(
+                        ØvrigTrigger.BARN_MED_6_ÅRS_DAG.name,
+                        "IKKE_GYLDIG_ØVRIG_TRIGGER",
+                    ),
+            )
         Assertions.assertEquals(
             listOf(
                 ØvrigTrigger.BARN_MED_6_ÅRS_DAG,

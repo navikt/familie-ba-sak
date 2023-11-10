@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class SkatteetatenServiceTest {
-
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient = mockk()
     private val fagsakRepository: FagsakRepository = mockk()
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
@@ -26,16 +25,18 @@ internal class SkatteetatenServiceTest {
         val fagsak2 = defaultFagsak()
 
         val nyesteVedtaksdato = LocalDate.now()
-        every { fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(any(), any()) } returns listOf(
-            TestUtvidetSkatt(fagsak.aktør.aktivFødselsnummer(), nyesteVedtaksdato),
-            TestUtvidetSkatt(fagsak2.aktør.aktivFødselsnummer(), nyesteVedtaksdato.plusDays(2)),
-        )
-
-        every { infotrygdBarnetrygdClient.hentPersonerMedUtvidetBarnetrygd(any()) } returns SkatteetatenPersonerResponse(
+        every { fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(any(), any()) } returns
             listOf(
-                SkatteetatenPerson(fagsak.aktør.aktivFødselsnummer(), nyesteVedtaksdato.atStartOfDay().minusYears(1)),
-            ),
-        )
+                TestUtvidetSkatt(fagsak.aktør.aktivFødselsnummer(), nyesteVedtaksdato),
+                TestUtvidetSkatt(fagsak2.aktør.aktivFødselsnummer(), nyesteVedtaksdato.plusDays(2)),
+            )
+
+        every { infotrygdBarnetrygdClient.hentPersonerMedUtvidetBarnetrygd(any()) } returns
+            SkatteetatenPersonerResponse(
+                listOf(
+                    SkatteetatenPerson(fagsak.aktør.aktivFødselsnummer(), nyesteVedtaksdato.atStartOfDay().minusYears(1)),
+                ),
+            )
 
         val skatteetatenService =
             SkatteetatenService(
@@ -72,10 +73,11 @@ internal class SkatteetatenServiceTest {
 
         val vedtaksdato = LocalDate.now()
 
-        every { fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(any(), any()) } returns listOf(
-            TestUtvidetSkatt(fagsak.aktør.aktivFødselsnummer(), vedtaksdato),
-            TestUtvidetSkatt(fagsak2.aktør.aktivFødselsnummer(), vedtaksdato.plusDays(2)),
-        )
+        every { fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(any(), any()) } returns
+            listOf(
+                TestUtvidetSkatt(fagsak.aktør.aktivFødselsnummer(), vedtaksdato),
+                TestUtvidetSkatt(fagsak2.aktør.aktivFødselsnummer(), vedtaksdato.plusDays(2)),
+            )
 
         val skatteetatenService =
             SkatteetatenService(
@@ -111,12 +113,13 @@ internal class SkatteetatenServiceTest {
 
         every { infotrygdBarnetrygdClient.hentPersonerMedUtvidetBarnetrygd(any()) } returns
             SkatteetatenPersonerResponse(
-                brukere = listOf(
-                    SkatteetatenPerson(
-                        fagsak.aktør.aktivFødselsnummer(),
-                        vedtaksdato.atStartOfDay(),
+                brukere =
+                    listOf(
+                        SkatteetatenPerson(
+                            fagsak.aktør.aktivFødselsnummer(),
+                            vedtaksdato.atStartOfDay(),
+                        ),
                     ),
-                ),
             )
 
         val skatteetatenService =

@@ -30,9 +30,10 @@ enum class ZipPadding {
 }
 
 fun <T> Tidslinje<T, Måned>.zipMedNeste(zipPadding: ZipPadding = INGEN_PADDING): Tidslinje<Pair<T?, T?>, Måned> {
-    val padding = listOf(
-        månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
-    )
+    val padding =
+        listOf(
+            månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
+        )
 
     return when (zipPadding) {
         FØR -> padding + perioder()

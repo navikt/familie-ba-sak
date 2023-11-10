@@ -25,7 +25,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 class UtbetalingssikkerhetTest {
-
     @Test
     fun `Skal kaste feil når en periode har flere andeler enn det som er tillatt`() {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
@@ -58,12 +57,13 @@ class UtbetalingssikkerhetTest {
             ),
         )
 
-        val feil = assertThrows<UtbetalingsikkerhetFeil> {
-            TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
-                tilkjentYtelse,
-                listOf(person.tilPersonEnkel()),
-            )
-        }
+        val feil =
+            assertThrows<UtbetalingsikkerhetFeil> {
+                TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+                    tilkjentYtelse,
+                    listOf(person.tilPersonEnkel()),
+                )
+            }
 
         assertTrue(feil.message?.contains("Tillatte andeler")!!)
     }
@@ -126,12 +126,13 @@ class UtbetalingssikkerhetTest {
             ),
         )
 
-        val feil = assertThrows<UtbetalingsikkerhetFeil> {
-            TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
-                tilkjentYtelse,
-                listOf(person.tilPersonEnkel()),
-            )
-        }
+        val feil =
+            assertThrows<UtbetalingsikkerhetFeil> {
+                TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+                    tilkjentYtelse,
+                    listOf(person.tilPersonEnkel()),
+                )
+            }
 
         assertTrue(feil.message?.contains("Tillatt totalbeløp")!!)
     }
@@ -197,10 +198,11 @@ class UtbetalingssikkerhetTest {
         )
 
         val far = tilfeldigPerson(personType = PersonType.SØKER)
-        val personopplysningGrunnlag2 = PersonopplysningGrunnlag(
-            behandlingId = 1,
-            personer = mutableSetOf(far, barn1, barn2),
-        )
+        val personopplysningGrunnlag2 =
+            PersonopplysningGrunnlag(
+                behandlingId = 1,
+                personer = mutableSetOf(far, barn1, barn2),
+            )
 
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
 
@@ -239,16 +241,18 @@ class UtbetalingssikkerhetTest {
             ),
         )
 
-        val feil = assertThrows<UtbetalingsikkerhetFeil> {
-            TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
-                behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
-                barnMedAndreRelevanteTilkjentYtelser = listOf(
-                    Pair(barn1.tilPersonEnkel(), listOf(tilkjentYtelse)),
-                    Pair(barn2.tilPersonEnkel(), listOf(tilkjentYtelse)),
-                ),
-                søkerOgBarn = personopplysningGrunnlag2.tilPersonEnkelSøkerOgBarn(),
-            )
-        }
+        val feil =
+            assertThrows<UtbetalingsikkerhetFeil> {
+                TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
+                    behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
+                    barnMedAndreRelevanteTilkjentYtelser =
+                        listOf(
+                            Pair(barn1.tilPersonEnkel(), listOf(tilkjentYtelse)),
+                            Pair(barn2.tilPersonEnkel(), listOf(tilkjentYtelse)),
+                        ),
+                    søkerOgBarn = personopplysningGrunnlag2.tilPersonEnkelSøkerOgBarn(),
+                )
+            }
 
         assertTrue(
             feil.frontendFeilmelding?.contains(
@@ -284,10 +288,11 @@ class UtbetalingssikkerhetTest {
         )
 
         val far = tilfeldigPerson(personType = PersonType.SØKER)
-        val personopplysningGrunnlag2 = PersonopplysningGrunnlag(
-            behandlingId = 1,
-            personer = mutableSetOf(far, barn),
-        )
+        val personopplysningGrunnlag2 =
+            PersonopplysningGrunnlag(
+                behandlingId = 1,
+                personer = mutableSetOf(far, barn),
+            )
 
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
 
@@ -337,10 +342,11 @@ class UtbetalingssikkerhetTest {
 
         val far = tilfeldigPerson(personType = PersonType.SØKER)
         val barn2 = tilfeldigPerson()
-        val personopplysningGrunnlag2 = PersonopplysningGrunnlag(
-            behandlingId = 1,
-            personer = mutableSetOf(far, barn2),
-        )
+        val personopplysningGrunnlag2 =
+            PersonopplysningGrunnlag(
+                behandlingId = 1,
+                personer = mutableSetOf(far, barn2),
+            )
 
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
 
@@ -398,13 +404,14 @@ class UtbetalingssikkerhetTest {
      */
     @Test
     fun `Alle satstyper er tatt hensyn til`() {
-        val støttedeSatstyper = setOf(
-            SatsType.SMA,
-            SatsType.TILLEGG_ORBA,
-            SatsType.FINN_SVAL,
-            SatsType.ORBA,
-            SatsType.UTVIDET_BARNETRYGD,
-        )
+        val støttedeSatstyper =
+            setOf(
+                SatsType.SMA,
+                SatsType.TILLEGG_ORBA,
+                SatsType.FINN_SVAL,
+                SatsType.ORBA,
+                SatsType.UTVIDET_BARNETRYGD,
+            )
         assertTrue(støttedeSatstyper.containsAll(SatsType.values().toSet()))
         assertEquals(støttedeSatstyper.size, SatsType.values().size)
     }

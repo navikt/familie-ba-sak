@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 internal class RolletilgangInterceptorTest : AbstractSpringIntegrationTest() {
-
     @Autowired
     lateinit var rolleConfig: RolleConfig
 

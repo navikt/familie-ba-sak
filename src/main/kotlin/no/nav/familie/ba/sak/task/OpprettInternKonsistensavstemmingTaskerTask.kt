@@ -23,7 +23,6 @@ import java.util.Properties
 class OpprettInternKonsistensavstemmingTaskerTask(
     val internKonsistensavstemmingService: InternKonsistensavstemmingService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val maksAntallTasker: Int = objectMapper.readValue(task.payload)
         internKonsistensavstemmingService
@@ -32,9 +31,10 @@ class OpprettInternKonsistensavstemmingTaskerTask(
 
     companion object {
         fun opprettTask(maksAntallTasker: Int = Int.MAX_VALUE): Task {
-            val metadata = Properties().apply {
-                this[MDCConstants.MDC_CALL_ID] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
-            }
+            val metadata =
+                Properties().apply {
+                    this[MDCConstants.MDC_CALL_ID] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
+                }
 
             return Task(
                 type = TASK_STEP_TYPE,

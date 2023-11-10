@@ -16,11 +16,11 @@ import java.time.YearMonth
 
 class CharTidslinje<T : Tidsenhet>(private val tegn: String, private val startTidspunkt: Tidspunkt<T>) :
     Tidslinje<Char, T>() {
-
-    val fraOgMed = when (tegn.first()) {
-        '<' -> startTidspunkt.somUendeligLengeSiden()
-        else -> startTidspunkt
-    }
+    val fraOgMed =
+        when (tegn.first()) {
+            '<' -> startTidspunkt.somUendeligLengeSiden()
+            else -> startTidspunkt
+        }
 
     val tilOgMed: Tidspunkt<T>
         get() {
@@ -35,11 +35,12 @@ class CharTidslinje<T : Tidsenhet>(private val tegn: String, private val startTi
         val tidspunkter = fraOgMed..tilOgMed
 
         return tidspunkter.mapIndexed { index, tidspunkt ->
-            val c = when (index) {
-                0 -> if (tegn[index] == '<') tegn[index + 1] else tegn[index]
-                tegn.length - 1 -> if (tegn[index] == '>') tegn[index - 1] else tegn[index]
-                else -> tegn[index]
-            }
+            val c =
+                when (index) {
+                    0 -> if (tegn[index] == '<') tegn[index + 1] else tegn[index]
+                    tegn.length - 1 -> if (tegn[index] == '>') tegn[index - 1] else tegn[index]
+                    else -> tegn[index]
+                }
             Periode(tidspunkt.somFraOgMed(), tidspunkt.somTilOgMed(), c)
         }
     }

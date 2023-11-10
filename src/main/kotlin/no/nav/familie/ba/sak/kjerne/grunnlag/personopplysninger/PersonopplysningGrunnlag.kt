@@ -31,22 +31,17 @@ data class PersonopplysningGrunnlag(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
-
     @OneToMany(
         fetch = FetchType.EAGER,
         mappedBy = "personopplysningGrunnlag",
         cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH],
     )
     val personer: MutableSet<Person> = mutableSetOf(),
-
     @Column(name = "aktiv", nullable = false)
     var aktiv: Boolean = true,
-
 ) : BaseEntitet() {
-
     val barna: List<Person>
         get() = personer.filter { it.type == PersonType.BARN }
 
@@ -54,10 +49,11 @@ data class PersonopplysningGrunnlag(
         get() = barna.maxOf { it.fødselsdato }
 
     val søker: Person
-        get() = personer.singleOrNull { it.type == PersonType.SØKER }
-            // Vil returnere barnet på EM-saker, som da i prinsippet også er søkeren. Vil også returnere barnet på inst. saker
-            ?: personer.singleOrNull()?.takeIf { it.type == PersonType.BARN }
-            ?: error("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
+        get() =
+            personer.singleOrNull { it.type == PersonType.SØKER }
+                // Vil returnere barnet på EM-saker, som da i prinsippet også er søkeren. Vil også returnere barnet på inst. saker
+                ?: personer.singleOrNull()?.takeIf { it.type == PersonType.BARN }
+                ?: error("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
 
     val annenForelder: Person?
         get() = personer.singleOrNull { it.type == PersonType.ANNENPART }
@@ -65,11 +61,12 @@ data class PersonopplysningGrunnlag(
     val søkerOgBarn: List<Person>
         get() = personer.filter { it.type == PersonType.SØKER || it.type == PersonType.BARN }
 
-    fun harBarnMedSeksårsdagPåFom(fom: LocalDate?) = personer.any { person ->
-        person
-            .hentSeksårsdag()
-            .toYearMonth() == (fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth())
-    }
+    fun harBarnMedSeksårsdagPåFom(fom: LocalDate?) =
+        personer.any { person ->
+            person
+                .hentSeksårsdag()
+                .toYearMonth() == (fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth())
+        }
 
     fun tilKopiForNyBehandling(
         behandling: Behandling,

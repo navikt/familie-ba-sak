@@ -15,19 +15,19 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.time.YearMonth
 
 object EndringIVilkårsvurderingUtil {
-
     fun utledEndringstidspunktForVilkårsvurdering(
         nåværendePersonResultat: Set<PersonResultat>,
         forrigePersonResultat: Set<PersonResultat>,
         personerIBehandling: Set<Person>,
         personerIForrigeBehandling: Set<Person>,
     ): YearMonth? {
-        val endringIVilkårsvurderingTidslinje = lagEndringIVilkårsvurderingTidslinje(
-            nåværendePersonResultater = nåværendePersonResultat,
-            forrigePersonResultater = forrigePersonResultat,
-            personerIBehandling = personerIBehandling,
-            personerIForrigeBehandling = personerIForrigeBehandling,
-        )
+        val endringIVilkårsvurderingTidslinje =
+            lagEndringIVilkårsvurderingTidslinje(
+                nåværendePersonResultater = nåværendePersonResultat,
+                forrigePersonResultater = forrigePersonResultat,
+                personerIBehandling = personerIBehandling,
+                personerIForrigeBehandling = personerIForrigeBehandling,
+            )
 
         return endringIVilkårsvurderingTidslinje.tilFørsteEndringstidspunkt()
     }
@@ -41,26 +41,29 @@ object EndringIVilkårsvurderingUtil {
         val allePersonerMedPersonResultat =
             (nåværendePersonResultater.map { it.aktør } + forrigePersonResultater.map { it.aktør }).distinct()
 
-        val tidslinjerPerPersonOgVilkår = allePersonerMedPersonResultat.flatMap { aktør ->
-            val personIBehandling = personerIBehandling.singleOrNull { it.aktør == aktør }
-            val personIForrigeBehandling = personerIForrigeBehandling.singleOrNull { it.aktør == aktør }
+        val tidslinjerPerPersonOgVilkår =
+            allePersonerMedPersonResultat.flatMap { aktør ->
+                val personIBehandling = personerIBehandling.singleOrNull { it.aktør == aktør }
+                val personIForrigeBehandling = personerIForrigeBehandling.singleOrNull { it.aktør == aktør }
 
-            Vilkår.values().map { vilkår ->
-                lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
-                    nåværendeOppfylteVilkårResultater = nåværendePersonResultater
-                        .filter { it.aktør == aktør }
-                        .flatMap { it.vilkårResultater }
-                        .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
-                    forrigeOppfylteVilkårResultater = forrigePersonResultater
-                        .filter { it.aktør == aktør }
-                        .flatMap { it.vilkårResultater }
-                        .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
-                    vilkår = vilkår,
-                    personIBehandling = personIBehandling,
-                    personIForrigeBehandling = personIForrigeBehandling,
-                )
+                Vilkår.values().map { vilkår ->
+                    lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
+                        nåværendeOppfylteVilkårResultater =
+                            nåværendePersonResultater
+                                .filter { it.aktør == aktør }
+                                .flatMap { it.vilkårResultater }
+                                .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
+                        forrigeOppfylteVilkårResultater =
+                            forrigePersonResultater
+                                .filter { it.aktør == aktør }
+                                .flatMap { it.vilkårResultater }
+                                .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
+                        vilkår = vilkår,
+                        personIBehandling = personIBehandling,
+                        personIForrigeBehandling = personIForrigeBehandling,
+                    )
+                }
             }
-        }
 
         return tidslinjerPerPersonOgVilkår.kombiner { finnesMinstEnEndringIPeriode(it) }
     }
@@ -80,11 +83,13 @@ object EndringIVilkårsvurderingUtil {
         personIBehandling: Person?,
         personIForrigeBehandling: Person?,
     ): Tidslinje<Boolean, Måned> {
-        val nåværendeVilkårResultatTidslinje = nåværendeOppfylteVilkårResultater
-            .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIBehandling?.fødselsdato)
+        val nåværendeVilkårResultatTidslinje =
+            nåværendeOppfylteVilkårResultater
+                .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIBehandling?.fødselsdato)
 
-        val tidligereVilkårResultatTidslinje = forrigeOppfylteVilkårResultater
-            .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIForrigeBehandling?.fødselsdato)
+        val tidligereVilkårResultatTidslinje =
+            forrigeOppfylteVilkårResultater
+                .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIForrigeBehandling?.fødselsdato)
 
         val endringIVilkårResultat =
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->

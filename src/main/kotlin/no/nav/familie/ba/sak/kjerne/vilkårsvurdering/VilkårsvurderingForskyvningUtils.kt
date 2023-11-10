@@ -27,11 +27,13 @@ object VilkårsvurderingForskyvningUtils {
         personerIPersongrunnlag: List<Person>,
         fagsakType: FagsakType,
     ): Tidslinje<List<VilkårResultat>, Måned> {
-        val tidslinjerPerPerson = this.map { personResultat ->
-            val person = personerIPersongrunnlag.find { it.aktør == personResultat.aktør }
-                ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av tidslinje for splitt")
-            personResultat.tilTidslinjeForSplittForPerson(person = person, fagsakType = fagsakType)
-        }
+        val tidslinjerPerPerson =
+            this.map { personResultat ->
+                val person =
+                    personerIPersongrunnlag.find { it.aktør == personResultat.aktør }
+                        ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av tidslinje for splitt")
+                personResultat.tilTidslinjeForSplittForPerson(person = person, fagsakType = fagsakType)
+            }
 
         return tidslinjerPerPerson.kombiner { it.filterNotNull().flatten() }.filtrerIkkeNull().slåSammenLike()
     }
@@ -68,7 +70,10 @@ object VilkårsvurderingForskyvningUtils {
         }
     }
 
-    fun Collection<VilkårResultat>.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår: Vilkår, fødselsdato: LocalDate?): Tidslinje<VilkårResultat, Måned> {
+    fun Collection<VilkårResultat>.tilForskjøvetTidslinjeForOppfyltVilkår(
+        vilkår: Vilkår,
+        fødselsdato: LocalDate?,
+    ): Tidslinje<VilkårResultat, Måned> {
         if (this.isEmpty()) return TomTidslinje()
 
         val tidslinje = this.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår)
@@ -95,7 +100,10 @@ object VilkårsvurderingForskyvningUtils {
             }
     }
 
-    fun Collection<VilkårResultat>.tilForskjøvetTidslinje(vilkår: Vilkår, fødselsdato: LocalDate): Tidslinje<VilkårResultat, Måned> {
+    fun Collection<VilkårResultat>.tilForskjøvetTidslinje(
+        vilkår: Vilkår,
+        fødselsdato: LocalDate,
+    ): Tidslinje<VilkårResultat, Måned> {
         val tidslinje = this.lagForskjøvetTidslinje(vilkår)
 
         return tidslinje.beskjærPå18ÅrHvisUnder18ÅrVilkår(vilkår = vilkår, fødselsdato = fødselsdato)
@@ -131,9 +139,10 @@ object VilkårsvurderingForskyvningUtils {
     }
 
     private fun VilkårResultat.erDeltBosted() =
-        this.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) || this.utdypendeVilkårsvurderinger.contains(
-            UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES,
-        )
+        this.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) ||
+            this.utdypendeVilkårsvurderinger.contains(
+                UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES,
+            )
 
     private fun alleOrdinæreVilkårErOppfyltEllerNull(
         vilkårResultater: Iterable<VilkårResultat>,
@@ -147,12 +156,16 @@ object VilkårsvurderingForskyvningUtils {
         }
     }
 
-    fun Iterable<VilkårResultat>.alleOrdinæreVilkårErOppfylt(personType: PersonType, fagsakType: FagsakType): Boolean {
-        val alleVilkårForPersonType = Vilkår.hentVilkårFor(
-            personType = personType,
-            fagsakType = fagsakType,
-            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-        )
+    fun Iterable<VilkårResultat>.alleOrdinæreVilkårErOppfylt(
+        personType: PersonType,
+        fagsakType: FagsakType,
+    ): Boolean {
+        val alleVilkårForPersonType =
+            Vilkår.hentVilkårFor(
+                personType = personType,
+                fagsakType = fagsakType,
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+            )
         return this.map { it.vilkårType }
             .containsAll(alleVilkårForPersonType) && this.all { it.resultat == Resultat.OPPFYLT }
     }

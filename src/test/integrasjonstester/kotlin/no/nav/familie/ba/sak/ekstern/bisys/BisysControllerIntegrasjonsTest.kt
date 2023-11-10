@@ -35,7 +35,6 @@ import java.time.temporal.ChronoUnit
 
 @ActiveProfiles("postgres", "integrasjonstest", "mock-pdl", "mock-ident-client", "mock-oauth", "mock-brev-klient")
 class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
-
     // Trenger fast port for at klienten i ba-sak kan kalle wiremock'en
     private val wireMockServer = WireMockServer(28085)
 
@@ -54,19 +53,21 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
     fun `Skal kaste feil når fraDato er mer enn 5 år tilbake i tid`() {
         val fnr = randomFnr()
 
-        val requestEntity = byggRequestEntity(
-            BisysUtvidetBarnetrygdRequest(
-                fnr,
-                LocalDate.now().minusYears(5).minusDays(1),
-            ),
-        )
-
-        val error = assertThrows<HttpClientErrorException> {
-            restTemplate.postForEntity<Any>(
-                hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-                requestEntity,
+        val requestEntity =
+            byggRequestEntity(
+                BisysUtvidetBarnetrygdRequest(
+                    fnr,
+                    LocalDate.now().minusYears(5).minusDays(1),
+                ),
             )
-        }
+
+        val error =
+            assertThrows<HttpClientErrorException> {
+                restTemplate.postForEntity<Any>(
+                    hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
+                    requestEntity,
+                )
+            }
 
         assertThat(error.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
         val errorObject = objectMapper.readValue<EksternTjenesteFeil>(error.responseBodyAsByteArray)
@@ -89,19 +90,21 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 ),
         )
 
-        val requestEntity = byggRequestEntity(
-            BisysUtvidetBarnetrygdRequest(
-                fnr,
-                LocalDate.now(),
-            ),
-        )
-
-        val error = assertThrows<HttpServerErrorException> {
-            restTemplate.postForEntity<Any>(
-                hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-                requestEntity,
+        val requestEntity =
+            byggRequestEntity(
+                BisysUtvidetBarnetrygdRequest(
+                    fnr,
+                    LocalDate.now(),
+                ),
             )
-        }
+
+        val error =
+            assertThrows<HttpServerErrorException> {
+                restTemplate.postForEntity<Any>(
+                    hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
+                    requestEntity,
+                )
+            }
 
         assertThat(error.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         val errorObject = objectMapper.readValue<EksternTjenesteFeil>(error.responseBodyAsByteArray)
@@ -126,17 +129,19 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 ),
         )
 
-        val requestEntity = byggRequestEntity(
-            BisysUtvidetBarnetrygdRequest(
-                fnr,
-                LocalDate.now().minusYears(4),
-            ),
-        )
+        val requestEntity =
+            byggRequestEntity(
+                BisysUtvidetBarnetrygdRequest(
+                    fnr,
+                    LocalDate.now().minusYears(4),
+                ),
+            )
 
-        val responseEntity = restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
-            hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-            requestEntity,
-        )
+        val responseEntity =
+            restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
+                hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
+                requestEntity,
+            )
         wireMockServer.verify(
             postRequestedFor(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .withRequestBody(
@@ -146,7 +151,6 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                         }" }""",
                     ),
                 ),
-
         )
 
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
@@ -185,17 +189,19 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 ),
         )
 
-        val requestEntity = byggRequestEntity(
-            BisysUtvidetBarnetrygdRequest(
-                fnr,
-                LocalDate.now().minusYears(4),
-            ),
-        )
+        val requestEntity =
+            byggRequestEntity(
+                BisysUtvidetBarnetrygdRequest(
+                    fnr,
+                    LocalDate.now().minusYears(4),
+                ),
+            )
 
-        val responseEntity = restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
-            hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-            requestEntity,
-        )
+        val responseEntity =
+            restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
+                hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
+                requestEntity,
+            )
 
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(responseEntity.body).isNotNull
@@ -246,17 +252,19 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 ),
         )
 
-        val requestEntity = byggRequestEntity(
-            BisysUtvidetBarnetrygdRequest(
-                fnr,
-                LocalDate.now().minusYears(4),
-            ),
-        )
+        val requestEntity =
+            byggRequestEntity(
+                BisysUtvidetBarnetrygdRequest(
+                    fnr,
+                    LocalDate.now().minusYears(4),
+                ),
+            )
 
-        val responseEntity = restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
-            hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-            requestEntity,
-        )
+        val responseEntity =
+            restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
+                hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
+                requestEntity,
+            )
 
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(responseEntity.body).isNotNull
@@ -293,17 +301,19 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         header.setBearerAuth(
             hentTokenForBisys(),
         )
-        val ikkeBisysTjeneste = HttpEntity<String>(
-            "tullball",
-            header,
-        )
-
-        val error = assertThrows<HttpClientErrorException> {
-            restTemplate.postForEntity<Any>(
-                hentUrl("/api/tullballtjeneste"),
-                ikkeBisysTjeneste,
+        val ikkeBisysTjeneste =
+            HttpEntity<String>(
+                "tullball",
+                header,
             )
-        }
+
+        val error =
+            assertThrows<HttpClientErrorException> {
+                restTemplate.postForEntity<Any>(
+                    hentUrl("/api/tullballtjeneste"),
+                    ikkeBisysTjeneste,
+                )
+            }
 
         assertThat(error.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -322,14 +332,15 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         )
     }
 
-    private fun hentTokenForBisys() = token(
-        mapOf(
-            "groups" to listOf("SAKSBEHANDLER"),
-            "name" to "Mock McMockface",
-            "NAVident" to "Z0000",
-        ),
-        clientId = "dummy",
-    )
+    private fun hentTokenForBisys() =
+        token(
+            mapOf(
+                "groups" to listOf("SAKSBEHANDLER"),
+                "name" to "Mock McMockface",
+                "NAVident" to "Z0000",
+            ),
+            clientId = "dummy",
+        )
 
     private fun gyldigOppgaveResponse(filnavn: String): String {
         return Files.readString(

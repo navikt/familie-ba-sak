@@ -40,26 +40,30 @@ class PdlRestClient(
     @Qualifier("jwtBearer") val restTemplate: RestOperations,
     val personidentService: PersonidentService,
 ) : AbstractRestClient(restTemplate, "pdl.personinfo") {
-
     protected val pdlUri = UriUtil.uri(pdlBaseUrl, PATH_GRAPHQL)
 
     @Cacheable("personopplysninger", cacheManager = "shortCache")
-    fun hentPerson(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-            query = personInfoQuery.graphQL,
-        )
-        val pdlResponse: PdlBaseResponse<PdlHentPersonResponse> = kallEksternTjeneste(
-            tjeneste = "pdl",
-            uri = pdlUri,
-            formål = "Hent person med query ${personInfoQuery.name}",
-        ) {
-            postForEntity(
-                pdlUri,
-                pdlPersonRequest,
-                httpHeaders(),
+    fun hentPerson(
+        aktør: Aktør,
+        personInfoQuery: PersonInfoQuery,
+    ): PersonInfo {
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
+                query = personInfoQuery.graphQL,
             )
-        }
+        val pdlResponse: PdlBaseResponse<PdlHentPersonResponse> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent person med query ${personInfoQuery.name}",
+            ) {
+                postForEntity(
+                    pdlUri,
+                    pdlPersonRequest,
+                    httpHeaders(),
+                )
+            }
 
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
@@ -102,9 +106,10 @@ class PdlRestClient(
     }
 
     private fun hentDødsfallDataFraListeMedDødsfall(doedsfall: List<Doedsfall>): DødsfallData? {
-        val dødsdato = doedsfall.filter { it.doedsdato != null }
-            .map { it.doedsdato }
-            .firstOrNull()
+        val dødsdato =
+            doedsfall.filter { it.doedsdato != null }
+                .map { it.doedsdato }
+                .firstOrNull()
 
         if (doedsfall.isEmpty() || dødsdato == null) {
             return null
@@ -114,15 +119,17 @@ class PdlRestClient(
 
     @Cacheable("vergedata", cacheManager = "shortCache")
     fun hentVergemaalEllerFremtidsfullmakt(aktør: Aktør): List<VergemaalEllerFremtidsfullmakt> {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-            query = hentGraphqlQuery("verge"),
-        )
-        val pdlResponse: PdlBaseResponse<PdlVergeResponse> = kallEksternTjeneste(
-            tjeneste = "pdl",
-            uri = pdlUri,
-            formål = "Hent vergemål eller fremtidsfullmakt",
-        ) { postForEntity(pdlUri, pdlPersonRequest, httpHeaders()) }
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
+                query = hentGraphqlQuery("verge"),
+            )
+        val pdlResponse: PdlBaseResponse<PdlVergeResponse> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent vergemål eller fremtidsfullmakt",
+            ) { postForEntity(pdlUri, pdlPersonRequest, httpHeaders()) }
 
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
@@ -133,15 +140,17 @@ class PdlRestClient(
     }
 
     fun hentStatsborgerskapUtenHistorikk(aktør: Aktør): List<Statsborgerskap> {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-            query = hentGraphqlQuery("statsborgerskap-uten-historikk"),
-        )
-        val pdlResponse: PdlBaseResponse<PdlStatsborgerskapResponse> = kallEksternTjeneste(
-            tjeneste = "pdl",
-            uri = pdlUri,
-            formål = "Hent statsborgerskap uten historikk",
-        ) { postForEntity(pdlUri, pdlPersonRequest, httpHeaders()) }
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
+                query = hentGraphqlQuery("statsborgerskap-uten-historikk"),
+            )
+        val pdlResponse: PdlBaseResponse<PdlStatsborgerskapResponse> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent statsborgerskap uten historikk",
+            ) { postForEntity(pdlUri, pdlPersonRequest, httpHeaders()) }
 
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
@@ -152,17 +161,19 @@ class PdlRestClient(
     }
 
     fun hentOppholdUtenHistorikk(aktør: Aktør): List<Opphold> {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-            query = hentGraphqlQuery("opphold-uten-historikk"),
-        )
-        val pdlResponse: PdlBaseResponse<PdlOppholdResponse> = kallEksternTjeneste(
-            tjeneste = "pdl",
-            uri = pdlUri,
-            formål = "Hent opphold uten historikk",
-        ) {
-            postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
-        }
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
+                query = hentGraphqlQuery("opphold-uten-historikk"),
+            )
+        val pdlResponse: PdlBaseResponse<PdlOppholdResponse> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent opphold uten historikk",
+            ) {
+                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+            }
 
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
@@ -173,24 +184,27 @@ class PdlRestClient(
     }
 
     fun hentUtenlandskBostedsadresse(aktør: Aktør): PdlUtenlandskAdresssePersonUtenlandskAdresse? {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-            query = hentGraphqlQuery("bostedsadresse-utenlandsk"),
-        )
-        val pdlResponse: PdlBaseResponse<PdlUtenlandskAdressseResponse> = kallEksternTjeneste(
-            tjeneste = "pdl",
-            uri = pdlUri,
-            formål = "Hent utenlandsk bostedsadresse",
-        ) {
-            postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
-        }
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
+                query = hentGraphqlQuery("bostedsadresse-utenlandsk"),
+            )
+        val pdlResponse: PdlBaseResponse<PdlUtenlandskAdressseResponse> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent utenlandsk bostedsadresse",
+            ) {
+                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+            }
 
-        val bostedsadresser = feilsjekkOgReturnerData(
-            ident = aktør.aktivFødselsnummer(),
-            pdlResponse = pdlResponse,
-        ) {
-            it.person!!.bostedsadresse
-        }
+        val bostedsadresser =
+            feilsjekkOgReturnerData(
+                ident = aktør.aktivFødselsnummer(),
+                pdlResponse = pdlResponse,
+            ) {
+                it.person!!.bostedsadresse
+            }
         return bostedsadresser.firstOrNull { bostedsadresse -> bostedsadresse.utenlandskAdresse != null }?.utenlandskAdresse
     }
 
@@ -199,17 +213,19 @@ class PdlRestClient(
      *
      */
     fun hentForelderBarnRelasjoner(aktør: Aktør): List<no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon> {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-            query = hentGraphqlQuery("hentperson-relasjoner"),
-        )
-        val pdlResponse: PdlBaseResponse<PdlHentPersonRelasjonerResponse> = kallEksternTjeneste(
-            tjeneste = "pdl",
-            uri = pdlUri,
-            formål = "Hent forelder barn relasjoner",
-        ) {
-            postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
-        }
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
+                query = hentGraphqlQuery("hentperson-relasjoner"),
+            )
+        val pdlResponse: PdlBaseResponse<PdlHentPersonRelasjonerResponse> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent forelder barn relasjoner",
+            ) {
+                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+            }
 
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
@@ -229,7 +245,6 @@ class PdlRestClient(
     }
 
     companion object {
-
         private const val PATH_GRAPHQL = "graphql"
         private const val PDL_TEMA = "BAR"
     }

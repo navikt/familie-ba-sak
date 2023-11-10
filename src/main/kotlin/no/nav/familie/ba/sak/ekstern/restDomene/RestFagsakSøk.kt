@@ -27,7 +27,6 @@ data class RestFagsakDeltager(
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
     val harTilgang: Boolean = true,
 ) {
-
     override fun toString(): String {
         return "RestFagsakDeltager(rolle=$rolle, kjønn=$kjønn, fagsakId=$fagsakId)"
     }

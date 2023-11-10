@@ -18,13 +18,15 @@ class MinimertPerson(
     val erDød = {
         dødsfallsdato != null
     }
+
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
 
-    fun tilMinimertRestPerson() = MinimertRestPerson(
-        personIdent = aktivPersonIdent,
-        fødselsdato = fødselsdato,
-        type = type,
-    )
+    fun tilMinimertRestPerson() =
+        MinimertRestPerson(
+            personIdent = aktivPersonIdent,
+            fødselsdato = fødselsdato,
+            type = type,
+        )
 }
 
 fun PersonopplysningGrunnlag.tilMinimertePersoner(): List<MinimertPerson> =
@@ -41,8 +43,9 @@ fun List<Person>.tilMinimertePersoner(): List<MinimertPerson> =
         )
     }
 
-fun List<MinimertPerson>.harBarnMedSeksårsdagPåFom(fom: LocalDate?) = this.any { person ->
-    person
-        .hentSeksårsdag()
-        .toYearMonth() == (fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth())
-}
+fun List<MinimertPerson>.harBarnMedSeksårsdagPåFom(fom: LocalDate?) =
+    this.any { person ->
+        person
+            .hentSeksårsdag()
+            .toYearMonth() == (fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth())
+    }

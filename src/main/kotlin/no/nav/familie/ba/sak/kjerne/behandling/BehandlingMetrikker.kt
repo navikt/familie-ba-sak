@@ -65,17 +65,18 @@ class BehandlingMetrikker(
             logger.warn("Kunne ikke hente EØS-begrunnelser fra sanity-api", exception)
         }
 
-        antallGangerBruktEØSBegrunnelse = EØSStandardbegrunnelse.values().associateWith {
-            val tittel = sanityEØSBegrunnelser[it]?.navnISystem ?: it.name
+        antallGangerBruktEØSBegrunnelse =
+            EØSStandardbegrunnelse.values().associateWith {
+                val tittel = sanityEØSBegrunnelser[it]?.navnISystem ?: it.name
 
-            Metrics.counter(
-                "eøs-begrunnelse",
-                "type",
-                it.name,
-                "beskrivelse",
-                tittel,
-            )
-        }
+                Metrics.counter(
+                    "eøs-begrunnelse",
+                    "type",
+                    it.name,
+                    "beskrivelse",
+                    tittel,
+                )
+            }
 
         try {
             sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
@@ -83,17 +84,18 @@ class BehandlingMetrikker(
             logger.warn("Klarte ikke å bygge tellere for begrunnelser")
         }
 
-        antallGangerBruktStandardbegrunnelse = Standardbegrunnelse.values().associateWith {
-            val tittel = sanityBegrunnelser[it]?.navnISystem ?: it.name
+        antallGangerBruktStandardbegrunnelse =
+            Standardbegrunnelse.values().associateWith {
+                val tittel = sanityBegrunnelser[it]?.navnISystem ?: it.name
 
-            Metrics.counter(
-                "brevbegrunnelse",
-                "type",
-                it.name,
-                "beskrivelse",
-                tittel,
-            )
-        }
+                Metrics.counter(
+                    "brevbegrunnelse",
+                    "type",
+                    it.name,
+                    "beskrivelse",
+                    tittel,
+                )
+            }
     }
 
     fun tellNøkkelTallVedOpprettelseAvBehandling(behandling: Behandling) {
@@ -128,8 +130,9 @@ class BehandlingMetrikker(
         if (antallGangerBruktStandardbegrunnelse.isEmpty()) hentBegrunnelserOgByggMetrikker()
 
         if (!behandlingHentOgPersisterService.hent(behandlingId = behandling.id).erHenlagt()) {
-            val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
-                ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
+            val vedtak =
+                vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
+                    ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
 
             val vedtaksperiodeMedBegrunnelser =
                 vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)

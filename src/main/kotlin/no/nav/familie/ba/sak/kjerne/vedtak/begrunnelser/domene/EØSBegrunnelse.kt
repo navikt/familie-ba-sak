@@ -30,12 +30,10 @@ class EØSBegrunnelse(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "fk_vedtaksperiode_id", nullable = false, updatable = false)
     val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "begrunnelse", updatable = false)
     val begrunnelse: EØSStandardbegrunnelse,
@@ -46,9 +44,10 @@ class EØSBegrunnelse(
             begrunnelse = this.begrunnelse,
         )
 
-    fun tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
-        standardbegrunnelse = this.begrunnelse.enumnavnTilString(),
-        vedtakBegrunnelseType = this.begrunnelse.vedtakBegrunnelseType,
-        vedtakBegrunnelseSpesifikasjon = this.begrunnelse.enumnavnTilString(),
-    )
+    fun tilRestVedtaksbegrunnelse() =
+        RestVedtaksbegrunnelse(
+            standardbegrunnelse = this.begrunnelse.enumnavnTilString(),
+            vedtakBegrunnelseType = this.begrunnelse.vedtakBegrunnelseType,
+            vedtakBegrunnelseSpesifikasjon = this.begrunnelse.enumnavnTilString(),
+        )
 }

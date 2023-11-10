@@ -22,10 +22,11 @@ internal class StatistikkClientTest : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun setUp() {
-        client = StatistikkClient(
-            URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations,
-        )
+        client =
+            StatistikkClient(
+                URI.create(wireMockServer.baseUrl() + "/api"),
+                restOperations,
+            )
     }
 
     @AfterEach

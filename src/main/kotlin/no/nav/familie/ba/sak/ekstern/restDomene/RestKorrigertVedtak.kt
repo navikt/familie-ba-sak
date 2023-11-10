@@ -10,9 +10,10 @@ class RestKorrigertVedtak(
     val aktiv: Boolean,
 )
 
-fun KorrigertVedtak.tilRestKorrigertVedtak(): RestKorrigertVedtak = RestKorrigertVedtak(
-    id = id,
-    vedtaksdato = vedtaksdato,
-    begrunnelse = begrunnelse,
-    aktiv = aktiv,
-)
+fun KorrigertVedtak.tilRestKorrigertVedtak(): RestKorrigertVedtak =
+    RestKorrigertVedtak(
+        id = id,
+        vedtaksdato = vedtaksdato,
+        begrunnelse = begrunnelse,
+        aktiv = aktiv,
+    )

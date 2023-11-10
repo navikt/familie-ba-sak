@@ -44,56 +44,48 @@ import java.time.YearMonth
 class RevurderingMedEndredeUtbetalingandelerTest(
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
-
     @Autowired
     private val vilkårService: VilkårService,
-
     @Autowired
     private val stegService: StegService,
-
     @Autowired
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
-
     @Autowired
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
-
     @Autowired
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-
     @Autowired
     private val personidentService: PersonidentService,
-
     @Autowired
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
-
     @Autowired
     private val søknadGrunnlagRepository: SøknadGrunnlagRepository,
-
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Endrede utbetalingsandeler fra forrige behandling kopieres riktig og oppdaterer andel med riktig beløp`() {
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(
-                    fødselsdato = "${LocalDate.now().minusYears(28)}",
-                    fornavn = "Mor",
-                    etternavn = "Søker",
+        val scenario =
+            mockServerKlient().lagScenario(
+                RestScenario(
+                    søker =
+                        RestScenarioPerson(
+                            fødselsdato = "${LocalDate.now().minusYears(28)}",
+                            fornavn = "Mor",
+                            etternavn = "Søker",
+                        ),
+                    barna =
+                        listOf(
+                            RestScenarioPerson(
+                                fødselsdato = LocalDate.now().minusYears(4).toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen",
+                            ),
+                        ),
                 ),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.now().minusYears(4).toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                    ),
-                ),
-            ),
-        )
+            )
         val fnr = scenario.søker.ident!!
         val barnFnr = scenario.barna[0].ident!!
         val barnetsFødselsdato = LocalDate.parse(scenario.barna[0].fødselsdato)
@@ -129,11 +121,12 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             ),
         )
 
-        val vilkårsvurderingRevurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
-            behandling = behandlingRevurdering,
-            bekreftEndringerViaFrontend = true,
-            forrigeBehandlingSomErVedtatt = iverksattFørstegangsbehandling,
-        )
+        val vilkårsvurderingRevurdering =
+            vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+                behandling = behandlingRevurdering,
+                bekreftEndringerViaFrontend = true,
+                forrigeBehandlingSomErVedtatt = iverksattFørstegangsbehandling,
+            )
 
         gjennomførVilkårsvurdering(
             vilkårsvurdering = vilkårsvurderingRevurdering,
@@ -168,22 +161,25 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                     behandlingId = behandling.id,
                     vilkårId = it.id,
                     restPersonResultat =
-                    RestPersonResultat(
-                        personIdent = personResultat.aktør.aktivFødselsnummer(),
-                        vilkårResultater = listOf(
-                            it.copy(
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
-                                    barnetsFødselsdato
-                                } else {
-                                    LocalDate.now().minusYears(3).minusMonths(5).withDayOfMonth(8)
-                                },
-                                utdypendeVilkårsvurderinger = listOfNotNull(
-                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                        RestPersonResultat(
+                            personIdent = personResultat.aktør.aktivFødselsnummer(),
+                            vilkårResultater =
+                                listOf(
+                                    it.copy(
+                                        resultat = Resultat.OPPFYLT,
+                                        periodeFom =
+                                            if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
+                                                barnetsFødselsdato
+                                            } else {
+                                                LocalDate.now().minusYears(3).minusMonths(5).withDayOfMonth(8)
+                                            },
+                                        utdypendeVilkårsvurderinger =
+                                            listOfNotNull(
+                                                if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                                            ),
+                                    ),
                                 ),
-                            ),
                         ),
-                    ),
                 )
             }
         }
@@ -205,15 +201,17 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val førstegangsbehandling =
             stegService.håndterNyBehandling(nyOrdinærBehandling(søkersIdent = søkersIdent, fagsakId = fagsak.id))
 
-        val søknadGrunnlag = SøknadGrunnlag(
-            behandlingId = førstegangsbehandling.id,
-            aktiv = true,
-            søknad = lagSøknadDTO(
-                søkersIdent,
-                barnasIdenter = listOf(barnFnr),
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-            ).writeValueAsString(),
-        )
+        val søknadGrunnlag =
+            SøknadGrunnlag(
+                behandlingId = førstegangsbehandling.id,
+                aktiv = true,
+                søknad =
+                    lagSøknadDTO(
+                        søkersIdent,
+                        barnasIdenter = listOf(barnFnr),
+                        underkategori = BehandlingUnderkategori.ORDINÆR,
+                    ).writeValueAsString(),
+            )
 
         søknadGrunnlagRepository.save(søknadGrunnlag)
 
@@ -228,11 +226,12 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             ),
         )
 
-        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
-            behandling = førstegangsbehandling,
-            bekreftEndringerViaFrontend = true,
-            forrigeBehandlingSomErVedtatt = null,
-        )
+        val vilkårsvurdering =
+            vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+                behandling = førstegangsbehandling,
+                bekreftEndringerViaFrontend = true,
+                forrigeBehandlingSomErVedtatt = null,
+            )
 
         gjennomførVilkårsvurdering(
             vilkårsvurdering = vilkårsvurdering,
@@ -243,18 +242,19 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val endretUtbetalingAndel =
             endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(førstegangsbehandling)
 
-        val restEndretUtbetalingAndel = RestEndretUtbetalingAndel(
-            id = endretUtbetalingAndel.id,
-            fom = endretAndelFom,
-            tom = endretAndelTom,
-            avtaletidspunktDeltBosted = LocalDate.now().minusYears(3).withDayOfMonth(8),
-            søknadstidspunkt = LocalDate.now().minusYears(3).withDayOfMonth(8),
-            begrunnelse = "begrunnelse",
-            personIdent = barnFnr,
-            årsak = Årsak.DELT_BOSTED,
-            prosent = BigDecimal.ZERO,
-            erTilknyttetAndeler = false,
-        )
+        val restEndretUtbetalingAndel =
+            RestEndretUtbetalingAndel(
+                id = endretUtbetalingAndel.id,
+                fom = endretAndelFom,
+                tom = endretAndelTom,
+                avtaletidspunktDeltBosted = LocalDate.now().minusYears(3).withDayOfMonth(8),
+                søknadstidspunkt = LocalDate.now().minusYears(3).withDayOfMonth(8),
+                begrunnelse = "begrunnelse",
+                personIdent = barnFnr,
+                årsak = Årsak.DELT_BOSTED,
+                prosent = BigDecimal.ZERO,
+                erTilknyttetAndeler = false,
+            )
 
         endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             førstegangsbehandling,

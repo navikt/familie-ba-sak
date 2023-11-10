@@ -15,7 +15,6 @@ class ForvalterScheduler(
     private val taskRepository: TaskRepositoryWrapper,
     private val envService: EnvService,
 ) {
-
     /*
      * Oppretter task månedlig for å identifisere løpende fagsaker som har flere migreringer sist måned
      */

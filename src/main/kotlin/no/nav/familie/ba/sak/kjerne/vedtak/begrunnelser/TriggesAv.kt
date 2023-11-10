@@ -91,8 +91,9 @@ data class TriggesAv(
         val avsluttetVilkårInneholdtDeltBosted =
             vilkårSomAvsluttesRettFørDennePerioden.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
 
-        val påbegyntVilkårInneholderDeltBosted = vilkårSomStarterIDennePerioden?.utdypendeVilkårsvurderinger
-            ?.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) ?: false
+        val påbegyntVilkårInneholderDeltBosted =
+            vilkårSomStarterIDennePerioden?.utdypendeVilkårsvurderinger
+                ?.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) ?: false
 
         return if (this.deltbosted) {
             avsluttetVilkårInneholdtDeltBosted != påbegyntVilkårInneholderDeltBosted
@@ -141,9 +142,10 @@ private fun endretUtbetalingBegrunnelseOppfyllerUtvidetScenario(
 ): Boolean {
     val begrunnelseGjelderUtvidet = vilkårBegrunnelsenGjelderFor?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
 
-    val periodeInneholderUtvidetMedEndring = minimerteUtbetalingsperiodeDetaljer.singleOrNull {
-        it.ytelseType == YtelseType.UTVIDET_BARNETRYGD
-    }?.erPåvirketAvEndring == true
+    val periodeInneholderUtvidetMedEndring =
+        minimerteUtbetalingsperiodeDetaljer.singleOrNull {
+            it.ytelseType == YtelseType.UTVIDET_BARNETRYGD
+        }?.erPåvirketAvEndring == true
 
     return begrunnelseGjelderUtvidet == periodeInneholderUtvidetMedEndring
 }

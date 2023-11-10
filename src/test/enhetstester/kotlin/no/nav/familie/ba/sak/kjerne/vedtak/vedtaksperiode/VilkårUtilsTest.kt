@@ -13,38 +13,42 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class VilkårUtilsTest {
-
-    val vedtaksperiode: Periode = Periode(
-        fom = LocalDate.now().minusMonths(2),
-        tom = LocalDate.now().plusMonths(4),
-    )
+    val vedtaksperiode: Periode =
+        Periode(
+            fom = LocalDate.now().minusMonths(2),
+            tom = LocalDate.now().plusMonths(4),
+        )
 
     val triggesAv = lagTriggesAv(deltbosted = false, vurderingAnnetGrunnlag = false, medlemskap = false)
-    val vilkårResultatIkkeOppfylt: VilkårResultat = lagVilkårResultat(
-        resultat = Resultat.IKKE_OPPFYLT,
-        periodeFom = vedtaksperiode.fom,
-        periodeTom = vedtaksperiode.tom,
-        personResultat = mockk(relaxed = true),
-    )
-    val vilkårResultatIkkeOppfyltDelvisOverlapp: VilkårResultat = lagVilkårResultat(
-        resultat = Resultat.IKKE_OPPFYLT,
-        periodeFom = vedtaksperiode.fom.minusMonths(1),
-        periodeTom = vedtaksperiode.tom.plusMonths(1),
-        personResultat = mockk(relaxed = true),
-    )
-    val vilkårResultatUtenforPeriode: VilkårResultat = lagVilkårResultat(
-        resultat = Resultat.IKKE_OPPFYLT,
-        periodeFom = vedtaksperiode.tom.plusMonths(1),
-        periodeTom = vedtaksperiode.tom.plusMonths(3),
-        personResultat = mockk(relaxed = true),
-    )
+    val vilkårResultatIkkeOppfylt: VilkårResultat =
+        lagVilkårResultat(
+            resultat = Resultat.IKKE_OPPFYLT,
+            periodeFom = vedtaksperiode.fom,
+            periodeTom = vedtaksperiode.tom,
+            personResultat = mockk(relaxed = true),
+        )
+    val vilkårResultatIkkeOppfyltDelvisOverlapp: VilkårResultat =
+        lagVilkårResultat(
+            resultat = Resultat.IKKE_OPPFYLT,
+            periodeFom = vedtaksperiode.fom.minusMonths(1),
+            periodeTom = vedtaksperiode.tom.plusMonths(1),
+            personResultat = mockk(relaxed = true),
+        )
+    val vilkårResultatUtenforPeriode: VilkårResultat =
+        lagVilkårResultat(
+            resultat = Resultat.IKKE_OPPFYLT,
+            periodeFom = vedtaksperiode.tom.plusMonths(1),
+            periodeTom = vedtaksperiode.tom.plusMonths(3),
+            personResultat = mockk(relaxed = true),
+        )
 
-    val vilkårResultatOppfylt: VilkårResultat = lagVilkårResultat(
-        resultat = Resultat.OPPFYLT,
-        periodeFom = vedtaksperiode.fom,
-        periodeTom = vedtaksperiode.tom,
-        personResultat = mockk(relaxed = true),
-    )
+    val vilkårResultatOppfylt: VilkårResultat =
+        lagVilkårResultat(
+            resultat = Resultat.OPPFYLT,
+            periodeFom = vedtaksperiode.fom,
+            periodeTom = vedtaksperiode.tom,
+            personResultat = mockk(relaxed = true),
+        )
 
     @Test
     fun `Er førte periode dersom resultat ikke er godkjent og det ikke er noen andeler tilkjent ytelse før perioden`() {
@@ -54,7 +58,6 @@ class VilkårUtilsTest {
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv,
-
             ),
         )
         Assertions.assertTrue(
@@ -63,7 +66,6 @@ class VilkårUtilsTest {
                 vilkårResultat = vilkårResultatIkkeOppfyltDelvisOverlapp.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv,
-
             ),
         )
     }
@@ -76,7 +78,6 @@ class VilkårUtilsTest {
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv,
-
             ),
         )
     }
@@ -89,7 +90,6 @@ class VilkårUtilsTest {
                 vilkårResultat = vilkårResultatOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv,
-
             ),
         )
     }
@@ -102,7 +102,6 @@ class VilkårUtilsTest {
                 vilkårResultat = vilkårResultatUtenforPeriode.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv,
-
             ),
         )
     }

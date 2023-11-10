@@ -29,44 +29,47 @@ abstract class Tidslinje<I, T : Tidsenhet> {
     protected abstract fun lagPerioder(): Collection<Periode<I, T>>
 
     protected open fun valider(perioder: List<Periode<I, T>>) {
-        val feilInnenforPerioder = perioder.map {
-            when {
-                it.fraOgMed > it.tilOgMed ->
-                    TidslinjeFeil(periode = it, tidslinje = this, type = TidslinjeFeilType.TOM_ER_FØR_FOM)
+        val feilInnenforPerioder =
+            perioder.map {
+                when {
+                    it.fraOgMed > it.tilOgMed ->
+                        TidslinjeFeil(periode = it, tidslinje = this, type = TidslinjeFeilType.TOM_ER_FØR_FOM)
 
-                else -> null
+                    else -> null
+                }
             }
-        }
 
-        val feilMellomPåfølgendePerioder = perioder.windowed(2) { (periode1, periode2) ->
-            when {
-                periode2.fraOgMed.erUendeligLengeSiden() ->
-                    TidslinjeFeil(
-                        periode = periode2,
-                        tidslinje = this,
-                        type = TidslinjeFeilType.UENDELIG_FORTID_ETTER_FØRSTE_PERIODE,
-                    )
+        val feilMellomPåfølgendePerioder =
+            perioder.windowed(2) { (periode1, periode2) ->
+                when {
+                    periode2.fraOgMed.erUendeligLengeSiden() ->
+                        TidslinjeFeil(
+                            periode = periode2,
+                            tidslinje = this,
+                            type = TidslinjeFeilType.UENDELIG_FORTID_ETTER_FØRSTE_PERIODE,
+                        )
 
-                periode1.tilOgMed.erUendeligLengeTil() ->
-                    TidslinjeFeil(
-                        periode = periode1,
-                        tidslinje = this,
-                        type = TidslinjeFeilType.UENDELIG_FREMTID_FØR_SISTE_PERIODE,
-                    )
+                    periode1.tilOgMed.erUendeligLengeTil() ->
+                        TidslinjeFeil(
+                            periode = periode1,
+                            tidslinje = this,
+                            type = TidslinjeFeilType.UENDELIG_FREMTID_FØR_SISTE_PERIODE,
+                        )
 
-                periode1.tilOgMed >= periode2.fraOgMed ->
-                    TidslinjeFeil(
-                        periode = periode1,
-                        tidslinje = this,
-                        type = TidslinjeFeilType.OVERLAPPER_ETTERFØLGENDE_PERIODE,
-                    )
+                    periode1.tilOgMed >= periode2.fraOgMed ->
+                        TidslinjeFeil(
+                            periode = periode1,
+                            tidslinje = this,
+                            type = TidslinjeFeilType.OVERLAPPER_ETTERFØLGENDE_PERIODE,
+                        )
 
-                else -> null
+                    else -> null
+                }
             }
-        }
 
-        val tidslinjeFeil = (feilInnenforPerioder + feilMellomPåfølgendePerioder)
-            .filterNotNull()
+        val tidslinjeFeil =
+            (feilInnenforPerioder + feilMellomPåfølgendePerioder)
+                .filterNotNull()
 
         if (tidslinjeFeil.isNotEmpty()) {
             throw TidslinjeFeilException(tidslinjeFeil)
@@ -80,6 +83,7 @@ abstract class Tidslinje<I, T : Tidsenhet> {
             false
         }
     }
+
     override fun hashCode(): Int {
         return perioder().hashCode()
     }

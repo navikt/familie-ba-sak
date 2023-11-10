@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class SendFødselsmeldingTilInfotrygdTaskTest : AbstractSpringIntegrationTest() {
-
     @Test
     fun `Legg til fødselsmelding til task`() {
         val fnrBarn = "12345678910"

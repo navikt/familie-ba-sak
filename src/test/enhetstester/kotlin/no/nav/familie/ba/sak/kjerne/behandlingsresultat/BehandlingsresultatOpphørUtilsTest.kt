@@ -20,7 +20,6 @@ import java.math.BigDecimal
 import java.time.YearMonth
 
 class BehandlingsresultatOpphørUtilsTest {
-
     val søker = tilfeldigPerson()
 
     val jan22 = YearMonth.of(2022, 1)
@@ -42,42 +41,45 @@ class BehandlingsresultatOpphørUtilsTest {
         mockkStatic(YearMonth::class)
         every { YearMonth.now() } returns YearMonth.of(2022, 4)
 
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = mai22,
-                beløp = 1054,
-                aktør = barn1Aktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = mai22,
-                beløp = 1054,
-                aktør = barn2Aktør,
-            ),
-        )
+        val forrigeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = mai22,
+                    beløp = 1054,
+                    aktør = barn1Aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = mai22,
+                    beløp = 1054,
+                    aktør = barn2Aktør,
+                ),
+            )
 
-        val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = mai22,
-                beløp = 1054,
-                aktør = barn1Aktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = aug22,
-                beløp = 1054,
-                aktør = barn2Aktør,
-            ),
-        )
+        val nåværendeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = mai22,
+                    beløp = 1054,
+                    aktør = barn1Aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = aug22,
+                    beløp = 1054,
+                    aktør = barn2Aktør,
+                ),
+            )
 
-        val opphørsresultat = hentOpphørsresultatPåBehandling(
-            nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler,
-            nåværendeEndretAndeler = emptyList(),
-            forrigeEndretAndeler = emptyList(),
-        )
+        val opphørsresultat =
+            hentOpphørsresultatPåBehandling(
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+                nåværendeEndretAndeler = emptyList(),
+                forrigeEndretAndeler = emptyList(),
+            )
 
         assertEquals(Opphørsresultat.IKKE_OPPHØRT, opphørsresultat)
     }
@@ -90,42 +92,45 @@ class BehandlingsresultatOpphørUtilsTest {
         mockkStatic(YearMonth::class)
         every { YearMonth.now() } returns YearMonth.of(2022, 4)
 
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = aug22,
-                beløp = 1054,
-                aktør = barn1Aktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = aug22,
-                beløp = 1054,
-                aktør = barn2Aktør,
-            ),
-        )
+        val forrigeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = aug22,
+                    beløp = 1054,
+                    aktør = barn1Aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = aug22,
+                    beløp = 1054,
+                    aktør = barn2Aktør,
+                ),
+            )
 
-        val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = feb22,
-                beløp = 1054,
-                aktør = barn1Aktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = feb22,
-                beløp = 1054,
-                aktør = barn2Aktør,
-            ),
-        )
+        val nåværendeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = feb22,
+                    beløp = 1054,
+                    aktør = barn1Aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = feb22,
+                    beløp = 1054,
+                    aktør = barn2Aktør,
+                ),
+            )
 
-        val opphørsresultat = hentOpphørsresultatPåBehandling(
-            nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler,
-            nåværendeEndretAndeler = emptyList(),
-            forrigeEndretAndeler = emptyList(),
-        )
+        val opphørsresultat =
+            hentOpphørsresultatPåBehandling(
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+                nåværendeEndretAndeler = emptyList(),
+                forrigeEndretAndeler = emptyList(),
+            )
 
         assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
     }
@@ -139,42 +144,45 @@ class BehandlingsresultatOpphørUtilsTest {
         mockkStatic(YearMonth::class)
         every { YearMonth.now() } returns apr22
 
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = mar22,
-                beløp = 1054,
-                aktør = barn1Aktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = mar22,
-                beløp = 1054,
-                aktør = barn2Aktør,
-            ),
-        )
+        val forrigeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = mar22,
+                    beløp = 1054,
+                    aktør = barn1Aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = mar22,
+                    beløp = 1054,
+                    aktør = barn2Aktør,
+                ),
+            )
 
-        val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = feb22,
-                beløp = 1054,
-                aktør = barn1Aktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = feb22,
-                beløp = 1054,
-                aktør = barn2Aktør,
-            ),
-        )
+        val nåværendeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = feb22,
+                    beløp = 1054,
+                    aktør = barn1Aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = feb22,
+                    beløp = 1054,
+                    aktør = barn2Aktør,
+                ),
+            )
 
-        val opphørsresultat = hentOpphørsresultatPåBehandling(
-            nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler,
-            nåværendeEndretAndeler = emptyList(),
-            forrigeEndretAndeler = emptyList(),
-        )
+        val opphørsresultat =
+            hentOpphørsresultatPåBehandling(
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+                nåværendeEndretAndeler = emptyList(),
+                forrigeEndretAndeler = emptyList(),
+            )
 
         assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
     }
@@ -187,21 +195,23 @@ class BehandlingsresultatOpphørUtilsTest {
         mockkStatic(YearMonth::class)
         every { YearMonth.now() } returns apr22
 
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = mar22,
-                beløp = 1054,
-                aktør = barn1Aktør,
-            ),
-        )
+        val forrigeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = mar22,
+                    beløp = 1054,
+                    aktør = barn1Aktør,
+                ),
+            )
 
-        val opphørsresultat = hentOpphørsresultatPåBehandling(
-            nåværendeAndeler = emptyList(),
-            forrigeAndeler = forrigeAndeler,
-            nåværendeEndretAndeler = emptyList(),
-            forrigeEndretAndeler = emptyList(),
-        )
+        val opphørsresultat =
+            hentOpphørsresultatPåBehandling(
+                nåværendeAndeler = emptyList(),
+                forrigeAndeler = forrigeAndeler,
+                nåværendeEndretAndeler = emptyList(),
+                forrigeEndretAndeler = emptyList(),
+            )
 
         assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
     }
@@ -215,42 +225,45 @@ class BehandlingsresultatOpphørUtilsTest {
         mockkStatic(YearMonth::class)
         every { YearMonth.now() } returns apr22
 
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = mar22,
-                beløp = 1054,
-                aktør = barn1Aktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = mar22,
-                beløp = 1054,
-                aktør = barn2Aktør,
-            ),
-        )
+        val forrigeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = mar22,
+                    beløp = 1054,
+                    aktør = barn1Aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = mar22,
+                    beløp = 1054,
+                    aktør = barn2Aktør,
+                ),
+            )
 
-        val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = mar22,
-                beløp = 1054,
-                aktør = barn1Aktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = mar22,
-                beløp = 1054,
-                aktør = barn2Aktør,
-            ),
-        )
+        val nåværendeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = mar22,
+                    beløp = 1054,
+                    aktør = barn1Aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = mar22,
+                    beløp = 1054,
+                    aktør = barn2Aktør,
+                ),
+            )
 
-        val opphørsresultat = hentOpphørsresultatPåBehandling(
-            nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler,
-            nåværendeEndretAndeler = emptyList(),
-            forrigeEndretAndeler = emptyList(),
-        )
+        val opphørsresultat =
+            hentOpphørsresultatPåBehandling(
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+                nåværendeEndretAndeler = emptyList(),
+                forrigeEndretAndeler = emptyList(),
+            )
 
         assertEquals(Opphørsresultat.FORTSATT_OPPHØRT, opphørsresultat)
     }
@@ -264,42 +277,45 @@ class BehandlingsresultatOpphørUtilsTest {
         mockkStatic(YearMonth::class)
         every { YearMonth.now() } returns apr22
 
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = aug22,
-                beløp = 1054,
-                aktør = barn1Aktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = mar22,
-                beløp = 1054,
-                aktør = barn2Aktør,
-            ),
-        )
+        val forrigeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = aug22,
+                    beløp = 1054,
+                    aktør = barn1Aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = mar22,
+                    beløp = 1054,
+                    aktør = barn2Aktør,
+                ),
+            )
 
-        val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = aug22,
-                beløp = 1054,
-                aktør = barn1Aktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = mar22,
-                beløp = 1054,
-                aktør = barn2Aktør,
-            ),
-        )
+        val nåværendeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = aug22,
+                    beløp = 1054,
+                    aktør = barn1Aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = mar22,
+                    beløp = 1054,
+                    aktør = barn2Aktør,
+                ),
+            )
 
-        val opphørsresultat = hentOpphørsresultatPåBehandling(
-            nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler,
-            nåværendeEndretAndeler = emptyList(),
-            forrigeEndretAndeler = emptyList(),
-        )
+        val opphørsresultat =
+            hentOpphørsresultatPåBehandling(
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+                nåværendeEndretAndeler = emptyList(),
+                forrigeEndretAndeler = emptyList(),
+            )
 
         assertEquals(Opphørsresultat.IKKE_OPPHØRT, opphørsresultat)
     }
@@ -310,26 +326,27 @@ class BehandlingsresultatOpphørUtilsTest {
         val barn = lagPerson(type = PersonType.BARN)
         val barnAktør = barn.aktør
 
-        val andeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = feb22,
-                beløp = 0,
-                aktør = barnAktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = mar22,
-                tom = mai22,
-                beløp = 1400,
-                aktør = barnAktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = aug22,
-                tom = aug22,
-                beløp = 0,
-                aktør = barnAktør,
-            ),
-        )
+        val andeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = feb22,
+                    beløp = 0,
+                    aktør = barnAktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = mar22,
+                    tom = mai22,
+                    beløp = 1400,
+                    aktør = barnAktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = aug22,
+                    tom = aug22,
+                    beløp = 0,
+                    aktør = barnAktør,
+                ),
+            )
 
         val endretUtBetalingAndeler =
             listOf(
@@ -360,26 +377,27 @@ class BehandlingsresultatOpphørUtilsTest {
         val barn = lagPerson(type = PersonType.BARN)
         val barnAktør = barn.aktør
 
-        val andeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = feb22,
-                beløp = 0,
-                aktør = barnAktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = mar22,
-                tom = mai22,
-                beløp = 1400,
-                aktør = barnAktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = aug22,
-                tom = aug22,
-                beløp = 0,
-                aktør = barnAktør,
-            ),
-        )
+        val andeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = feb22,
+                    beløp = 0,
+                    aktør = barnAktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = mar22,
+                    tom = mai22,
+                    beløp = 1400,
+                    aktør = barnAktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = aug22,
+                    tom = aug22,
+                    beløp = 0,
+                    aktør = barnAktør,
+                ),
+            )
 
         val endretUtBetalingAndeler =
             listOf(
@@ -412,29 +430,30 @@ class BehandlingsresultatOpphørUtilsTest {
         val søker = lagPerson(type = PersonType.SØKER)
         val søkerAktør = søker.aktør
 
-        val andeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = feb22,
-                beløp = 0,
-                differanseberegnetPeriodebeløp = 50,
-                aktør = søkerAktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = mar22,
-                tom = mai22,
-                beløp = 0,
-                differanseberegnetPeriodebeløp = 50,
-                aktør = barnAktør,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = aug22,
-                tom = aug22,
-                beløp = 0,
-                differanseberegnetPeriodebeløp = 50,
-                aktør = barnAktør,
-            ),
-        )
+        val andeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = feb22,
+                    beløp = 0,
+                    differanseberegnetPeriodebeløp = 50,
+                    aktør = søkerAktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = mar22,
+                    tom = mai22,
+                    beløp = 0,
+                    differanseberegnetPeriodebeløp = 50,
+                    aktør = barnAktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = aug22,
+                    tom = aug22,
+                    beløp = 0,
+                    differanseberegnetPeriodebeløp = 50,
+                    aktør = barnAktør,
+                ),
+            )
 
         val andelerEtterFiltrering = andeler.filtrerBortIrrelevanteAndeler(endretAndeler = emptyList())
 

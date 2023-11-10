@@ -47,7 +47,6 @@ import java.time.YearMonth
 
 @ExtendWith(MockKExtension::class)
 class FiltreringsreglerServiceTest {
-
     @MockK
     private lateinit var personopplysningerService: PersonopplysningerService
 
@@ -93,23 +92,25 @@ class FiltreringsreglerServiceTest {
             settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
 
         clearMocks(vilkårsvurderingRepository)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
-            mor,
-            listOf(barn),
-            behandling,
-            overstyrendeVilkårResultater = mapOf(
-                Pair(
-                    mor.aktør.aktørId,
-                    listOf(
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                            periodeFom = LocalDate.of(2020, 11, 1),
-                            periodeTom = LocalDate.of(2021, 2, 1),
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                mor,
+                listOf(barn),
+                behandling,
+                overstyrendeVilkårResultater =
+                    mapOf(
+                        Pair(
+                            mor.aktør.aktørId,
+                            listOf(
+                                lagVilkårResultat(
+                                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                                    periodeFom = LocalDate.of(2020, 11, 1),
+                                    periodeTom = LocalDate.of(2021, 2, 1),
+                                ),
+                            ),
                         ),
                     ),
-                ),
-            ),
-        )
+            )
 
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
@@ -141,23 +142,25 @@ class FiltreringsreglerServiceTest {
             settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
 
         clearMocks(vilkårsvurderingRepository)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
-            mor,
-            listOf(barn),
-            behandling,
-            overstyrendeVilkårResultater = mapOf(
-                Pair(
-                    mor.aktør.aktørId,
-                    listOf(
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                            periodeFom = LocalDate.of(2020, 11, 1),
-                            periodeTom = LocalDate.of(2021, 1, 1),
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                mor,
+                listOf(barn),
+                behandling,
+                overstyrendeVilkårResultater =
+                    mapOf(
+                        Pair(
+                            mor.aktør.aktørId,
+                            listOf(
+                                lagVilkårResultat(
+                                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                                    periodeFom = LocalDate.of(2020, 11, 1),
+                                    periodeTom = LocalDate.of(2021, 1, 1),
+                                ),
+                            ),
                         ),
                     ),
-                ),
-            ),
-        )
+            )
 
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
@@ -189,28 +192,30 @@ class FiltreringsreglerServiceTest {
             settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
 
         clearMocks(vilkårsvurderingRepository)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
-            mor,
-            listOf(barn),
-            behandling,
-            overstyrendeVilkårResultater = mapOf(
-                Pair(
-                    mor.aktør.aktørId,
-                    listOf(
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                            periodeFom = LocalDate.of(2020, 11, 1),
-                            periodeTom = LocalDate.of(2021, 1, 1),
-                        ),
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                            periodeFom = LocalDate.of(2022, 1, 1),
-                            periodeTom = LocalDate.of(2023, 1, 1),
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                mor,
+                listOf(barn),
+                behandling,
+                overstyrendeVilkårResultater =
+                    mapOf(
+                        Pair(
+                            mor.aktør.aktørId,
+                            listOf(
+                                lagVilkårResultat(
+                                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                                    periodeFom = LocalDate.of(2020, 11, 1),
+                                    periodeTom = LocalDate.of(2021, 1, 1),
+                                ),
+                                lagVilkårResultat(
+                                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                                    periodeFom = LocalDate.of(2022, 1, 1),
+                                    periodeTom = LocalDate.of(2023, 1, 1),
+                                ),
+                            ),
                         ),
                     ),
-                ),
-            ),
-        )
+            )
 
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
@@ -242,28 +247,30 @@ class FiltreringsreglerServiceTest {
             settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
 
         clearMocks(vilkårsvurderingRepository)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
-            mor,
-            listOf(barn),
-            behandling,
-            overstyrendeVilkårResultater = mapOf(
-                Pair(
-                    mor.aktør.aktørId,
-                    listOf(
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                            periodeFom = LocalDate.of(2020, 11, 1),
-                            periodeTom = LocalDate.of(2021, 1, 1),
-                        ),
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                            periodeFom = LocalDate.of(2022, 1, 1),
-                            periodeTom = null,
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                mor,
+                listOf(barn),
+                behandling,
+                overstyrendeVilkårResultater =
+                    mapOf(
+                        Pair(
+                            mor.aktør.aktørId,
+                            listOf(
+                                lagVilkårResultat(
+                                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                                    periodeFom = LocalDate.of(2020, 11, 1),
+                                    periodeTom = LocalDate.of(2021, 1, 1),
+                                ),
+                                lagVilkårResultat(
+                                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                                    periodeFom = LocalDate.of(2022, 1, 1),
+                                    periodeTom = null,
+                                ),
+                            ),
                         ),
                     ),
-                ),
-            ),
-        )
+            )
 
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
@@ -303,23 +310,25 @@ class FiltreringsreglerServiceTest {
             )
 
         clearMocks(vilkårsvurderingRepository)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
-            mor,
-            listOf(barn1, barn2),
-            behandling,
-            overstyrendeVilkårResultater = mapOf(
-                Pair(
-                    mor.aktør.aktørId,
-                    listOf(
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                            periodeFom = LocalDate.of(2019, 11, 1),
-                            periodeTom = LocalDate.of(2020, 1, 1),
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                mor,
+                listOf(barn1, barn2),
+                behandling,
+                overstyrendeVilkårResultater =
+                    mapOf(
+                        Pair(
+                            mor.aktør.aktørId,
+                            listOf(
+                                lagVilkårResultat(
+                                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                                    periodeFom = LocalDate.of(2019, 11, 1),
+                                    periodeTom = LocalDate.of(2020, 1, 1),
+                                ),
+                            ),
                         ),
                     ),
-                ),
-            ),
-        )
+            )
 
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
@@ -359,23 +368,25 @@ class FiltreringsreglerServiceTest {
             )
 
         clearMocks(vilkårsvurderingRepository)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
-            mor,
-            listOf(barn1, barn2),
-            behandling,
-            overstyrendeVilkårResultater = mapOf(
-                Pair(
-                    mor.aktør.aktørId,
-                    listOf(
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                            periodeFom = LocalDate.of(2019, 11, 1),
-                            periodeTom = LocalDate.of(2021, 1, 1),
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                mor,
+                listOf(barn1, barn2),
+                behandling,
+                overstyrendeVilkårResultater =
+                    mapOf(
+                        Pair(
+                            mor.aktør.aktørId,
+                            listOf(
+                                lagVilkårResultat(
+                                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                                    periodeFom = LocalDate.of(2019, 11, 1),
+                                    periodeTom = LocalDate.of(2021, 1, 1),
+                                ),
+                            ),
                         ),
                     ),
-                ),
-            ),
-        )
+            )
 
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
@@ -407,12 +418,13 @@ class FiltreringsreglerServiceTest {
             settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
 
         clearMocks(andelTilkjentYtelseRepository)
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns listOf(
-            MånedPeriode(YearMonth.of(2018, 1), YearMonth.now()),
-        )
-            .map {
-                lagAndelTilkjentYtelse(it.fom, it.tom)
-            }
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns
+            listOf(
+                MånedPeriode(YearMonth.of(2018, 1), YearMonth.now()),
+            )
+                .map {
+                    lagAndelTilkjentYtelse(it.fom, it.tom)
+                }
 
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
@@ -473,41 +485,45 @@ class FiltreringsreglerServiceTest {
         every { personidentService.hentAktør(mor.aktør.aktørId) } returns mor.aktør
         every { personidentService.hentAktørIder(barna.map { it.aktør.aktørId }) } returns barna.map { it.aktør }
 
-        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns lagTestPersonopplysningGrunnlag(
-            behandling.id,
-            mor,
-            *barna.toTypedArray(),
-        )
+        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                mor,
+                *barna.toTypedArray(),
+            )
         every { behandlingService.hentMigreringsdatoPåFagsak(behandling.fagsak.id) } returns null
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns sisteVedtatteBehandling
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
-            mor,
-            barna,
-            behandling,
-            overstyrendeVilkårResultater = mapOf(
-                Pair(
-                    mor.aktør.aktørId,
-                    listOf(
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                            periodeFom = barna.minOf { it.fødselsdato }.minusYears(1),
-                            periodeTom = barna.minOf { it.fødselsdato }.minusYears(1).plusMonths(6),
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                mor,
+                barna,
+                behandling,
+                overstyrendeVilkårResultater =
+                    mapOf(
+                        Pair(
+                            mor.aktør.aktørId,
+                            listOf(
+                                lagVilkårResultat(
+                                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                                    periodeFom = barna.minOf { it.fødselsdato }.minusYears(1),
+                                    periodeTom = barna.minOf { it.fødselsdato }.minusYears(1).plusMonths(6),
+                                ),
+                            ),
                         ),
                     ),
-                ),
-            ),
-        )
+            )
 
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(mor.aktør) } returns PersonInfo(
-            forelderBarnRelasjon =
-            barna.map {
-                ForelderBarnRelasjon(
-                    aktør = it.aktør,
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                )
-            }.toSet(),
-            fødselsdato = mor.fødselsdato,
-        )
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(mor.aktør) } returns
+            PersonInfo(
+                forelderBarnRelasjon =
+                    barna.map {
+                        ForelderBarnRelasjon(
+                            aktør = it.aktør,
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                        )
+                    }.toSet(),
+                fødselsdato = mor.fødselsdato,
+            )
 
         every { personopplysningerService.harVerge(mor.aktør) } returns VergeResponse(false)
 
@@ -520,12 +536,13 @@ class FiltreringsreglerServiceTest {
             )
         } returns false
 
-        val andelTilkjentytelse = listOf(
-            MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
-        )
-            .map {
-                lagAndelTilkjentYtelse(it.fom, it.tom)
-            }
+        val andelTilkjentytelse =
+            listOf(
+                MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
+            )
+                .map {
+                    lagAndelTilkjentYtelse(it.fom, it.tom)
+                }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
 
         val fødselshendelsefiltreringResultatSlot = slot<List<FødselshendelsefiltreringResultat>>()

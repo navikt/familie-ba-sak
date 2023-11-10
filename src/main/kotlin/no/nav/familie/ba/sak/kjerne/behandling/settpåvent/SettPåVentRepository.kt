@@ -5,7 +5,10 @@ import org.springframework.stereotype.Service
 
 @Service
 interface SettPåVentRepository : JpaRepository<SettPåVent, Long> {
-    fun findByBehandlingIdAndAktiv(behandlingId: Long, aktiv: Boolean): SettPåVent?
+    fun findByBehandlingIdAndAktiv(
+        behandlingId: Long,
+        aktiv: Boolean,
+    ): SettPåVent?
 
     fun findByAktivTrue(): List<SettPåVent>
 }

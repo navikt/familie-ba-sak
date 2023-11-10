@@ -21,7 +21,6 @@ import java.util.Properties
 class IdentHendelseTask(
     private val personidentService: PersonidentService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         logger.info("Kjører task for håntering av identhendelse.")
         val personIdent = objectMapper.readValue(task.payload, PersonIdent::class.java)
@@ -36,9 +35,10 @@ class IdentHendelseTask(
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(nyIdent),
-                properties = Properties().apply {
-                    this["nyPersonIdent"] = nyIdent.ident
-                },
+                properties =
+                    Properties().apply {
+                        this["nyPersonIdent"] = nyIdent.ident
+                    },
             ).medTriggerTid(
                 triggerTid = LocalDateTime.now().plusMinutes(1),
             )

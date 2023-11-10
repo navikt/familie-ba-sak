@@ -26,7 +26,6 @@ class TestVerktøyService(
     private val vedtakService: VedtakService,
     private val kompetanseRepository: KompetanseRepository,
 ) {
-
     @Transactional
     fun oppdaterVilkårUtenFomTilFødselsdato(behandlingId: Long) {
         val vilkårsvurdering = vilkårService.hentVilkårsvurdering(behandlingId)
@@ -70,9 +69,10 @@ class TestVerktøyService(
         val kompetanseForrigeBehandling =
             forrigeBehandling?.let { kompetanseRepository.finnFraBehandlingId(it.id) }
 
-        val vedtaksperioder = vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
-            vedtakService.hentAktivForBehandlingThrows(behandlingId).id,
-        )
+        val vedtaksperioder =
+            vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
+                vedtakService.hentAktivForBehandlingThrows(behandlingId).id,
+            )
 
         return lagGyldigeBegrunnelserTest(
             behandling = behandling,
@@ -110,9 +110,10 @@ class TestVerktøyService(
         val kompetanse = kompetanseRepository.finnFraBehandlingId(behandlingId)
         val kompetanseForrigeBehandling =
             forrigeBehandling?.let { kompetanseRepository.finnFraBehandlingId(it.id) }
-        val vedtaksperioder = vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
-            vedtakService.hentAktivForBehandlingThrows(behandlingId).id,
-        )
+        val vedtaksperioder =
+            vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
+                vedtakService.hentAktivForBehandlingThrows(behandlingId).id,
+            )
 
         return lagVedtaksperioderTest(
             behandling = behandling,

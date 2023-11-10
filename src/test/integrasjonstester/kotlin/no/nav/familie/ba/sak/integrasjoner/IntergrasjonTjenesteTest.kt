@@ -72,7 +72,6 @@ import java.time.LocalDate
 import kotlin.random.Random
 
 class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
-
     @Autowired
     @Qualifier("jwtBearer")
     lateinit var restOperations: RestOperations
@@ -82,13 +81,15 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun setUp() {
-        integrasjonClient = IntegrasjonClient(
-            URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations,
-        )
-        utgåendeJournalføringService = UtgåendeJournalføringService(
-            integrasjonClient = integrasjonClient,
-        )
+        integrasjonClient =
+            IntegrasjonClient(
+                URI.create(wireMockServer.baseUrl() + "/api"),
+                restOperations,
+            )
+        utgåendeJournalføringService =
+            UtgåendeJournalføringService(
+                integrasjonClient = integrasjonClient,
+            )
     }
 
     @AfterEach
@@ -175,22 +176,24 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             utgåendeJournalføringService.journalførDokument(
                 fnr = MOCK_FNR,
                 fagsakId = vedtak.behandling.fagsak.id.toString(),
-                brev = listOf(
-                    Dokument(
-                        dokument = mockPdf,
-                        filtype = Filtype.PDFA,
-                        dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE,
+                brev =
+                    listOf(
+                        Dokument(
+                            dokument = mockPdf,
+                            filtype = Filtype.PDFA,
+                            dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE,
+                        ),
                     ),
-                ),
                 journalførendeEnhet = "1",
-                vedlegg = listOf(
-                    Dokument(
-                        dokument = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)!!,
-                        filtype = Filtype.PDFA,
-                        dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
-                        tittel = VEDTAK_VEDLEGG_TITTEL,
+                vedlegg =
+                    listOf(
+                        Dokument(
+                            dokument = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)!!,
+                            filtype = Filtype.PDFA,
+                            dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
+                            tittel = VEDTAK_VEDLEGG_TITTEL,
+                        ),
                     ),
-                ),
                 behandlingId = vedtak.behandling.id,
             )
 
@@ -399,14 +402,15 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
     fun `skal hente arbeidsforhold for person`() {
         val fnr = randomFnr()
 
-        val arbeidsforhold = listOf(
-            Arbeidsforhold(
-                navArbeidsforholdId = Random.nextLong(),
-                arbeidstaker = Arbeidstaker("Person", fnr),
-                arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "998877665"),
-                ansettelsesperiode = Ansettelsesperiode(Periode(fom = LocalDate.now().minusYears(1))),
-            ),
-        )
+        val arbeidsforhold =
+            listOf(
+                Arbeidsforhold(
+                    navArbeidsforholdId = Random.nextLong(),
+                    arbeidstaker = Arbeidstaker("Person", fnr),
+                    arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "998877665"),
+                    ansettelsesperiode = Ansettelsesperiode(Periode(fom = LocalDate.now().minusYears(1))),
+                ),
+            )
 
         wireMockServer.stubFor(
             post("/api/aareg/arbeidsforhold").willReturn(
@@ -481,23 +485,28 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         return success(ArkiverDokumentResponse(MOCK_JOURNALPOST_FOR_VEDTAK_ID, true))
     }
 
-    private fun forventetRequestArkiverDokument(fagsakId: Long, behandlingId: Long): ArkiverDokumentRequest {
+    private fun forventetRequestArkiverDokument(
+        fagsakId: Long,
+        behandlingId: Long,
+    ): ArkiverDokumentRequest {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)
-        val brev = listOf(
-            Dokument(
-                dokument = mockPdf,
-                filtype = Filtype.PDFA,
-                dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE,
-            ),
-        )
-        val vedlegg = listOf(
-            Dokument(
-                dokument = vedleggPdf!!,
-                filtype = Filtype.PDFA,
-                dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
-                tittel = VEDTAK_VEDLEGG_TITTEL,
-            ),
-        )
+        val brev =
+            listOf(
+                Dokument(
+                    dokument = mockPdf,
+                    filtype = Filtype.PDFA,
+                    dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE,
+                ),
+            )
+        val vedlegg =
+            listOf(
+                Dokument(
+                    dokument = vedleggPdf!!,
+                    filtype = Filtype.PDFA,
+                    dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
+                    tittel = VEDTAK_VEDLEGG_TITTEL,
+                ),
+            )
 
         return ArkiverDokumentRequest(
             fnr = MOCK_FNR,
@@ -510,16 +519,16 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         )
     }
 
-    private fun lagDistribuerDokumentDTO() = DistribuerDokumentDTO(
-        journalpostId = "123456789",
-        behandlingId = 1L,
-        brevmal = Brevmal.VARSEL_OM_REVURDERING,
-        personEllerInstitusjonIdent = "test",
-        erManueltSendt = true,
-    )
+    private fun lagDistribuerDokumentDTO() =
+        DistribuerDokumentDTO(
+            journalpostId = "123456789",
+            behandlingId = 1L,
+            brevmal = Brevmal.VARSEL_OM_REVURDERING,
+            personEllerInstitusjonIdent = "test",
+            erManueltSendt = true,
+        )
 
     companion object {
-
         const val MOCK_JOURNALPOST_FOR_VEDTAK_ID = "453491843"
         const val MOCK_FNR = "12345678910"
         val mockPdf = "mock data".toByteArray()

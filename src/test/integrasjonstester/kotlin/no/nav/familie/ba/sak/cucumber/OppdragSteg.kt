@@ -36,8 +36,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 
+@Suppress("ktlint:standard:function-naming")
 class OppdragSteg {
-
     private val utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(mockk(relaxed = true))
     private var behandlinger = mapOf<Long, Behandling>()
     private var tilkjenteYtelser = listOf<TilkjentYtelse>()
@@ -63,11 +63,12 @@ class OppdragSteg {
 
     @Gitt("følgende behandlingsinformasjon")
     fun `følgendeBehandlingsinformasjon`(dataTable: DataTable) {
-        endretMigreringsdatoMap = dataTable.groupByBehandlingId()
-            .mapValues {
-                it.value.map { entry: Map<String, String> -> parseÅrMåned(entry[Domenebegrep.ENDRET_MIGRERINGSDATO.nøkkel]!!) }
-                    .single()
-            }.toMutableMap()
+        endretMigreringsdatoMap =
+            dataTable.groupByBehandlingId()
+                .mapValues {
+                    it.value.map { entry: Map<String, String> -> parseÅrMåned(entry[Domenebegrep.ENDRET_MIGRERINGSDATO.nøkkel]!!) }
+                        .single()
+                }.toMutableMap()
     }
 
     @Når("beregner utbetalingsoppdrag")
@@ -224,13 +225,15 @@ class OppdragSteg {
         beregnetUtbetalingsoppdrag: MutableMap<Long, Utbetalingsoppdrag>,
     ) {
         val medUtbetalingsperiode = true // TODO? Burde denne kunne sendes med som et flagg? Hva gjør den?
-        val forventedeUtbetalingsoppdrag = OppdragParser.mapForventetUtbetalingsoppdrag(
-            dataTable,
-        )
+        val forventedeUtbetalingsoppdrag =
+            OppdragParser.mapForventetUtbetalingsoppdrag(
+                dataTable,
+            )
         forventedeUtbetalingsoppdrag.forEach { forventetUtbetalingsoppdrag ->
             val behandlingId = forventetUtbetalingsoppdrag.behandlingId
-            val utbetalingsoppdrag = beregnetUtbetalingsoppdrag[behandlingId]
-                ?: error("Mangler utbetalingsoppdrag for $behandlingId")
+            val utbetalingsoppdrag =
+                beregnetUtbetalingsoppdrag[behandlingId]
+                    ?: error("Mangler utbetalingsoppdrag for $behandlingId")
             try {
                 assertUtbetalingsoppdrag(forventetUtbetalingsoppdrag, utbetalingsoppdrag, medUtbetalingsperiode)
             } catch (e: Throwable) {
@@ -244,11 +247,12 @@ class OppdragSteg {
         tilkjentYtelse: TilkjentYtelse?,
         erSimulering: Boolean = false,
     ): Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
-        val andelFactory = if (erSimulering) {
-            AndelTilkjentYtelseForSimuleringFactory()
-        } else {
-            AndelTilkjentYtelseForIverksettingFactory()
-        }
+        val andelFactory =
+            if (erSimulering) {
+                AndelTilkjentYtelseForSimuleringFactory()
+            } else {
+                AndelTilkjentYtelseForIverksettingFactory()
+            }
 
         return (tilkjentYtelse?.andelerTilkjentYtelse ?: emptyList())
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
@@ -258,9 +262,10 @@ class OppdragSteg {
 
     private fun genererBehandlinger(dataTable: DataTable) {
         val fagsak = defaultFagsak()
-        behandlinger = dataTable.groupByBehandlingId()
-            .map { lagBehandling(fagsak = fagsak).copy(id = it.key) }
-            .associateBy { it.id }
+        behandlinger =
+            dataTable.groupByBehandlingId()
+                .map { lagBehandling(fagsak = fagsak).copy(id = it.key) }
+                .associateBy { it.id }
     }
 
     // @Gitt("følgende tilkjente ytelser uten andel for {}")

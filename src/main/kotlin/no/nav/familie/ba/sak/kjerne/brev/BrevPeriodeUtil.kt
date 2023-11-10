@@ -81,14 +81,15 @@ fun hentMinimerteKompetanserForPeriode(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     landkoderISO2: Map<String, String>,
 ): List<MinimertKompetanse> {
-    val minimerteKompetanser = kompetanser.hentIPeriode(fom, tom)
-        .filter { it.erObligatoriskeFelterSatt() }
-        .map {
-            it.tilMinimertKompetanse(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                landkoderISO2 = landkoderISO2,
-            )
-        }
+    val minimerteKompetanser =
+        kompetanser.hentIPeriode(fom, tom)
+            .filter { it.erObligatoriskeFelterSatt() }
+            .map {
+                it.tilMinimertKompetanse(
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    landkoderISO2 = landkoderISO2,
+                )
+            }
 
     return minimerteKompetanser
 }
@@ -101,9 +102,10 @@ fun hentKompetanserSomStopperRettFørPeriode(
 fun Collection<Kompetanse>.hentIPeriode(
     fom: YearMonth?,
     tom: YearMonth?,
-): Collection<Kompetanse> = tilSeparateTidslinjerForBarna().mapValues { (_, tidslinje) ->
-    tidslinje.beskjær(
-        fraOgMed = fom.tilTidspunktEllerUendeligTidlig(tom),
-        tilOgMed = tom.tilTidspunktEllerUendeligSent(fom),
-    )
-}.tilSkjemaer()
+): Collection<Kompetanse> =
+    tilSeparateTidslinjerForBarna().mapValues { (_, tidslinje) ->
+        tidslinje.beskjær(
+            fraOgMed = fom.tilTidspunktEllerUendeligTidlig(tom),
+            tilOgMed = tom.tilTidspunktEllerUendeligSent(fom),
+        )
+    }.tilSkjemaer()

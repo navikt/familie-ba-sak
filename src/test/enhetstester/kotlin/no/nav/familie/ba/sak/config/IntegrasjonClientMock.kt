@@ -41,7 +41,6 @@ import java.util.UUID
 @TestConfiguration
 @Profile("dev", "postgres")
 class IntegrasjonClientMock {
-
     @Bean
     @Primary
     fun mockIntegrasjonClient(): IntegrasjonClient {
@@ -76,21 +75,23 @@ class IntegrasjonClientMock {
                 return
             }
 
-            every { mockIntegrasjonClient.hentJournalpost(any()) } returns lagTestJournalpost(
-                søkerFnr[0],
-                UUID.randomUUID().toString(),
-            )
+            every { mockIntegrasjonClient.hentJournalpost(any()) } returns
+                lagTestJournalpost(
+                    søkerFnr[0],
+                    UUID.randomUUID().toString(),
+                )
 
-            every { mockIntegrasjonClient.hentJournalposterForBruker(any()) } returns listOf(
-                lagTestJournalpost(
-                    søkerFnr[0],
-                    UUID.randomUUID().toString(),
-                ),
-                lagTestJournalpost(
-                    søkerFnr[0],
-                    UUID.randomUUID().toString(),
-                ),
-            )
+            every { mockIntegrasjonClient.hentJournalposterForBruker(any()) } returns
+                listOf(
+                    lagTestJournalpost(
+                        søkerFnr[0],
+                        UUID.randomUUID().toString(),
+                    ),
+                    lagTestJournalpost(
+                        søkerFnr[0],
+                        UUID.randomUUID().toString(),
+                    ),
+                )
 
             every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
                 lagTestOppgaveDTO(1L)
@@ -144,19 +145,21 @@ class IntegrasjonClientMock {
 
             every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()
 
-            every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(
-                Arbeidsfordelingsenhet(
-                    "100",
-                    "NAV Familie- og pensjonsytelser Oslo 1",
-                ),
-            )
+            every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns
+                listOf(
+                    Arbeidsfordelingsenhet(
+                        "100",
+                        "NAV Familie- og pensjonsytelser Oslo 1",
+                    ),
+                )
 
-            every { mockIntegrasjonClient.hentEnhet(any()) } returns NavKontorEnhet(
-                101,
-                "NAV Familie- og pensjonsytelser Oslo 1",
-                "101",
-                "",
-            )
+            every { mockIntegrasjonClient.hentEnhet(any()) } returns
+                NavKontorEnhet(
+                    101,
+                    "NAV Familie- og pensjonsytelser Oslo 1",
+                    "101",
+                    "",
+                )
 
             every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } just runs
 
@@ -222,12 +225,13 @@ class IntegrasjonClientMock {
             val betydningUK = BetydningDto(FOM_1900, TOM_2010, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseUK))
 
             return KodeverkDto(
-                betydninger = mapOf(
-                    "POL" to listOf(betydningPolen),
-                    "DEU" to listOf(betydningTyskland),
-                    "DNK" to listOf(betydningDanmark),
-                    "GBR" to listOf(betydningUK),
-                ),
+                betydninger =
+                    mapOf(
+                        "POL" to listOf(betydningPolen),
+                        "DEU" to listOf(betydningTyskland),
+                        "DNK" to listOf(betydningDanmark),
+                        "GBR" to listOf(betydningUK),
+                    ),
             )
         }
 

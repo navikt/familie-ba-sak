@@ -3,13 +3,11 @@ package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 
 interface Vedtaksbrev : Brev {
-
     override val mal: Brevmal
     override val data: VedtaksbrevData
 }
 
 interface VedtaksbrevData : BrevData {
-
     val perioder: List<BrevPeriode>
 }
 

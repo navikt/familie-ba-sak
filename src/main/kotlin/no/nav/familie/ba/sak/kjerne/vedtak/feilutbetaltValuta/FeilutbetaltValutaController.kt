@@ -89,7 +89,9 @@ class FeilutbetaltValutaController(
     }
 
     @GetMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentFeilutbetaltValutaPerioder(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestFeilutbetaltValuta>?>> {
+    fun hentFeilutbetaltValutaPerioder(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<List<RestFeilutbetaltValuta>?>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,

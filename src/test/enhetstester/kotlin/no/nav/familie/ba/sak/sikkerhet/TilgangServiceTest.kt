@@ -34,7 +34,6 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import java.time.LocalDate
 
 class TilgangServiceTest {
-
     private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val fagsakService: FagsakService = mockk()
@@ -44,11 +43,12 @@ class TilgangServiceTest {
     private val kode7Gruppe = "kode7"
     private val rolleConfig = RolleConfig("", "", "", FORVALTER_ROLLE = "", KODE6 = kode6Gruppe, KODE7 = kode7Gruppe)
     private val auditLogger = AuditLogger("familie-ba-sak")
-    private val familieIntegrasjonerTilgangskontrollService = FamilieIntegrasjonerTilgangskontrollService(
-        mockFamilieIntegrasjonerTilgangskontrollClient,
-        cacheManager,
-        mockk(),
-    )
+    private val familieIntegrasjonerTilgangskontrollService =
+        FamilieIntegrasjonerTilgangskontrollService(
+            mockFamilieIntegrasjonerTilgangskontrollClient,
+            cacheManager,
+            mockk(),
+        )
     private val tilgangService =
         TilgangService(
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
@@ -63,11 +63,12 @@ class TilgangServiceTest {
     private val fagsak = defaultFagsak()
     private val behandling = lagBehandling(fagsak)
     private val aktør = fagsak.aktør
-    private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-        behandlingId = behandling.id,
-        søkerPersonIdent = aktør.aktivFødselsnummer(),
-        barnasIdenter = emptyList(),
-    )
+    private val personopplysningGrunnlag =
+        lagTestPersonopplysningGrunnlag(
+            behandlingId = behandling.id,
+            søkerPersonIdent = aktør.aktivFødselsnummer(),
+            barnasIdenter = emptyList(),
+        )
     private val olaIdent = "4567"
 
     @BeforeEach

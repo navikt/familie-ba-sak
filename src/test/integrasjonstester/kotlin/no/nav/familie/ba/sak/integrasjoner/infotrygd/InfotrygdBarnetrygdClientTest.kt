@@ -26,7 +26,6 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
-
     val løpendeBarnetrygdURL = "/api/infotrygd/barnetrygd/lopende-barnetrygd"
     val sakerURL = "/api/infotrygd/barnetrygd/saker"
     val stønaderURL = "/api/infotrygd/barnetrygd/stonad?historikk=false"
@@ -43,10 +42,11 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun setUp() {
-        client = InfotrygdBarnetrygdClient(
-            URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations,
-        )
+        client =
+            InfotrygdBarnetrygdClient(
+                URI.create(wireMockServer.baseUrl() + "/api"),
+                restOperations,
+            )
     }
 
     @AfterEach
@@ -172,10 +172,11 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
 
-        val harNyligSendtBrev = client.harNyligSendtBrevFor(
-            søkersIdenter,
-            listOf(InfotrygdBrevkode.BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG),
-        )
+        val harNyligSendtBrev =
+            client.harNyligSendtBrevFor(
+                søkersIdenter,
+                listOf(InfotrygdBrevkode.BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG),
+            )
 
         Assertions.assertEquals(true, harNyligSendtBrev.harSendtBrev)
     }

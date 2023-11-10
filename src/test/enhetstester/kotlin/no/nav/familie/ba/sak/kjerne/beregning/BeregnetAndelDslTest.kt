@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.YearMonth
-class BeregnetAndelDslTest {
 
+class BeregnetAndelDslTest {
     @Test
     fun `sjekk at andel bygges riktig`() {
         val barn = barn født 14.des(2019) død 9.des(2024)

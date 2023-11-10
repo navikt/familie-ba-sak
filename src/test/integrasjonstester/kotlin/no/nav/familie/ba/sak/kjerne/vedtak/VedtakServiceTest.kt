@@ -49,78 +49,53 @@ import java.time.LocalDateTime
 class VedtakServiceTest(
     @Autowired
     private val behandlingRepository: BehandlingRepository,
-
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-
     @Autowired
     private val behandlingstemaService: BehandlingstemaService,
-
     @Autowired
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
-
     @Autowired
     private val vedtakRepository: VedtakRepository,
-
     @Autowired
     private val behandlingMetrikker: BehandlingMetrikker,
-
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
-
     @Autowired
     private val arbeidsfordelingService: ArbeidsfordelingService,
-
     @Autowired
     private val vedtakService: VedtakService,
-
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
-
     @Autowired
     private val personidentService: PersonidentService,
-
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
-
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val fagsakRepository: FagsakRepository,
-
     @Autowired
     private val totrinnskontrollService: TotrinnskontrollService,
-
     @Autowired
     private val loggService: LoggService,
-
     @Autowired
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-
     @Autowired
     private val infotrygdService: InfotrygdService,
-
     @Autowired
     private val beregningService: BeregningService,
-
     @Autowired
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-
     @Autowired
     private val taskRepository: TaskRepositoryWrapper,
-
     @Autowired
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
-
     @Autowired
     private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
-
     @Autowired
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
-
 ) : AbstractSpringIntegrationTest() {
-
     lateinit var behandlingService: BehandlingService
     lateinit var vilkårResultat1: VilkårResultat
     lateinit var vilkårResultat2: VilkårResultat
@@ -133,23 +108,24 @@ class VedtakServiceTest(
 
     @BeforeEach
     fun setup() {
-        behandlingService = BehandlingService(
-            behandlingHentOgPersisterService,
-            behandlingstemaService,
-            behandlingSøknadsinfoService,
-            behandlingMigreringsinfoRepository,
-            behandlingMetrikker,
-            saksstatistikkEventPublisher,
-            fagsakRepository,
-            vedtakRepository,
-            andelTilkjentYtelseRepository,
-            loggService,
-            arbeidsfordelingService,
-            infotrygdService,
-            vedtaksperiodeService,
-            taskRepository,
-            vilkårsvurderingService,
-        )
+        behandlingService =
+            BehandlingService(
+                behandlingHentOgPersisterService,
+                behandlingstemaService,
+                behandlingSøknadsinfoService,
+                behandlingMigreringsinfoRepository,
+                behandlingMetrikker,
+                saksstatistikkEventPublisher,
+                fagsakRepository,
+                vedtakRepository,
+                andelTilkjentYtelseRepository,
+                loggService,
+                arbeidsfordelingService,
+                infotrygdService,
+                vedtaksperiodeService,
+                taskRepository,
+                vilkårsvurderingService,
+            )
 
         val personAktørId = randomAktør()
 
@@ -160,44 +136,48 @@ class VedtakServiceTest(
 
         vilkårsvurdering = lagVilkårsvurdering(personAktørId, behandling, resultat)
 
-        personResultat = PersonResultat(
-            vilkårsvurdering = vilkårsvurdering,
-            aktør = personAktørId,
-        )
+        personResultat =
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = personAktørId,
+            )
 
-        vilkårResultat1 = VilkårResultat(
-            id = 1,
-            personResultat = personResultat,
-            vilkårType = vilkår,
-            resultat = resultat,
-            resultatBegrunnelse = null,
-            periodeFom = LocalDate.of(2010, 1, 1),
-            periodeTom = LocalDate.of(2010, 6, 1),
-            begrunnelse = "",
-            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-        )
-        vilkårResultat2 = VilkårResultat(
-            id = 2,
-            personResultat = personResultat,
-            vilkårType = vilkår,
-            resultat = resultat,
-            resultatBegrunnelse = null,
-            periodeFom = LocalDate.of(2010, 6, 2),
-            periodeTom = LocalDate.of(2010, 8, 1),
-            begrunnelse = "",
-            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-        )
-        vilkårResultat3 = VilkårResultat(
-            id = 3,
-            personResultat = personResultat,
-            vilkårType = vilkår,
-            resultat = resultat,
-            resultatBegrunnelse = null,
-            periodeFom = LocalDate.of(2010, 8, 2),
-            periodeTom = LocalDate.of(2010, 12, 1),
-            begrunnelse = "",
-            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-        )
+        vilkårResultat1 =
+            VilkårResultat(
+                id = 1,
+                personResultat = personResultat,
+                vilkårType = vilkår,
+                resultat = resultat,
+                resultatBegrunnelse = null,
+                periodeFom = LocalDate.of(2010, 1, 1),
+                periodeTom = LocalDate.of(2010, 6, 1),
+                begrunnelse = "",
+                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+            )
+        vilkårResultat2 =
+            VilkårResultat(
+                id = 2,
+                personResultat = personResultat,
+                vilkårType = vilkår,
+                resultat = resultat,
+                resultatBegrunnelse = null,
+                periodeFom = LocalDate.of(2010, 6, 2),
+                periodeTom = LocalDate.of(2010, 8, 1),
+                begrunnelse = "",
+                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+            )
+        vilkårResultat3 =
+            VilkårResultat(
+                id = 3,
+                personResultat = personResultat,
+                vilkårType = vilkår,
+                resultat = resultat,
+                resultatBegrunnelse = null,
+                periodeFom = LocalDate.of(2010, 8, 2),
+                periodeTom = LocalDate.of(2010, 12, 1),
+                begrunnelse = "",
+                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+            )
         personResultat.setSortedVilkårResultater(
             setOf(
                 vilkårResultat1,

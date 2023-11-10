@@ -75,18 +75,21 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
 ): List<AndelTilkjentYtelse> {
     // Ta bort eventuell eksisterende differanseberegning, slik at kalkulertUtbetalingsbeløp er nasjonal sats
     // Men behold funksjonelle splitter som er påført tidligere ved å beholde fom og tom på andelene
-    val utvidetBarnetrygdTidslinje = this.tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
-        .utenDifferanseberegning()
+    val utvidetBarnetrygdTidslinje =
+        this.tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
+            .utenDifferanseberegning()
 
-    val småbarnstilleggTidslinje = this.tilTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
-        .utenDifferanseberegning()
+    val småbarnstilleggTidslinje =
+        this.tilTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
+            .utenDifferanseberegning()
 
     val barnasAndelerTidslinjer = this.tilSeparateTidslinjerForBarna()
 
     // Finn alle andelene frem til barna er 18 år. Det vil i praksis være ALLE andelene
     // Bruk bare andelene der perioden BARE inneholder sekundærlandsandeler
-    val barnasRelevanteAndelerInntil18År = barnasAndelerTidslinjer
-        .kunReneSekundærlandsperioder(kompetanser)
+    val barnasRelevanteAndelerInntil18År =
+        barnasAndelerTidslinjer
+            .kunReneSekundærlandsperioder(kompetanser)
 
     // Lag tidslinjer for hvert barn som inneholder underskuddet fra differanseberegningen på ordinær barnetrygd.
     // Resultatet er tidslinjer med underskuddet som positivt beløp der det inntreffer
@@ -104,26 +107,29 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     // Runder av summen HALF_UP, som betyr en mulig ulempe for søker
     // Avrundingen er valgt for i størst mulig grad få summen til å bli lik utvidet barnetrygd når alle barnas deler blir brukt,
     // slik at utvidet barnetrrygd blir 0. Ellers ville den av og til kunne blitt 1, selv om det var ytterligere underskudd
-    val utenlandskDelAvUtvidetBarnetrygdTidslinje = minsteAvHver(
-        barnasDelAvUtvidetBarnetrygdTidslinjer,
-        barnasUnderskuddPåDifferanseberegningTidslinjer,
-    ).sum().rundAvTilHeltall()
+    val utenlandskDelAvUtvidetBarnetrygdTidslinje =
+        minsteAvHver(
+            barnasDelAvUtvidetBarnetrygdTidslinjer,
+            barnasUnderskuddPåDifferanseberegningTidslinjer,
+        ).sum().rundAvTilHeltall()
 
     // Til slutt oppdaterer vi differanseberegningen på utvidet barnetrygd med den utenlandske delen
     val differanseberegnetUtvidetBarnetrygdTidslinje =
         utvidetBarnetrygdTidslinje.oppdaterDifferanseberegning(utenlandskDelAvUtvidetBarnetrygdTidslinje)
 
     // For hvert barn finner vi ut hvor mye underskudd som gjenstår etter at delen av utvidet barnetrygd er trukket fra
-    val barnasGjenståendeUnderskuddTidslinjer = barnasUnderskuddPåDifferanseberegningTidslinjer
-        .minus(barnasDelAvUtvidetBarnetrygdTidslinjer)
-        .filtrerHverKunVerdi { it > BigDecimal.ZERO }
+    val barnasGjenståendeUnderskuddTidslinjer =
+        barnasUnderskuddPåDifferanseberegningTidslinjer
+            .minus(barnasDelAvUtvidetBarnetrygdTidslinjer)
+            .filtrerHverKunVerdi { it > BigDecimal.ZERO }
 
     // For hvert barn kombiner andel-tidslinjen med 3-års-tidslinjen. Resultatet er andelene når barna er inntil 3 år
     // Bruk bare andelene der perioden BARE inneholder sekundærlandsandeler
     // Må ta utgangspunkt i alle andeler for være sikker på at vi vurderer sekundærlandsperioder bare når barna er inntil 3 år
-    val barnasRelevanteAndelerInntil3ÅrTidslinjer = barnasAndelerTidslinjer
-        .kunAndelerTilOgMed3År(barna)
-        .kunReneSekundærlandsperioder(kompetanser)
+    val barnasRelevanteAndelerInntil3ÅrTidslinjer =
+        barnasAndelerTidslinjer
+            .kunAndelerTilOgMed3År(barna)
+            .kunReneSekundærlandsperioder(kompetanser)
 
     // Vi finner hvor mye hvert barn skal ha som andel av småbarnstillegget på hvert tidspunkt.
     // Det tilsvarer småbarnstillegget på et gitt tidspunkt delt på antall relevante barn under 3 år som har ytelse på det tidspunktet
@@ -135,10 +141,11 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     // Runder av HALF_UP, som betyr en mulig ulempe for søker
     // Avrundingen er valgt for i størst mulig grad få summen til å bli lik småbarnstillegget når alle barnas deler blir brukt,
     // slik at småbarnstillegget blir 0. Ellers ville den av og til kunne blitt 1, selv om det var ytterligere underskudd
-    val utenlandskDelAvSmåbarnstilleggTidslinje = minsteAvHver(
-        barnasDelAvSmåbarnstilleggetTidslinjer,
-        barnasGjenståendeUnderskuddTidslinjer,
-    ).sum().rundAvTilHeltall()
+    val utenlandskDelAvSmåbarnstilleggTidslinje =
+        minsteAvHver(
+            barnasDelAvSmåbarnstilleggetTidslinjer,
+            barnasGjenståendeUnderskuddTidslinjer,
+        ).sum().rundAvTilHeltall()
 
     // Til slutt oppdaterer vi differanseberegningen på småbarnstillegget med den utenlandske delen
     val differanseberegnetSmåbarnstilleggTidslinje =

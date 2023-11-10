@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 internal class PersonidentTest {
-
     val fnr1 = "12345678903"
     val fnr2 = "23345678903"
 

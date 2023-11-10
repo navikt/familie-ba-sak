@@ -43,44 +43,46 @@ class OpplysningspliktTest(
     @Autowired private val settPåVentService: SettPåVentService,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
-
     @Test
     fun `Skal opprette opplysningsplikt-vilkår på søker når 'innhente opplysninger'-brev sendes ut og ta med hjemmel 17 og 18 i vedtaksbrev når opplysningsplikt-vilkåret ikke er oppfylt`() {
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1990-04-20", fornavn = "Mor", etternavn = "Søker"),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.now().minusMonths(2).toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                    ),
+        val scenario =
+            mockServerKlient().lagScenario(
+                RestScenario(
+                    søker = RestScenarioPerson(fødselsdato = "1990-04-20", fornavn = "Mor", etternavn = "Søker"),
+                    barna =
+                        listOf(
+                            RestScenarioPerson(
+                                fødselsdato = LocalDate.now().minusMonths(2).toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen",
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
-        val behandling = kjørStegprosessForFGB(
-            tilSteg = StegType.VILKÅRSVURDERING,
-            søkerFnr = scenario.søker.ident!!,
-            barnasIdenter = scenario.barna.map { it.ident!! },
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-
-        )
+        val behandling =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = scenario.søker.ident!!,
+                barnasIdenter = scenario.barna.map { it.ident!! },
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         // Send "innhente opplysninger"-brev og sjekk at opplysningsplikt vilkåret dukker opp på _kun_ søker
         dokumentService.sendManueltBrev(
             fagsakId = behandling.fagsak.id,
-            manueltBrevRequest = ManueltBrevRequest(
-                brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
-                mottakerIdent = scenario.søker.ident,
-                enhet = Enhet(enhetId = "1234", enhetNavn = "Enhet Enhetesen"),
-            ),
+            manueltBrevRequest =
+                ManueltBrevRequest(
+                    brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
+                    mottakerIdent = scenario.søker.ident,
+                    enhet = Enhet(enhetId = "1234", enhetNavn = "Enhet Enhetesen"),
+                ),
             behandling = behandling,
         )
 
@@ -91,8 +93,9 @@ class OpplysningspliktTest(
         val opplysningspliktVilkårPåSøker =
             vilkårsvurdering?.personResultater?.single { it.erSøkersResultater() }?.andreVurderinger?.singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
 
-        val opplysningspliktVilkårPåBarna = vilkårsvurdering?.personResultater?.filter { !it.erSøkersResultater() }
-            ?.flatMap { it.andreVurderinger.filter { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT } } ?: emptyList()
+        val opplysningspliktVilkårPåBarna =
+            vilkårsvurdering?.personResultater?.filter { !it.erSøkersResultater() }
+                ?.flatMap { it.andreVurderinger.filter { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT } } ?: emptyList()
 
         Assertions.assertTrue(opplysningspliktVilkårPåSøker != null)
         Assertions.assertTrue(opplysningspliktVilkårPåBarna.isEmpty())
@@ -120,18 +123,21 @@ class OpplysningspliktTest(
                 RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
 
-        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
-            behandlingEtterVurderTilbakekreving.data!!.behandlingId,
-        )
+        val vedtaksperioderMedBegrunnelser =
+            vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+                behandlingEtterVurderTilbakekreving.data!!.behandlingId,
+            )
 
         val vedtaksperiode = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiode.id,
-            restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                standardbegrunnelser = listOf(
-                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+            restPutVedtaksperiodeMedStandardbegrunnelser =
+                RestPutVedtaksperiodeMedStandardbegrunnelser(
+                    standardbegrunnelser =
+                        listOf(
+                            Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+                        ),
                 ),
-            ),
         )
 
         val vedtak =

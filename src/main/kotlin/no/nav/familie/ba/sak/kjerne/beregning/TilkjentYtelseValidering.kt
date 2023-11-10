@@ -47,16 +47,19 @@ fun hentSøkersAndeler(
     søker: PersonEnkel,
 ) = andeler.filter { it.aktør == søker.aktør }
 
-fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<PersonEnkel>) = barna.map { barn ->
-    barn to andeler.filter { it.aktør == barn.aktør }
-}
+fun hentBarnasAndeler(
+    andeler: List<AndelTilkjentYtelse>,
+    barna: List<PersonEnkel>,
+) =
+    barna.map { barn ->
+        barn to andeler.filter { it.aktør == barn.aktør }
+    }
 
 /**
  * Ekstra sikkerhet rundt hva som utbetales som på sikt vil legges inn i
  * de respektive stegene SB håndterer slik at det er lettere for SB å rette feilene.
  */
 object TilkjentYtelseValidering {
-
     internal fun validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
         andelerFraForrigeBehandling: List<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
@@ -127,10 +130,11 @@ object TilkjentYtelseValidering {
             val forrigeAndelerForPersonOgType = forrigeAndelerForPerson.filter { it.type == ytelseType }
             val andelerForPersonOgType = andelerForPerson.filter { it.type == ytelseType }
 
-            val etterbetalingTidslinje = EndringIUtbetalingUtil.lagEtterbetalingstidslinjeForPersonOgType(
-                nåværendeAndeler = andelerForPersonOgType,
-                forrigeAndeler = forrigeAndelerForPersonOgType,
-            )
+            val etterbetalingTidslinje =
+                EndringIUtbetalingUtil.lagEtterbetalingstidslinjeForPersonOgType(
+                    nåværendeAndeler = andelerForPersonOgType,
+                    forrigeAndeler = forrigeAndelerForPersonOgType,
+                )
 
             val førsteMånedMedEtterbetaling = etterbetalingTidslinje.tilFørsteEndringstidspunkt()
 
@@ -178,10 +182,11 @@ object TilkjentYtelseValidering {
                     .flatMap { it.andelerTilkjentYtelse }
                     .filter { it.aktør == barn.aktør }
 
-            val perioderMedOverlapp = finnPeriodeMedOverlappAvAndeler(
-                andeler = andeler,
-                barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
-            )
+            val perioderMedOverlapp =
+                finnPeriodeMedOverlappAvAndeler(
+                    andeler = andeler,
+                    barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
+                )
             if (perioderMedOverlapp.isNotEmpty()) {
                 barnMedUtbetalingsikkerhetFeil.put(barn, perioderMedOverlapp)
             }
@@ -201,7 +206,10 @@ object TilkjentYtelseValidering {
     fun MutableMap<PersonEnkel, List<MånedPeriode>>.tilFeilmeldingTekst() =
         Utils.slåSammen(this.map { "${it.key.fødselsdato.tilKortString()} i perioden ${it.value.joinToString(", ") { "${it.fom} til ${it.tom}" }}" })
 
-    fun maksBeløp(personType: PersonType, fagsakType: FagsakType): Int {
+    fun maksBeløp(
+        personType: PersonType,
+        fagsakType: FagsakType,
+    ): Int {
         val satser = SatsService.hentAllesatser()
         val småbarnsTillegg = satser.filter { it.type == SatsType.SMA }
         val ordinærMedTillegg = satser.filter { it.type == SatsType.TILLEGG_ORBA }
@@ -226,12 +234,13 @@ object TilkjentYtelseValidering {
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
     ): List<MånedPeriode> {
-        val kombinertOverlappTidslinje = YtelseType.values().map { ytelseType ->
-            lagErOver100ProsentUtbetalingPåYtelseTidslinje(
-                andeler = andeler.filter { it.type == ytelseType },
-                barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger.filter { it.type == ytelseType },
-            )
-        }.kombiner { it.minstEnYtelseHarOverlapp() }
+        val kombinertOverlappTidslinje =
+            YtelseType.values().map { ytelseType ->
+                lagErOver100ProsentUtbetalingPåYtelseTidslinje(
+                    andeler = andeler.filter { it.type == ytelseType },
+                    barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger.filter { it.type == ytelseType },
+                )
+            }.kombiner { it.minstEnYtelseHarOverlapp() }
 
         return kombinertOverlappTidslinje.perioder().filter { it.innhold == true }
             .map { MånedPeriode(it.fraOgMed.tilYearMonth(), it.tilOgMed.tilYearMonth()) }
@@ -278,7 +287,13 @@ private fun validerAtBeløpForPartStemmerMedSatser(
     fagsakType: FagsakType,
 ) {
     val maksAntallAndeler =
-        if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) 2 else if (person.type == PersonType.BARN) 1 else 2
+        if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) {
+            2
+        } else if (person.type == PersonType.BARN) {
+            1
+        } else {
+            2
+        }
     val maksTotalBeløp = maksBeløp(personType = person.type, fagsakType = fagsakType)
 
     if (andeler.size > maksAntallAndeler) {
@@ -288,8 +303,9 @@ private fun validerAtBeløpForPartStemmerMedSatser(
         )
     }
 
-    val totalbeløp = andeler.map { it.kalkulertUtbetalingsbeløp }
-        .fold(0) { sum, beløp -> sum + beløp }
+    val totalbeløp =
+        andeler.map { it.kalkulertUtbetalingsbeløp }
+            .fold(0) { sum, beløp -> sum + beløp }
     if (totalbeløp > maksTotalBeløp) {
         throw UtbetalingsikkerhetFeil(
             melding = "Validering av andeler for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}) feilet: Tillatt totalbeløp = $maksTotalBeløp, faktiske totalbeløp = $totalbeløp.",

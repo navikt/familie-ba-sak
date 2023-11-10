@@ -22,7 +22,9 @@ class Bruker(
 )
 
 enum class IdType {
-    FNR, ORGNR, AKTOERID
+    FNR,
+    ORGNR,
+    AKTOERID,
 }
 
 enum class Sakstype(val type: String) {

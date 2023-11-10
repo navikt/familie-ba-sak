@@ -45,9 +45,10 @@ class DokumentController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val dokumentDistribueringService: DokumentDistribueringService,
 ) {
-
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
-    fun genererVedtaksbrev(@PathVariable vedtakId: Long): Ressurs<ByteArray> {
+    fun genererVedtaksbrev(
+        @PathVariable vedtakId: Long,
+    ): Ressurs<ByteArray> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} generer vedtaksbrev")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -65,7 +66,9 @@ class DokumentController(
     }
 
     @GetMapping(path = ["vedtaksbrev/{vedtakId}"])
-    fun hentVedtaksbrev(@PathVariable vedtakId: Long): Ressurs<ByteArray> {
+    fun hentVedtaksbrev(
+        @PathVariable vedtakId: Long,
+    ): Ressurs<ByteArray> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
@@ -97,11 +100,12 @@ class DokumentController(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         return dokumentGenereringService.genererManueltBrev(
-            manueltBrevRequest = manueltBrevRequest.byggMottakerdata(
-                behandling,
-                persongrunnlagService,
-                arbeidsfordelingService,
-            ),
+            manueltBrevRequest =
+                manueltBrevRequest.byggMottakerdata(
+                    behandling,
+                    persongrunnlagService,
+                    arbeidsfordelingService,
+                ),
             erForhåndsvisning = true,
         ).let { Ressurs.success(it) }
     }
@@ -121,11 +125,12 @@ class DokumentController(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         dokumentService.sendManueltBrev(
-            manueltBrevRequest = manueltBrevRequest.byggMottakerdata(
-                behandling,
-                persongrunnlagService,
-                arbeidsfordelingService,
-            ),
+            manueltBrevRequest =
+                manueltBrevRequest.byggMottakerdata(
+                    behandling,
+                    persongrunnlagService,
+                    arbeidsfordelingService,
+                ),
             behandling = behandling,
             fagsakId = behandling.fagsak.id,
         )
@@ -176,12 +181,13 @@ class DokumentController(
     }
 
     @PostMapping(path = ["/distribusjonskanal"])
-    fun hentDistribusjonskanal(@RequestBody personIdent: PersonIdent): Ressurs<Distribusjonskanal> {
+    fun hentDistribusjonskanal(
+        @RequestBody personIdent: PersonIdent,
+    ): Ressurs<Distribusjonskanal> {
         return Ressurs.success(dokumentDistribueringService.hentDistribusjonskanal(personIdent))
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(DokumentController::class.java)
     }
 }

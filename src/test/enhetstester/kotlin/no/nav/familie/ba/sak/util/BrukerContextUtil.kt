@@ -13,7 +13,6 @@ import org.springframework.web.context.request.ServletRequestAttributes
 import java.util.UUID
 
 object BrukerContextUtil {
-
     fun clearBrukerContext() {
         RequestContextHolder.resetRequestAttributes()
     }
@@ -41,7 +40,11 @@ object BrukerContextUtil {
         every { jwtTokenClaims.get("sub") } returns UUID.randomUUID().toString()
     }
 
-    fun <T> testWithBrukerContext(preferredUsername: String = "A", groups: List<String> = emptyList(), fn: () -> T): T {
+    fun <T> testWithBrukerContext(
+        preferredUsername: String = "A",
+        groups: List<String> = emptyList(),
+        fn: () -> T,
+    ): T {
         try {
             mockBrukerContext(preferredUsername, groups)
             return fn()

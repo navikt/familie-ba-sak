@@ -43,26 +43,28 @@ class EndringstidspunktTest(
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val unleashService: UnleashService,
 ) : AbstractVerdikjedetest() {
-
     @Test
     fun `Skal filtrere bort alle vedtaksperioder før endringstidspunktet`() {
         val barnFødselsdato = LocalDate.now().minusYears(2)
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(
-                    fødselsdato = "1982-01-12",
-                    fornavn = "Mor",
-                    etternavn = "Søker",
+        val scenario =
+            mockServerKlient().lagScenario(
+                RestScenario(
+                    søker =
+                        RestScenarioPerson(
+                            fødselsdato = "1982-01-12",
+                            fornavn = "Mor",
+                            etternavn = "Søker",
+                        ),
+                    barna =
+                        listOf(
+                            RestScenarioPerson(
+                                fødselsdato = barnFødselsdato.toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen",
+                            ),
+                        ),
                 ),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = barnFødselsdato.toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                    ),
-                ),
-            ),
-        )
+            )
 
         val overstyrendeVilkårResultaterFGB =
             scenario.barna.associate { it.aktørId!! to emptyList<VilkårResultat>() }.toMutableMap()
@@ -76,11 +78,11 @@ class EndringstidspunktTest(
             vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-            overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(
-                scenario,
-                overstyrendeVilkårResultaterFGB,
-            ),
-
+            overstyrendeVilkårsvurdering =
+                lagVilkårsvurderingFraRestScenario(
+                    scenario,
+                    overstyrendeVilkårResultaterFGB,
+                ),
             behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
@@ -99,55 +101,57 @@ class EndringstidspunktTest(
 
         val overstyrendeVilkårResultaterRevurdering =
             scenario.barna.associate {
-                it.aktørId!! to listOf(
-                    lagVilkårResultat(
-                        vilkårType = Vilkår.BOSATT_I_RIKET,
-                        periodeFom = barnFødselsdato,
-                        periodeTom = førsteDagMedDeltBostedOppfylt,
-                        personResultat = mockk(relaxed = true),
-                    ),
-                    lagVilkårResultat(
-                        vilkårType = Vilkår.BOSATT_I_RIKET,
-                        periodeFom = førsteDagMedDeltBostedOppfylt,
-                        periodeTom = sisteDagMedDeltBosdet,
-                        personResultat = mockk(relaxed = true),
-                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
-                    ),
-                    lagVilkårResultat(
-                        vilkårType = Vilkår.BOSATT_I_RIKET,
-                        periodeFom = førsteDagMedDeltBostedOppfylt,
-                        periodeTom = sisteDagMedDeltBosdet.førsteDagINesteMåned(),
-                        personResultat = mockk(relaxed = true),
-                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
-                    ),
-                )
+                it.aktørId!! to
+                    listOf(
+                        lagVilkårResultat(
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            periodeFom = barnFødselsdato,
+                            periodeTom = førsteDagMedDeltBostedOppfylt,
+                            personResultat = mockk(relaxed = true),
+                        ),
+                        lagVilkårResultat(
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            periodeFom = førsteDagMedDeltBostedOppfylt,
+                            periodeTom = sisteDagMedDeltBosdet,
+                            personResultat = mockk(relaxed = true),
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                        ),
+                        lagVilkårResultat(
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            periodeFom = førsteDagMedDeltBostedOppfylt,
+                            periodeTom = sisteDagMedDeltBosdet.førsteDagINesteMåned(),
+                            personResultat = mockk(relaxed = true),
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                        ),
+                    )
             }.toMutableMap()
 
         overstyrendeVilkårResultaterRevurdering[scenario.søker.aktørId] = emptyList()
 
-        val revurdering = kjørStegprosessForBehandling(
-            tilSteg = StegType.BEHANDLING_AVSLUTTET,
-            søkerFnr = scenario.søker.ident,
-            barnasIdenter = listOf(scenario.barna.first().ident!!),
-            vedtakService = vedtakService,
-            underkategori = BehandlingUnderkategori.ORDINÆR,
-            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-            overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(
-                scenario,
-                overstyrendeVilkårResultaterRevurdering,
-            ),
-
-            behandlingstype = BehandlingType.REVURDERING,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
-            fagsakService = fagsakService,
-            persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            brevmalService = brevmalService,
-            unleashService = unleashService,
-        )
+        val revurdering =
+            kjørStegprosessForBehandling(
+                tilSteg = StegType.BEHANDLING_AVSLUTTET,
+                søkerFnr = scenario.søker.ident,
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
+                vedtakService = vedtakService,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                overstyrendeVilkårsvurdering =
+                    lagVilkårsvurderingFraRestScenario(
+                        scenario,
+                        overstyrendeVilkårResultaterRevurdering,
+                    ),
+                behandlingstype = BehandlingType.REVURDERING,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
+                fagsakService = fagsakService,
+                persongrunnlagService = persongrunnlagService,
+                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+                brevmalService = brevmalService,
+                unleashService = unleashService,
+            )
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)

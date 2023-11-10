@@ -48,7 +48,6 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val testVerktøyService: TestVerktøyService,
 ) : AbstractVerdikjedetest() {
-
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
 
     @BeforeEach
@@ -71,37 +70,42 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         val osFom = LocalDate.now().førsteDagIInneværendeMåned()
         val osTom = LocalDate.now().plusMonths(2).sisteDagIMåned()
 
-        val behandling1 = fullførBehandlingMedOvergangsstønad(
-            fagsak = fagsak,
-            personScenario = personScenario,
-            barnFødselsdato = barnFødselsdato,
-            overgangsstønadPerioder = listOf(
-                EksternPeriode(
-                    personIdent = personScenario.søker.ident!!,
-                    fomDato = osFom,
-                    tomDato = osTom,
-                    datakilde = Datakilde.EF,
-                ),
-            ),
-        )
-        val perioderBehandling1 = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(
-            vedtak = vedtakService.hentAktivForBehandling(behandling1.id)!!,
-        )
+        val behandling1 =
+            fullførBehandlingMedOvergangsstønad(
+                fagsak = fagsak,
+                personScenario = personScenario,
+                barnFødselsdato = barnFødselsdato,
+                overgangsstønadPerioder =
+                    listOf(
+                        EksternPeriode(
+                            personIdent = personScenario.søker.ident!!,
+                            fomDato = osFom,
+                            tomDato = osTom,
+                            datakilde = Datakilde.EF,
+                        ),
+                    ),
+            )
+        val perioderBehandling1 =
+            vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtakService.hentAktivForBehandling(behandling1.id)!!,
+            )
 
         Assertions.assertEquals(
             1,
             perioderBehandling1.filter { it.utbetalingsperiodeDetaljer.any { it.ytelseType == YtelseType.SMÅBARNSTILLEGG } }.size,
         )
 
-        val behandling2 = fullførRevurderingUtenOvergangstonad(
-            fagsak = fagsak,
-            personScenario = personScenario,
-            barnFødselsdato = barnFødselsdato,
-        )
+        val behandling2 =
+            fullførRevurderingUtenOvergangstonad(
+                fagsak = fagsak,
+                personScenario = personScenario,
+                barnFødselsdato = barnFødselsdato,
+            )
 
-        val perioderBehandling2 = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(
-            vedtak = vedtakService.hentAktivForBehandling(behandling2.id)!!,
-        )
+        val perioderBehandling2 =
+            vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtakService.hentAktivForBehandling(behandling2.id)!!,
+            )
         val periodeMedReduksjon =
             perioderBehandling2.singleOrNull { it.type == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING }
 
@@ -114,19 +118,21 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         Assertions.assertEquals(osTom, periodeMedReduksjon.tom)
     }
 
-    fun lagScenario(barnFødselsdato: LocalDate): RestScenario = mockServerKlient().lagScenario(
-        RestScenario(
-            søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-            barna = listOf(
-                RestScenarioPerson(
-                    fødselsdato = barnFødselsdato.toString(),
-                    fornavn = "Barn",
-                    etternavn = "Barnesen",
-                    bostedsadresser = emptyList(),
-                ),
+    fun lagScenario(barnFødselsdato: LocalDate): RestScenario =
+        mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = barnFødselsdato.toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
+                            bostedsadresser = emptyList(),
+                        ),
+                    ),
             ),
-        ),
-    )
+        )
 
     fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak {
         return familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
@@ -139,9 +145,10 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         overgangsstønadPerioder: List<EksternPeriode>,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = overgangsstønadPerioder,
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder = overgangsstønadPerioder,
+            )
 
         val restBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
@@ -153,11 +160,12 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
             RestRegistrerSøknad(
-                søknad = lagSøknadDTO(
-                    søkerIdent = fagsak.søkerFødselsnummer,
-                    barnasIdenter = personScenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.UTVIDET,
-                ),
+                søknad =
+                    lagSøknadDTO(
+                        søkerIdent = fagsak.søkerFødselsnummer,
+                        barnasIdenter = personScenario.barna.map { it.ident!! },
+                        underkategori = BehandlingUnderkategori.UTVIDET,
+                    ),
                 bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
@@ -189,9 +197,10 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = emptyList(),
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder = emptyList(),
+            )
 
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(

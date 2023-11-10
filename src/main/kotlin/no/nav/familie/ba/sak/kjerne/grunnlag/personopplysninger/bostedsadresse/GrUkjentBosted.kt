@@ -13,9 +13,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 data class GrUkjentBosted(
     @Column(name = "bostedskommune")
     val bostedskommune: String,
-
 ) : GrBostedsadresse() {
-
     override fun tilKopiForNyPerson(): GrBostedsadresse =
         GrUkjentBosted(bostedskommune)
 
@@ -30,7 +28,6 @@ data class GrUkjentBosted(
     }
 
     companion object {
-
         fun fraUkjentBosted(ukjentBosted: UkjentBosted): GrUkjentBosted =
             GrUkjentBosted(bostedskommune = ukjentBosted.bostedskommune)
     }

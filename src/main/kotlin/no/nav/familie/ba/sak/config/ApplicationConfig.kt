@@ -34,7 +34,6 @@ import java.time.temporal.ChronoUnit
 @EnableJwtTokenValidation(ignore = ["org.springdoc"])
 @EnableOAuth2Client(cacheEnabled = true)
 class ApplicationConfig {
-
     @Bean
     fun logFilter(): FilterRegistrationBean<LogFilter> {
         log.info("Registering LogFilter filter")
@@ -85,11 +84,12 @@ class ApplicationConfig {
     fun prosesseringInfoProvider(
         @Value("\${prosessering.rolle}") prosesseringRolle: String,
     ) = object : ProsesseringInfoProvider {
-        override fun hentBrukernavn(): String = try {
-            SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread").getStringClaim("preferred_username")
-        } catch (e: Exception) {
-            "VL"
-        }
+        override fun hentBrukernavn(): String =
+            try {
+                SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread").getStringClaim("preferred_username")
+            } catch (e: Exception) {
+                "VL"
+            }
 
         override fun harTilgang(): Boolean = grupper().contains(prosesseringRolle)
 
@@ -105,7 +105,6 @@ class ApplicationConfig {
     }
 
     companion object {
-
         private val log = LoggerFactory.getLogger(ApplicationConfig::class.java)
         const val PAKKENAVN = "no.nav.familie.ba.sak"
     }

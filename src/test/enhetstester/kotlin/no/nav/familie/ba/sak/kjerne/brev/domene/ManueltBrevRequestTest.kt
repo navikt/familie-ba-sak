@@ -11,14 +11,15 @@ import org.junit.jupiter.api.assertThrows
 
 class ManueltBrevRequestTest {
     private val årsaker = listOf("1", "2", "3")
-    private val baseRequest = ManueltBrevRequest(
-        brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
-        multiselectVerdier = årsaker,
-        mottakerIdent = "testident",
-        mottakerNavn = "testnavn",
-        enhet = Enhet("testenhetId", "testenhet"),
-        antallUkerSvarfrist = 3,
-    )
+    private val baseRequest =
+        ManueltBrevRequest(
+            brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
+            multiselectVerdier = årsaker,
+            mottakerIdent = "testident",
+            mottakerNavn = "testnavn",
+            enhet = Enhet("testenhetId", "testenhet"),
+            antallUkerSvarfrist = 3,
+        )
 
     @Test
     fun `Forlenget svartidsbrev request skal gi forlenget svartid brevmal med riktig data`() {
@@ -36,16 +37,18 @@ class ManueltBrevRequestTest {
 
     @Test
     fun `Forlenget svartidsbrev institusjon request skal gi forlenget svartid brevmal med riktig data`() {
-        val brev = baseRequest.copy(
-            brevmal = Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
-            mottakerIdent = "998765432",
-            mottakerNavn = "Testorganisasjon",
-            vedrørende = PersonITest(
-                fødselsnummer = "testident",
-                navn = "testnavn",
-            ),
-        )
-            .tilBrev("saksbehandlerNavn") { emptyMap() }
+        val brev =
+            baseRequest.copy(
+                brevmal = Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
+                mottakerIdent = "998765432",
+                mottakerNavn = "Testorganisasjon",
+                vedrørende =
+                    PersonITest(
+                        fødselsnummer = "testident",
+                        navn = "testnavn",
+                    ),
+            )
+                .tilBrev("saksbehandlerNavn") { emptyMap() }
 
         assertThat(brev::class).isEqualTo(ForlengetSvartidsbrev::class)
         brev as ForlengetSvartidsbrev
@@ -64,17 +67,20 @@ class ManueltBrevRequestTest {
     fun `Innhente opplysninger brev til person og institusjon`() {
         val fnr = "12345678910"
         val orgnr = "123456789"
-        val brevRequestTilPerson = baseRequest.copy(
-            mottakerIdent = fnr,
-        )
-        val brevRequestTilInstitusjon = baseRequest.copy(
-            brevmal = Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
-            mottakerIdent = orgnr,
-            vedrørende = PersonITest(
-                fødselsnummer = fnr,
-                navn = "navn tilhørende $fnr",
-            ),
-        )
+        val brevRequestTilPerson =
+            baseRequest.copy(
+                mottakerIdent = fnr,
+            )
+        val brevRequestTilInstitusjon =
+            baseRequest.copy(
+                brevmal = Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
+                mottakerIdent = orgnr,
+                vedrørende =
+                    PersonITest(
+                        fødselsnummer = fnr,
+                        navn = "navn tilhørende $fnr",
+                    ),
+            )
         brevRequestTilPerson.tilBrev("saksbehandlerNavn") { emptyMap() }.data.apply {
             assertThat(flettefelter.fodselsnummer).containsExactly(brevRequestTilPerson.mottakerIdent)
             assertThat(flettefelter.navn).containsExactly(brevRequestTilPerson.mottakerNavn)
@@ -91,8 +97,9 @@ class ManueltBrevRequestTest {
 
     @Test
     fun `Varsel årleg kontroll eøs request skal gi varsel årleg kontroll eøs brevmal med riktig data`() {
-        val brev = baseRequest.copy(brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS, mottakerlandSed = listOf("SE"))
-            .tilBrev("saksbehandlerNavn") { mapOf(Pair("SE", "Sverige")) }
+        val brev =
+            baseRequest.copy(brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS, mottakerlandSed = listOf("SE"))
+                .tilBrev("saksbehandlerNavn") { mapOf(Pair("SE", "Sverige")) }
 
         assertThat(brev::class).isEqualTo(VarselbrevÅrlegKontrollEøs::class)
         brev as VarselbrevÅrlegKontrollEøs
@@ -106,12 +113,13 @@ class ManueltBrevRequestTest {
     @Test
     fun `Varsel årleg kontroll eøs med innhenting av opplysninger request skal gi varsel årleg kontroll eøs brevmal med riktig data`() {
         val dokumentliste = listOf("Dokument 1", "Dokument 2")
-        val brev = baseRequest.copy(
-            brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
-            mottakerlandSed = listOf("SE"),
-            multiselectVerdier = dokumentliste,
-        )
-            .tilBrev("saksbehandlerNavn") { mapOf(Pair("SE", "Sverige")) }
+        val brev =
+            baseRequest.copy(
+                brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
+                mottakerlandSed = listOf("SE"),
+                multiselectVerdier = dokumentliste,
+            )
+                .tilBrev("saksbehandlerNavn") { mapOf(Pair("SE", "Sverige")) }
 
         assertThat(brev::class).isEqualTo(VarselbrevÅrlegKontrollEøs::class)
         brev as VarselbrevÅrlegKontrollEøs

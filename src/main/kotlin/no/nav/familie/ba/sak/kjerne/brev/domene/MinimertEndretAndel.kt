@@ -43,14 +43,16 @@ fun EndretUtbetalingAndel.tilMinimertEndretUtbetalingAndel(): MinimertEndretAnde
     return MinimertEndretAndel(
         fom = this.fom!!,
         tom = this.tom!!,
-        aktørId = this.person?.aktør?.aktørId ?: throw Feil(
-            "Finner ikke aktørId på endretUtbetalingsandel ${this.id} " +
-                "ved konvertering til minimertEndretUtbetalingsandel",
-        ),
-        årsak = this.årsak ?: throw Feil(
-            "Har ikke årsak på endretUtbetalingsandel ${this.id} " +
-                "ved konvertering til minimertEndretUtbetalingsandel",
-        ),
+        aktørId =
+            this.person?.aktør?.aktørId ?: throw Feil(
+                "Finner ikke aktørId på endretUtbetalingsandel ${this.id} " +
+                    "ved konvertering til minimertEndretUtbetalingsandel",
+            ),
+        årsak =
+            this.årsak ?: throw Feil(
+                "Har ikke årsak på endretUtbetalingsandel ${this.id} " +
+                    "ved konvertering til minimertEndretUtbetalingsandel",
+            ),
         prosent = this.prosent,
     )
 }

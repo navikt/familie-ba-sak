@@ -98,17 +98,19 @@ class OppgaveServiceTest {
         } returns null
         every { personidentService.hentAktør(any()) } returns Aktør(AKTØR_ID_FAGSAK)
 
-        every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
-            behandlingId = 1,
-            behandlendeEnhetId = ENHETSNUMMER,
-            behandlendeEnhetNavn = "enhet",
-        )
+        every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns
+            ArbeidsfordelingPåBehandling(
+                behandlingId = 1,
+                behandlendeEnhetId = ENHETSNUMMER,
+                behandlendeEnhetNavn = "enhet",
+            )
 
-        every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
-            behandlingId = 1,
-            behandlendeEnhetId = ENHETSNUMMER,
-            behandlendeEnhetNavn = "enhet",
-        )
+        every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns
+            ArbeidsfordelingPåBehandling(
+                behandlingId = 1,
+                behandlendeEnhetId = ENHETSNUMMER,
+                behandlendeEnhetNavn = "enhet",
+            )
 
         val slot = slot<OpprettOppgaveRequest>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
@@ -145,17 +147,19 @@ class OppgaveServiceTest {
         } returns null
         every { personidentService.hentAktør(any()) } returns Aktør(AKTØR_ID_FAGSAK)
 
-        every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
-            behandlingId = 1,
-            behandlendeEnhetId = ENHETSNUMMER,
-            behandlendeEnhetNavn = "enhet",
-        )
+        every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns
+            ArbeidsfordelingPåBehandling(
+                behandlingId = 1,
+                behandlendeEnhetId = ENHETSNUMMER,
+                behandlendeEnhetNavn = "enhet",
+            )
 
-        every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
-            behandlingId = 1,
-            behandlendeEnhetId = ENHETSNUMMER,
-            behandlendeEnhetNavn = "enhet",
-        )
+        every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns
+            ArbeidsfordelingPåBehandling(
+                behandlingId = 1,
+                behandlendeEnhetId = ENHETSNUMMER,
+                behandlendeEnhetNavn = "enhet",
+            )
 
         val slot = slot<OpprettOppgaveRequest>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
@@ -263,10 +267,11 @@ class OppgaveServiceTest {
 
     @Test
     fun `hent oppgavefrister for åpne utvidtet barnetrygd behandlinger`() {
-        every { behandlingRepository.finnÅpneUtvidetBarnetrygdBehandlinger() } returns listOf(
-            lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L),
-            lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L),
-        )
+        every { behandlingRepository.finnÅpneUtvidetBarnetrygdBehandlinger() } returns
+            listOf(
+                lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L),
+                lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L),
+            )
         every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any(), any()) } returns lagTestOppgave()
 
         every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave(id = 10018798L, fristFerdigstillelse = "21.01.23")
@@ -296,7 +301,6 @@ class OppgaveServiceTest {
     }
 
     companion object {
-
         private const val FAGSAK_ID = 10000000L
         private const val BEHANDLING_ID = 20000000L
         private const val OPPGAVE_ID = "42"

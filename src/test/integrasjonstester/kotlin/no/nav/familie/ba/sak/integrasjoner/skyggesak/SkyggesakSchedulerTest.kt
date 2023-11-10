@@ -25,7 +25,6 @@ import java.time.LocalDateTime
 @ActiveProfiles("postgres", "integrasjonstest")
 @Tag("integration")
 class SkyggesakSchedulerTest {
-
     @Autowired
     lateinit var skyggesakRepository: SkyggesakRepository
 

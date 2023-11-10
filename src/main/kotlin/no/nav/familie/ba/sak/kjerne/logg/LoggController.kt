@@ -20,7 +20,6 @@ class LoggController(
     private val tilgangService: TilgangService,
     private val loggService: LoggService,
 ) {
-
     @GetMapping(path = ["/{behandlingId}"])
     fun hentLoggForBehandling(
         @PathVariable

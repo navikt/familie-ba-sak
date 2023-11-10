@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.Vilkårsvurderi
 import org.junit.jupiter.api.Test
 
 class RegistrerPersongrunnlagEnhetTest {
-
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val personopplysningGrunnlagForNyBehandlingService: PersonopplysningGrunnlagForNyBehandlingService = mockk()
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService = mockk()
@@ -27,16 +26,18 @@ class RegistrerPersongrunnlagEnhetTest {
     private val valutakursService: ValutakursService = mockk()
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService = mockk()
 
-    private val registrerPersongrunnlagSteg = RegistrerPersongrunnlag(
-        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-        vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
-        personopplysningGrunnlagForNyBehandlingService = personopplysningGrunnlagForNyBehandlingService,
-        eøsSkjemaerForNyBehandlingService = EøsSkjemaerForNyBehandlingService(
-            kompetanseService = kompetanseService,
-            utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
-            valutakursService = valutakursService,
-        ),
-    )
+    private val registrerPersongrunnlagSteg =
+        RegistrerPersongrunnlag(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
+            personopplysningGrunnlagForNyBehandlingService = personopplysningGrunnlagForNyBehandlingService,
+            eøsSkjemaerForNyBehandlingService =
+                EøsSkjemaerForNyBehandlingService(
+                    kompetanseService = kompetanseService,
+                    utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
+                    valutakursService = valutakursService,
+                ),
+        )
 
     @Test
     fun `Kopierer kompetanser, valutakurser og utenlandsk periodebeløp til ny behandling`() {
@@ -86,10 +87,11 @@ class RegistrerPersongrunnlagEnhetTest {
 
         registrerPersongrunnlagSteg.utførStegOgAngiNeste(
             behandling = behandling2,
-            data = RegistrerPersongrunnlagDTO(
-                ident = mor.aktør.aktivFødselsnummer(),
-                barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
-            ),
+            data =
+                RegistrerPersongrunnlagDTO(
+                    ident = mor.aktør.aktivFødselsnummer(),
+                    barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
+                ),
         )
 
         verify(exactly = 1) {

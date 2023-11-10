@@ -36,7 +36,10 @@ class PensjonService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val envService: EnvService,
 ) {
-    fun hentBarnetrygd(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
+    fun hentBarnetrygd(
+        personIdent: String,
+        fraDato: LocalDate,
+    ): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         val barnetrygdTilPensjon = fagsak?.let { hentBarnetrygdTilPensjon(fagsak, fraDato) }
@@ -45,12 +48,13 @@ class PensjonService(
         if (barnetrygdTilPensjon == null && barnetrygdTilPensjonFraInfotrygd.barnetrygdPerioder.isEmpty()) return emptyList()
 
         // Sjekk om det finnes relaterte saker, dvs om barna finnes i andre behandlinger
-        val barnetrygdMedRelaterteSaker = barnetrygdTilPensjon?.barnetrygdPerioder
-            ?.filter { it.personIdent != aktør.aktivFødselsnummer() }
-            ?.map { it.personIdent }?.distinct()
-            ?.map { hentBarnetrygdForRelatertPersonTilPensjon(it, fraDato, aktør) }
-            ?.flatten()
-            ?: emptyList()
+        val barnetrygdMedRelaterteSaker =
+            barnetrygdTilPensjon?.barnetrygdPerioder
+                ?.filter { it.personIdent != aktør.aktivFødselsnummer() }
+                ?.map { it.personIdent }?.distinct()
+                ?.map { hentBarnetrygdForRelatertPersonTilPensjon(it, fraDato, aktør) }
+                ?.flatten()
+                ?: emptyList()
 
         return barnetrygdMedRelaterteSaker.plus(barnetrygdTilPensjonFraInfotrygd.plus(barnetrygdTilPensjon)).distinct()
     }
@@ -67,20 +71,25 @@ class PensjonService(
         forelderAktør: Aktør,
     ): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
-        val fagsaker = fagsakRepository.finnFagsakerSomHarAndelerForAktør(aktør)
-            .filter { it.type == FagsakType.NORMAL } // skal kun ha normale fagsaker til med her
-            .filter { it.aktør != forelderAktør } // trenger ikke å hente data til forelderen på nytt
-            .distinct()
+        val fagsaker =
+            fagsakRepository.finnFagsakerSomHarAndelerForAktør(aktør)
+                .filter { it.type == FagsakType.NORMAL } // skal kun ha normale fagsaker til med her
+                .filter { it.aktør != forelderAktør } // trenger ikke å hente data til forelderen på nytt
+                .distinct()
         return fagsaker.mapNotNull { fagsak -> hentBarnetrygdTilPensjon(fagsak, fraDato) }
     }
 
-    private fun hentBarnetrygdTilPensjonFraInfotrygd(aktør: Aktør, fraDato: LocalDate): BarnetrygdTilPensjon {
+    private fun hentBarnetrygdTilPensjonFraInfotrygd(
+        aktør: Aktør,
+        fraDato: LocalDate,
+    ): BarnetrygdTilPensjon {
         val personidenter = personidenter(aktør, fraDato)
-        val allePerioderTilhørendeAktør = personidenter.flatMap { ident ->
-            infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident.fødselsnummer, fraDato).fagsaker.flatMap {
-                it.barnetrygdPerioder.maskerPersonidenteneIPreprod(aktør)
+        val allePerioderTilhørendeAktør =
+            personidenter.flatMap { ident ->
+                infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident.fødselsnummer, fraDato).fagsaker.flatMap {
+                    it.barnetrygdPerioder.maskerPersonidenteneIPreprod(aktør)
+                }
             }
-        }
 
         return BarnetrygdTilPensjon(
             fagsakEiersIdent = aktør.aktivFødselsnummer(),
@@ -88,9 +97,13 @@ class PensjonService(
         )
     }
 
-    private fun hentBarnetrygdTilPensjon(fagsak: Fagsak, fraDato: LocalDate): BarnetrygdTilPensjon? {
-        val behandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id)
-            ?: return null
+    private fun hentBarnetrygdTilPensjon(
+        fagsak: Fagsak,
+        fraDato: LocalDate,
+    ): BarnetrygdTilPensjon? {
+        val behandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id)
+                ?: return null
         logger.info("Henter perioder med barnetrygd til pensjon for fagsakId=${fagsak.id}, behandlingId=${behandling.id}")
 
         val perioder = hentPerioder(behandling, fraDato)
@@ -105,8 +118,9 @@ class PensjonService(
         behandling: Behandling,
         fraDato: LocalDate,
     ): List<BarnetrygdPeriode> {
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)
-            ?: error("Finner ikke tilkjent ytelse for behandling=${behandling.id}")
+        val tilkjentYtelse =
+            tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)
+                ?: error("Finner ikke tilkjent ytelse for behandling=${behandling.id}")
         return tilkjentYtelse.andelerTilkjentYtelse
             .filter { it.stønadTom.isSameOrAfter(fraDato.toYearMonth()) }
             .map { andel ->
@@ -116,11 +130,12 @@ class PensjonService(
                     utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
                     stønadFom = andel.stønadFom,
                     stønadTom = andel.stønadTom,
-                    delingsprosentYtelse = when (andel.prosent) {
-                        BigDecimal.valueOf(100L) -> YtelseProsent.FULL
-                        BigDecimal.valueOf(50L) -> YtelseProsent.DELT
-                        else -> YtelseProsent.USIKKER
-                    },
+                    delingsprosentYtelse =
+                        when (andel.prosent) {
+                            BigDecimal.valueOf(100L) -> YtelseProsent.FULL
+                            BigDecimal.valueOf(50L) -> YtelseProsent.DELT
+                            else -> YtelseProsent.USIKKER
+                        },
                     norgeErSekundærlandMedNullUtbetaling = andel.differanseberegnetPeriodebeløp?.let { it < 0 } ?: false,
                     sakstypeEkstern = behandling.kategori.tilPensjonSakstype(),
                 )
@@ -131,15 +146,19 @@ class PensjonService(
         aktør: Aktør,
         fraDato: LocalDate,
     ) = when {
-        envService.erPreprod() -> listOfNotNull(
-            tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer(), fraDato.year)?.let { Personident(it, aktør) },
-        )
+        envService.erPreprod() ->
+            listOfNotNull(
+                tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer(), fraDato.year)?.let { Personident(it, aktør) },
+            )
 
         else -> aktør.personidenter
     }
 
     @Cacheable("pensjon_testident", cacheManager = "dailyCache")
-    fun tilfeldigUttrekkInfotrygdBaQ(forIdent: String, år: Int): String? {
+    fun tilfeldigUttrekkInfotrygdBaQ(
+        forIdent: String,
+        år: Int,
+    ): String? {
         require(envService.erPreprod())
         return when {
             Random.nextBoolean() -> {

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
 class SanityServiceTest {
-
     @MockK
     private lateinit var sanityKlient: SanityKlient
 
@@ -21,25 +20,26 @@ class SanityServiceTest {
 
     @Test
     fun `hentSanityEØSBegrunnelser - skal ikke filtrere bort nye begrunnelser tilknyttet EØS praksisendring`() {
-        every { sanityKlient.hentEØSBegrunnelser() } returns EØSStandardbegrunnelse.values().map {
-            SanityEØSBegrunnelse(
-                apiNavn = it.sanityApiNavn,
-                navnISystem = it.name,
-                fagsakType = null,
-                periodeType = null,
-                tema = null,
-                vilkår = emptySet(),
-                annenForeldersAktivitet = emptyList(),
-                barnetsBostedsland = emptyList(),
-                kompetanseResultat = emptyList(),
-                hjemler = emptyList(),
-                hjemlerFolketrygdloven = emptyList(),
-                hjemlerEØSForordningen883 = emptyList(),
-                hjemlerEØSForordningen987 = emptyList(),
-                hjemlerSeperasjonsavtalenStorbritannina = emptyList(),
-                valgbarhet = null,
-            )
-        }
+        every { sanityKlient.hentEØSBegrunnelser() } returns
+            EØSStandardbegrunnelse.values().map {
+                SanityEØSBegrunnelse(
+                    apiNavn = it.sanityApiNavn,
+                    navnISystem = it.name,
+                    fagsakType = null,
+                    periodeType = null,
+                    tema = null,
+                    vilkår = emptySet(),
+                    annenForeldersAktivitet = emptyList(),
+                    barnetsBostedsland = emptyList(),
+                    kompetanseResultat = emptyList(),
+                    hjemler = emptyList(),
+                    hjemlerFolketrygdloven = emptyList(),
+                    hjemlerEØSForordningen883 = emptyList(),
+                    hjemlerEØSForordningen987 = emptyList(),
+                    hjemlerSeperasjonsavtalenStorbritannina = emptyList(),
+                    valgbarhet = null,
+                )
+            }
 
         val eøsBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
 

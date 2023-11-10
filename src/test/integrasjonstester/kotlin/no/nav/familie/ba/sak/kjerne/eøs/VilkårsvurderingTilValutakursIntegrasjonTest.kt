@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class VilkårsvurderingTilValutakursIntegrasjonTest : AbstractSpringIntegrationTest() {
-
     @Autowired
     lateinit var vilkårsvurderingTestController: VilkårsvurderingTestController
 
@@ -22,23 +21,27 @@ class VilkårsvurderingTilValutakursIntegrasjonTest : AbstractSpringIntegrationT
         val søkerStartdato = 1.jan(2020).tilLocalDate()
         val barnStartdato = 2.jan(2020).tilLocalDate()
 
-        val vilkårsvurderingRequest = mapOf(
-            søkerStartdato to mapOf(
-                Vilkår.BOSATT_I_RIKET to "EEEEEEEEEEEEEEEE",
-                Vilkår.LOVLIG_OPPHOLD to "EEEEEEEEEEEEEEEE",
-            ),
-            barnStartdato to mapOf(
-                Vilkår.UNDER_18_ÅR to "++++++++++++++++",
-                Vilkår.GIFT_PARTNERSKAP to "++++++++++++++++",
-                Vilkår.BOSATT_I_RIKET to "EEEEEEEEEEEEEEEE",
-                Vilkår.LOVLIG_OPPHOLD to "EEEEEEEEEEEEEEEE",
-                Vilkår.BOR_MED_SØKER to "EEEEEEEEEEEEEEEE",
-            ),
-        )
+        val vilkårsvurderingRequest =
+            mapOf(
+                søkerStartdato to
+                    mapOf(
+                        Vilkår.BOSATT_I_RIKET to "EEEEEEEEEEEEEEEE",
+                        Vilkår.LOVLIG_OPPHOLD to "EEEEEEEEEEEEEEEE",
+                    ),
+                barnStartdato to
+                    mapOf(
+                        Vilkår.UNDER_18_ÅR to "++++++++++++++++",
+                        Vilkår.GIFT_PARTNERSKAP to "++++++++++++++++",
+                        Vilkår.BOSATT_I_RIKET to "EEEEEEEEEEEEEEEE",
+                        Vilkår.LOVLIG_OPPHOLD to "EEEEEEEEEEEEEEEE",
+                        Vilkår.BOR_MED_SØKER to "EEEEEEEEEEEEEEEE",
+                    ),
+            )
 
-        val kompetanseRequest = mapOf(
-            barnStartdato to "PPPSSSSSSPPSSS--",
-        )
+        val kompetanseRequest =
+            mapOf(
+                barnStartdato to "PPPSSSSSSPPSSS--",
+            )
 
         val utvidetBehandlingFør =
             vilkårsvurderingTestController.opprettBehandlingMedVilkårsvurdering(vilkårsvurderingRequest)

@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class VedtaksperiodeServiceUtilsTest {
-
     @Test
     fun `Skal legge til alle barn med utbetaling ved utvidet barnetrygd`() {
         val behandling = lagBehandling()
@@ -36,30 +35,33 @@ class VedtaksperiodeServiceUtilsTest {
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn))
         val triggesAv = lagTriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
-        val vilkårsvurdering = lagVilkårsvurdering(
-            søkerAktør = søker.aktør,
-            behandling = behandling,
-            resultat = Resultat.OPPFYLT,
-        )
+        val vilkårsvurdering =
+            lagVilkårsvurdering(
+                søkerAktør = søker.aktør,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
         val identerMedUtbetaling = listOf(barn.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer())
 
-        val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
-            triggesAv = triggesAv,
-            vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-            vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
-            periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
-            restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
-                personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
-                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                minimerteEndredeUtbetalingAndeler = emptyList(),
-                fagsakType = FagsakType.NORMAL,
-            ),
-            identerMedUtbetalingPåPeriode = identerMedUtbetaling,
-            erFørsteVedtaksperiodePåFagsak = false,
-            minimerteUtbetalingsperiodeDetaljer = listOf(),
-            dødeBarnForrigePeriode = emptyList(),
-            begrunnelse = Standardbegrunnelse.INNVILGET_BOR_ALENE_MED_BARN,
-        )
+        val personidenterForBegrunnelse =
+            hentPersonidenterGjeldendeForBegrunnelse(
+                triggesAv = triggesAv,
+                vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
+                vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+                periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
+                restBehandlingsgrunnlagForBrev =
+                    RestBehandlingsgrunnlagForBrev(
+                        personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
+                        minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+                        minimerteEndredeUtbetalingAndeler = emptyList(),
+                        fagsakType = FagsakType.NORMAL,
+                    ),
+                identerMedUtbetalingPåPeriode = identerMedUtbetaling,
+                erFørsteVedtaksperiodePåFagsak = false,
+                minimerteUtbetalingsperiodeDetaljer = listOf(),
+                dødeBarnForrigePeriode = emptyList(),
+                begrunnelse = Standardbegrunnelse.INNVILGET_BOR_ALENE_MED_BARN,
+            )
 
         Assertions.assertEquals(
             setOf(barn.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer()),
@@ -75,46 +77,52 @@ class VedtaksperiodeServiceUtilsTest {
         val barn2 = lagPerson(type = PersonType.BARN)
 
         val fom = LocalDate.now().withDayOfMonth(1)
-        val tom = LocalDate.now().let {
-            it.withDayOfMonth(it.lengthOfMonth())
-        }
+        val tom =
+            LocalDate.now().let {
+                it.withDayOfMonth(it.lengthOfMonth())
+            }
 
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn2))
         val triggesAv = lagTriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
-        val vilkårsvurdering = lagVilkårsvurdering(
-            søkerAktør = søker.aktør,
-            behandling = behandling,
-            resultat = Resultat.OPPFYLT,
-        )
+        val vilkårsvurdering =
+            lagVilkårsvurdering(
+                søkerAktør = søker.aktør,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
 
         val identerMedUtbetaling = listOf(barn1.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer())
-        val endredeUtbetalingAndeler = listOf(
-            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-                person = barn2,
-                fom = fom.toYearMonth(),
-                tom = tom.toYearMonth(),
-            ),
-        )
+        val endredeUtbetalingAndeler =
+            listOf(
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                    person = barn2,
+                    fom = fom.toYearMonth(),
+                    tom = tom.toYearMonth(),
+                ),
+            )
 
-        val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
-            triggesAv = triggesAv,
-            periode = NullablePeriode(fom, tom),
-            vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-            vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
-            restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
-                personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
-                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler
-                    .map { it.tilMinimertRestEndretUtbetalingAndel() },
-                fagsakType = FagsakType.NORMAL,
-            ),
-            identerMedUtbetalingPåPeriode = identerMedUtbetaling,
-            erFørsteVedtaksperiodePåFagsak = false,
-            minimerteUtbetalingsperiodeDetaljer = listOf(),
-            dødeBarnForrigePeriode = emptyList(),
-            begrunnelse = Standardbegrunnelse.INNVILGET_BOR_ALENE_MED_BARN,
-        )
+        val personidenterForBegrunnelse =
+            hentPersonidenterGjeldendeForBegrunnelse(
+                triggesAv = triggesAv,
+                periode = NullablePeriode(fom, tom),
+                vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
+                vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+                restBehandlingsgrunnlagForBrev =
+                    RestBehandlingsgrunnlagForBrev(
+                        personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
+                        minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+                        minimerteEndredeUtbetalingAndeler =
+                            endredeUtbetalingAndeler
+                                .map { it.tilMinimertRestEndretUtbetalingAndel() },
+                        fagsakType = FagsakType.NORMAL,
+                    ),
+                identerMedUtbetalingPåPeriode = identerMedUtbetaling,
+                erFørsteVedtaksperiodePåFagsak = false,
+                minimerteUtbetalingsperiodeDetaljer = listOf(),
+                dødeBarnForrigePeriode = emptyList(),
+                begrunnelse = Standardbegrunnelse.INNVILGET_BOR_ALENE_MED_BARN,
+            )
 
         Assertions.assertEquals(
             setOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer()),

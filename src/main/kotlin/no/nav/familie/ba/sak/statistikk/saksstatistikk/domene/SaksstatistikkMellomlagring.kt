@@ -27,36 +27,26 @@ data class SaksstatistikkMellomlagring(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Column(name = "offset_verdi")
     var offsetVerdiOnPrem: Long? = null,
-
     @Column(name = "offset_aiven")
     var offsetVerdi: Long? = null,
-
     @Column(name = "funksjonell_id")
     val funksjonellId: String,
-
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
     val type: SaksstatistikkMellomlagringType,
-
     @Column(name = "kontrakt_versjon")
     val kontraktVersjon: String,
-
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "json")
     val json: String,
-
     @Column(name = "opprettet_tid", nullable = false, updatable = false)
     val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
-
     @Column(name = "konvertert_tid")
     var konvertertTidspunkt: LocalDateTime? = null,
-
     @Column(name = "sendt_tid")
     var sendtTidspunkt: LocalDateTime? = null,
-
     @Column(name = "type_id")
     var typeId: Long? = null,
 ) {

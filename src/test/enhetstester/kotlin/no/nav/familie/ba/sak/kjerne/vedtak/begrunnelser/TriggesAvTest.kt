@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
 class TriggesAvTest {
-
     val vilkårUtenUtvidetBarnetrygd: Set<Vilkår> = emptySet()
     val vilkårMedUtvidetBarnetrygd: Set<Vilkår> = setOf(Vilkår.UTVIDET_BARNETRYGD)
 
@@ -27,22 +26,25 @@ class TriggesAvTest {
             årsak = Årsak.DELT_BOSTED,
         )
 
-    val triggesAvEtterEndretUtbetaling = lagTriggesAv(
-        etterEndretUtbetaling = true,
-        endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES,
-        endringsaarsaker = setOf(
-            Årsak.DELT_BOSTED,
-        ),
-        vilkår = vilkårMedUtvidetBarnetrygd,
-    )
+    val triggesAvEtterEndretUtbetaling =
+        lagTriggesAv(
+            etterEndretUtbetaling = true,
+            endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES,
+            endringsaarsaker =
+                setOf(
+                    Årsak.DELT_BOSTED,
+                ),
+            vilkår = vilkårMedUtvidetBarnetrygd,
+        )
 
     val triggesIkkeAvSkalUtbetalesMedUtvidetVilkår =
         lagTriggesAv(
             endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES,
             etterEndretUtbetaling = false,
-            endringsaarsaker = setOf(
-                Årsak.DELT_BOSTED,
-            ),
+            endringsaarsaker =
+                setOf(
+                    Årsak.DELT_BOSTED,
+                ),
             vilkår = vilkårMedUtvidetBarnetrygd,
         )
 
@@ -50,48 +52,55 @@ class TriggesAvTest {
         lagTriggesAv(
             endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES,
             etterEndretUtbetaling = false,
-            endringsaarsaker = setOf(
-                Årsak.DELT_BOSTED,
-            ),
+            endringsaarsaker =
+                setOf(
+                    Årsak.DELT_BOSTED,
+                ),
             vilkår = vilkårUtenUtvidetBarnetrygd,
         )
 
-    val triggesAvSkalUtbetalesMedUtvidetVilkår = lagTriggesAv(
-        endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES,
-        etterEndretUtbetaling = false,
-        endringsaarsaker = setOf(
-            Årsak.DELT_BOSTED,
-        ),
-        vilkår = vilkårMedUtvidetBarnetrygd,
-    )
+    val triggesAvSkalUtbetalesMedUtvidetVilkår =
+        lagTriggesAv(
+            endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES,
+            etterEndretUtbetaling = false,
+            endringsaarsaker =
+                setOf(
+                    Årsak.DELT_BOSTED,
+                ),
+            vilkår = vilkårMedUtvidetBarnetrygd,
+        )
 
-    val triggesAvSkalUtbetalesUtenUtvidetVilkår = lagTriggesAv(
-        endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES,
-        etterEndretUtbetaling = false,
-        endringsaarsaker = setOf(
-            Årsak.DELT_BOSTED,
-        ),
-        vilkår = vilkårUtenUtvidetBarnetrygd,
-    )
+    val triggesAvSkalUtbetalesUtenUtvidetVilkår =
+        lagTriggesAv(
+            endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES,
+            etterEndretUtbetaling = false,
+            endringsaarsaker =
+                setOf(
+                    Årsak.DELT_BOSTED,
+                ),
+            vilkår = vilkårUtenUtvidetBarnetrygd,
+        )
 
     @Test
     fun `Skal gi false dersom er etter endret utbetaling`() {
-        val erEtterEndretUbetaling = triggesAvEtterEndretUtbetaling.erTriggereOppfyltForEndretUtbetaling(
-            minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-            minimerteUtbetalingsperiodeDetaljer = emptyList(),
-        )
+        val erEtterEndretUbetaling =
+            triggesAvEtterEndretUtbetaling.erTriggereOppfyltForEndretUtbetaling(
+                minimertEndretAndel = endretUtbetalingAndelIkkeNull,
+                minimerteUtbetalingsperiodeDetaljer = emptyList(),
+            )
 
         Assertions.assertFalse(erEtterEndretUbetaling)
 
-        val erEtterEndretUbetalingMedToggle = triggesAvEtterEndretUtbetaling.erTriggereOppfyltForEndretUtbetaling(
-            minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-            minimerteUtbetalingsperiodeDetaljer = listOf(
-                lagMinimertUtbetalingsperiodeDetalj(
-                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                ),
-            ),
-
-        )
+        val erEtterEndretUbetalingMedToggle =
+            triggesAvEtterEndretUtbetaling.erTriggereOppfyltForEndretUtbetaling(
+                minimertEndretAndel = endretUtbetalingAndelIkkeNull,
+                minimerteUtbetalingsperiodeDetaljer =
+                    listOf(
+                        lagMinimertUtbetalingsperiodeDetalj(
+                            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        ),
+                    ),
+            )
         Assertions.assertFalse(erEtterEndretUbetalingMedToggle)
     }
 
@@ -100,45 +109,49 @@ class TriggesAvTest {
         val skalUtbetalesMedUtbetaling =
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                minimerteUtbetalingsperiodeDetaljer = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                        erPåvirketAvEndring = true,
+                minimerteUtbetalingsperiodeDetaljer =
+                    listOf(
+                        lagMinimertUtbetalingsperiodeDetalj(
+                            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                            erPåvirketAvEndring = true,
+                        ),
                     ),
-                ),
             )
 
         val skalUtbetalesUtenUtbetaling =
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelNull,
-                minimerteUtbetalingsperiodeDetaljer = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                        erPåvirketAvEndring = true,
+                minimerteUtbetalingsperiodeDetaljer =
+                    listOf(
+                        lagMinimertUtbetalingsperiodeDetalj(
+                            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                            erPåvirketAvEndring = true,
+                        ),
                     ),
-                ),
             )
 
         val skalIkkeUtbetalesUtenUtbetaling =
             triggesIkkeAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelNull,
-                minimerteUtbetalingsperiodeDetaljer = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                        erPåvirketAvEndring = true,
+                minimerteUtbetalingsperiodeDetaljer =
+                    listOf(
+                        lagMinimertUtbetalingsperiodeDetalj(
+                            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                            erPåvirketAvEndring = true,
+                        ),
                     ),
-                ),
             )
 
         val skalIkkeUtbetalesMedUtbetaling =
             triggesIkkeAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                minimerteUtbetalingsperiodeDetaljer = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                        erPåvirketAvEndring = true,
+                minimerteUtbetalingsperiodeDetaljer =
+                    listOf(
+                        lagMinimertUtbetalingsperiodeDetalj(
+                            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                            erPåvirketAvEndring = true,
+                        ),
                     ),
-                ),
             )
 
         Assertions.assertTrue(skalUtbetalesMedUtbetaling)
@@ -152,78 +165,85 @@ class TriggesAvTest {
         Assertions.assertTrue(
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                minimerteUtbetalingsperiodeDetaljer = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                        erPåvirketAvEndring = true,
+                minimerteUtbetalingsperiodeDetaljer =
+                    listOf(
+                        lagMinimertUtbetalingsperiodeDetalj(
+                            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                            erPåvirketAvEndring = true,
+                        ),
                     ),
-                ),
             ),
         )
 
         Assertions.assertFalse(
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                minimerteUtbetalingsperiodeDetaljer = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(ytelseType = YtelseType.ORDINÆR_BARNETRYGD),
-                ),
+                minimerteUtbetalingsperiodeDetaljer =
+                    listOf(
+                        lagMinimertUtbetalingsperiodeDetalj(ytelseType = YtelseType.ORDINÆR_BARNETRYGD),
+                    ),
             ),
         )
 
         Assertions.assertTrue(
             triggesAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                minimerteUtbetalingsperiodeDetaljer = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                minimerteUtbetalingsperiodeDetaljer =
+                    listOf(
+                        lagMinimertUtbetalingsperiodeDetalj(
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        ),
                     ),
-                ),
             ),
         )
 
         Assertions.assertFalse(
             triggesAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                minimerteUtbetalingsperiodeDetaljer = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                        erPåvirketAvEndring = true,
+                minimerteUtbetalingsperiodeDetaljer =
+                    listOf(
+                        lagMinimertUtbetalingsperiodeDetalj(
+                            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                            erPåvirketAvEndring = true,
+                        ),
                     ),
-                ),
             ),
         )
 
         Assertions.assertFalse(
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                minimerteUtbetalingsperiodeDetaljer = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                        erPåvirketAvEndring = false,
+                minimerteUtbetalingsperiodeDetaljer =
+                    listOf(
+                        lagMinimertUtbetalingsperiodeDetalj(
+                            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                            erPåvirketAvEndring = false,
+                        ),
                     ),
-                ),
             ),
         )
 
         Assertions.assertTrue(
             triggesAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                minimerteUtbetalingsperiodeDetaljer = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                        erPåvirketAvEndring = false,
+                minimerteUtbetalingsperiodeDetaljer =
+                    listOf(
+                        lagMinimertUtbetalingsperiodeDetalj(
+                            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                            erPåvirketAvEndring = false,
+                        ),
                     ),
-                ),
             ),
         )
     }
 
     @Test
     fun `Skal ikke være oppfylt hvis endringsperiode og triggesav ulik årsak`() {
-        val endretUtbetalingAndel = lagMinimertEndretUtbetalingAndel(
-            prosent = BigDecimal.ZERO,
-            årsak = Årsak.ALLEREDE_UTBETALT,
-        )
+        val endretUtbetalingAndel =
+            lagMinimertEndretUtbetalingAndel(
+                prosent = BigDecimal.ZERO,
+                årsak = Årsak.ALLEREDE_UTBETALT,
+            )
 
         Assertions.assertFalse(
             triggesIkkeAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
@@ -235,12 +255,12 @@ class TriggesAvTest {
         Assertions.assertFalse(
             triggesIkkeAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndel,
-                minimerteUtbetalingsperiodeDetaljer = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                minimerteUtbetalingsperiodeDetaljer =
+                    listOf(
+                        lagMinimertUtbetalingsperiodeDetalj(
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        ),
                     ),
-                ),
-
             ),
         )
     }

@@ -13,10 +13,11 @@ class KompetanseService(
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>,
 ) {
-    val skjemaService = PeriodeOgBarnSkjemaService(
-        kompetanseRepository,
-        endringsabonnenter,
-    )
+    val skjemaService =
+        PeriodeOgBarnSkjemaService(
+            kompetanseRepository,
+            endringsabonnenter,
+        )
 
     fun hentKompetanser(behandlingId: BehandlingId) =
         skjemaService.hentMedBehandlingId(behandlingId)
@@ -25,14 +26,23 @@ class KompetanseService(
         skjemaService.hentMedId(kompetanseId)
 
     @Transactional
-    fun oppdaterKompetanse(behandlingId: BehandlingId, oppdatering: Kompetanse) =
+    fun oppdaterKompetanse(
+        behandlingId: BehandlingId,
+        oppdatering: Kompetanse,
+    ) =
         skjemaService.endreSkjemaer(behandlingId, oppdatering)
 
     @Transactional
-    fun slettKompetanse(behandlingId: BehandlingId, kompetanseId: Long) =
+    fun slettKompetanse(
+        behandlingId: BehandlingId,
+        kompetanseId: Long,
+    ) =
         skjemaService.slettSkjema(behandlingId, kompetanseId)
 
     @Transactional
-    fun kopierOgErstattKompetanser(fraBehandlingId: BehandlingId, tilBehandlingId: BehandlingId) =
+    fun kopierOgErstattKompetanser(
+        fraBehandlingId: BehandlingId,
+        tilBehandlingId: BehandlingId,
+    ) =
         skjemaService.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
 }

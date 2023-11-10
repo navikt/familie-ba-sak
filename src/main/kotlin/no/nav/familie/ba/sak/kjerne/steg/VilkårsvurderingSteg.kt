@@ -27,8 +27,10 @@ class VilkårsvurderingSteg(
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 ) : BehandlingSteg<String> {
-
-    override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
+    override fun preValiderSteg(
+        behandling: Behandling,
+        stegService: StegService?,
+    ) {
         val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
@@ -64,9 +66,10 @@ class VilkårsvurderingSteg(
             vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
                 behandling = behandling,
                 bekreftEndringerViaFrontend = true,
-                forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
-                    behandling,
-                ),
+                forrigeBehandlingSomErVedtatt =
+                    behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
+                        behandling,
+                    ),
             )
         }
 

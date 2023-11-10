@@ -7,14 +7,15 @@ import java.io.InputStreamReader
 
 fun main(args: Array<String>) {
     System.setProperty("spring.profiles.active", Profil.DevPostgresPreprod.navn)
-    val springBuilder = SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
-        "mock-økonomi",
-        "mock-infotrygd-feed",
-        "mock-tilbakekreving-klient",
-        "task-scheduling",
-        "mock-infotrygd-barnetrygd",
-        "mock-leader-client",
-    )
+    val springBuilder =
+        SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
+            "mock-økonomi",
+            "mock-infotrygd-feed",
+            "mock-tilbakekreving-klient",
+            "task-scheduling",
+            "mock-infotrygd-barnetrygd",
+            "mock-leader-client",
+        )
 
     if (args.contains("--dbcontainer")) {
         springBuilder.initializers(DbContainerInitializer())

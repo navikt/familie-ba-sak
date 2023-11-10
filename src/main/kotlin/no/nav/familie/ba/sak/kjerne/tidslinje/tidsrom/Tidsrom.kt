@@ -30,26 +30,29 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.tilOgMed() =
         }
     }
 
-fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.fraOgMed() = this
-    .mapNotNull { it.fraOgMed() }
-    .minsteEllerNull()
+fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.fraOgMed() =
+    this
+        .mapNotNull { it.fraOgMed() }
+        .minsteEllerNull()
 
-fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tilOgMed() = this
-    .mapNotNull { it.tilOgMed() }
-    .størsteEllerNull()
+fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tilOgMed() =
+    this
+        .mapNotNull { it.tilOgMed() }
+        .størsteEllerNull()
 
-fun <I, T : Tidsenhet> Tidslinje<I, T>.tidsrom(): Collection<Tidspunkt<T>> = when {
-    this.perioder().isEmpty() -> emptyList()
-    else -> {
-        val fraOgMed = this.fraOgMed()
-        val tilOgMed = this.tilOgMed()
-        if (fraOgMed == null || tilOgMed == null) {
-            emptyList()
-        } else {
-            (fraOgMed..tilOgMed).toList()
+fun <I, T : Tidsenhet> Tidslinje<I, T>.tidsrom(): Collection<Tidspunkt<T>> =
+    when {
+        this.perioder().isEmpty() -> emptyList()
+        else -> {
+            val fraOgMed = this.fraOgMed()
+            val tilOgMed = this.tilOgMed()
+            if (fraOgMed == null || tilOgMed == null) {
+                emptyList()
+            } else {
+                (fraOgMed..tilOgMed).toList()
+            }
         }
     }
-}
 
 fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tidsrom(): Collection<Tidspunkt<T>> {
     val fraOgMed = fraOgMed() ?: return emptyList()
@@ -65,7 +68,10 @@ private fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.størsteEllerNull() =
 private fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.minsteEllerNull() =
     this.reduceOrNull { acc, neste -> minsteAv(acc, neste) }
 
-internal fun <T : Tidsenhet> størsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> =
+internal fun <T : Tidsenhet> størsteAv(
+    t1: Tidspunkt<T>,
+    t2: Tidspunkt<T>,
+): Tidspunkt<T> =
     if (t1.erUendeligLengeTil() && t2.erEndelig() && t1.endeligMindreEllerLik(t2)) {
         t2.neste().somUendeligLengeTil()
     } else if (t2.erUendeligLengeTil() && t1.erEndelig() && t2.endeligMindreEllerLik(t1)) {
@@ -76,7 +82,10 @@ internal fun <T : Tidsenhet> størsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tid
         maxOf(t1, t2)
     }
 
-internal fun <T : Tidsenhet> minsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> =
+internal fun <T : Tidsenhet> minsteAv(
+    t1: Tidspunkt<T>,
+    t2: Tidspunkt<T>,
+): Tidspunkt<T> =
     if (t1.erUendeligLengeSiden() && t2.erEndelig() && t2.endeligMindreEllerLik(t1)) {
         t2.forrige().somUendeligLengeSiden()
     } else if (t2.erUendeligLengeSiden() && t1.erEndelig() && t1.endeligMindreEllerLik(t2)) {

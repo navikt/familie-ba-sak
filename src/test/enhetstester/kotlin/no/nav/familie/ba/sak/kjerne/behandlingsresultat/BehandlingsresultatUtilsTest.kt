@@ -14,7 +14,6 @@ import java.time.YearMonth
 import java.util.stream.Stream
 
 class BehandlingsresultatUtilsTest {
-
     val søker = tilfeldigPerson()
 
     @BeforeEach
@@ -30,11 +29,12 @@ class BehandlingsresultatUtilsTest {
         opphørsresultat: Opphørsresultat,
         behandlingsresultat: Behandlingsresultat,
     ) {
-        val kombinertResultat = BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(
-            søknadsresultat,
-            endringsresultat,
-            opphørsresultat,
-        )
+        val kombinertResultat =
+            BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(
+                søknadsresultat,
+                endringsresultat,
+                opphørsresultat,
+            )
 
         assertEquals(kombinertResultat, behandlingsresultat)
     }

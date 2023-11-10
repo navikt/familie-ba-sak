@@ -77,21 +77,22 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val opprettTaskService: OpprettTaskService,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
-
     private val barnFødselsdato = LocalDate.now().minusYears(2)
     private val periodeMedFullOvergangsstønadFom = barnFødselsdato.plusYears(1)
 
-    val restScenario = RestScenario(
-        søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-        barna = listOf(
-            RestScenarioPerson(
-                fødselsdato = barnFødselsdato.toString(),
-                fornavn = "Barn",
-                etternavn = "Barnesen",
-                bostedsadresser = emptyList(),
-            ),
-        ),
-    )
+    val restScenario =
+        RestScenario(
+            søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+            barna =
+                listOf(
+                    RestScenarioPerson(
+                        fødselsdato = barnFødselsdato.toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen",
+                        bostedsadresser = emptyList(),
+                    ),
+                ),
+        )
 
     lateinit var scenario: RestScenario
 
@@ -112,16 +113,18 @@ class BehandleSmåbarnstilleggTest(
     }
 
     private fun settOppefSakMockForDeFørste2Testene(søkersIdent: String) {
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = listOf(
-                EksternPeriode(
-                    personIdent = søkersIdent,
-                    fomDato = periodeMedFullOvergangsstønadFom,
-                    tomDato = barnFødselsdato.plusYears(18),
-                    datakilde = Datakilde.EF,
-                ),
-            ),
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder =
+                    listOf(
+                        EksternPeriode(
+                            personIdent = søkersIdent,
+                            fomDato = periodeMedFullOvergangsstønadFom,
+                            tomDato = barnFødselsdato.plusYears(18),
+                            datakilde = Datakilde.EF,
+                        ),
+                    ),
+            )
     }
 
     @Test
@@ -131,20 +134,22 @@ class BehandleSmåbarnstilleggTest(
         settOppefSakMockForDeFørste2Testene(søkersIdent)
 
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
-        val restBehandling = familieBaSakKlient().opprettBehandling(
-            søkersIdent = søkersIdent,
-            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
-            fagsakId = fagsak.data!!.id,
-        )
+        val restBehandling =
+            familieBaSakKlient().opprettBehandling(
+                søkersIdent = søkersIdent,
+                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
+                fagsakId = fagsak.data!!.id,
+            )
 
         val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
             RestRegistrerSøknad(
-                søknad = lagSøknadDTO(
-                    søkerIdent = søkersIdent,
-                    barnasIdenter = scenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.UTVIDET,
-                ),
+                søknad =
+                    lagSøknadDTO(
+                        søkerIdent = søkersIdent,
+                        barnasIdenter = scenario.barna.map { it.ident!! },
+                        underkategori = BehandlingUnderkategori.UTVIDET,
+                    ),
                 bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
@@ -164,15 +169,16 @@ class BehandleSmåbarnstilleggTest(
                     behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,
                     restPersonResultat =
-                    RestPersonResultat(
-                        personIdent = restPersonResultat.personIdent,
-                        vilkårResultater = listOf(
-                            it.copy(
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = barnFødselsdato,
-                            ),
+                        RestPersonResultat(
+                            personIdent = restPersonResultat.personIdent,
+                            vilkårResultater =
+                                listOf(
+                                    it.copy(
+                                        resultat = Resultat.OPPFYLT,
+                                        periodeFom = barnFødselsdato,
+                                    ),
+                                ),
                         ),
-                    ),
                 )
             }
         }
@@ -230,18 +236,21 @@ class BehandleSmåbarnstilleggTest(
             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
         )
 
-        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
-        )
+        val vedtaksperioderMedBegrunnelser =
+            vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+                restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+            )
 
         val vedtaksperiode = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiode.id,
-            restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                standardbegrunnelser = listOf(
-                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+            restPutVedtaksperiodeMedStandardbegrunnelser =
+                RestPutVedtaksperiodeMedStandardbegrunnelser(
+                    standardbegrunnelser =
+                        listOf(
+                            Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+                        ),
                 ),
-            ),
         )
 
         val restUtvidetBehandlingEtterSendTilBeslutter =
@@ -256,21 +265,23 @@ class BehandleSmåbarnstilleggTest(
         val restUtvidetBehandlingEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
                 behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
-                restBeslutningPåVedtak = RestBeslutningPåVedtak(
-                    Beslutning.GODKJENT,
-                ),
-                beslutterHeaders = HttpHeaders().apply {
-                    setBearerAuth(
-                        token(
-                            mapOf(
-                                "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
-                                "azp" to "azp-test",
-                                "name" to "Mock McMockface Beslutter",
-                                "NAVident" to "Z0000",
+                restBeslutningPåVedtak =
+                    RestBeslutningPåVedtak(
+                        Beslutning.GODKJENT,
+                    ),
+                beslutterHeaders =
+                    HttpHeaders().apply {
+                        setBearerAuth(
+                            token(
+                                mapOf(
+                                    "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
+                                    "azp" to "azp-test",
+                                    "name" to "Mock McMockface Beslutter",
+                                    "NAVident" to "Z0000",
+                                ),
                             ),
-                        ),
-                    )
-                },
+                        )
+                    },
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
@@ -314,16 +325,18 @@ class BehandleSmåbarnstilleggTest(
         val søkersAktør = personidentService.hentAktør(scenario.søker.aktørId!!)
 
         val periodeOvergangsstønadTom = LocalDate.now().minusMonths(3)
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = listOf(
-                EksternPeriode(
-                    personIdent = søkersAktør.aktivFødselsnummer(),
-                    fomDato = periodeMedFullOvergangsstønadFom,
-                    tomDato = periodeOvergangsstønadTom,
-                    datakilde = Datakilde.EF,
-                ),
-            ),
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder =
+                    listOf(
+                        EksternPeriode(
+                            personIdent = søkersAktør.aktivFødselsnummer(),
+                            fomDato = periodeMedFullOvergangsstønadFom,
+                            tomDato = periodeOvergangsstønadTom,
+                            datakilde = Datakilde.EF,
+                        ),
+                    ),
+            )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
             aktør = søkersAktør,
@@ -351,13 +364,15 @@ class BehandleSmåbarnstilleggTest(
         assertEquals(StegType.BEHANDLINGSRESULTAT, aktivBehandling.steg)
         assertEquals(BehandlingStatus.UTREDES, aktivBehandling.status)
 
-        val behandlingEtterHenleggelse = stegService.håndterHenleggBehandling(
-            behandling = aktivBehandling,
-            henleggBehandlingInfo = RestHenleggBehandlingInfo(
-                årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
-                begrunnelse = "",
-            ),
-        )
+        val behandlingEtterHenleggelse =
+            stegService.håndterHenleggBehandling(
+                behandling = aktivBehandling,
+                henleggBehandlingInfo =
+                    RestHenleggBehandlingInfo(
+                        årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
+                        begrunnelse = "",
+                    ),
+            )
         assertEquals(false, behandlingEtterHenleggelse.aktiv)
     }
 
@@ -370,16 +385,18 @@ class BehandleSmåbarnstilleggTest(
         val søkersAktør = personidentService.hentAktør(søkersIdent)
 
         val periodeOvergangsstønadTom = LocalDate.now()
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = listOf(
-                EksternPeriode(
-                    personIdent = søkersIdent,
-                    fomDato = periodeMedFullOvergangsstønadFom,
-                    tomDato = periodeOvergangsstønadTom,
-                    datakilde = Datakilde.EF,
-                ),
-            ),
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder =
+                    listOf(
+                        EksternPeriode(
+                            personIdent = søkersIdent,
+                            fomDato = periodeMedFullOvergangsstønadFom,
+                            tomDato = periodeOvergangsstønadTom,
+                            datakilde = Datakilde.EF,
+                        ),
+                    ),
+            )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
             aktør = søkersAktør,
@@ -402,9 +419,10 @@ class BehandleSmåbarnstilleggTest(
             småbarnstilleggAndel.stønadTom,
         )
 
-        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(
-            vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.id),
-        )
+        val vedtaksperioderMedBegrunnelser =
+            vedtaksperiodeService.hentPersisterteVedtaksperioder(
+                vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.id),
+            )
 
         val aktuellVedtaksperiode =
             vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == YearMonth.now().nesteMåned() }

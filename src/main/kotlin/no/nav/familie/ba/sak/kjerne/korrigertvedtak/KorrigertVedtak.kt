@@ -27,17 +27,13 @@ class KorrigertVedtak(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Column(name = "vedtaksdato", columnDefinition = "DATE")
     val vedtaksdato: LocalDate,
-
     @Column(name = "begrunnelse")
     val begrunnelse: String?,
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_behandling_id")
     val behandling: Behandling,
-
     @Column(name = "aktiv")
     var aktiv: Boolean,
 ) : BaseEntitet()
