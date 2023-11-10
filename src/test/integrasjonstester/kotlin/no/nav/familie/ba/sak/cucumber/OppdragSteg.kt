@@ -36,6 +36,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 
+@Suppress("ktlint:standard:function-naming")
 class OppdragSteg {
     private val utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(mockk(relaxed = true))
     private var behandlinger = mapOf<Long, Behandling>()

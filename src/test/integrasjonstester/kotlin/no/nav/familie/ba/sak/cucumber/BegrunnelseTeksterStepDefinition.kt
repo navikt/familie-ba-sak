@@ -50,6 +50,7 @@ import java.time.LocalDate
 val sanityBegrunnelserMock = SanityBegrunnelseMock.hentSanityBegrunnelserMock()
 val sanityEØSBegrunnelserMock = SanityBegrunnelseMock.hentSanityEØSBegrunnelserMock()
 
+@Suppress("ktlint:standard:function-naming")
 class BegrunnelseTeksterStepDefinition {
     private var fagsaker: Map<Long, Fagsak> = emptyMap()
     private var behandlinger = mutableMapOf<Long, Behandling>()

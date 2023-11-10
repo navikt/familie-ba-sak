@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import org.assertj.core.api.Assertions
 import java.time.LocalDate
 
+@Suppress("ktlint:standard:function-naming")
 class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var fagsaker: Map<Long, Fagsak> = emptyMap()
     private var behandlinger = mutableMapOf<Long, Behandling>()
