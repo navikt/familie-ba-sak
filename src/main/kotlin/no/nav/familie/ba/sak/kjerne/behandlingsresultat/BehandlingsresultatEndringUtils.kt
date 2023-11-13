@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -79,6 +80,15 @@ object BehandlingsresultatEndringUtils {
                     "erEndringIKompetanse=$erEndringIKompetanse, " +
                     "erEndringIVilkårsvurdering=$erEndringIVilkårsvurdering, " +
                     "erEndringIEndretUtbetalingAndeler=$erEndringIEndretUtbetalingAndeler",
+            )
+
+            val endredeAndelTilkjentYtelse = if (erEndringIBeløp) "nye AndelerTilkjentYtelse: $nåværendeAndeler , " else ""
+            val endredeKompetanser = if (erEndringIKompetanse) "nye kompetanser: $nåværendeKompetanser ," else ""
+            val endredeVilkårsvurderinger = if (erEndringIVilkårsvurdering) "nye personresultater: $nåværendePersonResultat ," else ""
+            val endredeEndretUtbetalingAndeler = if (erEndringIEndretUtbetalingAndeler) "nye endretUtbetalingAndeler: $nåværendeEndretAndeler" else ""
+
+            secureLogger.info(
+                "Endringer: $endredeAndelTilkjentYtelse $endredeKompetanser $endredeVilkårsvurderinger $endredeEndretUtbetalingAndeler",
             )
         }
 
