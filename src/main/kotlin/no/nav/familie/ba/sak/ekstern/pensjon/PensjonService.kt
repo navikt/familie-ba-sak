@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.ekstern.pensjon
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.ekstern.bisys.BisysService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
+import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
@@ -35,11 +37,18 @@ class PensjonService(
     private val taskRepository: TaskRepositoryWrapper,
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val envService: EnvService,
+    private val unleashNext: UnleashService,
 ) {
     fun hentBarnetrygd(
         personIdent: String,
         fraDato: LocalDate,
     ): List<BarnetrygdTilPensjon> {
+        if (envService.erPreprod() && unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
+            val barnetrygdTilPensjonFraInfotrygdQ = hentBarnetrygdTilPensjonFraInfotrygdQ(personIdent, fraDato)
+            if (barnetrygdTilPensjonFraInfotrygdQ.isNotEmpty()) {
+                return barnetrygdTilPensjonFraInfotrygdQ.distinct()
+            }
+        }
         val aktør = personidentService.hentAktør(personIdent)
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         val barnetrygdTilPensjon = fagsak?.let { hentBarnetrygdTilPensjon(fagsak, fraDato) }
@@ -95,6 +104,10 @@ class PensjonService(
             fagsakEiersIdent = aktør.aktivFødselsnummer(),
             barnetrygdPerioder = allePerioderTilhørendeAktør,
         )
+    }
+
+    private fun hentBarnetrygdTilPensjonFraInfotrygdQ(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
+        return infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(personIdent, fraDato).fagsaker
     }
 
     private fun hentBarnetrygdTilPensjon(
