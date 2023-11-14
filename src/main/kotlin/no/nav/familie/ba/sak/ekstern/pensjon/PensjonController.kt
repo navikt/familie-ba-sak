@@ -78,13 +78,13 @@ class PensjonController(private val pensjonService: PensjonService) {
         @RequestBody
         request: BarnetrygdTilPensjonRequest,
     ): ResponseEntity<BarnetrygdTilPensjonResponse> {
-        if (LocalDate.now().minusYears(2).isAfter(request.fraDato)) {
+        if (LocalDate.now().minusYears(3).isAfter(request.fraDato)) {
             throw EksternTjenesteFeilException(
                 EksternTjenesteFeil(
                     "/api/ekstern/pensjon/hent-barnetrygd",
                     HttpStatus.BAD_REQUEST,
                 ),
-                "fraDato kan ikke være lenger enn 2 år tilbake i tid",
+                "fraDato kan ikke være lenger enn 3 år tilbake i tid",
                 request,
             )
         }

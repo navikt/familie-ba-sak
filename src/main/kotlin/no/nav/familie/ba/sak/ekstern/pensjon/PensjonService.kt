@@ -106,7 +106,10 @@ class PensjonService(
         )
     }
 
-    private fun hentBarnetrygdTilPensjonFraInfotrygdQ(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
+    private fun hentBarnetrygdTilPensjonFraInfotrygdQ(
+        personIdent: String,
+        fraDato: LocalDate,
+    ): List<BarnetrygdTilPensjon> {
         return infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(personIdent, fraDato).fagsaker
     }
 
