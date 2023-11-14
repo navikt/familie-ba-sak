@@ -64,8 +64,9 @@ private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
     }
 
     private fun lagAndelMedEndringer(andelTilkjentYtelse: AndelTilkjentYtelse): AndelTilkjentYtelseMedEndreteUtbetalinger {
-        val endreteUtbetalinger = endretUtbetalingAndeler
-            .filter { overlapper(andelTilkjentYtelse, it) }
+        val endreteUtbetalinger =
+            endretUtbetalingAndeler
+                .filter { overlapper(andelTilkjentYtelse, it) }
 
         return AndelTilkjentYtelseMedEndreteUtbetalinger(
             andelTilkjentYtelse,
@@ -74,8 +75,9 @@ private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
     }
 
     private fun lagEndringMedAndeler(endretUtbetalingAndel: EndretUtbetalingAndel): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
-        val andeler = andelerTilkjentYtelse
-            .filter { overlapper(it, endretUtbetalingAndel) }
+        val andeler =
+            andelerTilkjentYtelse
+                .filter { overlapper(it, endretUtbetalingAndel) }
 
         return EndretUtbetalingAndelMedAndelerTilkjentYtelse(
             endretUtbetalingAndel,
@@ -102,11 +104,17 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     val type get() = andelTilkjentYtelse.type
     val kalkulertUtbetalingsbeløp get() = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
     val aktør get() = andelTilkjentYtelse.aktør
+
     fun erSøkersAndel() = andelTilkjentYtelse.erSøkersAndel()
+
     fun erSmåbarnstillegg() = andelTilkjentYtelse.erSmåbarnstillegg()
+
     fun erUtvidet(): Boolean = andelTilkjentYtelse.erUtvidet()
+
     fun erAndelSomSkalSendesTilOppdrag() = andelTilkjentYtelse.erAndelSomSkalSendesTilOppdrag()
+
     fun overlapperPeriode(månedPeriode: MånedPeriode) = andelTilkjentYtelse.overlapperPeriode(månedPeriode)
+
     fun slåSammenMed(naboAndel: AndelTilkjentYtelseMedEndreteUtbetalinger): AndelTilkjentYtelseMedEndreteUtbetalinger {
         // Skal allerede være sjekket at disse er naboer som kan slås sammen, bla. at de eventuelt har samme endringsperiode
         // Dermed skal en en enkel utvidelse med stønadTom fra naboen fungere
@@ -137,6 +145,7 @@ data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     private val andeler: List<AndelTilkjentYtelse>,
 ) {
     fun overlapperMed(månedPeriode: MånedPeriode) = endretUtbetalingAndel.overlapperMed(månedPeriode)
+
     fun årsakErDeltBosted() = endretUtbetalingAndel.årsakErDeltBosted()
 
     val periode get() = endretUtbetalingAndel.periode

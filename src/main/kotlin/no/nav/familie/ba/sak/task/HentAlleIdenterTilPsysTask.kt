@@ -30,7 +30,6 @@ class HentAlleIdenterTilPsysTask(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val envService: EnvService,
 ) : AsyncTaskStep {
-
     private val logger = LoggerFactory.getLogger(HentAlleIdenterTilPsysTask::class.java)
 
     override fun doTask(task: Task) {
@@ -40,10 +39,11 @@ class HentAlleIdenterTilPsysTask(
             logger.info("Ferdig med å hente alle identer fra DB for request $requestId")
 
             logger.info("Starter med å hente alle identer fra Infotrygd for request $requestId")
-            val identerFraInfotrygd = when {
-                envService.erPreprod() -> emptyList() // Tar ikke med personer fra infotrygd i preprod siden de ikke finnes i PDL
-                else -> infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
-            }
+            val identerFraInfotrygd =
+                when {
+                    envService.erPreprod() -> emptyList() // Tar ikke med personer fra infotrygd i preprod siden de ikke finnes i PDL
+                    else -> infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
+                }
             logger.info("Ferdig med å hente alle identer fra Infotrygd for request $requestId")
 
             logger.info("Starter på å sende alle identer til kafka for request $requestId")
@@ -64,17 +64,22 @@ class HentAlleIdenterTilPsysTask(
     }
 
     companion object {
-        fun lagTask(år: Int, uuid: UUID): Task {
+        fun lagTask(
+            år: Int,
+            uuid: UUID,
+        ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(HentAlleIdenterTilPsysRequestDTO(år = år, requestId = uuid)),
-                properties = Properties().apply {
-                    this["år"] = år.toString()
-                    this["requestId"] = uuid.toString()
-                    this["callId"] = uuid.toString()
-                },
+                properties =
+                    Properties().apply {
+                        this["år"] = år.toString()
+                        this["requestId"] = uuid.toString()
+                        this["callId"] = uuid.toString()
+                    },
             )
         }
+
         const val TASK_STEP_TYPE = "hentAlleIdenterTilPsys"
     }
 }

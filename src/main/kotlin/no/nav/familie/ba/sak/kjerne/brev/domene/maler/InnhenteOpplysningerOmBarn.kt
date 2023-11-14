@@ -17,20 +17,24 @@ data class InnhenteOpplysningerOmBarn(
         saksbehandlerNavn: String,
     ) : this(
         mal = mal,
-        data = InnhenteOpplysningerOmBarnData(
-            delmalData = InnhenteOpplysningerOmBarnData.DelmalData(
-                signatur = SignaturDelmal(
-                    enhet = enhet,
-                    saksbehandlerNavn = saksbehandlerNavn,
-                ),
+        data =
+            InnhenteOpplysningerOmBarnData(
+                delmalData =
+                    InnhenteOpplysningerOmBarnData.DelmalData(
+                        signatur =
+                            SignaturDelmal(
+                                enhet = enhet,
+                                saksbehandlerNavn = saksbehandlerNavn,
+                            ),
+                    ),
+                flettefelter =
+                    InnhenteOpplysningerOmBarnData.Flettefelter(
+                        navn = navn,
+                        fodselsnummer = fødselsnummer,
+                        barnasFødselsdager = barnasFødselsdager,
+                        dokumentliste = dokumentliste,
+                    ),
             ),
-            flettefelter = InnhenteOpplysningerOmBarnData.Flettefelter(
-                navn = navn,
-                fodselsnummer = fødselsnummer,
-                barnasFødselsdager = barnasFødselsdager,
-                dokumentliste = dokumentliste,
-            ),
-        ),
     )
 }
 
@@ -38,7 +42,6 @@ data class InnhenteOpplysningerOmBarnData(
     override val delmalData: DelmalData,
     override val flettefelter: Flettefelter,
 ) : BrevData {
-
     data class Flettefelter(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
@@ -46,7 +49,6 @@ data class InnhenteOpplysningerOmBarnData(
         val barnasFodselsdatoer: Flettefelt,
         val dokumentliste: Flettefelt,
     ) : FlettefelterForDokument {
-
         constructor(
             navn: String,
             fodselsnummer: String,

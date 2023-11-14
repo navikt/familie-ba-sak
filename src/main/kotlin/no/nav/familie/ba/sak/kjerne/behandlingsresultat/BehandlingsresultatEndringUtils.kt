@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import java.time.YearMonth
 
@@ -25,8 +27,8 @@ internal enum class Endringsresultat {
     ENDRING,
     INGEN_ENDRING,
 }
-object BehandlingsresultatEndringUtils {
 
+object BehandlingsresultatEndringUtils {
     internal fun utledEndringsresultat(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
@@ -40,31 +42,55 @@ object BehandlingsresultatEndringUtils {
         personerIBehandling: Set<Person>,
         personerIForrigeBehandling: Set<Person>,
     ): Endringsresultat {
-        val erEndringIBeløp = erEndringIBeløp(
-            nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler,
-            nåværendeEndretAndeler = nåværendeEndretAndeler,
-            personerFremstiltKravFor = personerFremstiltKravFor,
-        )
+        val erEndringIBeløp =
+            erEndringIBeløp(
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+                nåværendeEndretAndeler = nåværendeEndretAndeler,
+                personerFremstiltKravFor = personerFremstiltKravFor,
+            )
 
-        val erEndringIKompetanse = erEndringIKompetanse(
-            nåværendeKompetanser = nåværendeKompetanser,
-            forrigeKompetanser = forrigeKompetanser,
-        )
+        val erEndringIKompetanse =
+            erEndringIKompetanse(
+                nåværendeKompetanser = nåværendeKompetanser,
+                forrigeKompetanser = forrigeKompetanser,
+            )
 
-        val erEndringIVilkårsvurdering = erEndringIVilkårsvurdering(
-            nåværendePersonResultat = nåværendePersonResultat,
-            forrigePersonResultat = forrigePersonResultat,
-            personerIBehandling = personerIBehandling,
-            personerIForrigeBehandling = personerIForrigeBehandling,
-        )
+        val erEndringIVilkårsvurdering =
+            erEndringIVilkårsvurdering(
+                nåværendePersonResultat = nåværendePersonResultat,
+                forrigePersonResultat = forrigePersonResultat,
+                personerIBehandling = personerIBehandling,
+                personerIForrigeBehandling = personerIForrigeBehandling,
+            )
 
-        val erEndringIEndretUtbetalingAndeler = erEndringIEndretUtbetalingAndeler(
-            nåværendeEndretAndeler = nåværendeEndretAndeler,
-            forrigeEndretAndeler = forrigeEndretAndeler,
-        )
+        val erEndringIEndretUtbetalingAndeler =
+            erEndringIEndretUtbetalingAndeler(
+                nåværendeEndretAndeler = nåværendeEndretAndeler,
+                forrigeEndretAndeler = forrigeEndretAndeler,
+            )
 
-        val erMinstEnEndring = erEndringIBeløp || erEndringIKompetanse || erEndringIVilkårsvurdering || erEndringIEndretUtbetalingAndeler
+        val erMinstEnEndring =
+            erEndringIBeløp || erEndringIKompetanse || erEndringIVilkårsvurdering || erEndringIEndretUtbetalingAndeler
+
+        if (erMinstEnEndring) {
+            logger.info(
+                "Endringer: " +
+                    "erEndringIBeløp=$erEndringIBeløp, " +
+                    "erEndringIKompetanse=$erEndringIKompetanse, " +
+                    "erEndringIVilkårsvurdering=$erEndringIVilkårsvurdering, " +
+                    "erEndringIEndretUtbetalingAndeler=$erEndringIEndretUtbetalingAndeler",
+            )
+
+            val endredeAndelTilkjentYtelse = if (erEndringIBeløp) "nye AndelerTilkjentYtelse: $nåværendeAndeler , " else ""
+            val endredeKompetanser = if (erEndringIKompetanse) "nye kompetanser: $nåværendeKompetanser ," else ""
+            val endredeVilkårsvurderinger = if (erEndringIVilkårsvurdering) "nye personresultater: $nåværendePersonResultat ," else ""
+            val endredeEndretUtbetalingAndeler = if (erEndringIEndretUtbetalingAndeler) "nye endretUtbetalingAndeler: $nåværendeEndretAndeler" else ""
+
+            secureLogger.info(
+                "Endringer: $endredeAndelTilkjentYtelse $endredeKompetanser $endredeVilkårsvurderinger $endredeEndretUtbetalingAndeler",
+            )
+        }
 
         return if (erMinstEnEndring) Endringsresultat.ENDRING else Endringsresultat.INGEN_ENDRING
     }
@@ -77,23 +103,25 @@ object BehandlingsresultatEndringUtils {
         personerFremstiltKravFor: List<Aktør>,
     ): Boolean {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
-        val opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
-            forrigeAndeler = forrigeAndeler,
-            nåværendeEndretAndeler = nåværendeEndretAndeler,
-        ) ?: return false // Returnerer false hvis verken forrige eller nåværende behandling har andeler
+        val opphørstidspunkt =
+            nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                forrigeAndeler = forrigeAndeler,
+                nåværendeEndretAndeler = nåværendeEndretAndeler,
+            ) ?: return false // Returnerer false hvis verken forrige eller nåværende behandling har andeler
 
-        val erEndringIBeløpForMinstEnPerson = allePersonerMedAndeler.any { aktør ->
-            val ytelseTyperForPerson = (nåværendeAndeler.map { it.type } + forrigeAndeler.map { it.type }).distinct()
+        val erEndringIBeløpForMinstEnPerson =
+            allePersonerMedAndeler.any { aktør ->
+                val ytelseTyperForPerson = (nåværendeAndeler.map { it.type } + forrigeAndeler.map { it.type }).distinct()
 
-            ytelseTyperForPerson.any { ytelseType ->
-                erEndringIBeløpForPersonOgType(
-                    nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
-                    forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
-                    opphørstidspunkt = opphørstidspunkt,
-                    erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør),
-                )
+                ytelseTyperForPerson.any { ytelseType ->
+                    erEndringIBeløpForPersonOgType(
+                        nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
+                        forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
+                        opphørstidspunkt = opphørstidspunkt,
+                        erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør),
+                    )
+                }
             }
-        }
 
         return erEndringIBeløpForMinstEnPerson
     }
@@ -108,24 +136,25 @@ object BehandlingsresultatEndringUtils {
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
 
-        val endringIBeløpTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
-            val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
-            val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
+        val endringIBeløpTidslinje =
+            nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+                val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
+                val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
 
-            if (erFremstiltKravForPerson) {
-                // Hvis det er søkt for person vil vi kun ha med endringer som går fra beløp > 0 til 0/null
-                when {
-                    forrigeBeløp > 0 && nåværendeBeløp == 0 -> true
-                    else -> false
+                if (erFremstiltKravForPerson) {
+                    // Hvis det er søkt for person vil vi kun ha med endringer som går fra beløp > 0 til 0/null
+                    when {
+                        forrigeBeløp > 0 && nåværendeBeløp == 0 -> true
+                        else -> false
+                    }
+                } else {
+                    // Hvis det ikke er søkt for person vil vi ha med alle endringer i beløp
+                    when {
+                        forrigeBeløp != nåværendeBeløp -> true
+                        else -> false
+                    }
                 }
-            } else {
-                // Hvis det ikke er søkt for person vil vi ha med alle endringer i beløp
-                when {
-                    forrigeBeløp != nåværendeBeløp -> true
-                    else -> false
-                }
-            }
-        }.fjernPerioderEtterOpphørsdato(opphørstidspunkt)
+            }.fjernPerioderEtterOpphørsdato(opphørstidspunkt)
 
         return endringIBeløpTidslinje.perioder().any { it.innhold == true }
     }
@@ -137,10 +166,11 @@ object BehandlingsresultatEndringUtils {
         nåværendeKompetanser: List<Kompetanse>,
         forrigeKompetanser: List<Kompetanse>,
     ): Boolean {
-        val endringIKompetanseTidslinje = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
-            nåværendeKompetanser = nåværendeKompetanser,
-            forrigeKompetanser = forrigeKompetanser,
-        )
+        val endringIKompetanseTidslinje =
+            EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
+                nåværendeKompetanser = nåværendeKompetanser,
+                forrigeKompetanser = forrigeKompetanser,
+            )
 
         return endringIKompetanseTidslinje.perioder().any { it.innhold == true }
     }
@@ -151,12 +181,13 @@ object BehandlingsresultatEndringUtils {
         personerIBehandling: Set<Person>,
         personerIForrigeBehandling: Set<Person>,
     ): Boolean {
-        val endringIVilkårsvurderingTidslinje = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-            nåværendePersonResultater = nåværendePersonResultat,
-            forrigePersonResultater = forrigePersonResultat,
-            personerIBehandling = personerIBehandling,
-            personerIForrigeBehandling = personerIForrigeBehandling,
-        )
+        val endringIVilkårsvurderingTidslinje =
+            EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
+                nåværendePersonResultater = nåværendePersonResultat,
+                forrigePersonResultater = forrigePersonResultat,
+                personerIBehandling = personerIBehandling,
+                personerIForrigeBehandling = personerIForrigeBehandling,
+            )
         return endringIVilkårsvurderingTidslinje.perioder().any { it.innhold == true }
     }
 
@@ -164,10 +195,11 @@ object BehandlingsresultatEndringUtils {
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
         forrigeEndretAndeler: List<EndretUtbetalingAndel>,
     ): Boolean {
-        val endringIEndretUtbetalingAndelTidslinje = EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUtbetalingAndelTidslinje(
-            nåværendeEndretAndeler = nåværendeEndretAndeler,
-            forrigeEndretAndeler = forrigeEndretAndeler,
-        )
+        val endringIEndretUtbetalingAndelTidslinje =
+            EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUtbetalingAndelTidslinje(
+                nåværendeEndretAndeler = nåværendeEndretAndeler,
+                forrigeEndretAndeler = forrigeEndretAndeler,
+            )
 
         return endringIEndretUtbetalingAndelTidslinje.perioder().any { it.innhold == true }
     }

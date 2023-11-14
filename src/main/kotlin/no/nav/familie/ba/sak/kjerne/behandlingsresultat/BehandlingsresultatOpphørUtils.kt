@@ -17,7 +17,6 @@ internal enum class Opphørsresultat {
 }
 
 object BehandlingsresultatOpphørUtils {
-
     internal fun hentOpphørsresultatPåBehandling(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>,

@@ -23,30 +23,21 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 
 class InnkommendeJournalføringServiceTest(
-
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-
     @Autowired
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
-
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val personidentService: PersonidentService,
-
     @Autowired
     private val innkommendeJournalføringService: InnkommendeJournalføringService,
-
     @Autowired
     private val journalføringRepository: JournalføringRepository,
-
     @Autowired
     private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
-
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun `lagrer journalpostreferanse til behandling og fagsak til journalpost`() {
         val søkerFnr = randomFnr()
@@ -55,8 +46,9 @@ class InnkommendeJournalføringServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak))
 
-        val (sak, behandlinger) = innkommendeJournalføringService
-            .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(behandling.id.toString()), "12345")
+        val (sak, behandlinger) =
+            innkommendeJournalføringService
+                .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(behandling.id.toString()), "12345")
 
         val journalposter = journalføringRepository.findByBehandlingId(behandlingId = behandling.id)
 
@@ -74,8 +66,9 @@ class InnkommendeJournalføringServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak))
 
-        val (sak, behandlinger) = innkommendeJournalføringService
-            .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(), "12345")
+        val (sak, behandlinger) =
+            innkommendeJournalføringService
+                .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(), "12345")
 
         assertNull(sak.fagsakId)
         assertEquals(Sakstype.GENERELL_SAK.type, sak.sakstype)
@@ -109,11 +102,12 @@ class InnkommendeJournalføringServiceTest(
 
         val behandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId.toLong())
 
-        val nySøknad2DagerSenere = førsteSøknad.copy(
-            datoMottatt = førsteSøknad.datoMottatt!!.plusDays(2),
-            opprettOgKnyttTilNyBehandling = false,
-            tilknyttedeBehandlingIder = listOf(behandling!!.id.toString()),
-        )
+        val nySøknad2DagerSenere =
+            førsteSøknad.copy(
+                datoMottatt = førsteSøknad.datoMottatt!!.plusDays(2),
+                opprettOgKnyttTilNyBehandling = false,
+                tilknyttedeBehandlingIder = listOf(behandling!!.id.toString()),
+            )
 
         innkommendeJournalføringService.journalfør(nySøknad2DagerSenere, "124", "mockEnhet", "2")
 
@@ -126,16 +120,18 @@ class InnkommendeJournalføringServiceTest(
 
     @Test
     fun `journalfør skal opprette behandling på fagsak som har BARN som eier hvis enslig mindreårig eller institusjon`() {
-        val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
-            .copy(fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG)
+        val request =
+            lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
+                .copy(fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG)
         val fagsakId = innkommendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
         val behandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId.toLong())
 
         assertNotNull(behandling)
         assertEquals(FagsakType.BARN_ENSLIG_MINDREÅRIG, behandling!!.fagsak.type)
 
-        val request2 = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
-            .copy(fagsakType = FagsakType.INSTITUSJON, institusjon = InstitusjonInfo("orgnr", tssEksternId = "tss"))
+        val request2 =
+            lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
+                .copy(fagsakType = FagsakType.INSTITUSJON, institusjon = InstitusjonInfo("orgnr", tssEksternId = "tss"))
         val fagsakId2 = innkommendeJournalføringService.journalfør(request2, "1234", "mockEnhet", "2")
         val behandling2 = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId2.toLong())
 
@@ -148,14 +144,15 @@ class InnkommendeJournalføringServiceTest(
         val søkerFnr = randomFnr()
         val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", søkerFnr)).copy(datoMottatt = null)
 
-        val exception = assertThrows<RuntimeException> {
-            innkommendeJournalføringService.journalfør(
-                request,
-                "123",
-                "mockEnhet",
-                "1",
-            )
-        }
+        val exception =
+            assertThrows<RuntimeException> {
+                innkommendeJournalføringService.journalfør(
+                    request,
+                    "123",
+                    "mockEnhet",
+                    "1",
+                )
+            }
         assertEquals("Du må sette søknads mottatt dato før du kan fortsette videre", exception.message)
     }
 }

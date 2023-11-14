@@ -48,11 +48,11 @@ class VedtaksperiodefinnerSmåbarnstilleggFeil(
     override val httpStatus: HttpStatus = HttpStatus.OK,
     override val throwable: Throwable? = null,
 ) : Feil(
-    melding,
-    frontendFeilmelding,
-    httpStatus,
-    throwable,
-)
+        melding,
+        frontendFeilmelding,
+        httpStatus,
+        throwable,
+    )
 
 fun vedtakOmOvergangsstønadPåvirkerFagsak(
     småbarnstilleggBarnetrygdGenerator: SmåbarnstilleggBarnetrygdGenerator,
@@ -64,12 +64,13 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
 
     val (forrigeUtvidetAndeler, forrigeBarnasAndeler) = forrigeAndelerIkkeSmåbarnstillegg.partition { it.erUtvidet() }
 
-    val nyeSmåbarnstilleggAndeler = småbarnstilleggBarnetrygdGenerator.lagSmåbarnstilleggAndeler(
-        perioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
-        barnasAndeler = forrigeBarnasAndeler,
-        utvidetAndeler = forrigeUtvidetAndeler,
-        barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer,
-    )
+    val nyeSmåbarnstilleggAndeler =
+        småbarnstilleggBarnetrygdGenerator.lagSmåbarnstilleggAndeler(
+            perioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
+            barnasAndeler = forrigeBarnasAndeler,
+            utvidetAndeler = forrigeUtvidetAndeler,
+            barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer,
+        )
 
     return nyeSmåbarnstilleggAndeler.førerTilEndringIUtbetalingFraForrigeBehandling(
         forrigeAndeler = forrigeSmåbarnstilleggAndeler,
@@ -79,10 +80,11 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
 private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.førerTilEndringIUtbetalingFraForrigeBehandling(
     forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
 ): Boolean {
-    val endringstidslinje = EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
-        nåværendeAndeler = this.map { it.andel },
-        forrigeAndeler = forrigeAndeler.map { it.andel },
-    )
+    val endringstidslinje =
+        EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
+            nåværendeAndeler = this.map { it.andel },
+            forrigeAndeler = forrigeAndeler.map { it.andel },
+        )
 
     return endringstidslinje.perioder().any { it.innhold == true }
 }
@@ -91,24 +93,26 @@ fun hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
     forrigeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
     nyeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
 ): Pair<List<MånedPeriode>, List<MånedPeriode>> {
-    val forrigeAndelerTidslinje = LocalDateTimeline(
-        forrigeSmåbarnstilleggAndeler.map {
-            LocalDateSegment(
-                it.stønadFom.førsteDagIInneværendeMåned(),
-                it.stønadTom.sisteDagIInneværendeMåned(),
-                it,
-            )
-        },
-    )
-    val andelerTidslinje = LocalDateTimeline(
-        nyeSmåbarnstilleggAndeler.map {
-            LocalDateSegment(
-                it.stønadFom.førsteDagIInneværendeMåned(),
-                it.stønadTom.sisteDagIInneværendeMåned(),
-                it,
-            )
-        },
-    )
+    val forrigeAndelerTidslinje =
+        LocalDateTimeline(
+            forrigeSmåbarnstilleggAndeler.map {
+                LocalDateSegment(
+                    it.stønadFom.førsteDagIInneværendeMåned(),
+                    it.stønadTom.sisteDagIInneværendeMåned(),
+                    it,
+                )
+            },
+        )
+    val andelerTidslinje =
+        LocalDateTimeline(
+            nyeSmåbarnstilleggAndeler.map {
+                LocalDateSegment(
+                    it.stønadFom.førsteDagIInneværendeMåned(),
+                    it.stønadTom.sisteDagIInneværendeMåned(),
+                    it,
+                )
+            },
+        )
 
     val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
     val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
@@ -137,11 +141,12 @@ fun kanAutomatiskIverksetteSmåbarnstillegg(
         it.fom.isSameOrAfter(
             YearMonth.now(),
         )
-    } && reduserteMånedPerioder.all {
-        it.fom.isSameOrAfter(
-            YearMonth.now(),
-        )
-    }
+    } &&
+        reduserteMånedPerioder.all {
+            it.fom.isSameOrAfter(
+                YearMonth.now(),
+            )
+        }
 }
 
 @Throws(VedtaksperiodefinnerSmåbarnstilleggFeil::class)
@@ -183,12 +188,13 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
     }
 
     vedtaksperiodeSomSkalOppdateres.settBegrunnelser(
-        vedtaksperiodeSomSkalOppdateres.begrunnelser.toList() + listOf(
-            Vedtaksbegrunnelse(
-                vedtaksperiodeMedBegrunnelser = vedtaksperiodeSomSkalOppdateres,
-                standardbegrunnelse = vedtaksperiodeSomSkalOppdateresOgBegrunnelse.second,
+        vedtaksperiodeSomSkalOppdateres.begrunnelser.toList() +
+            listOf(
+                Vedtaksbegrunnelse(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeSomSkalOppdateres,
+                    standardbegrunnelse = vedtaksperiodeSomSkalOppdateresOgBegrunnelse.second,
+                ),
             ),
-        ),
     )
 
     return vedtaksperiodeSomSkalOppdateres
@@ -214,14 +220,16 @@ fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
     val barnasAndelerTidslinjer =
         barnasAndeler.groupBy { it.aktør }.mapValues { AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(it.value) }
 
-    val barnasAndelerUnder3ÅrTidslinje = barnasAndelerTidslinjer.map { (barnAktør, barnTidslinje) ->
-        val barnetsFødselsdato = barnasAktørerOgFødselsdatoer.find { it.first == barnAktør }?.second
-            ?: throw Feil("Kan ikke beregne småbarnstillegg for et barn som ikke har fødselsdato.")
+    val barnasAndelerUnder3ÅrTidslinje =
+        barnasAndelerTidslinjer.map { (barnAktør, barnTidslinje) ->
+            val barnetsFødselsdato =
+                barnasAktørerOgFødselsdatoer.find { it.first == barnAktør }?.second
+                    ?: throw Feil("Kan ikke beregne småbarnstillegg for et barn som ikke har fødselsdato.")
 
-        val erTilOgMed3ÅrTidslinje = erTilogMed3ÅrTidslinje(barnetsFødselsdato)
+            val erTilOgMed3ÅrTidslinje = erTilogMed3ÅrTidslinje(barnetsFødselsdato)
 
-        barnTidslinje.beskjærEtter(erTilOgMed3ÅrTidslinje)
-    }
+            barnTidslinje.beskjærEtter(erTilOgMed3ÅrTidslinje)
+        }
 
     return barnasAndelerUnder3ÅrTidslinje.kombinerUtenNull { kombinerBarnasTidslinjerTilUnder3ÅrResultat(it) }
         .filtrerIkkeNull()

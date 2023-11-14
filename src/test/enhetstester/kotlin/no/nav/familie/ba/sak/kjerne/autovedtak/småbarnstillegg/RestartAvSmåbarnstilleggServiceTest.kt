@@ -11,21 +11,21 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class RestartAvSmåbarnstilleggServiceTest {
-
     private val fagsakRepository = mockk<FagsakRepository>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
-    private val restartAvSmåbarnstilleggService = spyk(
-        RestartAvSmåbarnstilleggService(
-            fagsakRepository = fagsakRepository,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            opprettTaskService = mockk(),
-            vedtakService = mockk(),
-            vedtaksperiodeService = mockk(),
-            behandlingMigreringsinfoRepository = behandlingMigreringsinfoRepository,
-            andelerTilkjentYtelseRepository = mockk(),
-        ),
-    )
+    private val restartAvSmåbarnstilleggService =
+        spyk(
+            RestartAvSmåbarnstilleggService(
+                fagsakRepository = fagsakRepository,
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                opprettTaskService = mockk(),
+                vedtakService = mockk(),
+                vedtaksperiodeService = mockk(),
+                behandlingMigreringsinfoRepository = behandlingMigreringsinfoRepository,
+                andelerTilkjentYtelseRepository = mockk(),
+            ),
+        )
 
     @Test
     fun `Skal ikke inkludere saker som er migrert forrige måned ved opprettelse av restartet småbarnstillegg oppgave`() {
@@ -34,10 +34,12 @@ class RestartAvSmåbarnstilleggServiceTest {
 
         every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(0L) } returns LocalDate.now()
 
-        every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(1L) } returns LocalDate.now()
-            .minusMonths(1)
-        every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(2L) } returns LocalDate.now()
-            .minusMonths(2)
+        every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(1L) } returns
+            LocalDate.now()
+                .minusMonths(1)
+        every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(2L) } returns
+            LocalDate.now()
+                .minusMonths(2)
 
         every {
             restartAvSmåbarnstilleggService.periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(any(), any())

@@ -45,9 +45,10 @@ class BehandlingController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
 ) {
-
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    fun opprettBehandling(
+        @RequestBody nyBehandling: NyBehandling,
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(nyBehandling.søkersIdent),
             event = AuditLoggerEvent.CREATE,
@@ -101,12 +102,13 @@ class BehandlingController(
         )
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        val behandling = behandlingstemaService.oppdaterBehandlingstema(
-            behandling = behandlingHentOgPersisterService.hent(behandlingId),
-            overstyrtUnderkategori = endreBehandling.behandlingUnderkategori,
-            overstyrtKategori = endreBehandling.behandlingKategori,
-            manueltOppdatert = true,
-        )
+        val behandling =
+            behandlingstemaService.oppdaterBehandlingstema(
+                behandling = behandlingHentOgPersisterService.hent(behandlingId),
+                overstyrtUnderkategori = endreBehandling.behandlingUnderkategori,
+                overstyrtKategori = endreBehandling.behandlingKategori,
+                manueltOppdatert = true,
+            )
 
         return ResponseEntity.ok(
             Ressurs.success(
@@ -151,7 +153,6 @@ data class NyBehandling(
     val søknadsinfo: Søknadsinfo? = null,
     val fagsakId: Long,
 ) {
-
     init { // Initiell validering på request
         when {
             søkersIdent.isBlank() -> throw Feil(

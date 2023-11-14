@@ -18,22 +18,25 @@ data class Svartidsbrev(
         saksbehandlerNavn: String,
     ) : this(
         mal = mal,
-        data = SvartidsbrevData(
-            flettefelter = SvartidsbrevData.Flettefelter(
-                navn = navn,
-                fodselsnummer = fodselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                gjelder = gjelder,
+        data =
+            SvartidsbrevData(
+                flettefelter =
+                    SvartidsbrevData.Flettefelter(
+                        navn = navn,
+                        fodselsnummer = fodselsnummer,
+                        organisasjonsnummer = organisasjonsnummer,
+                        gjelder = gjelder,
+                    ),
+                delmalData =
+                    SvartidsbrevData.DelmalData(
+                        signatur =
+                            SignaturDelmal(
+                                enhet = enhet,
+                                saksbehandlerNavn = saksbehandlerNavn,
+                            ),
+                        kontonummer = erEøsBehandling,
+                    ),
             ),
-            delmalData = SvartidsbrevData.DelmalData(
-                signatur = SignaturDelmal(
-                    enhet = enhet,
-                    saksbehandlerNavn = saksbehandlerNavn,
-                ),
-                kontonummer = erEøsBehandling,
-
-            ),
-        ),
     )
 }
 
@@ -41,7 +44,6 @@ data class SvartidsbrevData(
     override val delmalData: DelmalData,
     override val flettefelter: Flettefelter,
 ) : BrevData {
-
     data class Flettefelter(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
@@ -49,7 +51,6 @@ data class SvartidsbrevData(
         override val organisasjonsnummer: Flettefelt,
         override val gjelder: Flettefelt,
     ) : FlettefelterForDokument {
-
         constructor(
             navn: String,
             fodselsnummer: String,

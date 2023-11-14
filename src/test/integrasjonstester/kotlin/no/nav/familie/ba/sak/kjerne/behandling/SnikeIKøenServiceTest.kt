@@ -49,7 +49,6 @@ class SnikeIKøenServiceTest(
     @Autowired private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     @Autowired private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
 ) : AbstractSpringIntegrationTest() {
-
     private lateinit var fagsak: Fagsak
     private var skalVenteLitt = false // for å unngå at behandlingen opprettes med samme tidspunkt
 
@@ -144,10 +143,11 @@ class SnikeIKøenServiceTest(
 
     @Test
     fun `reaktivering skal tilbakestille behandling på vent`() {
-        val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false).let {
-            leggTilSteg(it, StegType.VURDER_TILBAKEKREVING)
-            behandlingRepository.saveAndFlush(it)
-        }
+        val behandling1 =
+            opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false).let {
+                leggTilSteg(it, StegType.VURDER_TILBAKEKREVING)
+                behandlingRepository.saveAndFlush(it)
+            }
         val vedtak = vedtakRepository.saveAndFlush(lagVedtak(behandling = behandling1))
         vedtaksperiodeHentOgPersisterService.lagre(
             VedtaksperiodeMedBegrunnelser(
@@ -165,10 +165,11 @@ class SnikeIKøenServiceTest(
 
     @Test
     fun `skal ikke reaktivere noe hvis det ikke finnes en behandling som er på maskinell vent`() {
-        val behandling2 = opprettBehandling(
-            status = BehandlingStatus.AVSLUTTET,
-            aktiv = true,
-        )
+        val behandling2 =
+            opprettBehandling(
+                status = BehandlingStatus.AVSLUTTET,
+                aktiv = true,
+            )
 
         assertThat(snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)).isFalse()
         assertThat(behandlingRepository.finnBehandling(behandling2.id).aktiv).isTrue()
@@ -177,11 +178,12 @@ class SnikeIKøenServiceTest(
     @Test
     fun `skal kunne reaktivere en behandling selv om det ikke finnes en annen behandling som er aktiv, eks henlagt`() {
         val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
-        val behandling2 = opprettBehandling(
-            status = BehandlingStatus.AVSLUTTET,
-            aktiv = false,
-            resultat = Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
-        )
+        val behandling2 =
+            opprettBehandling(
+                status = BehandlingStatus.AVSLUTTET,
+                aktiv = false,
+                resultat = Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+            )
 
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
 
@@ -191,7 +193,6 @@ class SnikeIKøenServiceTest(
 
     @Nested
     inner class ValideringAvSettPåVent {
-
         @Test
         fun `kan ikke sette en inaktiv behandling på vent`() {
             val behandling = opprettBehandling(aktiv = false)
@@ -214,7 +215,6 @@ class SnikeIKøenServiceTest(
 
     @Nested
     inner class ValideringAvReaktiverBehandling {
-
         @Suppress("UNUSED_VARIABLE")
         @Test
         fun `skal feile når åpen behandling er aktiv`() {
@@ -267,7 +267,10 @@ class SnikeIKøenServiceTest(
         }
     }
 
-    private fun leggTilSteg(behandling: Behandling, stegType: StegType) {
+    private fun leggTilSteg(
+        behandling: Behandling,
+        stegType: StegType,
+    ) {
         val stegTilstand = BehandlingStegTilstand(behandling = behandling, behandlingSteg = stegType)
         behandling.behandlingStegTilstand.add(stegTilstand)
     }
@@ -289,25 +292,27 @@ class SnikeIKøenServiceTest(
         } else {
             skalVenteLitt = true
         }
-        val behandling = Behandling(
-            fagsak = fagsak,
-            opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-            type = BehandlingType.REVURDERING,
-            kategori = BehandlingKategori.NASJONAL,
-            underkategori = BehandlingUnderkategori.ORDINÆR,
-            status = status,
-            aktiv = aktiv,
-            resultat = resultat,
-        ).initBehandlingStegTilstand()
+        val behandling =
+            Behandling(
+                fagsak = fagsak,
+                opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                type = BehandlingType.REVURDERING,
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                status = status,
+                aktiv = aktiv,
+                resultat = resultat,
+            ).initBehandlingStegTilstand()
         return behandlingRepository.saveAndFlush(behandling)
     }
 
     private fun lagreArbeidsfordeling(behandling1: Behandling) {
-        val arbeidsfordelingPåBehandling = ArbeidsfordelingPåBehandling(
-            behandlingId = behandling1.id,
-            behandlendeEnhetId = "4820",
-            behandlendeEnhetNavn = "Enhet",
-        )
+        val arbeidsfordelingPåBehandling =
+            ArbeidsfordelingPåBehandling(
+                behandlingId = behandling1.id,
+                behandlendeEnhetId = "4820",
+                behandlendeEnhetNavn = "Enhet",
+            )
         arbeidsfordelingPåBehandlingRepository.saveAndFlush(arbeidsfordelingPåBehandling)
     }
 }

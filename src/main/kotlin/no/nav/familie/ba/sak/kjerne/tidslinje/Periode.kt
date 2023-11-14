@@ -22,10 +22,18 @@ data class Periode<I, T : Tidsenhet>(
     override fun toString(): String = "$fraOgMed - $tilOgMed: $innhold"
 }
 
-fun <I> periodeAv(fraOgMed: LocalDate?, tilOgMed: LocalDate?, innhold: I): Periode<I, Dag> =
+fun <I> periodeAv(
+    fraOgMed: LocalDate?,
+    tilOgMed: LocalDate?,
+    innhold: I,
+): Periode<I, Dag> =
     Periode(fraOgMed.tilTidspunktEllerUendeligTidlig(), tilOgMed.tilTidspunktEllerUendeligSent(), innhold)
 
-fun <I> månedPeriodeAv(fraOgMed: YearMonth?, tilOgMed: YearMonth?, innhold: I): Periode<I, Måned> =
+fun <I> månedPeriodeAv(
+    fraOgMed: YearMonth?,
+    tilOgMed: YearMonth?,
+    innhold: I,
+): Periode<I, Måned> =
     Periode(fraOgMed.tilTidspunktEllerUendeligTidlig(), tilOgMed.tilTidspunktEllerUendeligSent(), innhold)
 
 fun <I, T : Tidsenhet> periodeAv(

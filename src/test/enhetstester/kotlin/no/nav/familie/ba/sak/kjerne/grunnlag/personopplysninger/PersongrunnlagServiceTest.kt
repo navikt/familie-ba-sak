@@ -39,21 +39,22 @@ class PersongrunnlagServiceTest {
     val loggService = mockk<LoggService>()
     val vilkårsvurderingService = mockk<VilkårsvurderingService>()
 
-    val persongrunnlagService = spyk(
-        PersongrunnlagService(
-            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
-            statsborgerskapService = mockk(),
-            arbeidsfordelingService = mockk(relaxed = true),
-            personopplysningerService = personopplysningerService,
-            personidentService = personidentService,
-            saksstatistikkEventPublisher = mockk(relaxed = true),
-            behandlingHentOgPersisterService = mockk(),
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            loggService = loggService,
-            arbeidsforholdService = mockk(),
-            vilkårsvurderingService = vilkårsvurderingService,
-        ),
-    )
+    val persongrunnlagService =
+        spyk(
+            PersongrunnlagService(
+                personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
+                statsborgerskapService = mockk(),
+                arbeidsfordelingService = mockk(relaxed = true),
+                personopplysningerService = personopplysningerService,
+                personidentService = personidentService,
+                saksstatistikkEventPublisher = mockk(relaxed = true),
+                behandlingHentOgPersisterService = mockk(),
+                andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+                loggService = loggService,
+                arbeidsforholdService = mockk(),
+                vilkårsvurderingService = vilkårsvurderingService,
+            ),
+        )
 
     @Test
     fun `Skal sende med barna fra forrige behandling ved førstegangsbehandling nummer to`() {
@@ -73,10 +74,11 @@ class PersongrunnlagServiceTest {
                 personer = arrayOf(søker, barnFraForrigeBehandling),
             )
 
-        val søknadDTO = lagSøknadDTO(
-            søkerIdent = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
-        )
+        val søknadDTO =
+            lagSøknadDTO(
+                søkerIdent = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
+            )
 
         every { personidentService.hentOgLagreAktør(søkerFnr, true) } returns søker.aktør
         every { personidentService.hentOgLagreAktør(barnFnr, true) } returns barn.aktør
@@ -119,9 +121,10 @@ class PersongrunnlagServiceTest {
     @Test
     fun `hentOgLagreSøkerOgBarnINyttGrunnlag skal på inst- og EM-saker kun lagre èn instans av barnet, med personType BARN`() {
         val barnet = lagPerson()
-        val behandlinger = listOf(FagsakType.INSTITUSJON, FagsakType.BARN_ENSLIG_MINDREÅRIG).map { fagsakType ->
-            lagBehandling(fagsak = defaultFagsak().copy(type = fagsakType))
-        }
+        val behandlinger =
+            listOf(FagsakType.INSTITUSJON, FagsakType.BARN_ENSLIG_MINDREÅRIG).map { fagsakType ->
+                lagBehandling(fagsak = defaultFagsak().copy(type = fagsakType))
+            }
         behandlinger.forEach { behandling ->
             val nyttGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
 
@@ -166,14 +169,15 @@ class PersongrunnlagServiceTest {
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
         every { personidentService.hentAktør(personFnr) } returns person.aktør
 
-        val funksjonellFeil = assertThrows<FunksjonellFeil> {
-            persongrunnlagService.registrerManuellDødsfallPåPerson(
-                behandlingId = BehandlingId(behandling.id),
-                personIdent = PersonIdent(personFnr),
-                dødsfallDato = dødsfallsDato,
-                begrunnelse = "test",
-            )
-        }
+        val funksjonellFeil =
+            assertThrows<FunksjonellFeil> {
+                persongrunnlagService.registrerManuellDødsfallPåPerson(
+                    behandlingId = BehandlingId(behandling.id),
+                    personIdent = PersonIdent(personFnr),
+                    dødsfallDato = dødsfallsDato,
+                    begrunnelse = "test",
+                )
+            }
 
         assertThat(funksjonellFeil.melding, Is("Du kan ikke sette dødsfall dato til en dato som er før SØKER sin fødselsdato"))
     }
@@ -181,9 +185,10 @@ class PersongrunnlagServiceTest {
     @Test
     fun `registrerManuellDødsfallPåPerson skal kaste feil dersom man registrer dødsfall dato når personen allerede har dødsfallsdato registrert`() {
         val dødsfallsDato = LocalDate.of(2020, 10, 10)
-        val person = lagPerson(fødselsdato = dødsfallsDato.minusMonths(10)).also {
-            it.dødsfall = Dødsfall(person = it, dødsfallDato = dødsfallsDato)
-        }
+        val person =
+            lagPerson(fødselsdato = dødsfallsDato.minusMonths(10)).also {
+                it.dødsfall = Dødsfall(person = it, dødsfallDato = dødsfallsDato)
+            }
 
         val personFnr = person.aktør.aktivFødselsnummer()
         val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
@@ -197,14 +202,15 @@ class PersongrunnlagServiceTest {
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
         every { personidentService.hentAktør(personFnr) } returns person.aktør
 
-        val funksjonellFeil = assertThrows<FunksjonellFeil> {
-            persongrunnlagService.registrerManuellDødsfallPåPerson(
-                behandlingId = BehandlingId(behandling.id),
-                personIdent = PersonIdent(personFnr),
-                dødsfallDato = dødsfallsDato,
-                begrunnelse = "test",
-            )
-        }
+        val funksjonellFeil =
+            assertThrows<FunksjonellFeil> {
+                persongrunnlagService.registrerManuellDødsfallPåPerson(
+                    behandlingId = BehandlingId(behandling.id),
+                    personIdent = PersonIdent(personFnr),
+                    dødsfallDato = dødsfallsDato,
+                    begrunnelse = "test",
+                )
+            }
 
         assertThat(funksjonellFeil.melding, Is("Dødsfall dato er allerede registrert på person med navn ${person.navn}"))
     }

@@ -57,7 +57,6 @@ class SettPåVentServiceTest(
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val snikeIKøenService: SnikeIKøenService,
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
@@ -68,11 +67,12 @@ class SettPåVentServiceTest(
         val behandling = opprettBehandling()
         val frist = LocalDate.now().plusDays(3)
 
-        val settBehandlingPåVent = settPåVentService.settBehandlingPåVent(
-            behandling.id,
-            frist,
-            SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
-        )
+        val settBehandlingPåVent =
+            settPåVentService.settBehandlingPåVent(
+                behandling.id,
+                frist,
+                SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            )
 
         assertThat(settBehandlingPåVent.behandling.id).isEqualTo(behandling.id)
         assertThat(settBehandlingPåVent.frist).isEqualTo(frist)
@@ -119,16 +119,17 @@ class SettPåVentServiceTest(
 
     @Test
     fun `Kan ikke endre på behandling etter at den er satt på vent`() {
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-            tilSteg = StegType.VILKÅRSVURDERING,
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandlingEtterVilkårsvurderingSteg =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         val behandlingId = behandlingEtterVilkårsvurderingSteg.id
         settPåVentService.settBehandlingPåVent(
@@ -144,16 +145,17 @@ class SettPåVentServiceTest(
 
     @Test
     fun `Kan endre på behandling etter venting er deaktivert`() {
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-            tilSteg = StegType.VILKÅRSVURDERING,
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandlingEtterVilkårsvurderingSteg =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         settPåVentService.settBehandlingPåVent(
             behandlingId = behandlingEtterVilkårsvurderingSteg.id,
@@ -163,10 +165,11 @@ class SettPåVentServiceTest(
 
         val nå = LocalDate.now()
 
-        val settPåVent = settPåVentService.gjenopptaBehandling(
-            behandlingId = behandlingEtterVilkårsvurderingSteg.id,
-            nå = nå,
-        )
+        val settPåVent =
+            settPåVentService.gjenopptaBehandling(
+                behandlingId = behandlingEtterVilkårsvurderingSteg.id,
+                nå = nå,
+            )
 
         Assertions.assertEquals(
             nå,
@@ -180,16 +183,17 @@ class SettPåVentServiceTest(
 
     @Test
     fun `Kan ikke sette ventefrist til før dagens dato`() {
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-            tilSteg = StegType.VILKÅRSVURDERING,
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandlingEtterVilkårsvurderingSteg =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         assertThrows<FunksjonellFeil> {
             settPåVentService.settBehandlingPåVent(
@@ -202,28 +206,30 @@ class SettPåVentServiceTest(
 
     @Test
     fun `Kan oppdatare set på vent på behandling`() {
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-            tilSteg = StegType.VILKÅRSVURDERING,
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandlingEtterVilkårsvurderingSteg =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         val behandlingId = behandlingEtterVilkårsvurderingSteg.id
 
         val frist1 = LocalDate.now().plusDays(21)
 
-        val settPåVent = settPåVentRepository.save(
-            SettPåVent(
-                behandling = behandlingEtterVilkårsvurderingSteg,
-                frist = frist1,
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
-            ),
-        )
+        val settPåVent =
+            settPåVentRepository.save(
+                SettPåVent(
+                    behandling = behandlingEtterVilkårsvurderingSteg,
+                    frist = frist1,
+                    årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+                ),
+            )
 
         Assertions.assertEquals(frist1, settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId)!!.frist)
 
@@ -237,27 +243,29 @@ class SettPåVentServiceTest(
 
     @Test
     fun `Skal gjennopta behandlinger etter ventefristen`() {
-        val behandling1 = kjørStegprosessForFGB(
-            tilSteg = StegType.VILKÅRSVURDERING,
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandling1 =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
-        val behandling2 = kjørStegprosessForFGB(
-            tilSteg = StegType.VILKÅRSVURDERING,
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandling2 =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         settPåVentService.settBehandlingPåVent(
             behandlingId = behandling1.id,
@@ -296,9 +304,10 @@ class SettPåVentServiceTest(
         )
         snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(behandling.id, SettPåMaskinellVentÅrsak.SATSENDRING)
 
-        val throwable = catchThrowable {
-            settPåVentService.gjenopptaBehandling(behandling.id)
-        }
+        val throwable =
+            catchThrowable {
+                settPåVentService.gjenopptaBehandling(behandling.id)
+            }
         assertThat(throwable).isInstanceOf(FunksjonellFeil::class.java)
         assertThat((throwable as FunksjonellFeil).frontendFeilmelding)
             .isEqualTo("Behandlingen er under maskinell vent, og kan gjenopptas senere.")
@@ -306,14 +315,15 @@ class SettPåVentServiceTest(
 
     private fun opprettBehandling(status: BehandlingStatus = BehandlingStatus.UTREDES): Behandling {
         val fagsak = fagsakService.hentEllerOpprettFagsak(randomFnr())
-        val behandling = Behandling(
-            fagsak = fagsak,
-            kategori = BehandlingKategori.NASJONAL,
-            underkategori = BehandlingUnderkategori.ORDINÆR,
-            type = BehandlingType.REVURDERING,
-            opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-            status = status,
-        ).initBehandlingStegTilstand()
+        val behandling =
+            Behandling(
+                fagsak = fagsak,
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                type = BehandlingType.REVURDERING,
+                opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                status = status,
+            ).initBehandlingStegTilstand()
         return behandlingService.lagreNyOgDeaktiverGammelBehandling(behandling)
     }
 }

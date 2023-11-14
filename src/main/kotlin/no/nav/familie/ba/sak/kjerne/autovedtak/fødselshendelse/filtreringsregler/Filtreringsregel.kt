@@ -36,23 +36,24 @@ enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering)
 }
 
 object FiltreringsregelEvaluering {
-    fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) = Filtreringsregel.values()
-        .fold(mutableListOf<Evaluering>()) { acc, filtreringsregel ->
-            if (acc.any { it.resultat == Resultat.IKKE_OPPFYLT }) {
-                acc.add(
-                    Evaluering(
-                        resultat = Resultat.IKKE_VURDERT,
-                        identifikator = filtreringsregel.name,
-                        begrunnelse = "Ikke vurdert",
-                        evalueringÅrsaker = emptyList(),
-                    ),
-                )
-            } else {
-                acc.add(filtreringsregel.vurder(fakta).copy(identifikator = filtreringsregel.name))
-            }
+    fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) =
+        Filtreringsregel.values()
+            .fold(mutableListOf<Evaluering>()) { acc, filtreringsregel ->
+                if (acc.any { it.resultat == Resultat.IKKE_OPPFYLT }) {
+                    acc.add(
+                        Evaluering(
+                            resultat = Resultat.IKKE_VURDERT,
+                            identifikator = filtreringsregel.name,
+                            begrunnelse = "Ikke vurdert",
+                            evalueringÅrsaker = emptyList(),
+                        ),
+                    )
+                } else {
+                    acc.add(filtreringsregel.vurder(fakta).copy(identifikator = filtreringsregel.name))
+                }
 
-            acc
-        }
+                acc
+            }
 
     fun morHarGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
         val erMorFnrGyldig =
@@ -80,13 +81,14 @@ object FiltreringsregelEvaluering {
         }
     }
 
-    fun morErOver18år(fakta: FiltreringsreglerFakta): Evaluering = if (fakta.mor.hentAlder() >= 18) {
-        Evaluering.oppfylt(
-            FiltreringsregelOppfylt.MOR_ER_OVER_18_ÅR,
-        )
-    } else {
-        Evaluering.ikkeOppfylt(FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR)
-    }
+    fun morErOver18år(fakta: FiltreringsreglerFakta): Evaluering =
+        if (fakta.mor.hentAlder() >= 18) {
+            Evaluering.oppfylt(
+                FiltreringsregelOppfylt.MOR_ER_OVER_18_ÅR,
+            )
+        } else {
+            Evaluering.ikkeOppfylt(FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR)
+        }
 
     fun morLever(fakta: FiltreringsreglerFakta): Evaluering =
         if (fakta.morLever) {
@@ -106,15 +108,16 @@ object FiltreringsregelEvaluering {
             )
         }
 
-    fun morHarIkkeVerge(fakta: FiltreringsreglerFakta): Evaluering = if (!fakta.morHarVerge) {
-        Evaluering.oppfylt(
-            FiltreringsregelOppfylt.MOR_ER_MYNDIG,
-        )
-    } else {
-        Evaluering.ikkeOppfylt(
-            FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_VERGEMÅL,
-        )
-    }
+    fun morHarIkkeVerge(fakta: FiltreringsreglerFakta): Evaluering =
+        if (!fakta.morHarVerge) {
+            Evaluering.oppfylt(
+                FiltreringsregelOppfylt.MOR_ER_MYNDIG,
+            )
+        } else {
+            Evaluering.ikkeOppfylt(
+                FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_VERGEMÅL,
+            )
+        }
 
     fun morMottarIkkeLøpendeUtvidet(fakta: FiltreringsreglerFakta): Evaluering =
         if (!fakta.morMottarLøpendeUtvidet) {
@@ -167,11 +170,12 @@ object FiltreringsregelEvaluering {
             )
         }
 
-    fun morHarIkkeOpphørtBarnetrygd(fakta: FiltreringsreglerFakta): Evaluering = if (fakta.morHarIkkeOpphørtBarnetrygd) {
-        Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD)
-    } else {
-        Evaluering.ikkeOppfylt(FiltreringsregelIkkeOppfylt.MOR_HAR_OPPHØRT_BARNETRYGD)
-    }
+    fun morHarIkkeOpphørtBarnetrygd(fakta: FiltreringsreglerFakta): Evaluering =
+        if (fakta.morHarIkkeOpphørtBarnetrygd) {
+            Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD)
+        } else {
+            Evaluering.ikkeOppfylt(FiltreringsregelIkkeOppfylt.MOR_HAR_OPPHØRT_BARNETRYGD)
+        }
 
     fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFakta): Evaluering {
         return when (

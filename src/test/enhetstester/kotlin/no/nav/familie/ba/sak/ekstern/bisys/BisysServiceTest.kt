@@ -23,7 +23,6 @@ import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BisysServiceTest {
-
     private lateinit var bisysService: BisysService
     private val mockPersonidentService = mockk<PersonidentService>()
     private val mockFagsakRepository = mockk<FagsakRepository>()
@@ -33,13 +32,14 @@ internal class BisysServiceTest {
 
     @BeforeAll
     fun setUp() {
-        bisysService = BisysService(
-            mockBehandlingHentOgPersisterService,
-            mockInfotrygdClient,
-            mockFagsakRepository,
-            mockPersonidentService,
-            mockTilkjentYtelseRepository,
-        )
+        bisysService =
+            BisysService(
+                mockBehandlingHentOgPersisterService,
+                mockInfotrygdClient,
+                mockFagsakRepository,
+                mockPersonidentService,
+                mockTilkjentYtelseRepository,
+            )
     }
 
     @Test
@@ -50,9 +50,10 @@ internal class BisysServiceTest {
         every { mockPersonidentService.hentAktør(any()) } answers { aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(aktør.aktivFødselsnummer()) }
 
-        every { mockInfotrygdClient.hentUtvidetBarnetrygd(fnr, any()) } returns BisysUtvidetBarnetrygdResponse(
-            perioder = emptyList(),
-        )
+        every { mockInfotrygdClient.hentUtvidetBarnetrygd(fnr, any()) } returns
+            BisysUtvidetBarnetrygdResponse(
+                perioder = emptyList(),
+            )
 
         every { mockFagsakRepository.finnFagsakForAktør(aktør) } returns null
 
@@ -69,16 +70,18 @@ internal class BisysServiceTest {
         every { mockPersonidentService.hentAktør(any()) } answers { aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(aktør.aktivFødselsnummer()) }
 
-        val periodeInfotrygd = UtvidetBarnetrygdPeriode(
-            BisysStønadstype.UTVIDET,
-            YearMonth.of(2019, 1),
-            YearMonth.now(),
-            500.0,
-            manueltBeregnet = true,
-        )
-        every { mockInfotrygdClient.hentUtvidetBarnetrygd(fnr, any()) } returns BisysUtvidetBarnetrygdResponse(
-            perioder = listOf(periodeInfotrygd),
-        )
+        val periodeInfotrygd =
+            UtvidetBarnetrygdPeriode(
+                BisysStønadstype.UTVIDET,
+                YearMonth.of(2019, 1),
+                YearMonth.now(),
+                500.0,
+                manueltBeregnet = true,
+            )
+        every { mockInfotrygdClient.hentUtvidetBarnetrygd(fnr, any()) } returns
+            BisysUtvidetBarnetrygdResponse(
+                perioder = listOf(periodeInfotrygd),
+            )
 
         every { mockFagsakRepository.finnFagsakForAktør(aktør) } returns null
 
@@ -104,9 +107,10 @@ internal class BisysServiceTest {
             )
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
 
-        every { mockInfotrygdClient.hentUtvidetBarnetrygd(any(), any()) } returns BisysUtvidetBarnetrygdResponse(
-            perioder = emptyList(),
-        )
+        every { mockInfotrygdClient.hentUtvidetBarnetrygd(any(), any()) } returns
+            BisysUtvidetBarnetrygdResponse(
+                perioder = emptyList(),
+            )
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
         every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
@@ -145,22 +149,24 @@ internal class BisysServiceTest {
         every { mockPersonidentService.hentAktør(any()) } answers { andelTilkjentYtelse.aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(andelTilkjentYtelse.aktør.aktivFødselsnummer()) }
 
-        val periodeInfotrygd = UtvidetBarnetrygdPeriode(
-            BisysStønadstype.UTVIDET,
-            YearMonth.of(2019, 1),
-            YearMonth.of(2019, 12),
-            660.0,
-            manueltBeregnet = false,
-            deltBosted = true,
-        )
+        val periodeInfotrygd =
+            UtvidetBarnetrygdPeriode(
+                BisysStønadstype.UTVIDET,
+                YearMonth.of(2019, 1),
+                YearMonth.of(2019, 12),
+                660.0,
+                manueltBeregnet = false,
+                deltBosted = true,
+            )
         every {
             mockInfotrygdClient.hentUtvidetBarnetrygd(
                 andelTilkjentYtelse.aktør.aktivFødselsnummer(),
                 any(),
             )
-        } returns BisysUtvidetBarnetrygdResponse(
-            perioder = listOf(periodeInfotrygd),
-        )
+        } returns
+            BisysUtvidetBarnetrygdResponse(
+                perioder = listOf(periodeInfotrygd),
+            )
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
 
@@ -197,22 +203,24 @@ internal class BisysServiceTest {
         every { mockPersonidentService.hentAktør(any()) } answers { andelTilkjentYtelse.aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(andelTilkjentYtelse.aktør.aktivFødselsnummer()) }
 
-        val periodeInfotrygd = UtvidetBarnetrygdPeriode(
-            BisysStønadstype.UTVIDET,
-            YearMonth.of(2020, 9),
-            YearMonth.of(2021, 12),
-            1054.0,
-            manueltBeregnet = false,
-            deltBosted = false,
-        )
+        val periodeInfotrygd =
+            UtvidetBarnetrygdPeriode(
+                BisysStønadstype.UTVIDET,
+                YearMonth.of(2020, 9),
+                YearMonth.of(2021, 12),
+                1054.0,
+                manueltBeregnet = false,
+                deltBosted = false,
+            )
         every {
             mockInfotrygdClient.hentUtvidetBarnetrygd(
                 andelTilkjentYtelse.aktør.aktivFødselsnummer(),
                 any(),
             )
-        } returns BisysUtvidetBarnetrygdResponse(
-            perioder = listOf(periodeInfotrygd),
-        )
+        } returns
+            BisysUtvidetBarnetrygdResponse(
+                perioder = listOf(periodeInfotrygd),
+            )
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
 
@@ -249,22 +257,24 @@ internal class BisysServiceTest {
         every { mockPersonidentService.hentAktør(any()) } answers { andelTilkjentYtelse.aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(andelTilkjentYtelse.aktør.aktivFødselsnummer()) }
 
-        val periodeInfotrygd = UtvidetBarnetrygdPeriode(
-            BisysStønadstype.UTVIDET,
-            YearMonth.of(2019, 3),
-            null,
-            1054.0,
-            manueltBeregnet = false,
-            deltBosted = false,
-        )
+        val periodeInfotrygd =
+            UtvidetBarnetrygdPeriode(
+                BisysStønadstype.UTVIDET,
+                YearMonth.of(2019, 3),
+                null,
+                1054.0,
+                manueltBeregnet = false,
+                deltBosted = false,
+            )
         every {
             mockInfotrygdClient.hentUtvidetBarnetrygd(
                 andelTilkjentYtelse.aktør.aktivFødselsnummer(),
                 any(),
             )
-        } returns BisysUtvidetBarnetrygdResponse(
-            perioder = listOf(periodeInfotrygd),
-        )
+        } returns
+            BisysUtvidetBarnetrygdResponse(
+                perioder = listOf(periodeInfotrygd),
+            )
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
 
@@ -301,22 +311,24 @@ internal class BisysServiceTest {
         every { mockPersonidentService.hentAktør(any()) } answers { andelTilkjentYtelse.aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(andelTilkjentYtelse.aktør.aktivFødselsnummer()) }
 
-        val periodeInfotrygd = UtvidetBarnetrygdPeriode(
-            BisysStønadstype.UTVIDET,
-            YearMonth.of(2019, 1),
-            YearMonth.of(2019, 12),
-            660.0,
-            manueltBeregnet = true,
-            deltBosted = false,
-        )
+        val periodeInfotrygd =
+            UtvidetBarnetrygdPeriode(
+                BisysStønadstype.UTVIDET,
+                YearMonth.of(2019, 1),
+                YearMonth.of(2019, 12),
+                660.0,
+                manueltBeregnet = true,
+                deltBosted = false,
+            )
         every {
             mockInfotrygdClient.hentUtvidetBarnetrygd(
                 andelTilkjentYtelse.aktør.aktivFødselsnummer(),
                 any(),
             )
-        } returns BisysUtvidetBarnetrygdResponse(
-            perioder = listOf(periodeInfotrygd),
-        )
+        } returns
+            BisysUtvidetBarnetrygdResponse(
+                perioder = listOf(periodeInfotrygd),
+            )
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
         every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling

@@ -42,18 +42,22 @@ class KlageService(
     private val stegService: StegService,
     private val vedtakService: VedtakService,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
-
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun opprettKlage(fagsakId: Long, opprettKlageDto: OpprettKlageDto) {
+    fun opprettKlage(
+        fagsakId: Long,
+        opprettKlageDto: OpprettKlageDto,
+    ) {
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
 
         opprettKlage(fagsak, opprettKlageDto.kravMottattDato)
     }
 
-    fun opprettKlage(fagsak: Fagsak, kravMottattDato: LocalDate) {
+    fun opprettKlage(
+        fagsak: Fagsak,
+        kravMottattDato: LocalDate,
+    ) {
         if (kravMottattDato.isAfter(LocalDate.now())) {
             throw FunksjonellFeil("Kan ikke opprette klage med krav mottatt frem i tid")
         }
@@ -76,8 +80,9 @@ class KlageService(
     fun hentKlagebehandlingerPåFagsak(fagsakId: Long): List<KlagebehandlingDto> {
         val klagebehandligerPerFagsak = klageClient.hentKlagebehandlinger(setOf(fagsakId))
 
-        val klagerPåFagsak = klagebehandligerPerFagsak[fagsakId]
-            ?: throw Feil("Fikk ikke fagsakId=$fagsakId tilbake fra kallet til klage.")
+        val klagerPåFagsak =
+            klagebehandligerPerFagsak[fagsakId]
+                ?: throw Feil("Fikk ikke fagsakId=$fagsakId tilbake fra kallet til klage.")
 
         return klagerPåFagsak.map { it.brukVedtaksdatoFraKlageinstansHvisOversendt() }
     }
@@ -88,10 +93,11 @@ class KlageService(
         val resultat = utledKanOppretteRevurdering(fagsak)
         return when (resultat) {
             is KanOppretteRevurdering -> KanOppretteRevurderingResponse(true, null)
-            is KanIkkeOppretteRevurdering -> KanOppretteRevurderingResponse(
-                false,
-                resultat.årsak.kanIkkeOppretteRevurderingÅrsak,
-            )
+            is KanIkkeOppretteRevurdering ->
+                KanOppretteRevurderingResponse(
+                    false,
+                    resultat.årsak.kanIkkeOppretteRevurderingÅrsak,
+                )
         }
     }
 
@@ -106,32 +112,32 @@ class KlageService(
         }
     }
 
-    private fun opprettRevurderingKlage(fagsak: Fagsak) = try {
-        val forrigeBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
-                ?: throw Feil("Finner ikke tidligere behandling")
+    private fun opprettRevurderingKlage(fagsak: Fagsak) =
+        try {
+            val forrigeBehandling =
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
+                    ?: throw Feil("Finner ikke tidligere behandling")
 
-        val nyBehandling = NyBehandling(
-            kategori = forrigeBehandling.kategori,
-            underkategori = forrigeBehandling.underkategori,
-            søkersIdent = forrigeBehandling.fagsak.aktør.aktivFødselsnummer(),
-            behandlingType = BehandlingType.REVURDERING,
-            behandlingÅrsak = BehandlingÅrsak.KLAGE,
-            navIdent = SikkerhetContext.hentSaksbehandler(),
+            val nyBehandling =
+                NyBehandling(
+                    kategori = forrigeBehandling.kategori,
+                    underkategori = forrigeBehandling.underkategori,
+                    søkersIdent = forrigeBehandling.fagsak.aktør.aktivFødselsnummer(),
+                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingÅrsak = BehandlingÅrsak.KLAGE,
+                    navIdent = SikkerhetContext.hentSaksbehandler(),
+                    // barnasIdenter hentes fra forrige behandling i håndterNyBehandling() ved revurdering
+                    barnasIdenter = emptyList(),
+                    fagsakId = forrigeBehandling.fagsak.id,
+                )
 
-            // barnasIdenter hentes fra forrige behandling i håndterNyBehandling() ved revurdering
-            barnasIdenter = emptyList(),
-
-            fagsakId = forrigeBehandling.fagsak.id,
-        )
-
-        val revurdering = stegService.håndterNyBehandling(nyBehandling)
-        OpprettRevurderingResponse(Opprettet(revurdering.id.toString()))
-    } catch (e: Exception) {
-        logger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}, se secure logg for detaljer")
-        secureLogger.error("Feilet opprettelse av revurdering for fagsak=$fagsak", e)
-        OpprettRevurderingResponse(IkkeOpprettet(IkkeOpprettetÅrsak.FEIL, e.message))
-    }
+            val revurdering = stegService.håndterNyBehandling(nyBehandling)
+            OpprettRevurderingResponse(Opprettet(revurdering.id.toString()))
+        } catch (e: Exception) {
+            logger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}, se secure logg for detaljer")
+            secureLogger.error("Feilet opprettelse av revurdering for fagsak=$fagsak", e)
+            OpprettRevurderingResponse(IkkeOpprettet(IkkeOpprettetÅrsak.FEIL, e.message))
+        }
 
     private fun utledKanOppretteRevurdering(fagsak: Fagsak): KanOppretteRevurderingResultat {
         val erÅpenBehandlingPåFagsak = behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(fagsak.id)
@@ -172,14 +178,15 @@ class KlageService(
 }
 
 private sealed interface KanOppretteRevurderingResultat
+
 private object KanOppretteRevurdering : KanOppretteRevurderingResultat
+
 private data class KanIkkeOppretteRevurdering(val årsak: Årsak) : KanOppretteRevurderingResultat
 
 private enum class Årsak(
     val ikkeOpprettetÅrsak: IkkeOpprettetÅrsak,
     val kanIkkeOppretteRevurderingÅrsak: KanIkkeOppretteRevurderingÅrsak,
 ) {
-
     ÅPEN_BEHANDLING(IkkeOpprettetÅrsak.ÅPEN_BEHANDLING, KanIkkeOppretteRevurderingÅrsak.ÅPEN_BEHANDLING),
     INGEN_BEHANDLING(IkkeOpprettetÅrsak.INGEN_BEHANDLING, KanIkkeOppretteRevurderingÅrsak.INGEN_BEHANDLING),
 }

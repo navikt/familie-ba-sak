@@ -46,7 +46,6 @@ import java.math.BigDecimal
 
 @ExtendWith(MockKExtension::class)
 class KontrollerNyUtbetalingsgeneratorServiceTest {
-
     @MockK
     private lateinit var unleashService: UnleashService
 
@@ -65,24 +64,27 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     @Test
     fun `kontrollerNyUtbetalingsgenerator - skal fange opp at gammel simulering har perioder med endring før ny simulering og ulikt resultat i samme perioder`() {
         setupMocks()
-        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
-            listOf(
-                Periode(jan(2023), mar(2023), 100),
-                Periode(apr(2023), mai(2023), 200),
-            ),
-        )
+        val simuleringBasertPåGammelGenerator =
+            lagDetaljertSimuleringsResultat(
+                listOf(
+                    Periode(jan(2023), mar(2023), 100),
+                    Periode(apr(2023), mai(2023), 200),
+                ),
+            )
 
-        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
-            listOf(
-                Periode(apr(2023), mai(2023), 250),
-            ),
-        )
+        every { økonomiKlient.hentSimulering(any()) } returns
+            lagDetaljertSimuleringsResultat(
+                listOf(
+                    Periode(apr(2023), mai(2023), 250),
+                ),
+            )
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
-            gammeltUtbetalingsoppdrag = mockk(),
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+                gammeltUtbetalingsoppdrag = mockk(),
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(2)
         assertThat(
@@ -98,24 +100,27 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     @Test
     fun `kontrollerNyUtbetalingsgenerator - skal ikke gi feil dersom gammel simulering har perioder uten endring før ny simulering og resultatene er like i øvrige perioder`() {
         setupMocks()
-        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
-            listOf(
-                Periode(jan(2023), mar(2023), 0),
-                Periode(apr(2023), mai(2023), 200),
-            ),
-        )
+        val simuleringBasertPåGammelGenerator =
+            lagDetaljertSimuleringsResultat(
+                listOf(
+                    Periode(jan(2023), mar(2023), 0),
+                    Periode(apr(2023), mai(2023), 200),
+                ),
+            )
 
-        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
-            listOf(
-                Periode(apr(2023), mai(2023), 200),
-            ),
-        )
+        every { økonomiKlient.hentSimulering(any()) } returns
+            lagDetaljertSimuleringsResultat(
+                listOf(
+                    Periode(apr(2023), mai(2023), 200),
+                ),
+            )
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
-            gammeltUtbetalingsoppdrag = mockk(),
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+                gammeltUtbetalingsoppdrag = mockk(),
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(0)
     }
@@ -123,25 +128,28 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     @Test
     fun `kontrollerNyUtbetalingsgenerator - skal ikke gi feil dersom gammel simulering og ny simulering er helt like`() {
         setupMocks()
-        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
-            listOf(
-                Periode(jan(2023), mar(2023), 100),
-                Periode(apr(2023), mai(2023), 200),
-            ),
-        )
+        val simuleringBasertPåGammelGenerator =
+            lagDetaljertSimuleringsResultat(
+                listOf(
+                    Periode(jan(2023), mar(2023), 100),
+                    Periode(apr(2023), mai(2023), 200),
+                ),
+            )
 
-        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
-            listOf(
-                Periode(jan(2023), mar(2023), 100),
-                Periode(apr(2023), mai(2023), 200),
-            ),
-        )
+        every { økonomiKlient.hentSimulering(any()) } returns
+            lagDetaljertSimuleringsResultat(
+                listOf(
+                    Periode(jan(2023), mar(2023), 100),
+                    Periode(apr(2023), mai(2023), 200),
+                ),
+            )
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
-            gammeltUtbetalingsoppdrag = mockk(),
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+                gammeltUtbetalingsoppdrag = mockk(),
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(0)
     }
@@ -149,29 +157,32 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     @Test
     fun `kontrollerNyUtbetalingsgenerator - skal gi feil dersom gammel simulering og ny simulering har et ulikt resultat`() {
         setupMocks()
-        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
-            listOf(
-                Periode(jan(2023), feb(2023), 100),
-                Periode(mar(2023), apr(2023), 200),
-                Periode(mai(2023), jun(2023), 300),
-                Periode(jul(2023), aug(2023), 200),
-            ),
-        )
+        val simuleringBasertPåGammelGenerator =
+            lagDetaljertSimuleringsResultat(
+                listOf(
+                    Periode(jan(2023), feb(2023), 100),
+                    Periode(mar(2023), apr(2023), 200),
+                    Periode(mai(2023), jun(2023), 300),
+                    Periode(jul(2023), aug(2023), 200),
+                ),
+            )
 
-        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
-            listOf(
-                Periode(jan(2023), feb(2023), 100),
-                Periode(mar(2023), apr(2023), 200),
-                Periode(mai(2023), jun(2023), 320),
-                Periode(jul(2023), aug(2023), 200),
-            ),
-        )
+        every { økonomiKlient.hentSimulering(any()) } returns
+            lagDetaljertSimuleringsResultat(
+                listOf(
+                    Periode(jan(2023), feb(2023), 100),
+                    Periode(mar(2023), apr(2023), 200),
+                    Periode(mai(2023), jun(2023), 320),
+                    Periode(jul(2023), aug(2023), 200),
+                ),
+            )
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
-            gammeltUtbetalingsoppdrag = mockk(),
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+                gammeltUtbetalingsoppdrag = mockk(),
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(1)
         assertThat(
@@ -182,28 +193,31 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     @Test
     fun `kontrollerNyUtbetalingsgenerator - skal gi feil dersom gammel simulering har endring før ny simulering`() {
         setupMocks()
-        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
-            listOf(
-                Periode(jan(2023), feb(2023), 100),
-                Periode(mar(2023), apr(2023), 200),
-                Periode(mai(2023), jun(2023), 320),
-                Periode(jul(2023), aug(2023), 200),
-            ),
-        )
+        val simuleringBasertPåGammelGenerator =
+            lagDetaljertSimuleringsResultat(
+                listOf(
+                    Periode(jan(2023), feb(2023), 100),
+                    Periode(mar(2023), apr(2023), 200),
+                    Periode(mai(2023), jun(2023), 320),
+                    Periode(jul(2023), aug(2023), 200),
+                ),
+            )
 
-        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
-            listOf(
-                Periode(mar(2023), apr(2023), 200),
-                Periode(mai(2023), jun(2023), 320),
-                Periode(jul(2023), aug(2023), 200),
-            ),
-        )
+        every { økonomiKlient.hentSimulering(any()) } returns
+            lagDetaljertSimuleringsResultat(
+                listOf(
+                    Periode(mar(2023), apr(2023), 200),
+                    Periode(mai(2023), jun(2023), 320),
+                    Periode(jul(2023), aug(2023), 200),
+                ),
+            )
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
-            gammeltUtbetalingsoppdrag = mockk(),
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+                gammeltUtbetalingsoppdrag = mockk(),
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(1)
         assertThat(
@@ -214,27 +228,30 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     @Test
     fun `kontrollerNyUtbetalingsgenerator - skal ikke gi feil dersom gammel simulering og ny simulering er like og har hull i periodene`() {
         setupMocks()
-        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
-            listOf(
-                Periode(jan(2023), feb(2023), 100),
-                Periode(mai(2023), jun(2023), 300),
-                Periode(aug(2023), sep(2023), 200),
-            ),
-        )
+        val simuleringBasertPåGammelGenerator =
+            lagDetaljertSimuleringsResultat(
+                listOf(
+                    Periode(jan(2023), feb(2023), 100),
+                    Periode(mai(2023), jun(2023), 300),
+                    Periode(aug(2023), sep(2023), 200),
+                ),
+            )
 
-        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
-            listOf(
-                Periode(jan(2023), feb(2023), 100),
-                Periode(mai(2023), jun(2023), 300),
-                Periode(aug(2023), sep(2023), 200),
-            ),
-        )
+        every { økonomiKlient.hentSimulering(any()) } returns
+            lagDetaljertSimuleringsResultat(
+                listOf(
+                    Periode(jan(2023), feb(2023), 100),
+                    Periode(mai(2023), jun(2023), 300),
+                    Periode(aug(2023), sep(2023), 200),
+                ),
+            )
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
-            gammeltUtbetalingsoppdrag = mockk(),
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+                gammeltUtbetalingsoppdrag = mockk(),
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(0)
     }
@@ -250,10 +267,11 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
             )
         } returns lagUtbetalingsoppdrag(emptyList<Utbetalingsperiode>())
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            saksbehandlerId = "12345",
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                saksbehandlerId = "12345",
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(0)
     }
@@ -267,16 +285,18 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
                 saksbehandlerId = any(),
                 erSimulering = any(),
             )
-        } returns BeregnetUtbetalingsoppdragLongId(
-            lagUtbetalingsoppdrag(emptyList<no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode>()),
-            emptyList(),
-        )
+        } returns
+            BeregnetUtbetalingsoppdragLongId(
+                lagUtbetalingsoppdrag(emptyList<no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode>()),
+                emptyList(),
+            )
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            gammeltSimuleringResultat = mockk(),
-            gammeltUtbetalingsoppdrag = mockk(),
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                gammeltSimuleringResultat = mockk(),
+                gammeltUtbetalingsoppdrag = mockk(),
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(0)
     }
@@ -284,23 +304,26 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     @Test
     fun `kontrollerNyUtbetalingsgenerator - skal gi feil dersom ett av simuleringsresultatene ikke er tomt men det andre er det`() {
         setupMocks()
-        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
-            listOf(
-                Periode(jan(2023), feb(2023), 100),
-                Periode(mai(2023), jun(2023), 300),
-                Periode(aug(2023), sep(2023), 200),
-            ),
-        )
+        val simuleringBasertPåGammelGenerator =
+            lagDetaljertSimuleringsResultat(
+                listOf(
+                    Periode(jan(2023), feb(2023), 100),
+                    Periode(mai(2023), jun(2023), 300),
+                    Periode(aug(2023), sep(2023), 200),
+                ),
+            )
 
-        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
-            emptyList(),
-        )
+        every { økonomiKlient.hentSimulering(any()) } returns
+            lagDetaljertSimuleringsResultat(
+                emptyList(),
+            )
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
-            gammeltUtbetalingsoppdrag = mockk(),
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+                gammeltUtbetalingsoppdrag = mockk(),
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(1)
         assertThat(
@@ -311,19 +334,22 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     @Test
     fun `kontrollerNyUtbetalingsgenerator - skal ikke kjøre sammenligning dersom begge simuleringsresultatene er tomme`() {
         setupMocks()
-        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
-            emptyList(),
-        )
+        val simuleringBasertPåGammelGenerator =
+            lagDetaljertSimuleringsResultat(
+                emptyList(),
+            )
 
-        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
-            emptyList(),
-        )
+        every { økonomiKlient.hentSimulering(any()) } returns
+            lagDetaljertSimuleringsResultat(
+                emptyList(),
+            )
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
-            gammeltUtbetalingsoppdrag = mockk(),
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+                gammeltUtbetalingsoppdrag = mockk(),
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(0)
     }
@@ -335,11 +361,12 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
             økonomiKlient.hentSimulering(any())
         } throws Exception("Test")
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            gammeltSimuleringResultat = mockk(),
-            gammeltUtbetalingsoppdrag = mockk(),
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                gammeltSimuleringResultat = mockk(),
+                gammeltUtbetalingsoppdrag = mockk(),
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(1)
         assertThat(
@@ -350,36 +377,41 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     @Test
     fun `kontrollerNyUtbetalingsgenerator - skal gi feil dersom antall andeler fra ny generator er ulikt andeler med utbetaling`() {
         setupMocks(
-            overstyrteAndelerFraGenerator = listOf(
-                AndelMedPeriodeIdLongId(0, 1, null, 1),
-                AndelMedPeriodeIdLongId(1, 2, 1, 1),
-                AndelMedPeriodeIdLongId(2, 3, 2, 1),
-            ),
-            overstyrteAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    fom = inneværendeMåned(),
-                    tom = inneværendeMåned().plusMonths(1),
+            overstyrteAndelerFraGenerator =
+                listOf(
+                    AndelMedPeriodeIdLongId(0, 1, null, 1),
+                    AndelMedPeriodeIdLongId(1, 2, 1, 1),
+                    AndelMedPeriodeIdLongId(2, 3, 2, 1),
                 ),
-                lagAndelTilkjentYtelse(
-                    fom = inneværendeMåned().plusMonths(2),
-                    tom = inneværendeMåned().plusMonths(3),
+            overstyrteAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = inneværendeMåned(),
+                        tom = inneværendeMåned().plusMonths(1),
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = inneværendeMåned().plusMonths(2),
+                        tom = inneværendeMåned().plusMonths(3),
+                    ),
                 ),
-            ),
         )
 
-        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
-            emptyList(),
-        )
+        val simuleringBasertPåGammelGenerator =
+            lagDetaljertSimuleringsResultat(
+                emptyList(),
+            )
 
-        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
-            emptyList(),
-        )
+        every { økonomiKlient.hentSimulering(any()) } returns
+            lagDetaljertSimuleringsResultat(
+                emptyList(),
+            )
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
-            gammeltUtbetalingsoppdrag = mockk(),
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+                gammeltUtbetalingsoppdrag = mockk(),
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(1)
         assertThat(
@@ -390,43 +422,48 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     @Test
     fun `kontrollerNyUtbetalingsgenerator - skal gi feil dersom id'ene til andeler fra ny generator ikke matcher id'ene til andeler med utbetaling`() {
         setupMocks(
-            overstyrteAndelerFraGenerator = listOf(
-                AndelMedPeriodeIdLongId(0, 1, null, 1),
-                AndelMedPeriodeIdLongId(1, 2, 1, 1),
-                AndelMedPeriodeIdLongId(2, 3, 2, 1),
-            ),
-            overstyrteAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    id = 1,
-                    fom = inneværendeMåned(),
-                    tom = inneværendeMåned().plusMonths(1),
+            overstyrteAndelerFraGenerator =
+                listOf(
+                    AndelMedPeriodeIdLongId(0, 1, null, 1),
+                    AndelMedPeriodeIdLongId(1, 2, 1, 1),
+                    AndelMedPeriodeIdLongId(2, 3, 2, 1),
                 ),
-                lagAndelTilkjentYtelse(
-                    id = 2,
-                    fom = inneværendeMåned().plusMonths(2),
-                    tom = inneværendeMåned().plusMonths(3),
+            overstyrteAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        id = 1,
+                        fom = inneværendeMåned(),
+                        tom = inneværendeMåned().plusMonths(1),
+                    ),
+                    lagAndelTilkjentYtelse(
+                        id = 2,
+                        fom = inneværendeMåned().plusMonths(2),
+                        tom = inneværendeMåned().plusMonths(3),
+                    ),
+                    lagAndelTilkjentYtelse(
+                        id = 3,
+                        fom = inneværendeMåned().plusMonths(4),
+                        tom = inneværendeMåned().plusMonths(5),
+                    ),
                 ),
-                lagAndelTilkjentYtelse(
-                    id = 3,
-                    fom = inneværendeMåned().plusMonths(4),
-                    tom = inneværendeMåned().plusMonths(5),
-                ),
-            ),
         )
 
-        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
-            emptyList(),
-        )
+        val simuleringBasertPåGammelGenerator =
+            lagDetaljertSimuleringsResultat(
+                emptyList(),
+            )
 
-        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
-            emptyList(),
-        )
+        every { økonomiKlient.hentSimulering(any()) } returns
+            lagDetaljertSimuleringsResultat(
+                emptyList(),
+            )
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
-            gammeltUtbetalingsoppdrag = mockk(),
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+                gammeltUtbetalingsoppdrag = mockk(),
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(1)
         assertThat(
@@ -437,43 +474,48 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
     @Test
     fun `kontrollerNyUtbetalingsgenerator - skal ikke gi feil dersom andeler fra ny generator matcher andeler med utbetaling`() {
         setupMocks(
-            overstyrteAndelerFraGenerator = listOf(
-                AndelMedPeriodeIdLongId(0, 1, null, 1),
-                AndelMedPeriodeIdLongId(1, 2, 1, 1),
-                AndelMedPeriodeIdLongId(2, 3, 2, 1),
-            ),
-            overstyrteAndeler = listOf(
-                lagAndelTilkjentYtelse(
-                    id = 0,
-                    fom = inneværendeMåned(),
-                    tom = inneværendeMåned().plusMonths(1),
+            overstyrteAndelerFraGenerator =
+                listOf(
+                    AndelMedPeriodeIdLongId(0, 1, null, 1),
+                    AndelMedPeriodeIdLongId(1, 2, 1, 1),
+                    AndelMedPeriodeIdLongId(2, 3, 2, 1),
                 ),
-                lagAndelTilkjentYtelse(
-                    id = 1,
-                    fom = inneværendeMåned().plusMonths(2),
-                    tom = inneværendeMåned().plusMonths(3),
+            overstyrteAndeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        id = 0,
+                        fom = inneværendeMåned(),
+                        tom = inneværendeMåned().plusMonths(1),
+                    ),
+                    lagAndelTilkjentYtelse(
+                        id = 1,
+                        fom = inneværendeMåned().plusMonths(2),
+                        tom = inneværendeMåned().plusMonths(3),
+                    ),
+                    lagAndelTilkjentYtelse(
+                        id = 2,
+                        fom = inneværendeMåned().plusMonths(4),
+                        tom = inneværendeMåned().plusMonths(5),
+                    ),
                 ),
-                lagAndelTilkjentYtelse(
-                    id = 2,
-                    fom = inneværendeMåned().plusMonths(4),
-                    tom = inneværendeMåned().plusMonths(5),
-                ),
-            ),
         )
 
-        val simuleringBasertPåGammelGenerator = lagDetaljertSimuleringsResultat(
-            emptyList(),
-        )
+        val simuleringBasertPåGammelGenerator =
+            lagDetaljertSimuleringsResultat(
+                emptyList(),
+            )
 
-        every { økonomiKlient.hentSimulering(any()) } returns lagDetaljertSimuleringsResultat(
-            emptyList(),
-        )
+        every { økonomiKlient.hentSimulering(any()) } returns
+            lagDetaljertSimuleringsResultat(
+                emptyList(),
+            )
 
-        val simuleringsPeriodeDiffFeil = kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-            vedtak = lagVedtak(),
-            gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
-            gammeltUtbetalingsoppdrag = mockk(),
-        )
+        val simuleringsPeriodeDiffFeil =
+            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
+                vedtak = lagVedtak(),
+                gammeltSimuleringResultat = simuleringBasertPåGammelGenerator,
+                gammeltUtbetalingsoppdrag = mockk(),
+            )
 
         assertThat(simuleringsPeriodeDiffFeil.size).isEqualTo(0)
     }
@@ -510,11 +552,12 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
             )
         } returns beregnetUtbetalingsoppdragMock
 
-        every { tikjentYtelseRepository.findByBehandling(any()) } returns lagInitiellTilkjentYtelse().also {
-            it.andelerTilkjentYtelse.addAll(
-                overstyrteAndeler ?: emptyList(),
-            )
-        }
+        every { tikjentYtelseRepository.findByBehandling(any()) } returns
+            lagInitiellTilkjentYtelse().also {
+                it.andelerTilkjentYtelse.addAll(
+                    overstyrteAndeler ?: emptyList(),
+                )
+            }
     }
 
     fun lagDetaljertSimuleringsResultat(perioder: List<Periode<Int, Måned>>) =
@@ -523,31 +566,32 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
         } else {
             DetaljertSimuleringResultat(
                 simuleringMottaker =
-                listOf(
-                    SimuleringMottaker(
-                        simulertPostering = perioder.fold(mutableListOf()) { acc, periode ->
-                            if (periode.innhold!! == 0) {
-                                acc.addAll(
-                                    listOf(
-                                        lagSimulertPostering(periode, overstyrtBeløp = 1000),
-                                        lagSimulertPostering(
-                                            periode = periode,
-                                            overstyrtBeløp = 1000,
-                                            negativtFortegn = true,
-                                        ),
-                                    ),
-                                )
-                                acc
-                            } else {
-                                acc.add(
-                                    lagSimulertPostering(periode),
-                                )
-                                acc
-                            }
-                        },
-                        mottakerType = MottakerType.BRUKER,
+                    listOf(
+                        SimuleringMottaker(
+                            simulertPostering =
+                                perioder.fold(mutableListOf()) { acc, periode ->
+                                    if (periode.innhold!! == 0) {
+                                        acc.addAll(
+                                            listOf(
+                                                lagSimulertPostering(periode, overstyrtBeløp = 1000),
+                                                lagSimulertPostering(
+                                                    periode = periode,
+                                                    overstyrtBeløp = 1000,
+                                                    negativtFortegn = true,
+                                                ),
+                                            ),
+                                        )
+                                        acc
+                                    } else {
+                                        acc.add(
+                                            lagSimulertPostering(periode),
+                                        )
+                                        acc
+                                    }
+                                },
+                            mottakerType = MottakerType.BRUKER,
+                        ),
                     ),
-                ),
             )
         }
 
@@ -561,13 +605,14 @@ class KontrollerNyUtbetalingsgeneratorServiceTest {
             fom = periode.fraOgMed.tilLocalDate(),
             tom = periode.tilOgMed.tilLocalDate(),
             betalingType = BetalingType.DEBIT,
-            beløp = if (negativtFortegn) {
-                -BigDecimal(overstyrtBeløp ?: periode.innhold!!).setScale(10)
-            } else {
-                BigDecimal(overstyrtBeløp ?: periode.innhold!!).setScale(
-                    10,
-                )
-            },
+            beløp =
+                if (negativtFortegn) {
+                    -BigDecimal(overstyrtBeløp ?: periode.innhold!!).setScale(10)
+                } else {
+                    BigDecimal(overstyrtBeløp ?: periode.innhold!!).setScale(
+                        10,
+                    )
+                },
             posteringType = PosteringType.YTELSE,
             forfallsdato = des(2023).tilLocalDate(),
             utenInntrekk = true,

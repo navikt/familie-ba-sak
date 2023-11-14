@@ -42,15 +42,16 @@ class TeamStatistikkService(
                 behandlingRepository.hentTotalUtbetalingForMåned(it.førsteDagIInneværendeMåned().atStartOfDay())
             }
 
-        val rows = månederMedTotalUtbetaling.map {
-            MultiGauge.Row.of(
-                Tags.of(
-                    ÅR_MÅNED_TAG,
-                    "${it.key.year}-${it.key.month}",
-                ),
-                it.value,
-            )
-        }
+        val rows =
+            månederMedTotalUtbetaling.map {
+                MultiGauge.Row.of(
+                    Tags.of(
+                        ÅR_MÅNED_TAG,
+                        "${it.key.year}-${it.key.month}",
+                    ),
+                    it.value,
+                )
+            }
 
         utbetalingerPerMånedGauge.register(rows)
     }
@@ -61,15 +62,16 @@ class TeamStatistikkService(
 
         val antallFagsaker = fagsakRepository.finnAntallFagsakerTotalt()
 
-        val rows = listOf(
-            MultiGauge.Row.of(
-                Tags.of(
-                    ÅR_MÅNED_TAG,
-                    "${YearMonth.now().year}-${YearMonth.now().month}",
+        val rows =
+            listOf(
+                MultiGauge.Row.of(
+                    Tags.of(
+                        ÅR_MÅNED_TAG,
+                        "${YearMonth.now().year}-${YearMonth.now().month}",
+                    ),
+                    antallFagsaker,
                 ),
-                antallFagsaker,
-            ),
-        )
+            )
 
         antallFagsakerPerMånedGauge.register(rows)
     }
@@ -80,15 +82,16 @@ class TeamStatistikkService(
 
         val løpendeFagsaker = fagsakRepository.finnAntallFagsakerLøpende()
 
-        val rows = listOf(
-            MultiGauge.Row.of(
-                Tags.of(
-                    ÅR_MÅNED_TAG,
-                    "${YearMonth.now().year}-${YearMonth.now().month}",
+        val rows =
+            listOf(
+                MultiGauge.Row.of(
+                    Tags.of(
+                        ÅR_MÅNED_TAG,
+                        "${YearMonth.now().year}-${YearMonth.now().month}",
+                    ),
+                    løpendeFagsaker,
                 ),
-                løpendeFagsaker,
-            ),
-        )
+            )
 
         løpendeFagsakerPerMånedGauge.register(rows)
     }
@@ -99,15 +102,16 @@ class TeamStatistikkService(
 
         val åpneBehandlinger = behandlingRepository.finnAntallBehandlingerIkkeAvsluttet()
 
-        val rows = listOf(
-            MultiGauge.Row.of(
-                Tags.of(
-                    ÅR_MÅNED_TAG,
-                    "${YearMonth.now().year}-${YearMonth.now().month}",
+        val rows =
+            listOf(
+                MultiGauge.Row.of(
+                    Tags.of(
+                        ÅR_MÅNED_TAG,
+                        "${YearMonth.now().year}-${YearMonth.now().month}",
+                    ),
+                    åpneBehandlinger,
                 ),
-                åpneBehandlinger,
-            ),
-        )
+            )
 
         åpneBehandlingerPerMånedGauge.register(rows)
     }
@@ -124,29 +128,30 @@ class TeamStatistikkService(
         val max = diffPåÅpneBehandlinger.maxOf { it }
         val min = diffPåÅpneBehandlinger.minOf { it }
 
-        val rows = listOf(
-            MultiGauge.Row.of(
-                Tags.of(
-                    ÅR_MÅNED_TAG,
-                    "${YearMonth.now().year}-${YearMonth.now().month}-snitt",
+        val rows =
+            listOf(
+                MultiGauge.Row.of(
+                    Tags.of(
+                        ÅR_MÅNED_TAG,
+                        "${YearMonth.now().year}-${YearMonth.now().month}-snitt",
+                    ),
+                    snitt,
                 ),
-                snitt,
-            ),
-            MultiGauge.Row.of(
-                Tags.of(
-                    ÅR_MÅNED_TAG,
-                    "${YearMonth.now().year}-${YearMonth.now().month}-max",
+                MultiGauge.Row.of(
+                    Tags.of(
+                        ÅR_MÅNED_TAG,
+                        "${YearMonth.now().year}-${YearMonth.now().month}-max",
+                    ),
+                    max,
                 ),
-                max,
-            ),
-            MultiGauge.Row.of(
-                Tags.of(
-                    ÅR_MÅNED_TAG,
-                    "${YearMonth.now().year}-${YearMonth.now().month}-min",
+                MultiGauge.Row.of(
+                    Tags.of(
+                        ÅR_MÅNED_TAG,
+                        "${YearMonth.now().year}-${YearMonth.now().month}-min",
+                    ),
+                    min,
                 ),
-                min,
-            ),
-        )
+            )
 
         tidSidenOpprettelseåpneBehandlingerPerMånedGauge.register(rows)
     }
@@ -156,9 +161,10 @@ class TeamStatistikkService(
         if (!erLeader()) return
 
         listOf(180, 150, 120, 90, 60).fold(mutableSetOf<Long>()) { acc, dagerSiden ->
-            val åpneBehandlinger = behandlingRepository.finnÅpneBehandlinger(
-                opprettetFør = LocalDateTime.now().minusDays(dagerSiden.toLong()),
-            ).filter { !acc.contains(it.id) }
+            val åpneBehandlinger =
+                behandlingRepository.finnÅpneBehandlinger(
+                    opprettetFør = LocalDateTime.now().minusDays(dagerSiden.toLong()),
+                ).filter { !acc.contains(it.id) }
 
             if (åpneBehandlinger.isNotEmpty()) {
                 logger.warn(

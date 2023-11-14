@@ -31,7 +31,6 @@ class SendMeldingTilBisysTask(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AsyncTaskStep {
-
     private val logger = LoggerFactory.getLogger(SendMeldingTilBisysTask::class.java)
     private val meldingsTeller = Metrics.counter("familie.ba.sak.bisys.meldinger.sendt")
 
@@ -44,10 +43,11 @@ class SendMeldingTilBisysTask(
             behandling.resultat == Behandlingsresultat.ENDRET_OG_OPPHØRT
         ) {
             val barnEndretOpplysning = finnBarnEndretOpplysning(behandling)
-            val barnetrygdBisysMelding = BarnetrygdBisysMelding(
-                søker = behandling.fagsak.aktør.aktivFødselsnummer(),
-                barn = barnEndretOpplysning.filter { it.value.isNotEmpty() }.map { it.value.first() },
-            )
+            val barnetrygdBisysMelding =
+                BarnetrygdBisysMelding(
+                    søker = behandling.fagsak.aktør.aktivFødselsnummer(),
+                    barn = barnEndretOpplysning.filter { it.value.isNotEmpty() }.map { it.value.first() },
+                )
 
             if (barnetrygdBisysMelding.barn.isEmpty()) {
                 logger.info("Behandling endret men ikke reduksjon eller opphør. Send ikke melding til bisys")
@@ -133,19 +133,26 @@ class SendMeldingTilBisysTask(
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = behandlingsId.toString(),
-                properties = Properties().apply {
-                    this["behandlingsId"] = behandlingsId.toString()
-                },
+                properties =
+                    Properties().apply {
+                        this["behandlingsId"] = behandlingsId.toString()
+                    },
             )
         }
     }
 }
 
-fun earlist(yearMonth1: YearMonth, yearMonth2: YearMonth): YearMonth {
+fun earlist(
+    yearMonth1: YearMonth,
+    yearMonth2: YearMonth,
+): YearMonth {
     return if (yearMonth1.isSameOrBefore(yearMonth2)) yearMonth1 else yearMonth2
 }
 
-fun latest(yearMonth1: YearMonth, yearMonth2: YearMonth): YearMonth {
+fun latest(
+    yearMonth1: YearMonth,
+    yearMonth2: YearMonth,
+): YearMonth {
     return if (yearMonth1.isSameOrAfter(yearMonth2)) yearMonth1 else yearMonth2
 }
 

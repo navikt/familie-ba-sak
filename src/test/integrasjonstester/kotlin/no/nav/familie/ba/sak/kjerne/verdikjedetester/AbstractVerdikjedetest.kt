@@ -17,7 +17,6 @@ val MOCK_SERVER_IMAGE = "ghcr.io/navikt/familie-mock-server/familie-mock-server:
 
 class VerdikjedetesterPropertyOverrideContextInitializer :
     ApplicationContextInitializer<ConfigurableApplicationContext?> {
-
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
             configurableApplicationContext,
@@ -56,20 +55,21 @@ class VerdikjedetesterPropertyOverrideContextInitializer :
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
-
     @Autowired
     lateinit var restOperations: RestOperations
 
-    fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
-        baSakUrl = hentUrl(""),
-        restOperations = restOperations,
-        headers = hentHeadersForSystembruker(),
-    )
+    fun familieBaSakKlient(): FamilieBaSakKlient =
+        FamilieBaSakKlient(
+            baSakUrl = hentUrl(""),
+            restOperations = restOperations,
+            headers = hentHeadersForSystembruker(),
+        )
 
-    fun mockServerKlient(): MockserverKlient = MockserverKlient(
-        mockServerUrl = "http://localhost:1337",
-        restOperations = restOperations,
-    )
+    fun mockServerKlient(): MockserverKlient =
+        MockserverKlient(
+            mockServerUrl = "http://localhost:1337",
+            restOperations = restOperations,
+        )
 }
 
 /**

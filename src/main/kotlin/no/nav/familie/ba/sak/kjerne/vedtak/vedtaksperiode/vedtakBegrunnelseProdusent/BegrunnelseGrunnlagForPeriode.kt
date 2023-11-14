@@ -14,7 +14,6 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
             forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
             sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?,
             periodetype: Vedtaksperiodetype,
-
         ): IBegrunnelseGrunnlagForPeriode =
             when (periodetype) {
                 Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> {

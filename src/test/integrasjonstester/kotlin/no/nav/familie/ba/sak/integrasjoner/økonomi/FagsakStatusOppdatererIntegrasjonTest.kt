@@ -26,7 +26,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
-
     @Autowired
     private lateinit var fagsakService: FagsakService
 
@@ -54,9 +53,10 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
     fun `ikke oppdater status på fagsaker som er løpende og har løpende utbetalinger`() {
         val forelderIdent = randomFnr()
 
-        val fagsakOriginal = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
-            fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
-        }
+        val fagsakOriginal =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+                fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
+            }
         opprettOgLagreBehandlingMedAndeler(
             personIdent = forelderIdent,
             offsetPåAndeler = listOf(1L),
@@ -77,9 +77,10 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
     fun `skal sette status til avsluttet hvis ingen løpende utbetalinger`() {
         val forelderIdent = randomFnr()
 
-        val fagsakOriginal = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
-            fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
-        }
+        val fagsakOriginal =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+                fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
+            }
         val førstegangsbehandling =
             opprettOgLagreBehandlingMedAndeler(
                 personIdent = forelderIdent,
@@ -123,12 +124,16 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         return behandling
     }
 
-    private fun tilkjentYtelse(behandling: Behandling, erIverksatt: Boolean) = TilkjentYtelse(
-        behandling = behandling,
-        opprettetDato = LocalDate.now(),
-        endretDato = LocalDate.now(),
-        utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
-    )
+    private fun tilkjentYtelse(
+        behandling: Behandling,
+        erIverksatt: Boolean,
+    ) =
+        TilkjentYtelse(
+            behandling = behandling,
+            opprettetDato = LocalDate.now(),
+            endretDato = LocalDate.now(),
+            utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
+        )
 
     // Kun offset og kobling til behandling/tilkjent ytelse som er relevant når man skal plukke ut til konsistensavstemming
     private fun andelPåTilkjentYtelse(
@@ -141,12 +146,14 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,
         nasjonaltPeriodebeløp = 1054,
-        stønadFom = LocalDate.now()
-            .minusMonths(12)
-            .toYearMonth(),
-        stønadTom = LocalDate.now()
-            .plusMonths(12)
-            .toYearMonth(),
+        stønadFom =
+            LocalDate.now()
+                .minusMonths(12)
+                .toYearMonth(),
+        stønadTom =
+            LocalDate.now()
+                .plusMonths(12)
+                .toYearMonth(),
         type = YtelseType.ORDINÆR_BARNETRYGD,
         periodeOffset = periodeOffset,
         forrigePeriodeOffset = null,

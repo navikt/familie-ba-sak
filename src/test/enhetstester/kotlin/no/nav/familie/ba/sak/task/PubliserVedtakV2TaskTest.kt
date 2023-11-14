@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
 class PubliserVedtakV2TaskTest {
-
     @MockK(relaxed = true)
     private lateinit var taskRepositoryMock: TaskRepositoryWrapper
 

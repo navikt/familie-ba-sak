@@ -16,7 +16,6 @@ import org.assertj.core.api.Assertions.assertThat
 import java.time.LocalDate
 
 object OppdragParser {
-
     fun mapTilkjentYtelse(
         dataTable: DataTable,
         behandlinger: Map<Long, Behandling>,
@@ -30,17 +29,18 @@ object OppdragParser {
             val andeler = parseAndelder(behandling, rader, index)
             index += andeler.size
 
-            val tilkjentYtelse = TilkjentYtelse(
-                id = tilkjentYtelseIdIterator++,
-                behandling = behandling,
-                stønadFom = null,
-                stønadTom = null,
-                opphørFom = null,
-                opprettetDato = LocalDate.now(),
-                endretDato = LocalDate.now(),
-                utbetalingsoppdrag = null,
-                andelerTilkjentYtelse = andeler,
-            )
+            val tilkjentYtelse =
+                TilkjentYtelse(
+                    id = tilkjentYtelseIdIterator++,
+                    behandling = behandling,
+                    stønadFom = null,
+                    stønadTom = null,
+                    opphørFom = null,
+                    opprettetDato = LocalDate.now(),
+                    endretDato = LocalDate.now(),
+                    utbetalingsoppdrag = null,
+                    andelerTilkjentYtelse = andeler,
+                )
             andeler.forEach { it.tilkjentYtelse = tilkjentYtelse }
 
             tilkjentYtelse
@@ -97,8 +97,9 @@ object OppdragParser {
             periodeId = parseLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, it),
             forrigePeriodeId = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, it),
             sats = parseInt(DomenebegrepUtbetalingsoppdrag.BELØP, it),
-            ytelse = parseValgfriEnum<YtelseType>(DomenebegrepUtbetalingsoppdrag.YTELSE_TYPE, it)
-                ?: YtelseType.ORDINÆR_BARNETRYGD,
+            ytelse =
+                parseValgfriEnum<YtelseType>(DomenebegrepUtbetalingsoppdrag.YTELSE_TYPE, it)
+                    ?: YtelseType.ORDINÆR_BARNETRYGD,
             fom = parseÅrMåned(Domenebegrep.FRA_DATO, it).atDay(1),
             tom = parseÅrMåned(Domenebegrep.TIL_DATO, it).atEndOfMonth(),
             opphør = parseValgfriÅrMåned(DomenebegrepUtbetalingsoppdrag.OPPHØRSDATO, it)?.atDay(1),

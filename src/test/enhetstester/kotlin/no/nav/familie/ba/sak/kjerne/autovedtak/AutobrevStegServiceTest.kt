@@ -25,22 +25,24 @@ class AutobrevStegServiceTest {
     private val autovedtakBrevService = mockk<AutovedtakBrevService>()
     private val autovedtakSmåbarnstilleggService = mockk<AutovedtakSmåbarnstilleggService>()
 
-    val autovedtakStegService = AutovedtakStegService(
-        fagsakService = fagsakService,
-        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-        oppgaveService = oppgaveService,
-        autovedtakFødselshendelseService = autovedtakFødselshendelseService,
-        autovedtakBrevService = autovedtakBrevService,
-        autovedtakSmåbarnstilleggService = autovedtakSmåbarnstilleggService,
-    )
+    val autovedtakStegService =
+        AutovedtakStegService(
+            fagsakService = fagsakService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            oppgaveService = oppgaveService,
+            autovedtakFødselshendelseService = autovedtakFødselshendelseService,
+            autovedtakBrevService = autovedtakBrevService,
+            autovedtakSmåbarnstilleggService = autovedtakSmåbarnstilleggService,
+        )
 
     @Test
     fun `Skal stoppe autovedtak og opprette oppgave ved åpen behandling som utredes`() {
         val aktør = randomAktør()
         val fagsak = defaultFagsak(aktør)
-        val behandling = lagBehandling(fagsak).also {
-            it.status = BehandlingStatus.UTREDES
-        }
+        val behandling =
+            lagBehandling(fagsak).also {
+                it.status = BehandlingStatus.UTREDES
+            }
 
         every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(SmåbarnstilleggData(aktør)) } returns true
         every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
@@ -59,9 +61,10 @@ class AutobrevStegServiceTest {
     fun `Skal stoppe autovedtak og opprette oppgave ved åpen behandling med status Fatter vedtak`() {
         val aktør = randomAktør()
         val fagsak = defaultFagsak(aktør)
-        val behandling = lagBehandling(fagsak).also {
-            it.status = BehandlingStatus.FATTER_VEDTAK
-        }
+        val behandling =
+            lagBehandling(fagsak).also {
+                it.status = BehandlingStatus.FATTER_VEDTAK
+            }
 
         every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(SmåbarnstilleggData(aktør)) } returns true
         every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
@@ -80,9 +83,10 @@ class AutobrevStegServiceTest {
     fun `Skal stoppe autovedtak ved å kaste feil ved åpen behandling som iverksettes`() {
         val aktør = randomAktør()
         val fagsak = defaultFagsak(aktør)
-        val behandling = lagBehandling(fagsak).also {
-            it.status = BehandlingStatus.IVERKSETTER_VEDTAK
-        }
+        val behandling =
+            lagBehandling(fagsak).also {
+                it.status = BehandlingStatus.IVERKSETTER_VEDTAK
+            }
 
         every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(SmåbarnstilleggData(aktør)) } returns true
         every { fagsakService.hentNormalFagsak(aktør) } returns fagsak

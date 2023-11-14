@@ -65,51 +65,35 @@ import java.time.LocalDate
 class StegServiceIntegrationTest(
     @Autowired
     private val stegService: StegService,
-
     @Autowired
     private val vedtakService: VedtakService,
-
     @Autowired
     private val behandlingService: BehandlingService,
-
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
-
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService,
-
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
-
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-
     @Autowired
     private val totrinnskontrollService: TotrinnskontrollService,
-
     @Autowired
     private val personidentService: PersonidentService,
-
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
-
     @Autowired
     private val oppgaveRepository: OppgaveRepository,
-
     @Autowired
     private val brevmalService: BrevmalService,
-
     @Autowired
     private val økonomiKlient: ØkonomiKlient,
-
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
@@ -122,18 +106,19 @@ class StegServiceIntegrationTest(
         val barnFnr1 = ClientMocks.barnFnr[0]
         val barnFnr2 = ClientMocks.barnFnr[1]
 
-        val behandling = kjørStegprosessForFGB(
-            tilSteg = StegType.REGISTRERE_SØKNAD,
-            søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barnFnr1, barnFnr2),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandling =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.REGISTRERE_SØKNAD,
+                søkerFnr = søkerFnr,
+                barnasIdenter = listOf(barnFnr1, barnFnr2),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
         assertEquals(
@@ -151,18 +136,19 @@ class StegServiceIntegrationTest(
     @Test
     fun `Skal kjøre gjennom alle steg med datageneratoren`() {
         val søkerFnr = randomFnr()
-        val behandling = kjørStegprosessForFGB(
-            tilSteg = StegType.BEHANDLING_AVSLUTTET,
-            søkerFnr = søkerFnr,
-            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandling =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.BEHANDLING_AVSLUTTET,
+                søkerFnr = søkerFnr,
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         // Venter med å kjøre gjennom til avsluttet til brev er støttet for fortsatt innvilget.
         kjørStegprosessForRevurderingÅrligKontroll(
@@ -205,9 +191,10 @@ class StegServiceIntegrationTest(
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
         behandling.status = BehandlingStatus.AVSLUTTET
-        val feil = assertThrows<FunksjonellFeil> {
-            stegService.håndterSendTilBeslutter(behandling, "1234")
-        }
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                stegService.håndterSendTilBeslutter(behandling, "1234")
+            }
         assertEquals(
             "Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes",
             feil.message,
@@ -289,13 +276,14 @@ class StegServiceIntegrationTest(
     fun `Henlegge før behandling er sendt til beslutter`() {
         val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving()
 
-        val henlagtBehandling = stegService.håndterHenleggBehandling(
-            vilkårsvurdertBehandling,
-            RestHenleggBehandlingInfo(
-                årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
-                begrunnelse = "",
-            ),
-        )
+        val henlagtBehandling =
+            stegService.håndterHenleggBehandling(
+                vilkårsvurdertBehandling,
+                RestHenleggBehandlingInfo(
+                    årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
+                    begrunnelse = "",
+                ),
+            )
         assertTrue(
             henlagtBehandling.behandlingStegTilstand.firstOrNull {
                 it.behandlingSteg == StegType.HENLEGG_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
@@ -320,13 +308,14 @@ class StegServiceIntegrationTest(
                 DbOppgave(behandling = behandling, type = Oppgavetype.BehandleUnderkjentVedtak, gsakId = "3"),
             ),
         )
-        val henlagtBehandling = stegService.håndterHenleggBehandling(
-            behandling,
-            RestHenleggBehandlingInfo(
-                årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
-                begrunnelse = "Satsendring",
-            ),
-        )
+        val henlagtBehandling =
+            stegService.håndterHenleggBehandling(
+                behandling,
+                RestHenleggBehandlingInfo(
+                    årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
+                    begrunnelse = "Satsendring",
+                ),
+            )
         assertEquals(StegType.BEHANDLING_AVSLUTTET, henlagtBehandling.steg)
         assertTrue {
             oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
@@ -381,10 +370,11 @@ class StegServiceIntegrationTest(
             ),
         )
 
-        val behandlingEtterHenleggelse = stegService.håndterHenleggBehandling(
-            behandling,
-            RestHenleggBehandlingInfo(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET, begrunnelse = ""),
-        )
+        val behandlingEtterHenleggelse =
+            stegService.håndterHenleggBehandling(
+                behandling,
+                RestHenleggBehandlingInfo(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET, begrunnelse = ""),
+            )
 
         assertThat(behandlingEtterHenleggelse.steg).isEqualTo(StegType.BEHANDLING_AVSLUTTET)
         assertThat(behandlingEtterHenleggelse.status).isEqualTo(BehandlingStatus.AVSLUTTET)
@@ -393,27 +383,29 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering innenfor beløpsgrenser`() {
-        val simulertPosteringMock = listOf(
-            SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-09-01"),
-                tom = LocalDate.parse("2019-09-30"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 1.toBigDecimal(),
-                posteringType = PosteringType.FEILUTBETALING,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-                erFeilkonto = null,
-            ),
-        )
+        val simulertPosteringMock =
+            listOf(
+                SimulertPostering(
+                    fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                    fom = LocalDate.parse("2019-09-01"),
+                    tom = LocalDate.parse("2019-09-30"),
+                    betalingType = BetalingType.DEBIT,
+                    beløp = 1.toBigDecimal(),
+                    posteringType = PosteringType.FEILUTBETALING,
+                    forfallsdato = LocalDate.parse("2021-02-23"),
+                    utenInntrekk = false,
+                    erFeilkonto = null,
+                ),
+            )
 
-        val simuleringMottakerMock = listOf(
-            SimuleringMottaker(
-                simulertPostering = simulertPosteringMock,
-                mottakerType = MottakerType.BRUKER,
-                mottakerNummer = "12345678910",
-            ),
-        )
+        val simuleringMottakerMock =
+            listOf(
+                SimuleringMottaker(
+                    simulertPostering = simulertPosteringMock,
+                    mottakerType = MottakerType.BRUKER,
+                    mottakerNummer = "12345678910",
+                ),
+            )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
 
@@ -436,18 +428,19 @@ class StegServiceIntegrationTest(
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                søkersIdent = søkerFnr,
-                barnasIdenter = barnasIdenter,
-                nyMigreringsdato = nyMigreringsdato,
-                fagsakId = fagsak.id,
-            ),
-        )
+        val behandling =
+            stegService.håndterNyBehandling(
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                    søkersIdent = søkerFnr,
+                    barnasIdenter = barnasIdenter,
+                    nyMigreringsdato = nyMigreringsdato,
+                    fagsakId = fagsak.id,
+                ),
+            )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -465,19 +458,21 @@ class StegServiceIntegrationTest(
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
-        val behandlingEtterTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
-            behandlingEtterBehandlingsresultatSteg,
-            RestTilbakekreving(
-                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                begrunnelse = "ignorer tilbakekreving",
-            ),
-        )
+        val behandlingEtterTilbakekrevingSteg =
+            stegService.håndterVurderTilbakekreving(
+                behandlingEtterBehandlingsresultatSteg,
+                RestTilbakekreving(
+                    valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                    begrunnelse = "ignorer tilbakekreving",
+                ),
+            )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
-        val behandlingEtterBeslutterSteg = stegService.håndterSendTilBeslutter(
-            behandlingEtterTilbakekrevingSteg,
-            "1234",
-        )
+        val behandlingEtterBeslutterSteg =
+            stegService.håndterSendTilBeslutter(
+                behandlingEtterTilbakekrevingSteg,
+                "1234",
+            )
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterBeslutterSteg.steg)
         assertTrue {
             behandlingEtterBeslutterSteg.behandlingStegTilstand.any {
@@ -502,27 +497,29 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering utenefor beløpsgrenser`() {
-        val simulertPosteringMock = listOf(
-            SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-09-01"),
-                tom = LocalDate.parse("2019-09-30"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 600.toBigDecimal(),
-                posteringType = PosteringType.FEILUTBETALING,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-                erFeilkonto = null,
-            ),
-        )
+        val simulertPosteringMock =
+            listOf(
+                SimulertPostering(
+                    fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                    fom = LocalDate.parse("2019-09-01"),
+                    tom = LocalDate.parse("2019-09-30"),
+                    betalingType = BetalingType.DEBIT,
+                    beløp = 600.toBigDecimal(),
+                    posteringType = PosteringType.FEILUTBETALING,
+                    forfallsdato = LocalDate.parse("2021-02-23"),
+                    utenInntrekk = false,
+                    erFeilkonto = null,
+                ),
+            )
 
-        val simuleringMottakerMock = listOf(
-            SimuleringMottaker(
-                simulertPostering = simulertPosteringMock,
-                mottakerType = MottakerType.BRUKER,
-                mottakerNummer = "12345678910",
-            ),
-        )
+        val simuleringMottakerMock =
+            listOf(
+                SimuleringMottaker(
+                    simulertPostering = simulertPosteringMock,
+                    mottakerType = MottakerType.BRUKER,
+                    mottakerNummer = "12345678910",
+                ),
+            )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
 
@@ -545,18 +542,19 @@ class StegServiceIntegrationTest(
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                søkersIdent = søkerFnr,
-                barnasIdenter = barnasIdenter,
-                nyMigreringsdato = nyMigreringsdato,
-                fagsakId = fagsak.id,
-            ),
-        )
+        val behandling =
+            stegService.håndterNyBehandling(
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                    søkersIdent = søkerFnr,
+                    barnasIdenter = barnasIdenter,
+                    nyMigreringsdato = nyMigreringsdato,
+                    fagsakId = fagsak.id,
+                ),
+            )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -574,19 +572,21 @@ class StegServiceIntegrationTest(
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
-        val behandlingEtterTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
-            behandlingEtterBehandlingsresultatSteg,
-            RestTilbakekreving(
-                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                begrunnelse = "ignorer tilbakekreving",
-            ),
-        )
+        val behandlingEtterTilbakekrevingSteg =
+            stegService.håndterVurderTilbakekreving(
+                behandlingEtterBehandlingsresultatSteg,
+                RestTilbakekreving(
+                    valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                    begrunnelse = "ignorer tilbakekreving",
+                ),
+            )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
-        val behandlingEtterBeslutterSteg = stegService.håndterSendTilBeslutter(
-            behandlingEtterTilbakekrevingSteg,
-            "1234",
-        )
+        val behandlingEtterBeslutterSteg =
+            stegService.håndterSendTilBeslutter(
+                behandlingEtterTilbakekrevingSteg,
+                "1234",
+            )
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterBeslutterSteg.steg)
         assertTrue {
             behandlingEtterBeslutterSteg.behandlingStegTilstand.any {
@@ -611,27 +611,29 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering utenfor beløpsgrenser`() {
-        val simulertPosteringMock = listOf(
-            SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-09-01"),
-                tom = LocalDate.parse("2019-09-30"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 500.toBigDecimal(),
-                posteringType = PosteringType.FEILUTBETALING,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-                erFeilkonto = null,
-            ),
-        )
+        val simulertPosteringMock =
+            listOf(
+                SimulertPostering(
+                    fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                    fom = LocalDate.parse("2019-09-01"),
+                    tom = LocalDate.parse("2019-09-30"),
+                    betalingType = BetalingType.DEBIT,
+                    beløp = 500.toBigDecimal(),
+                    posteringType = PosteringType.FEILUTBETALING,
+                    forfallsdato = LocalDate.parse("2021-02-23"),
+                    utenInntrekk = false,
+                    erFeilkonto = null,
+                ),
+            )
 
-        val simuleringMottakerMock = listOf(
-            SimuleringMottaker(
-                simulertPostering = simulertPosteringMock,
-                mottakerType = MottakerType.BRUKER,
-                mottakerNummer = "12345678910",
-            ),
-        )
+        val simuleringMottakerMock =
+            listOf(
+                SimuleringMottaker(
+                    simulertPostering = simulertPosteringMock,
+                    mottakerType = MottakerType.BRUKER,
+                    mottakerNummer = "12345678910",
+                ),
+            )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
 
@@ -654,18 +656,19 @@ class StegServiceIntegrationTest(
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                søkersIdent = søkerFnr,
-                barnasIdenter = barnasIdenter,
-                nyMigreringsdato = nyMigreringsdato,
-                fagsakId = fagsak.id,
-            ),
-        )
+        val behandling =
+            stegService.håndterNyBehandling(
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                    søkersIdent = søkerFnr,
+                    barnasIdenter = barnasIdenter,
+                    nyMigreringsdato = nyMigreringsdato,
+                    fagsakId = fagsak.id,
+                ),
+            )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -683,20 +686,22 @@ class StegServiceIntegrationTest(
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
-        val behandlingEtterTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
-            behandlingEtterBehandlingsresultatSteg,
-            RestTilbakekreving(
-                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                begrunnelse = "ignorer tilbakekreving",
-            ),
-        )
+        val behandlingEtterTilbakekrevingSteg =
+            stegService.håndterVurderTilbakekreving(
+                behandlingEtterBehandlingsresultatSteg,
+                RestTilbakekreving(
+                    valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                    begrunnelse = "ignorer tilbakekreving",
+                ),
+            )
 
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
-        val behandlingEtterSendTilBeslutterSteg = stegService.håndterSendTilBeslutter(
-            behandlingEtterTilbakekrevingSteg,
-            "1234",
-        )
+        val behandlingEtterSendTilBeslutterSteg =
+            stegService.håndterSendTilBeslutter(
+                behandlingEtterTilbakekrevingSteg,
+                "1234",
+            )
 
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterSendTilBeslutterSteg.steg)
 
@@ -711,27 +716,29 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for helmanuell migrering med avvik i simulering innenfor beløpsgrenser`() {
-        val simulertPosteringMock = listOf(
-            SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-09-01"),
-                tom = LocalDate.parse("2019-09-30"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 1.toBigDecimal(),
-                posteringType = PosteringType.FEILUTBETALING,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-                erFeilkonto = null,
-            ),
-        )
+        val simulertPosteringMock =
+            listOf(
+                SimulertPostering(
+                    fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                    fom = LocalDate.parse("2019-09-01"),
+                    tom = LocalDate.parse("2019-09-30"),
+                    betalingType = BetalingType.DEBIT,
+                    beløp = 1.toBigDecimal(),
+                    posteringType = PosteringType.FEILUTBETALING,
+                    forfallsdato = LocalDate.parse("2021-02-23"),
+                    utenInntrekk = false,
+                    erFeilkonto = null,
+                ),
+            )
 
-        val simuleringMottakerMock = listOf(
-            SimuleringMottaker(
-                simulertPostering = simulertPosteringMock,
-                mottakerType = MottakerType.BRUKER,
-                mottakerNummer = "12345678910",
-            ),
-        )
+        val simuleringMottakerMock =
+            listOf(
+                SimuleringMottaker(
+                    simulertPostering = simulertPosteringMock,
+                    mottakerType = MottakerType.BRUKER,
+                    mottakerNummer = "12345678910",
+                ),
+            )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
 
@@ -741,18 +748,19 @@ class StegServiceIntegrationTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val migreringsdato = LocalDate.now().minusMonths(6)
-        val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                søkersIdent = søkerFnr,
-                barnasIdenter = barnasIdenter,
-                nyMigreringsdato = migreringsdato,
-                fagsakId = fagsak.id,
-            ),
-        )
+        val behandling =
+            stegService.håndterNyBehandling(
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                    søkersIdent = søkerFnr,
+                    barnasIdenter = barnasIdenter,
+                    nyMigreringsdato = migreringsdato,
+                    fagsakId = fagsak.id,
+                ),
+            )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -779,19 +787,21 @@ class StegServiceIntegrationTest(
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
-        val behandlingEtterTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
-            behandlingEtterBehandlingsresultatSteg,
-            RestTilbakekreving(
-                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                begrunnelse = "ignorer tilbakekreving",
-            ),
-        )
+        val behandlingEtterTilbakekrevingSteg =
+            stegService.håndterVurderTilbakekreving(
+                behandlingEtterBehandlingsresultatSteg,
+                RestTilbakekreving(
+                    valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                    begrunnelse = "ignorer tilbakekreving",
+                ),
+            )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
-        val behandlingEtterBesultterSteg = stegService.håndterSendTilBeslutter(
-            behandlingEtterTilbakekrevingSteg,
-            "1234",
-        )
+        val behandlingEtterBesultterSteg =
+            stegService.håndterSendTilBeslutter(
+                behandlingEtterTilbakekrevingSteg,
+                "1234",
+            )
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBesultterSteg.steg)
         assertTrue {
             behandlingEtterBesultterSteg.behandlingStegTilstand.any {
@@ -816,27 +826,29 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for helmanuell migrering med avvik i simulering utenfor beløpsgrenser`() {
-        val simulertPosteringMock = listOf(
-            SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-09-01"),
-                tom = LocalDate.parse("2019-09-30"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 300.toBigDecimal(),
-                posteringType = PosteringType.FEILUTBETALING,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-                erFeilkonto = null,
-            ),
-        )
+        val simulertPosteringMock =
+            listOf(
+                SimulertPostering(
+                    fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                    fom = LocalDate.parse("2019-09-01"),
+                    tom = LocalDate.parse("2019-09-30"),
+                    betalingType = BetalingType.DEBIT,
+                    beløp = 300.toBigDecimal(),
+                    posteringType = PosteringType.FEILUTBETALING,
+                    forfallsdato = LocalDate.parse("2021-02-23"),
+                    utenInntrekk = false,
+                    erFeilkonto = null,
+                ),
+            )
 
-        val simuleringMottakerMock = listOf(
-            SimuleringMottaker(
-                simulertPostering = simulertPosteringMock,
-                mottakerType = MottakerType.BRUKER,
-                mottakerNummer = "12345678910",
-            ),
-        )
+        val simuleringMottakerMock =
+            listOf(
+                SimuleringMottaker(
+                    simulertPostering = simulertPosteringMock,
+                    mottakerType = MottakerType.BRUKER,
+                    mottakerNummer = "12345678910",
+                ),
+            )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
 
@@ -846,18 +858,19 @@ class StegServiceIntegrationTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val migreringsdato = LocalDate.now().minusMonths(6)
-        val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                søkersIdent = søkerFnr,
-                barnasIdenter = barnasIdenter,
-                nyMigreringsdato = migreringsdato,
-                fagsakId = fagsak.id,
-            ),
-        )
+        val behandling =
+            stegService.håndterNyBehandling(
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                    søkersIdent = søkerFnr,
+                    barnasIdenter = barnasIdenter,
+                    nyMigreringsdato = migreringsdato,
+                    fagsakId = fagsak.id,
+                ),
+            )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -884,29 +897,32 @@ class StegServiceIntegrationTest(
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
-        val behandlingEtterTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
-            behandlingEtterBehandlingsresultatSteg,
-            RestTilbakekreving(
-                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                begrunnelse = "ignorer tilbakekreving",
-            ),
-        )
+        val behandlingEtterTilbakekrevingSteg =
+            stegService.håndterVurderTilbakekreving(
+                behandlingEtterBehandlingsresultatSteg,
+                RestTilbakekreving(
+                    valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                    begrunnelse = "ignorer tilbakekreving",
+                ),
+            )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
-        val behandlingEtterSendTilBeslutterSteg = stegService.håndterSendTilBeslutter(
-            behandlingEtterTilbakekrevingSteg,
-            "1234",
-        )
+        val behandlingEtterSendTilBeslutterSteg =
+            stegService.håndterSendTilBeslutter(
+                behandlingEtterTilbakekrevingSteg,
+                "1234",
+            )
 
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutterSteg.steg)
 
-        val behandlingEtterBesluttVedtakSteg = stegService.håndterBeslutningForVedtak(
-            behandlingEtterSendTilBeslutterSteg,
-            RestBeslutningPåVedtak(
-                Beslutning.GODKJENT,
-                "godkjent manuelt",
-            ),
-        )
+        val behandlingEtterBesluttVedtakSteg =
+            stegService.håndterBeslutningForVedtak(
+                behandlingEtterSendTilBeslutterSteg,
+                RestBeslutningPåVedtak(
+                    Beslutning.GODKJENT,
+                    "godkjent manuelt",
+                ),
+            )
 
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBesluttVedtakSteg.steg)
 
@@ -934,27 +950,29 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for helmanuell migrering med manuelle posteringer med avvik innenfor beløpsgrenser`() {
-        val simulertPosteringMock = listOf(
-            SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT,
-                fom = LocalDate.parse("2019-09-01"),
-                tom = LocalDate.parse("2019-09-30"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 1.toBigDecimal(),
-                posteringType = PosteringType.FEILUTBETALING,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-                erFeilkonto = null,
-            ),
-        )
+        val simulertPosteringMock =
+            listOf(
+                SimulertPostering(
+                    fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT,
+                    fom = LocalDate.parse("2019-09-01"),
+                    tom = LocalDate.parse("2019-09-30"),
+                    betalingType = BetalingType.DEBIT,
+                    beløp = 1.toBigDecimal(),
+                    posteringType = PosteringType.FEILUTBETALING,
+                    forfallsdato = LocalDate.parse("2021-02-23"),
+                    utenInntrekk = false,
+                    erFeilkonto = null,
+                ),
+            )
 
-        val simuleringMottakerMock = listOf(
-            SimuleringMottaker(
-                simulertPostering = simulertPosteringMock,
-                mottakerType = MottakerType.BRUKER,
-                mottakerNummer = "12345678910",
-            ),
-        )
+        val simuleringMottakerMock =
+            listOf(
+                SimuleringMottaker(
+                    simulertPostering = simulertPosteringMock,
+                    mottakerType = MottakerType.BRUKER,
+                    mottakerNummer = "12345678910",
+                ),
+            )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
 
@@ -964,18 +982,19 @@ class StegServiceIntegrationTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val migreringsdato = LocalDate.now().minusMonths(6)
-        val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                søkersIdent = søkerFnr,
-                barnasIdenter = barnasIdenter,
-                nyMigreringsdato = migreringsdato,
-                fagsakId = fagsak.id,
-            ),
-        )
+        val behandling =
+            stegService.håndterNyBehandling(
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                    søkersIdent = søkerFnr,
+                    barnasIdenter = barnasIdenter,
+                    nyMigreringsdato = migreringsdato,
+                    fagsakId = fagsak.id,
+                ),
+            )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -1002,30 +1021,33 @@ class StegServiceIntegrationTest(
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
-        val behandlingEtterTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
-            behandlingEtterBehandlingsresultatSteg,
-            RestTilbakekreving(
-                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                begrunnelse = "ignorer tilbakekreving",
-            ),
-        )
+        val behandlingEtterTilbakekrevingSteg =
+            stegService.håndterVurderTilbakekreving(
+                behandlingEtterBehandlingsresultatSteg,
+                RestTilbakekreving(
+                    valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                    begrunnelse = "ignorer tilbakekreving",
+                ),
+            )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
-        val behandlingEtterSendTilBeslutterSteg = stegService.håndterSendTilBeslutter(
-            behandlingEtterTilbakekrevingSteg,
-            "1234",
-        )
+        val behandlingEtterSendTilBeslutterSteg =
+            stegService.håndterSendTilBeslutter(
+                behandlingEtterTilbakekrevingSteg,
+                "1234",
+            )
 
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutterSteg.steg)
 
         // Må manuelt godkjenne vedtak
-        val behandlingEtterBesluttVedtakSteg = stegService.håndterBeslutningForVedtak(
-            behandlingEtterSendTilBeslutterSteg,
-            RestBeslutningPåVedtak(
-                Beslutning.GODKJENT,
-                "godkjent manuelt",
-            ),
-        )
+        val behandlingEtterBesluttVedtakSteg =
+            stegService.håndterBeslutningForVedtak(
+                behandlingEtterSendTilBeslutterSteg,
+                RestBeslutningPåVedtak(
+                    Beslutning.GODKJENT,
+                    "godkjent manuelt",
+                ),
+            )
 
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBesluttVedtakSteg.steg)
 
@@ -1053,27 +1075,29 @@ class StegServiceIntegrationTest(
 
     @Test
     fun `skal kjøre gjennom steg for endre migreringsdato behandling og automatisk godkjenne totrinnskontroll`() {
-        val simulertPosteringMock = listOf(
-            SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT,
-                fom = LocalDate.parse("2019-09-01"),
-                tom = LocalDate.parse("2019-09-30"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 1.toBigDecimal(),
-                posteringType = PosteringType.FEILUTBETALING,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-                erFeilkonto = null,
-            ),
-        )
+        val simulertPosteringMock =
+            listOf(
+                SimulertPostering(
+                    fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT,
+                    fom = LocalDate.parse("2019-09-01"),
+                    tom = LocalDate.parse("2019-09-30"),
+                    betalingType = BetalingType.DEBIT,
+                    beløp = 1.toBigDecimal(),
+                    posteringType = PosteringType.FEILUTBETALING,
+                    forfallsdato = LocalDate.parse("2021-02-23"),
+                    utenInntrekk = false,
+                    erFeilkonto = null,
+                ),
+            )
 
-        val simuleringMottakerMock = listOf(
-            SimuleringMottaker(
-                simulertPostering = simulertPosteringMock,
-                mottakerType = MottakerType.BRUKER,
-                mottakerNummer = "12345678910",
-            ),
-        )
+        val simuleringMottakerMock =
+            listOf(
+                SimuleringMottaker(
+                    simulertPostering = simulertPosteringMock,
+                    mottakerType = MottakerType.BRUKER,
+                    mottakerNummer = "12345678910",
+                ),
+            )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
 
@@ -1096,18 +1120,19 @@ class StegServiceIntegrationTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val migreringsdato = LocalDate.now().minusMonths(6)
-        val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                søkersIdent = søkerFnr,
-                barnasIdenter = barnasIdenter,
-                nyMigreringsdato = migreringsdato,
-                fagsakId = fagsak.id,
-            ),
-        )
+        val behandling =
+            stegService.håndterNyBehandling(
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                    søkersIdent = søkerFnr,
+                    barnasIdenter = barnasIdenter,
+                    nyMigreringsdato = migreringsdato,
+                    fagsakId = fagsak.id,
+                ),
+            )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
@@ -1130,19 +1155,21 @@ class StegServiceIntegrationTest(
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
-        val behandlingEtterTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
-            behandlingEtterBehandlingsresultatSteg,
-            RestTilbakekreving(
-                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                begrunnelse = "ignorer tilbakekreving",
-            ),
-        )
+        val behandlingEtterTilbakekrevingSteg =
+            stegService.håndterVurderTilbakekreving(
+                behandlingEtterBehandlingsresultatSteg,
+                RestTilbakekreving(
+                    valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                    begrunnelse = "ignorer tilbakekreving",
+                ),
+            )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
-        val behandlingEtterSendTilBeslutterSteg = stegService.håndterSendTilBeslutter(
-            behandlingEtterTilbakekrevingSteg,
-            "1234",
-        )
+        val behandlingEtterSendTilBeslutterSteg =
+            stegService.håndterSendTilBeslutter(
+                behandlingEtterTilbakekrevingSteg,
+                "1234",
+            )
 
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterSendTilBeslutterSteg.steg)
 
@@ -1186,7 +1213,10 @@ class StegServiceIntegrationTest(
         )
     }
 
-    private fun assertMigreringsdato(migreringsdato: LocalDate, behandling: Behandling) {
+    private fun assertMigreringsdato(
+        migreringsdato: LocalDate,
+        behandling: Behandling,
+    ) {
         assertEquals(migreringsdato, behandlingService.hentMigreringsdatoIBehandling(behandling.id))
     }
 }

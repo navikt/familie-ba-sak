@@ -10,7 +10,6 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VergeServiceTest {
-
     private val vergeRepositoryMock: VergeRepository = mockk()
 
     @Test

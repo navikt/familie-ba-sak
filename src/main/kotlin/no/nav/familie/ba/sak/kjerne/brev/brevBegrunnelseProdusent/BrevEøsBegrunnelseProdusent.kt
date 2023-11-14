@@ -26,23 +26,25 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     landkoder: Map<String, String>,
 ): List<EØSBegrunnelseData> {
     val sanityBegrunnelse = hentSanityBegrunnelse(grunnlag)
-    val personerGjeldeneForBegrunnelse = vedtaksperiode.hentGyldigeBegrunnelserPerPerson(
-        grunnlag,
-    ).mapNotNull { (person, begrunnelserPåPerson) -> person.takeIf { this in begrunnelserPåPerson } }
+    val personerGjeldeneForBegrunnelse =
+        vedtaksperiode.hentGyldigeBegrunnelserPerPerson(
+            grunnlag,
+        ).mapNotNull { (person, begrunnelserPåPerson) -> person.takeIf { this in begrunnelserPåPerson } }
     val periodegrunnlagForPersonerIBegrunnelse =
         begrunnelsesGrunnlagPerPerson.filter { (person, _) -> person in personerGjeldeneForBegrunnelse }
 
-    val kompetanser = when (sanityBegrunnelse.periodeResultat) {
-        SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
-        SanityPeriodeResultat.INGEN_ENDRING,
-        -> periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.dennePerioden.kompetanse }
+    val kompetanser =
+        when (sanityBegrunnelse.periodeResultat) {
+            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
+            SanityPeriodeResultat.INGEN_ENDRING,
+            -> periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.dennePerioden.kompetanse }
 
-        SanityPeriodeResultat.IKKE_INNVILGET,
-        SanityPeriodeResultat.REDUKSJON,
-        -> periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.forrigePeriode?.kompetanse }
+            SanityPeriodeResultat.IKKE_INNVILGET,
+            SanityPeriodeResultat.REDUKSJON,
+            -> periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.forrigePeriode?.kompetanse }
 
-        null -> error("Feltet 'periodeResultat' er ikke satt for begrunnelse fra sanity '${sanityBegrunnelse.apiNavn}'.")
-    }
+            null -> error("Feltet 'periodeResultat' er ikke satt for begrunnelse fra sanity '${sanityBegrunnelse.apiNavn}'.")
+        }
 
     val personerIBegrunnelse = personerGjeldeneForBegrunnelse
     val barnPåBehandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
@@ -51,12 +53,13 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     return if (kompetanser.isEmpty() && sanityBegrunnelse.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {
         val gjelderSøker = personerIBegrunnelse.any { it.type == PersonType.SØKER }
 
-        val barnasFødselsdatoer = hentBarnasFødselsdatoerForAvslagsbegrunnelse(
-            barnIBegrunnelse = barnIBegrunnelse,
-            barnPåBehandling = barnPåBehandling,
-            uregistrerteBarn = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn,
-            gjelderSøker = gjelderSøker,
-        )
+        val barnasFødselsdatoer =
+            hentBarnasFødselsdatoerForAvslagsbegrunnelse(
+                barnIBegrunnelse = barnIBegrunnelse,
+                barnPåBehandling = barnPåBehandling,
+                uregistrerteBarn = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn,
+                gjelderSøker = gjelderSøker,
+            )
 
         listOf(
             EØSBegrunnelseDataUtenKompetanse(

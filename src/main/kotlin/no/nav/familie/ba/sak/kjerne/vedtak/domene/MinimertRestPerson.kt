@@ -25,11 +25,12 @@ data class MinimertRestPerson(
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
 }
 
-fun RestPerson.tilMinimertPerson() = MinimertRestPerson(
-    personIdent = this.personIdent,
-    fødselsdato = fødselsdato ?: throw Feil("Fødselsdato mangler"),
-    type = this.type,
-)
+fun RestPerson.tilMinimertPerson() =
+    MinimertRestPerson(
+        personIdent = this.personIdent,
+        fødselsdato = fødselsdato ?: throw Feil("Fødselsdato mangler"),
+        type = this.type,
+    )
 
 fun List<MinimertRestPerson>.barnMedSeksårsdagPåFom(fom: LocalDate?): List<MinimertRestPerson> {
     return this
@@ -38,15 +39,16 @@ fun List<MinimertRestPerson>.barnMedSeksårsdagPåFom(fom: LocalDate?): List<Min
             person.hentSeksårsdag().toYearMonth() == (
                 fom?.toYearMonth()
                     ?: TIDENES_ENDE.toYearMonth()
-                )
+            )
         }
 }
 
-fun Person.tilMinimertPerson() = MinimertRestPerson(
-    personIdent = this.aktør.aktivFødselsnummer(),
-    fødselsdato = this.fødselsdato,
-    type = this.type,
-)
+fun Person.tilMinimertPerson() =
+    MinimertRestPerson(
+        personIdent = this.aktør.aktivFødselsnummer(),
+        fødselsdato = this.fødselsdato,
+        type = this.type,
+    )
 
 fun MinimertRestPerson.tilBrevPeriodeTestPerson(
     brevPeriodeGrunnlag: MinimertVedtaksperiode,
@@ -57,29 +59,32 @@ fun MinimertRestPerson.tilBrevPeriodeTestPerson(
         restBehandlingsgrunnlagForBrev.minimertePersonResultater.firstOrNull { it.personIdent == this.personIdent }!!
     val minimerteEndretUtbetalingAndelPåPerson =
         restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler.filter { it.personIdent == this.personIdent }
-    val minimerteUtbetalingsperiodeDetaljer = brevPeriodeGrunnlag.minimerteUtbetalingsperiodeDetaljer.filter {
-        it.person.personIdent == this.personIdent
-    }
+    val minimerteUtbetalingsperiodeDetaljer =
+        brevPeriodeGrunnlag.minimerteUtbetalingsperiodeDetaljer.filter {
+            it.person.personIdent == this.personIdent
+        }
 
     return BrevPeriodePersonForLogging(
         fødselsdato = this.fødselsdato,
         type = this.type,
         overstyrteVilkårresultater = minimertePersonResultater.minimerteVilkårResultater,
         andreVurderinger = minimertePersonResultater.minimerteAndreVurderinger,
-        endredeUtbetalinger = minimerteEndretUtbetalingAndelPåPerson.map {
-            EndretUtbetalingAndelPåPersonForLogging(
-                periode = it.periode,
-                årsak = it.årsak,
-            )
-        },
-        utbetalinger = minimerteUtbetalingsperiodeDetaljer.map {
-            UtbetalingPåPersonForLogging(
-                it.ytelseType,
-                it.utbetaltPerMnd,
-                it.erPåvirketAvEndring,
-                it.prosent,
-            )
-        },
+        endredeUtbetalinger =
+            minimerteEndretUtbetalingAndelPåPerson.map {
+                EndretUtbetalingAndelPåPersonForLogging(
+                    periode = it.periode,
+                    årsak = it.årsak,
+                )
+            },
+        utbetalinger =
+            minimerteUtbetalingsperiodeDetaljer.map {
+                UtbetalingPåPersonForLogging(
+                    it.ytelseType,
+                    it.utbetaltPerMnd,
+                    it.erPåvirketAvEndring,
+                    it.prosent,
+                )
+            },
         harReduksjonFraForrigeBehandling = barnMedReduksjonFraForrigeBehandlingIdent.contains(this.personIdent),
     )
 }

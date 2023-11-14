@@ -40,14 +40,15 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner
                 beløp = sammenslåtteAndeler.sumOf { it.kalkulertUtbetalingsbeløp },
                 stønadFom = sammenslåtteAndeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN.toYearMonth(),
                 stønadTom = sammenslåtteAndeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX.toYearMonth(),
-                ytelsePerioder = sammenslåtteAndeler.map { it1 ->
-                    RestYtelsePeriode(
-                        beløp = it1.kalkulertUtbetalingsbeløp,
-                        stønadFom = it1.stønadFom,
-                        stønadTom = it1.stønadTom,
-                        ytelseType = it1.type,
-                        skalUtbetales = it1.prosent > BigDecimal.ZERO,
-                    )
-                },
+                ytelsePerioder =
+                    sammenslåtteAndeler.map { it1 ->
+                        RestYtelsePeriode(
+                            beløp = it1.kalkulertUtbetalingsbeløp,
+                            stønadFom = it1.stønadFom,
+                            stønadTom = it1.stønadTom,
+                            ytelseType = it1.type,
+                            skalUtbetales = it1.prosent > BigDecimal.ZERO,
+                        )
+                    },
             )
         }

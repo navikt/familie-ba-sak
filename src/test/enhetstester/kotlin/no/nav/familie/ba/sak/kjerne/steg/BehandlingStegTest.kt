@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class BehandlingStegTest {
-
     @Test
     fun `Tester rekkefølgen på behandling ENDRE_MIGRERINGSDATO`() {
         var steg = FØRSTE_STEG
@@ -29,12 +28,14 @@ class BehandlingStegTest {
             StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(steg, it)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                ),
-                utførendeStegType = it,
-            )
+            steg =
+                hentNesteSteg(
+                    behandling =
+                        lagBehandling(
+                            årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                        ),
+                    utførendeStegType = it,
+                )
         }
     }
 
@@ -59,14 +60,16 @@ class BehandlingStegTest {
             StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(steg, it)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    årsak = BehandlingÅrsak.SØKNAD,
-                ),
-                utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
-            )
+            steg =
+                hentNesteSteg(
+                    behandling =
+                        lagBehandling(
+                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                            årsak = BehandlingÅrsak.SØKNAD,
+                        ),
+                    utførendeStegType = it,
+                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
+                )
         }
     }
 
@@ -88,14 +91,16 @@ class BehandlingStegTest {
             StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(steg, it)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    årsak = BehandlingÅrsak.SØKNAD,
-                ),
-                utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
-            )
+            steg =
+                hentNesteSteg(
+                    behandling =
+                        lagBehandling(
+                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                            årsak = BehandlingÅrsak.SØKNAD,
+                        ),
+                    utførendeStegType = it,
+                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
+                )
         }
     }
 
@@ -116,14 +121,16 @@ class BehandlingStegTest {
             StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(steg, it)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    årsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                ),
-                utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
-            )
+            steg =
+                hentNesteSteg(
+                    behandling =
+                        lagBehandling(
+                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                            årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                        ),
+                    utførendeStegType = it,
+                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
+                )
         }
     }
 
@@ -139,28 +146,32 @@ class BehandlingStegTest {
             StegType.HENLEGG_BEHANDLING,
         ).forEach {
             assertEquals(steg, it)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    årsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                ),
-                utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
-            )
+            steg =
+                hentNesteSteg(
+                    behandling =
+                        lagBehandling(
+                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                            årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                        ),
+                    utførendeStegType = it,
+                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
+                )
         }
     }
 
     @Test
     fun `Tester at neste steg for migrering fra infotrygd kaster feil at denne ikke er mulig å behandle lenger`() {
-        val feil = assertThrows<Feil> {
-            hentNesteSteg(
-                behandling = lagBehandling(
-                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                    årsak = BehandlingÅrsak.MIGRERING,
-                ),
-                utførendeStegType = FØRSTE_STEG,
-            )
-        }
+        val feil =
+            assertThrows<Feil> {
+                hentNesteSteg(
+                    behandling =
+                        lagBehandling(
+                            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                            årsak = BehandlingÅrsak.MIGRERING,
+                        ),
+                    utførendeStegType = FØRSTE_STEG,
+                )
+            }
         assertEquals("Maskinell migrering er ikke mulig å behandle lenger", feil.message)
     }
 
@@ -182,14 +193,16 @@ class BehandlingStegTest {
         ).forEach {
             assertEquals(steg, it)
             assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    behandlingType = BehandlingType.TEKNISK_ENDRING,
-                    årsak = BehandlingÅrsak.TEKNISK_ENDRING,
-                ),
-                utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
-            )
+            steg =
+                hentNesteSteg(
+                    behandling =
+                        lagBehandling(
+                            behandlingType = BehandlingType.TEKNISK_ENDRING,
+                            årsak = BehandlingÅrsak.TEKNISK_ENDRING,
+                        ),
+                    utførendeStegType = it,
+                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
+                )
         }
     }
 
@@ -209,14 +222,16 @@ class BehandlingStegTest {
         ).forEach {
             assertEquals(steg, it)
             assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    behandlingType = BehandlingType.TEKNISK_ENDRING,
-                    årsak = BehandlingÅrsak.TEKNISK_ENDRING,
-                ),
-                utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
-            )
+            steg =
+                hentNesteSteg(
+                    behandling =
+                        lagBehandling(
+                            behandlingType = BehandlingType.TEKNISK_ENDRING,
+                            årsak = BehandlingÅrsak.TEKNISK_ENDRING,
+                        ),
+                    utførendeStegType = it,
+                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
+                )
         }
     }
 
@@ -234,12 +249,14 @@ class BehandlingStegTest {
             StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(it, steg)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.OMREGNING_18ÅR,
-                ),
-                utførendeStegType = it,
-            )
+            steg =
+                hentNesteSteg(
+                    behandling =
+                        lagBehandling(
+                            årsak = BehandlingÅrsak.OMREGNING_18ÅR,
+                        ),
+                    utførendeStegType = it,
+                )
         }
     }
 
@@ -263,13 +280,15 @@ class BehandlingStegTest {
             StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(it, steg)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.SMÅBARNSTILLEGG,
-                ),
-                utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
-            )
+            steg =
+                hentNesteSteg(
+                    behandling =
+                        lagBehandling(
+                            årsak = BehandlingÅrsak.SMÅBARNSTILLEGG,
+                        ),
+                    utførendeStegType = it,
+                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
+                )
         }
     }
 
@@ -293,13 +312,15 @@ class BehandlingStegTest {
             StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(it, steg)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
-                ),
-                utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
-            )
+            steg =
+                hentNesteSteg(
+                    behandling =
+                        lagBehandling(
+                            årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
+                        ),
+                    utførendeStegType = it,
+                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
+                )
         }
     }
 
@@ -317,13 +338,15 @@ class BehandlingStegTest {
             StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(it, steg)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.SATSENDRING,
-                ),
-                utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
-            )
+            steg =
+                hentNesteSteg(
+                    behandling =
+                        lagBehandling(
+                            årsak = BehandlingÅrsak.SATSENDRING,
+                        ),
+                    utførendeStegType = it,
+                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
+                )
         }
     }
 
@@ -340,21 +363,24 @@ class BehandlingStegTest {
             if (it == StegType.BEHANDLINGSRESULTAT) {
                 assertThrows<Feil> {
                     hentNesteSteg(
-                        behandling = lagBehandling(
-                            årsak = BehandlingÅrsak.SATSENDRING,
-                        ),
+                        behandling =
+                            lagBehandling(
+                                årsak = BehandlingÅrsak.SATSENDRING,
+                            ),
                         utførendeStegType = it,
                         endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
                     )
                 }
             } else {
-                steg = hentNesteSteg(
-                    behandling = lagBehandling(
-                        årsak = BehandlingÅrsak.SATSENDRING,
-                    ),
-                    utførendeStegType = it,
-                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
-                )
+                steg =
+                    hentNesteSteg(
+                        behandling =
+                            lagBehandling(
+                                årsak = BehandlingÅrsak.SATSENDRING,
+                            ),
+                        utførendeStegType = it,
+                        endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
+                    )
             }
         }
     }
@@ -376,13 +402,15 @@ class BehandlingStegTest {
             StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(it, steg)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
-                ),
-                utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
-            )
+            steg =
+                hentNesteSteg(
+                    behandling =
+                        lagBehandling(
+                            årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
+                        ),
+                    utførendeStegType = it,
+                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
+                )
         }
     }
 

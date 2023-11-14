@@ -21,7 +21,6 @@ class ValutakursRepositoryTest(
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val valutakursRepository: ValutakursRepository,
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun `Skal lagre flere valutakurser med gjenbruk av flere aktører`() {
         val søker = aktørIdRepository.save(randomAktør())
@@ -31,17 +30,19 @@ class ValutakursRepositoryTest(
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandling(fagsak))
 
-        val valutakurs = valutakursRepository.save(
-            lagValutakurs(
-                barnAktører = setOf(barn1, barn2),
-            ).also { it.behandlingId = behandling.id },
-        )
+        val valutakurs =
+            valutakursRepository.save(
+                lagValutakurs(
+                    barnAktører = setOf(barn1, barn2),
+                ).also { it.behandlingId = behandling.id },
+            )
 
-        val valutakurs2 = valutakursRepository.save(
-            lagValutakurs(
-                barnAktører = setOf(barn1, barn2),
-            ).also { it.behandlingId = behandling.id },
-        )
+        val valutakurs2 =
+            valutakursRepository.save(
+                lagValutakurs(
+                    barnAktører = setOf(barn1, barn2),
+                ).also { it.behandlingId = behandling.id },
+            )
 
         assertEquals(valutakurs.barnAktører, valutakurs2.barnAktører)
     }
@@ -54,17 +55,18 @@ class ValutakursRepositoryTest(
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandling(fagsak))
 
-        val valutakurs = valutakursRepository.save(
-            lagValutakurs(
-                behandlingId = behandling.id,
-                barnAktører = setOf(barn1),
-                fom = YearMonth.of(2020, 1),
-                tom = YearMonth.of(2021, 12),
-                valutakode = "EUR",
-                valutakursdato = LocalDate.of(2020, 2, 17),
-                kurs = BigDecimal.valueOf(10.453),
-            ),
-        )
+        val valutakurs =
+            valutakursRepository.save(
+                lagValutakurs(
+                    behandlingId = behandling.id,
+                    barnAktører = setOf(barn1),
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2021, 12),
+                    valutakode = "EUR",
+                    valutakursdato = LocalDate.of(2020, 2, 17),
+                    kurs = BigDecimal.valueOf(10.453),
+                ),
+            )
 
         val hentedeValutakurser =
             valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id)

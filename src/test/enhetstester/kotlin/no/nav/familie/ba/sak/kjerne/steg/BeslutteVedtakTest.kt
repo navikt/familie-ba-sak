@@ -42,7 +42,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class BeslutteVedtakTest {
-
     private lateinit var beslutteVedtak: BeslutteVedtak
     private lateinit var vedtakService: VedtakService
     private lateinit var behandlingService: BehandlingService
@@ -83,11 +82,12 @@ class BeslutteVedtakTest {
                 any(),
                 any(),
             )
-        } returns Totrinnskontroll(
-            behandling = lagBehandling(),
-            saksbehandler = "Mock Saksbehandler",
-            saksbehandlerId = "Mock.Saksbehandler",
-        )
+        } returns
+            Totrinnskontroll(
+                behandling = lagBehandling(),
+                saksbehandler = "Mock Saksbehandler",
+                saksbehandlerId = "Mock.Saksbehandler",
+            )
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
         every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any(), any()) } just runs
@@ -95,19 +95,20 @@ class BeslutteVedtakTest {
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
 
-        beslutteVedtak = BeslutteVedtak(
-            totrinnskontrollService = toTrinnKontrollService,
-            vedtakService = vedtakService,
-            behandlingService = behandlingService,
-            beregningService = beregningService,
-            taskRepository = taskRepository,
-            loggService = loggService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            unleashService = unleashService,
-            tilkjentYtelseValideringService = tilkjentYtelseValideringService,
-            saksbehandlerContext = saksbehandlerContext,
-            automatiskBeslutningService = automatiskBeslutningService,
-        )
+        beslutteVedtak =
+            BeslutteVedtak(
+                totrinnskontrollService = toTrinnKontrollService,
+                vedtakService = vedtakService,
+                behandlingService = behandlingService,
+                beregningService = beregningService,
+                taskRepository = taskRepository,
+                loggService = loggService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                unleashService = unleashService,
+                tilkjentYtelseValideringService = tilkjentYtelseValideringService,
+                saksbehandlerContext = saksbehandlerContext,
+                automatiskBeslutningService = automatiskBeslutningService,
+            )
     }
 
     @Test
@@ -215,10 +216,11 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgaver.Companion)
         mockkObject(OpprettOppgaveTask.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
-        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task(
-            OpprettOppgaveTask.TASK_STEP_TYPE,
-            "",
-        )
+        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns
+            Task(
+                OpprettOppgaveTask.TASK_STEP_TYPE,
+                "",
+            )
 
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
@@ -242,10 +244,11 @@ class BeslutteVedtakTest {
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
         mockkObject(FerdigstillOppgaver.Companion)
-        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(
-            type = FerdigstillOppgaver.TASK_STEP_TYPE,
-            payload = "",
-        )
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns
+            Task(
+                type = FerdigstillOppgaver.TASK_STEP_TYPE,
+                payload = "",
+            )
 
         assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
     }
@@ -261,10 +264,11 @@ class BeslutteVedtakTest {
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
         mockkObject(FerdigstillOppgaver.Companion)
-        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(
-            type = FerdigstillOppgaver.TASK_STEP_TYPE,
-            payload = "",
-        )
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns
+            Task(
+                type = FerdigstillOppgaver.TASK_STEP_TYPE,
+                payload = "",
+            )
 
         assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
     }

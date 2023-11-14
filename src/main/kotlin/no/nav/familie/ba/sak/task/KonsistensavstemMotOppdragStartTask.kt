@@ -14,14 +14,14 @@ import java.time.LocalDateTime
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = KonsistensavstemMotOppdragStartTask
-        .TASK_STEP_TYPE,
+    taskStepType =
+        KonsistensavstemMotOppdragStartTask
+            .TASK_STEP_TYPE,
     beskrivelse = "Start Konsistensavstemming mot oppdrag",
     maxAntallFeil = 1,
     settTilManuellOppfølgning = true,
 )
 class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingService) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val konsistensavstemmingTask =
             objectMapper.readValue(task.payload, KonsistensavstemmingStartTaskDTO::class.java)

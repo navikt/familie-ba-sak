@@ -41,10 +41,11 @@ class ØkonomiService(
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
 
-        val brukNyUtbetalingsoppdragGenerator = unleashService.isEnabled(
-            FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-            mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
-        )
+        val brukNyUtbetalingsoppdragGenerator =
+            unleashService.isEnabled(
+                FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+                mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
+            )
 
         if (!brukNyUtbetalingsoppdragGenerator) {
             kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
@@ -78,7 +79,10 @@ class ØkonomiService(
         return utbetalingsoppdrag
     }
 
-    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag, behandlingId: Long) {
+    private fun iverksettOppdrag(
+        utbetalingsoppdrag: Utbetalingsoppdrag,
+        behandlingId: Long,
+    ) {
         if (!utbetalingsoppdrag.skalIverksettesMotOppdrag()) {
             logger.warn(
                 "Iverksetter ikke noe mot oppdrag. " +
@@ -101,7 +105,10 @@ class ØkonomiService(
         }
     }
 
-    fun hentStatus(oppdragId: OppdragId, behandlingId: Long): OppdragStatus =
+    fun hentStatus(
+        oppdragId: OppdragId,
+        behandlingId: Long,
+    ): OppdragStatus =
         if (tilkjentYtelseRepository.findByBehandling(behandlingId).skalIverksettesMotOppdrag()) {
             økonomiKlient.hentStatus(oppdragId)
         } else {
@@ -110,17 +117,17 @@ class ØkonomiService(
 
     fun opprettManuellKvitteringPåOppdrag(behandlingId: Long) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val oppdragId = OppdragId(
-            fagsystem = FAGSYSTEM,
-            personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-            behandlingsId = behandling.id.toString(),
-        )
+        val oppdragId =
+            OppdragId(
+                fagsystem = FAGSYSTEM,
+                personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                behandlingsId = behandling.id.toString(),
+            )
 
         økonomiKlient.opprettManuellKvitteringPåOppdrag(oppdragId)
     }
 
     companion object {
-
         val logger = LoggerFactory.getLogger(ØkonomiService::class.java)
     }
 }

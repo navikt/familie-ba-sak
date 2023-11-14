@@ -7,10 +7,10 @@ open class PdlBaseResponse<T>(
     open val errors: List<PdlError>?,
     open val extensions: PdlExtensions?,
 ) {
-
     fun harFeil(): Boolean {
         return errors != null && errors!!.isNotEmpty()
     }
+
     fun harAdvarsel(): Boolean {
         return !extensions?.warnings.isNullOrEmpty()
     }
@@ -27,7 +27,6 @@ data class PdlError(
 )
 
 data class PdlErrorExtensions(val code: String?) {
-
     fun notFound() = code == "not_found"
 }
 

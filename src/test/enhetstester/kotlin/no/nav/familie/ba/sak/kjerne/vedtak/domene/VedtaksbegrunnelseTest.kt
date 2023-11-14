@@ -22,9 +22,10 @@ class VedtaksbegrunnelseTest {
     val barn2 = lagPerson(type = PersonType.BARN)
     val barn3 = lagPerson(type = PersonType.BARN)
 
-    val restVedtaksbegrunnelse = lagVedtaksbegrunnelse(
-        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-    )
+    val restVedtaksbegrunnelse =
+        lagVedtaksbegrunnelse(
+            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+        )
 
     val vedtaksperiode = NullablePeriode(LocalDate.now().minusMonths(1), LocalDate.now())
 
@@ -36,20 +37,22 @@ class VedtaksbegrunnelseTest {
 
     @Test
     fun `skal ta med alle barnas fødselsdatoer ved avslag på søker, men ikke inkludere dem i antall barn`() {
-        val brevBegrunnelseGrunnlagMedPersoner = lagBrevBegrunnelseGrunnlagMedPersoner(
-            standardbegrunnelse = Standardbegrunnelse.AVSLAG_BOR_HOS_SØKER,
-            personIdenter = listOf(søker).map { it.aktør.aktivFødselsnummer() },
-            vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG,
-        )
+        val brevBegrunnelseGrunnlagMedPersoner =
+            lagBrevBegrunnelseGrunnlagMedPersoner(
+                standardbegrunnelse = Standardbegrunnelse.AVSLAG_BOR_HOS_SØKER,
+                personIdenter = listOf(søker).map { it.aktør.aktivFødselsnummer() },
+                vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG,
+            )
 
-        val brevbegrunnelse = brevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
-            vedtaksperiode = vedtaksperiode,
-            personerIPersongrunnlag = personerIPersongrunnlag,
-            brevMålform = målform,
-            uregistrerteBarn = emptyList(),
-            minimerteUtbetalingsperiodeDetaljer = emptyList(),
-            minimerteRestEndredeAndeler = emptyList(),
-        ) as BegrunnelseData
+        val brevbegrunnelse =
+            brevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
+                vedtaksperiode = vedtaksperiode,
+                personerIPersongrunnlag = personerIPersongrunnlag,
+                brevMålform = målform,
+                uregistrerteBarn = emptyList(),
+                minimerteUtbetalingsperiodeDetaljer = emptyList(),
+                minimerteRestEndredeAndeler = emptyList(),
+            ) as BegrunnelseData
 
         Assertions.assertEquals(true, brevbegrunnelse.gjelderSoker)
         Assertions.assertEquals(
@@ -63,30 +66,33 @@ class VedtaksbegrunnelseTest {
 
     @Test
     fun `skal ta med uregistrerte barn`() {
-        val uregistrerteBarn = listOf(
-            lagPerson(type = PersonType.BARN),
-            lagPerson(type = PersonType.BARN),
-        ).map {
-            BarnMedOpplysninger(
-                ident = it.aktør.aktivFødselsnummer(),
-                fødselsdato = it.fødselsdato,
-            ).tilMinimertUregistrertBarn()
-        }
+        val uregistrerteBarn =
+            listOf(
+                lagPerson(type = PersonType.BARN),
+                lagPerson(type = PersonType.BARN),
+            ).map {
+                BarnMedOpplysninger(
+                    ident = it.aktør.aktivFødselsnummer(),
+                    fødselsdato = it.fødselsdato,
+                ).tilMinimertUregistrertBarn()
+            }
 
-        val brevBegrunnelseGrunnlagMedPersoner = lagBrevBegrunnelseGrunnlagMedPersoner(
-            standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
-            personIdenter = emptyList(),
-            vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG,
-        )
+        val brevBegrunnelseGrunnlagMedPersoner =
+            lagBrevBegrunnelseGrunnlagMedPersoner(
+                standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
+                personIdenter = emptyList(),
+                vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG,
+            )
 
-        val brevbegrunnelse = brevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
-            vedtaksperiode = vedtaksperiode,
-            personerIPersongrunnlag = personerIPersongrunnlag,
-            brevMålform = målform,
-            uregistrerteBarn = uregistrerteBarn,
-            minimerteUtbetalingsperiodeDetaljer = emptyList(),
-            minimerteRestEndredeAndeler = emptyList(),
-        ) as BegrunnelseData
+        val brevbegrunnelse =
+            brevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
+                vedtaksperiode = vedtaksperiode,
+                personerIPersongrunnlag = personerIPersongrunnlag,
+                brevMålform = målform,
+                uregistrerteBarn = uregistrerteBarn,
+                minimerteUtbetalingsperiodeDetaljer = emptyList(),
+                minimerteRestEndredeAndeler = emptyList(),
+            ) as BegrunnelseData
 
         Assertions.assertEquals(false, brevbegrunnelse.gjelderSoker)
         Assertions.assertEquals(

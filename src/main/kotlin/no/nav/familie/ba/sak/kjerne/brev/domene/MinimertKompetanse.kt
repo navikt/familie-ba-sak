@@ -36,15 +36,17 @@ fun Kompetanse.tilMinimertKompetanse(
         annenForeldersAktivitetslandNavn = annenForeldersAktivitetslandNavn,
         barnetsBostedslandNavn = barnetsBostedslandNavn,
         resultat = this.resultat!!,
-        personer = this.barnAktører.map { aktør ->
-            val fødselsdato = personopplysningGrunnlag.barna.find { it.aktør == aktør }?.fødselsdato
-                ?: throw Feil("Fant ikke aktør i personopplysninggrunnlaget")
-            MinimertRestPerson(
-                personIdent = aktør.aktivFødselsnummer(),
-                fødselsdato = fødselsdato,
-                type = PersonType.BARN,
-            )
-        },
+        personer =
+            this.barnAktører.map { aktør ->
+                val fødselsdato =
+                    personopplysningGrunnlag.barna.find { it.aktør == aktør }?.fødselsdato
+                        ?: throw Feil("Fant ikke aktør i personopplysninggrunnlaget")
+                MinimertRestPerson(
+                    personIdent = aktør.aktivFødselsnummer(),
+                    fødselsdato = fødselsdato,
+                    type = PersonType.BARN,
+                )
+            },
     )
 }
 
@@ -58,7 +60,7 @@ private fun String.tilLandNavn(landkoderISO2: Map<String, String>): LandNavn {
     val landNavn = (
         landkoderISO2[this]
             ?: throw Feil("Fant ikke navn for landkode $this ")
-        )
+    )
 
     return LandNavn(landNavn.storForbokstav())
 }

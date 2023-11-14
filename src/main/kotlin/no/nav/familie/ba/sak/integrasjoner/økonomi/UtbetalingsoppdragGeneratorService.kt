@@ -38,7 +38,6 @@ class UtbetalingsoppdragGeneratorService(
     private val beregningService: BeregningService,
     private val unleashService: UnleashService,
 ) {
-
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
         vedtak: Vedtak,
@@ -47,22 +46,25 @@ class UtbetalingsoppdragGeneratorService(
     ): BeregnetUtbetalingsoppdragLongId {
         val forrigeTilkjentYtelse = hentForrigeTilkjentYtelse(vedtak.behandling)
         val nyTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = vedtak.behandling.id)
-        val endretMigreringsDato = beregnOmMigreringsDatoErEndret(
-            vedtak.behandling,
-            forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom },
-        )
+        val endretMigreringsDato =
+            beregnOmMigreringsDatoErEndret(
+                vedtak.behandling,
+                forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom },
+            )
         val sisteAndelPerKjede = hentSisteAndelTilkjentYtelse(vedtak.behandling.fagsak)
-        val beregnetUtbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
-            saksbehandlerId = saksbehandlerId,
-            vedtak = vedtak,
-            forrigeTilkjentYtelse = forrigeTilkjentYtelse,
-            nyTilkjentYtelse = nyTilkjentYtelse,
-            sisteAndelPerKjede = sisteAndelPerKjede,
-            erSimulering = erSimulering,
-            endretMigreringsDato = endretMigreringsDato,
-        )
+        val beregnetUtbetalingsoppdrag =
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                saksbehandlerId = saksbehandlerId,
+                vedtak = vedtak,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                nyTilkjentYtelse = nyTilkjentYtelse,
+                sisteAndelPerKjede = sisteAndelPerKjede,
+                erSimulering = erSimulering,
+                endretMigreringsDato = endretMigreringsDato,
+            )
 
-        if (!erSimulering && unleashService.isEnabled(
+        if (!erSimulering &&
+            unleashService.isEnabled(
                 FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
                 mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
             )
@@ -117,58 +119,61 @@ class UtbetalingsoppdragGeneratorService(
             beregningService.hentSisteAndelPerIdent(fagsakId = oppdatertBehandling.fagsak.id)
                 .isEmpty()
 
-        val utbetalingsoppdrag = if (erFørsteIverksatteBehandlingPåFagsak) {
-            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                saksbehandlerId = saksbehandlerId,
-                vedtak = vedtak,
-                erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
-                oppdaterteKjeder = oppdaterteKjeder,
-                erSimulering = erSimulering,
-            )
-        } else {
-            val forrigeBehandling =
-                behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
-                    ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
+        val utbetalingsoppdrag =
+            if (erFørsteIverksatteBehandlingPåFagsak) {
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                    saksbehandlerId = saksbehandlerId,
+                    vedtak = vedtak,
+                    erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
+                    oppdaterteKjeder = oppdaterteKjeder,
+                    erSimulering = erSimulering,
+                )
+            } else {
+                val forrigeBehandling =
+                    behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
+                        ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
 
-            val forrigeTilstand =
-                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
-                    .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
+                val forrigeTilstand =
+                    beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
+                        .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
-            val forrigeKjeder = grupperAndeler(forrigeTilstand)
+                val forrigeKjeder = grupperAndeler(forrigeTilstand)
 
-            val sisteAndelPerIdent = beregningService.hentSisteAndelPerIdent(forrigeBehandling.fagsak.id)
+                val sisteAndelPerIdent = beregningService.hentSisteAndelPerIdent(forrigeBehandling.fagsak.id)
 
-            if (oppdatertTilstand.isNotEmpty()) {
-                oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
-                val tilkjentYtelseMedOppdaterteAndeler = oppdatertTilstand.first().tilkjentYtelse
-                beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
-            }
+                if (oppdatertTilstand.isNotEmpty()) {
+                    oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
+                    val tilkjentYtelseMedOppdaterteAndeler = oppdatertTilstand.first().tilkjentYtelse
+                    beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
+                }
 
-            val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                saksbehandlerId = saksbehandlerId,
-                vedtak = vedtak,
-                erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
-                forrigeKjeder = forrigeKjeder,
-                sisteAndelPerIdent = sisteAndelPerIdent,
-                oppdaterteKjeder = oppdaterteKjeder,
-                erSimulering = erSimulering,
-                endretMigreringsDato = beregnOmMigreringsDatoErEndret(
-                    vedtak.behandling,
-                    forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom,
-                ),
-            )
-
-            if (!erSimulering && (
-                    oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
-                        oppdatertBehandling.id,
-                    ).resultat == Behandlingsresultat.OPPHØRT
+                val utbetalingsoppdrag =
+                    utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                        saksbehandlerId = saksbehandlerId,
+                        vedtak = vedtak,
+                        erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
+                        forrigeKjeder = forrigeKjeder,
+                        sisteAndelPerIdent = sisteAndelPerIdent,
+                        oppdaterteKjeder = oppdaterteKjeder,
+                        erSimulering = erSimulering,
+                        endretMigreringsDato =
+                            beregnOmMigreringsDatoErEndret(
+                                vedtak.behandling,
+                                forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom,
+                            ),
                     )
-            ) {
-                utbetalingsoppdrag.validerOpphørsoppdrag()
-            }
 
-            utbetalingsoppdrag
-        }
+                if (!erSimulering && (
+                        oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
+                            oppdatertBehandling.id,
+                        ).resultat == Behandlingsresultat.OPPHØRT
+                    )
+                ) {
+                    utbetalingsoppdrag.validerOpphørsoppdrag()
+                }
+
+                utbetalingsoppdrag
+            }
 
         if (skalValideres) {
             utbetalingsoppdrag.validerNullutbetaling(
@@ -182,7 +187,10 @@ class UtbetalingsoppdragGeneratorService(
         return utbetalingsoppdrag
     }
 
-    private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {
+    private fun beregnOmMigreringsDatoErEndret(
+        behandling: Behandling,
+        forrigeTilstandFraDato: YearMonth?,
+    ): YearMonth? {
         val erMigrertSak =
             behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id)
                 .any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
@@ -191,9 +199,10 @@ class UtbetalingsoppdragGeneratorService(
             return null
         }
 
-        val nyttTilstandFraDato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
-            ?.toYearMonth()
-            ?.plusMonths(1)
+        val nyttTilstandFraDato =
+            behandlingService.hentMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
+                ?.toYearMonth()
+                ?.plusMonths(1)
 
         return if (forrigeTilstandFraDato != null &&
             nyttTilstandFraDato != null &&
@@ -250,8 +259,9 @@ class UtbetalingsoppdragGeneratorService(
             error("Antallet andeler med oppdatert periodeOffset, forrigePeriodeOffset og kildeBehandlingId fra ny generator skal være likt antallet andeler med kalkulertUtbetalingsbeløp != 0. Generator gir ${andelerMedPeriodeId.size} andeler men det er ${andelerSomSkalSendesTilOppdrag.size} andeler med kalkulertUtbetalingsbeløp != 0")
         }
         andelerSomSkalSendesTilOppdrag.forEach { andel ->
-            val andelMedOffset = andelerPåId[andel.id]
-                ?: error("Feil ved oppdaterig av offset på andeler. Finner ikke andel med id ${andel.id} blandt andelene med oppdatert offset fra ny generator. Ny generator returnerer andeler med ider [${andelerPåId.values.map { it.id }}]")
+            val andelMedOffset =
+                andelerPåId[andel.id]
+                    ?: error("Feil ved oppdaterig av offset på andeler. Finner ikke andel med id ${andel.id} blandt andelene med oppdatert offset fra ny generator. Ny generator returnerer andeler med ider [${andelerPåId.values.map { it.id }}]")
             andel.periodeOffset = andelMedOffset.periodeId
             andel.forrigePeriodeOffset = andelMedOffset.forrigePeriodeId
             andel.kildeBehandlingId = andelMedOffset.kildeBehandlingId

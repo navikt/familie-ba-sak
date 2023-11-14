@@ -17,19 +17,19 @@ class DistribuerVedtaksbrevTask(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val brevmalService: BrevmalService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val distribuerVedtaksbrevDTO = objectMapper.readValue(task.payload, DistribuerVedtaksbrevDTO::class.java)
 
         val behandling = behandlingHentOgPersisterService.hent(distribuerVedtaksbrevDTO.behandlingId)
 
-        val distribuerDokumentDTO = DistribuerDokumentDTO(
-            behandlingId = distribuerVedtaksbrevDTO.behandlingId,
-            journalpostId = distribuerVedtaksbrevDTO.journalpostId,
-            personEllerInstitusjonIdent = distribuerVedtaksbrevDTO.personIdent,
-            brevmal = brevmalService.hentBrevmal(behandling),
-            erManueltSendt = false,
-        )
+        val distribuerDokumentDTO =
+            DistribuerDokumentDTO(
+                behandlingId = distribuerVedtaksbrevDTO.behandlingId,
+                journalpostId = distribuerVedtaksbrevDTO.journalpostId,
+                personEllerInstitusjonIdent = distribuerVedtaksbrevDTO.personIdent,
+                brevmal = brevmalService.hentBrevmal(behandling),
+                erManueltSendt = false,
+            )
         stegService.håndterDistribuerVedtaksbrev(
             behandling = behandlingHentOgPersisterService.hent(distribuerVedtaksbrevDTO.behandlingId),
             distribuerDokumentDTO = distribuerDokumentDTO,
@@ -37,7 +37,6 @@ class DistribuerVedtaksbrevTask(
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "distribuerVedtaksbrev"
     }
 }

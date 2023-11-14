@@ -25,7 +25,6 @@ enum class Vilkår(
     val beskrivelse: String,
     val harRegelverk: Boolean,
 ) {
-
     UNDER_18_ÅR(
         beskrivelse = "Er under 18 år",
         harRegelverk = false,
@@ -57,14 +56,14 @@ enum class Vilkår(
     }
 
     companion object {
-
         fun hentOrdinæreVilkårFor(
             personType: PersonType,
-        ): List<Vilkår> = when (personType) {
-            SØKER -> listOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD)
-            ANNENPART -> emptyList()
-            BARN -> listOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD, UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP)
-        }
+        ): List<Vilkår> =
+            when (personType) {
+                SØKER -> listOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD)
+                ANNENPART -> emptyList()
+                BARN -> listOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD, UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP)
+            }
 
         fun hentVilkårFor(
             personType: PersonType,
@@ -72,19 +71,22 @@ enum class Vilkår(
             behandlingUnderkategori: BehandlingUnderkategori,
         ): Set<Vilkår> {
             return when (fagsakType) {
-                FagsakType.NORMAL -> when (personType) {
-                    BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
-                    SØKER -> setOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (behandlingUnderkategori == BehandlingUnderkategori.UTVIDET) setOf(UTVIDET_BARNETRYGD) else emptySet()
-                    ANNENPART -> emptySet()
-                }
-                FagsakType.INSTITUSJON -> when (personType) {
-                    BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
-                    SØKER, ANNENPART -> emptySet()
-                }
-                FagsakType.BARN_ENSLIG_MINDREÅRIG -> when (personType) {
-                    BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (behandlingUnderkategori == BehandlingUnderkategori.UTVIDET) setOf(UTVIDET_BARNETRYGD) else emptySet()
-                    SØKER, ANNENPART -> emptySet()
-                }
+                FagsakType.NORMAL ->
+                    when (personType) {
+                        BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
+                        SØKER -> setOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (behandlingUnderkategori == BehandlingUnderkategori.UTVIDET) setOf(UTVIDET_BARNETRYGD) else emptySet()
+                        ANNENPART -> emptySet()
+                    }
+                FagsakType.INSTITUSJON ->
+                    when (personType) {
+                        BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
+                        SØKER, ANNENPART -> emptySet()
+                    }
+                FagsakType.BARN_ENSLIG_MINDREÅRIG ->
+                    when (personType) {
+                        BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (behandlingUnderkategori == BehandlingUnderkategori.UTVIDET) setOf(UTVIDET_BARNETRYGD) else emptySet()
+                        SØKER, ANNENPART -> emptySet()
+                    }
             }
         }
 
@@ -118,51 +120,59 @@ enum class Vilkår(
         vurderFra: LocalDate = LocalDate.now(),
         annenForelder: Person? = null,
     ): AutomatiskVurdering {
-        val vilkårsregel = when (this) {
-            UNDER_18_ÅR -> VurderBarnErUnder18(
-                alder = person.hentAlder(),
-            )
+        val vilkårsregel =
+            when (this) {
+                UNDER_18_ÅR ->
+                    VurderBarnErUnder18(
+                        alder = person.hentAlder(),
+                    )
 
-            BOR_MED_SØKER -> VurderBarnErBosattMedSøker(
-                søkerAdresser = person.personopplysningGrunnlag.søker.bostedsadresser,
-                barnAdresser = person.bostedsadresser,
-            )
+                BOR_MED_SØKER ->
+                    VurderBarnErBosattMedSøker(
+                        søkerAdresser = person.personopplysningGrunnlag.søker.bostedsadresser,
+                        barnAdresser = person.bostedsadresser,
+                    )
 
-            GIFT_PARTNERSKAP -> VurderBarnErUgift(
-                sivilstander = person.sivilstander,
-            )
+                GIFT_PARTNERSKAP ->
+                    VurderBarnErUgift(
+                        sivilstander = person.sivilstander,
+                    )
 
-            BOSATT_I_RIKET -> VurderPersonErBosattIRiket(
-                adresser = person.bostedsadresser,
-                vurderFra = vurderFra,
-            )
+                BOSATT_I_RIKET ->
+                    VurderPersonErBosattIRiket(
+                        adresser = person.bostedsadresser,
+                        vurderFra = vurderFra,
+                    )
 
-            LOVLIG_OPPHOLD -> if (person.type == BARN) {
-                VurderBarnHarLovligOpphold(
-                    aktør = person.aktør,
-                )
-            } else {
-                VurderPersonHarLovligOpphold(
-                    morLovligOppholdFaktaEØS = LovligOppholdFaktaEØS(
-                        arbeidsforhold = person.arbeidsforhold,
-                        bostedsadresser = person.bostedsadresser,
-                        statsborgerskap = person.statsborgerskap,
-                    ),
-                    annenForelderLovligOppholdFaktaEØS = if (annenForelder != null) {
-                        LovligOppholdFaktaEØS(
-                            arbeidsforhold = annenForelder.arbeidsforhold,
-                            bostedsadresser = annenForelder.bostedsadresser,
-                            statsborgerskap = annenForelder.statsborgerskap,
+                LOVLIG_OPPHOLD ->
+                    if (person.type == BARN) {
+                        VurderBarnHarLovligOpphold(
+                            aktør = person.aktør,
                         )
                     } else {
-                        null
-                    },
-                    opphold = person.opphold,
-                )
-            }
+                        VurderPersonHarLovligOpphold(
+                            morLovligOppholdFaktaEØS =
+                                LovligOppholdFaktaEØS(
+                                    arbeidsforhold = person.arbeidsforhold,
+                                    bostedsadresser = person.bostedsadresser,
+                                    statsborgerskap = person.statsborgerskap,
+                                ),
+                            annenForelderLovligOppholdFaktaEØS =
+                                if (annenForelder != null) {
+                                    LovligOppholdFaktaEØS(
+                                        arbeidsforhold = annenForelder.arbeidsforhold,
+                                        bostedsadresser = annenForelder.bostedsadresser,
+                                        statsborgerskap = annenForelder.statsborgerskap,
+                                    )
+                                } else {
+                                    null
+                                },
+                            opphold = person.opphold,
+                        )
+                    }
 
-            UTVIDET_BARNETRYGD -> throw Feil("Ikke støtte for å automatisk vurdere vilkåret ${this.beskrivelse}")
-        }
+                UTVIDET_BARNETRYGD -> throw Feil("Ikke støtte for å automatisk vurdere vilkåret ${this.beskrivelse}")
+            }
 
         return AutomatiskVurdering(
             evaluering = vilkårsregel.vurder(),
@@ -181,7 +191,6 @@ data class GyldigVilkårsperiode(
     val gyldigFom: LocalDate = LocalDate.MIN,
     val gyldigTom: LocalDate = LocalDate.MAX,
 ) {
-
     fun gyldigFor(dato: LocalDate): Boolean {
         return !(dato.isBefore(gyldigFom) || dato.isAfter(gyldigTom))
     }

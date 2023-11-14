@@ -27,7 +27,6 @@ class DokumentGenereringService(
     private val saksbehandlerContext: SaksbehandlerContext,
     @Lazy private val testVerktøyService: TestVerktøyService,
 ) {
-
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
         try {
             if (!vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.steg > StegType.BESLUTTE_VEDTAK) {

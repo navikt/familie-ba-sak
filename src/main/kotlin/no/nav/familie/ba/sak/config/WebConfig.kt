@@ -12,7 +12,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 class WebConfig(
     private val rolleConfig: RolleConfig,
 ) : WebMvcConfigurer {
-
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(RolletilgangInterceptor(rolleConfig))
             .excludePathPatterns("/api/task/**")

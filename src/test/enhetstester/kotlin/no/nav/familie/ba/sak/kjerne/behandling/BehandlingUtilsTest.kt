@@ -130,26 +130,28 @@ class BehandlingUtilsTest {
 
         val behandling = lagBehandling()
 
-        val tilkjentYtelse = TilkjentYtelse(
-            behandling = behandling,
-            opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now(),
-        )
+        val tilkjentYtelse =
+            TilkjentYtelse(
+                behandling = behandling,
+                opprettetDato = LocalDate.now(),
+                endretDato = LocalDate.now(),
+            )
 
-        val andelTilkjentYtelse = listOf(
-            AndelTilkjentYtelse(
-                behandlingId = behandling.id,
-                type = YtelseType.UTVIDET_BARNETRYGD,
-                tilkjentYtelse = tilkjentYtelse,
-                aktør = søkerAktørId,
-                kalkulertUtbetalingsbeløp = 1054,
-                nasjonaltPeriodebeløp = 1054,
-                sats = 123,
-                stønadFom = YearMonth.of(2015, 6),
-                stønadTom = YearMonth.now().plusYears(5),
-                prosent = BigDecimal(2),
-            ),
-        )
+        val andelTilkjentYtelse =
+            listOf(
+                AndelTilkjentYtelse(
+                    behandlingId = behandling.id,
+                    type = YtelseType.UTVIDET_BARNETRYGD,
+                    tilkjentYtelse = tilkjentYtelse,
+                    aktør = søkerAktørId,
+                    kalkulertUtbetalingsbeløp = 1054,
+                    nasjonaltPeriodebeløp = 1054,
+                    sats = 123,
+                    stønadFom = YearMonth.of(2015, 6),
+                    stønadTom = YearMonth.now().plusYears(5),
+                    prosent = BigDecimal(2),
+                ),
+            )
 
         val løpendeUndekategori = utledLøpendeUnderkategori(andelTilkjentYtelse)
 
@@ -162,26 +164,28 @@ class BehandlingUtilsTest {
 
         val behandling = lagBehandling()
 
-        val tilkjentYtelse = TilkjentYtelse(
-            behandling = behandling,
-            opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now(),
-        )
+        val tilkjentYtelse =
+            TilkjentYtelse(
+                behandling = behandling,
+                opprettetDato = LocalDate.now(),
+                endretDato = LocalDate.now(),
+            )
 
-        val andelTilkjentYtelse = listOf(
-            AndelTilkjentYtelse(
-                behandlingId = behandling.id,
-                type = YtelseType.UTVIDET_BARNETRYGD,
-                tilkjentYtelse = tilkjentYtelse,
-                aktør = søkerAktørId,
-                kalkulertUtbetalingsbeløp = 1054,
-                nasjonaltPeriodebeløp = 1054,
-                sats = 123,
-                stønadFom = YearMonth.of(2015, 6),
-                stønadTom = YearMonth.now().minusYears(1),
-                prosent = BigDecimal(2),
-            ),
-        )
+        val andelTilkjentYtelse =
+            listOf(
+                AndelTilkjentYtelse(
+                    behandlingId = behandling.id,
+                    type = YtelseType.UTVIDET_BARNETRYGD,
+                    tilkjentYtelse = tilkjentYtelse,
+                    aktør = søkerAktørId,
+                    kalkulertUtbetalingsbeløp = 1054,
+                    nasjonaltPeriodebeløp = 1054,
+                    sats = 123,
+                    stønadFom = YearMonth.of(2015, 6),
+                    stønadTom = YearMonth.now().minusYears(1),
+                    prosent = BigDecimal(2),
+                ),
+            )
 
         val løpendeUndekategori = utledLøpendeUnderkategori(andelTilkjentYtelse)
 
@@ -194,26 +198,28 @@ class BehandlingUtilsTest {
 
         val behandling = lagBehandling()
 
-        val tilkjentYtelse = TilkjentYtelse(
-            behandling = behandling,
-            opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now(),
-        )
+        val tilkjentYtelse =
+            TilkjentYtelse(
+                behandling = behandling,
+                opprettetDato = LocalDate.now(),
+                endretDato = LocalDate.now(),
+            )
 
-        val andelTilkjentYtelse = listOf(
-            AndelTilkjentYtelse(
-                behandlingId = behandling.id,
-                type = YtelseType.ORDINÆR_BARNETRYGD,
-                tilkjentYtelse = tilkjentYtelse,
-                aktør = søkerAktørId,
-                kalkulertUtbetalingsbeløp = 1054,
-                nasjonaltPeriodebeløp = 1054,
-                sats = 123,
-                stønadFom = YearMonth.of(2015, 6),
-                stønadTom = YearMonth.now().plusYears(2),
-                prosent = BigDecimal(2),
-            ),
-        )
+        val andelTilkjentYtelse =
+            listOf(
+                AndelTilkjentYtelse(
+                    behandlingId = behandling.id,
+                    type = YtelseType.ORDINÆR_BARNETRYGD,
+                    tilkjentYtelse = tilkjentYtelse,
+                    aktør = søkerAktørId,
+                    kalkulertUtbetalingsbeløp = 1054,
+                    nasjonaltPeriodebeløp = 1054,
+                    sats = 123,
+                    stønadFom = YearMonth.of(2015, 6),
+                    stønadTom = YearMonth.now().plusYears(2),
+                    prosent = BigDecimal(2),
+                ),
+            )
 
         val løpendeUndekategori = utledLøpendeUnderkategori(andelTilkjentYtelse)
 
@@ -223,14 +229,16 @@ class BehandlingUtilsTest {
     @Test
     fun `Skal finne ut at omregningsbehandling allerede har kjørt inneværende måned`() {
         val fgb = lagBehandling()
-        val omregning6År = lagBehandling(
-            årsak = BehandlingÅrsak.OMREGNING_6ÅR,
-        )
-        val behandlingsårsakHarAlleredeKjørt = Behandlingutils.harBehandlingsårsakAlleredeKjørt(
-            behandlingÅrsak = BehandlingÅrsak.OMREGNING_6ÅR,
-            behandlinger = listOf(fgb, omregning6År),
-            måned = YearMonth.now(),
-        )
+        val omregning6År =
+            lagBehandling(
+                årsak = BehandlingÅrsak.OMREGNING_6ÅR,
+            )
+        val behandlingsårsakHarAlleredeKjørt =
+            Behandlingutils.harBehandlingsårsakAlleredeKjørt(
+                behandlingÅrsak = BehandlingÅrsak.OMREGNING_6ÅR,
+                behandlinger = listOf(fgb, omregning6År),
+                måned = YearMonth.now(),
+            )
 
         assertTrue(behandlingsårsakHarAlleredeKjørt)
     }
@@ -238,11 +246,12 @@ class BehandlingUtilsTest {
     @Test
     fun `Skal finne ut at omregningsbehandling ikke har kjørt inneværende måned`() {
         val fgb = lagBehandling()
-        val behandlingsårsakHarAlleredeKjørt = Behandlingutils.harBehandlingsårsakAlleredeKjørt(
-            behandlingÅrsak = BehandlingÅrsak.OMREGNING_6ÅR,
-            behandlinger = listOf(fgb),
-            måned = YearMonth.now(),
-        )
+        val behandlingsårsakHarAlleredeKjørt =
+            Behandlingutils.harBehandlingsårsakAlleredeKjørt(
+                behandlingÅrsak = BehandlingÅrsak.OMREGNING_6ÅR,
+                behandlinger = listOf(fgb),
+                måned = YearMonth.now(),
+            )
 
         assertFalse(behandlingsårsakHarAlleredeKjørt)
     }
@@ -300,7 +309,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
             ),
         )
     }
@@ -313,7 +322,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
             ),
         )
     }
@@ -327,7 +336,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = overstyrtKategori,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
             ),
         )
     }
@@ -340,7 +349,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.NASJONAL,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.MIGRERING,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
             ),
         )
     }
@@ -353,7 +362,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.MIGRERING,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
             ),
         )
     }

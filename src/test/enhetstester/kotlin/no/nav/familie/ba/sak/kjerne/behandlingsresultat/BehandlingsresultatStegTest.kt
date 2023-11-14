@@ -55,7 +55,6 @@ import java.math.BigDecimal
 import java.time.YearMonth
 
 class BehandlingsresultatStegTest {
-
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
 
     private val behandlingService: BehandlingService = mockk()
@@ -85,24 +84,26 @@ class BehandlingsresultatStegTest {
 
     @BeforeEach
     fun init() {
-        behandlingsresultatSteg = BehandlingsresultatSteg(
-            behandlingHentOgPersisterService,
-            behandlingService,
-            simuleringService,
-            vedtakService,
-            vedtaksperiodeService,
-            mockBehandlingsresultatService,
-            vilkårService,
-            persongrunnlagService,
-            beregningService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            andelTilkjentYtelseRepository,
-        )
+        behandlingsresultatSteg =
+            BehandlingsresultatSteg(
+                behandlingHentOgPersisterService,
+                behandlingService,
+                simuleringService,
+                vedtakService,
+                vedtaksperiodeService,
+                mockBehandlingsresultatService,
+                vilkårService,
+                persongrunnlagService,
+                beregningService,
+                andelerTilkjentYtelseOgEndreteUtbetalingerService,
+                andelTilkjentYtelseRepository,
+            )
 
-        behandling = lagBehandling(
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-        )
+        behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+            )
     }
 
     @Test
@@ -168,9 +169,10 @@ class BehandlingsresultatStegTest {
     @Test
     fun `skal kaste feil om det er endring etter migreringsdatoen til første behandling`() {
         val startdato = YearMonth.of(2023, 2)
-        val endringTidslinje = "TTTFFFF".tilBoolskTidslinje(
-            startdato,
-        )
+        val endringTidslinje =
+            "TTTFFFF".tilBoolskTidslinje(
+                startdato,
+            )
 
         assertThrows<FunksjonellFeil> {
             endringTidslinje.kastFeilVedEndringEtter(startdato, lagBehandling())
@@ -182,9 +184,10 @@ class BehandlingsresultatStegTest {
         val startdato = YearMonth.of(2023, 2)
         val treMånederEtterStartdato = startdato.plusMonths(3)
 
-        val endringTidslinje = "TTTFFFF".tilBoolskTidslinje(
-            startdato,
-        )
+        val endringTidslinje =
+            "TTTFFFF".tilBoolskTidslinje(
+                startdato,
+            )
 
         assertDoesNotThrow {
             endringTidslinje.kastFeilVedEndringEtter(treMånederEtterStartdato, lagBehandling())
@@ -206,10 +209,11 @@ class BehandlingsresultatStegTest {
                     tom = YearMonth.of(2023, 2),
                     behandling = forrigeBehandling,
                     tilkjentYtelse = forrigeTilkjentYtelse,
-                    beløp = SatsService.finnGjeldendeSatsForDato(
-                        SatsType.ORBA,
-                        YearMonth.of(2023, 1).førsteDagIInneværendeMåned(),
-                    ),
+                    beløp =
+                        SatsService.finnGjeldendeSatsForDato(
+                            SatsType.ORBA,
+                            YearMonth.of(2023, 1).førsteDagIInneværendeMåned(),
+                        ),
                     aktør = barn.aktør,
                 ),
                 lagAndelTilkjentYtelse(
@@ -217,20 +221,22 @@ class BehandlingsresultatStegTest {
                     tom = YearMonth.of(2033, 1),
                     behandling = forrigeBehandling,
                     tilkjentYtelse = forrigeTilkjentYtelse,
-                    beløp = SatsService.finnGjeldendeSatsForDato(
-                        SatsType.ORBA,
-                        YearMonth.of(2023, 3).førsteDagIInneværendeMåned(),
-                    ),
+                    beløp =
+                        SatsService.finnGjeldendeSatsForDato(
+                            SatsType.ORBA,
+                            YearMonth.of(2023, 3).førsteDagIInneværendeMåned(),
+                        ),
                     aktør = barn.aktør,
                 ),
             ),
         )
 
-        val behandling = lagBehandling(
-            fagsak = forrigeBehandling.fagsak,
-            behandlingType = BehandlingType.REVURDERING,
-            årsak = BehandlingÅrsak.SATSENDRING,
-        )
+        val behandling =
+            lagBehandling(
+                fagsak = forrigeBehandling.fagsak,
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.SATSENDRING,
+            )
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             mutableSetOf(
@@ -239,10 +245,11 @@ class BehandlingsresultatStegTest {
                     tom = YearMonth.of(2023, 2),
                     behandling = forrigeBehandling,
                     tilkjentYtelse = forrigeTilkjentYtelse,
-                    beløp = SatsService.finnGjeldendeSatsForDato(
-                        SatsType.ORBA,
-                        YearMonth.of(2023, 1).førsteDagIInneværendeMåned(),
-                    ),
+                    beløp =
+                        SatsService.finnGjeldendeSatsForDato(
+                            SatsType.ORBA,
+                            YearMonth.of(2023, 1).førsteDagIInneværendeMåned(),
+                        ),
                     aktør = barn.aktør,
                 ),
                 lagAndelTilkjentYtelse(
@@ -250,10 +257,11 @@ class BehandlingsresultatStegTest {
                     tom = YearMonth.of(2023, 6),
                     behandling = forrigeBehandling,
                     tilkjentYtelse = forrigeTilkjentYtelse,
-                    beløp = SatsService.finnGjeldendeSatsForDato(
-                        SatsType.ORBA,
-                        YearMonth.of(2023, 3).førsteDagIInneværendeMåned(),
-                    ),
+                    beløp =
+                        SatsService.finnGjeldendeSatsForDato(
+                            SatsType.ORBA,
+                            YearMonth.of(2023, 3).førsteDagIInneværendeMåned(),
+                        ),
                     aktør = barn.aktør,
                 ),
                 lagAndelTilkjentYtelse(
@@ -261,10 +269,11 @@ class BehandlingsresultatStegTest {
                     tom = YearMonth.of(2033, 1),
                     behandling = forrigeBehandling,
                     tilkjentYtelse = forrigeTilkjentYtelse,
-                    beløp = SatsService.finnGjeldendeSatsForDato(
-                        SatsType.ORBA,
-                        YearMonth.of(2023, 7).førsteDagIInneværendeMåned(),
-                    ),
+                    beløp =
+                        SatsService.finnGjeldendeSatsForDato(
+                            SatsType.ORBA,
+                            YearMonth.of(2023, 7).førsteDagIInneværendeMåned(),
+                        ),
                     aktør = barn.aktør,
                 ),
             ),
@@ -297,10 +306,11 @@ class BehandlingsresultatStegTest {
                     tom = YearMonth.of(2023, 2),
                     behandling = forrigeBehandling,
                     tilkjentYtelse = forrigeTilkjentYtelse,
-                    beløp = SatsService.finnGjeldendeSatsForDato(
-                        SatsType.ORBA,
-                        YearMonth.of(2023, 1).førsteDagIInneværendeMåned(),
-                    ),
+                    beløp =
+                        SatsService.finnGjeldendeSatsForDato(
+                            SatsType.ORBA,
+                            YearMonth.of(2023, 1).førsteDagIInneværendeMåned(),
+                        ),
                     aktør = barn.aktør,
                     prosent = BigDecimal(50),
                 ),
@@ -309,21 +319,23 @@ class BehandlingsresultatStegTest {
                     tom = YearMonth.of(2033, 1),
                     behandling = forrigeBehandling,
                     tilkjentYtelse = forrigeTilkjentYtelse,
-                    beløp = SatsService.finnGjeldendeSatsForDato(
-                        SatsType.ORBA,
-                        YearMonth.of(2023, 3).førsteDagIInneværendeMåned(),
-                    ),
+                    beløp =
+                        SatsService.finnGjeldendeSatsForDato(
+                            SatsType.ORBA,
+                            YearMonth.of(2023, 3).førsteDagIInneværendeMåned(),
+                        ),
                     aktør = barn.aktør,
                     prosent = BigDecimal(50),
                 ),
             ),
         )
 
-        val behandling = lagBehandling(
-            fagsak = forrigeBehandling.fagsak,
-            behandlingType = BehandlingType.REVURDERING,
-            årsak = BehandlingÅrsak.SATSENDRING,
-        )
+        val behandling =
+            lagBehandling(
+                fagsak = forrigeBehandling.fagsak,
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.SATSENDRING,
+            )
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             mutableSetOf(
@@ -332,10 +344,11 @@ class BehandlingsresultatStegTest {
                     tom = YearMonth.of(2023, 2),
                     behandling = forrigeBehandling,
                     tilkjentYtelse = forrigeTilkjentYtelse,
-                    beløp = SatsService.finnGjeldendeSatsForDato(
-                        SatsType.ORBA,
-                        YearMonth.of(2023, 1).førsteDagIInneværendeMåned(),
-                    ),
+                    beløp =
+                        SatsService.finnGjeldendeSatsForDato(
+                            SatsType.ORBA,
+                            YearMonth.of(2023, 1).førsteDagIInneværendeMåned(),
+                        ),
                     aktør = barn.aktør,
                     prosent = BigDecimal(50),
                 ),
@@ -344,10 +357,11 @@ class BehandlingsresultatStegTest {
                     tom = YearMonth.of(2023, 6),
                     behandling = forrigeBehandling,
                     tilkjentYtelse = forrigeTilkjentYtelse,
-                    beløp = SatsService.finnGjeldendeSatsForDato(
-                        SatsType.ORBA,
-                        YearMonth.of(2023, 3).førsteDagIInneværendeMåned(),
-                    ),
+                    beløp =
+                        SatsService.finnGjeldendeSatsForDato(
+                            SatsType.ORBA,
+                            YearMonth.of(2023, 3).førsteDagIInneværendeMåned(),
+                        ),
                     aktør = barn.aktør,
                     prosent = BigDecimal(100),
                 ),
@@ -356,10 +370,11 @@ class BehandlingsresultatStegTest {
                     tom = YearMonth.of(2033, 1),
                     behandling = forrigeBehandling,
                     tilkjentYtelse = forrigeTilkjentYtelse,
-                    beløp = SatsService.finnGjeldendeSatsForDato(
-                        SatsType.ORBA,
-                        YearMonth.of(2023, 7).førsteDagIInneværendeMåned(),
-                    ),
+                    beløp =
+                        SatsService.finnGjeldendeSatsForDato(
+                            SatsType.ORBA,
+                            YearMonth.of(2023, 7).førsteDagIInneværendeMåned(),
+                        ),
                     aktør = barn.aktør,
                     prosent = BigDecimal(50),
                 ),
@@ -406,10 +421,11 @@ class BehandlingsresultatStegTest {
                 .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
         } returns emptyList()
 
-        every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomiTidslinje(behandling) } returns EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
-            nåværendeAndeler = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-            forrigeAndeler = forrigeTilkjentYtelse.andelerTilkjentYtelse.toList(),
-        )
+        every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomiTidslinje(behandling) } returns
+            EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
+                nåværendeAndeler = tilkjentYtelse.andelerTilkjentYtelse.toList(),
+                forrigeAndeler = forrigeTilkjentYtelse.andelerTilkjentYtelse.toList(),
+            )
 
         every {
             beregningService
@@ -418,14 +434,16 @@ class BehandlingsresultatStegTest {
     }
 
     fun `skal gå rett fra behandlingsresultat til iverksetting for alle fødselshendelser`() {
-        val fødselshendelseBehandling = behandling.copy(
-            skalBehandlesAutomatisk = true,
-            opprettetÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-        )
-        val vedtak = lagVedtak(
-            fødselshendelseBehandling,
-        )
+        val fødselshendelseBehandling =
+            behandling.copy(
+                skalBehandlesAutomatisk = true,
+                opprettetÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            )
+        val vedtak =
+            lagVedtak(
+                fødselshendelseBehandling,
+            )
         every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.INNVILGET_OG_ENDRET
         every { behandlingService.nullstillEndringstidspunkt(fødselshendelseBehandling.id) } just runs
         every {

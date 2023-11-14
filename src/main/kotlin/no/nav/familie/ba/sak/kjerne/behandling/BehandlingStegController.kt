@@ -44,7 +44,6 @@ class BehandlingStegController(
     private val tilgangService: TilgangService,
     private val unleashService: UnleashNextMedContextService,
 ) {
-
     @PostMapping(
         path = ["registrer-søknad"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
@@ -65,7 +64,9 @@ class BehandlingStegController(
     }
 
     @PostMapping(path = ["vilkårsvurdering"])
-    fun validerVilkårsvurdering(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    fun validerVilkårsvurdering(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "vurdere vilkårsvurdering",
@@ -78,7 +79,9 @@ class BehandlingStegController(
     }
 
     @GetMapping(path = ["behandlingsresultat/valider"])
-    fun validerBehandlingsresultat(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<Boolean>> {
+    fun validerBehandlingsresultat(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<Boolean>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "validere behandlingsresultat",
@@ -101,7 +104,9 @@ class BehandlingStegController(
     }
 
     @PostMapping(path = ["behandlingsresultat"])
-    fun utledBehandlingsresultat(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    fun utledBehandlingsresultat(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "vurdere behandlingsresultat",
@@ -226,10 +231,11 @@ enum class HenleggÅrsak(val beskrivelse: String) {
     TEKNISK_VEDLIKEHOLD("Teknisk vedlikehold"),
     ;
 
-    fun tilBehandlingsresultat() = when (this) {
-        FEILAKTIG_OPPRETTET -> Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
-        SØKNAD_TRUKKET -> Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
-        FØDSELSHENDELSE_UGYLDIG_UTFALL -> Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
-        TEKNISK_VEDLIKEHOLD -> Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
-    }
+    fun tilBehandlingsresultat() =
+        when (this) {
+            FEILAKTIG_OPPRETTET -> Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
+            SØKNAD_TRUKKET -> Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
+            FØDSELSHENDELSE_UGYLDIG_UTFALL -> Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+            TEKNISK_VEDLIKEHOLD -> Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
+        }
 }

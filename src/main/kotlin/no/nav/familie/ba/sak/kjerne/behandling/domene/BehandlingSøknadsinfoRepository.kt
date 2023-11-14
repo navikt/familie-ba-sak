@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query
 import java.time.LocalDateTime
 
 interface BehandlingSøknadsinfoRepository : JpaRepository<BehandlingSøknadsinfo, Long> {
-
     @Query("SELECT bs FROM BehandlingSøknadsinfo bs where bs.behandling.id=:behandlingId ")
     fun findByBehandlingId(behandlingId: Long): Set<BehandlingSøknadsinfo>
 
@@ -21,7 +20,10 @@ interface BehandlingSøknadsinfoRepository : JpaRepository<BehandlingSøknadsinf
         GROUP BY bs.brevkode, bs.erDigital
     """,
     )
-    fun hentAntallSøknaderIPeriode(fomDato: LocalDateTime, tomDato: LocalDateTime): List<AntallSøknaderPerGruppe>
+    fun hentAntallSøknaderIPeriode(
+        fomDato: LocalDateTime,
+        tomDato: LocalDateTime,
+    ): List<AntallSøknaderPerGruppe>
 }
 
 interface AntallSøknaderPerGruppe {

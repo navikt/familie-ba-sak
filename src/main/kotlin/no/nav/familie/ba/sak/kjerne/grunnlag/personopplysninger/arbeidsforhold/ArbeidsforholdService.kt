@@ -15,11 +15,12 @@ class ArbeidsforholdService(private val integrasjonClient: IntegrasjonClient) {
 
         return arbeidsforholdForSisteFemÅr.map {
             val periode = DatoIntervallEntitet(it.ansettelsesperiode?.periode?.fom, it.ansettelsesperiode?.periode?.tom)
-            val arbeidsgiverId = when (it.arbeidsgiver?.type) {
-                ArbeidsgiverType.Organisasjon -> it.arbeidsgiver.organisasjonsnummer
-                ArbeidsgiverType.Person -> it.arbeidsgiver.offentligIdent
-                else -> null
-            }
+            val arbeidsgiverId =
+                when (it.arbeidsgiver?.type) {
+                    ArbeidsgiverType.Organisasjon -> it.arbeidsgiver.organisasjonsnummer
+                    ArbeidsgiverType.Person -> it.arbeidsgiver.offentligIdent
+                    else -> null
+                }
 
             GrArbeidsforhold(
                 periode = periode,

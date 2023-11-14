@@ -21,16 +21,16 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class HenleggBehandlingTaskTest {
-
     val oppgaveService: OppgaveService = mockk()
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     val stegService: StegService = mockk(relaxed = true)
-    private val henleggBehandlingTask = HenleggBehandlingTask(
-        arbeidsfordelingService = mockk(relaxed = true),
-        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-        stegService = stegService,
-        oppgaveService = oppgaveService,
-    )
+    private val henleggBehandlingTask =
+        HenleggBehandlingTask(
+            arbeidsfordelingService = mockk(relaxed = true),
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            stegService = stegService,
+            oppgaveService = oppgaveService,
+        )
 
     @Test
     fun `skal ikke henlegge dersom behandlingen allerede er avsluttet`() {
@@ -65,9 +65,10 @@ internal class HenleggBehandlingTaskTest {
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { oppgaveService.hentOppgaverSomIkkeErFerdigstilt(any(), any()) } returns
             listOf(DbOppgave(behandling = behandling, gsakId = "1", type = Oppgavetype.BehandleSak))
-        every { oppgaveService.hentOppgave(any()) } returns lagTestOppgaveDTO(1, Oppgavetype.BehandleSak).copy(
-            fristFerdigstillelse = LocalDate.of(2023, 4, 2).toString(),
-        )
+        every { oppgaveService.hentOppgave(any()) } returns
+            lagTestOppgaveDTO(1, Oppgavetype.BehandleSak).copy(
+                fristFerdigstillelse = LocalDate.of(2023, 4, 2).toString(),
+            )
 
         val task = opprettTekniskHenleggelseGrunnetSatsendringTask()
         henleggBehandlingTask.doTask(task)
@@ -84,14 +85,15 @@ internal class HenleggBehandlingTaskTest {
     private fun opprettTekniskHenleggelseGrunnetSatsendringTask(): Task {
         return Task(
             type = HenleggBehandlingTask.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(
-                HenleggBehandlingTaskDTO(
-                    behandlingId = 1,
-                    årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
-                    begrunnelse = "Satsendring",
-                    validerOppgavefristErEtterDato = LocalDate.of(2023, 4, 1),
+            payload =
+                objectMapper.writeValueAsString(
+                    HenleggBehandlingTaskDTO(
+                        behandlingId = 1,
+                        årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
+                        begrunnelse = "Satsendring",
+                        validerOppgavefristErEtterDato = LocalDate.of(2023, 4, 1),
+                    ),
                 ),
-            ),
         )
     }
 }

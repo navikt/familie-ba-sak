@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 
 interface VedtaksperiodeRepository : JpaRepository<VedtaksperiodeMedBegrunnelser, Long> {
-
     @Modifying
     @Query("DELETE FROM Vedtaksperiode v WHERE v.vedtak = :vedtak")
     fun slettVedtaksperioderFor(vedtak: Vedtak)

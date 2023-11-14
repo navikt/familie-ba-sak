@@ -26,17 +26,15 @@ import java.time.LocalDate
 @RequestMapping("/api/ekstern/pensjon")
 @ProtectedWithClaims(issuer = "azuread")
 class PensjonController(private val pensjonService: PensjonService) {
-
     @Operation(
         description = "Tjeneste for Pensjon for å hente barnetrygd og relaterte saker for en gitt person.",
-
     )
     @ApiResponses(
         value = [
             ApiResponse(
                 responseCode = "200",
                 description =
-                """Liste over fagsaker og relaterte fagsaker(hvis barna finnes i flere fagsaker) fra ba-sak 
+                    """Liste over fagsaker og relaterte fagsaker(hvis barna finnes i flere fagsaker) fra ba-sak 
                                         
                    fagsakId:                unik id for fagsaken
                    fagsakEiersIdent:        Fnr for eier av fagsaken
@@ -48,7 +46,7 @@ class PensjonController(private val pensjonService: PensjonService) {
                         mediaType = "application/json",
                         array = (
                             ArraySchema(schema = Schema(implementation = BarnetrygdTilPensjon::class))
-                            ),
+                        ),
                     ),
                 ],
             ),
@@ -65,7 +63,7 @@ class PensjonController(private val pensjonService: PensjonService) {
                         mediaType = "application/json",
                         array = (
                             ArraySchema(schema = Schema(implementation = Ressurs::class))
-                            ),
+                        ),
                     ),
                 ],
             ),
@@ -103,14 +101,13 @@ class PensjonController(private val pensjonService: PensjonService) {
 
     @Operation(
         description = "Tjeneste for Pensjon for å bestille identer med barnetrygd for et gitt år på kafka.",
-
     )
     @ApiResponses(
         value = [
             ApiResponse(
                 responseCode = "202",
                 description =
-                """
+                    """
                     RequestId som blir med kafka-meldingene
                 """,
                 content = [

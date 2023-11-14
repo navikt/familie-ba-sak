@@ -40,7 +40,6 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
-
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService
 
@@ -97,128 +96,138 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val excludedAktørId = tilAktør(excludedFnr)
 
         // Result from ba-sak
-        val testDataBaSak = arrayOf(
-            // Excluded because of the vedtak is older
-            PerioderTestData(
-                fnr = duplicatedFnr,
-                aktør = duplicatedAktørId,
-                endretDato = LocalDateTime.of(2020, 11, 5, 12, 0),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2020, 9, 1, 12, 0),
-                        LocalDateTime.of(2020, 10, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
+        val testDataBaSak =
+            arrayOf(
+                // Excluded because of the vedtak is older
+                PerioderTestData(
+                    fnr = duplicatedFnr,
+                    aktør = duplicatedAktørId,
+                    endretDato = LocalDateTime.of(2020, 11, 5, 12, 0),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2020, 9, 1, 12, 0),
+                                LocalDateTime.of(2020, 10, 8, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                        ),
                 ),
-            ),
-            // Included
-            PerioderTestData(
-                fnr = duplicatedFnr,
-                aktør = duplicatedAktørId,
-                endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2019, 9, 1, 12, 0),
-                        LocalDateTime.of(2020, 7, 31, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
-                    Triple(
-                        LocalDateTime.of(2020, 8, 1, 12, 0),
-                        LocalDateTime.of(2020, 12, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._50,
-                    ),
+                // Included
+                PerioderTestData(
+                    fnr = duplicatedFnr,
+                    aktør = duplicatedAktørId,
+                    endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2019, 9, 1, 12, 0),
+                                LocalDateTime.of(2020, 7, 31, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                            Triple(
+                                LocalDateTime.of(2020, 8, 1, 12, 0),
+                                LocalDateTime.of(2020, 12, 8, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._50,
+                            ),
+                        ),
                 ),
-            ),
-            // Excluded because the stonad period is earlier than the specified year
-            PerioderTestData(
-                fnr = "00000000002",
-                aktør = tilAktør("00000000002"),
-                endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2019, 3, 1, 12, 0),
-                        LocalDateTime.of(2019, 12, 31, 23, 59),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
+                // Excluded because the stonad period is earlier than the specified year
+                PerioderTestData(
+                    fnr = "00000000002",
+                    aktør = tilAktør("00000000002"),
+                    endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2019, 3, 1, 12, 0),
+                                LocalDateTime.of(2019, 12, 31, 23, 59),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                        ),
                 ),
-            ),
-            // Excluded because the stonad period is later than the specified year
-            PerioderTestData(
-                fnr = "00000000003",
-                aktør = tilAktør("00000000003"),
-                endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2021, 1, 1, 1, 0),
-                        LocalDateTime.of(2022, 12, 31, 23, 59),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
+                // Excluded because the stonad period is later than the specified year
+                PerioderTestData(
+                    fnr = "00000000003",
+                    aktør = tilAktør("00000000003"),
+                    endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2021, 1, 1, 1, 0),
+                                LocalDateTime.of(2022, 12, 31, 23, 59),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                        ),
                 ),
-            ),
-            // Excluded because the person ident is not in the provided list
-            PerioderTestData(
-                fnr = excludedFnr,
-                aktør = excludedAktørId,
-                endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2020, 1, 1, 1, 0),
-                        LocalDateTime.of(2022, 12, 31, 23, 59),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
+                // Excluded because the person ident is not in the provided list
+                PerioderTestData(
+                    fnr = excludedFnr,
+                    aktør = excludedAktørId,
+                    endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2020, 1, 1, 1, 0),
+                                LocalDateTime.of(2022, 12, 31, 23, 59),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         // result from Infotrygd
-        val testDataInfotrygd = arrayOf(
-            // Excluded because the person ident can be found in ba-sak
-            PerioderTestData(
-                fnr = duplicatedFnr,
-                aktør = duplicatedAktørId,
-                endretDato = LocalDateTime.of(2020, 9, 5, 12, 0),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2020, 8, 1, 12, 0),
-                        LocalDateTime.of(2020, 9, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
+        val testDataInfotrygd =
+            arrayOf(
+                // Excluded because the person ident can be found in ba-sak
+                PerioderTestData(
+                    fnr = duplicatedFnr,
+                    aktør = duplicatedAktørId,
+                    endretDato = LocalDateTime.of(2020, 9, 5, 12, 0),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2020, 8, 1, 12, 0),
+                                LocalDateTime.of(2020, 9, 8, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                        ),
                 ),
-            ),
-            // Included
-            PerioderTestData(
-                fnr = "00000000010",
-                aktør = tilAktør("00000000010"),
-                endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2020, 3, 1, 12, 0),
-                        LocalDateTime.of(2020, 4, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
+                // Included
+                PerioderTestData(
+                    fnr = "00000000010",
+                    aktør = tilAktør("00000000010"),
+                    endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2020, 3, 1, 12, 0),
+                                LocalDateTime.of(2020, 4, 8, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         testDataBaSak.forEach {
             lagerTilkjentYtelse(it)
         }
 
-        val result = testDataInfotrygd.flatMap {
-            listOf(
-                SkatteetatenPerioder(
-                    it.fnr,
-                    it.endretDato,
-                    it.perioder.map { p ->
-                        SkatteetatenPeriode(
-                            fraMaaned = p.first.tilMaaned(),
-                            tomMaaned = p.second?.tilMaaned(),
-                            delingsprosent = p.third,
-                        )
-                    },
-                ),
-            )
-        }
+        val result =
+            testDataInfotrygd.flatMap {
+                listOf(
+                    SkatteetatenPerioder(
+                        it.fnr,
+                        it.endretDato,
+                        it.perioder.map { p ->
+                            SkatteetatenPeriode(
+                                fraMaaned = p.first.tilMaaned(),
+                                tomMaaned = p.second?.tilMaaned(),
+                                delingsprosent = p.third,
+                            )
+                        },
+                    ),
+                )
+            }
 
         every {
             infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygdForPersoner(
@@ -260,38 +269,42 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val aktør = tilAktør(fnr)
 
         // Result from ba-sak
-        val testDataBaSak = arrayOf(
-            // Included
-            PerioderTestData(
-                fnr = fnr,
-                aktør = aktør,
-                endretDato = LocalDate.of(2022, 2, 6).atStartOfDay(),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2022, 3, 1, 12, 0),
-                        LocalDateTime.of(2027, 7, 31, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
+        val testDataBaSak =
+            arrayOf(
+                // Included
+                PerioderTestData(
+                    fnr = fnr,
+                    aktør = aktør,
+                    endretDato = LocalDate.of(2022, 2, 6).atStartOfDay(),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2022, 3, 1, 12, 0),
+                                LocalDateTime.of(2027, 7, 31, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         // result from Infotrygd
-        val testDataInfotrygd = arrayOf(
-            // Excluded because the person ident can be found in ba-sak
-            PerioderTestData(
-                fnr = fnr,
-                aktør = aktør,
-                endretDato = LocalDate.of(2020, 9, 5).atStartOfDay(),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2019, 9, 1, 12, 0),
-                        LocalDateTime.of(2022, 2, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
+        val testDataInfotrygd =
+            arrayOf(
+                // Excluded because the person ident can be found in ba-sak
+                PerioderTestData(
+                    fnr = fnr,
+                    aktør = aktør,
+                    endretDato = LocalDate.of(2020, 9, 5).atStartOfDay(),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2019, 9, 1, 12, 0),
+                                LocalDateTime.of(2022, 2, 8, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         testDataBaSak.forEach {
             lagerTilkjentYtelse(it)
@@ -302,21 +315,22 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 eq(listOf("00000000001")),
                 any(),
             )
-        } returns testDataInfotrygd.flatMap {
-            listOf(
-                SkatteetatenPerioder(
-                    it.fnr,
-                    it.endretDato,
-                    it.perioder.map { p ->
-                        SkatteetatenPeriode(
-                            fraMaaned = p.first.tilMaaned(),
-                            tomMaaned = p.second?.tilMaaned(),
-                            delingsprosent = p.third,
-                        )
-                    },
-                ),
-            )
-        }
+        } returns
+            testDataInfotrygd.flatMap {
+                listOf(
+                    SkatteetatenPerioder(
+                        it.fnr,
+                        it.endretDato,
+                        it.perioder.map { p ->
+                            SkatteetatenPeriode(
+                                fraMaaned = p.first.tilMaaned(),
+                                tomMaaned = p.second?.tilMaaned(),
+                                delingsprosent = p.third,
+                            )
+                        },
+                    ),
+                )
+            }
 
         val resultat = skatteetatenService.finnPerioderMedUtvidetBarnetrygd(listOf((fnr)), "2022")
 
@@ -335,38 +349,42 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val aktør = tilAktør(fnr)
 
         // Result from ba-sak
-        val testDataBaSak = arrayOf(
-            // Included
-            PerioderTestData(
-                fnr = fnr,
-                aktør = aktør,
-                endretDato = LocalDate.of(2022, 2, 6).atStartOfDay(),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2022, 3, 1, 12, 0),
-                        LocalDateTime.of(2027, 7, 31, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
+        val testDataBaSak =
+            arrayOf(
+                // Included
+                PerioderTestData(
+                    fnr = fnr,
+                    aktør = aktør,
+                    endretDato = LocalDate.of(2022, 2, 6).atStartOfDay(),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2022, 3, 1, 12, 0),
+                                LocalDateTime.of(2027, 7, 31, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         // result from Infotrygd
-        val testDataInfotrygd = arrayOf(
-            // Excluded because the person ident can be found in ba-sak
-            PerioderTestData(
-                fnr = fnr,
-                aktør = aktør,
-                endretDato = LocalDate.of(2020, 9, 5).atStartOfDay(),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2019, 9, 1, 12, 0),
-                        null,
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
+        val testDataInfotrygd =
+            arrayOf(
+                // Excluded because the person ident can be found in ba-sak
+                PerioderTestData(
+                    fnr = fnr,
+                    aktør = aktør,
+                    endretDato = LocalDate.of(2020, 9, 5).atStartOfDay(),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2019, 9, 1, 12, 0),
+                                null,
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         testDataBaSak.forEach {
             lagerTilkjentYtelse(it)
@@ -377,21 +395,22 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 eq(listOf("00000000001")),
                 any(),
             )
-        } returns testDataInfotrygd.flatMap {
-            listOf(
-                SkatteetatenPerioder(
-                    it.fnr,
-                    it.endretDato,
-                    it.perioder.map { p ->
-                        SkatteetatenPeriode(
-                            fraMaaned = p.first.tilMaaned(),
-                            tomMaaned = p.second?.tilMaaned(),
-                            delingsprosent = p.third,
-                        )
-                    },
-                ),
-            )
-        }
+        } returns
+            testDataInfotrygd.flatMap {
+                listOf(
+                    SkatteetatenPerioder(
+                        it.fnr,
+                        it.endretDato,
+                        it.perioder.map { p ->
+                            SkatteetatenPeriode(
+                                fraMaaned = p.first.tilMaaned(),
+                                tomMaaned = p.second?.tilMaaned(),
+                                delingsprosent = p.third,
+                            )
+                        },
+                    ),
+                )
+            }
 
         val resultat = skatteetatenService.finnPerioderMedUtvidetBarnetrygd(listOf((fnr)), "2022")
 
@@ -410,38 +429,42 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val aktør = tilAktør(fnr)
 
         // Result from ba-sak
-        val testDataBaSak = arrayOf(
-            // Included
-            PerioderTestData(
-                fnr = fnr,
-                aktør = aktør,
-                endretDato = LocalDate.of(2022, 2, 6).atStartOfDay(),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2021, 9, 1, 12, 0),
-                        LocalDateTime.of(2027, 7, 31, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
+        val testDataBaSak =
+            arrayOf(
+                // Included
+                PerioderTestData(
+                    fnr = fnr,
+                    aktør = aktør,
+                    endretDato = LocalDate.of(2022, 2, 6).atStartOfDay(),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2021, 9, 1, 12, 0),
+                                LocalDateTime.of(2027, 7, 31, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         // result from Infotrygd
-        val testDataInfotrygd = arrayOf(
-            // Excluded because the person ident can be found in ba-sak
-            PerioderTestData(
-                fnr = fnr,
-                aktør = aktør,
-                endretDato = LocalDate.of(2020, 9, 5).atStartOfDay(),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2019, 9, 1, 12, 0),
-                        LocalDateTime.of(2022, 3, 1, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
+        val testDataInfotrygd =
+            arrayOf(
+                // Excluded because the person ident can be found in ba-sak
+                PerioderTestData(
+                    fnr = fnr,
+                    aktør = aktør,
+                    endretDato = LocalDate.of(2020, 9, 5).atStartOfDay(),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2019, 9, 1, 12, 0),
+                                LocalDateTime.of(2022, 3, 1, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         testDataBaSak.forEach {
             lagerTilkjentYtelse(it)
@@ -452,21 +475,22 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 eq(listOf("00000000001")),
                 any(),
             )
-        } returns testDataInfotrygd.flatMap {
-            listOf(
-                SkatteetatenPerioder(
-                    it.fnr,
-                    it.endretDato,
-                    it.perioder.map { p ->
-                        SkatteetatenPeriode(
-                            fraMaaned = p.first.tilMaaned(),
-                            tomMaaned = p.second?.tilMaaned(),
-                            delingsprosent = p.third,
-                        )
-                    },
-                ),
-            )
-        }
+        } returns
+            testDataInfotrygd.flatMap {
+                listOf(
+                    SkatteetatenPerioder(
+                        it.fnr,
+                        it.endretDato,
+                        it.perioder.map { p ->
+                            SkatteetatenPeriode(
+                                fraMaaned = p.first.tilMaaned(),
+                                tomMaaned = p.second?.tilMaaned(),
+                                delingsprosent = p.third,
+                            )
+                        },
+                    ),
+                )
+            }
 
         val resultat = skatteetatenService.finnPerioderMedUtvidetBarnetrygd(listOf((fnr)), "2022")
 
@@ -486,40 +510,42 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val excludedFnr = "10000000004"
 
         // Result from ba-sak
-        val testDataBaSak = arrayOf(
-            PerioderTestData(
-                fnr = fnr,
-                aktør = aktørId,
-                endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2019, 9, 1, 12, 0),
-                        LocalDateTime.of(2020, 2, 11, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
-                    Triple(
-                        LocalDateTime.of(2020, 3, 1, 12, 0),
-                        LocalDateTime.of(2020, 4, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
-                    Triple(
-                        LocalDateTime.of(2020, 5, 1, 12, 0),
-                        LocalDateTime.of(2020, 6, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
-                    Triple(
-                        LocalDateTime.of(2020, 7, 1, 12, 0),
-                        LocalDateTime.of(2020, 8, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._50,
-                    ),
-                    Triple(
-                        LocalDateTime.of(2020, 9, 1, 12, 0),
-                        LocalDateTime.of(2020, 11, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
-                    ),
+        val testDataBaSak =
+            arrayOf(
+                PerioderTestData(
+                    fnr = fnr,
+                    aktør = aktørId,
+                    endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
+                    perioder =
+                        listOf(
+                            Triple(
+                                LocalDateTime.of(2019, 9, 1, 12, 0),
+                                LocalDateTime.of(2020, 2, 11, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                            Triple(
+                                LocalDateTime.of(2020, 3, 1, 12, 0),
+                                LocalDateTime.of(2020, 4, 8, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                            Triple(
+                                LocalDateTime.of(2020, 5, 1, 12, 0),
+                                LocalDateTime.of(2020, 6, 8, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                            Triple(
+                                LocalDateTime.of(2020, 7, 1, 12, 0),
+                                LocalDateTime.of(2020, 8, 8, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._50,
+                            ),
+                            Triple(
+                                LocalDateTime.of(2020, 9, 1, 12, 0),
+                                LocalDateTime.of(2020, 11, 8, 12, 0),
+                                SkatteetatenPeriode.Delingsprosent._0,
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         testDataBaSak.forEach {
             every {
@@ -581,13 +607,14 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 fnr = fnr,
                 aktør = tilAktør(fnr),
                 endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2019, 9, 1, 12, 0),
-                        LocalDateTime.of(2029, 7, 31, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
+                perioder =
+                    listOf(
+                        Triple(
+                            LocalDateTime.of(2019, 9, 1, 12, 0),
+                            LocalDateTime.of(2029, 7, 31, 12, 0),
+                            SkatteetatenPeriode.Delingsprosent._0,
+                        ),
                     ),
-                ),
             )
 
         lagerTilkjentYtelse(testDataBaSak)
@@ -629,13 +656,14 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 fnr = fnr,
                 aktør = tilAktør(fnr).also { it.personidenter.add(Personident(historiskIdent, aktiv = false, aktør = it)) },
                 endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
-                perioder = listOf(
-                    Triple(
-                        LocalDateTime.of(2019, 9, 1, 12, 0),
-                        LocalDateTime.of(2029, 7, 31, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0,
+                perioder =
+                    listOf(
+                        Triple(
+                            LocalDateTime.of(2019, 9, 1, 12, 0),
+                            LocalDateTime.of(2029, 7, 31, 12, 0),
+                            SkatteetatenPeriode.Delingsprosent._0,
+                        ),
                     ),
-                ),
             )
 
         lagerTilkjentYtelse(testDataBaSak)
@@ -664,84 +692,91 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør) ?: fagsakRepository.saveAndFlush(Fagsak(aktør = aktør))
 
-        val behandling = Behandling(
-            fagsak = fagsak,
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            opprettetÅrsak = BehandlingÅrsak.MIGRERING,
-            kategori = BehandlingKategori.NASJONAL,
-            underkategori = BehandlingUnderkategori.UTVIDET,
-            status = BehandlingStatus.AVSLUTTET,
-            aktiv = false,
-        )
+        val behandling =
+            Behandling(
+                fagsak = fagsak,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                opprettetÅrsak = BehandlingÅrsak.MIGRERING,
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.UTVIDET,
+                status = BehandlingStatus.AVSLUTTET,
+                aktiv = false,
+            )
         behandlingHentOgPersisterService.lagreOgFlush(behandling)
 
-        val ty = TilkjentYtelse(
-            behandling = behandling,
-            opprettetDato = perioderTestData.endretDato.toLocalDate(),
-            endretDato = perioderTestData.endretDato.toLocalDate(),
-            utbetalingsoppdrag = "utbetalt",
-        ).also {
-            it.andelerTilkjentYtelse.addAll(
-                perioderTestData.perioder.map { p ->
-                    AndelTilkjentYtelse(
-                        behandlingId = it.behandling.id,
-                        tilkjentYtelse = it,
-                        aktør = perioderTestData.aktør,
-                        kalkulertUtbetalingsbeløp = 1000,
-                        nasjonaltPeriodebeløp = 1000,
-                        stønadFom = YearMonth.of(p.first.year, p.first.month),
-                        stønadTom = YearMonth.of(p.second!!.year, p.second!!.month),
-                        type = YtelseType.UTVIDET_BARNETRYGD,
-                        sats = 1,
-                        prosent = p.third.tilBigDecimal(),
-                    )
-                }.toMutableSet(),
-            )
-        }
+        val ty =
+            TilkjentYtelse(
+                behandling = behandling,
+                opprettetDato = perioderTestData.endretDato.toLocalDate(),
+                endretDato = perioderTestData.endretDato.toLocalDate(),
+                utbetalingsoppdrag = "utbetalt",
+            ).also {
+                it.andelerTilkjentYtelse.addAll(
+                    perioderTestData.perioder.map { p ->
+                        AndelTilkjentYtelse(
+                            behandlingId = it.behandling.id,
+                            tilkjentYtelse = it,
+                            aktør = perioderTestData.aktør,
+                            kalkulertUtbetalingsbeløp = 1000,
+                            nasjonaltPeriodebeløp = 1000,
+                            stønadFom = YearMonth.of(p.first.year, p.first.month),
+                            stønadTom = YearMonth.of(p.second!!.year, p.second!!.month),
+                            type = YtelseType.UTVIDET_BARNETRYGD,
+                            sats = 1,
+                            prosent = p.third.tilBigDecimal(),
+                        )
+                    }.toMutableSet(),
+                )
+            }
         tilkjentYtelseRepository.saveAndFlush(ty)
     }
 
-    fun lagRevurderingMedNyStonadTom(perioderTestData: PerioderTestData, stønadTom: YearMonth) {
+    fun lagRevurderingMedNyStonadTom(
+        perioderTestData: PerioderTestData,
+        stønadTom: YearMonth,
+    ) {
         val fødselsnummer = perioderTestData.aktør.aktivFødselsnummer()
         val aktør = personidentService.hentOgLagreAktør(fødselsnummer, false)
 
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør)!!
 
-        val behandling = behandlingHentOgPersisterService.lagreOgFlush(
-            Behandling(
-                id = nesteBehandlingId(),
-                fagsak = fagsak,
-                type = BehandlingType.REVURDERING,
-                opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.UTVIDET,
-            ),
-        )
-
-        val ty = TilkjentYtelse(
-            id = nesteVedtakId(),
-            behandling = behandling,
-            opprettetDato = perioderTestData.endretDato.toLocalDate(),
-            endretDato = perioderTestData.endretDato.toLocalDate(),
-            utbetalingsoppdrag = "utbetalt",
-        ).also {
-            it.andelerTilkjentYtelse.addAll(
-                perioderTestData.perioder.map { p ->
-                    AndelTilkjentYtelse(
-                        behandlingId = it.behandling.id,
-                        tilkjentYtelse = it,
-                        aktør = perioderTestData.aktør,
-                        kalkulertUtbetalingsbeløp = 1000,
-                        nasjonaltPeriodebeløp = 1000,
-                        stønadFom = YearMonth.of(p.first.year, p.first.month),
-                        stønadTom = stønadTom,
-                        type = YtelseType.UTVIDET_BARNETRYGD,
-                        sats = 1,
-                        prosent = p.third.tilBigDecimal(),
-                    )
-                }.toMutableSet(),
+        val behandling =
+            behandlingHentOgPersisterService.lagreOgFlush(
+                Behandling(
+                    id = nesteBehandlingId(),
+                    fagsak = fagsak,
+                    type = BehandlingType.REVURDERING,
+                    opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                ),
             )
-        }
+
+        val ty =
+            TilkjentYtelse(
+                id = nesteVedtakId(),
+                behandling = behandling,
+                opprettetDato = perioderTestData.endretDato.toLocalDate(),
+                endretDato = perioderTestData.endretDato.toLocalDate(),
+                utbetalingsoppdrag = "utbetalt",
+            ).also {
+                it.andelerTilkjentYtelse.addAll(
+                    perioderTestData.perioder.map { p ->
+                        AndelTilkjentYtelse(
+                            behandlingId = it.behandling.id,
+                            tilkjentYtelse = it,
+                            aktør = perioderTestData.aktør,
+                            kalkulertUtbetalingsbeløp = 1000,
+                            nasjonaltPeriodebeløp = 1000,
+                            stønadFom = YearMonth.of(p.first.year, p.first.month),
+                            stønadTom = stønadTom,
+                            type = YtelseType.UTVIDET_BARNETRYGD,
+                            sats = 1,
+                            prosent = p.third.tilBigDecimal(),
+                        )
+                    }.toMutableSet(),
+                )
+            }
         tilkjentYtelseRepository.saveAndFlush(ty)
     }
 }

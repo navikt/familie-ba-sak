@@ -30,11 +30,12 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
         fritekster = this.fritekster,
         minimerteUtbetalingsperiodeDetaljer = this.utbetalingsperiodeDetaljer.map { it.tilMinimertUtbetalingsperiodeDetalj() },
         begrunnelser = this.begrunnelser.map { it.tilBegrunnelseMedTriggere(sanityBegrunnelser) },
-        eøsBegrunnelser = this.eøsBegrunnelser.mapNotNull {
-            it.begrunnelse.tilEØSBegrunnelseMedTriggere(
-                sanityEØSBegrunnelser,
-            )
-        },
+        eøsBegrunnelser =
+            this.eøsBegrunnelser.mapNotNull {
+                it.begrunnelse.tilEØSBegrunnelseMedTriggere(
+                    sanityEØSBegrunnelser,
+                )
+            },
     )
 }
 
@@ -51,13 +52,14 @@ fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
         vedtaksperiodetype = this.type,
         begrunnelser = this.begrunnelser.map { it.tilBrevBegrunnelseGrunnlagForLogging() },
         fritekster = this.fritekster,
-        personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling.map {
-            it.tilBrevPeriodeTestPerson(
-                brevPeriodeGrunnlag = this,
-                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-                barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
-            )
-        },
+        personerPåBehandling =
+            restBehandlingsgrunnlagForBrev.personerPåBehandling.map {
+                it.tilBrevPeriodeTestPerson(
+                    brevPeriodeGrunnlag = this,
+                    restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
+                    barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
+                )
+            },
         uregistrerteBarn = uregistrerteBarn.map { it.copy(personIdent = "", navn = "") },
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
         brevMålform = brevMålform,

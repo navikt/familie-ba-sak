@@ -18,7 +18,6 @@ class PubliserVedtakV2Task(
     val stønadsstatistikkService: StønadsstatistikkService,
     val env: EnvService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(task.payload.toLong())
         LOG.info("Send VedtakV2 til DVH, behandling id ${vedtakV2DVH.behandlingsId}")
@@ -26,18 +25,21 @@ class PubliserVedtakV2Task(
     }
 
     companion object {
-
         val LOG = LoggerFactory.getLogger(PubliserVedtakV2Task::class.java)
         const val TASK_STEP_TYPE = "publiserVedtakV2Task"
 
-        fun opprettTask(personIdent: String, behandlingsId: Long): Task {
+        fun opprettTask(
+            personIdent: String,
+            behandlingsId: Long,
+        ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = behandlingsId.toString(),
-                properties = Properties().apply {
-                    this["personIdent"] = personIdent
-                    this["behandlingsId"] = behandlingsId.toString()
-                },
+                properties =
+                    Properties().apply {
+                        this["personIdent"] = personIdent
+                        this["behandlingsId"] = behandlingsId.toString()
+                    },
             )
         }
     }

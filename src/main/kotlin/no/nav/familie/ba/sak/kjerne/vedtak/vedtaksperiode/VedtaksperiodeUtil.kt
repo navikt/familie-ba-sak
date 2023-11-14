@@ -37,21 +37,25 @@ fun oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
         val utbetalingsperioderTidslinje = VedtaksperiodeMedBegrunnelserTidslinje(utbetalingsperioder)
         val reduksjonsperioderTidslinje = ReduksjonsperioderFraForrigeBehandlingTidslinje(reduksjonsperioder)
 
-        val kombinertTidslinje = utbetalingsperioderTidslinje.kombinerMed(
-            reduksjonsperioderTidslinje,
-        ) { utbetalingsperiode, reduksjonsperiode ->
-            when {
-                reduksjonsperiode != null && utbetalingsperiode == null -> reduksjonsperiode
-                reduksjonsperiode != null && utbetalingsperiode != null -> utbetalingsperiode.copy(type = reduksjonsperiode.type)
-                else -> utbetalingsperiode
+        val kombinertTidslinje =
+            utbetalingsperioderTidslinje.kombinerMed(
+                reduksjonsperioderTidslinje,
+            ) { utbetalingsperiode, reduksjonsperiode ->
+                when {
+                    reduksjonsperiode != null && utbetalingsperiode == null -> reduksjonsperiode
+                    reduksjonsperiode != null && utbetalingsperiode != null -> utbetalingsperiode.copy(type = reduksjonsperiode.type)
+                    else -> utbetalingsperiode
+                }
             }
-        }
         return kombinertTidslinje.lagVedtaksperioderMedBegrunnelser()
     }
     return utbetalingsperioder
 }
 
-fun validerSatsendring(fom: LocalDate?, harBarnMedSeksårsdagPåFom: Boolean) {
+fun validerSatsendring(
+    fom: LocalDate?,
+    harBarnMedSeksårsdagPåFom: Boolean,
+) {
     val satsendring = SatsService.finnSatsendring(fom ?: TIDENES_MORGEN)
 
     if (satsendring.isEmpty() && !harBarnMedSeksårsdagPåFom) {
@@ -85,11 +89,12 @@ fun validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser: Vedtaksp
 fun erFørsteVedtaksperiodePåFagsak(
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     periodeFom: LocalDate?,
-): Boolean = !andelerTilkjentYtelse.any {
-    it.stønadFom.isBefore(
-        periodeFom?.toYearMonth() ?: TIDENES_MORGEN.toYearMonth(),
-    )
-}
+): Boolean =
+    !andelerTilkjentYtelse.any {
+        it.stønadFom.isBefore(
+            periodeFom?.toYearMonth() ?: TIDENES_MORGEN.toYearMonth(),
+        )
+    }
 
 fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
@@ -103,50 +108,57 @@ fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
     val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter()
 
     // henter segmenter for personer som finnes i forrige behandling
-    val nåværendeSegmenter = andelerTilkjentYtelse.filter {
-        aktørerIForrigePersonopplysningGrunnlag.any { forrigeAktør -> forrigeAktør == it.aktør }
-    }.lagVertikaleSegmenter()
+    val nåværendeSegmenter =
+        andelerTilkjentYtelse.filter {
+            aktørerIForrigePersonopplysningGrunnlag.any { forrigeAktør -> forrigeAktør == it.aktør }
+        }.lagVertikaleSegmenter()
 
-    val segmenter = forrigeSegmenter.filterNot { (forrigeSegment, _) ->
-        nåværendeSegmenter.any { (nyttSegment, _) ->
-            forrigeSegment.fom == nyttSegment.fom && forrigeSegment.tom == nyttSegment.tom && forrigeSegment.value == nyttSegment.value
+    val segmenter =
+        forrigeSegmenter.filterNot { (forrigeSegment, _) ->
+            nåværendeSegmenter.any { (nyttSegment, _) ->
+                forrigeSegment.fom == nyttSegment.fom && forrigeSegment.tom == nyttSegment.tom && forrigeSegment.value == nyttSegment.value
+            }
         }
-    }
-    val reduksjonsperioderFraInnvilgelsesTidspunkt = segmenter.filter { (forrigeSegment, _) ->
-        nåværendeSegmenter.any { (nyttSegment, _) ->
-            nyttSegment.overlapper(
-                forrigeSegment,
-            )
-        }
-    }.toList().fold(emptyList<VedtaksperiodeMedBegrunnelser>()) { acc, (gammeltSegment, gammeltAndelerTyForSegment) ->
-        val overlappendePerioder = nåværendeSegmenter.filter { (nåSegment, nåAndelTilkjentYtelserForSegment) ->
-            nåSegment.overlapper(gammeltSegment) && gammeltAndelerTyForSegment.any { gammelAndelTyForSegment ->
-                val fom = nåSegment.fom
-                nåAndelTilkjentYtelserForSegment.all { nåAndelTyForSegment ->
-                    // Når en person mister utbetaling på et segment i behandling
-                    !(nåAndelTyForSegment.aktør.aktørId == gammelAndelTyForSegment.aktør.aktørId && nåAndelTyForSegment.type == gammelAndelTyForSegment.type) &&
-                        // Når den personen som mister utbetaling ikke har en utbetaling av samme type i forrige måned
-                        utbetalingsperioder.none { utbetalingsperiode ->
-                            utbetalingsperiode.tom == fom.minusDays(1) && utbetalingsperiode.hentUtbetalingsperiodeDetaljer(
-                                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                                personopplysningGrunnlag = personopplysningGrunnlag,
-                            ).any {
-                                it.person.personIdent == gammelAndelTyForSegment.aktør.aktivFødselsnummer() && it.ytelseType == gammelAndelTyForSegment.type
+    val reduksjonsperioderFraInnvilgelsesTidspunkt =
+        segmenter.filter { (forrigeSegment, _) ->
+            nåværendeSegmenter.any { (nyttSegment, _) ->
+                nyttSegment.overlapper(
+                    forrigeSegment,
+                )
+            }
+        }.toList().fold(emptyList<VedtaksperiodeMedBegrunnelser>()) { acc, (gammeltSegment, gammeltAndelerTyForSegment) ->
+            val overlappendePerioder =
+                nåværendeSegmenter.filter { (nåSegment, nåAndelTilkjentYtelserForSegment) ->
+                    nåSegment.overlapper(gammeltSegment) &&
+                        gammeltAndelerTyForSegment.any { gammelAndelTyForSegment ->
+                            val fom = nåSegment.fom
+                            nåAndelTilkjentYtelserForSegment.all { nåAndelTyForSegment ->
+                                // Når en person mister utbetaling på et segment i behandling
+                                !(nåAndelTyForSegment.aktør.aktørId == gammelAndelTyForSegment.aktør.aktørId && nåAndelTyForSegment.type == gammelAndelTyForSegment.type) &&
+                                    // Når den personen som mister utbetaling ikke har en utbetaling av samme type i forrige måned
+                                    utbetalingsperioder.none { utbetalingsperiode ->
+                                        utbetalingsperiode.tom == fom.minusDays(1) &&
+                                            utbetalingsperiode.hentUtbetalingsperiodeDetaljer(
+                                                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                                                personopplysningGrunnlag = personopplysningGrunnlag,
+                                            ).any {
+                                                it.person.personIdent == gammelAndelTyForSegment.aktør.aktivFødselsnummer() && it.ytelseType == gammelAndelTyForSegment.type
+                                            }
+                                    }
                             }
                         }
-                }
-            }
-        }.keys
+                }.keys
 
-        acc + overlappendePerioder.map { overlappendePeriode ->
-            VedtaksperiodeMedBegrunnelser(
-                vedtak = vedtak,
-                fom = utledFom(gammeltSegment, overlappendePeriode),
-                tom = utledTom(gammeltSegment, overlappendePeriode),
-                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-            )
+            acc +
+                overlappendePerioder.map { overlappendePeriode ->
+                    VedtaksperiodeMedBegrunnelser(
+                        vedtak = vedtak,
+                        fom = utledFom(gammeltSegment, overlappendePeriode),
+                        tom = utledTom(gammeltSegment, overlappendePeriode),
+                        type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+                    )
+                }
         }
-    }
     // opphørsperioder kan ikke være inkludert i reduksjonsperioder
     return reduksjonsperioderFraInnvilgelsesTidspunkt.filterNot { reduksjonsperiode ->
         opphørsperioder.any { it.fom == reduksjonsperiode.fom || it.tom == reduksjonsperiode.tom }
@@ -174,34 +186,36 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     ytelserForrigePerioder: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
 ): List<Standardbegrunnelse> {
-    val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.entries
-        .filter {
-            minimertVedtaksperiode.type.tillatteBegrunnelsestyper.contains(it.vedtakBegrunnelseType)
-        }.filter {
-            if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
-                endretUtbetalingsperiodeBegrunnelser.contains(it)
-            } else {
-                true
+    val tillateBegrunnelserForVedtakstype =
+        Standardbegrunnelse.entries
+            .filter {
+                minimertVedtaksperiode.type.tillatteBegrunnelsestyper.contains(it.vedtakBegrunnelseType)
+            }.filter {
+                if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
+                    endretUtbetalingsperiodeBegrunnelser.contains(it)
+                } else {
+                    true
+                }
             }
-        }
 
     return when (minimertVedtaksperiode.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET,
         Vedtaksperiodetype.AVSLAG,
         -> tillateBegrunnelserForVedtakstype
 
-        Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> velgRedusertBegrunnelser(
-            tillateBegrunnelserForVedtakstype,
-            sanityBegrunnelser,
-            minimertVedtaksperiode,
-            minimertePersonresultater,
-            minimertePersoner,
-            aktørIderMedUtbetaling,
-            minimerteEndredeUtbetalingAndeler,
-            erFørsteVedtaksperiodePåFagsak,
-            ytelserForSøkerForrigeMåned,
-            ytelserForrigePerioder,
-        )
+        Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING ->
+            velgRedusertBegrunnelser(
+                tillateBegrunnelserForVedtakstype,
+                sanityBegrunnelser,
+                minimertVedtaksperiode,
+                minimertePersonresultater,
+                minimertePersoner,
+                aktørIderMedUtbetaling,
+                minimerteEndredeUtbetalingAndeler,
+                erFørsteVedtaksperiodePåFagsak,
+                ytelserForSøkerForrigeMåned,
+                ytelserForrigePerioder,
+            )
 
         else -> {
             velgUtbetalingsbegrunnelser(
@@ -232,22 +246,24 @@ private fun velgRedusertBegrunnelser(
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
 ): List<Standardbegrunnelse> {
-    val redusertBegrunnelser = tillateBegrunnelserForVedtakstype.filter {
-        sanityBegrunnelser[it]?.triggesAv?.gjelderFraInnvilgelsestidspunkt ?: false
-    }
+    val redusertBegrunnelser =
+        tillateBegrunnelserForVedtakstype.filter {
+            sanityBegrunnelser[it]?.triggesAv?.gjelderFraInnvilgelsestidspunkt ?: false
+        }
     if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
-        val utbetalingsbegrunnelser = velgUtbetalingsbegrunnelser(
-            Standardbegrunnelse.entries,
-            sanityBegrunnelser,
-            minimertVedtaksperiode,
-            minimertePersonresultater,
-            minimertePersoner,
-            aktørIderMedUtbetaling,
-            minimerteEndredeUtbetalingAndeler,
-            erFørsteVedtaksperiodePåFagsak,
-            ytelserForSøkerForrigeMåned,
-            ytelserForrigePeriode,
-        )
+        val utbetalingsbegrunnelser =
+            velgUtbetalingsbegrunnelser(
+                Standardbegrunnelse.entries,
+                sanityBegrunnelser,
+                minimertVedtaksperiode,
+                minimertePersonresultater,
+                minimertePersoner,
+                aktørIderMedUtbetaling,
+                minimerteEndredeUtbetalingAndeler,
+                erFørsteVedtaksperiodePåFagsak,
+                ytelserForSøkerForrigeMåned,
+                ytelserForrigePeriode,
+            )
         return redusertBegrunnelser + utbetalingsbegrunnelser
     }
     return redusertBegrunnelser

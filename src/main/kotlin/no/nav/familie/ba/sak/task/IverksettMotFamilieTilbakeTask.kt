@@ -20,7 +20,6 @@ class IverksettMotFamilieTilbakeTask(
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     val stegService: StegService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val iverksettMotFamilieTilbake = objectMapper.readValue(task.payload, IverksettMotFamilieTilbakeDTO::class.java)
         stegService.håndterIverksettMotFamilieTilbake(
@@ -30,15 +29,19 @@ class IverksettMotFamilieTilbakeTask(
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "iverksettMotFamilieTilbake"
-        fun opprettTask(behandlingsId: Long, metadata: Properties): Task {
+
+        fun opprettTask(
+            behandlingsId: Long,
+            metadata: Properties,
+        ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(IverksettMotFamilieTilbakeDTO(behandlingsId)),
-                properties = metadata.apply {
-                    this["behandlingId"] = behandlingsId.toString()
-                },
+                properties =
+                    metadata.apply {
+                        this["behandlingId"] = behandlingsId.toString()
+                    },
             )
         }
     }

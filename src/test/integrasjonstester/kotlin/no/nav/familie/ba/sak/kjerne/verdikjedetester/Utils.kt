@@ -65,11 +65,12 @@ fun generellAssertFagsak(
     if (restFagsak.status != Ressurs.Status.SUKSESS) throw IllegalStateException("generellAssertFagsak feilet. status: ${restFagsak.status.name},  melding: ${restFagsak.melding}")
     assertEquals(fagsakStatus, restFagsak.data?.status)
 
-    val aktivBehandling = if (aktivBehandlingId == null) {
-        hentAktivBehandling(restFagsak = restFagsak.data!!)
-    } else {
-        restFagsak.data!!.behandlinger.single { it.behandlingId == aktivBehandlingId }
-    }
+    val aktivBehandling =
+        if (aktivBehandlingId == null) {
+            hentAktivBehandling(restFagsak = restFagsak.data!!)
+        } else {
+            restFagsak.data!!.behandlinger.single { it.behandlingId == aktivBehandlingId }
+        }
 
     if (behandlingStegType != null) {
         assertEquals(behandlingStegType, aktivBehandling.steg)
@@ -79,7 +80,11 @@ fun generellAssertFagsak(
     }
 }
 
-fun assertUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode, antallBarn: Int, utbetaltPerMnd: Int) {
+fun assertUtbetalingsperiode(
+    utbetalingsperiode: Utbetalingsperiode,
+    antallBarn: Int,
+    utbetaltPerMnd: Int,
+) {
     assertEquals(antallBarn, utbetalingsperiode.utbetalingsperiodeDetaljer.size)
     assertEquals(utbetaltPerMnd, utbetalingsperiode.utbetaltPerMnd)
 }
@@ -87,8 +92,9 @@ fun assertUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode, antallBarn:
 fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: RestUtvidetBehandling): Int {
     val utbetalingsperioder =
         behandling.utbetalingsperioder.sortedBy { it.periodeFom }
-    val nåværendeUtbetalingsperiode = utbetalingsperioder
-        .firstOrNull { it.periodeFom.isSameOrBefore(LocalDate.now()) && it.periodeTom.isAfter(LocalDate.now()) }
+    val nåværendeUtbetalingsperiode =
+        utbetalingsperioder
+            .firstOrNull { it.periodeFom.isSameOrBefore(LocalDate.now()) && it.periodeTom.isAfter(LocalDate.now()) }
 
     val nesteUtbetalingsperiode = utbetalingsperioder.firstOrNull { it.periodeFom.isAfter(LocalDate.now()) }
 
@@ -179,13 +185,14 @@ fun håndterIverksettingAvBehandling(
         stegService.håndterStatusFraØkonomi(
             behandlingEtterIverksetteVedtak,
             StatusFraOppdragMedTask(
-                statusFraOppdragDTO = StatusFraOppdragDTO(
-                    fagsystem = FAGSYSTEM,
-                    personIdent = søkerFnr,
-                    aktørId = behandlingEtterVurdering.fagsak.aktør.aktørId,
-                    behandlingsId = behandlingEtterIverksetteVedtak.id,
-                    vedtaksId = vedtak.id,
-                ),
+                statusFraOppdragDTO =
+                    StatusFraOppdragDTO(
+                        fagsystem = FAGSYSTEM,
+                        personIdent = søkerFnr,
+                        aktørId = behandlingEtterVurdering.fagsak.aktør.aktørId,
+                        behandlingsId = behandlingEtterIverksetteVedtak.id,
+                        vedtaksId = vedtak.id,
+                    ),
                 task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = ""),
             ),
         )
@@ -218,9 +225,10 @@ fun håndterIverksettingAvBehandling(
                         behandlingId = behandlingEtterJournalførtVedtak.id,
                         journalpostId = "1234",
                         personEllerInstitusjonIdent = søkerFnr,
-                        brevmal = brevmalService.hentBrevmal(
-                            behandlingEtterJournalførtVedtak,
-                        ),
+                        brevmal =
+                            brevmalService.hentBrevmal(
+                                behandlingEtterJournalførtVedtak,
+                            ),
                         erManueltSendt = false,
                     ),
                 )
@@ -237,9 +245,10 @@ fun håndterIverksettingAvBehandling(
         restFagsak = fagsakService.hentRestFagsak(restMinimalFagsakEtterAvsluttetBehandling.data!!.id),
         fagsakStatus = fagsakStatusEtterIverksetting,
         behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
-        aktivBehandlingId = hentAktivBehandling(
-            restMinimalFagsakEtterAvsluttetBehandling.data!!,
-        ).behandlingId,
+        aktivBehandlingId =
+            hentAktivBehandling(
+                restMinimalFagsakEtterAvsluttetBehandling.data!!,
+            ).behandlingId,
     )
 
     return ferdigstiltBehandling

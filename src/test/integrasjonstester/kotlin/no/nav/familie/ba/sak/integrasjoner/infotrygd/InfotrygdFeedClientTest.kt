@@ -25,7 +25,6 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 class InfotrygdFeedClientTest : AbstractSpringIntegrationTest() {
-
     lateinit var client: InfotrygdFeedClient
 
     @Autowired
@@ -34,10 +33,11 @@ class InfotrygdFeedClientTest : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun setUp() {
-        client = InfotrygdFeedClient(
-            URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations,
-        )
+        client =
+            InfotrygdFeedClient(
+                URI.create(wireMockServer.baseUrl() + "/api"),
+                restOperations,
+            )
     }
 
     @AfterEach

@@ -9,7 +9,6 @@ data class HenleggeTrukketSøknadData(
     override val delmalData: DelmalData,
     override val flettefelter: FlettefelterForDokumentImpl,
 ) : BrevData {
-
     data class DelmalData(
         val signatur: SignaturDelmal,
     )

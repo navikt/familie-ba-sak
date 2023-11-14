@@ -38,7 +38,6 @@ data class RestVilkårResultat(
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
     val resultatBegrunnelse: ResultatBegrunnelse? = null,
 ) {
-
     fun erAvslagUtenPeriode() =
         this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
 
@@ -48,27 +47,29 @@ data class RestVilkårResultat(
 fun PersonResultat.tilRestPersonResultat() =
     RestPersonResultat(
         personIdent = this.aktør.aktivFødselsnummer(),
-        vilkårResultater = this.vilkårResultater.map { vilkårResultat ->
-            RestVilkårResultat(
-                resultat = vilkårResultat.resultat,
-                resultatBegrunnelse = vilkårResultat.resultatBegrunnelse,
-                erAutomatiskVurdert = vilkårResultat.erAutomatiskVurdert,
-                erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
-                id = vilkårResultat.id,
-                vilkårType = vilkårResultat.vilkårType,
-                periodeFom = vilkårResultat.periodeFom,
-                periodeTom = vilkårResultat.periodeTom,
-                begrunnelse = vilkårResultat.begrunnelse,
-                endretAv = vilkårResultat.endretAv,
-                endretTidspunkt = vilkårResultat.endretTidspunkt,
-                behandlingId = vilkårResultat.sistEndretIBehandlingId,
-                erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0,
-                avslagBegrunnelser = vilkårResultat.standardbegrunnelser,
-                vurderesEtter = vilkårResultat.vurderesEtter,
-                utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger,
-            )
-        },
-        andreVurderinger = this.andreVurderinger.map { annenVurdering ->
-            annenVurdering.tilRestAnnenVurdering()
-        },
+        vilkårResultater =
+            this.vilkårResultater.map { vilkårResultat ->
+                RestVilkårResultat(
+                    resultat = vilkårResultat.resultat,
+                    resultatBegrunnelse = vilkårResultat.resultatBegrunnelse,
+                    erAutomatiskVurdert = vilkårResultat.erAutomatiskVurdert,
+                    erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
+                    id = vilkårResultat.id,
+                    vilkårType = vilkårResultat.vilkårType,
+                    periodeFom = vilkårResultat.periodeFom,
+                    periodeTom = vilkårResultat.periodeTom,
+                    begrunnelse = vilkårResultat.begrunnelse,
+                    endretAv = vilkårResultat.endretAv,
+                    endretTidspunkt = vilkårResultat.endretTidspunkt,
+                    behandlingId = vilkårResultat.sistEndretIBehandlingId,
+                    erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0,
+                    avslagBegrunnelser = vilkårResultat.standardbegrunnelser,
+                    vurderesEtter = vilkårResultat.vurderesEtter,
+                    utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger,
+                )
+            },
+        andreVurderinger =
+            this.andreVurderinger.map { annenVurdering ->
+                annenVurdering.tilRestAnnenVurdering()
+            },
     )

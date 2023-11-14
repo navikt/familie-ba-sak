@@ -15,56 +15,63 @@ import java.util.concurrent.TimeUnit
 @Configuration
 @EnableCaching
 class CacheConfig {
-
     @Bean
     @Primary
-    fun cacheManager(): CacheManager = object : ConcurrentMapCacheManager() {
-        override fun createConcurrentMapCache(name: String): Cache {
-            val concurrentMap = Caffeine
-                .newBuilder()
-                .maximumSize(1000)
-                .expireAfterWrite(60, TimeUnit.MINUTES)
-                .recordStats().build<Any, Any>().asMap()
-            return ConcurrentMapCache(name, concurrentMap, true)
+    fun cacheManager(): CacheManager =
+        object : ConcurrentMapCacheManager() {
+            override fun createConcurrentMapCache(name: String): Cache {
+                val concurrentMap =
+                    Caffeine
+                        .newBuilder()
+                        .maximumSize(1000)
+                        .expireAfterWrite(60, TimeUnit.MINUTES)
+                        .recordStats().build<Any, Any>().asMap()
+                return ConcurrentMapCache(name, concurrentMap, true)
+            }
         }
-    }
 
     @Bean("shortCache")
-    fun shortCache(): CacheManager = object : ConcurrentMapCacheManager() {
-        override fun createConcurrentMapCache(name: String): Cache {
-            val concurrentMap = Caffeine
-                .newBuilder()
-                .maximumSize(1000)
-                .expireAfterWrite(10, TimeUnit.MINUTES)
-                .recordStats().build<Any, Any>().asMap()
-            return ConcurrentMapCache(name, concurrentMap, true)
+    fun shortCache(): CacheManager =
+        object : ConcurrentMapCacheManager() {
+            override fun createConcurrentMapCache(name: String): Cache {
+                val concurrentMap =
+                    Caffeine
+                        .newBuilder()
+                        .maximumSize(1000)
+                        .expireAfterWrite(10, TimeUnit.MINUTES)
+                        .recordStats().build<Any, Any>().asMap()
+                return ConcurrentMapCache(name, concurrentMap, true)
+            }
         }
-    }
 
     @Bean("dailyCache")
-    fun dailyCache(): CacheManager = object : ConcurrentMapCacheManager() {
-        override fun createConcurrentMapCache(name: String): Cache {
-            val concurrentMap = Caffeine
-                .newBuilder()
-                .maximumSize(1000)
-                .expireAfterWrite(24, TimeUnit.HOURS)
-                .recordStats().build<Any, Any>().asMap()
-            return ConcurrentMapCache(name, concurrentMap, true)
+    fun dailyCache(): CacheManager =
+        object : ConcurrentMapCacheManager() {
+            override fun createConcurrentMapCache(name: String): Cache {
+                val concurrentMap =
+                    Caffeine
+                        .newBuilder()
+                        .maximumSize(1000)
+                        .expireAfterWrite(24, TimeUnit.HOURS)
+                        .recordStats().build<Any, Any>().asMap()
+                return ConcurrentMapCache(name, concurrentMap, true)
+            }
         }
-    }
 
     @Bean("skattPersonerCache")
-    fun skattPersonerCache(): CacheManager = object : ConcurrentMapCacheManager() {
-        override fun createConcurrentMapCache(name: String): Cache {
-            val concurrentMap = Caffeine
-                .newBuilder()
-                .initialCapacity(100)
-                .maximumSize(1000)
-                .expireAfterWrite(1, TimeUnit.DAYS)
-                .recordStats().build<Any, Any>().asMap()
-            return ConcurrentMapCache(name, concurrentMap, true)
+    fun skattPersonerCache(): CacheManager =
+        object : ConcurrentMapCacheManager() {
+            override fun createConcurrentMapCache(name: String): Cache {
+                val concurrentMap =
+                    Caffeine
+                        .newBuilder()
+                        .initialCapacity(100)
+                        .maximumSize(1000)
+                        .expireAfterWrite(1, TimeUnit.DAYS)
+                        .recordStats().build<Any, Any>().asMap()
+                return ConcurrentMapCache(name, concurrentMap, true)
+            }
         }
-    }
 }
 
 fun CacheManager.getCacheOrThrow(cache: String) = this.getCache(cache) ?: error("Finner ikke cache=$cache")
@@ -82,14 +89,16 @@ fun <VALUE : Any, RESULT> CacheManager.hentCacheForSaksbehandler(
     val cache = this.getCacheOrThrow(cacheName)
     val saksbehandler = SikkerhetContext.hentSaksbehandler()
 
-    val previousValues: List<Pair<VALUE, RESULT?>> = values.distinct()
-        .map { it to cache.get(Pair(saksbehandler, it))?.get() as RESULT? }
+    val previousValues: List<Pair<VALUE, RESULT?>> =
+        values.distinct()
+            .map { it to cache.get(Pair(saksbehandler, it))?.get() as RESULT? }
 
     val cachedValues = previousValues.mapNotNull { if (it.second == null) null else it }.toMap() as Map<VALUE, RESULT>
     val valuesWithoutCache = previousValues.filter { it.second == null }.map { it.first }
-    val loadedValues: Map<VALUE, RESULT> = valuesWithoutCache
-        .takeIf { it.isNotEmpty() }
-        ?.let { valueLoader(it) } ?: emptyMap()
+    val loadedValues: Map<VALUE, RESULT> =
+        valuesWithoutCache
+            .takeIf { it.isNotEmpty() }
+            ?.let { valueLoader(it) } ?: emptyMap()
     loadedValues.forEach { cache.put(Pair(saksbehandler, it.key), it.value) }
 
     return cachedValues + loadedValues

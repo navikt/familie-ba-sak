@@ -26,7 +26,6 @@ data class FeilutbetaltValuta(
     var feilutbetaltBeløp: Int,
     @Column(name = "er_per_maaned")
     var erPerMåned: Boolean,
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "feilutbetalt_valuta_seq_generator")
     @SequenceGenerator(

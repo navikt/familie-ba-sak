@@ -30,7 +30,6 @@ class Autobrev6og18ÅrService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val startSatsendring: StartSatsendring,
 ) {
-
     @Transactional
     fun opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO) {
         logger.info("opprettOmregningsoppgaveForBarnIBrytingsalder for fagsak ${autobrev6og18ÅrDTO.fagsakId}")
@@ -39,9 +38,10 @@ class Autobrev6og18ÅrService(
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(autobrev6og18ÅrDTO.fagsakId)
                 ?: error("Fant ikke aktiv behandling")
 
-        val behandlingsårsak = finnBehandlingÅrsakForAlder(
-            autobrev6og18ÅrDTO.alder,
-        )
+        val behandlingsårsak =
+            finnBehandlingÅrsakForAlder(
+                autobrev6og18ÅrDTO.alder,
+            )
 
         if (!autovedtakBrevService.skalAutobrevBehandlingOpprettes(
                 fagsakId = autobrev6og18ÅrDTO.fagsakId,
@@ -75,7 +75,6 @@ class Autobrev6og18ÅrService(
                 alder = autobrev6og18ÅrDTO.alder,
                 behandlingId = behandling.id,
                 årMåned = autobrev6og18ÅrDTO.årMåned,
-
             )
         ) {
             logger.info("Ingen løpende ytelse for barnet i brytningsalder for fagsak=${behandling.fagsak.id} behandlingsårsak=$behandlingsårsak")
@@ -91,14 +90,16 @@ class Autobrev6og18ÅrService(
 
         autovedtakStegService.kjørBehandlingOmregning(
             mottakersAktør = behandling.fagsak.aktør,
-            behandlingsdata = OmregningBrevData(
-                aktør = behandling.fagsak.aktør,
-                behandlingsårsak = behandlingsårsak,
-                standardbegrunnelse = AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(
-                    autobrev6og18ÅrDTO.alder,
+            behandlingsdata =
+                OmregningBrevData(
+                    aktør = behandling.fagsak.aktør,
+                    behandlingsårsak = behandlingsårsak,
+                    standardbegrunnelse =
+                        AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(
+                            autobrev6og18ÅrDTO.alder,
+                        ),
+                    fagsakId = behandling.fagsak.id,
                 ),
-                fagsakId = behandling.fagsak.id,
-            ),
         )
     }
 
@@ -116,10 +117,16 @@ class Autobrev6og18ÅrService(
             else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
         }
 
-    private fun barnMedAngittAlderInneværendeMånedEksisterer(behandlingId: Long, alder: Int): Boolean =
+    private fun barnMedAngittAlderInneværendeMånedEksisterer(
+        behandlingId: Long,
+        alder: Int,
+    ): Boolean =
         barnMedAngittAlderInneværendeMåned(behandlingId, alder).isNotEmpty()
 
-    private fun barnMedAngittAlderInneværendeMåned(behandlingId: Long, alder: Int): List<Person> =
+    private fun barnMedAngittAlderInneværendeMåned(
+        behandlingId: Long,
+        alder: Int,
+    ): List<Person> =
         personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.barna
             ?.filter { it.type == PersonType.BARN && it.fyllerAntallÅrInneværendeMåned(alder) }?.toList() ?: listOf()
 
@@ -158,7 +165,6 @@ class Autobrev6og18ÅrService(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(Autobrev6og18ÅrService::class.java)
     }
 }

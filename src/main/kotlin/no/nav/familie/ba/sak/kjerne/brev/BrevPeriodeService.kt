@@ -54,22 +54,24 @@ class BrevPeriodeService(
     private val integrasjonClient: IntegrasjonClient,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
-
     fun hentBrevperioderData(
         vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
         behandling: Behandling,
         skalLogge: Boolean = true,
     ): List<BrevperiodeData> {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
-            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+        val vilkårsvurdering =
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+                ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
-        val endredeUtbetalingAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId = behandling.id)
+        val endredeUtbetalingAndeler =
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
+                .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId = behandling.id)
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
-        val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+        val andelerMedEndringer =
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
         val uregistrerteBarn =
             søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentUregistrerteBarn()
@@ -78,23 +80,25 @@ class BrevPeriodeService(
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandling.id)
 
-        val kompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(behandling.id))
-            .filter {
-                if (forrigeBehandling?.erAutomatiskEøsMigrering() == true && behandling.skalBehandlesAutomatisk) {
-                    it.erObligatoriskeFelterSatt()
-                } else {
-                    true
+        val kompetanser =
+            kompetanseService.hentKompetanser(behandlingId = BehandlingId(behandling.id))
+                .filter {
+                    if (forrigeBehandling?.erAutomatiskEøsMigrering() == true && behandling.skalBehandlesAutomatisk) {
+                        it.erObligatoriskeFelterSatt()
+                    } else {
+                        true
+                    }
                 }
-            }
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
 
-        val restBehandlingsgrunnlagForBrev = hentRestBehandlingsgrunnlagForBrev(
-            vilkårsvurdering = vilkårsvurdering,
-            endredeUtbetalingAndeler = endredeUtbetalingAndeler,
-            persongrunnlag = personopplysningGrunnlag,
-        )
+        val restBehandlingsgrunnlagForBrev =
+            hentRestBehandlingsgrunnlagForBrev(
+                vilkårsvurdering = vilkårsvurdering,
+                endredeUtbetalingAndeler = endredeUtbetalingAndeler,
+                persongrunnlag = personopplysningGrunnlag,
+            )
 
         return vedtaksperioder.map {
             hentBrevperiodeData(
@@ -120,15 +124,15 @@ class BrevPeriodeService(
         kompetanser: List<Kompetanse>,
         sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
         sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
-
         skalLogge: Boolean = true,
     ): BrevperiodeData {
         val minimerteUregistrerteBarn = uregistrerteBarn.map { it.tilMinimertUregistrertBarn() }
 
-        val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
-        )
+        val utvidetVedtaksperiodeMedBegrunnelse =
+            vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+            )
 
         val ytelserForrigePeriode =
             andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelse) }
@@ -144,39 +148,44 @@ class BrevPeriodeService(
 
         val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
 
-        val brevperiodeData = BrevperiodeData(
-            minimertVedtaksperiode = minimertVedtaksperiode,
-            restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-            uregistrerteBarn = minimerteUregistrerteBarn,
-            brevMålform = personopplysningGrunnlag.søker.målform,
-            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                periodeFom = utvidetVedtaksperiodeMedBegrunnelse.fom,
-            ),
-            barnMedReduksjonFraForrigeBehandlingIdent = hentBarnsPersonIdentMedRedusertPeriode(
-                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-            ),
-            minimerteKompetanserForPeriode = hentMinimerteKompetanserForPeriode(
-                kompetanser = kompetanser,
-                fom = vedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
-                tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                landkoderISO2 = landkoderISO2,
-            ),
-            minimerteKompetanserSomStopperRettFørPeriode = hentKompetanserSomStopperRettFørPeriode(
-                kompetanser = kompetanser,
-                periodeFom = minimertVedtaksperiode.fom?.toYearMonth(),
-            ).filter {
-                it.erObligatoriskeFelterSatt()
-            }.map {
-                it.tilMinimertKompetanse(
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    landkoderISO2 = landkoderISO2,
-                )
-            },
-            dødeBarnForrigePeriode = dødeBarnForrigePeriode,
-        )
+        val brevperiodeData =
+            BrevperiodeData(
+                minimertVedtaksperiode = minimertVedtaksperiode,
+                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
+                uregistrerteBarn = minimerteUregistrerteBarn,
+                brevMålform = personopplysningGrunnlag.søker.målform,
+                erFørsteVedtaksperiodePåFagsak =
+                    erFørsteVedtaksperiodePåFagsak(
+                        andelerTilkjentYtelse = andelerTilkjentYtelse,
+                        periodeFom = utvidetVedtaksperiodeMedBegrunnelse.fom,
+                    ),
+                barnMedReduksjonFraForrigeBehandlingIdent =
+                    hentBarnsPersonIdentMedRedusertPeriode(
+                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                        andelerTilkjentYtelse = andelerTilkjentYtelse,
+                    ),
+                minimerteKompetanserForPeriode =
+                    hentMinimerteKompetanserForPeriode(
+                        kompetanser = kompetanser,
+                        fom = vedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
+                        tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
+                        personopplysningGrunnlag = personopplysningGrunnlag,
+                        landkoderISO2 = landkoderISO2,
+                    ),
+                minimerteKompetanserSomStopperRettFørPeriode =
+                    hentKompetanserSomStopperRettFørPeriode(
+                        kompetanser = kompetanser,
+                        periodeFom = minimertVedtaksperiode.fom?.toYearMonth(),
+                    ).filter {
+                        it.erObligatoriskeFelterSatt()
+                    }.map {
+                        it.tilMinimertKompetanse(
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            landkoderISO2 = landkoderISO2,
+                        )
+                    },
+                dødeBarnForrigePeriode = dødeBarnForrigePeriode,
+            )
 
         if (skalLogge) {
             secureLogger.info(
@@ -195,8 +204,9 @@ class BrevPeriodeService(
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(vedtaksperiodeMedBegrunnelser.vedtak.behandling)
         return if (forrigeBehandling != null) {
-            val forrigeAndelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
-                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeBehandling.id)
+            val forrigeAndelerMedEndringer =
+                andelerTilkjentYtelseOgEndreteUtbetalingerService
+                    .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeBehandling.id)
             val endringerITilkjentYtelsePerBarn =
                 andelerTilkjentYtelse.hentPerioderMedEndringerFra(forrigeAndelerMedEndringer)
             endringerITilkjentYtelsePerBarn.keys.filter { barn ->

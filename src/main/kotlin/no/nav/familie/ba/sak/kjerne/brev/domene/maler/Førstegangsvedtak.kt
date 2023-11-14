@@ -6,7 +6,6 @@ data class Førstegangsvedtak(
     override val mal: Brevmal,
     override val data: FørstegangsvedtakData,
 ) : Vedtaksbrev {
-
     constructor(
         mal: Brevmal = Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
         vedtakFellesfelter: VedtakFellesfelter,
@@ -20,31 +19,35 @@ data class Førstegangsvedtak(
     ) :
         this(
             mal = mal,
-            data = FørstegangsvedtakData(
-                delmalData = FørstegangsvedtakData.Delmaler(
-                    signaturVedtak = SignaturVedtak(
-                        enhet = vedtakFellesfelter.enhet,
-                        saksbehandler = vedtakFellesfelter.saksbehandler,
-                        beslutter = vedtakFellesfelter.beslutter,
-                    ),
-                    etterbetaling = etterbetaling,
-                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
-                    etterbetalingInstitusjon = etterbetalingInstitusjon,
-                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
-                    informasjonOmAarligKontroll = informasjonOmAarligKontroll,
-                    refusjonEosAvklart = refusjonEosAvklart,
-                    refusjonEosUavklart = refusjonEosUavklart,
-                    duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
-                    duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
+            data =
+                FørstegangsvedtakData(
+                    delmalData =
+                        FørstegangsvedtakData.Delmaler(
+                            signaturVedtak =
+                                SignaturVedtak(
+                                    enhet = vedtakFellesfelter.enhet,
+                                    saksbehandler = vedtakFellesfelter.saksbehandler,
+                                    beslutter = vedtakFellesfelter.beslutter,
+                                ),
+                            etterbetaling = etterbetaling,
+                            hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                            etterbetalingInstitusjon = etterbetalingInstitusjon,
+                            korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
+                            informasjonOmAarligKontroll = informasjonOmAarligKontroll,
+                            refusjonEosAvklart = refusjonEosAvklart,
+                            refusjonEosUavklart = refusjonEosUavklart,
+                            duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
+                            duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
+                        ),
+                    perioder = vedtakFellesfelter.perioder,
+                    flettefelter =
+                        FlettefelterForDokumentImpl(
+                            gjelder = flettefelt(vedtakFellesfelter.gjelder),
+                            navn = flettefelt(vedtakFellesfelter.søkerNavn),
+                            fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer),
+                            organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
+                        ),
                 ),
-                perioder = vedtakFellesfelter.perioder,
-                flettefelter = FlettefelterForDokumentImpl(
-                    gjelder = flettefelt(vedtakFellesfelter.gjelder),
-                    navn = flettefelt(vedtakFellesfelter.søkerNavn),
-                    fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer),
-                    organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
-                ),
-            ),
         )
 }
 
@@ -53,7 +56,6 @@ data class FørstegangsvedtakData(
     override val flettefelter: FlettefelterForDokument,
     override val perioder: List<BrevPeriode>,
 ) : VedtaksbrevData {
-
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
         val etterbetaling: Etterbetaling?,

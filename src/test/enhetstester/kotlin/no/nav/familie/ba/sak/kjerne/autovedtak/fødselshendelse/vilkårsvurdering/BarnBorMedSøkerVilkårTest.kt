@@ -12,7 +12,6 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
 class BarnBorMedSøkerVilkårTest {
-
     @Test
     fun `Samme matrikkelId men ellers forskjellige adresser`() {
         val faktaPerson = opprettFaktaPerson(adresseMatrikkelId1barn, adresseMatrikkelId1SøkerBruksenhetsnummer)
@@ -61,9 +60,10 @@ class BarnBorMedSøkerVilkårTest {
         barnMedAdresse.personopplysningGrunnlag.personer.clear()
         barnMedAdresse.personopplysningGrunnlag.personer.add(
             søker.copy(
-                bostedsadresser = mutableListOf(
-                    bostedsadresseSøker,
-                ),
+                bostedsadresser =
+                    mutableListOf(
+                        bostedsadresseSøker,
+                    ),
             ),
         )
 
@@ -71,7 +71,6 @@ class BarnBorMedSøkerVilkårTest {
     }
 
     companion object {
-
         val vilkår = Vilkår.BOR_MED_SØKER
         val barn = tilfeldigPerson(personType = PersonType.BARN)
 

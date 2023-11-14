@@ -29,7 +29,6 @@ class KorrigertVedtakController(
     private val korrigertVedtakService: KorrigertVedtakService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
-
     @PostMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettKorrigertVedtakPåBehandling(
         @PathVariable behandlingId: Long,

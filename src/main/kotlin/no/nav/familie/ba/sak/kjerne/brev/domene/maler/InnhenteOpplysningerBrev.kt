@@ -12,7 +12,6 @@ data class InnhenteOpplysningerData(
     override val delmalData: DelmalData,
     override val flettefelter: Flettefelter,
 ) : BrevData {
-
     data class Flettefelter(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
@@ -21,7 +20,6 @@ data class InnhenteOpplysningerData(
         override val gjelder: Flettefelt,
         val dokumentliste: Flettefelt,
     ) : FlettefelterForDokument {
-
         constructor(
             navn: String,
             fodselsnummer: String,

@@ -22,7 +22,6 @@ class PersonIdent(
     @Column(name = "person_ident", updatable = false, length = 50)
     val ident: String,
 ) : Comparable<PersonIdent> {
-
     override fun compareTo(other: PersonIdent): Int {
         return ident.compareTo(other.ident)
     }

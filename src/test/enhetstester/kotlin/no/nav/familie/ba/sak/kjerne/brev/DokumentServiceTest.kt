@@ -51,23 +51,24 @@ internal class DokumentServiceTest {
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>(relaxed = true)
     val brevmottakerService = mockk<BrevmottakerService>(relaxed = true)
 
-    private val dokumentService: DokumentService = spyk(
-        DokumentService(
-            journalføringRepository = journalføringRepository,
-            taskRepository = taskRepository,
-            vilkårsvurderingService = vilkårsvurderingService,
-            vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
-            rolleConfig = mockk(relaxed = true),
-            settPåVentService = mockk(relaxed = true),
-            utgåendeJournalføringService = utgåendeJournalføringService,
-            fagsakRepository = fagsakRepository,
-            organisasjonService = organisasjonService,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            dokumentGenereringService = mockk(relaxed = true),
-            brevmottakerService = brevmottakerService,
-            validerBrevmottakerService = mockk(relaxed = true),
-        ),
-    )
+    private val dokumentService: DokumentService =
+        spyk(
+            DokumentService(
+                journalføringRepository = journalføringRepository,
+                taskRepository = taskRepository,
+                vilkårsvurderingService = vilkårsvurderingService,
+                vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
+                rolleConfig = mockk(relaxed = true),
+                settPåVentService = mockk(relaxed = true),
+                utgåendeJournalføringService = utgåendeJournalføringService,
+                fagsakRepository = fagsakRepository,
+                organisasjonService = organisasjonService,
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                dokumentGenereringService = mockk(relaxed = true),
+                brevmottakerService = brevmottakerService,
+                validerBrevmottakerService = mockk(relaxed = true),
+            ),
+        )
 
     @Test
     fun `sendManueltBrev skal journalføre med brukerIdType ORGNR hvis brukers id er 9 siffer, og FNR ellers`() {
@@ -93,14 +94,16 @@ internal class DokumentServiceTest {
                     avsenderMottaker = capture(avsenderMottaker),
                 )
             } returns "mockJournalpostId"
-            every { journalføringRepository.save(any()) } returns DbJournalpost(
-                behandling = behandling,
-                journalpostId = "id",
-            )
-            every { organisasjonService.hentOrganisasjon(any()) } returns Organisasjon(
-                organisasjonsnummer = brukerId,
-                navn = "Testinstitusjon",
-            )
+            every { journalføringRepository.save(any()) } returns
+                DbJournalpost(
+                    behandling = behandling,
+                    journalpostId = "id",
+                )
+            every { organisasjonService.hentOrganisasjon(any()) } returns
+                Organisasjon(
+                    organisasjonsnummer = brukerId,
+                    navn = "Testinstitusjon",
+                )
 
             runCatching {
                 dokumentService.sendManueltBrev(
@@ -237,17 +240,18 @@ internal class DokumentServiceTest {
         val manueltBrevRequest = ManueltBrevRequest(mottakerIdent = søkersident, brevmal = Brevmal.SVARTIDSBREV)
         val avsenderMottakere = mutableListOf<AvsenderMottaker>()
 
-        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns listOf(
-            Brevmottaker(
-                behandlingId = behandling.id,
-                type = MottakerType.FULLMEKTIG,
-                navn = "Fullmektig navn",
-                adresselinje1 = "Test adresse",
-                postnummer = "0000",
-                poststed = "Oslo",
-                landkode = "NO",
-            ),
-        )
+        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+            listOf(
+                Brevmottaker(
+                    behandlingId = behandling.id,
+                    type = MottakerType.FULLMEKTIG,
+                    navn = "Fullmektig navn",
+                    adresselinje1 = "Test adresse",
+                    postnummer = "0000",
+                    poststed = "Oslo",
+                    landkode = "NO",
+                ),
+            )
         every { brevmottakerService.lagMottakereFraBrevMottakere(any(), any(), any()) } answers { callOriginal() }
         every { brevmottakerService.hentMottakerNavn(søkersident) } returns "søker"
         every {
@@ -327,7 +331,10 @@ internal class DokumentServiceTest {
         verify(exactly = 1) { taskRepository.save(any()) }
     }
 
-    private fun sendBrev(brevmal: Brevmal, behandling: Behandling) {
+    private fun sendBrev(
+        brevmal: Brevmal,
+        behandling: Behandling,
+    ) {
         dokumentService.sendManueltBrev(
             ManueltBrevRequest(
                 brevmal = brevmal,

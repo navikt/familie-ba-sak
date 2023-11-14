@@ -18,23 +18,17 @@ import org.springframework.beans.factory.annotation.Autowired
 class RegistrerPersongrunnlagTest(
     @Autowired
     private val stegService: StegService,
-
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val behandlingService: BehandlingService,
-
     @Autowired
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService,
-
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeAll
     fun truncate() {
         databaseCleanupService.truncate()
@@ -52,10 +46,11 @@ class RegistrerPersongrunnlagTest(
             behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         stegService.håndterPersongrunnlag(
             behandling = behandling1,
-            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
-                ident = morId,
-                barnasIdenter = listOf(barn1Id, barn2Id),
-            ),
+            registrerPersongrunnlagDTO =
+                RegistrerPersongrunnlagDTO(
+                    ident = morId,
+                    barnasIdenter = listOf(barn1Id, barn2Id),
+                ),
         )
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
@@ -81,10 +76,11 @@ class RegistrerPersongrunnlagTest(
             behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         stegService.håndterPersongrunnlag(
             behandling = behandling1,
-            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
-                ident = morId,
-                barnasIdenter = listOf(barn1Id),
-            ),
+            registrerPersongrunnlagDTO =
+                RegistrerPersongrunnlagDTO(
+                    ident = morId,
+                    barnasIdenter = listOf(barn1Id),
+                ),
         )
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
@@ -95,13 +91,15 @@ class RegistrerPersongrunnlagTest(
 
         stegService.håndterPersongrunnlag(
             behandling = behandling1,
-            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
-                ident = morId,
-                barnasIdenter = listOf(
-                    barn1Id,
-                    barn2Id,
+            registrerPersongrunnlagDTO =
+                RegistrerPersongrunnlagDTO(
+                    ident = morId,
+                    barnasIdenter =
+                        listOf(
+                            barn1Id,
+                            barn2Id,
+                        ),
                 ),
-            ),
         )
         val grunnlag2 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
@@ -113,13 +111,15 @@ class RegistrerPersongrunnlagTest(
         // Skal ikke føre til flere personer på persongrunnlaget
         stegService.håndterPersongrunnlag(
             behandling = behandling1,
-            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
-                ident = morId,
-                barnasIdenter = listOf(
-                    barn1Id,
-                    barn2Id,
+            registrerPersongrunnlagDTO =
+                RegistrerPersongrunnlagDTO(
+                    ident = morId,
+                    barnasIdenter =
+                        listOf(
+                            barn1Id,
+                            barn2Id,
+                        ),
                 ),
-            ),
         )
 
         val grunnlag3 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)

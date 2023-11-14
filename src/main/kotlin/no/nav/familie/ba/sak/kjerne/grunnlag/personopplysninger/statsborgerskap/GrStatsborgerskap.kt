@@ -36,23 +36,18 @@ data class GrStatsborgerskap(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Embedded
     val gyldigPeriode: DatoIntervallEntitet? = null,
-
     @Column(name = "landkode", nullable = false)
     val landkode: String,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "medlemskap", nullable = false)
     val medlemskap: Medlemskap = Medlemskap.UKJENT,
-
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
     val person: Person,
 ) : BaseEntitet() {
-
     fun tilKopiForNyPerson(nyPerson: Person): GrStatsborgerskap =
         copy(id = 0, person = nyPerson)
 
@@ -79,11 +74,12 @@ data class GrStatsborgerskap(
         return result
     }
 
-    fun tilRestRegisteropplysning() = RestRegisteropplysning(
-        fom = this.gyldigPeriode?.fom,
-        tom = this.gyldigPeriode?.tom,
-        verdi = this.landkode,
-    )
+    fun tilRestRegisteropplysning() =
+        RestRegisteropplysning(
+            fom = this.gyldigPeriode?.fom,
+            tom = this.gyldigPeriode?.tom,
+            verdi = this.landkode,
+        )
 }
 
 fun Statsborgerskap.fom() = this.gyldigFraOgMed ?: this.bekreftelsesdato

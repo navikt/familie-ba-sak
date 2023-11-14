@@ -8,10 +8,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class VedtaksperiodeHentOgPersisterService(
-
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
 ) {
-
     fun hentVedtaksperiodeThrows(vedtaksperiodeId: Long): VedtaksperiodeMedBegrunnelser =
         vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
             ?: throw Feil(

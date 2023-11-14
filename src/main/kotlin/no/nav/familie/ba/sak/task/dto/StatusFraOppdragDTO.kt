@@ -10,7 +10,6 @@ data class StatusFraOppdragDTO(
     val behandlingsId: Long,
     val vedtaksId: Long,
 ) {
-
     val oppdragId
         get() = OppdragId(fagsystem, personIdent, behandlingsId.toString())
 }

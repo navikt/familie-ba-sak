@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class PersongrunnlagTest {
-
     val persongrunnlagService = mockk<PersongrunnlagService>()
 
     @Test
@@ -20,18 +19,20 @@ class PersongrunnlagTest {
         val nyttbarn = randomFnr()
 
         val forrigeBehandling = lagBehandling()
-        val forrigeGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = forrigeBehandling.id,
-            søkerPersonIdent = søker,
-            barnasIdenter = listOf(barn),
-        )
+        val forrigeGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = forrigeBehandling.id,
+                søkerPersonIdent = søker,
+                barnasIdenter = listOf(barn),
+            )
 
         val behandling = lagBehandling()
-        val grunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = søker,
-            barnasIdenter = listOf(barn, nyttbarn),
-        )
+        val grunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søker,
+                barnasIdenter = listOf(barn, nyttbarn),
+            )
 
         every { persongrunnlagService.hentAktiv(forrigeBehandling.id) } returns forrigeGrunnlag
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns grunnlag

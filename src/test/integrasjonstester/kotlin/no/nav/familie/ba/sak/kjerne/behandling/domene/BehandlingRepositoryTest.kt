@@ -23,7 +23,6 @@ class BehandlingRepositoryTest(
     @Autowired private val tilkjentRepository: TilkjentYtelseRepository,
     @Autowired private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeEach
     fun cleanUp() {
         databaseCleanupService.truncate()
@@ -31,7 +30,6 @@ class BehandlingRepositoryTest(
 
     @Nested
     inner class FinnSisteIverksatteBehandling {
-
         val tilfeldigPerson = tilfeldigPerson()
         val tilfeldigPerson2 = tilfeldigPerson()
         lateinit var fagsak: Fagsak
@@ -47,13 +45,15 @@ class BehandlingRepositoryTest(
         fun `skal finne siste iverksatte behandlingen som har utbetalingsoppdrag, som er avsluttet`() {
             opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(3))
                 .medTilkjentYtelse(true)
-            val behandling2 = opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(2))
-                .medTilkjentYtelse(true)
+            val behandling2 =
+                opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(2))
+                    .medTilkjentYtelse(true)
             opprettBehandling(fagsak, IVERKSETTER_VEDTAK, LocalDateTime.now().minusDays(1))
                 .medTilkjentYtelse(true)
 
-            val behandling4 = opprettBehandling(fagsak2, AVSLUTTET, LocalDateTime.now())
-                .medTilkjentYtelse(true)
+            val behandling4 =
+                opprettBehandling(fagsak2, AVSLUTTET, LocalDateTime.now())
+                    .medTilkjentYtelse(true)
 
             assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)!!).isEqualTo(behandling2)
             assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak2.id)!!).isEqualTo(behandling4)
@@ -63,8 +63,9 @@ class BehandlingRepositoryTest(
         fun `skal finne siste iverksatte behandlingen som har utbetalingsoppdrag`() {
             opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(3))
                 .medTilkjentYtelse(true)
-            val behandling3 = opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(1))
-                .medTilkjentYtelse(true)
+            val behandling3 =
+                opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(1))
+                    .medTilkjentYtelse(true)
 
             opprettBehandling(fagsak, AVSLUTTET).medTilkjentYtelse()
             opprettBehandling(fagsak, IVERKSETTER_VEDTAK).medTilkjentYtelse()
@@ -79,12 +80,13 @@ class BehandlingRepositoryTest(
         aktivertTidspunkt: LocalDateTime = LocalDateTime.now(),
         aktiv: Boolean = false,
     ): Behandling {
-        val behandling = lagBehandling(fagsak = fagsak, status = behandlingStatus)
-            .copy(
-                id = 0,
-                aktiv = aktiv,
-                aktivertTidspunkt = aktivertTidspunkt,
-            )
+        val behandling =
+            lagBehandling(fagsak = fagsak, status = behandlingStatus)
+                .copy(
+                    id = 0,
+                    aktiv = aktiv,
+                    aktivertTidspunkt = aktivertTidspunkt,
+                )
         val oppdaterteSteg = behandling.behandlingStegTilstand.map { it.copy(behandling = behandling) }
         behandling.behandlingStegTilstand.clear()
         behandling.behandlingStegTilstand.addAll(oppdaterteSteg)
@@ -95,10 +97,11 @@ class BehandlingRepositoryTest(
 
     private fun Behandling.medTilkjentYtelse(medUtbetalingsoppdrag: Boolean = false) =
         this.also {
-            val tilkjentYtelse = lagInitiellTilkjentYtelse(
-                behandling = it,
-                utbetalingsoppdrag = if (medUtbetalingsoppdrag) "~" else null,
-            )
+            val tilkjentYtelse =
+                lagInitiellTilkjentYtelse(
+                    behandling = it,
+                    utbetalingsoppdrag = if (medUtbetalingsoppdrag) "~" else null,
+                )
             tilkjentRepository.saveAndFlush(tilkjentYtelse)
         }
 }
