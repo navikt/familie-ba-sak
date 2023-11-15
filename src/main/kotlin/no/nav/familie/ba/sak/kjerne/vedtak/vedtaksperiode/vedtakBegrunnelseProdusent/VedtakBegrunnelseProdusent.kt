@@ -419,10 +419,14 @@ private fun SanityBegrunnelse.erGjeldendeForOpphørFraForrigeBehandling(begrunne
                 ?: emptyList(),
         )
 
+    val ikkeOppfylteVilkårDenneBehandlingen = begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.IKKE_OPPFYLT }
+
+    val begrunnelsenGjelderVilkårIkkeLengerOppfylt = this.erLikVilkårOgUtdypendeVilkårIPeriode(ikkeOppfylteVilkårDenneBehandlingen.filter { it.vilkårType in vilkårMistetSidenForrigeBehandling })
+
     val dennePeriodenErFørsteVedtaksperiodePåFagsak =
         begrunnelseGrunnlag.forrigePeriode == null || begrunnelseGrunnlag.forrigePeriode!!.andeler.firstOrNull() == null
 
-    return begrunnelseGjelderMistedeVilkår && dennePeriodenErFørsteVedtaksperiodePåFagsak
+    return (begrunnelseGjelderMistedeVilkår || begrunnelsenGjelderVilkårIkkeLengerOppfylt) && dennePeriodenErFørsteVedtaksperiodePåFagsak
 }
 
 private fun SanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling() =
