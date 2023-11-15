@@ -25,7 +25,7 @@
         <prosessering.version>2.20231026103714_2f17845</prosessering.version>
         <felles.version>2.20231023162434_fa320ce</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20231109091547_fd2cae7</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20231114145122_eb1ce78</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230912090318_2267c05</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20230927085000_900743f</utbetalingsgenerator.version>
@@ -46,7 +46,7 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.19.1</testcontainers.postgresql.version>
+        <testcontainers.postgresql.version>1.19.2</testcontainers.postgresql.version>
         <unleash.version>8.4.0</unleash.version>
         <maven.model.version>3.9.5</maven.model.version>
         <jackson.module.kotlin.version>2.15.3</jackson.module.kotlin.version>
