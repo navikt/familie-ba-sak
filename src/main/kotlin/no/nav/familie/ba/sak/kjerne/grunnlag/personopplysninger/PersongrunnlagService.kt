@@ -133,6 +133,10 @@ class PersongrunnlagService(
 
         val personopplysningGrunnlag = hentAktivThrows(behandlingId = behandling.id)
 
+        if (nyttbarnAktør == personopplysningGrunnlag.søker.aktør) {
+            throw FunksjonellFeil("Du kan ikke legge til søker som barn på behandlingen")
+        }
+
         val barnIGrunnlag = personopplysningGrunnlag.barna.map { it.aktør }
 
         if (barnIGrunnlag.contains(nyttbarnAktør)) {
