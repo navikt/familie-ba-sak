@@ -155,35 +155,35 @@ class BrevPeriodeService(
                 uregistrerteBarn = minimerteUregistrerteBarn,
                 brevMålform = personopplysningGrunnlag.søker.målform,
                 erFørsteVedtaksperiodePåFagsak =
-                erFørsteVedtaksperiodePåFagsak(
-                    andelerTilkjentYtelse = andelerTilkjentYtelse,
-                    periodeFom = utvidetVedtaksperiodeMedBegrunnelse.fom,
-                ),
+                    erFørsteVedtaksperiodePåFagsak(
+                        andelerTilkjentYtelse = andelerTilkjentYtelse,
+                        periodeFom = utvidetVedtaksperiodeMedBegrunnelse.fom,
+                    ),
                 barnMedReduksjonFraForrigeBehandlingIdent =
-                hentBarnsPersonIdentMedRedusertPeriode(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                    andelerTilkjentYtelse = andelerTilkjentYtelse,
-                ),
+                    hentBarnsPersonIdentMedRedusertPeriode(
+                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                        andelerTilkjentYtelse = andelerTilkjentYtelse,
+                    ),
                 minimerteKompetanserForPeriode =
-                hentMinimerteKompetanserForPeriode(
-                    kompetanser = kompetanser,
-                    fom = vedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
-                    tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    landkoderISO2 = landkoderISO2,
-                ),
-                minimerteKompetanserSomStopperRettFørPeriode =
-                hentKompetanserSomStopperRettFørPeriode(
-                    kompetanser = kompetanser,
-                    periodeFom = minimertVedtaksperiode.fom?.toYearMonth(),
-                ).filter {
-                    it.erObligatoriskeFelterSatt()
-                }.map {
-                    it.tilMinimertKompetanse(
+                    hentMinimerteKompetanserForPeriode(
+                        kompetanser = kompetanser,
+                        fom = vedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
+                        tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
                         personopplysningGrunnlag = personopplysningGrunnlag,
                         landkoderISO2 = landkoderISO2,
-                    )
-                },
+                    ),
+                minimerteKompetanserSomStopperRettFørPeriode =
+                    hentKompetanserSomStopperRettFørPeriode(
+                        kompetanser = kompetanser,
+                        periodeFom = minimertVedtaksperiode.fom?.toYearMonth(),
+                    ).filter {
+                        it.erObligatoriskeFelterSatt()
+                    }.map {
+                        it.tilMinimertKompetanse(
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            landkoderISO2 = landkoderISO2,
+                        )
+                    },
                 dødeBarnForrigePeriode = dødeBarnForrigePeriode,
             )
 

@@ -57,10 +57,10 @@ fun Standardbegrunnelse.triggesForPeriode(
         hentPersonerForAlleUtgjørendeVilkår(
             minimertePersonResultater = minimertePersonResultater,
             vedtaksperiode =
-            Periode(
-                fom = minimertVedtaksperiode.fom ?: TIDENES_MORGEN,
-                tom = minimertVedtaksperiode.tom ?: TIDENES_ENDE,
-            ),
+                Periode(
+                    fom = minimertVedtaksperiode.fom ?: TIDENES_MORGEN,
+                    tom = minimertVedtaksperiode.tom ?: TIDENES_ENDE,
+                ),
             oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
             aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertRestPerson() },
             triggesAv = triggesAv,
@@ -146,8 +146,8 @@ private fun erEndretTriggerErOppfylt(
         triggesAv.erTriggereOppfyltForEndretUtbetaling(
             minimertEndretAndel = minimertEndretAndel,
             minimerteUtbetalingsperiodeDetaljer =
-            minimertVedtaksperiode
-                .utbetalingsperioder.map { it.tilMinimertUtbetalingsperiodeDetalj() },
+                minimertVedtaksperiode
+                    .utbetalingsperioder.map { it.tilMinimertUtbetalingsperiodeDetalj() },
         )
     }
 }

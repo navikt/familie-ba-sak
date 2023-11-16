@@ -104,8 +104,8 @@ fun hentHjemmeltekst(
     val ordinæreHjemler =
         hentOrdinæreHjemler(
             hjemler =
-            (sanityStandardbegrunnelser.flatMap { it.hjemler } + sanityEøsBegrunnelser.flatMap { it.hjemler })
-                .toMutableSet(),
+                (sanityStandardbegrunnelser.flatMap { it.hjemler } + sanityEøsBegrunnelser.flatMap { it.hjemler })
+                    .toMutableSet(),
             opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev,
             finnesVedtaksperiodeMedFritekst = minimerteVedtaksperioder.flatMap { it.fritekster }.isNotEmpty(),
         )
@@ -115,12 +115,12 @@ fun hentHjemmeltekst(
     val alleHjemlerForBegrunnelser =
         hentAlleTyperHjemler(
             hjemlerSeparasjonsavtaleStorbritannia =
-            sanityEøsBegrunnelser.flatMap { it.hjemlerSeperasjonsavtalenStorbritannina }
-                .distinct(),
+                sanityEøsBegrunnelser.flatMap { it.hjemlerSeperasjonsavtalenStorbritannina }
+                    .distinct(),
             ordinæreHjemler = ordinæreHjemler.distinct(),
             hjemlerFraFolketrygdloven =
-            (sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven })
-                .distinct(),
+                (sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven })
+                    .distinct(),
             hjemlerEØSForordningen883 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen883 }.distinct(),
             hjemlerEØSForordningen987 = hentHjemlerForEøsForordningen987(sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev),
             målform = målform,
@@ -265,7 +265,7 @@ fun hentVirkningstidspunkt(
         .maxOfOrNull { it.periodeFom }
         ?.tilMånedÅr()
         ?: throw Feil("Fant ikke opphørdato ved generering av dødsfallbrev på behandling $behandlingId")
-    )
+)
 
 fun hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev: Boolean): List<String> {
     return if (vedtakKorrigertHjemmelSkalMedIBrev) listOf("35") else emptyList()

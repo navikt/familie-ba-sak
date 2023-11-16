@@ -872,7 +872,7 @@ private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOg
         listOf(
             månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + grunnlagPerioderSplittetPåVedtaksperiode
-        ).zipWithNext { forrige, denne ->
+    ).zipWithNext { forrige, denne ->
         periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
     }.tilTidslinje()
 }

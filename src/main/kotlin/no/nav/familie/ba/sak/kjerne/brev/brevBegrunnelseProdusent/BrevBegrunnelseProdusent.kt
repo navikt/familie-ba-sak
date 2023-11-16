@@ -135,12 +135,12 @@ private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
             soknadstidspunkt = søknadstidspunktEndretUtbetaling?.tilKortString() ?: "",
             avtaletidspunktDeltBosted = "",
             sokersRettTilUtvidet =
-            hentSøkersRettTilUtvidet(
-                utvidetUtbetalingsdetaljer =
-                hentUtvidetAndelerIPeriode(
-                    begrunnelsesGrunnlagPerPerson,
-                ),
-            ).tilSanityFormat(),
+                hentSøkersRettTilUtvidet(
+                    utvidetUtbetalingsdetaljer =
+                        hentUtvidetAndelerIPeriode(
+                            begrunnelsesGrunnlagPerPerson,
+                        ),
+                ).tilSanityFormat(),
             vedtakBegrunnelseType = this.vedtakBegrunnelseType,
         ),
     )
@@ -203,12 +203,12 @@ private fun Standardbegrunnelse.delOppBegrunnelsenPåAvtaletidspunkt(
             soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: "",
             avtaletidspunktDeltBosted = avtaletidspunktDeltBosted.tilKortString(),
             sokersRettTilUtvidet =
-            hentSøkersRettTilUtvidet(
-                utvidetUtbetalingsdetaljer =
-                hentUtvidetAndelerIPeriode(
-                    begrunnelseGrunnlagPerPerson,
-                ),
-            ).tilSanityFormat(),
+                hentSøkersRettTilUtvidet(
+                    utvidetUtbetalingsdetaljer =
+                        hentUtvidetAndelerIPeriode(
+                            begrunnelseGrunnlagPerPerson,
+                        ),
+                ).tilSanityFormat(),
             vedtakBegrunnelseType = this.vedtakBegrunnelseType,
         )
     }
