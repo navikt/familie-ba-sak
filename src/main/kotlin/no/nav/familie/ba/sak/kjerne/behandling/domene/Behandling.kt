@@ -339,14 +339,6 @@ enum class Behandlingsresultat(val displayName: String) {
     fun erAvslått(): Boolean = this in listOf(AVSLÅTT, AVSLÅTT_OG_OPPHØRT, AVSLÅTT_OG_ENDRET, AVSLÅTT_ENDRET_OG_OPPHØRT)
 
     fun erFortsattInnvilget(): Boolean = this in listOf(FORTSATT_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET)
-
-    fun erOpphør(): Boolean =
-        this in
-            listOf(
-                OPPHØRT,
-                ENDRET_OG_OPPHØRT,
-                FORTSATT_OPPHØRT,
-            )
 }
 
 /**
@@ -436,8 +428,6 @@ enum class BehandlingStatus {
     IVERKSETTER_VEDTAK,
     AVSLUTTET,
     ;
-
-    fun erLåstMenIkkeAvsluttet() = this == FATTER_VEDTAK || this == IVERKSETTER_VEDTAK
 
     fun erLåstForVidereRedigering() = this != UTREDES
 }
