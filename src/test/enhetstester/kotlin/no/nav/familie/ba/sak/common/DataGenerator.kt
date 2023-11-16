@@ -44,6 +44,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -79,7 +80,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
@@ -500,15 +500,15 @@ fun lagSøknadDTO(
     return SøknadDTO(
         underkategori = underkategori.tilDto(),
         søkerMedOpplysninger =
-            SøkerMedOpplysninger(
-                ident = søkerIdent,
-            ),
+        SøkerMedOpplysninger(
+            ident = søkerIdent,
+        ),
         barnaMedOpplysninger =
-            barnasIdenter.map {
-                BarnMedOpplysninger(
-                    ident = it,
-                )
-            },
+        barnasIdenter.map {
+            BarnMedOpplysninger(
+                ident = it,
+            )
+        },
         endringAvOpplysningerBegrunnelse = "",
     )
 }
@@ -535,11 +535,11 @@ fun lagPersonResultaterForSøkerOgToBarn(
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             person =
-                lagPerson(
-                    type = PersonType.BARN,
-                    aktør = barn1Aktør,
-                    fødselsdato = stønadFom,
-                ),
+            lagPerson(
+                type = PersonType.BARN,
+                aktør = barn1Aktør,
+                fødselsdato = stønadFom,
+            ),
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
             periodeTom = stønadTom,
@@ -595,13 +595,13 @@ fun lagPersonResultat(
                     begrunnelse = "",
                     sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                     utdypendeVilkårsvurderinger =
-                        listOfNotNull(
-                            when {
-                                erDeltBosted && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED
-                                erDeltBostedSkalIkkeDeles && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
-                                else -> null
-                            },
-                        ),
+                    listOfNotNull(
+                        when {
+                            erDeltBosted && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED
+                            erDeltBostedSkalIkkeDeles && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
+                            else -> null
+                        },
+                    ),
                     erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
                 )
             }.toSet(),
@@ -747,15 +747,15 @@ fun kjørStegprosessForFGB(
         stegService.håndterSøknad(
             behandling = behandling,
             restRegistrerSøknad =
-                RestRegistrerSøknad(
-                    søknad =
-                        lagSøknadDTO(
-                            søkerIdent = søkerFnr,
-                            barnasIdenter = barnasIdenter,
-                            underkategori = behandlingUnderkategori,
-                        ),
-                    bekreftEndringerViaFrontend = true,
+            RestRegistrerSøknad(
+                søknad =
+                lagSøknadDTO(
+                    søkerIdent = søkerFnr,
+                    barnasIdenter = barnasIdenter,
+                    underkategori = behandlingUnderkategori,
                 ),
+                bekreftEndringerViaFrontend = true,
+            ),
         )
 
     if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD) {
@@ -822,13 +822,13 @@ fun kjørStegprosessForFGB(
             behandlingEtterIverksetteVedtak,
             StatusFraOppdragMedTask(
                 statusFraOppdragDTO =
-                    StatusFraOppdragDTO(
-                        fagsystem = FAGSYSTEM,
-                        personIdent = søkerFnr,
-                        aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktivFødselsnummer(),
-                        behandlingsId = behandlingEtterIverksetteVedtak.id,
-                        vedtaksId = vedtak.id,
-                    ),
+                StatusFraOppdragDTO(
+                    fagsystem = FAGSYSTEM,
+                    personIdent = søkerFnr,
+                    aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktivFødselsnummer(),
+                    behandlingsId = behandlingEtterIverksetteVedtak.id,
+                    vedtaksId = vedtak.id,
+                ),
                 task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = ""),
             ),
         )
@@ -856,9 +856,9 @@ fun kjørStegprosessForFGB(
                 journalpostId = "1234",
                 personEllerInstitusjonIdent = søkerFnr,
                 brevmal =
-                    brevmalService.hentBrevmal(
-                        behandlingEtterJournalførtVedtak,
-                    ),
+                brevmalService.hentBrevmal(
+                    behandlingEtterJournalførtVedtak,
+                ),
                 erManueltSendt = false,
             ),
         )
@@ -957,13 +957,13 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
             behandlingEtterIverksetteVedtak,
             StatusFraOppdragMedTask(
                 statusFraOppdragDTO =
-                    StatusFraOppdragDTO(
-                        fagsystem = FAGSYSTEM,
-                        personIdent = søkerFnr,
-                        aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktørId,
-                        behandlingsId = behandlingEtterIverksetteVedtak.id,
-                        vedtaksId = vedtak.id,
-                    ),
+                StatusFraOppdragDTO(
+                    fagsystem = FAGSYSTEM,
+                    personIdent = søkerFnr,
+                    aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktørId,
+                    behandlingsId = behandlingEtterIverksetteVedtak.id,
+                    vedtaksId = vedtak.id,
+                ),
                 task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = ""),
             ),
         )
@@ -1087,9 +1087,9 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = perisisterteVedtaksperioder.first { it.type == Vedtaksperiodetype.UTBETALING }.id,
         standardbegrunnelserFraFrontend =
-            listOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-            ),
+        listOf(
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+        ),
         eøsStandardbegrunnelserFraFrontend = emptyList(),
     )
 }
@@ -1341,6 +1341,7 @@ fun lagSanityEøsBegrunnelse(
     tema: Tema? = null,
     periodeType: BrevPeriodeType? = null,
     valgbarhet: Valgbarhet? = null,
+    ovrigeTriggere: List<ØvrigTrigger>,
 ): SanityEØSBegrunnelse =
     SanityEØSBegrunnelse(
         apiNavn = apiNavn,
@@ -1358,6 +1359,7 @@ fun lagSanityEøsBegrunnelse(
         tema = tema,
         periodeType = periodeType,
         valgbarhet = valgbarhet,
+        ovrigeTriggere = ovrigeTriggere,
     )
 
 fun lagTriggesAv(
@@ -1404,11 +1406,11 @@ fun oppfyltVilkår(
     VilkårRegelverkResultat(
         vilkår = vilkår,
         regelverkResultat =
-            when (regelverk) {
-                Regelverk.NASJONALE_REGLER -> RegelverkResultat.OPPFYLT_NASJONALE_REGLER
-                Regelverk.EØS_FORORDNINGEN -> RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
-                else -> RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
-            },
+        when (regelverk) {
+            Regelverk.NASJONALE_REGLER -> RegelverkResultat.OPPFYLT_NASJONALE_REGLER
+            Regelverk.EØS_FORORDNINGEN -> RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
+            else -> RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
+        },
     )
 
 fun ikkeOppfyltVilkår(vilkår: Vilkår) =

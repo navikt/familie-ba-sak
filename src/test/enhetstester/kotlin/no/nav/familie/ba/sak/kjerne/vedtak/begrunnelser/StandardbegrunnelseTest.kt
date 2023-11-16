@@ -226,22 +226,22 @@ internal class StandardbegrunnelseTest {
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     minimertVedtaksperiode =
-                        lagUtvidetVedtaksperiodeMedBegrunnelser(
-                            type = Vedtaksperiodetype.UTBETALING,
-                            fom = LocalDate.of(2021, 10, 1),
-                            tom = LocalDate.of(2021, 10, 31),
-                        ).tilMinimertVedtaksperiode(),
+                    lagUtvidetVedtaksperiodeMedBegrunnelser(
+                        type = Vedtaksperiodetype.UTBETALING,
+                        fom = LocalDate.of(2021, 10, 1),
+                        tom = LocalDate.of(2021, 10, 31),
+                    ).tilMinimertVedtaksperiode(),
                     minimerteEndredeUtbetalingAndeler =
-                        listOf(
-                            lagEndretUtbetalingAndel(
-                                prosent = BigDecimal.ZERO,
-                                behandlingId = behandling.id,
-                                person = barn,
-                                fom = YearMonth.of(2021, 6),
-                                tom = YearMonth.of(2021, 9),
-                                årsak = Årsak.DELT_BOSTED,
-                            ),
-                        ).map { it.tilMinimertEndretUtbetalingAndel() },
+                    listOf(
+                        lagEndretUtbetalingAndel(
+                            prosent = BigDecimal.ZERO,
+                            behandlingId = behandling.id,
+                            person = barn,
+                            fom = YearMonth.of(2021, 6),
+                            tom = YearMonth.of(2021, 9),
+                            årsak = Årsak.DELT_BOSTED,
+                        ),
+                    ).map { it.tilMinimertEndretUtbetalingAndel() },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = emptyList(),
@@ -261,22 +261,22 @@ internal class StandardbegrunnelseTest {
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     minimertVedtaksperiode =
-                        lagUtvidetVedtaksperiodeMedBegrunnelser(
-                            type = Vedtaksperiodetype.UTBETALING,
-                            fom = LocalDate.of(2021, 10, 1),
-                            tom = LocalDate.of(2021, 10, 31),
-                        ).tilMinimertVedtaksperiode(),
+                    lagUtvidetVedtaksperiodeMedBegrunnelser(
+                        type = Vedtaksperiodetype.UTBETALING,
+                        fom = LocalDate.of(2021, 10, 1),
+                        tom = LocalDate.of(2021, 10, 31),
+                    ).tilMinimertVedtaksperiode(),
                     minimerteEndredeUtbetalingAndeler =
-                        listOf(
-                            lagEndretUtbetalingAndel(
-                                prosent = BigDecimal.ZERO,
-                                behandlingId = behandling.id,
-                                person = barn,
-                                fom = YearMonth.of(2021, 10),
-                                tom = YearMonth.of(2021, 10),
-                                årsak = Årsak.DELT_BOSTED,
-                            ),
-                        ).map { it.tilMinimertEndretUtbetalingAndel() },
+                    listOf(
+                        lagEndretUtbetalingAndel(
+                            prosent = BigDecimal.ZERO,
+                            behandlingId = behandling.id,
+                            person = barn,
+                            fom = YearMonth.of(2021, 10),
+                            tom = YearMonth.of(2021, 10),
+                            årsak = Årsak.DELT_BOSTED,
+                        ),
+                    ).map { it.tilMinimertEndretUtbetalingAndel() },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
                     ytelserForrigePeriode = emptyList(),
@@ -358,10 +358,10 @@ internal class StandardbegrunnelseTest {
             listOf(
                 lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom =
-                        YearMonth.of(
-                            LocalDate.now().minusMonths(1).year,
-                            LocalDate.now().minusMonths(1).month,
-                        ),
+                    YearMonth.of(
+                        LocalDate.now().minusMonths(1).year,
+                        LocalDate.now().minusMonths(1).month,
+                    ),
                     tom = YearMonth.of(LocalDate.now().year, LocalDate.now().month),
                     aktør = Aktør(fnr + "00").also { it.personidenter.add(Personident(fnr, it)) },
                 ),
@@ -405,10 +405,10 @@ internal class StandardbegrunnelseTest {
             listOf(
                 lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom =
-                        YearMonth.of(
-                            dødsfallDato.minusMonths(5).year,
-                            dødsfallDato.minusMonths(5).month,
-                        ),
+                    YearMonth.of(
+                        dødsfallDato.minusMonths(5).year,
+                        dødsfallDato.minusMonths(5).month,
+                    ),
                     tom = YearMonth.of(dødsfallDato.minusMonths(1).year, dødsfallDato.minusMonths(1).month),
                     aktør = Aktør(fnr + "00").also { it.personidenter.add(Personident(fnr, it)) },
                 ),
@@ -452,10 +452,10 @@ internal class StandardbegrunnelseTest {
             listOf(
                 lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom =
-                        YearMonth.of(
-                            dødsfallDato.plusMonths(5).year,
-                            dødsfallDato.plusMonths(5).month,
-                        ),
+                    YearMonth.of(
+                        dødsfallDato.plusMonths(5).year,
+                        dødsfallDato.plusMonths(5).month,
+                    ),
                     tom = YearMonth.of(dødsfallDato.plusMonths(6).year, dødsfallDato.plusMonths(6).month),
                     aktør = Aktør(fnr + "00").also { it.personidenter.add(Personident(fnr, it)) },
                 ),
@@ -493,10 +493,10 @@ internal class StandardbegrunnelseTest {
             listOf(
                 lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom =
-                        YearMonth.of(
-                            dødsfallDatoBarn1.minusMonths(1).year,
-                            dødsfallDatoBarn1.minusMonths(1).month,
-                        ),
+                    YearMonth.of(
+                        dødsfallDatoBarn1.minusMonths(1).year,
+                        dødsfallDatoBarn1.minusMonths(1).month,
+                    ),
                     tom = YearMonth.of(dødsfallDatoBarn1.year, dødsfallDatoBarn1.month),
                     aktør = Aktør(barn1Fnr + "00").also { it.personidenter.add(Personident(barn1Fnr, it)) },
                 ),
@@ -516,10 +516,10 @@ internal class StandardbegrunnelseTest {
             listOf(
                 lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom =
-                        YearMonth.of(
-                            dødsfallDatoBarn1.minusMonths(1).year,
-                            dødsfallDatoBarn1.minusMonths(1).month,
-                        ),
+                    YearMonth.of(
+                        dødsfallDatoBarn1.minusMonths(1).year,
+                        dødsfallDatoBarn1.minusMonths(1).month,
+                    ),
                     tom = YearMonth.of(dødsfallDatoBarn2.year, dødsfallDatoBarn2.month),
                     aktør = Aktør(barn2Fnr + "00").also { it.personidenter.add(Personident(barn2Fnr, it)) },
                 ),
@@ -549,10 +549,10 @@ internal class StandardbegrunnelseTest {
             listOf(
                 lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom =
-                        YearMonth.of(
-                            dødsfallDatoBarn1.minusMonths(1).year,
-                            dødsfallDatoBarn1.minusMonths(1).month,
-                        ),
+                    YearMonth.of(
+                        dødsfallDatoBarn1.minusMonths(1).year,
+                        dødsfallDatoBarn1.minusMonths(1).month,
+                    ),
                     tom = YearMonth.of(dødsfallDatoBarn1.year, dødsfallDatoBarn1.month),
                     aktør = Aktør(barn1Fnr + "00").also { it.personidenter.add(Personident(barn1Fnr, it)) },
                 ),

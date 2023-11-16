@@ -167,15 +167,15 @@ private fun håndterSøknadSteg(
 ) = stegService.håndterSøknad(
     behandling = behandling,
     restRegistrerSøknad =
-        RestRegistrerSøknad(
-            søknad =
-                lagSøknadDTO(
-                    søkerIdent = søkerFnr,
-                    barnasIdenter = barnasIdenter,
-                    underkategori = behandlingUnderkategori,
-                ),
-            bekreftEndringerViaFrontend = true,
+    RestRegistrerSøknad(
+        søknad =
+        lagSøknadDTO(
+            søkerIdent = søkerFnr,
+            barnasIdenter = barnasIdenter,
+            underkategori = behandlingUnderkategori,
         ),
+        bekreftEndringerViaFrontend = true,
+    ),
 )
 
 private fun håndterSendtTilBeslutterSteg(
@@ -262,13 +262,13 @@ private fun håndterStatusFraOppdragSteg(
         behandlingEtterIverksetteVedtak,
         StatusFraOppdragMedTask(
             statusFraOppdragDTO =
-                StatusFraOppdragDTO(
-                    fagsystem = FAGSYSTEM,
-                    personIdent = søkerFnr,
-                    aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktørId,
-                    behandlingsId = behandlingEtterIverksetteVedtak.id,
-                    vedtaksId = vedtak!!.id,
-                ),
+            StatusFraOppdragDTO(
+                fagsystem = FAGSYSTEM,
+                personIdent = søkerFnr,
+                aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktørId,
+                behandlingsId = behandlingEtterIverksetteVedtak.id,
+                vedtaksId = vedtak!!.id,
+            ),
             task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = ""),
         ),
     )
@@ -405,29 +405,29 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
                 sanityBegrunnelser = sanityBegrunnelser,
                 minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                 minimertePersonresultater =
-                    vilkårsvurdering.personResultater
-                        .map { it.tilMinimertPersonResultat() },
+                vilkårsvurdering.personResultater
+                    .map { it.tilMinimertPersonResultat() },
                 aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                 minimerteEndredeUtbetalingAndeler =
-                    endredeUtbetalingAndeler
-                        .map { it.tilMinimertEndretUtbetalingAndel() },
+                endredeUtbetalingAndeler
+                    .map { it.tilMinimertEndretUtbetalingAndel() },
                 erFørsteVedtaksperiodePåFagsak =
-                    erFørsteVedtaksperiodePåFagsak(
-                        andelerTilkjentYtelse,
-                        utvidetVedtaksperiodeMedBegrunnelser.fom,
-                    ),
+                erFørsteVedtaksperiodePåFagsak(
+                    andelerTilkjentYtelse,
+                    utvidetVedtaksperiodeMedBegrunnelser.fom,
+                ),
                 ytelserForSøkerForrigeMåned =
-                    hentYtelserForSøkerForrigeMåned(
-                        andelerTilkjentYtelse,
-                        utvidetVedtaksperiodeMedBegrunnelser,
-                    ),
+                hentYtelserForSøkerForrigeMåned(
+                    andelerTilkjentYtelse,
+                    utvidetVedtaksperiodeMedBegrunnelser,
+                ),
                 ytelserForrigePerioder =
-                    andelerTilkjentYtelse.filter {
-                        ytelseErFraForrigePeriode(
-                            it,
-                            utvidetVedtaksperiodeMedBegrunnelser,
-                        )
-                    },
+                andelerTilkjentYtelse.filter {
+                    ytelseErFraForrigePeriode(
+                        it,
+                        utvidetVedtaksperiodeMedBegrunnelser,
+                    )
+                },
             )
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiode.id,

@@ -52,20 +52,20 @@ class BrevperiodeTest {
                         tom = behandlingsresultatPersonTestConfig.tom,
                         type = behandlingsresultatPersonTestConfig.vedtaksperiodetype,
                         begrunnelser =
-                            behandlingsresultatPersonTestConfig
-                                .begrunnelser.map { it.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser) },
+                        behandlingsresultatPersonTestConfig
+                            .begrunnelser.map { it.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser) },
                         fritekster = behandlingsresultatPersonTestConfig.fritekster,
                         minimerteUtbetalingsperiodeDetaljer =
-                            behandlingsresultatPersonTestConfig
-                                .personerPåBehandling
-                                .flatMap { it.tilUtbetalingsperiodeDetaljer() },
+                        behandlingsresultatPersonTestConfig
+                            .personerPåBehandling
+                            .flatMap { it.tilUtbetalingsperiodeDetaljer() },
                         eøsBegrunnelser =
-                            behandlingsresultatPersonTestConfig.eøsBegrunnelser?.map {
-                                EØSBegrunnelseMedTriggere(
-                                    eøsBegrunnelse = it,
-                                    sanityEØSBegrunnelse = sanityEØSBegrunnelser[it]!!,
-                                )
-                            } ?: emptyList(),
+                        behandlingsresultatPersonTestConfig.eøsBegrunnelser?.map {
+                            EØSBegrunnelseMedTriggere(
+                                eøsBegrunnelse = it,
+                                sanityEØSBegrunnelse = sanityEØSBegrunnelser[it]!!,
+                            )
+                        } ?: emptyList(),
                     )
 
                 val restBehandlingsgrunnlagForBrev =
@@ -85,20 +85,20 @@ class BrevperiodeTest {
                             erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
                             brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
                             barnMedReduksjonFraForrigeBehandlingIdent =
-                                behandlingsresultatPersonTestConfig.hentBarnMedReduksjonFraForrigeBehandling()
-                                    .map { it.personIdent },
+                            behandlingsresultatPersonTestConfig.hentBarnMedReduksjonFraForrigeBehandling()
+                                .map { it.personIdent },
                             minimerteKompetanserForPeriode =
-                                behandlingsresultatPersonTestConfig.kompetanser?.map {
-                                    it.tilMinimertKompetanse(
-                                        behandlingsresultatPersonTestConfig.personerPåBehandling,
-                                    )
-                                } ?: emptyList(),
+                            behandlingsresultatPersonTestConfig.kompetanser?.map {
+                                it.tilMinimertKompetanse(
+                                    behandlingsresultatPersonTestConfig.personerPåBehandling,
+                                )
+                            } ?: emptyList(),
                             minimerteKompetanserSomStopperRettFørPeriode =
-                                behandlingsresultatPersonTestConfig.kompetanserSomStopperRettFørPeriode?.map {
-                                    it.tilMinimertKompetanse(
-                                        behandlingsresultatPersonTestConfig.personerPåBehandling,
-                                    )
-                                } ?: emptyList(),
+                            behandlingsresultatPersonTestConfig.kompetanserSomStopperRettFørPeriode?.map {
+                                it.tilMinimertKompetanse(
+                                    behandlingsresultatPersonTestConfig.personerPåBehandling,
+                                )
+                            } ?: emptyList(),
                             dødeBarnForrigePeriode = emptyList(),
                         ).genererBrevPeriode()
                     } catch (e: Exception) {

@@ -175,25 +175,6 @@ enum class SanityPeriodeResultat {
     REDUKSJON,
 }
 
-enum class ØvrigTrigger {
-    MANGLER_OPPLYSNINGER,
-    SATSENDRING,
-    BARN_MED_6_ÅRS_DAG,
-    ALLTID_AUTOMATISK,
-    ETTER_ENDRET_UTBETALING,
-    ENDRET_UTBETALING,
-    OPPHØR_FRA_FORRIGE_BEHANDLING,
-    REDUKSJON_FRA_FORRIGE_BEHANDLING,
-    BARN_DØD,
-    SKAL_VISES_SELV_OM_IKKE_ENDRING,
-
-    @Deprecated("Skal erstattes med OPPHØR_FRA_FORRIGE_BEHANDLING, må endres i sanity")
-    GJELDER_FØRSTE_PERIODE,
-
-    @Deprecated("Skal erstattes med REDUKSJON_FRA_FORRIGE_BEHANDLING, må endres i sanity")
-    GJELDER_FRA_INNVILGELSESTIDSPUNKT,
-}
-
 enum class EndretUtbetalingsperiodeTrigger {
     ETTER_ENDRET_UTBETALINGSPERIODE,
 }
