@@ -104,7 +104,7 @@ data class SanityEØSBegrunnelse(
     override val periodeType: BrevPeriodeType?,
     override val begrunnelseTypeForPerson: VedtakBegrunnelseType? = null,
     override val valgbarhet: Valgbarhet?,
-    override val ovrigeTriggere: List<ØvrigTrigger>,
+    override val ovrigeTriggere: List<ØvrigTrigger> = emptyList(),
     val annenForeldersAktivitet: List<KompetanseAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,

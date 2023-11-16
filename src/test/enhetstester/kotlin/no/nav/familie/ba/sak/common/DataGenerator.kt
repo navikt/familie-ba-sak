@@ -1341,7 +1341,7 @@ fun lagSanityEøsBegrunnelse(
     tema: Tema? = null,
     periodeType: BrevPeriodeType? = null,
     valgbarhet: Valgbarhet? = null,
-    ovrigeTriggere: List<ØvrigTrigger>,
+    ovrigeTriggere: List<ØvrigTrigger> = emptyList(),
 ): SanityEØSBegrunnelse =
     SanityEØSBegrunnelse(
         apiNavn = apiNavn,

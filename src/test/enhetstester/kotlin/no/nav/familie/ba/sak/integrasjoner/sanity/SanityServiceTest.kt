@@ -38,6 +38,7 @@ class SanityServiceTest {
                     hjemlerEØSForordningen987 = emptyList(),
                     hjemlerSeperasjonsavtalenStorbritannina = emptyList(),
                     valgbarhet = null,
+                    ovrigeTriggere = emptyList()
                 )
             }
 
