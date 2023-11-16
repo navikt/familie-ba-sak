@@ -20,7 +20,7 @@ Egenskap: Vedtaksperioder for fortsatt innvilget
       | 2            | 1       | SØKER      | 27.04.1991  |
       | 2            | 2       | BARN       | 07.10.2021  |
 
-  Scenario: Skal gi riktige perioder når behandlingsresultatet er fortsatt innvilget
+  Scenario: Skal gi én vedtaksperiode når behandlingsresultatet er fortsatt innvilget
     Og lag personresultater for behandling 1
     Og lag personresultater for behandling 2
 
