@@ -20,7 +20,6 @@ import java.util.concurrent.CountDownLatch
     matchIfMissing = false,
 )
 class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingService: FagsystemsbehandlingService) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     var latch: CountDownLatch = CountDownLatch(1)
@@ -30,7 +29,10 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
         topics = ["teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic"],
         containerFactory = "concurrentKafkaListenerContainerFactory",
     )
-    fun listen(consumerRecord: ConsumerRecord<String, String>, ack: Acknowledgment) {
+    fun listen(
+        consumerRecord: ConsumerRecord<String, String>,
+        ack: Acknowledgment,
+    ) {
         val data: String = consumerRecord.value()
         val key: String = consumerRecord.key()
         val request: HentFagsystemsbehandlingRequest =
@@ -42,15 +44,16 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
         logger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
         secureLogger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
 
-        val fagsystemsbehandling = try {
-            fagsystemsbehandlingService.hentFagsystemsbehandling(request)
-        } catch (e: Exception) {
-            logger.warn(
-                "Noe gikk galt mens sender HentFagsystemsbehandlingRespons for behandling=${request.eksternId}. " +
-                    "Feiler med ${e.message}",
-            )
-            HentFagsystemsbehandlingRespons(feilMelding = e.message)
-        }
+        val fagsystemsbehandling =
+            try {
+                fagsystemsbehandlingService.hentFagsystemsbehandling(request)
+            } catch (e: Exception) {
+                logger.warn(
+                    "Noe gikk galt mens sender HentFagsystemsbehandlingRespons for behandling=${request.eksternId}. " +
+                        "Feiler med ${e.message}",
+                )
+                HentFagsystemsbehandlingRespons(feilMelding = e.message)
+            }
         fagsystemsbehandlingService.sendFagsystemsbehandling(fagsystemsbehandling, key, request.eksternId)
         latch.countDown()
         ack.acknowledge()

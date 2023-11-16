@@ -51,23 +51,24 @@ class LagreMigreringsdatoTest {
     val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     val simuleringService = mockk<SimuleringService>()
 
-    private val behandlingService = BehandlingService(
-        behandlingHentOgPersisterService,
-        behandlingstemaService,
-        behandlingSøknadsinfoService,
-        behandlingMigreringsinfoRepository,
-        behandlingMetrikker,
-        saksstatistikkEventPublisher,
-        fagsakRepository,
-        vedtakRepository,
-        andelTilkjentYtelseRepository,
-        loggService,
-        arbeidsfordelingService,
-        infotrygdService,
-        vedtaksperiodeService,
-        taskRepository,
-        vilkårsvurderingService,
-    )
+    private val behandlingService =
+        BehandlingService(
+            behandlingHentOgPersisterService,
+            behandlingstemaService,
+            behandlingSøknadsinfoService,
+            behandlingMigreringsinfoRepository,
+            behandlingMetrikker,
+            saksstatistikkEventPublisher,
+            fagsakRepository,
+            vedtakRepository,
+            andelTilkjentYtelseRepository,
+            loggService,
+            arbeidsfordelingService,
+            infotrygdService,
+            vedtaksperiodeService,
+            taskRepository,
+            vilkårsvurderingService,
+        )
 
     @Test
     fun `Lagre første migreringstidspunkt skal ikke kaste feil`() {
@@ -90,15 +91,17 @@ class LagreMigreringsdatoTest {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns null
         every { behandlingMigreringsinfoRepository.save(any()) } returns mockk()
 
-        val feil = assertThrows<FunksjonellFeil> {
-            behandlingService.lagreNedMigreringsdato(
-                migreringsdato = LocalDate.now(),
-                behandling = lagBehandling(
-                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                ),
-            )
-        }
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                behandlingService.lagreNedMigreringsdato(
+                    migreringsdato = LocalDate.now(),
+                    behandling =
+                        lagBehandling(
+                            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                            årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                        ),
+                )
+            }
         assertEquals(
             "Migreringsdatoen du har lagt inn er lik eller senere enn eksisterende migreringsdato. Du må velge en tidligere migreringsdato for å fortsette.",
             feil.melding,
@@ -114,10 +117,11 @@ class LagreMigreringsdatoTest {
         assertDoesNotThrow {
             behandlingService.lagreNedMigreringsdato(
                 migreringsdato = LocalDate.now().minusMonths(1),
-                behandling = lagBehandling(
-                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                ),
+                behandling =
+                    lagBehandling(
+                        behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                        årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                    ),
             )
         }
     }
@@ -134,15 +138,17 @@ class LagreMigreringsdatoTest {
 
         every { behandlingMigreringsinfoRepository.save(any()) } returns mockk()
 
-        val feil = assertThrows<FunksjonellFeil> {
-            behandlingService.lagreNedMigreringsdato(
-                migreringsdato = LocalDate.now(),
-                behandling = lagBehandling(
-                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                ),
-            )
-        }
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                behandlingService.lagreNedMigreringsdato(
+                    migreringsdato = LocalDate.now(),
+                    behandling =
+                        lagBehandling(
+                            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                            årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                        ),
+                )
+            }
         assertEquals(
             "Migreringsdatoen du har lagt inn er lik eller senere enn eksisterende migreringsdato. Du må velge en tidligere migreringsdato for å fortsette.",
             feil.melding,
@@ -164,10 +170,11 @@ class LagreMigreringsdatoTest {
         assertDoesNotThrow {
             behandlingService.lagreNedMigreringsdato(
                 migreringsdato = LocalDate.now(),
-                behandling = lagBehandling(
-                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                ),
+                behandling =
+                    lagBehandling(
+                        behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                        årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                    ),
             )
         }
     }

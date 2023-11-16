@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregle
 
 enum class FiltreringsregelOppfylt(val beskrivelse: String, private val filtreringsregel: Filtreringsregel) :
     EvalueringÅrsak {
-
     MOR_HAR_GYLDIG_FNR("Mor har gyldig fødselsnummer", Filtreringsregel.MOR_GYLDIG_FNR),
     BARN_HAR_GYLDIG_FNR("Barn har gyldig fødselsnummer", Filtreringsregel.BARN_GYLDIG_FNR),
     MOR_ER_OVER_18_ÅR("Mor er over 18 år.", Filtreringsregel.MOR_ER_OVER_18_ÅR),

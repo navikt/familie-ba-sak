@@ -8,7 +8,6 @@ class SaksbehandlerContext(
     @Value("\${rolle.kode6}")
     private val kode6GruppeId: String,
 ) {
-
     fun hentSaksbehandlerSignaturTilBrev(): String {
         val grupper = SikkerhetContext.hentGrupper()
 

@@ -27,16 +27,16 @@ class InternStatistikkController(
     private val internStatistikkService: InternStatistikkService,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
 ) {
-
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentAntallFagsakerOpprettet(): ResponseEntity<Ressurs<InternStatistikkResponse>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter internstatistikk")
-        val internstatistikk = InternStatistikkResponse(
-            antallFagsakerTotalt = internStatistikkService.finnAntallFagsakerTotalt(),
-            antallFagsakerLøpende = internStatistikkService.finnAntallFagsakerLøpende(),
-            antallBehandlingerIkkeFerdigstilt = internStatistikkService.finnAntallBehandlingerIkkeErAvsluttet(),
-            antallBehandlingerPerÅrsak = internStatistikkService.finnAntallBehandlingerPerÅrsak(),
-        )
+        val internstatistikk =
+            InternStatistikkResponse(
+                antallFagsakerTotalt = internStatistikkService.finnAntallFagsakerTotalt(),
+                antallFagsakerLøpende = internStatistikkService.finnAntallFagsakerLøpende(),
+                antallBehandlingerIkkeFerdigstilt = internStatistikkService.finnAntallBehandlingerIkkeErAvsluttet(),
+                antallBehandlingerPerÅrsak = internStatistikkService.finnAntallBehandlingerPerÅrsak(),
+            )
         return ResponseEntity.ok(Ressurs.Companion.success(internstatistikk))
     }
 
@@ -52,7 +52,6 @@ class InternStatistikkController(
     }
 
     companion object {
-
         private val logger: Logger = LoggerFactory.getLogger(InternStatistikkController::class.java)
     }
 }

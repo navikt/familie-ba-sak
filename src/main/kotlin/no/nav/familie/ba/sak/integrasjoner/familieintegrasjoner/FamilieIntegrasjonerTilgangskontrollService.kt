@@ -16,7 +16,6 @@ class FamilieIntegrasjonerTilgangskontrollService(
     private val cacheManager: CacheManager,
     private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
 ) {
-
     fun hentMaskertPersonInfoVedManglendeTilgang(aktør: Aktør): RestPersonInfo? {
         val harTilgang = sjekkTilgangTilPerson(personIdent = aktør.aktivFødselsnummer()).harTilgang
         return if (!harTilgang) {

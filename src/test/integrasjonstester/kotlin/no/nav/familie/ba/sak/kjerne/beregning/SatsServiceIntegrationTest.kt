@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class SatsServiceIntegrationTest : AbstractSpringIntegrationTest() {
-
     @Test
     fun `Skal gi riktig sats for ordinær barnetrygd, 6 til 18 år`() {
         val forventet =

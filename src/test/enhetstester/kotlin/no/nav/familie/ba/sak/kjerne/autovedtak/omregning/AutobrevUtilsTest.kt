@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class AutobrevUtilsTest {
-
     @Test
     fun `Skal sjekke at historiske og gjeldene begrunnelser blir hentet for 6 år`() {
         val begrunnelser = AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(alder = 6)

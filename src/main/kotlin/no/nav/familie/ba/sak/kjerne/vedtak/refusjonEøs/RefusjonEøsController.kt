@@ -90,7 +90,9 @@ class RefusjonEøsController(
     }
 
     @GetMapping(path = ["behandlinger/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentRefusjonEøsPerioder(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestRefusjonEøs>>> {
+    fun hentRefusjonEøsPerioder(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<List<RestRefusjonEøs>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente refusjon EØS for behandling",

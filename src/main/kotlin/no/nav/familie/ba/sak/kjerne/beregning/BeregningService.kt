@@ -93,13 +93,15 @@ class BeregningService(
         barnAktør: Aktør,
         fagsakId: Long,
     ): List<TilkjentYtelse> {
-        val andreFagsaker = fagsakService.hentFagsakerPåPerson(barnAktør)
-            .filter { it.id != fagsakId }
+        val andreFagsaker =
+            fagsakService.hentFagsakerPåPerson(barnAktør)
+                .filter { it.id != fagsakId }
 
         return andreFagsaker.mapNotNull { fagsak ->
-            val behandlingSomLiggerTilGodkjenning = behandlingRepository.finnBehandlingerSomLiggerTilGodkjenning(
-                fagsakId = fagsak.id,
-            ).singleOrNull()
+            val behandlingSomLiggerTilGodkjenning =
+                behandlingRepository.finnBehandlingerSomLiggerTilGodkjenning(
+                    fagsakId = fagsak.id,
+                ).singleOrNull()
 
             if (behandlingSomLiggerTilGodkjenning != null) {
                 behandlingSomLiggerTilGodkjenning
@@ -160,17 +162,18 @@ class BeregningService(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         nyEndretUtbetalingAndel: EndretUtbetalingAndel? = null,
     ): TilkjentYtelse {
-        val endreteUtbetalingAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id).filter {
-                // Ved automatiske behandlinger ønsker vi alltid å ta vare på de gamle endrede andelene
-                if (behandling.skalBehandlesAutomatisk) {
-                    true
-                } else if (nyEndretUtbetalingAndel != null) {
-                    it.id == nyEndretUtbetalingAndel.id || it.andelerTilkjentYtelse.isNotEmpty()
-                } else {
-                    it.andelerTilkjentYtelse.isNotEmpty()
+        val endreteUtbetalingAndeler =
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
+                .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id).filter {
+                    // Ved automatiske behandlinger ønsker vi alltid å ta vare på de gamle endrede andelene
+                    if (behandling.skalBehandlesAutomatisk) {
+                        true
+                    } else if (nyEndretUtbetalingAndel != null) {
+                        it.id == nyEndretUtbetalingAndel.id || it.andelerTilkjentYtelse.isNotEmpty()
+                    } else {
+                        it.andelerTilkjentYtelse.isNotEmpty()
+                    }
                 }
-            }
 
         return genererOgLagreTilkjentYtelse(
             behandling = behandling,
@@ -185,8 +188,9 @@ class BeregningService(
         endreteUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
     ): TilkjentYtelse {
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-            ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
+        val vilkårsvurdering =
+            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+                ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
         val tilkjentYtelse =
             TilkjentYtelseUtils.beregnTilkjentYtelse(
@@ -258,10 +262,11 @@ class BeregningService(
                 ).filter { it.erSmåbarnstillegg() }
             }
 
-        val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
-            forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
-            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
-        )
+        val (innvilgedeMånedPerioder, reduserteMånedPerioder) =
+            hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
+                forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
+                nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
+            )
 
         return kanAutomatiskIverksetteSmåbarnstillegg(
             innvilgedeMånedPerioder = innvilgedeMånedPerioder,
@@ -273,8 +278,9 @@ class BeregningService(
      * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse.
      */
     fun finnBarnFraBehandlingMedTilkjentYtelse(behandlingId: Long): List<Aktør> {
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandling(behandlingId)
+        val andelerTilkjentYtelse =
+            andelTilkjentYtelseRepository
+                .finnAndelerTilkjentYtelseForBehandling(behandlingId)
 
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
             ?.filter {

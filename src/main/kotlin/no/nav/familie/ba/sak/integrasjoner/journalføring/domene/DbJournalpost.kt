@@ -27,21 +27,16 @@ data class DbJournalpost(
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "journalpost_seq_generator")
     @SequenceGenerator(name = "journalpost_seq_generator", sequenceName = "journalpost_seq", allocationSize = 50)
     val id: Long = 0,
-
     @Column(name = "opprettet_av", nullable = false, updatable = false)
     val opprettetAv: String = SikkerhetContext.hentSaksbehandlerNavn(),
-
     @Column(name = "opprettet_tid", nullable = false, updatable = false)
     val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
-
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "fk_behandling_id", nullable = false)
     val behandling: Behandling,
-
     @Column(name = "journalpost_id")
     val journalpostId: String,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     val type: DbJournalpostType? = null,
@@ -63,5 +58,6 @@ data class DbJournalpost(
 }
 
 enum class DbJournalpostType {
-    I, U
+    I,
+    U,
 }

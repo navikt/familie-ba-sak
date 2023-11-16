@@ -20,8 +20,10 @@ class BrevKlient(
     @Value("\${SANITY_DATASET}") private val sanityDataset: String,
     restTemplate: RestTemplate,
 ) : AbstractRestClient(restTemplate, "familie-brev") {
-
-    fun genererBrev(målform: String, brev: Brev): ByteArray {
+    fun genererBrev(
+        målform: String,
+        brev: Brev,
+    ): ByteArray {
         val uri = URI.create("$familieBrevUri/api/$sanityDataset/dokument/$målform/${brev.mal.apiNavn}/pdf")
 
         secureLogger.info("Kaller familie brev($uri) med data ${brev.data.toBrevString()}")

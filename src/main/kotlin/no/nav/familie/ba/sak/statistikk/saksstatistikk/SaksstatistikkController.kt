@@ -24,11 +24,12 @@ class SaksstatistikkController(
     private val saksstatistikkService: SaksstatistikkService,
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 ) {
-
     private val logger = LoggerFactory.getLogger(SaksstatistikkController::class.java)
 
     @GetMapping(path = ["/behandling/{behandlingId}"])
-    fun hentBehandlingDvh(@PathVariable(name = "behandlingId", required = true) behandlingId: Long): BehandlingDVH {
+    fun hentBehandlingDvh(
+        @PathVariable(name = "behandlingId", required = true) behandlingId: Long,
+    ): BehandlingDVH {
         try {
             return saksstatistikkService.mapTilBehandlingDVH(behandlingId)!!
         } catch (e: Exception) {
@@ -38,7 +39,9 @@ class SaksstatistikkController(
     }
 
     @GetMapping(path = ["/sak/{fagsakId}"])
-    fun hentSakDvh(@PathVariable(name = "fagsakId", required = true) fagsakId: Long): SakDVH {
+    fun hentSakDvh(
+        @PathVariable(name = "fagsakId", required = true) fagsakId: Long,
+    ): SakDVH {
         try {
             return saksstatistikkService.mapTilSakDvh(fagsakId)!!
         } catch (e: Exception) {
@@ -51,26 +54,30 @@ class SaksstatistikkController(
         description = "Oppdaterer saksstatistikk mellomlagring om at en melding har blitt sendt. Setter sendtTidspunkt slik at melding ikke blir sendt på nytt.",
     )
     @PostMapping(path = ["/registrer-sendt-fra-statistikk"])
-    fun registrerSendtFraStatistikk(@RequestBody(required = true) input: SaksstatistikkSendtRequest): ResponseEntity<SaksstatistikkMellomlagring> {
+    fun registrerSendtFraStatistikk(
+        @RequestBody(required = true) input: SaksstatistikkSendtRequest,
+    ): ResponseEntity<SaksstatistikkMellomlagring> {
         try {
             val jsnoNode = sakstatistikkObjectMapper.readTree(input.json)
             val funksjonellId = jsnoNode.get("funksjonellId").asText()
-            val typeId = if (input.type == SaksstatistikkMellomlagringType.SAK) {
-                jsnoNode.get("sakId").asLong()
-            } else {
-                jsnoNode.get("behandlingId").asLong()
-            }
+            val typeId =
+                if (input.type == SaksstatistikkMellomlagringType.SAK) {
+                    jsnoNode.get("sakId").asLong()
+                } else {
+                    jsnoNode.get("behandlingId").asLong()
+                }
             val kontraktversjon = jsnoNode.get("versjon").asText()
 
-            val sm = SaksstatistikkMellomlagring(
-                offsetVerdiOnPrem = input.offset,
-                funksjonellId = funksjonellId,
-                type = input.type,
-                json = input.json,
-                typeId = typeId,
-                kontraktVersjon = kontraktversjon,
-                sendtTidspunkt = input.sendtTidspunkt,
-            )
+            val sm =
+                SaksstatistikkMellomlagring(
+                    offsetVerdiOnPrem = input.offset,
+                    funksjonellId = funksjonellId,
+                    type = input.type,
+                    json = input.json,
+                    typeId = typeId,
+                    kontraktVersjon = kontraktversjon,
+                    sendtTidspunkt = input.sendtTidspunkt,
+                )
 
             saksstatistikkMellomlagringRepository.saveAndFlush(sm)
             return ResponseEntity.ok(sm)

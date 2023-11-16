@@ -33,7 +33,6 @@ class StatusFraOppdragTask(
     private val personidentService: PersonidentService,
     private val taskRepository: TaskRepositoryWrapper,
 ) : AsyncTaskStep {
-
     /**
      * Metoden prøver å hente kvittering i ét døgn.
      * Får tasken kvittering som ikke er OK feiler vi tasken.
@@ -56,7 +55,6 @@ class StatusFraOppdragTask(
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "statusFraOppdrag"
     }
 }

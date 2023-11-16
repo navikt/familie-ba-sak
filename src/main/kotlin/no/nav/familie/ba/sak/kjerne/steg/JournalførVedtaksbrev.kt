@@ -39,8 +39,10 @@ class JournalførVedtaksbrev(
     private val brevmottakerService: BrevmottakerService,
     private val brevmalService: BrevmalService,
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
-
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: JournalførVedtaksbrevDTO): StegType {
+    override fun utførStegOgAngiNeste(
+        behandling: Behandling,
+        data: JournalførVedtaksbrevDTO,
+    ): StegType {
         val vedtak = vedtakService.hent(vedtakId = data.vedtakId)
         val fagsakId = "${vedtak.behandling.fagsak.id}"
         val fagsak = fagsakRepository.finnFagsak(vedtak.behandling.fagsak.id)
@@ -78,11 +80,13 @@ class JournalførVedtaksbrev(
                 vedtak = vedtak,
                 journalførendeEnhet = behandlendeEnhet,
                 mottakerInfo = mottakerInfo,
-                tilManuellMottakerEllerVerge = if (institusjonVergeIdent != null) {
-                    mottakerInfo.erInstitusjonVerge
-                } else {
-                    (mottakerInfo.navn != null && mottakerInfo.navn != brevmottakerService.hentMottakerNavn(søkersident))
-                }, // mottakersnavn fyller ut kun når manuell mottaker finnes
+                tilManuellMottakerEllerVerge =
+                    if (institusjonVergeIdent != null) {
+                        mottakerInfo.erInstitusjonVerge
+                    } else {
+                        (mottakerInfo.navn != null && mottakerInfo.navn != brevmottakerService.hentMottakerNavn(søkersident))
+                    },
+                // mottakersnavn fyller ut kun når manuell mottaker finnes
             ).also { journalposterTilDistribusjon[it] = mottakerInfo }
         }
 
@@ -104,23 +108,26 @@ class JournalførVedtaksbrev(
                 val distribuerTilVergeTask =
                     DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask
                         .opprettDistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
-                            distribuerDokumentDTO = lagDistribuerDokumentDto(
-                                behandling = behandling,
-                                journalPostId = it.key,
-                                mottakerInfo = it.value,
-                            ),
+                            distribuerDokumentDTO =
+                                lagDistribuerDokumentDto(
+                                    behandling = behandling,
+                                    journalPostId = it.key,
+                                    mottakerInfo = it.value,
+                                ),
                             properties = data.task.metadata,
                         )
                 taskRepository.save(distribuerTilVergeTask)
             } else { // Denne tasken sender vedtaksbrev og håndterer steg videre
-                val distribuerTilSøkerTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
-                    distribuerDokumentDTO = lagDistribuerDokumentDto(
-                        behandling = behandling,
-                        journalPostId = it.key,
-                        mottakerInfo = it.value,
-                    ),
-                    properties = data.task.metadata,
-                )
+                val distribuerTilSøkerTask =
+                    DistribuerDokumentTask.opprettDistribuerDokumentTask(
+                        distribuerDokumentDTO =
+                            lagDistribuerDokumentDto(
+                                behandling = behandling,
+                                journalPostId = it.key,
+                                mottakerInfo = it.value,
+                            ),
+                        properties = data.task.metadata,
+                    )
                 taskRepository.save(distribuerTilSøkerTask)
             }
         }
@@ -137,27 +144,29 @@ class JournalførVedtaksbrev(
         val vedleggPdf =
             hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
 
-        val brev = listOf(
-            Dokument(
-                vedtak.stønadBrevPdF!!,
-                filtype = Filtype.PDFA,
-                dokumenttype = vedtak.behandling.resultat.tilDokumenttype(),
-                tittel = hentOverstyrtDokumenttittel(vedtak.behandling),
-            ),
-        )
+        val brev =
+            listOf(
+                Dokument(
+                    vedtak.stønadBrevPdF!!,
+                    filtype = Filtype.PDFA,
+                    dokumenttype = vedtak.behandling.resultat.tilDokumenttype(),
+                    tittel = hentOverstyrtDokumenttittel(vedtak.behandling),
+                ),
+            )
         logger.info(
             "Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${
                 hentOverstyrtDokumenttittel(vedtak.behandling)
             }",
         )
-        val vedlegg = listOf(
-            Dokument(
-                vedleggPdf,
-                filtype = Filtype.PDFA,
-                dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
-                tittel = VEDTAK_VEDLEGG_TITTEL,
-            ),
-        )
+        val vedlegg =
+            listOf(
+                Dokument(
+                    vedleggPdf,
+                    filtype = Filtype.PDFA,
+                    dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
+                    tittel = VEDTAK_VEDLEGG_TITTEL,
+                ),
+            )
         return utgåendeJournalføringService.journalførDokument(
             fnr = fnr,
             fagsakId = fagsakId,
@@ -170,11 +179,12 @@ class JournalførVedtaksbrev(
         )
     }
 
-    private fun Behandlingsresultat.tilDokumenttype() = when (this) {
-        Behandlingsresultat.AVSLÅTT -> Dokumenttype.BARNETRYGD_VEDTAK_AVSLAG
-        Behandlingsresultat.OPPHØRT -> Dokumenttype.BARNETRYGD_OPPHØR
-        else -> Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
-    }
+    private fun Behandlingsresultat.tilDokumenttype() =
+        when (this) {
+            Behandlingsresultat.AVSLÅTT -> Dokumenttype.BARNETRYGD_VEDTAK_AVSLAG
+            Behandlingsresultat.OPPHØRT -> Dokumenttype.BARNETRYGD_OPPHØR
+            else -> Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
+        }
 
     private fun utledAvsenderMottaker(mottakerInfo: MottakerInfo): AvsenderMottaker? {
         return when {
@@ -227,7 +237,6 @@ class JournalførVedtaksbrev(
     }
 
     companion object {
-
         val logger = LoggerFactory.getLogger(JournalførVedtaksbrev::class.java)
 
         fun hentVedlegg(vedleggsnavn: String): ByteArray? {

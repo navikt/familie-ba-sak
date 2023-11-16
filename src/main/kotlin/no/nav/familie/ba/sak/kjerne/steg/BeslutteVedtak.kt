@@ -44,7 +44,6 @@ class BeslutteVedtak(
     private val saksbehandlerContext: SaksbehandlerContext,
     private val automatiskBeslutningService: AutomatiskBeslutningService,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
-
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
         data: RestBeslutningPåVedtak,
@@ -60,7 +59,8 @@ class BeslutteVedtak(
                 melding = "Årsak ${BehandlingÅrsak.KORREKSJON_VEDTAKSBREV.visningsnavn} og toggle ${FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV} false",
                 frontendFeilmelding = "Du har ikke tilgang til å beslutte for denne behandlingen. Ta kontakt med teamet dersom dette ikke stemmer.",
             )
-        } else if (behandling.erTekniskBehandling() && !unleashService.isEnabled(
+        } else if (behandling.erTekniskBehandling() &&
+            !unleashService.isEnabled(
                 FeatureToggleConfig.TEKNISK_ENDRING,
                 behandling.id,
             )
@@ -78,13 +78,14 @@ class BeslutteVedtak(
         val beslutterId =
             if (behandlingSkalAutomatiskBesluttes) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
 
-        val totrinnskontroll = totrinnskontrollService.besluttTotrinnskontroll(
-            behandling = behandling,
-            beslutter = beslutter,
-            beslutterId = beslutterId,
-            beslutning = data.beslutning,
-            kontrollerteSider = data.kontrollerteSider,
-        )
+        val totrinnskontroll =
+            totrinnskontrollService.besluttTotrinnskontroll(
+                behandling = behandling,
+                beslutter = beslutter,
+                beslutterId = beslutterId,
+                beslutning = data.beslutning,
+                kontrollerteSider = data.kontrollerteSider,
+            )
 
         opprettTaskFerdigstillGodkjenneVedtak(
             behandling = behandling,
@@ -93,8 +94,9 @@ class BeslutteVedtak(
         )
 
         return if (data.beslutning.erGodkjent()) {
-            val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+            val vedtak =
+                vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+                    ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
 
@@ -125,8 +127,9 @@ class BeslutteVedtak(
             }
             nesteSteg
         } else {
-            val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
-                ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
+            val vilkårsvurdering =
+                vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+                    ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
             val kopiertVilkårsVurdering = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertVilkårsVurdering)
 
@@ -134,18 +137,19 @@ class BeslutteVedtak(
                 behandling = behandling,
                 kopierVedtakBegrunnelser = true,
                 begrunnelseVilkårPekere =
-                VilkårsvurderingService.matchVilkårResultater(
-                    vilkårsvurdering,
-                    kopiertVilkårsVurdering,
-                ),
+                    VilkårsvurderingService.matchVilkårResultater(
+                        vilkårsvurdering,
+                        kopiertVilkårsVurdering,
+                    ),
             )
 
-            val behandleUnderkjentVedtakTask = OpprettOppgaveTask.opprettTask(
-                behandlingId = behandling.id,
-                oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
-                tilordnetRessurs = totrinnskontroll.saksbehandlerId,
-                fristForFerdigstillelse = LocalDate.now(),
-            )
+            val behandleUnderkjentVedtakTask =
+                OpprettOppgaveTask.opprettTask(
+                    behandlingId = behandling.id,
+                    oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                    tilordnetRessurs = totrinnskontroll.saksbehandlerId,
+                    fristForFerdigstillelse = LocalDate.now(),
+                )
             taskRepository.save(behandleUnderkjentVedtakTask)
             StegType.SEND_TIL_BESLUTTER
         }
@@ -167,10 +171,11 @@ class BeslutteVedtak(
     }
 
     private fun opprettFerdigstillBehandlingTask(behandling: Behandling) {
-        val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
-            søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-            behandlingsId = behandling.id,
-        )
+        val ferdigstillBehandlingTask =
+            FerdigstillBehandlingTask.opprettTask(
+                søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                behandlingsId = behandling.id,
+            )
         taskRepository.save(ferdigstillBehandlingTask)
     }
 
@@ -193,17 +198,24 @@ class BeslutteVedtak(
         }
     }
 
-    private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak) {
+    private fun opprettTaskIverksettMotOppdrag(
+        behandling: Behandling,
+        vedtak: Vedtak,
+    ) {
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
         taskRepository.save(task)
     }
 
-    private fun opprettJournalførVedtaksbrevTask(behandling: Behandling, vedtak: Vedtak) {
-        val task = JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
-            vedtakId = vedtak.id,
-            personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-            behandlingId = behandling.id,
-        )
+    private fun opprettJournalførVedtaksbrevTask(
+        behandling: Behandling,
+        vedtak: Vedtak,
+    ) {
+        val task =
+            JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
+                vedtakId = vedtak.id,
+                personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                behandlingId = behandling.id,
+            )
         taskRepository.save(task)
     }
 }

@@ -16,7 +16,6 @@ class JournalførVedtaksbrevTask(
     private val vedtakService: VedtakService,
     private val stegService: StegService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val vedtakId = task.payload.toLong()
         val behandling = vedtakService.hent(vedtakId).behandling
@@ -25,7 +24,6 @@ class JournalførVedtaksbrevTask(
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "journalførTilJoark"
 
         fun opprettTaskJournalførVedtaksbrev(

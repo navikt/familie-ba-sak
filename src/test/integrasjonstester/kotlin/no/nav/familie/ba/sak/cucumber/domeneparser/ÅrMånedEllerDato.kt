@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 data class ÅrMånedEllerDato(val dato: Any) {
-
     fun førsteDagenIMåneden(): LocalDate {
         return if (dato is LocalDate) {
             require(dato.dayOfMonth != 1) { "Må være første dagen i måneden - $dato" }

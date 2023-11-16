@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 
 class FamilieIntegrasjonerTilgangskontrollServiceTest {
-
     private val client = mockk<FamilieIntegrasjonerTilgangskontrollClient>()
 
     private val cacheManager = ConcurrentMapCacheManager()

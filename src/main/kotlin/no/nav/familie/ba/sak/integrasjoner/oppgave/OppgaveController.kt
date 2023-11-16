@@ -50,7 +50,9 @@ class OppgaveController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun hentOppgaver(@RequestBody restFinnOppgaveRequest: RestFinnOppgaveRequest): ResponseEntity<Ressurs<FinnOppgaveResponseDto>> =
+    fun hentOppgaver(
+        @RequestBody restFinnOppgaveRequest: RestFinnOppgaveRequest,
+    ): ResponseEntity<Ressurs<FinnOppgaveResponseDto>> =
         try {
             val oppgaver: FinnOppgaveResponseDto =
                 oppgaveService.hentOppgaver(restFinnOppgaveRequest.tilFinnOppgaveRequest())
@@ -80,7 +82,9 @@ class OppgaveController(
     }
 
     @PostMapping(path = ["/{oppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun tilbakestillFordelingPåOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<Oppgave>> {
+    fun tilbakestillFordelingPåOppgave(
+        @PathVariable(name = "oppgaveId") oppgaveId: Long,
+    ): ResponseEntity<Ressurs<Oppgave>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "tilbakestille fordeling på oppgave",
@@ -95,21 +99,25 @@ class OppgaveController(
     }
 
     @GetMapping(path = ["/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentDataForManuellJournalføring(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<DataForManuellJournalføring>> {
+    fun hentDataForManuellJournalføring(
+        @PathVariable(name = "oppgaveId") oppgaveId: Long,
+    ): ResponseEntity<Ressurs<DataForManuellJournalføring>> {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val aktør = oppgave.aktoerId?.let { personidentService.hentAktør(it) }
 
         val journalpost = if (oppgave.journalpostId != null) integrasjonClient.hentJournalpost(oppgave.journalpostId!!) else throw Feil("Oppgave har ingen journalpost knyttet til seg")
 
-        val dataForManuellJournalføring = DataForManuellJournalføring(
-            oppgave = oppgave,
-            journalpost = journalpost,
-            person = aktør?.let {
-                personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it)
-                    .tilRestPersonInfo(it.aktivFødselsnummer())
-            },
-            minimalFagsak = if (aktør != null) fagsakService.hentMinimalFagsakForPerson(aktør).data else null,
-        )
+        val dataForManuellJournalføring =
+            DataForManuellJournalføring(
+                oppgave = oppgave,
+                journalpost = journalpost,
+                person =
+                    aktør?.let {
+                        personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it)
+                            .tilRestPersonInfo(it.aktivFødselsnummer())
+                    },
+                minimalFagsak = if (aktør != null) fagsakService.hentMinimalFagsakForPerson(aktør).data else null,
+            )
 
         return ResponseEntity.ok(
             Ressurs.success(
@@ -119,7 +127,9 @@ class OppgaveController(
     }
 
     @GetMapping("/{oppgaveId}/ferdigstill")
-    fun ferdigstillOppgave(@PathVariable oppgaveId: Long): ResponseEntity<Ressurs<String>> {
+    fun ferdigstillOppgave(
+        @PathVariable oppgaveId: Long,
+    ): ResponseEntity<Ressurs<String>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "ferdigstill oppgave",
@@ -156,10 +166,13 @@ class OppgaveController(
     }
 
     @PostMapping("/fjern-behandles-av-applikasjon")
-    fun fjernBehandlesAvApplikasjonFor(@RequestBody oppgaver: List<Long>): ResponseEntity<Ressurs<String>> {
-        val fjernetBehandlesAvApplikasjonForOppgaver = oppgaveService.fjernBehandlesAvApplikasjon(
-            oppgaver,
-        )
+    fun fjernBehandlesAvApplikasjonFor(
+        @RequestBody oppgaver: List<Long>,
+    ): ResponseEntity<Ressurs<String>> {
+        val fjernetBehandlesAvApplikasjonForOppgaver =
+            oppgaveService.fjernBehandlesAvApplikasjon(
+                oppgaver,
+            )
         logger.info("Fjernet behandlesAvApplikasjon for oppgaver=$fjernetBehandlesAvApplikasjonForOppgaver")
         return ResponseEntity.ok(
             Ressurs.success(

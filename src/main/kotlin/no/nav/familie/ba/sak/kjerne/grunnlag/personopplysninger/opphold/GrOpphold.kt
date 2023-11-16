@@ -35,19 +35,15 @@ data class GrOpphold(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Embedded
     val gyldigPeriode: DatoIntervallEntitet? = null,
-
     @Column(name = "type", nullable = false)
     val type: OPPHOLDSTILLATELSE,
-
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
     val person: Person,
 ) : BaseEntitet() {
-
     fun tilKopiForNyPerson(nyPerson: Person): GrOpphold =
         copy(id = 0, person = nyPerson)
 
@@ -74,20 +70,24 @@ data class GrOpphold(
         return result
     }
 
-    fun tilRestRegisteropplysning() = RestRegisteropplysning(
-        fom = this.gyldigPeriode?.fom,
-        tom = this.gyldigPeriode?.tom,
-        verdi = this.type.name.replace('_', ' ').storForbokstav(),
-    )
+    fun tilRestRegisteropplysning() =
+        RestRegisteropplysning(
+            fom = this.gyldigPeriode?.fom,
+            tom = this.gyldigPeriode?.tom,
+            verdi = this.type.name.replace('_', ' ').storForbokstav(),
+        )
 
     companion object {
-
-        fun fraOpphold(opphold: Opphold, person: Person) =
+        fun fraOpphold(
+            opphold: Opphold,
+            person: Person,
+        ) =
             GrOpphold(
-                gyldigPeriode = DatoIntervallEntitet(
-                    fom = opphold.oppholdFra,
-                    tom = opphold.oppholdTil,
-                ),
+                gyldigPeriode =
+                    DatoIntervallEntitet(
+                        fom = opphold.oppholdFra,
+                        tom = opphold.oppholdTil,
+                    ),
                 type = opphold.type,
                 person = person,
             )

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class TomTidslinjeTest {
-
     @Test
     fun `test at fra-og-med og til-og-med er uendelige`() {
         val fom = TomTidslinje<Boolean, Dag>().fraOgMed()

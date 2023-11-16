@@ -45,6 +45,7 @@ data class PdlFolkeregisteridentifikator(
 )
 
 enum class FolkeregisteridentifikatorStatus { I_BRUK, OPPHOERT }
+
 enum class FolkeregisteridentifikatorType { FNR, DNR }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -56,7 +57,6 @@ data class PdlNavn(
     val mellomnavn: String? = null,
     val etternavn: String,
 ) {
-
     fun fulltNavn(): String {
         return when (mellomnavn) {
             null -> "$fornavn $etternavn"

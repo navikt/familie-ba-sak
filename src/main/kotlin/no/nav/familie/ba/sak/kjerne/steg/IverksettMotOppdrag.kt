@@ -27,14 +27,18 @@ class IverksettMotOppdrag(
 ) : BehandlingSteg<IverksettingTaskDTO> {
     private val iverksattOppdrag = Metrics.counter("familie.ba.sak.oppdrag.iverksatt")
 
-    override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
+    override fun preValiderSteg(
+        behandling: Behandling,
+        stegService: StegService?,
+    ) {
         tilkjentYtelseValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling)
 
-        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
-            ?: throw Feil(
-                message = "Mangler totrinnskontroll ved iverksetting",
-                frontendFeilmelding = "Mangler totrinnskontroll ved iverksetting",
-            )
+        val totrinnskontroll =
+            totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
+                ?: throw Feil(
+                    message = "Mangler totrinnskontroll ved iverksetting",
+                    frontendFeilmelding = "Mangler totrinnskontroll ved iverksetting",
+                )
 
         if (totrinnskontroll.erUgyldig()) {
             throw Feil(

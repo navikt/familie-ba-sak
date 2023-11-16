@@ -18,7 +18,6 @@ class SamhandlerKlient(
     private val familieOppdragUri: String,
     @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "samhandler") {
-
     @Cacheable("hent-samhandler", cacheManager = "dailyCache")
     fun hentSamhandler(orgNummer: String): SamhandlerInfo {
         val uri = URI.create("$familieOppdragUri/tss/orgnr/$orgNummer")
@@ -32,7 +31,12 @@ class SamhandlerKlient(
         }
     }
 
-    fun søkSamhandlere(navn: String?, postnummer: String?, område: String?, side: Int): SøkSamhandlerInfo {
+    fun søkSamhandlere(
+        navn: String?,
+        postnummer: String?,
+        område: String?,
+        side: Int,
+    ): SøkSamhandlerInfo {
         val uri = URI.create("$familieOppdragUri/tss/navn")
 
         return kallEksternTjenesteRessurs(

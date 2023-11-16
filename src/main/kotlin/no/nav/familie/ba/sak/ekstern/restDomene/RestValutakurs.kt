@@ -21,21 +21,23 @@ data class RestValutakurs(
     }
 }
 
-fun RestValutakurs.tilValutakurs(barnAktører: List<Aktør>) = Valutakurs(
-    fom = this.fom,
-    tom = this.tom,
-    barnAktører = barnAktører.toSet(),
-    valutakursdato = this.valutakursdato,
-    valutakode = this.valutakode,
-    kurs = this.kurs,
-)
+fun RestValutakurs.tilValutakurs(barnAktører: List<Aktør>) =
+    Valutakurs(
+        fom = this.fom,
+        tom = this.tom,
+        barnAktører = barnAktører.toSet(),
+        valutakursdato = this.valutakursdato,
+        valutakode = this.valutakode,
+        kurs = this.kurs,
+    )
 
-fun Valutakurs.tilRestValutakurs() = RestValutakurs(
-    id = this.id,
-    fom = this.fom,
-    tom = this.tom,
-    barnIdenter = this.barnAktører.map { it.aktivFødselsnummer() },
-    valutakursdato = this.valutakursdato,
-    valutakode = this.valutakode,
-    kurs = this.kurs,
-).medUtfyltStatus()
+fun Valutakurs.tilRestValutakurs() =
+    RestValutakurs(
+        id = this.id,
+        fom = this.fom,
+        tom = this.tom,
+        barnIdenter = this.barnAktører.map { it.aktivFødselsnummer() },
+        valutakursdato = this.valutakursdato,
+        valutakode = this.valutakode,
+        kurs = this.kurs,
+    ).medUtfyltStatus()

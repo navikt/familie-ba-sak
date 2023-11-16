@@ -27,7 +27,6 @@ class SendVedtakTilInfotrygdTask(
     private val infotrygdFeedClient: InfotrygdFeedClient,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val infotrygdVedtakFeedTaskDto = objectMapper.readValue(task.payload, InfotrygdVedtakFeedTaskDto::class.java)
 
@@ -40,13 +39,15 @@ class SendVedtakTilInfotrygdTask(
     }
 
     private fun finnFørsteUtbetalingsperiode(behandlingId: Long): LocalDate {
-        val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
+        val andelerMedEndringer =
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
 
         return if (andelerMedEndringer.isNotEmpty()) {
-            val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(andelerMedEndringer)
-                .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
-                .first()
+            val førsteUtbetalingsperiode =
+                beregnUtbetalingsperioderUtenKlassifisering(andelerMedEndringer)
+                    .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
+                    .first()
             førsteUtbetalingsperiode.fom
         } else {
             error("Finner ikke første utbetalingsperiode")
@@ -54,27 +55,31 @@ class SendVedtakTilInfotrygdTask(
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "sendVedtakFeedTilInfotrygd"
 
-        fun opprettTask(fnrStoenadsmottaker: String, behandlingId: Long): Task {
+        fun opprettTask(
+            fnrStoenadsmottaker: String,
+            behandlingId: Long,
+        ): Task {
             secureLogger.info("Oppretter task for å sende vedtaksmelding for $fnrStoenadsmottaker til Infotrygd.")
 
-            val metadata = Properties().apply {
-                this["fnrStoenadsmottaker"] = fnrStoenadsmottaker
-                if (!MDC.get(MDCConstants.MDC_CALL_ID).isNullOrEmpty()) {
-                    this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
+            val metadata =
+                Properties().apply {
+                    this["fnrStoenadsmottaker"] = fnrStoenadsmottaker
+                    if (!MDC.get(MDCConstants.MDC_CALL_ID).isNullOrEmpty()) {
+                        this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
+                    }
                 }
-            }
 
             return Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(
-                    InfotrygdVedtakFeedTaskDto(
-                        fnrStoenadsmottaker = fnrStoenadsmottaker,
-                        behandlingId = behandlingId,
+                payload =
+                    objectMapper.writeValueAsString(
+                        InfotrygdVedtakFeedTaskDto(
+                            fnrStoenadsmottaker = fnrStoenadsmottaker,
+                            behandlingId = behandlingId,
+                        ),
                     ),
-                ),
                 properties = metadata,
             )
         }

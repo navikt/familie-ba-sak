@@ -29,9 +29,10 @@ class TilbakestillBehandlingTilBehandlingsresultatService(
         }
 
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
-            vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId,
-            ),
+            vedtak =
+                vedtakRepository.findByBehandlingAndAktiv(
+                    behandlingId,
+                ),
         )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
         return behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(

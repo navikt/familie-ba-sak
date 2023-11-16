@@ -18,16 +18,16 @@ class SimuleringController(
     private val simuleringService: SimuleringService,
     private val tilgangService: TilgangService,
 ) {
-
     @GetMapping(path = ["/{behandlingId}/simulering"])
     fun hentSimulering(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<RestSimulering>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
-        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
-            økonomiSimuleringMottakere = vedtakSimuleringMottaker,
-        )
+        val restSimulering =
+            vedtakSimuleringMottakereTilRestSimulering(
+                økonomiSimuleringMottakere = vedtakSimuleringMottaker,
+            )
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
 }

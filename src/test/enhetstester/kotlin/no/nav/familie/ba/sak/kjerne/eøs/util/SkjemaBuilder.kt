@@ -18,10 +18,15 @@ abstract class SkjemaBuilder<S, B>(
 ) where S : PeriodeOgBarnSkjemaEntitet<S>, B : SkjemaBuilder<S, B> {
     private val skjemaer: MutableList<S> = mutableListOf()
 
-    protected fun medSkjema(k: String, barn: List<Person>, mapChar: (Char?) -> S?): B {
-        val tidslinje = k.tilCharTidslinje(startMåned)
-            .map(mapChar)
-            .slåSammenLike()
+    protected fun medSkjema(
+        k: String,
+        barn: List<Person>,
+        mapChar: (Char?) -> S?,
+    ): B {
+        val tidslinje =
+            k.tilCharTidslinje(startMåned)
+                .map(mapChar)
+                .slåSammenLike()
 
         tidslinje.perioder()
             .filter { it.innhold != null }
@@ -47,8 +52,9 @@ abstract class SkjemaBuilder<S, B>(
         return this as B
     }
 
-    fun bygg(): Collection<S> = skjemaer
-        .map { skjema -> skjema.also { it.behandlingId = behandlingId.id } }
+    fun bygg(): Collection<S> =
+        skjemaer
+            .map { skjema -> skjema.also { it.behandlingId = behandlingId.id } }
 
     fun lagreTil(repository: PeriodeOgBarnSkjemaRepository<S>): List<S> {
         return repository.saveAll(bygg())

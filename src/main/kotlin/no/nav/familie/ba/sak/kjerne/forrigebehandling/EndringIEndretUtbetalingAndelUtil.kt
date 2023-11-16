@@ -10,15 +10,15 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import java.time.YearMonth
 
 object EndringIEndretUtbetalingAndelUtil {
-
     fun utledEndringstidspunktForEndretUtbetalingAndel(
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
         forrigeEndretAndeler: List<EndretUtbetalingAndel>,
     ): YearMonth? {
-        val endringIEndretUtbetalingAndelTidslinje = lagEndringIEndretUtbetalingAndelTidslinje(
-            nåværendeEndretAndeler = nåværendeEndretAndeler,
-            forrigeEndretAndeler = forrigeEndretAndeler,
-        )
+        val endringIEndretUtbetalingAndelTidslinje =
+            lagEndringIEndretUtbetalingAndelTidslinje(
+                nåværendeEndretAndeler = nåværendeEndretAndeler,
+                forrigeEndretAndeler = forrigeEndretAndeler,
+            )
 
         return endringIEndretUtbetalingAndelTidslinje.tilFørsteEndringstidspunkt()
     }
@@ -29,12 +29,13 @@ object EndringIEndretUtbetalingAndelUtil {
     ): Tidslinje<Boolean, Måned> {
         val allePersoner = (nåværendeEndretAndeler.mapNotNull { it.person?.aktør } + forrigeEndretAndeler.mapNotNull { it.person?.aktør }).distinct()
 
-        val tidslinjePerPerson = allePersoner.map { aktør ->
-            lagEndringIEndretUbetalingAndelPerPersonTidslinje(
-                nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { it.person?.aktør == aktør },
-                forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.person?.aktør == aktør },
-            )
-        }
+        val tidslinjePerPerson =
+            allePersoner.map { aktør ->
+                lagEndringIEndretUbetalingAndelPerPersonTidslinje(
+                    nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { it.person?.aktør == aktør },
+                    forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.person?.aktør == aktør },
+                )
+            }
 
         return tidslinjePerPerson.kombiner { finnesMinstEnEndringIPeriode(it) }
     }
@@ -50,13 +51,14 @@ object EndringIEndretUtbetalingAndelUtil {
         val nåværendeTidslinje = EndretUtbetalingAndelTidslinje(nåværendeEndretAndelerForPerson)
         val forrigeTidslinje = EndretUtbetalingAndelTidslinje(forrigeEndretAndelerForPerson)
 
-        val endringerTidslinje = nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
-            (
-                nåværende.avtaletidspunktDeltBosted != forrige.avtaletidspunktDeltBosted ||
-                    nåværende.årsak != forrige.årsak ||
-                    nåværende.søknadstidspunkt != forrige.søknadstidspunkt
+        val endringerTidslinje =
+            nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
+                (
+                    nåværende.avtaletidspunktDeltBosted != forrige.avtaletidspunktDeltBosted ||
+                        nåværende.årsak != forrige.årsak ||
+                        nåværende.søknadstidspunkt != forrige.søknadstidspunkt
                 )
-        }
+            }
 
         return endringerTidslinje
     }

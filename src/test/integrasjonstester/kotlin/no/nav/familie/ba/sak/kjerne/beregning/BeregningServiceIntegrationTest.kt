@@ -44,7 +44,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
-
     @Autowired
     private lateinit var beregningService: BeregningService
 
@@ -92,16 +91,17 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         opprettTilkjentYtelse(behandling)
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGBMedToBarn(
-            fnr,
-            fagsak.id.toString(),
-            behandling.id,
-            dagensDato,
-            fomBarn1,
-            tomBarn1,
-            fomBarn2,
-            tomBarn2,
-        )
+        val utbetalingsoppdrag =
+            lagTestUtbetalingsoppdragForFGBMedToBarn(
+                fnr,
+                fagsak.id.toString(),
+                behandling.id,
+                dagensDato,
+                fomBarn1,
+                tomBarn1,
+                fomBarn2,
+                tomBarn2,
+            )
 
         leggTilAndelTilkjentYtelsePåTilkjentYtelse(
             behandling,
@@ -137,17 +137,18 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         opprettTilkjentYtelse(behandling)
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForOpphørMedToBarn(
-            fnr,
-            fagsak.id.toString(),
-            behandling.id,
-            dagensDato,
-            fomBarn1,
-            tomBarn1,
-            fomBarn2,
-            tomBarn2,
-            opphørsDato,
-        )
+        val utbetalingsoppdrag =
+            lagTestUtbetalingsoppdragForOpphørMedToBarn(
+                fnr,
+                fagsak.id.toString(),
+                behandling.id,
+                dagensDato,
+                fomBarn1,
+                tomBarn1,
+                fomBarn2,
+                tomBarn2,
+                opphørsDato,
+            )
 
         leggTilAndelTilkjentYtelsePåTilkjentYtelse(
             behandling,
@@ -186,25 +187,27 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val tomDatoBarn2 = fomDatoBarn2.plusYears(18).sisteDagIForrigeMåned()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING),
-        )
+        val behandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING),
+            )
         opprettTilkjentYtelse(behandling)
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForRevurderingMedToBarn(
-            fnr,
-            fagsak.id.toString(),
-            behandling.id,
-            behandling.id - 1,
-            dagensDato,
-            opphørFomBarn1,
-            revurderingFomBarn1,
-            fomDatoBarn1,
-            tomDatoBarn1,
-            opphørFomBarn2,
-            revurderingFomBarn2,
-            fomDatoBarn2,
-            tomDatoBarn2,
-        )
+        val utbetalingsoppdrag =
+            lagTestUtbetalingsoppdragForRevurderingMedToBarn(
+                fnr,
+                fagsak.id.toString(),
+                behandling.id,
+                behandling.id - 1,
+                dagensDato,
+                opphørFomBarn1,
+                revurderingFomBarn1,
+                fomDatoBarn1,
+                tomDatoBarn1,
+                opphørFomBarn2,
+                revurderingFomBarn2,
+                fomDatoBarn2,
+                tomDatoBarn2,
+            )
 
         leggTilAndelTilkjentYtelsePåTilkjentYtelse(
             behandling,
@@ -235,7 +238,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val søkerAktørId = personidentService.hentOgLagreAktør(søkerFnr, true)
         val barn1AktørId = personidentService.hentOgLagreAktør(barn1Fnr, true)
         val barn2AktørId = personidentService.hentOgLagreAktør(barn2Fnr, true)
-        val dato_2021_11_01 = LocalDate.of(2021, 11, 1)
+        val dato20211101 = LocalDate.of(2021, 11, 1)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -257,14 +260,15 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             personopplysningGrunnlag.barna.find { it.aktør.aktivFødselsnummer() == barn2Fnr }!!.aktør.aktivFødselsnummer()
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
-        vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(
-            vilkårsvurdering,
-            søkerAktørId,
-            barn1AktørId,
-            barn2AktørId,
-            dato_2021_11_01,
-            dato_2021_11_01.plusYears(17),
-        )
+        vilkårsvurdering.personResultater =
+            lagPersonResultaterForSøkerOgToBarn(
+                vilkårsvurdering,
+                søkerAktørId,
+                barn1AktørId,
+                barn2AktørId,
+                dato20211101,
+                dato20211101.plusYears(17),
+            )
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -290,7 +294,6 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Nested
     inner class HentSisteAndelPerIdent {
-
         val søker = tilfeldigPerson()
         val barn1 = tilfeldigPerson()
         val barn2 = tilfeldigPerson()
@@ -315,16 +318,17 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         @Test
         fun `uten utbetalingsoppdrag`() {
             with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = null)) {
-                val andeler = listOf(
-                    lagAndel(
-                        tilkjentYtelse = this,
-                        aktør = aktørBarn1,
-                        person = barn1,
-                        fom = YearMonth.of(2020, 1),
-                        tom = YearMonth.of(2020, 2),
-                        offset = 0,
-                    ),
-                )
+                val andeler =
+                    listOf(
+                        lagAndel(
+                            tilkjentYtelse = this,
+                            aktør = aktørBarn1,
+                            person = barn1,
+                            fom = YearMonth.of(2020, 1),
+                            tom = YearMonth.of(2020, 2),
+                            offset = 0,
+                        ),
+                    )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
             }
@@ -336,16 +340,17 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         @Test
         fun `behandling er ikke avsluttet`() {
             with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "")) {
-                val andeler = listOf(
-                    lagAndel(
-                        tilkjentYtelse = this,
-                        aktør = aktørBarn1,
-                        person = barn1,
-                        fom = YearMonth.of(2020, 1),
-                        tom = YearMonth.of(2020, 2),
-                        offset = 0,
-                    ),
-                )
+                val andeler =
+                    listOf(
+                        lagAndel(
+                            tilkjentYtelse = this,
+                            aktør = aktørBarn1,
+                            person = barn1,
+                            fom = YearMonth.of(2020, 1),
+                            tom = YearMonth.of(2020, 2),
+                            offset = 0,
+                        ),
+                    )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
             }
@@ -356,16 +361,17 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         @Test
         fun `gitt fagsak har ikke noen andeler`() {
             with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
-                val andeler = listOf(
-                    lagAndel(
-                        tilkjentYtelse = this,
-                        aktør = aktørBarn1,
-                        person = barn1,
-                        fom = YearMonth.of(2020, 1),
-                        tom = YearMonth.of(2020, 2),
-                        offset = 0,
-                    ),
-                )
+                val andeler =
+                    listOf(
+                        lagAndel(
+                            tilkjentYtelse = this,
+                            aktør = aktørBarn1,
+                            person = barn1,
+                            fom = YearMonth.of(2020, 1),
+                            tom = YearMonth.of(2020, 2),
+                            offset = 0,
+                        ),
+                    )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
             }
@@ -376,24 +382,25 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         @Test
         fun `2 ulike personer med samme type`() {
             with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
-                val andeler = listOf(
-                    lagAndel(
-                        tilkjentYtelse = this,
-                        aktør = aktørBarn1,
-                        person = barn1,
-                        fom = YearMonth.of(2020, 1),
-                        tom = YearMonth.of(2020, 2),
-                        offset = 0,
-                    ),
-                    lagAndel(
-                        tilkjentYtelse = this,
-                        aktør = aktørBarn2,
-                        person = barn2,
-                        fom = YearMonth.of(2020, 3),
-                        tom = YearMonth.of(2020, 5),
-                        offset = 1,
-                    ),
-                )
+                val andeler =
+                    listOf(
+                        lagAndel(
+                            tilkjentYtelse = this,
+                            aktør = aktørBarn1,
+                            person = barn1,
+                            fom = YearMonth.of(2020, 1),
+                            tom = YearMonth.of(2020, 2),
+                            offset = 0,
+                        ),
+                        lagAndel(
+                            tilkjentYtelse = this,
+                            aktør = aktørBarn2,
+                            person = barn2,
+                            fom = YearMonth.of(2020, 3),
+                            tom = YearMonth.of(2020, 5),
+                            offset = 1,
+                        ),
+                    )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
             }
@@ -417,29 +424,30 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         @Test
         fun `førstegångsbehandling med flere andeler per person`() {
             with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
-                val andeler = listOf(
-                    lagAndel(
-                        tilkjentYtelse = this,
-                        fom = YearMonth.of(2020, 1),
-                        tom = YearMonth.of(2020, 2),
-                        offset = 0,
-                    ),
-                    lagAndel(
-                        tilkjentYtelse = this,
-                        fom = YearMonth.of(2020, 3),
-                        tom = YearMonth.of(2020, 5),
-                        offset = 1,
-                        forrigeOffset = 0,
-                    ),
-                    lagAndel(
-                        tilkjentYtelse = this,
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                        fom = YearMonth.of(2020, 3),
-                        tom = YearMonth.of(2020, 3),
-                        offset = 2,
-                        forrigeOffset = null,
-                    ),
-                )
+                val andeler =
+                    listOf(
+                        lagAndel(
+                            tilkjentYtelse = this,
+                            fom = YearMonth.of(2020, 1),
+                            tom = YearMonth.of(2020, 2),
+                            offset = 0,
+                        ),
+                        lagAndel(
+                            tilkjentYtelse = this,
+                            fom = YearMonth.of(2020, 3),
+                            tom = YearMonth.of(2020, 5),
+                            offset = 1,
+                            forrigeOffset = 0,
+                        ),
+                        lagAndel(
+                            tilkjentYtelse = this,
+                            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                            fom = YearMonth.of(2020, 3),
+                            tom = YearMonth.of(2020, 3),
+                            offset = 2,
+                            forrigeOffset = null,
+                        ),
+                    )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
             }
@@ -464,29 +472,31 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         @Test
         fun `siste andelen kommer fra revurderingen`() {
             with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
-                val andeler = listOf(
-                    lagAndel(
-                        tilkjentYtelse = this,
-                        fom = YearMonth.of(2020, 1),
-                        tom = YearMonth.of(2020, 2),
-                        offset = 0,
-                    ),
-                )
+                val andeler =
+                    listOf(
+                        lagAndel(
+                            tilkjentYtelse = this,
+                            fom = YearMonth.of(2020, 1),
+                            tom = YearMonth.of(2020, 2),
+                            offset = 0,
+                        ),
+                    )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
             }
             avsluttOgLagreBehandling(førsteBehandling)
             val revurdering = lagRevurdering()
             with(lagInitiellTilkjentYtelse(revurdering, utbetalingsoppdrag = "utbetalingsoppdrag")) {
-                val andeler = listOf(
-                    lagAndel(
-                        tilkjentYtelse = this,
-                        fom = YearMonth.of(2020, 1),
-                        tom = YearMonth.of(2020, 3),
-                        offset = 1,
-                        forrigeOffset = 0,
-                    ),
-                )
+                val andeler =
+                    listOf(
+                        lagAndel(
+                            tilkjentYtelse = this,
+                            fom = YearMonth.of(2020, 1),
+                            tom = YearMonth.of(2020, 3),
+                            offset = 1,
+                            forrigeOffset = 0,
+                        ),
+                    )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
             }
@@ -506,35 +516,37 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         @Test
         fun `en revurdering opphører en andel, sånn at siste andelen finnes i en tidligere behandling`() {
             with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
-                val andeler = listOf(
-                    lagAndel(
-                        tilkjentYtelse = this,
-                        fom = YearMonth.of(2020, 1),
-                        tom = YearMonth.of(2020, 3),
-                        offset = 0,
-                    ),
-                    lagAndel(
-                        tilkjentYtelse = this,
-                        fom = YearMonth.of(2020, 4),
-                        tom = YearMonth.of(2020, 5),
-                        offset = 1,
-                        forrigeOffset = 0,
-                    ),
-                )
+                val andeler =
+                    listOf(
+                        lagAndel(
+                            tilkjentYtelse = this,
+                            fom = YearMonth.of(2020, 1),
+                            tom = YearMonth.of(2020, 3),
+                            offset = 0,
+                        ),
+                        lagAndel(
+                            tilkjentYtelse = this,
+                            fom = YearMonth.of(2020, 4),
+                            tom = YearMonth.of(2020, 5),
+                            offset = 1,
+                            forrigeOffset = 0,
+                        ),
+                    )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
             }
             avsluttOgLagreBehandling(førsteBehandling)
             val revurdering = lagRevurdering()
             with(lagInitiellTilkjentYtelse(revurdering, utbetalingsoppdrag = "utbetalingsoppdrag")) {
-                val andeler = listOf(
-                    lagAndel(
-                        tilkjentYtelse = this,
-                        fom = YearMonth.of(2020, 1),
-                        tom = YearMonth.of(2020, 3),
-                        offset = 0,
-                    ),
-                )
+                val andeler =
+                    listOf(
+                        lagAndel(
+                            tilkjentYtelse = this,
+                            fom = YearMonth.of(2020, 1),
+                            tom = YearMonth.of(2020, 3),
+                            offset = 0,
+                        ),
+                    )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
             }
@@ -578,9 +590,10 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 forrigeperiodeIdOffset = forrigeOffset,
             )
 
-        private fun lagRevurdering() = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING),
-        )
+        private fun lagRevurdering() =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING),
+            )
     }
 
     private fun avsluttOgLagreBehandling(behandling: Behandling) {
@@ -592,20 +605,25 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         tilkjentYtelseRepository.saveAndFlush(lagInitiellTilkjentYtelse(behandling))
     }
 
-    private fun leggTilAndelTilkjentYtelsePåTilkjentYtelse(behandling: Behandling, fom: YearMonth, tom: YearMonth) {
+    private fun leggTilAndelTilkjentYtelsePåTilkjentYtelse(
+        behandling: Behandling,
+        fom: YearMonth,
+        tom: YearMonth,
+    ) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val tilfeldigperson = tilfeldigPerson(aktør = tilAktør(randomFnr()))
         aktørIdRepository.saveAndFlush(tilfeldigperson.aktør)
 
-        val andelTilkjentYtelse = lagAndelTilkjentYtelse(
-            fom,
-            tom,
-            YtelseType.ORDINÆR_BARNETRYGD,
-            1054,
-            behandling,
-            tilkjentYtelse = tilkjentYtelse,
-            aktør = tilfeldigperson.aktør,
-        )
+        val andelTilkjentYtelse =
+            lagAndelTilkjentYtelse(
+                fom,
+                tom,
+                YtelseType.ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                aktør = tilfeldigperson.aktør,
+            )
 
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
         tilkjentYtelseRepository.saveAndFlush(tilkjentYtelse)

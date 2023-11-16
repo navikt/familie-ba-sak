@@ -15,7 +15,6 @@ class SaksstatistikkScheduler(
     val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     val kafkaProducer: KafkaProducer,
 ) {
-
     @Scheduled(fixedDelay = 60000)
     fun sendKafkameldinger() {
         if (LeaderClient.isLeader() == true) {

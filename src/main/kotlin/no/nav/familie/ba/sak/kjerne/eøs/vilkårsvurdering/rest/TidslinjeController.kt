@@ -23,9 +23,10 @@ class TidslinjeController(
     private val tilgangService: TilgangService,
     private val tidslinjeService: VilkårsvurderingTidslinjeService,
 ) {
-
     @GetMapping("/{behandlingId}")
-    fun hentTidslinjer(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestTidslinjer>> {
+    fun hentTidslinjer(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<RestTidslinjer>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,

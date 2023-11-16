@@ -83,10 +83,11 @@ fun utledLøpendeKategori(
 
     val nå = MånedTidspunkt.nå()
 
-    val etBarnHarMinstEnLøpendeEØSPeriode = barnasTidslinjer
-        .values
-        .map { it.egetRegelverkResultatTidslinje.innholdForTidspunkt(nå) }
-        .any { it.innhold?.regelverk == Regelverk.EØS_FORORDNINGEN }
+    val etBarnHarMinstEnLøpendeEØSPeriode =
+        barnasTidslinjer
+            .values
+            .map { it.egetRegelverkResultatTidslinje.innholdForTidspunkt(nå) }
+            .any { it.innhold?.regelverk == Regelverk.EØS_FORORDNINGEN }
 
     return if (etBarnHarMinstEnLøpendeEØSPeriode) {
         BehandlingKategori.EØS

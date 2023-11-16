@@ -37,38 +37,40 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
-
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn født november 2021 og behandles desember 2021 uten utbetalinger`() {
         // Behandler desember 2021 for å få med automatisk begrunnelse av satsendring januar 2022
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.of(2021, 11, 18).toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                    ),
+        val scenario =
+            mockServerKlient().lagScenario(
+                RestScenario(
+                    søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                    barna =
+                        listOf(
+                            RestScenarioPerson(
+                                fødselsdato = LocalDate.of(2021, 11, 18).toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen",
+                            ),
+                        ),
                 ),
-            ),
-        )
-        val behandling = behandleFødselshendelse(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!),
-            ),
-            behandleFødselshendelseTask = behandleFødselshendelseTask,
-            fagsakService = fagsakService,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            vedtakService = vedtakService,
-            stegService = stegService,
-            personidentService = personidentService,
-            brevmalService = brevmalService,
-
-        )
+            )
+        val behandling =
+            behandleFødselshendelse(
+                nyBehandlingHendelse =
+                    NyBehandlingHendelse(
+                        morsIdent = scenario.søker.ident!!,
+                        barnasIdenter = listOf(scenario.barna.first().ident!!),
+                    ),
+                behandleFødselshendelseTask = behandleFødselshendelseTask,
+                fagsakService = fagsakService,
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                vedtakService = vedtakService,
+                stegService = stegService,
+                personidentService = personidentService,
+                brevmalService = brevmalService,
+            )
 
         val restFagsakEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
@@ -116,37 +118,40 @@ class FødselshendelseFørstegangsbehandlingTest(
 
     @Test
     fun `Skal innvilge fødselshendelse på mor med 2 barn uten utbetalinger`() {
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.now().minusDays(2).toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                    ),
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.now().minusDays(2).toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen 2",
-                    ),
+        val scenario =
+            mockServerKlient().lagScenario(
+                RestScenario(
+                    søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                    barna =
+                        listOf(
+                            RestScenarioPerson(
+                                fødselsdato = LocalDate.now().minusDays(2).toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen",
+                            ),
+                            RestScenarioPerson(
+                                fødselsdato = LocalDate.now().minusDays(2).toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen 2",
+                            ),
+                        ),
                 ),
-            ),
-        )
-        val behandling = behandleFødselshendelse(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = scenario.søker.ident!!,
-                barnasIdenter = scenario.barna.map { it.ident!! },
-            ),
-            behandleFødselshendelseTask = behandleFødselshendelseTask,
-            fagsakService = fagsakService,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            personidentService = personidentService,
-            vedtakService = vedtakService,
-            stegService = stegService,
-            brevmalService = brevmalService,
-
-        )
+            )
+        val behandling =
+            behandleFødselshendelse(
+                nyBehandlingHendelse =
+                    NyBehandlingHendelse(
+                        morsIdent = scenario.søker.ident!!,
+                        barnasIdenter = scenario.barna.map { it.ident!! },
+                    ),
+                behandleFødselshendelseTask = behandleFødselshendelseTask,
+                fagsakService = fagsakService,
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                personidentService = personidentService,
+                vedtakService = vedtakService,
+                stegService = stegService,
+                brevmalService = brevmalService,
+            )
 
         val restFagsakEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
@@ -160,10 +165,11 @@ class FødselshendelseFørstegangsbehandlingTest(
         assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
-        val gjeldendeUtbetalingsperiode = utbetalingsperioder.find {
-            it.periodeFom.toYearMonth() >= tilleggOrdinærSatsNesteMånedTilTester().gyldigFom.toYearMonth() &&
-                it.periodeFom.toYearMonth() <= tilleggOrdinærSatsNesteMånedTilTester().gyldigTom.toYearMonth()
-        }!!
+        val gjeldendeUtbetalingsperiode =
+            utbetalingsperioder.find {
+                it.periodeFom.toYearMonth() >= tilleggOrdinærSatsNesteMånedTilTester().gyldigFom.toYearMonth() &&
+                    it.periodeFom.toYearMonth() <= tilleggOrdinærSatsNesteMånedTilTester().gyldigTom.toYearMonth()
+            }!!
 
         assertUtbetalingsperiode(
             gjeldendeUtbetalingsperiode,

@@ -15,8 +15,9 @@ data class PersonEnkel(
 )
 
 // Vil returnere barnet på EM-saker, som da i prinsippet også er søkeren. Vil også returnere barnet på inst. saker
-fun Collection<PersonEnkel>.søker() = this.singleOrNull { it.type == PersonType.SØKER }
-    ?: this.singleOrNull()?.takeIf { it.type == PersonType.BARN }
-    ?: error("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
+fun Collection<PersonEnkel>.søker() =
+    this.singleOrNull { it.type == PersonType.SØKER }
+        ?: this.singleOrNull()?.takeIf { it.type == PersonType.BARN }
+        ?: error("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
 
 fun Collection<PersonEnkel>.barn(): List<PersonEnkel> = this.filter { it.type == PersonType.BARN }

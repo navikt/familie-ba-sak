@@ -15,7 +15,6 @@ import java.time.LocalDate
 
 @TestConfiguration
 class EfSakRestClientMock {
-
     @Bean
     @Primary
     fun mockEfSakRestClient(): EfSakRestClient {
@@ -33,14 +32,15 @@ class EfSakRestClientMock {
             val hentPerioderMedFullOvergangsstønadSlot = slot<String>()
             every { efSakRestClient.hentPerioderMedFullOvergangsstønad(capture(hentPerioderMedFullOvergangsstønadSlot)) } answers {
                 EksternePerioderResponse(
-                    perioder = listOf(
-                        EksternPeriode(
-                            personIdent = hentPerioderMedFullOvergangsstønadSlot.captured,
-                            fomDato = LocalDate.now().minusYears(2),
-                            datakilde = Datakilde.EF,
-                            tomDato = LocalDate.now().minusMonths(3),
+                    perioder =
+                        listOf(
+                            EksternPeriode(
+                                personIdent = hentPerioderMedFullOvergangsstønadSlot.captured,
+                                fomDato = LocalDate.now().minusYears(2),
+                                datakilde = Datakilde.EF,
+                                tomDato = LocalDate.now().minusMonths(3),
+                            ),
                         ),
-                    ),
                 )
             }
         }

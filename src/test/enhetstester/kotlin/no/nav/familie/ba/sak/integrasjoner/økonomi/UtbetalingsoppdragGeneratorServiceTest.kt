@@ -34,7 +34,6 @@ import java.time.YearMonth
 
 @ExtendWith(MockKExtension::class)
 class UtbetalingsoppdragGeneratorServiceTest {
-
     @MockK
     private lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 
@@ -111,11 +110,12 @@ class UtbetalingsoppdragGeneratorServiceTest {
             andelerTilkjentYtelse = lagredeAndeler,
             forventetAntallAndeler = 3,
             forventetAntallUtbetalingsperioder = 3,
-            forventedeOffsets = listOf(
-                Pair(0L, null),
-                Pair(1L, 0L),
-                Pair(2L, 1L),
-            ),
+            forventedeOffsets =
+                listOf(
+                    Pair(0L, null),
+                    Pair(1L, 0L),
+                    Pair(2L, 1L),
+                ),
         )
     }
 
@@ -193,9 +193,10 @@ class UtbetalingsoppdragGeneratorServiceTest {
             andelerTilkjentYtelse = lagredeAndeler,
             forventetAntallAndeler = 1,
             forventetAntallUtbetalingsperioder = 1,
-            forventedeOffsets = listOf(
-                Pair(3L, 2L),
-            ),
+            forventedeOffsets =
+                listOf(
+                    Pair(3L, 2L),
+                ),
         )
     }
 
@@ -266,13 +267,14 @@ class UtbetalingsoppdragGeneratorServiceTest {
             andelerTilkjentYtelse = lagredeAndeler,
             forventetAntallAndeler = 5,
             forventetAntallUtbetalingsperioder = 5,
-            forventedeOffsets = listOf(
-                Pair(0L, null),
-                Pair(1L, 0L),
-                Pair(2L, 1L),
-                Pair(3L, null),
-                Pair(4L, 3L),
-            ),
+            forventedeOffsets =
+                listOf(
+                    Pair(0L, null),
+                    Pair(1L, 0L),
+                    Pair(2L, 1L),
+                    Pair(3L, null),
+                    Pair(4L, 3L),
+                ),
         )
     }
 
@@ -373,10 +375,11 @@ class UtbetalingsoppdragGeneratorServiceTest {
             andelerTilkjentYtelse = lagredeAndeler,
             forventetAntallAndeler = 2,
             forventetAntallUtbetalingsperioder = 2,
-            forventedeOffsets = listOf(
-                Pair(5L, 2L),
-                Pair(6L, 4L),
-            ),
+            forventedeOffsets =
+                listOf(
+                    Pair(5L, 2L),
+                    Pair(6L, 4L),
+                ),
         )
     }
 
@@ -461,10 +464,11 @@ class UtbetalingsoppdragGeneratorServiceTest {
             andelerTilkjentYtelse = lagredeAndeler,
             forventetAntallAndeler = 2,
             forventetAntallUtbetalingsperioder = 3,
-            forventedeOffsets = listOf(
-                Pair(3L, 2L),
-                Pair(4L, null),
-            ),
+            forventedeOffsets =
+                listOf(
+                    Pair(3L, 2L),
+                    Pair(4L, null),
+                ),
         )
     }
 
@@ -547,10 +551,11 @@ class UtbetalingsoppdragGeneratorServiceTest {
             andelerTilkjentYtelse = emptySet(),
             forventetAntallAndeler = 2,
             forventetAntallUtbetalingsperioder = 3,
-            forventedeOffsets = listOf(
-                Pair(3L, 2L),
-                Pair(4L, null),
-            ),
+            forventedeOffsets =
+                listOf(
+                    Pair(3L, 2L),
+                    Pair(4L, null),
+                ),
         )
     }
 
@@ -621,10 +626,11 @@ class UtbetalingsoppdragGeneratorServiceTest {
             andelerTilkjentYtelse = emptySet(),
             forventetAntallAndeler = 2,
             forventetAntallUtbetalingsperioder = 2,
-            forventedeOffsets = listOf(
-                Pair(0L, null),
-                Pair(1L, null),
-            ),
+            forventedeOffsets =
+                listOf(
+                    Pair(0L, null),
+                    Pair(1L, null),
+                ),
         )
     }
 
@@ -679,11 +685,12 @@ class UtbetalingsoppdragGeneratorServiceTest {
             andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse,
             forventetAntallAndeler = 3,
             forventetAntallUtbetalingsperioder = 3,
-            forventedeOffsets = listOf(
-                Pair(null, null),
-                Pair(null, null),
-                Pair(null, null),
-            ),
+            forventedeOffsets =
+                listOf(
+                    Pair(null, null),
+                    Pair(null, null),
+                    Pair(null, null),
+                ),
         )
     }
 

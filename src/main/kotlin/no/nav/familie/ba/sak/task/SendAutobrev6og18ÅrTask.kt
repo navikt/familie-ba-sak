@@ -22,7 +22,6 @@ import java.time.LocalDate
 class SendAutobrev6og18ÅrTask(
     private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val autobrevDTO = objectMapper.readValue(task.payload, Autobrev6og18ÅrDTO::class.java)
 
@@ -34,7 +33,6 @@ class SendAutobrev6og18ÅrTask(
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "sendAutobrevVed6og18År"
     }
 }

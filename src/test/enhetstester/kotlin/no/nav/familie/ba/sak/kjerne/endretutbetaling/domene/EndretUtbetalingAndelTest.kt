@@ -16,7 +16,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 internal class EndretUtbetalingAndelTest {
-
     @Test
     fun `Sjekk validering med tomme felt`() {
         val behandling = lagBehandling()
@@ -67,38 +66,41 @@ internal class EndretUtbetalingAndelTest {
     fun `Skal sette tom til siste måned med andel tilkjent ytelse hvis tom er null og det ikke finnes noen andre endringsperioder`() {
         val behandling = lagBehandling()
         val barn = lagPerson(type = PersonType.BARN)
-        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
-            behandlingId = behandling.id,
-            person = barn,
-            fom = YearMonth.now(),
-            tom = null,
-            årsak = Årsak.DELT_BOSTED,
-        )
+        val endretUtbetalingAndel =
+            lagEndretUtbetalingAndel(
+                behandlingId = behandling.id,
+                person = barn,
+                fom = YearMonth.now(),
+                tom = null,
+                årsak = Årsak.DELT_BOSTED,
+            )
 
         val sisteTomPåAndeler = YearMonth.now().plusMonths(10)
-        val andelTilkjentYtelser = listOf(
-            lagAndelTilkjentYtelse(
-                person = barn,
-                fom = YearMonth.now().minusYears(2),
-                tom = YearMonth.now().minusMonths(5),
-            ),
-            lagAndelTilkjentYtelse(
-                person = barn,
-                fom = YearMonth.now().minusMonths(4),
-                tom = YearMonth.now().plusMonths(4),
-            ),
-            lagAndelTilkjentYtelse(
-                person = barn,
-                fom = YearMonth.now().plusMonths(5),
-                tom = sisteTomPåAndeler,
-            ),
-        )
+        val andelTilkjentYtelser =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    person = barn,
+                    fom = YearMonth.now().minusYears(2),
+                    tom = YearMonth.now().minusMonths(5),
+                ),
+                lagAndelTilkjentYtelse(
+                    person = barn,
+                    fom = YearMonth.now().minusMonths(4),
+                    tom = YearMonth.now().plusMonths(4),
+                ),
+                lagAndelTilkjentYtelse(
+                    person = barn,
+                    fom = YearMonth.now().plusMonths(5),
+                    tom = sisteTomPåAndeler,
+                ),
+            )
 
-        val nyTom = beregnGyldigTomIFremtiden(
-            andelTilkjentYtelser = andelTilkjentYtelser,
-            endretUtbetalingAndel = endretUtbetalingAndel,
-            andreEndredeAndelerPåBehandling = emptyList(),
-        )
+        val nyTom =
+            beregnGyldigTomIFremtiden(
+                andelTilkjentYtelser = andelTilkjentYtelser,
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                andreEndredeAndelerPåBehandling = emptyList(),
+            )
 
         assertEquals(sisteTomPåAndeler, nyTom)
     }
@@ -107,45 +109,49 @@ internal class EndretUtbetalingAndelTest {
     fun `Skal sette tom til måneden før neste endringsperiode`() {
         val behandling = lagBehandling()
         val barn = lagPerson(type = PersonType.BARN)
-        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
-            behandlingId = behandling.id,
-            person = barn,
-            fom = YearMonth.now(),
-            tom = null,
-            årsak = Årsak.DELT_BOSTED,
-        )
-
-        val annenEndretAndel = lagEndretUtbetalingAndel(
-            behandlingId = behandling.id,
-            person = barn,
-            fom = YearMonth.now().plusMonths(5),
-            tom = YearMonth.now().plusMonths(8),
-            årsak = Årsak.DELT_BOSTED,
-        )
-
-        val andelTilkjentYtelser = listOf(
-            lagAndelTilkjentYtelse(
+        val endretUtbetalingAndel =
+            lagEndretUtbetalingAndel(
+                behandlingId = behandling.id,
                 person = barn,
-                fom = YearMonth.now().minusYears(2),
-                tom = YearMonth.now().minusMonths(5),
-            ),
-            lagAndelTilkjentYtelse(
-                person = barn,
-                fom = YearMonth.now().minusMonths(4),
-                tom = YearMonth.now().plusMonths(4),
-            ),
-            lagAndelTilkjentYtelse(
+                fom = YearMonth.now(),
+                tom = null,
+                årsak = Årsak.DELT_BOSTED,
+            )
+
+        val annenEndretAndel =
+            lagEndretUtbetalingAndel(
+                behandlingId = behandling.id,
                 person = barn,
                 fom = YearMonth.now().plusMonths(5),
-                tom = YearMonth.now().plusMonths(10),
-            ),
-        )
+                tom = YearMonth.now().plusMonths(8),
+                årsak = Årsak.DELT_BOSTED,
+            )
 
-        val nyTom = beregnGyldigTomIFremtiden(
-            andelTilkjentYtelser = andelTilkjentYtelser,
-            endretUtbetalingAndel = endretUtbetalingAndel,
-            andreEndredeAndelerPåBehandling = listOf(annenEndretAndel),
-        )
+        val andelTilkjentYtelser =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    person = barn,
+                    fom = YearMonth.now().minusYears(2),
+                    tom = YearMonth.now().minusMonths(5),
+                ),
+                lagAndelTilkjentYtelse(
+                    person = barn,
+                    fom = YearMonth.now().minusMonths(4),
+                    tom = YearMonth.now().plusMonths(4),
+                ),
+                lagAndelTilkjentYtelse(
+                    person = barn,
+                    fom = YearMonth.now().plusMonths(5),
+                    tom = YearMonth.now().plusMonths(10),
+                ),
+            )
+
+        val nyTom =
+            beregnGyldigTomIFremtiden(
+                andelTilkjentYtelser = andelTilkjentYtelser,
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                andreEndredeAndelerPåBehandling = listOf(annenEndretAndel),
+            )
 
         assertEquals(annenEndretAndel.fom!!.minusMonths(1), nyTom)
     }

@@ -17,7 +17,6 @@ import java.time.LocalDate
 
 @TestConfiguration
 class PdlRestClientTestConfig {
-
     @Bean
     @Profile("mock-pdl-client")
     @Primary
@@ -26,21 +25,23 @@ class PdlRestClientTestConfig {
 
         every {
             klient.hentPerson(any(), any())
-        } returns PersonInfo(
-            fødselsdato = LocalDate.of(1980, 5, 12),
-            navn = "Kari Normann",
-            kjønn = Kjønn.KVINNE,
-            forelderBarnRelasjon = setOf(
-                ForelderBarnRelasjon(
-                    aktør = tilAktør("12345678910"),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                ),
-            ),
-            adressebeskyttelseGradering = null,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
-            dødsfall = null,
-            kontaktinformasjonForDoedsbo = null,
-        )
+        } returns
+            PersonInfo(
+                fødselsdato = LocalDate.of(1980, 5, 12),
+                navn = "Kari Normann",
+                kjønn = Kjønn.KVINNE,
+                forelderBarnRelasjon =
+                    setOf(
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør("12345678910"),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                        ),
+                    ),
+                adressebeskyttelseGradering = null,
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                dødsfall = null,
+                kontaktinformasjonForDoedsbo = null,
+            )
         return klient
     }
 }

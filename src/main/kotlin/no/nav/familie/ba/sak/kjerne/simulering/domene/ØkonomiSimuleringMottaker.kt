@@ -32,18 +32,14 @@ data class ØkonomiSimuleringMottaker(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Column(name = "mottaker_nummer", nullable = false)
     val mottakerNummer: String?,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "mottaker_type", nullable = false)
     val mottakerType: MottakerType,
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandling: Behandling,
-
     @OneToMany(
         mappedBy = "økonomiSimuleringMottaker",
         cascade = [CascadeType.ALL],
@@ -52,7 +48,6 @@ data class ØkonomiSimuleringMottaker(
     )
     var økonomiSimuleringPostering: List<ØkonomiSimuleringPostering> = emptyList(),
 ) : BaseEntitet() {
-
     override fun hashCode() = id.hashCode()
 
     override fun equals(other: Any?): Boolean {

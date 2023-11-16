@@ -25,7 +25,6 @@ import org.springframework.test.context.ContextConfiguration
 @ContextConfiguration(classes = [TestConfig::class, UtenlandskPeriodebeløpController::class, ValidationAutoConfiguration::class])
 @ActiveProfiles("postgres", "integrasjonstest")
 class UtenlandskPeriodebeløpControllerTest {
-
     @Autowired
     lateinit var utenlandskPeriodebeløpController: UtenlandskPeriodebeløpController
 
@@ -40,17 +39,19 @@ class UtenlandskPeriodebeløpControllerTest {
 
     @Test
     fun `Skal kaste feil dersom validering av input feiler`() {
-        val exception = assertThrows<ConstraintViolationException> {
-            utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
-                1,
-                RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = (-1.0).toBigDecimal(), null, null, null),
-            )
-        }
+        val exception =
+            assertThrows<ConstraintViolationException> {
+                utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
+                    1,
+                    RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = (-1.0).toBigDecimal(), null, null, null),
+                )
+            }
 
         val forventedeFelterMedFeil = listOf("beløp")
-        val faktiskeFelterMedFeil = exception.constraintViolations.map { constraintViolation ->
-            constraintViolation.propertyPath.toString().split(".").last()
-        }
+        val faktiskeFelterMedFeil =
+            exception.constraintViolations.map { constraintViolation ->
+                constraintViolation.propertyPath.toString().split(".").last()
+            }
 
         assertEqualsUnordered(forventedeFelterMedFeil, faktiskeFelterMedFeil)
 
@@ -62,17 +63,17 @@ class UtenlandskPeriodebeløpControllerTest {
         every { utenlandskPeriodebeløpRepository.getReferenceById(any()) } returns UtenlandskPeriodebeløp.NULL
         every { utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(any(), any()) } just runs
 
-        val response = utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
-            1,
-            RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = 1.0.toBigDecimal(), null, null, null),
-        )
+        val response =
+            utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
+                1,
+                RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = 1.0.toBigDecimal(), null, null, null),
+            )
 
         assertEquals(HttpStatus.OK, response.statusCode)
     }
 }
 
 class TestConfig {
-
     @Bean
     fun utenlandskPeriodebeløpService(): UtenlandskPeriodebeløpService = mockk()
 

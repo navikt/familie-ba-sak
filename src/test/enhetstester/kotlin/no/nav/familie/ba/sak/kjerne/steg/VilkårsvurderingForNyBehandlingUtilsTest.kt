@@ -22,30 +22,31 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VilkårsvurderingForNyBehandlingUtilsTest {
-
     @Test
     fun `Skal kun ta med aktører som hadde andeler med utvidet barnetrygd`() {
         val søker = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
 
-        val andeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = YearMonth.now().minusYears(2).plusMonths(1),
-                tom = YearMonth.now(),
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = barn,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = YearMonth.now().minusYears(1),
-                tom = YearMonth.now(),
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                person = søker,
-            ),
-        )
+        val andeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusYears(2).plusMonths(1),
+                    tom = YearMonth.now(),
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    person = barn,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusYears(1),
+                    tom = YearMonth.now(),
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    person = søker,
+                ),
+            )
 
-        val aktørerMedUtvidet = finnAktørerMedUtvidetFraAndeler(
-            andeler = andeler,
-        )
+        val aktørerMedUtvidet =
+            finnAktørerMedUtvidetFraAndeler(
+                andeler = andeler,
+            )
 
         Assertions.assertThat(aktørerMedUtvidet).containsExactly(søker.aktør)
     }
@@ -60,45 +61,49 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
         val tomPåFørsteUtvidetVilkår = LocalDate.now().minusMonths(8)
 
         val søkerPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = søker.aktør)
-        val søkerVilkårResultater = lagSøkerVilkårResultat(søkerPersonResultat = søkerPersonResultat, periodeFom = LocalDate.now().minusYears(2), periodeTom = null, behandlingId = behandling.id) + setOf(
-            VilkårResultat(
-                personResultat = søkerPersonResultat,
-                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.now().minusYears(2),
-                periodeTom = tomPåFørsteUtvidetVilkår,
-                begrunnelse = "",
-                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                utdypendeVilkårsvurderinger = emptyList(),
-            ),
-            VilkårResultat(
-                personResultat = søkerPersonResultat,
-                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = tomPåFørsteUtvidetVilkår.plusMonths(1),
-                periodeTom = null,
-                begrunnelse = "",
-                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                utdypendeVilkårsvurderinger = emptyList(),
-            ),
-        )
+        val søkerVilkårResultater =
+            lagSøkerVilkårResultat(søkerPersonResultat = søkerPersonResultat, periodeFom = LocalDate.now().minusYears(2), periodeTom = null, behandlingId = behandling.id) +
+                setOf(
+                    VilkårResultat(
+                        personResultat = søkerPersonResultat,
+                        vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = LocalDate.now().minusYears(2),
+                        periodeTom = tomPåFørsteUtvidetVilkår,
+                        begrunnelse = "",
+                        sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                        utdypendeVilkårsvurderinger = emptyList(),
+                    ),
+                    VilkårResultat(
+                        personResultat = søkerPersonResultat,
+                        vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = tomPåFørsteUtvidetVilkår.plusMonths(1),
+                        periodeTom = null,
+                        begrunnelse = "",
+                        sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                        utdypendeVilkårsvurderinger = emptyList(),
+                    ),
+                )
 
         val barnPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn.aktør)
-        val barnVilkårResultater = lagBarnVilkårResultat(
-            barnPersonResultat = barnPersonResultat,
-            barnetsFødselsdato = barn.fødselsdato,
-            periodeFom = LocalDate.now().minusYears(2),
-            behandlingId = behandling.id,
-        )
+        val barnVilkårResultater =
+            lagBarnVilkårResultat(
+                barnPersonResultat = barnPersonResultat,
+                barnetsFødselsdato = barn.fødselsdato,
+                periodeFom = LocalDate.now().minusYears(2),
+                behandlingId = behandling.id,
+            )
 
         søkerPersonResultat.setSortedVilkårResultater(søkerVilkårResultater)
         barnPersonResultat.setSortedVilkårResultater(barnVilkårResultater)
 
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
 
-        val nyVilkårsvurdering = VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(barn, søker))).hentVilkårsvurderingMedDødsdatoSomTomDato(
-            vilkårsvurdering = vilkårsvurdering,
-        )
+        val nyVilkårsvurdering =
+            VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(barn, søker))).hentVilkårsvurderingMedDødsdatoSomTomDato(
+                vilkårsvurdering = vilkårsvurdering,
+            )
         val søkersVilkårResultater = nyVilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
         val søkersUtvidetVilkår = søkersVilkårResultater?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 

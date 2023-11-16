@@ -29,7 +29,6 @@ import java.time.LocalDate
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ECBIntegrationTest : AbstractSpringIntegrationTest() {
-
     @MockK
     private lateinit var ecbClient: ValutakursRestClient
 
@@ -44,21 +43,23 @@ class ECBIntegrationTest : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun setUp() {
-        ecbService = ECBService(
-            ecbClient = ecbClient,
-            ecbValutakursCacheRepository = ecbValutakursCacheRepository,
-        )
+        ecbService =
+            ECBService(
+                ecbClient = ecbClient,
+                ecbValutakursCacheRepository = ecbValutakursCacheRepository,
+            )
         databaseCleanupService.truncate()
     }
 
     @Test
     fun `Skal teste at valutakurs hentes fra cache dersom valutakursen allerede er hentet fra ECB`() {
         val valutakursDato = LocalDate.of(2022, 7, 20)
-        val ecbExchangeRatesData = createECBResponse(
-            Frequency.Daily,
-            listOf(Pair("NOK", BigDecimal.valueOf(9.4567))),
-            valutakursDato.toString(),
-        )
+        val ecbExchangeRatesData =
+            createECBResponse(
+                Frequency.Daily,
+                listOf(Pair("NOK", BigDecimal.valueOf(9.4567))),
+                valutakursDato.toString(),
+            )
         every {
             ecbClient.hentValutakurs(
                 any(),

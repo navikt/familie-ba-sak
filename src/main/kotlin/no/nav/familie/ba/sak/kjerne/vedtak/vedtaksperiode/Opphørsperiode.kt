@@ -38,11 +38,12 @@ fun mapTilOpphørsperioder(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
 ): List<Opphørsperiode> {
-    val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) {
-        forrigeAndelerTilkjentYtelse.mapTilUtbetalingsperioder(forrigePersonopplysningGrunnlag)
-    } else {
-        emptyList()
-    }
+    val forrigeUtbetalingsperioder =
+        if (forrigePersonopplysningGrunnlag != null) {
+            forrigeAndelerTilkjentYtelse.mapTilUtbetalingsperioder(forrigePersonopplysningGrunnlag)
+        } else {
+            emptyList()
+        }
     val utbetalingsperioder =
         andelerTilkjentYtelse.mapTilUtbetalingsperioder(personopplysningGrunnlag)
 
@@ -60,11 +61,12 @@ private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
     forrigeUtbetalingsperioder: List<Utbetalingsperiode>,
     utbetalingsperioder: List<Utbetalingsperiode>,
 ): List<Opphørsperiode> {
-    val erUtbetalingOpphørtTidslinje = forrigeUtbetalingsperioder
-        .tilTidslinje()
-        .kombinerMed(utbetalingsperioder.tilTidslinje()) { forrigeUtbetaling, utbetaling ->
-            forrigeUtbetaling != null && utbetaling == null
-        }
+    val erUtbetalingOpphørtTidslinje =
+        forrigeUtbetalingsperioder
+            .tilTidslinje()
+            .kombinerMed(utbetalingsperioder.tilTidslinje()) { forrigeUtbetaling, utbetaling ->
+                forrigeUtbetaling != null && utbetaling == null
+            }
 
     return erUtbetalingOpphørtTidslinje.perioder()
         .mapNotNull { erUtbetalingOpphørtPeriode ->
@@ -125,9 +127,10 @@ private fun <V, T : Tidsenhet> Tidslinje<V, T>.tilHarVerdiTidslinje(): Tidslinje
     }
 
 private fun finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
-    val sisteUtbetalingsperiodeTom = utbetalingsperioder
-        .maxOfOrNull { it.periodeTom }?.toYearMonth()
-        ?: TIDENES_ENDE.toYearMonth()
+    val sisteUtbetalingsperiodeTom =
+        utbetalingsperioder
+            .maxOfOrNull { it.periodeTom }?.toYearMonth()
+            ?: TIDENES_ENDE.toYearMonth()
     val nesteMåned = inneværendeMåned().nesteMåned()
 
     return if (sisteUtbetalingsperiodeTom.isBefore(nesteMåned)) {
@@ -158,10 +161,11 @@ fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>): Lis
             nesteOpphørsperiode.periodeFom.isSameOrBefore(forrigeOpphørsperiode.periodeTom ?: TIDENES_ENDE) -> {
                 acc[acc.lastIndex] =
                     forrigeOpphørsperiode.copy(
-                        periodeTom = maxOfOpphørsperiodeTom(
-                            forrigeOpphørsperiode.periodeTom,
-                            nesteOpphørsperiode.periodeTom,
-                        ),
+                        periodeTom =
+                            maxOfOpphørsperiodeTom(
+                                forrigeOpphørsperiode.periodeTom,
+                                nesteOpphørsperiode.periodeTom,
+                            ),
                     )
             }
 
@@ -174,6 +178,9 @@ fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>): Lis
     }
 }
 
-private fun maxOfOpphørsperiodeTom(a: LocalDate?, b: LocalDate?): LocalDate? {
+private fun maxOfOpphørsperiodeTom(
+    a: LocalDate?,
+    b: LocalDate?,
+): LocalDate? {
     return if (a != null && b != null) maxOf(a, b) else null
 }

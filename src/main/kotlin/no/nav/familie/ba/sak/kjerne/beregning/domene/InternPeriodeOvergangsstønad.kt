@@ -20,11 +20,12 @@ data class InternPeriodeOvergangsstønad(
     )
 }
 
-fun EksternPeriode.tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsstønad(
-    personIdent = this.personIdent,
-    fomDato = this.fomDato,
-    tomDato = this.tomDato,
-)
+fun EksternPeriode.tilInternPeriodeOvergangsstønad() =
+    InternPeriodeOvergangsstønad(
+        personIdent = this.personIdent,
+        fomDato = this.fomDato,
+        tomDato = this.tomDato,
+    )
 
 fun List<InternPeriodeOvergangsstønad>.slåSammenTidligerePerioder(
     dagensDato: LocalDate,
@@ -71,15 +72,16 @@ fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandl
     val gammelOvergangsstønadTidslinje =
         InternPeriodeOvergangsstønadTidslinje(overgangsstønadPerioderFraForrigeBehandling)
 
-    val oppsplittedeFramtigigePerioder = gammelOvergangsstønadTidslinje
-        .kombinerMed(nyeOvergangsstønadTidslinje) { gammelOvergangsstønadPeriode, nyOvergangsstønadPeriode ->
-            if (nyOvergangsstønadPeriode == null) {
-                null
-            } else {
-                gammelOvergangsstønadPeriode ?: nyOvergangsstønadPeriode
+    val oppsplittedeFramtigigePerioder =
+        gammelOvergangsstønadTidslinje
+            .kombinerMed(nyeOvergangsstønadTidslinje) { gammelOvergangsstønadPeriode, nyOvergangsstønadPeriode ->
+                if (nyOvergangsstønadPeriode == null) {
+                    null
+                } else {
+                    gammelOvergangsstønadPeriode ?: nyOvergangsstønadPeriode
+                }
             }
-        }
-        .lagInternePerioderOvergangsstønad()
+            .lagInternePerioderOvergangsstønad()
 
     return tidligerePerioder + oppsplittedeFramtigigePerioder
 }

@@ -16,10 +16,11 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
  * fom og tom lik null tolkes som fra uendelig lenge siden til uendelig lenge til, som ville skapt overlapp med oppfylt vilkår
  * Overlapp er ikke støttet av tidsliner, og ville gitt exception
  */
-fun Iterable<VilkårResultat>.tilVilkårRegelverkResultatTidslinje() = tidslinje {
-    this.filter { it.erOppfylt() }
-        .map { it.tilPeriode() }
-}
+fun Iterable<VilkårResultat>.tilVilkårRegelverkResultatTidslinje() =
+    tidslinje {
+        this.filter { it.erOppfylt() }
+            .map { it.tilPeriode() }
+    }
 
 fun VilkårResultat.tilPeriode(): Periode<VilkårRegelverkResultat, Dag> {
     val fom = periodeFom.tilTidspunktEllerUendeligTidlig(periodeTom)

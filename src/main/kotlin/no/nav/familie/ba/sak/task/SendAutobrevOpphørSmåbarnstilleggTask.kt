@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service
 class SendAutobrevOpphørSmåbarnstilleggTask(
     private val autobrevOpphørSmåbarnstilleggService: AutobrevOpphørSmåbarnstilleggService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val autobrevDTO = objectMapper.readValue(task.payload, AutobrevOpphørSmåbarnstilleggDTO::class.java)
 

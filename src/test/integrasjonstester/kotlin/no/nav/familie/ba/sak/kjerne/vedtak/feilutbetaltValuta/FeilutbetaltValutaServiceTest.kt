@@ -20,18 +20,18 @@ class FeilutbetaltValutaServiceTest(
     @Autowired val fagsakRepository: FagsakRepository,
     @Autowired val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun kanLagreEndreOgSlette() {
         val fagsak =
             defaultFagsak(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
         val behandling = lagBehandling(fagsak = fagsak).let { behandlingHentOgPersisterService.lagreEllerOppdater(it, false) }
-        val feilutbetaltValuta = RestFeilutbetaltValuta(
-            id = 0,
-            fom = LocalDate.of(2020, Month.JANUARY, 1),
-            tom = LocalDate.of(2021, Month.MAY, 31),
-            feilutbetaltBeløp = 1234,
-        )
+        val feilutbetaltValuta =
+            RestFeilutbetaltValuta(
+                id = 0,
+                fom = LocalDate.of(2020, Month.JANUARY, 1),
+                tom = LocalDate.of(2021, Month.MAY, 31),
+                feilutbetaltBeløp = 1234,
+            )
 
         val id = feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, behandlingId = behandling.id)
 
@@ -41,12 +41,13 @@ class FeilutbetaltValutaServiceTest(
             .also { Assertions.assertThat(it[0].tom).isNotNull() }
 
         feilutbetaltValutaService.oppdatertFeilutbetaltValutaPeriode(
-            feilutbetaltValuta = RestFeilutbetaltValuta(
-                id = id,
-                fom = LocalDate.of(2020, Month.JANUARY, 1),
-                tom = LocalDate.of(2020, Month.MAY, 31),
-                feilutbetaltBeløp = 1,
-            ),
+            feilutbetaltValuta =
+                RestFeilutbetaltValuta(
+                    id = id,
+                    fom = LocalDate.of(2020, Month.JANUARY, 1),
+                    tom = LocalDate.of(2020, Month.MAY, 31),
+                    feilutbetaltBeløp = 1,
+                ),
             id = id,
         )
 
@@ -54,12 +55,13 @@ class FeilutbetaltValutaServiceTest(
             .also { Assertions.assertThat(it.get(0).id).isEqualTo(id) }
             .also { Assertions.assertThat(it.get(0).tom).isEqualTo("2020-05-31") }
 
-        val feilutbetaltValuta2 = RestFeilutbetaltValuta(
-            id = 0,
-            fom = LocalDate.of(2019, Month.DECEMBER, 1),
-            tom = LocalDate.of(2019, Month.DECEMBER, 31),
-            feilutbetaltBeløp = 100,
-        )
+        val feilutbetaltValuta2 =
+            RestFeilutbetaltValuta(
+                id = 0,
+                fom = LocalDate.of(2019, Month.DECEMBER, 1),
+                tom = LocalDate.of(2019, Month.DECEMBER, 31),
+                feilutbetaltBeløp = 100,
+            )
 
         val id2 = feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta2, behandlingId = behandling.id)
 

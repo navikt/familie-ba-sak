@@ -23,7 +23,6 @@ import org.hamcrest.CoreMatchers.`is` as Is
 
 @ExtendWith(MockKExtension::class)
 internal class SmåbarnstilleggKorrigeringServiceTest {
-
     @MockK
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
@@ -62,18 +61,20 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
         val behandling = lagBehandling()
         val tilkjentYtelseMock = mockk<TilkjentYtelse>()
 
-        val andelTilkjentYtelse = lagAndelTilkjentYtelse(
-            fom = YearMonth.of(2010, 10),
-            tom = YearMonth.of(2020, 10),
-            ytelseType = YtelseType.SMÅBARNSTILLEGG,
-        )
+        val andelTilkjentYtelse =
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2010, 10),
+                tom = YearMonth.of(2020, 10),
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
+            )
 
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelseMock
         every { tilkjentYtelseMock.andelerTilkjentYtelse } returns mutableSetOf(andelTilkjentYtelse)
 
-        val feil = assertThrows<FunksjonellFeil> {
-            småbarnstilleggKorrigeringService.leggTilSmåbarnstilleggPåBehandling(YearMonth.of(2020, 10), behandling)
-        }
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                småbarnstilleggKorrigeringService.leggTilSmåbarnstilleggPåBehandling(YearMonth.of(2020, 10), behandling)
+            }
 
         assertThat(
             feil.melding,
@@ -131,9 +132,10 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelse
 
-        val feil = assertThrows<FunksjonellFeil> {
-            småbarnstilleggKorrigeringService.fjernSmåbarnstilleggPåBehandling(YearMonth.of(2025, 5), behandling)
-        }
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                småbarnstilleggKorrigeringService.fjernSmåbarnstilleggPåBehandling(YearMonth.of(2025, 5), behandling)
+            }
 
         assertThat(
             feil.melding,

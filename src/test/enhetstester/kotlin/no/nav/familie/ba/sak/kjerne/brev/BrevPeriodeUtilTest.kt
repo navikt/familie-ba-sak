@@ -19,41 +19,36 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class BrevPeriodeUtilTest {
-
     @Test
     fun `Skal sortere perioder kronologisk, med generelle avslag til slutt`() {
-        val liste = listOf(
-            lagBrevperiodeData(
-                fom = LocalDate.now().minusMonths(12),
-                tom = LocalDate.now().minusMonths(8),
-                type = Vedtaksperiodetype.UTBETALING,
-
-            ),
-            lagBrevperiodeData(
-                fom = LocalDate.now().minusMonths(3),
-                tom = null,
-                type = Vedtaksperiodetype.AVSLAG,
-
-            ),
-            lagBrevperiodeData(
-                fom = null,
-                tom = null,
-                type = Vedtaksperiodetype.AVSLAG,
-
-            ),
-            lagBrevperiodeData(
-                fom = LocalDate.now().minusMonths(7),
-                tom = LocalDate.now().minusMonths(4),
-                type = Vedtaksperiodetype.OPPHØR,
-
-            ),
-            lagBrevperiodeData(
-                fom = LocalDate.now().minusMonths(3),
-                tom = LocalDate.now(),
-                type = Vedtaksperiodetype.UTBETALING,
-
-            ),
-        )
+        val liste =
+            listOf(
+                lagBrevperiodeData(
+                    fom = LocalDate.now().minusMonths(12),
+                    tom = LocalDate.now().minusMonths(8),
+                    type = Vedtaksperiodetype.UTBETALING,
+                ),
+                lagBrevperiodeData(
+                    fom = LocalDate.now().minusMonths(3),
+                    tom = null,
+                    type = Vedtaksperiodetype.AVSLAG,
+                ),
+                lagBrevperiodeData(
+                    fom = null,
+                    tom = null,
+                    type = Vedtaksperiodetype.AVSLAG,
+                ),
+                lagBrevperiodeData(
+                    fom = LocalDate.now().minusMonths(7),
+                    tom = LocalDate.now().minusMonths(4),
+                    type = Vedtaksperiodetype.OPPHØR,
+                ),
+                lagBrevperiodeData(
+                    fom = LocalDate.now().minusMonths(3),
+                    tom = LocalDate.now(),
+                    type = Vedtaksperiodetype.UTBETALING,
+                ),
+            )
 
         val sortertListe = liste.sorted()
 
@@ -113,20 +108,23 @@ class BrevPeriodeUtilTest {
 
     @Test
     fun `Skal kunne kombinere registrerte og uregistrerte barns fødselsdatoer til avslagsbegrunnelse`() {
-        val barnIBegrunnelse = listOf(
-            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 1, 1), type = PersonType.BARN),
-            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 2, 2), type = PersonType.BARN),
-        ).map { it.tilMinimertRestPerson() }
-        val barnPåBehandling = listOf(
-            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 1, 1), type = PersonType.BARN),
-            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 2, 2), type = PersonType.BARN),
-            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 3, 3), type = PersonType.BARN),
-        ).map { it.tilMinimertRestPerson() }
-        val uregistrerteBarn = listOf(
-            MinimertUregistrertBarn(personIdent = "", navn = "Ole", fødselsdato = LocalDate.of(2021, 4, 4)),
-            MinimertUregistrertBarn(personIdent = "", navn = "Dole", fødselsdato = LocalDate.of(2021, 5, 5)),
-            MinimertUregistrertBarn(personIdent = "", navn = "Doffen", fødselsdato = LocalDate.of(2021, 6, 6)),
-        )
+        val barnIBegrunnelse =
+            listOf(
+                lagMinimertPerson(fødselsdato = LocalDate.of(2021, 1, 1), type = PersonType.BARN),
+                lagMinimertPerson(fødselsdato = LocalDate.of(2021, 2, 2), type = PersonType.BARN),
+            ).map { it.tilMinimertRestPerson() }
+        val barnPåBehandling =
+            listOf(
+                lagMinimertPerson(fødselsdato = LocalDate.of(2021, 1, 1), type = PersonType.BARN),
+                lagMinimertPerson(fødselsdato = LocalDate.of(2021, 2, 2), type = PersonType.BARN),
+                lagMinimertPerson(fødselsdato = LocalDate.of(2021, 3, 3), type = PersonType.BARN),
+            ).map { it.tilMinimertRestPerson() }
+        val uregistrerteBarn =
+            listOf(
+                MinimertUregistrertBarn(personIdent = "", navn = "Ole", fødselsdato = LocalDate.of(2021, 4, 4)),
+                MinimertUregistrertBarn(personIdent = "", navn = "Dole", fødselsdato = LocalDate.of(2021, 5, 5)),
+                MinimertUregistrertBarn(personIdent = "", navn = "Doffen", fødselsdato = LocalDate.of(2021, 6, 6)),
+            )
 
         Assertions.assertEquals(
             hentBarnasFødselsdatoerForAvslagsbegrunnelse(
@@ -172,23 +170,25 @@ private fun lagBrevperiodeData(
     tom: LocalDate?,
     type: Vedtaksperiodetype,
 ): BrevperiodeData {
-    val restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
-        personerPåBehandling = emptyList(),
-        minimertePersonResultater = emptyList(),
-        minimerteEndredeUtbetalingAndeler = emptyList(),
-        fagsakType = FagsakType.NORMAL,
-    )
+    val restBehandlingsgrunnlagForBrev =
+        RestBehandlingsgrunnlagForBrev(
+            personerPåBehandling = emptyList(),
+            minimertePersonResultater = emptyList(),
+            minimerteEndredeUtbetalingAndeler = emptyList(),
+            fagsakType = FagsakType.NORMAL,
+        )
     return BrevperiodeData(
         restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
         erFørsteVedtaksperiodePåFagsak = false,
         brevMålform = Målform.NB,
-        minimertVedtaksperiode = MinimertVedtaksperiode(
-            begrunnelser = emptyList(),
-            fom = fom,
-            tom = tom,
-            type = type,
-            eøsBegrunnelser = emptyList(),
-        ),
+        minimertVedtaksperiode =
+            MinimertVedtaksperiode(
+                begrunnelser = emptyList(),
+                fom = fom,
+                tom = tom,
+                type = type,
+                eøsBegrunnelser = emptyList(),
+            ),
         uregistrerteBarn = emptyList(),
         minimerteKompetanserForPeriode = emptyList(),
         minimerteKompetanserSomStopperRettFørPeriode = emptyList(),

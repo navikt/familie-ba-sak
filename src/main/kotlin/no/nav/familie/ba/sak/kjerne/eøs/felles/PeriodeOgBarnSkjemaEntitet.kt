@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 abstract class PeriodeOgBarnSkjemaEntitet<T : PeriodeOgBarnSkjema<T>> :
     BaseEntitet(),
     PeriodeOgBarnSkjema<T> {
-
     abstract var id: Long
     abstract var behandlingId: Long
 }

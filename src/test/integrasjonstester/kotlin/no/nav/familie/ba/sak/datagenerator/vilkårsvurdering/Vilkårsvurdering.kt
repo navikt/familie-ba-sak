@@ -34,20 +34,22 @@ fun lagVilkårsvurderingMedOverstyrendeResultater(
 ): Vilkårsvurdering {
     val vilkårsvurdering = Vilkårsvurdering(behandling = behandling ?: mockk(relaxed = true), id = id)
 
-    val søkerPersonResultater = lagPersonResultatAvOverstyrteResultater(
-        person = søker,
-        overstyrendeVilkårResultater = overstyrendeVilkårResultater[søker.aktør.aktørId] ?: emptyList(),
-        vilkårsvurdering = vilkårsvurdering,
-        id = id,
-    )
-
-    val barnaPersonResultater = barna.map {
+    val søkerPersonResultater =
         lagPersonResultatAvOverstyrteResultater(
-            person = it,
-            overstyrendeVilkårResultater = overstyrendeVilkårResultater[it.aktør.aktørId] ?: emptyList(),
+            person = søker,
+            overstyrendeVilkårResultater = overstyrendeVilkårResultater[søker.aktør.aktørId] ?: emptyList(),
             vilkårsvurdering = vilkårsvurdering,
+            id = id,
         )
-    }
+
+    val barnaPersonResultater =
+        barna.map {
+            lagPersonResultatAvOverstyrteResultater(
+                person = it,
+                overstyrendeVilkårResultater = overstyrendeVilkårResultater[it.aktør.aktørId] ?: emptyList(),
+                vilkårsvurdering = vilkårsvurdering,
+            )
+        }
 
     vilkårsvurdering.personResultater = barnaPersonResultater.toSet() + søkerPersonResultater
     return vilkårsvurdering
@@ -57,24 +59,26 @@ fun lagVilkårsvurderingFraRestScenario(
     scenario: RestScenario,
     overstyrendeVilkårResultater: Map<AktørId, List<VilkårResultat>>,
 ): Vilkårsvurdering {
-    fun RestScenarioPerson.TilAktør() = Aktør(
-        this.aktørId!!,
-        mutableSetOf(Personident(this.ident!!, mockk(relaxed = true))),
-    )
+    fun RestScenarioPerson.tilAktør() =
+        Aktør(
+            this.aktørId!!,
+            mutableSetOf(Personident(this.ident!!, mockk(relaxed = true))),
+        )
 
     val søker =
         lagPerson(
-            aktør = scenario.søker.TilAktør(),
+            aktør = scenario.søker.tilAktør(),
             fødselsdato = LocalDate.parse(scenario.søker.fødselsdato),
             type = PersonType.SØKER,
         )
-    val barna = scenario.barna.map {
-        lagPerson(
-            aktør = it.TilAktør(),
-            fødselsdato = LocalDate.parse(it.fødselsdato),
-            type = PersonType.BARN,
-        )
-    }
+    val barna =
+        scenario.barna.map {
+            lagPerson(
+                aktør = it.tilAktør(),
+                fødselsdato = LocalDate.parse(it.fødselsdato),
+                type = PersonType.BARN,
+            )
+        }
     return lagVilkårsvurderingMedOverstyrendeResultater(
         søker = søker,
         barna = barna,

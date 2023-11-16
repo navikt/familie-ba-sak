@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
-
     val barnsFødselsdato = 13.jan(2020)
     val startMåned = barnsFødselsdato.tilInneværendeMåned()
 
@@ -30,11 +29,12 @@ class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
 
         val forrigeTilkjentYtelse = TilkjentYtelseBuilder(startMåned, behandling).bygg()
 
-        val nyTilkjentYtelse = TilkjentYtelseBuilder(startMåned, behandling)
-            .forPersoner(barn1)
-            .medOrdinær(" $$$$$$")
-            .medOrdinær("      $$$$$")
-            .bygg()
+        val nyTilkjentYtelse =
+            TilkjentYtelseBuilder(startMåned, behandling)
+                .forPersoner(barn1)
+                .medOrdinær(" $$$$$$")
+                .medOrdinær("      $$$$$")
+                .bygg()
 
         assertThrows<IllegalStateException> {
             tilkjentYtelseRepository.oppdaterTilkjentYtelse(
@@ -50,11 +50,12 @@ class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
 
         val forrigeTilkjentYtelse = TilkjentYtelseBuilder(startMåned, behandling).bygg()
 
-        val nyTilkjentYtelse = TilkjentYtelseBuilder(startMåned, behandling)
-            .forPersoner(søker)
-            .medUtvidet(" $$$$$$")
-            .medUtvidet("      $$$$$")
-            .bygg()
+        val nyTilkjentYtelse =
+            TilkjentYtelseBuilder(startMåned, behandling)
+                .forPersoner(søker)
+                .medUtvidet(" $$$$$$")
+                .medUtvidet("      $$$$$")
+                .bygg()
 
         assertThrows<IllegalStateException> {
             tilkjentYtelseRepository.oppdaterTilkjentYtelse(
@@ -68,15 +69,17 @@ class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
     fun `skal ikke kaste exception hvis tilkjent ytelse oppdateres med gyldige andeler`() {
         val behandling = lagBehandling()
 
-        val forrigeTilkjentYtelse = TilkjentYtelseBuilder(startMåned, behandling)
-            .bygg()
+        val forrigeTilkjentYtelse =
+            TilkjentYtelseBuilder(startMåned, behandling)
+                .bygg()
 
-        val nyTilkjentYtelse = TilkjentYtelseBuilder(startMåned, behandling)
-            .forPersoner(søker)
-            .medUtvidet(" $$$$$$$$$$")
-            .forPersoner(barn1)
-            .medOrdinær("$$$$$$$$$")
-            .bygg()
+        val nyTilkjentYtelse =
+            TilkjentYtelseBuilder(startMåned, behandling)
+                .forPersoner(søker)
+                .medUtvidet(" $$$$$$$$$$")
+                .forPersoner(barn1)
+                .medOrdinær("$$$$$$$$$")
+                .bygg()
 
         every { tilkjentYtelseRepository.saveAndFlush(any()) } returns nyTilkjentYtelse
 

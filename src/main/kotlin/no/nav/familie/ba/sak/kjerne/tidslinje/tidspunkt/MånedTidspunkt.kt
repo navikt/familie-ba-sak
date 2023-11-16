@@ -8,7 +8,6 @@ data class MånedTidspunkt internal constructor(
     internal val måned: YearMonth,
     override val uendelighet: Uendelighet,
 ) : Tidspunkt<Måned>(uendelighet) {
-
     fun tilYearMonthEllerNull(): YearMonth? =
         if (uendelighet != Uendelighet.INGEN) {
             null
@@ -32,10 +31,11 @@ data class MånedTidspunkt internal constructor(
         return when (uendelighet) {
             Uendelighet.FORTID -> "<--"
             else -> ""
-        } + måned + when (uendelighet) {
-            Uendelighet.FREMTID -> "-->"
-            else -> ""
-        }
+        } + måned +
+            when (uendelighet) {
+                Uendelighet.FREMTID -> "-->"
+                else -> ""
+            }
     }
 
     override fun sammenliknMed(tidspunkt: Tidspunkt<Måned>): Int {
@@ -60,10 +60,17 @@ data class MånedTidspunkt internal constructor(
 
     companion object {
         fun nå() = MånedTidspunkt(YearMonth.now(), Uendelighet.INGEN)
+
         fun uendeligLengeTil(måned: YearMonth = YearMonth.now()) = MånedTidspunkt(måned, Uendelighet.FREMTID)
+
         fun uendeligLengeSiden(måned: YearMonth = YearMonth.now()) = MånedTidspunkt(måned, Uendelighet.FORTID)
+
         fun med(måned: YearMonth) = MånedTidspunkt(måned, Uendelighet.INGEN)
-        fun med(år: Int, måned: Int) = MånedTidspunkt(YearMonth.of(år, måned), Uendelighet.INGEN)
+
+        fun med(
+            år: Int,
+            måned: Int,
+        ) = MånedTidspunkt(YearMonth.of(år, måned), Uendelighet.INGEN)
 
         internal fun YearMonth.tilTidspunkt() = MånedTidspunkt(this, Uendelighet.INGEN)
 
@@ -73,7 +80,10 @@ data class MånedTidspunkt internal constructor(
         internal fun YearMonth?.tilTidspunktEllerUendeligSent(defaultUendelighetMåned: YearMonth? = null) =
             this.tilTidspunktEllerUendelig(defaultUendelighetMåned, Uendelighet.FREMTID)
 
-        private fun YearMonth?.tilTidspunktEllerUendelig(default: YearMonth?, uendelighet: Uendelighet) =
+        private fun YearMonth?.tilTidspunktEllerUendelig(
+            default: YearMonth?,
+            uendelighet: Uendelighet,
+        ) =
             this?.let { MånedTidspunkt(it, Uendelighet.INGEN) } ?: MånedTidspunkt(
                 default ?: YearMonth.now(),
                 uendelighet,

@@ -24,7 +24,6 @@ class KonsistensavstemmingScheduler(
     val fagsakService: FagsakService,
     val taskRepository: TaskRepositoryWrapper,
 ) {
-
     @Scheduled(cron = "0 0 22 * * *")
     @Transactional
     fun utførKonsistensavstemming() {
@@ -37,16 +36,18 @@ class KonsistensavstemmingScheduler(
         taskRepository.save(
             Task(
                 type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(
-                    KonsistensavstemmingStartTaskDTO(
-                        batchId = plukketBatch.id,
-                        avstemmingdato = LocalDateTime.now(),
-                        transaksjonsId = transaksjonsId,
+                payload =
+                    objectMapper.writeValueAsString(
+                        KonsistensavstemmingStartTaskDTO(
+                            batchId = plukketBatch.id,
+                            avstemmingdato = LocalDateTime.now(),
+                            transaksjonsId = transaksjonsId,
+                        ),
                     ),
-                ),
-                properties = Properties().apply {
-                    this["transaksjonsId"] = transaksjonsId.toString()
-                },
+                properties =
+                    Properties().apply {
+                        this["transaksjonsId"] = transaksjonsId.toString()
+                    },
             ),
         )
 
@@ -54,7 +55,6 @@ class KonsistensavstemmingScheduler(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(KonsistensavstemmingScheduler::class.java)
     }
 }

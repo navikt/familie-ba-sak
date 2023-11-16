@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.YearMonth
 
 object Behandlingutils {
-
     fun hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger: List<Behandling>): Behandling? {
         return iverksatteBehandlinger
             .filter { it.steg == StegType.BEHANDLING_AVSLUTTET }
@@ -54,7 +53,11 @@ object Behandlingutils {
         }
     }
 
-    fun validerhenleggelsestype(henleggÅrsak: HenleggÅrsak, tekniskVedlikeholdToggel: Boolean, behandlingId: Long) {
+    fun validerhenleggelsestype(
+        henleggÅrsak: HenleggÅrsak,
+        tekniskVedlikeholdToggel: Boolean,
+        behandlingId: Long,
+    ) {
         if (!tekniskVedlikeholdToggel && henleggÅrsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD) {
             throw Feil(
                 "Teknisk vedlikehold henleggele er ikke påslått for " +

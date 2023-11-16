@@ -17,15 +17,18 @@ class DeltBostedBuilder(
     startMåned: Tidspunkt<Måned> = jan(2020),
     internal val tilkjentYtelse: TilkjentYtelse,
 ) : SkjemaBuilder<DeltBosted, DeltBostedBuilder>(startMåned, BehandlingId(tilkjentYtelse.behandling.id)) {
-
-    fun medDeltBosted(k: String, vararg barn: Person) = medSkjema(k, barn.toList()) {
-        when (it) {
-            '0' -> DeltBosted(prosent = 0, barnPersoner = barn.toList())
-            '/' -> DeltBosted(prosent = 50, barnPersoner = barn.toList())
-            '1' -> DeltBosted(prosent = 100, barnPersoner = barn.toList())
-            else -> null
+    fun medDeltBosted(
+        k: String,
+        vararg barn: Person,
+    ) =
+        medSkjema(k, barn.toList()) {
+            when (it) {
+                '0' -> DeltBosted(prosent = 0, barnPersoner = barn.toList())
+                '/' -> DeltBosted(prosent = 50, barnPersoner = barn.toList())
+                '1' -> DeltBosted(prosent = 100, barnPersoner = barn.toList())
+                else -> null
+            }
         }
-    }
 }
 
 data class DeltBosted(
@@ -36,7 +39,12 @@ data class DeltBosted(
     internal val barnPersoner: List<Person> = emptyList(),
 ) : PeriodeOgBarnSkjemaEntitet<DeltBosted>() {
     override fun utenInnhold() = copy(prosent = null)
-    override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) =
+
+    override fun kopier(
+        fom: YearMonth?,
+        tom: YearMonth?,
+        barnAktører: Set<Aktør>,
+    ) =
         copy(
             fom = fom,
             tom = tom,

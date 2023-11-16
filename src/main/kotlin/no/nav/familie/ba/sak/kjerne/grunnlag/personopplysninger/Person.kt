@@ -45,65 +45,51 @@ data class Person(
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "po_person_seq_generator")
     @SequenceGenerator(name = "po_person_seq_generator", sequenceName = "po_person_seq", allocationSize = 50)
     val id: Long = 0,
-
     // SØKER, BARN, ANNENPART
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     val type: PersonType,
-
     @Column(name = "foedselsdato", nullable = false)
     val fødselsdato: LocalDate,
-
     @Column(name = "navn", nullable = false)
     val navn: String = "",
-
     @Enumerated(EnumType.STRING)
     @Column(name = "kjoenn", nullable = false)
     val kjønn: Kjønn,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "maalform", nullable = false)
     val målform: Målform = Målform.NB,
-
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_gr_personopplysninger_id", nullable = false, updatable = false)
     val personopplysningGrunnlag: PersonopplysningGrunnlag,
-
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
-
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
     @Fetch(value = FetchMode.SUBSELECT)
     var bostedsadresser: MutableList<GrBostedsadresse> = mutableListOf(),
-
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
     @Fetch(value = FetchMode.SUBSELECT)
     var statsborgerskap: MutableList<GrStatsborgerskap> = mutableListOf(),
-
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
     @Fetch(value = FetchMode.SUBSELECT)
     var opphold: MutableList<GrOpphold> = mutableListOf(),
-
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
     @Fetch(value = FetchMode.SUBSELECT)
     var arbeidsforhold: MutableList<GrArbeidsforhold> = mutableListOf(),
-
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
     @Fetch(value = FetchMode.SUBSELECT)
     var sivilstander: MutableList<GrSivilstand> = mutableListOf(),
-
     @OneToOne(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, optional = true)
     var dødsfall: Dødsfall? = null,
 ) : BaseEntitet() {
-
     fun tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag: PersonopplysningGrunnlag): Person =
         copy(
             id = 0,
@@ -139,7 +125,7 @@ data class Person(
         return """Person(aktørId=$aktør,
                         |type=$type
                         |fødselsdato=$fødselsdato)
-        """.trimMargin()
+            """.trimMargin()
     }
 
     override fun equals(other: Any?): Boolean {
@@ -191,13 +177,15 @@ enum class Målform {
     NN,
     ;
 
-    fun tilSanityFormat() = when (this) {
-        NB -> "bokmaal"
-        NN -> "nynorsk"
-    }
+    fun tilSanityFormat() =
+        when (this) {
+            NB -> "bokmaal"
+            NN -> "nynorsk"
+        }
 
-    fun tilSpråkkode() = when (this) {
-        NB -> Språkkode.NB
-        NN -> Språkkode.NN
-    }
+    fun tilSpråkkode() =
+        when (this) {
+            NB -> Språkkode.NB
+            NN -> Språkkode.NN
+        }
 }

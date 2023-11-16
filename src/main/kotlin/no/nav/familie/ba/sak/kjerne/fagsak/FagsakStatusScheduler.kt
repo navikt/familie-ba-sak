@@ -14,7 +14,6 @@ class FagsakStatusScheduler(
     private val taskRepository: TaskRepositoryWrapper,
     private val envService: EnvService,
 ) {
-
     /*
      * Siden barnetrygd er en månedsytelse vil en fagsak alltid løpe ut en måned
      * Det er derfor nok å finne alle fagsaker som ikke lenger har noen løpende utbetalinger den 1 hver måned.
@@ -35,7 +34,6 @@ class FagsakStatusScheduler(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(FagsakStatusScheduler::class.java)
     }
 }

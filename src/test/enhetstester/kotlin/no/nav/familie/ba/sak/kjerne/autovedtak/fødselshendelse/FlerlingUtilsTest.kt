@@ -13,22 +13,23 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class FlerlingUtilsTest {
-
     @Test
     fun `Skal behandle 1 barn når mor ikke har andre barn`() {
         val morsIdent = randomFnr()
         val barn = randomFnr()
-        val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
-            nyBehandlingHendelse = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barn)),
-            barnaTilMor = listOf(
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now(),
-                ),
-            ),
-            barnaSomHarBlittBehandlet = emptyList(),
-        )
+        val (barnSomSkalBehandlesForMor, _) =
+            finnBarnSomSkalBehandlesForMor(
+                nyBehandlingHendelse = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barn)),
+                barnaTilMor =
+                    listOf(
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now(),
+                        ),
+                    ),
+                barnaSomHarBlittBehandlet = emptyList(),
+            )
 
         assertEquals(1, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))
@@ -39,22 +40,24 @@ class FlerlingUtilsTest {
         val morsIdent = randomFnr()
         val barn = randomFnr()
         val barn2 = randomFnr()
-        val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
-            nyBehandlingHendelse = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barn)),
-            barnaTilMor = listOf(
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now(),
-                ),
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn2),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now().minusYears(2),
-                ),
-            ),
-            barnaSomHarBlittBehandlet = listOf(barn2),
-        )
+        val (barnSomSkalBehandlesForMor, _) =
+            finnBarnSomSkalBehandlesForMor(
+                nyBehandlingHendelse = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barn)),
+                barnaTilMor =
+                    listOf(
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now(),
+                        ),
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn2),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now().minusYears(2),
+                        ),
+                    ),
+                barnaSomHarBlittBehandlet = listOf(barn2),
+            )
 
         assertEquals(1, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))
@@ -65,22 +68,24 @@ class FlerlingUtilsTest {
         val morsIdent = randomFnr()
         val barn = randomFnr()
         val barn2 = randomFnr()
-        val (barnSomSkalBehandlesForMor, alleBarnSomKanBehandles) = finnBarnSomSkalBehandlesForMor(
-            nyBehandlingHendelse = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barn2)),
-            barnaTilMor = listOf(
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now(),
-                ),
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn2),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now().minusYears(2),
-                ),
-            ),
-            barnaSomHarBlittBehandlet = listOf(barn, barn2),
-        )
+        val (barnSomSkalBehandlesForMor, alleBarnSomKanBehandles) =
+            finnBarnSomSkalBehandlesForMor(
+                nyBehandlingHendelse = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barn2)),
+                barnaTilMor =
+                    listOf(
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now(),
+                        ),
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn2),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now().minusYears(2),
+                        ),
+                    ),
+                barnaSomHarBlittBehandlet = listOf(barn, barn2),
+            )
 
         assertEquals(0, barnSomSkalBehandlesForMor.size)
         assertEquals(1, alleBarnSomKanBehandles.size)
@@ -91,25 +96,28 @@ class FlerlingUtilsTest {
         val morsIdent = randomFnr()
         val barn = randomFnr()
         val barn2 = randomFnr()
-        val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = morsIdent,
-                barnasIdenter = listOf(barn, barn2),
-            ),
-            barnaTilMor = listOf(
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now(),
-                ),
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn2),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now().minusYears(2),
-                ),
-            ),
-            barnaSomHarBlittBehandlet = emptyList(),
-        )
+        val (barnSomSkalBehandlesForMor, _) =
+            finnBarnSomSkalBehandlesForMor(
+                nyBehandlingHendelse =
+                    NyBehandlingHendelse(
+                        morsIdent = morsIdent,
+                        barnasIdenter = listOf(barn, barn2),
+                    ),
+                barnaTilMor =
+                    listOf(
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now(),
+                        ),
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn2),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now().minusYears(2),
+                        ),
+                    ),
+                barnaSomHarBlittBehandlet = emptyList(),
+            )
 
         assertEquals(2, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))
@@ -121,25 +129,28 @@ class FlerlingUtilsTest {
         val morsIdent = randomFnr()
         val barn = randomFnr()
         val barn2 = randomFnr()
-        val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = morsIdent,
-                barnasIdenter = listOf(barn),
-            ),
-            barnaTilMor = listOf(
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now(),
-                ),
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn2),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now(),
-                ),
-            ),
-            barnaSomHarBlittBehandlet = emptyList(),
-        )
+        val (barnSomSkalBehandlesForMor, _) =
+            finnBarnSomSkalBehandlesForMor(
+                nyBehandlingHendelse =
+                    NyBehandlingHendelse(
+                        morsIdent = morsIdent,
+                        barnasIdenter = listOf(barn),
+                    ),
+                barnaTilMor =
+                    listOf(
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now(),
+                        ),
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn2),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now(),
+                        ),
+                    ),
+                barnaSomHarBlittBehandlet = emptyList(),
+            )
 
         assertEquals(2, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))
@@ -154,35 +165,38 @@ class FlerlingUtilsTest {
         val barn3 = randomFnr()
         val barn4 = randomFnr()
         val barn5 = randomFnr()
-        val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = morsIdent,
-                barnasIdenter = listOf(barn),
-            ),
-            barnaTilMor = listOf(
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now(),
-                ),
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn2),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now(),
-                ),
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn3),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now(),
-                ),
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn4),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now(),
-                ),
-            ),
-            barnaSomHarBlittBehandlet = listOf(barn5),
-        )
+        val (barnSomSkalBehandlesForMor, _) =
+            finnBarnSomSkalBehandlesForMor(
+                nyBehandlingHendelse =
+                    NyBehandlingHendelse(
+                        morsIdent = morsIdent,
+                        barnasIdenter = listOf(barn),
+                    ),
+                barnaTilMor =
+                    listOf(
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now(),
+                        ),
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn2),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now(),
+                        ),
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn3),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now(),
+                        ),
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn4),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now(),
+                        ),
+                    ),
+                barnaSomHarBlittBehandlet = listOf(barn5),
+            )
 
         assertEquals(4, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))
@@ -196,25 +210,28 @@ class FlerlingUtilsTest {
         val morsIdent = randomFnr()
         val barn = randomFnr()
         val barn2 = randomFnr()
-        val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = morsIdent,
-                barnasIdenter = listOf(barn),
-            ),
-            barnaTilMor = listOf(
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now(),
-                ),
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn2),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now().minusDays(1),
-                ),
-            ),
-            barnaSomHarBlittBehandlet = emptyList(),
-        )
+        val (barnSomSkalBehandlesForMor, _) =
+            finnBarnSomSkalBehandlesForMor(
+                nyBehandlingHendelse =
+                    NyBehandlingHendelse(
+                        morsIdent = morsIdent,
+                        barnasIdenter = listOf(barn),
+                    ),
+                barnaTilMor =
+                    listOf(
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now(),
+                        ),
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn2),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now().minusDays(1),
+                        ),
+                    ),
+                barnaSomHarBlittBehandlet = emptyList(),
+            )
 
         assertEquals(2, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))
@@ -226,25 +243,28 @@ class FlerlingUtilsTest {
         val morsIdent = randomFnr()
         val barn = randomFnr()
         val barn2 = randomFnr()
-        val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = morsIdent,
-                barnasIdenter = listOf(barn),
-            ),
-            barnaTilMor = listOf(
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now(),
-                ),
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(barn2),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now().plusDays(1),
-                ),
-            ),
-            barnaSomHarBlittBehandlet = emptyList(),
-        )
+        val (barnSomSkalBehandlesForMor, _) =
+            finnBarnSomSkalBehandlesForMor(
+                nyBehandlingHendelse =
+                    NyBehandlingHendelse(
+                        morsIdent = morsIdent,
+                        barnasIdenter = listOf(barn),
+                    ),
+                barnaTilMor =
+                    listOf(
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now(),
+                        ),
+                        ForelderBarnRelasjon(
+                            aktør = tilAktør(barn2),
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            fødselsdato = LocalDate.now().plusDays(1),
+                        ),
+                    ),
+                barnaSomHarBlittBehandlet = emptyList(),
+            )
 
         assertEquals(2, barnSomSkalBehandlesForMor.size)
         assertTrue(barnSomSkalBehandlesForMor.contains(barn))

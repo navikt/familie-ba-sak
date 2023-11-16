@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 
 internal class SamhandlerControllerTest {
-
     lateinit var samhandlerController: SamhandlerController
     private val samhandlerKlientMock: SamhandlerKlient = mockk()
     private val institusjonRepository: InstitusjonRepository = mockk()
@@ -40,18 +39,20 @@ internal class SamhandlerControllerTest {
     @Test
     fun `Kaster feilmelding hvis det ikke fins organisasjon med gitt orgnr`() {
         every { samhandlerKlientMock.hentSamhandler(any()) } throws HttpClientErrorException(HttpStatus.NOT_FOUND)
-        val feil = assertThrows<FunksjonellFeil> {
-            samhandlerController.hentSamhandlerDataForOrganisasjon("123456789")
-        }
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                samhandlerController.hentSamhandlerDataForOrganisasjon("123456789")
+            }
         assertThat(feil.message).isEqualTo("Finner ikke institusjon. Kontakt NØS for å opprette TSS-ident.")
     }
 
     @Test
     fun `Søk etter samhandlere skal returnere samhandlere på navn og ikke hente flere hvis det ikke finnes flere samhandlere`() {
-        every { samhandlerKlientMock.søkSamhandlere("BUFETAT", null, null, 0) } returns SøkSamhandlerInfo(
-            false,
-            samhandlereInfoMock,
-        )
+        every { samhandlerKlientMock.søkSamhandlere("BUFETAT", null, null, 0) } returns
+            SøkSamhandlerInfo(
+                false,
+                samhandlereInfoMock,
+            )
 
         val samhandlerInfo =
             samhandlerController.søkSamhandlerinfoFraNavn(SøkSamhandlerInfoRequest("Bufetat", null, null))
@@ -64,15 +65,17 @@ internal class SamhandlerControllerTest {
 
     @Test
     fun `Søk etter samhandlere skal returnere samhandlere på navn og slå sammen resultatene fra alle sidene ved mer enn 1 side`() {
-        every { samhandlerKlientMock.søkSamhandlere("BUFETAT", null, null, 0) } returns SøkSamhandlerInfo(
-            true,
-            listOf(samhandlereInfoMock.get(0)),
-        )
+        every { samhandlerKlientMock.søkSamhandlere("BUFETAT", null, null, 0) } returns
+            SøkSamhandlerInfo(
+                true,
+                listOf(samhandlereInfoMock.get(0)),
+            )
 
-        every { samhandlerKlientMock.søkSamhandlere("BUFETAT", null, null, 1) } returns SøkSamhandlerInfo(
-            false,
-            listOf(samhandlereInfoMock.get(1)),
-        )
+        every { samhandlerKlientMock.søkSamhandlere("BUFETAT", null, null, 1) } returns
+            SøkSamhandlerInfo(
+                false,
+                listOf(samhandlereInfoMock.get(1)),
+            )
 
         val samhandlerInfo =
             samhandlerController.søkSamhandlerinfoFraNavn(SøkSamhandlerInfoRequest("Bufetat", null, null))

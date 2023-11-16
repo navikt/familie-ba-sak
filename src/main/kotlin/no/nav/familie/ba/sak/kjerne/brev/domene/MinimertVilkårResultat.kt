@@ -21,12 +21,12 @@ data class MinimertVilkårResultat(
     @JsonDeserialize(using = IVedtakBegrunnelseDeserializer::class)
     val standardbegrunnelser: List<IVedtakBegrunnelse>,
 ) {
-
-    fun toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
-        this.periodeFom,
-        this.periodeTom,
-        this.erEksplisittAvslagPåSøknad,
-    )
+    fun toPeriode(): Periode =
+        lagOgValiderPeriodeFraVilkår(
+            this.periodeFom,
+            this.periodeTom,
+            this.erEksplisittAvslagPåSøknad,
+        )
 }
 
 fun VilkårResultat.tilMinimertVilkårResultat() =

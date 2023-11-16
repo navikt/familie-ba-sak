@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 class AndelTilkjentYtelseTidslinje(
     private val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ) : Tidslinje<AndelTilkjentYtelse, Måned>() {
-
     override fun lagPerioder(): List<Periode<AndelTilkjentYtelse, Måned>> {
         return andelerTilkjentYtelse.map {
             Periode(

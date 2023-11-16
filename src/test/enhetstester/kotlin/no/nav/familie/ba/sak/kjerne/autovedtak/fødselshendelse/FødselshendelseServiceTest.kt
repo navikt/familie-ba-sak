@@ -71,36 +71,39 @@ class FødselshendelseServiceTest {
     val oppgaveService = mockk<OppgaveService>()
 
     val integrasjonClient = mockk<IntegrasjonClient>()
-    val statsborgerskapService = StatsborgerskapService(
-        integrasjonClient = integrasjonClient,
-    )
+    val statsborgerskapService =
+        StatsborgerskapService(
+            integrasjonClient = integrasjonClient,
+        )
 
-    private val autovedtakFødselshendelseService = AutovedtakFødselshendelseService(
-        fagsakService,
-        behandlingHentOgPersisterService,
-        filtreringsreglerService,
-        taskRepository,
-        vilkårsvurderingRepository,
-        persongrunnlagService,
-        personidentService,
-        stegService,
-        vedtakService,
-        vedtaksperiodeService,
-        autovedtakService,
-        personopplysningerService,
-        statsborgerskapService,
-        opprettTaskService,
-        oppgaveService,
-    )
+    private val autovedtakFødselshendelseService =
+        AutovedtakFødselshendelseService(
+            fagsakService,
+            behandlingHentOgPersisterService,
+            filtreringsreglerService,
+            taskRepository,
+            vilkårsvurderingRepository,
+            persongrunnlagService,
+            personidentService,
+            stegService,
+            vedtakService,
+            vedtaksperiodeService,
+            autovedtakService,
+            personopplysningerService,
+            statsborgerskapService,
+            opprettTaskService,
+            oppgaveService,
+        )
 
     @Test
     fun `Skal opprette fremleggsoppgave dersom søker er EØS medlem`() {
-        every { personopplysningerService.hentGjeldendeStatsborgerskap(any()) } returns Statsborgerskap(
-            land = "POL",
-            gyldigFraOgMed = LocalDate.now().minusMonths(2),
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null,
-        )
+        every { personopplysningerService.hentGjeldendeStatsborgerskap(any()) } returns
+            Statsborgerskap(
+                land = "POL",
+                gyldigFraOgMed = LocalDate.now().minusMonths(2),
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+            )
         every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
         every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
 
@@ -118,12 +121,13 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal ikke opprette fremleggsoppgave dersom søker er nordisk medlem`() {
-        every { personopplysningerService.hentGjeldendeStatsborgerskap(any()) } returns Statsborgerskap(
-            land = "DNK",
-            gyldigFraOgMed = LocalDate.now().minusMonths(2),
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null,
-        )
+        every { personopplysningerService.hentGjeldendeStatsborgerskap(any()) } returns
+            Statsborgerskap(
+                land = "DNK",
+                gyldigFraOgMed = LocalDate.now().minusMonths(2),
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+            )
         every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
         every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
 
@@ -162,21 +166,23 @@ class FødselshendelseServiceTest {
             )
         } returns fagsak
 
-        val forrigeBehandling = lagBehandling(
-            fagsak = fagsak,
-            behandlingType = BehandlingType.REVURDERING,
-            årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-            førsteSteg = StegType.BEHANDLING_AVSLUTTET,
-            resultat = Behandlingsresultat.OPPHØRT,
-            status = BehandlingStatus.AVSLUTTET,
-        )
-        val nyBehandling = lagBehandling(
-            fagsak,
-            behandlingKategori = BehandlingKategori.NASJONAL,
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            årsak = BehandlingÅrsak.FØDSELSHENDELSE,
-            skalBehandlesAutomatisk = true,
-        )
+        val forrigeBehandling =
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                førsteSteg = StegType.BEHANDLING_AVSLUTTET,
+                resultat = Behandlingsresultat.OPPHØRT,
+                status = BehandlingStatus.AVSLUTTET,
+            )
+        val nyBehandling =
+            lagBehandling(
+                fagsak,
+                behandlingKategori = BehandlingKategori.NASJONAL,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                skalBehandlesAutomatisk = true,
+            )
         every { behandlingHentOgPersisterService.hent(forrigeBehandling.id) } returns forrigeBehandling
         every { behandlingHentOgPersisterService.lagreEllerOppdater(forrigeBehandling) } returns forrigeBehandling
         every { behandlingHentOgPersisterService.hentBehandlinger(fagsak.id) } returns listOf(forrigeBehandling)
@@ -188,53 +194,60 @@ class FødselshendelseServiceTest {
                 nyBehandlingHendelse,
             )
         } returns nyBehandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
-        every { stegService.håndterVilkårsvurdering(nyBehandling) } returns nyBehandling.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
-            .leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)
+        every { stegService.håndterVilkårsvurdering(nyBehandling) } returns
+            nyBehandling.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
+                .leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)
         every { stegService.håndterHenleggBehandling(any(), any()) } returns nyBehandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
         every { persongrunnlagService.hentSøker(nyBehandling.id) } returns søkerPerson
         every { persongrunnlagService.hentBarna(nyBehandling) } returns listOf(barn1Person, barn2Person)
 
-        every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(nyBehandling.id) } returns listOf(
-            barn1Person.tilPersonEnkel(),
-            barn2Person.tilPersonEnkel(),
-            søkerPerson.tilPersonEnkel(),
-        )
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(nyBehandling.id) } returns
+            listOf(
+                barn1Person.tilPersonEnkel(),
+                barn2Person.tilPersonEnkel(),
+                søkerPerson.tilPersonEnkel(),
+            )
 
         every { personidentService.hentAktør(søker) } returns søkerAktør
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerAktør) } returns PersonInfo(
-            fødselsdato = LocalDate.of(1990, Month.JANUARY, 5),
-            navn = "Mor Mocksen",
-            kjønn = Kjønn.KVINNE,
-            forelderBarnRelasjon = setOf(
-                ForelderBarnRelasjon(aktør = tilAktør(barn1), relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN),
-                ForelderBarnRelasjon(aktør = tilAktør(barn2), relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN),
-            ),
-        )
-        every { persongrunnlagService.hentBarna(forrigeBehandling) } returns listOf(
-            barn1Person,
-        )
-        every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(forrigeBehandling.id) } returns listOf(
-            barn1Person.tilPersonEnkel(),
-        )
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(nyBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
-            søkerPerson,
-            listOf(barn1Person, barn2Person),
-            nyBehandling,
-            id = 1,
-            mapOf(
-                Pair(
-                    barn1Person.aktør.aktørId,
-                    listOf(
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.BOR_MED_SØKER,
-                            resultat = Resultat.IKKE_OPPFYLT,
-                            behandlingId = nyBehandling.id,
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerAktør) } returns
+            PersonInfo(
+                fødselsdato = LocalDate.of(1990, Month.JANUARY, 5),
+                navn = "Mor Mocksen",
+                kjønn = Kjønn.KVINNE,
+                forelderBarnRelasjon =
+                    setOf(
+                        ForelderBarnRelasjon(aktør = tilAktør(barn1), relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN),
+                        ForelderBarnRelasjon(aktør = tilAktør(barn2), relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN),
+                    ),
+            )
+        every { persongrunnlagService.hentBarna(forrigeBehandling) } returns
+            listOf(
+                barn1Person,
+            )
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(forrigeBehandling.id) } returns
+            listOf(
+                barn1Person.tilPersonEnkel(),
+            )
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(nyBehandling.id) } returns
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                søkerPerson,
+                listOf(barn1Person, barn2Person),
+                nyBehandling,
+                id = 1,
+                mapOf(
+                    Pair(
+                        barn1Person.aktør.aktørId,
+                        listOf(
+                            lagVilkårResultat(
+                                vilkårType = Vilkår.BOR_MED_SØKER,
+                                resultat = Resultat.IKKE_OPPFYLT,
+                                behandlingId = nyBehandling.id,
+                            ),
                         ),
                     ),
                 ),
-            ),
-        )
+            )
 
         autovedtakFødselshendelseService.kjørBehandling(FødselshendelseData(nyBehandlingHendelse))
         verify(exactly = 0) {

@@ -18,7 +18,6 @@ class VilkårsvurderingTidslinjeService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
-
     fun hentTidslinjerThrows(behandlingId: BehandlingId): VilkårsvurderingTidslinjer {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandlingId.id)!!
         val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandlingId = behandlingId.id)
@@ -39,12 +38,14 @@ class VilkårsvurderingTidslinjeService(
 
     fun hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId: BehandlingId): Tidslinje<Boolean, Måned> {
         val søker = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId.id).søker
-        val søkerPersonresultater = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandlingId.id)
-            .personResultater.single { it.aktør == søker.aktør }
+        val søkerPersonresultater =
+            vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandlingId.id)
+                .personResultater.single { it.aktør == søker.aktør }
 
-        val erAnnenForelderOmfattetAvNorskLovgivingTidslinje = søkerPersonresultater.vilkårResultater
-            .lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOSATT_I_RIKET)
-            .map { it?.utdypendeVilkårsvurderinger?.contains(UtdypendeVilkårsvurdering.ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING) }
+        val erAnnenForelderOmfattetAvNorskLovgivingTidslinje =
+            søkerPersonresultater.vilkårResultater
+                .lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOSATT_I_RIKET)
+                .map { it?.utdypendeVilkårsvurderinger?.contains(UtdypendeVilkårsvurdering.ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING) }
 
         return erAnnenForelderOmfattetAvNorskLovgivingTidslinje
     }

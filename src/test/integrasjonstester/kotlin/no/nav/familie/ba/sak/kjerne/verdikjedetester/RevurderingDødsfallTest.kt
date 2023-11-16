@@ -48,31 +48,34 @@ class RevurderingDødsfallTest(
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val unleashService: UnleashService,
 ) : AbstractVerdikjedetest() {
-
     @Test
     fun `Dødsfall bruker skal kjøre gjennom`() {
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(
-                    fødselsdato = "1982-01-12",
-                    fornavn = "Mor",
-                    etternavn = "Søker",
+        val scenario =
+            mockServerKlient().lagScenario(
+                RestScenario(
+                    søker =
+                        RestScenarioPerson(
+                            fødselsdato = "1982-01-12",
+                            fornavn = "Mor",
+                            etternavn = "Søker",
+                        ),
+                    barna =
+                        listOf(
+                            RestScenarioPerson(
+                                fødselsdato = LocalDate.now().minusMonths(2).toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen",
+                            ),
+                        ),
                 ),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.now().minusMonths(2).toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                    ),
-                ),
-            ),
-        )
+            )
 
         behandleFødselshendelse(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!),
-            ),
+            nyBehandlingHendelse =
+                NyBehandlingHendelse(
+                    morsIdent = scenario.søker.ident!!,
+                    barnasIdenter = listOf(scenario.barna.first().ident!!),
+                ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -80,48 +83,48 @@ class RevurderingDødsfallTest(
             stegService = stegService,
             personidentService = personidentService,
             brevmalService = brevmalService,
-
         )
 
         val overstyrendeVilkårResultater =
             scenario.barna.associate { it.aktørId!! to emptyList<VilkårResultat>() }.toMutableMap()
 
         // Ved søkers dødsfall settes tomdatoen for "bosatt i riket"-vilkåret til dagen søker døde.
-        overstyrendeVilkårResultater[scenario.søker.aktørId!!] = listOf(
-            lagVilkårResultat(
-                vilkårType = Vilkår.BOSATT_I_RIKET,
-                periodeFom = LocalDate.parse(scenario.søker.fødselsdato),
-                periodeTom = LocalDate.now().minusMonths(1),
-                personResultat = mockk(relaxed = true),
-            ),
-            lagVilkårResultat(
-                vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                periodeFom = LocalDate.parse(scenario.søker.fødselsdato),
-                periodeTom = LocalDate.now().minusMonths(1),
-                personResultat = mockk(relaxed = true),
-            ),
-        )
+        overstyrendeVilkårResultater[scenario.søker.aktørId!!] =
+            listOf(
+                lagVilkårResultat(
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    periodeFom = LocalDate.parse(scenario.søker.fødselsdato),
+                    periodeTom = LocalDate.now().minusMonths(1),
+                    personResultat = mockk(relaxed = true),
+                ),
+                lagVilkårResultat(
+                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                    periodeFom = LocalDate.parse(scenario.søker.fødselsdato),
+                    periodeTom = LocalDate.now().minusMonths(1),
+                    personResultat = mockk(relaxed = true),
+                ),
+            )
 
-        val behandlingDødsfall = kjørStegprosessForBehandling(
-            tilSteg = StegType.BEHANDLING_AVSLUTTET,
-            søkerFnr = scenario.søker.ident,
-            barnasIdenter = listOf(scenario.barna.first().ident!!),
-            vedtakService = vedtakService,
-            underkategori = BehandlingUnderkategori.ORDINÆR,
-            behandlingÅrsak = BehandlingÅrsak.DØDSFALL_BRUKER,
-            overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(scenario, overstyrendeVilkårResultater),
-
-            behandlingstype = BehandlingType.REVURDERING,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
-            fagsakService = fagsakService,
-            persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            brevmalService = brevmalService,
-            unleashService = unleashService,
-        )
+        val behandlingDødsfall =
+            kjørStegprosessForBehandling(
+                tilSteg = StegType.BEHANDLING_AVSLUTTET,
+                søkerFnr = scenario.søker.ident,
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
+                vedtakService = vedtakService,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                behandlingÅrsak = BehandlingÅrsak.DØDSFALL_BRUKER,
+                overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(scenario, overstyrendeVilkårResultater),
+                behandlingstype = BehandlingType.REVURDERING,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
+                fagsakService = fagsakService,
+                persongrunnlagService = persongrunnlagService,
+                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+                brevmalService = brevmalService,
+                unleashService = unleashService,
+            )
 
         val restFagsakEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandlingDødsfall.fagsak.id)
@@ -136,28 +139,32 @@ class RevurderingDødsfallTest(
 
     @Test
     fun `Dødsfall bruker skal stoppes dersom ikke bosatt i riket er stoppet før dagens dato`() {
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(
-                    fødselsdato = "1982-01-12",
-                    fornavn = "Mor",
-                    etternavn = "Søker",
+        val scenario =
+            mockServerKlient().lagScenario(
+                RestScenario(
+                    søker =
+                        RestScenarioPerson(
+                            fødselsdato = "1982-01-12",
+                            fornavn = "Mor",
+                            etternavn = "Søker",
+                        ),
+                    barna =
+                        listOf(
+                            RestScenarioPerson(
+                                fødselsdato = LocalDate.now().minusMonths(2).toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen",
+                            ),
+                        ),
                 ),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.now().minusMonths(2).toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                    ),
-                ),
-            ),
-        )
+            )
 
         behandleFødselshendelse(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!),
-            ),
+            nyBehandlingHendelse =
+                NyBehandlingHendelse(
+                    morsIdent = scenario.søker.ident!!,
+                    barnasIdenter = listOf(scenario.barna.first().ident!!),
+                ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -165,7 +172,6 @@ class RevurderingDødsfallTest(
             stegService = stegService,
             personidentService = personidentService,
             brevmalService = brevmalService,
-
         )
 
         val overstyrendeVilkårResultater =
@@ -179,11 +185,11 @@ class RevurderingDødsfallTest(
                 vedtakService = vedtakService,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.DØDSFALL_BRUKER,
-                overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(
-                    scenario,
-                    overstyrendeVilkårResultater,
-                ),
-
+                overstyrendeVilkårsvurdering =
+                    lagVilkårsvurderingFraRestScenario(
+                        scenario,
+                        overstyrendeVilkårResultater,
+                    ),
                 behandlingstype = BehandlingType.REVURDERING,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,

@@ -2,9 +2,9 @@ version: 2
 registries:
   familie-felles:
     type: maven-repository
-    url: https://maven.pkg.github.com/navikt/familie-felles
+    url: https://maven.pkg.github.com/navikt/maven-release
     username: x-access-token
-    password: "${{secrets.NAV_READ_PACKAGES}}"
+    password: "${{secrets.READER_TOKEN}}"
 
 updates:
   - package-ecosystem: maven

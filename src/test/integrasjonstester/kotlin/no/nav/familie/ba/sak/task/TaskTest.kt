@@ -13,20 +13,20 @@ import java.util.stream.Collectors
 
 @Tag("integration")
 class TaskTest : AbstractSpringIntegrationTest() {
-
     @Autowired
     lateinit var tasker: List<AsyncTaskStep>
 
     @Test
     fun `Tasker skal ha unikt navn`() {
-        val taskTyper: List<String> = tasker.stream()
-            .map { task: AsyncTaskStep ->
-                finnAnnotasjon(task)
-            }
-            .map { it?.taskStepType }
-            .collect(
-                Collectors.toList<String>(),
-            )
+        val taskTyper: List<String> =
+            tasker.stream()
+                .map { task: AsyncTaskStep ->
+                    finnAnnotasjon(task)
+                }
+                .map { it?.taskStepType }
+                .collect(
+                    Collectors.toList<String>(),
+                )
 
         Assertions.assertEquals(tasker.size, taskTyper.distinct().size)
     }

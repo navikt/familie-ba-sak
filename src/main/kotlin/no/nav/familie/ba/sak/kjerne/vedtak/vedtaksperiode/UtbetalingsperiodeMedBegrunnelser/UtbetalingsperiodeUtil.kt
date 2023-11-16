@@ -23,10 +23,11 @@ fun hentPerioderMedUtbetaling(
 ): List<VedtaksperiodeMedBegrunnelser> {
     val tidslinjeForSplitt = personResultater.tilTidslinjeForSplitt(personerIPersongrunnlag, fagsakType)
 
-    val alleAndelerKombinertTidslinje = andelerTilkjentYtelse
-        .tilTidslinjerPerPersonOgType().values
-        .kombinerUtenNull { it }
-        .filtrer { !it?.toList().isNullOrEmpty() }
+    val alleAndelerKombinertTidslinje =
+        andelerTilkjentYtelse
+            .tilTidslinjerPerPersonOgType().values
+            .kombinerUtenNull { it }
+            .filtrer { !it?.toList().isNullOrEmpty() }
 
     val andelerSplittetOppTidslinje =
         alleAndelerKombinertTidslinje.kombinerMed(tidslinjeForSplitt) { andelerIPeriode, splittVilkårIPeriode ->

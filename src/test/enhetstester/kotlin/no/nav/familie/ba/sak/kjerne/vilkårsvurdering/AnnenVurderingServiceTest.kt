@@ -20,7 +20,6 @@ import java.time.LocalDate
 import java.util.Optional
 
 class AnnenVurderingServiceTest {
-
     private val annenVurderingRepository = mockk<AnnenVurderingRepository>(relaxed = true)
 
     private lateinit var annenVurderingService: AnnenVurderingService
@@ -30,31 +29,34 @@ class AnnenVurderingServiceTest {
     fun setUp() {
         annenVurderingService = AnnenVurderingService(annenVurderingRepository = annenVurderingRepository)
 
-        personResultat = lagPersonResultat(
-            vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
-            person = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 1, 1)),
-            resultat = Resultat.OPPFYLT,
-            periodeFom = LocalDate.of(2020, 1, 1),
-            periodeTom = LocalDate.of(2020, 7, 1),
-        )
+        personResultat =
+            lagPersonResultat(
+                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+                person = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 1, 1)),
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2020, 1, 1),
+                periodeTom = LocalDate.of(2020, 7, 1),
+            )
     }
 
     @Test
     fun `Verifiser endreAnnenVurdering`() {
-        every { annenVurderingRepository.findById(any()) } returns Optional.of(
+        every { annenVurderingRepository.findById(any()) } returns
+            Optional.of(
+                AnnenVurdering(
+                    resultat = Resultat.OPPFYLT,
+                    type = AnnenVurderingType.OPPLYSNINGSPLIKT,
+                    begrunnelse = "begrunnelse",
+                    personResultat = personResultat,
+                ),
+            )
+        val nyAnnenVurering =
             AnnenVurdering(
-                resultat = Resultat.OPPFYLT,
+                resultat = Resultat.IKKE_OPPFYLT,
                 type = AnnenVurderingType.OPPLYSNINGSPLIKT,
-                begrunnelse = "begrunnelse",
+                begrunnelse = "begrunnelse to",
                 personResultat = personResultat,
-            ),
-        )
-        val nyAnnenVurering = AnnenVurdering(
-            resultat = Resultat.IKKE_OPPFYLT,
-            type = AnnenVurderingType.OPPLYSNINGSPLIKT,
-            begrunnelse = "begrunnelse to",
-            personResultat = personResultat,
-        )
+            )
 
         every { annenVurderingRepository.save(any()) } returns nyAnnenVurering
 

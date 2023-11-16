@@ -11,42 +11,49 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.neste
 import java.time.LocalDate
 import java.time.YearMonth
 
-fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned> = tidslinje {
-    listOf(
-        Periode(
-            fødselsdato.toYearMonth().tilTidspunkt().neste(),
-            fødselsdato.plusYears(18).toYearMonth().tilTidspunkt().forrige(),
-            true,
-        ),
-    )
-}
+fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned> =
+    tidslinje {
+        listOf(
+            Periode(
+                fødselsdato.toYearMonth().tilTidspunkt().neste(),
+                fødselsdato.plusYears(18).toYearMonth().tilTidspunkt().forrige(),
+                true,
+            ),
+        )
+    }
 
-fun erUnder6ÅrTidslinje(person: Person) = tidslinje {
-    listOf(
-        Periode(
-            person.fødselsdato.toYearMonth().tilTidspunkt(),
-            person.fødselsdato.toYearMonth().plusYears(6).tilTidspunkt().forrige(),
-            true,
-        ),
-    )
-}
+fun erUnder6ÅrTidslinje(person: Person) =
+    tidslinje {
+        listOf(
+            Periode(
+                person.fødselsdato.toYearMonth().tilTidspunkt(),
+                person.fødselsdato.toYearMonth().plusYears(6).tilTidspunkt().forrige(),
+                true,
+            ),
+        )
+    }
 
-fun erTilogMed3ÅrTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned> = tidslinje {
-    listOf(
-        Periode(
-            fødselsdato.toYearMonth().tilTidspunkt().neste(),
-            fødselsdato.plusYears(3).toYearMonth().tilTidspunkt(),
-            true,
-        ),
-    )
-}
+fun erTilogMed3ÅrTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned> =
+    tidslinje {
+        listOf(
+            Periode(
+                fødselsdato.toYearMonth().tilTidspunkt().neste(),
+                fødselsdato.plusYears(3).toYearMonth().tilTidspunkt(),
+                true,
+            ),
+        )
+    }
 
-fun opprettBooleanTidslinje(fraÅrMåned: YearMonth, tilÅrMåned: YearMonth) = tidslinje {
-    listOf(
-        Periode(
-            fraÅrMåned.tilTidspunkt(),
-            tilÅrMåned.tilTidspunkt(),
-            true,
-        ),
-    )
-}
+fun opprettBooleanTidslinje(
+    fraÅrMåned: YearMonth,
+    tilÅrMåned: YearMonth,
+) =
+    tidslinje {
+        listOf(
+            Periode(
+                fraÅrMåned.tilTidspunkt(),
+                tilÅrMåned.tilTidspunkt(),
+                true,
+            ),
+        )
+    }

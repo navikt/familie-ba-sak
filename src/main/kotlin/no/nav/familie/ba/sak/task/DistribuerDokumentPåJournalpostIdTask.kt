@@ -37,7 +37,6 @@ const val ANTALL_SEKUNDER_I_EN_UKE = 604800L
 class DistribuerDokumentPåJournalpostIdTask(
     private val dokumentDistribueringService: DokumentDistribueringService,
 ) : AsyncTaskStep {
-
     private val antallBrevIkkeDistribuertUkjentDødsboadresse: Map<Brevmal, Counter> =
         mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
             Metrics.counter(
@@ -48,11 +47,12 @@ class DistribuerDokumentPåJournalpostIdTask(
         }
 
     override fun doTask(task: Task) {
-        val taskData = if (task.payload.contains("personEllerInstitusjonIdent")) {
-            objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
-        } else {
-            fraGammelTilNyKontrakt(task)
-        }
+        val taskData =
+            if (task.payload.contains("personEllerInstitusjonIdent")) {
+                objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
+            } else {
+                fraGammelTilNyKontrakt(task)
+            }
         val brevmal = taskData.brevmal
         val erTaskEldreEnn6Mnd = task.opprettetTid.isBefore(LocalDateTime.now().minusMonths(6))
 
@@ -97,11 +97,12 @@ class DistribuerDokumentPåJournalpostIdTask(
         fun opprettTask(distribuerDokumentDTO: DistribuerDokumentDTO): Task {
             check(distribuerDokumentDTO.behandlingId == null)
 
-            val metadata = Properties().apply {
-                this["journalpostId"] = distribuerDokumentDTO.journalpostId
-                this["personEllerInstitusjonIdent"] = distribuerDokumentDTO.personEllerInstitusjonIdent
-                this[MDCConstants.MDC_CALL_ID] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
-            }
+            val metadata =
+                Properties().apply {
+                    this["journalpostId"] = distribuerDokumentDTO.journalpostId
+                    this["personEllerInstitusjonIdent"] = distribuerDokumentDTO.personEllerInstitusjonIdent
+                    this[MDCConstants.MDC_CALL_ID] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
+                }
 
             return Task(
                 type = this.TASK_STEP_TYPE,

@@ -33,33 +33,35 @@ class FødselshendelseRevurderingTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
-
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
         val revurderingsbarnSinFødselsdato = now().minusMonths(3)
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = now().minusMonths(12).toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                    ),
-                    RestScenarioPerson(
-                        fødselsdato = revurderingsbarnSinFødselsdato.toString(),
-                        fornavn = "Barn2",
-                        etternavn = "Barnesen2",
-                    ),
+        val scenario =
+            mockServerKlient().lagScenario(
+                RestScenario(
+                    søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
+                    barna =
+                        listOf(
+                            RestScenarioPerson(
+                                fødselsdato = now().minusMonths(12).toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen",
+                            ),
+                            RestScenarioPerson(
+                                fødselsdato = revurderingsbarnSinFødselsdato.toString(),
+                                fornavn = "Barn2",
+                                etternavn = "Barnesen2",
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         behandleFødselshendelse(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.minByOrNull { it.fødselsdato }!!.ident!!),
-            ),
+            nyBehandlingHendelse =
+                NyBehandlingHendelse(
+                    morsIdent = scenario.søker.ident!!,
+                    barnasIdenter = listOf(scenario.barna.minByOrNull { it.fødselsdato }!!.ident!!),
+                ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -67,26 +69,26 @@ class FødselshendelseRevurderingTest(
             stegService = stegService,
             personidentService = personidentService,
             brevmalService = brevmalService,
-
         )
 
         val søkerIdent = scenario.søker.ident
         val vurdertBarn = scenario.barna.maxByOrNull { it.fødselsdato }!!.ident!!
-        val behandling = behandleFødselshendelse(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = søkerIdent,
-                barnasIdenter = listOf(vurdertBarn),
-            ),
-            fagsakStatusEtterVurdering = FagsakStatus.LØPENDE,
-            behandleFødselshendelseTask = behandleFødselshendelseTask,
-            fagsakService = fagsakService,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            personidentService = personidentService,
-            vedtakService = vedtakService,
-            stegService = stegService,
-            brevmalService = brevmalService,
-
-        )
+        val behandling =
+            behandleFødselshendelse(
+                nyBehandlingHendelse =
+                    NyBehandlingHendelse(
+                        morsIdent = søkerIdent,
+                        barnasIdenter = listOf(vurdertBarn),
+                    ),
+                fagsakStatusEtterVurdering = FagsakStatus.LØPENDE,
+                behandleFødselshendelseTask = behandleFødselshendelseTask,
+                fagsakService = fagsakService,
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                personidentService = personidentService,
+                vedtakService = vedtakService,
+                stegService = stegService,
+                brevmalService = brevmalService,
+            )
 
         val restFagsakEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
@@ -101,21 +103,24 @@ class FødselshendelseRevurderingTest(
         val aktivBehandling =
             restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger
                 .single {
-                    it.behandlingId == behandlingHentOgPersisterService.finnAktivForFagsak(
-                        restFagsakEtterBehandlingAvsluttet.data!!.id,
-                    )?.id
+                    it.behandlingId ==
+                        behandlingHentOgPersisterService.finnAktivForFagsak(
+                            restFagsakEtterBehandlingAvsluttet.data!!.id,
+                        )?.id
                 }
 
-        val vurderteVilkårIDenneBehandlingen = aktivBehandling.personResultater.flatMap { it.vilkårResultater }
-            .filter { it.behandlingId == aktivBehandling.behandlingId }
+        val vurderteVilkårIDenneBehandlingen =
+            aktivBehandling.personResultater.flatMap { it.vilkårResultater }
+                .filter { it.behandlingId == aktivBehandling.behandlingId }
         assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
         assertEquals(5, vurderteVilkårIDenneBehandlingen.size)
         vurderteVilkårIDenneBehandlingen.forEach { assertEquals(revurderingsbarnSinFødselsdato, it.periodeFom) }
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
-        val nesteMånedUtbetalingsperiode = utbetalingsperioder.sortedBy { it.periodeFom }.first {
-            it.periodeFom.toYearMonth() <= now().nesteMåned() && it.periodeTom.toYearMonth() >= now().nesteMåned()
-        }
+        val nesteMånedUtbetalingsperiode =
+            utbetalingsperioder.sortedBy { it.periodeFom }.first {
+                it.periodeFom.toYearMonth() <= now().nesteMåned() && it.periodeTom.toYearMonth() >= now().nesteMåned()
+            }
 
         assertUtbetalingsperiode(
             nesteMånedUtbetalingsperiode,

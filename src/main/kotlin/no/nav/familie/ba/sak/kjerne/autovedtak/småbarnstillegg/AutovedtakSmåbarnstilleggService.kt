@@ -46,7 +46,6 @@ class AutovedtakSmåbarnstilleggService(
     private val oppgaveService: OppgaveService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
 ) : AutovedtakBehandlingService<SmåbarnstilleggData> {
-
     private val antallVedtakOmOvergangsstønad: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "antall")
     private val antallVedtakOmOvergangsstønadPåvirkerFagsak: Counter =
@@ -92,8 +91,9 @@ class AutovedtakSmåbarnstilleggService(
     override fun kjørBehandling(behandlingsdata: SmåbarnstilleggData): String {
         antallVedtakOmOvergangsstønad.increment()
         val aktør = behandlingsdata.aktør
-        val fagsak = fagsakService.hentNormalFagsak(aktør)
-            ?: throw Feil(message = "Fant ikke fagsak av typen NORMAL for aktør ${aktør.aktørId}")
+        val fagsak =
+            fagsakService.hentNormalFagsak(aktør)
+                ?: throw Feil(message = "Fant ikke fagsak av typen NORMAL for aktør ${aktør.aktørId}")
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 aktør = aktør,
@@ -115,10 +115,11 @@ class AutovedtakSmåbarnstilleggService(
         } catch (e: VedtaksperiodefinnerSmåbarnstilleggFeil) {
             logger.warn(e.message, e)
 
-            val behandlingSomSkalManueltBehandles = behandlingService.oppdaterStatusPåBehandling(
-                behandlingEtterBehandlingsresultat.id,
-                BehandlingStatus.UTREDES,
-            )
+            val behandlingSomSkalManueltBehandles =
+                behandlingService.oppdaterStatusPåBehandling(
+                    behandlingEtterBehandlingsresultat.id,
+                    BehandlingStatus.UTREDES,
+                )
             return kanIkkeBehandleAutomatisk(
                 behandling = behandlingSomSkalManueltBehandles,
                 metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.KLARER_IKKE_BEGRUNNE]!!,
@@ -126,15 +127,17 @@ class AutovedtakSmåbarnstilleggService(
             )
         }
 
-        val vedtakEtterTotrinn = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
-            behandlingEtterBehandlingsresultat,
-        )
+        val vedtakEtterTotrinn =
+            autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
+                behandlingEtterBehandlingsresultat,
+            )
 
-        val task = IverksettMotOppdragTask.opprettTask(
-            behandlingEtterBehandlingsresultat,
-            vedtakEtterTotrinn,
-            SikkerhetContext.hentSaksbehandler(),
-        )
+        val task =
+            IverksettMotOppdragTask.opprettTask(
+                behandlingEtterBehandlingsresultat,
+                vedtakEtterTotrinn,
+                SikkerhetContext.hentSaksbehandler(),
+            )
         taskService.save(task)
 
         return AutovedtakStegService.BEHANDLING_FERDIG
@@ -163,20 +166,23 @@ class AutovedtakSmåbarnstilleggService(
                 ).filter { it.erSmåbarnstillegg() }
             }
 
-        val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
-            forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
-            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
-        )
+        val (innvilgedeMånedPerioder, reduserteMånedPerioder) =
+            hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
+                forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
+                nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
+            )
 
         vedtaksperiodeHentOgPersisterService.lagre(
             finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
                 innvilgetMånedPeriode = innvilgedeMånedPerioder.singleOrNull(),
                 redusertMånedPeriode = reduserteMånedPerioder.singleOrNull(),
-                vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(
-                    vedtak = vedtakService.hentAktivForBehandlingThrows(
-                        behandlingId = behandlingEtterBehandlingsresultat.id,
+                vedtaksperioderMedBegrunnelser =
+                    vedtaksperiodeService.hentPersisterteVedtaksperioder(
+                        vedtak =
+                            vedtakService.hentAktivForBehandlingThrows(
+                                behandlingId = behandlingEtterBehandlingsresultat.id,
+                            ),
                     ),
-                ),
             ),
         )
     }
@@ -187,10 +193,11 @@ class AutovedtakSmåbarnstilleggService(
         meldingIOppgave: String,
     ): String {
         metric.increment()
-        val omgjortBehandling = autovedtakService.omgjørBehandlingTilManuellOgKjørSteg(
-            behandling = behandling,
-            steg = StegType.VILKÅRSVURDERING,
-        )
+        val omgjortBehandling =
+            autovedtakService.omgjørBehandlingTilManuellOgKjørSteg(
+                behandling = behandling,
+                steg = StegType.VILKÅRSVURDERING,
+            )
         return oppgaveService.opprettOppgaveForManuellBehandling(
             behandling = omgjortBehandling,
             begrunnelse = meldingIOppgave,

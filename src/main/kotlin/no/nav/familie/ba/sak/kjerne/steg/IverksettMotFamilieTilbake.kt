@@ -24,11 +24,14 @@ class IverksettMotFamilieTilbake(
     private val taskRepository: TaskRepositoryWrapper,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) : BehandlingSteg<IverksettMotFamilieTilbakeData> {
-
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: IverksettMotFamilieTilbakeData): StegType {
-        val vedtak = vedtakService.hentAktivForBehandling(behandling.id) ?: throw Feil(
-            "Fant ikke vedtak for behandling ${behandling.id} ved iverksetting mot familie-tilbake.",
-        )
+    override fun utførStegOgAngiNeste(
+        behandling: Behandling,
+        data: IverksettMotFamilieTilbakeData,
+    ): StegType {
+        val vedtak =
+            vedtakService.hentAktivForBehandling(behandling.id) ?: throw Feil(
+                "Fant ikke vedtak for behandling ${behandling.id} ved iverksetting mot familie-tilbake.",
+            )
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
@@ -52,12 +55,16 @@ class IverksettMotFamilieTilbake(
         return hentNesteStegForNormalFlyt(behandling)
     }
 
-    private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, metadata: Properties) {
-        val task = Task(
-            type = JournalførVedtaksbrevTask.TASK_STEP_TYPE,
-            payload = "$vedtakId",
-            properties = metadata,
-        )
+    private fun opprettTaskJournalførVedtaksbrev(
+        vedtakId: Long,
+        metadata: Properties,
+    ) {
+        val task =
+            Task(
+                type = JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+                payload = "$vedtakId",
+                properties = metadata,
+            )
         taskRepository.save(task)
     }
 
@@ -66,7 +73,6 @@ class IverksettMotFamilieTilbake(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(StatusFraOppdrag::class.java)
     }
 }

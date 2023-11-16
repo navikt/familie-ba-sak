@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class SatsServiceTest {
-
     @Test
     fun `Skal opprette korrekt tidslinje for ordinær barnetrygd for barn`() {
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2017, 4, 6))

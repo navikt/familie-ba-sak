@@ -12,9 +12,11 @@ class VurderTilbakekrevingSteg(
     val tilbakekrevingService: TilbakekrevingService,
     val simuleringService: SimuleringService,
 ) : BehandlingSteg<RestTilbakekreving?> {
-
     @Transactional
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: RestTilbakekreving?): StegType {
+    override fun utførStegOgAngiNeste(
+        behandling: Behandling,
+        data: RestTilbakekreving?,
+    ): StegType {
         if (!tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)) {
             tilbakekrevingService.validerRestTilbakekreving(data, behandling.id)
             if (data != null) {

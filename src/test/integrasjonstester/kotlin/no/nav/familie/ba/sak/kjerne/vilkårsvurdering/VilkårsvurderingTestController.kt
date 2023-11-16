@@ -59,41 +59,44 @@ class VilkårsvurderingTestController(
     private val aktørIdRepository: AktørIdRepository,
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService,
 ) {
-
     @PostMapping()
     fun opprettBehandlingMedVilkårsvurdering(
         @RequestBody personresultater: Map<LocalDate, Map<Vilkår, String>>,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val personer = personresultater.tilPersoner()
-            .map { it.copy(aktør = aktørIdRepository.saveAndFlush(it.aktør)) }
+        val personer =
+            personresultater.tilPersoner()
+                .map { it.copy(aktør = aktørIdRepository.saveAndFlush(it.aktør)) }
 
         val søker = personer.first { it.type == PersonType.SØKER }
         val barn = personer.filter { it.type == PersonType.BARN }
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søker.aktør.aktivFødselsnummer())
 
-        val behandling = behandlingService.opprettBehandling(
-            NyBehandling(
-                kategori = BehandlingKategori.EØS,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                søkersIdent = søker.aktør.aktivFødselsnummer(),
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                søknadMottattDato = LocalDate.now(),
-                barnasIdenter = barn.map { it.aktør.aktivFødselsnummer() },
-                fagsakId = fagsak.id,
-            ),
-        )
+        val behandling =
+            behandlingService.opprettBehandling(
+                NyBehandling(
+                    kategori = BehandlingKategori.EØS,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    søkersIdent = søker.aktør.aktivFødselsnummer(),
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    søknadMottattDato = LocalDate.now(),
+                    barnasIdenter = barn.map { it.aktør.aktivFødselsnummer() },
+                    fagsakId = fagsak.id,
+                ),
+            )
 
         // Opprett persongrunnlag
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.save(
-            lagTestPersonopplysningGrunnlag(behandling.id, *personer.toTypedArray()),
-        )
+        val personopplysningGrunnlag =
+            personopplysningGrunnlagRepository.save(
+                lagTestPersonopplysningGrunnlag(behandling.id, *personer.toTypedArray()),
+            )
 
         // Opprett og lagre vilkårsvurdering
-        val vilkårsvurdering = personresultater.tilVilkårsvurdering(
-            behandling,
-            personopplysningGrunnlag,
-        )
+        val vilkårsvurdering =
+            personresultater.tilVilkårsvurdering(
+                behandling,
+                personopplysningGrunnlag,
+            )
 
         vilkårsvurderingService.lagreInitielt(
             vilkårsvurdering,
@@ -113,10 +116,11 @@ class VilkårsvurderingTestController(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingRepository.finnBehandling(behandlingId)
 
-        val nyVilkårsvurdering = personresultater.tilVilkårsvurdering(
-            behandling,
-            personopplysningGrunnlag!!,
-        )
+        val nyVilkårsvurdering =
+            personresultater.tilVilkårsvurdering(
+                behandling,
+                personopplysningGrunnlag!!,
+            )
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
 

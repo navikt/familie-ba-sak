@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.time.LocalDate
 
 object VilkårResultatUtils {
-
     fun genererVilkårResultatForEtVilkårPåEnPerson(
         person: Person,
         eldsteBarnSinFødselsdato: LocalDate,
@@ -16,11 +15,12 @@ object VilkårResultatUtils {
         vilkår: Vilkår,
         annenForelder: Person? = null,
     ): VilkårResultat {
-        val automatiskVurderingResultat = vilkår.vurderVilkår(
-            person = person,
-            annenForelder = annenForelder,
-            vurderFra = eldsteBarnSinFødselsdato,
-        )
+        val automatiskVurderingResultat =
+            vilkår.vurderVilkår(
+                person = person,
+                annenForelder = annenForelder,
+                vurderFra = eldsteBarnSinFødselsdato,
+            )
 
         val fom = if (eldsteBarnSinFødselsdato >= person.fødselsdato) eldsteBarnSinFødselsdato else person.fødselsdato
 

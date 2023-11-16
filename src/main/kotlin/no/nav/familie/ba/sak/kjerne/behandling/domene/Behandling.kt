@@ -43,54 +43,40 @@ data class Behandling(
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_seq_generator")
     @SequenceGenerator(name = "behandling_seq_generator", sequenceName = "behandling_seq", allocationSize = 50)
     val id: Long = 0,
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
     val fagsak: Fagsak,
-
     @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
     @SortComparator(BehandlingStegComparator::class)
     val behandlingStegTilstand: MutableSet<BehandlingStegTilstand> = sortedSetOf(comparator),
-
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat", nullable = false)
     var resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "behandling_type", nullable = false)
     val type: BehandlingType,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "opprettet_aarsak", nullable = false)
     val opprettetÅrsak: BehandlingÅrsak,
-
     @Column(name = "skal_behandles_automatisk", nullable = false, updatable = true)
     var skalBehandlesAutomatisk: Boolean = false,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "kategori", nullable = false, updatable = true)
     var kategori: BehandlingKategori,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "underkategori", nullable = false, updatable = true)
     var underkategori: BehandlingUnderkategori,
-
     @Column(name = "aktiv", nullable = false)
     var aktiv: Boolean = true,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     var status: BehandlingStatus = initStatus(),
-
     var overstyrtEndringstidspunkt: LocalDate? = null,
-
     @OneToOne(mappedBy = "behandling", optional = true)
     val verge: Verge? = null,
-
     @Column(name = "aktivert_tid", nullable = false)
     var aktivertTidspunkt: LocalDateTime = LocalDateTime.now(),
 ) : BaseEntitet() {
-
     val steg: StegType
         get() = behandlingStegTilstand.last().behandlingSteg
 
@@ -98,7 +84,7 @@ data class Behandling(
         return !skalBehandlesAutomatisk && (
             type == BehandlingType.FØRSTEGANGSBEHANDLING ||
                 type == BehandlingType.REVURDERING
-            )
+        )
     }
 
     override fun toString(): String {
@@ -217,11 +203,12 @@ data class Behandling(
                 BehandlingStegTilstand(
                     behandling = this,
                     behandlingSteg = steg,
-                    behandlingStegStatus = if (steg == SISTE_STEG) {
-                        BehandlingStegStatus.UTFØRT
-                    } else {
-                        BehandlingStegStatus.IKKE_UTFØRT
-                    },
+                    behandlingStegStatus =
+                        if (steg == SISTE_STEG) {
+                            BehandlingStegStatus.UTFØRT
+                        } else {
+                            BehandlingStegStatus.IKKE_UTFØRT
+                        },
                 ),
             )
         }
@@ -261,8 +248,9 @@ data class Behandling(
 
     fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
 
-    fun erManuellMigreringForEndreMigreringsdato() = erMigrering() &&
-        opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+    fun erManuellMigreringForEndreMigreringsdato() =
+        erMigrering() &&
+            opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
 
     fun erHelmanuellMigrering() = erMigrering() && opprettetÅrsak == BehandlingÅrsak.HELMANUELL_MIGRERING
 
@@ -299,7 +287,6 @@ data class Behandling(
     }
 
     companion object {
-
         val comparator = BehandlingStegComparator()
     }
 }
@@ -316,7 +303,6 @@ data class Behandling(
  * @displayName benyttes for visning av resultat
  */
 enum class Behandlingsresultat(val displayName: String) {
-
     // Søknad
     INNVILGET(displayName = "Innvilget"),
     INNVILGET_OG_OPPHØRT(displayName = "Innvilget og opphørt"),
@@ -353,13 +339,20 @@ enum class Behandlingsresultat(val displayName: String) {
     fun erAvslått(): Boolean = this in listOf(AVSLÅTT, AVSLÅTT_OG_OPPHØRT, AVSLÅTT_OG_ENDRET, AVSLÅTT_ENDRET_OG_OPPHØRT)
 
     fun erFortsattInnvilget(): Boolean = this in listOf(FORTSATT_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET)
+
+    fun erOpphør(): Boolean =
+        this in
+            listOf(
+                OPPHØRT,
+                ENDRET_OG_OPPHØRT,
+                FORTSATT_OPPHØRT,
+            )
 }
 
 /**
  * Årsak er knyttet til en behandling og sier noe om hvorfor behandling ble opprettet.
  */
 enum class BehandlingÅrsak(val visningsnavn: String) {
-
     SØKNAD("Søknad"),
     FØDSELSHENDELSE("Fødselshendelse"),
     ÅRLIG_KONTROLL("Årsak kontroll"),
@@ -444,12 +437,16 @@ enum class BehandlingStatus {
     AVSLUTTET,
     ;
 
+    fun erLåstMenIkkeAvsluttet() = this == FATTER_VEDTAK || this == IVERKSETTER_VEDTAK
+
     fun erLåstForVidereRedigering() = this != UTREDES
 }
 
 class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {
-
-    override fun compare(bst1: BehandlingStegTilstand, bst2: BehandlingStegTilstand): Int {
+    override fun compare(
+        bst1: BehandlingStegTilstand,
+        bst2: BehandlingStegTilstand,
+    ): Int {
         return bst1.opprettetTidspunkt.compareTo(bst2.opprettetTidspunkt)
     }
 }

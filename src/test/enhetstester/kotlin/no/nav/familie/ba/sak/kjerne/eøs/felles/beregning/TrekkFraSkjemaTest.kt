@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class TrekkFraSkjemaTest {
-
     val jan2020 = jan(2020)
     val barn1 = tilfeldigPerson()
     val barn2 = tilfeldigPerson()
@@ -16,18 +15,21 @@ class TrekkFraSkjemaTest {
 
     @Test
     fun testRestSomIntrodusererHull() {
-        val kompetanse = KompetanseBuilder(jan2020)
-            .medKompetanse("------", barn1, barn2, barn3)
-            .byggKompetanser().first()
+        val kompetanse =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("------", barn1, barn2, barn3)
+                .byggKompetanser().first()
 
-        val oppdatertKompetanse = KompetanseBuilder(jan2020)
-            .medKompetanse("  SS  ", barn1)
-            .byggKompetanser().first()
+        val oppdatertKompetanse =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("  SS  ", barn1)
+                .byggKompetanser().first()
 
-        val forventedeKompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("------", barn2, barn3)
-            .medKompetanse("--  --", barn1)
-            .byggKompetanser()
+        val forventedeKompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("------", barn2, barn3)
+                .medKompetanse("--  --", barn1)
+                .byggKompetanser()
 
         val restKompetanser = kompetanse.trekkFra(oppdatertKompetanse)
 
@@ -37,18 +39,21 @@ class TrekkFraSkjemaTest {
 
     @Test
     fun testRestMedPeriodeOverEnEnkeltMåned() {
-        val kompetanse = KompetanseBuilder(jan2020)
-            .medKompetanse("  --", barn1, barn2)
-            .byggKompetanser().first()
+        val kompetanse =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("  --", barn1, barn2)
+                .byggKompetanser().first()
 
-        val fjernKompetanse = KompetanseBuilder(jan2020)
-            .medKompetanse("   S", barn1)
-            .byggKompetanser().first()
+        val fjernKompetanse =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("   S", barn1)
+                .byggKompetanser().first()
 
-        val forventedeKompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("  - ", barn1)
-            .medKompetanse("  --", barn2)
-            .byggKompetanser()
+        val forventedeKompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("  - ", barn1)
+                .medKompetanse("  --", barn2)
+                .byggKompetanser()
 
         val restKompetanser = kompetanse.trekkFra(fjernKompetanse)
 

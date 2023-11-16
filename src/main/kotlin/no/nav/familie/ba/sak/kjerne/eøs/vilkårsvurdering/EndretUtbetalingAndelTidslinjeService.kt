@@ -35,8 +35,9 @@ internal fun Iterable<EndretUtbetalingAndel>.tilBarnasSkalIkkeUtbetalesTidslinje
         .mapValues { (_, perioder) -> tidslinje { perioder } }
 }
 
-private fun <I> EndretUtbetalingAndel.tilPeriode(mapper: (EndretUtbetalingAndel) -> I?) = Periode(
-    fraOgMed = this.fom.tilTidspunktEllerUendeligTidlig(tom),
-    tilOgMed = this.tom.tilTidspunktEllerUendeligSent(fom),
-    innhold = mapper(this),
-)
+private fun <I> EndretUtbetalingAndel.tilPeriode(mapper: (EndretUtbetalingAndel) -> I?) =
+    Periode(
+        fraOgMed = this.fom.tilTidspunktEllerUendeligTidlig(tom),
+        tilOgMed = this.tom.tilTidspunktEllerUendeligSent(fom),
+        innhold = mapper(this),
+    )

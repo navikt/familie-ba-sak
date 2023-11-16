@@ -30,7 +30,6 @@ class VelgFagsystemIntegrasjonTest(
     @Autowired val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     @Autowired val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
-
     val søkerFnr = randomFnr()
 
     @BeforeEach
@@ -50,10 +49,11 @@ class VelgFagsystemIntegrasjonTest(
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
         val fagsystemUtfall = FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
 
-        every { infotrygdBarnetrygdClient.hentStønader(any(), any(), any()) } returns InfotrygdSøkResponse(
-            listOf(Stønad(opphørtFom = "012020")),
-            emptyList(),
-        ) andThen InfotrygdSøkResponse(emptyList(), emptyList())
+        every { infotrygdBarnetrygdClient.hentStønader(any(), any(), any()) } returns
+            InfotrygdSøkResponse(
+                listOf(Stønad(opphørtFom = "012020")),
+                emptyList(),
+            ) andThen InfotrygdSøkResponse(emptyList(), emptyList())
 
         val (fagsystemRegelVurdering, faktiskFagsystemUtfall) = velgFagSystemService.velgFagsystem(nyBehandling)
         assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, fagsystemRegelVurdering)
@@ -64,12 +64,13 @@ class VelgFagsystemIntegrasjonTest(
     fun `skal IKKE velge ba-sak når mor er EØS borger`() {
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
 
-        every { mockPersonopplysningerService.hentGjeldendeStatsborgerskap(any()) } returns Statsborgerskap(
-            land = "POL",
-            gyldigFraOgMed = LocalDate.now().minusYears(2),
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null,
-        )
+        every { mockPersonopplysningerService.hentGjeldendeStatsborgerskap(any()) } returns
+            Statsborgerskap(
+                land = "POL",
+                gyldigFraOgMed = LocalDate.now().minusYears(2),
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+            )
         val (fagsystemRegelVurdering, faktiskFagsystemUtfall) = velgFagSystemService.velgFagsystem(nyBehandling)
         assertEquals(FagsystemRegelVurdering.SEND_TIL_BA, fagsystemRegelVurdering)
         assertEquals(FagsystemUtfall.STØTTET_I_BA_SAK, faktiskFagsystemUtfall)
@@ -80,12 +81,13 @@ class VelgFagsystemIntegrasjonTest(
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
         val fagsystemUtfall = FagsystemUtfall.STØTTET_I_BA_SAK
 
-        every { mockPersonopplysningerService.hentGjeldendeStatsborgerskap(any()) } returns Statsborgerskap(
-            land = "USA",
-            gyldigFraOgMed = LocalDate.now().minusYears(2),
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null,
-        )
+        every { mockPersonopplysningerService.hentGjeldendeStatsborgerskap(any()) } returns
+            Statsborgerskap(
+                land = "USA",
+                gyldigFraOgMed = LocalDate.now().minusYears(2),
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
+            )
         val (fagsystemRegelVurdering, faktiskFagsystemUtfall) = velgFagSystemService.velgFagsystem(nyBehandling)
         assertEquals(FagsystemRegelVurdering.SEND_TIL_BA, fagsystemRegelVurdering)
         assertEquals(fagsystemUtfall, faktiskFagsystemUtfall)
