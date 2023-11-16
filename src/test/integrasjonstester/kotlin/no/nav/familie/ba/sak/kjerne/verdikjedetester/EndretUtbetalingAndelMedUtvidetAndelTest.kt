@@ -24,41 +24,44 @@ import java.time.LocalDate
 class EndretUtbetalingAndelMedUtvidetAndelTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) : AbstractVerdikjedetest() {
-
     @Test
     fun `Skal teste at endret utbetalingsandeler for ordinær og utvidet endrer utbetaling for søker og barn`() {
         val barnFødselsdato = LocalDate.now().minusYears(3)
 
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = barnFødselsdato.toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                        bostedsadresser = emptyList(),
-                    ),
+        val scenario =
+            mockServerKlient().lagScenario(
+                RestScenario(
+                    søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                    barna =
+                        listOf(
+                            RestScenarioPerson(
+                                fødselsdato = barnFødselsdato.toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen",
+                                bostedsadresser = emptyList(),
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         val søkersIdent = scenario.søker.ident!!
 
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
-        val restUtvidetBehandling = familieBaSakKlient().opprettBehandling(
-            søkersIdent = søkersIdent,
-            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
-            fagsakId = fagsak.data!!.id,
-        ).data!!
+        val restUtvidetBehandling =
+            familieBaSakKlient().opprettBehandling(
+                søkersIdent = søkersIdent,
+                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
+                fagsakId = fagsak.data!!.id,
+            ).data!!
 
         val restRegistrerSøknad =
             RestRegistrerSøknad(
-                søknad = lagSøknadDTO(
-                    søkerIdent = scenario.søker.ident,
-                    barnasIdenter = scenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.UTVIDET,
-                ),
+                søknad =
+                    lagSøknadDTO(
+                        søkerIdent = scenario.søker.ident,
+                        barnasIdenter = scenario.barna.map { it.ident!! },
+                        underkategori = BehandlingUnderkategori.UTVIDET,
+                    ),
                 bekreftEndringerViaFrontend = false,
             )
         val restBehandlingEtterRegistrertSøknad: Ressurs<RestUtvidetBehandling> =
@@ -73,59 +76,64 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
                     behandlingId = restBehandlingEtterRegistrertSøknad.data?.behandlingId!!,
                     vilkårId = it.id,
                     restPersonResultat =
-                    RestPersonResultat(
-                        personIdent = restPersonResultat.personIdent,
-                        vilkårResultater = listOf(
-                            it.copy(
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = barnFødselsdato,
-                                utdypendeVilkårsvurderinger = listOfNotNull(
-                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                        RestPersonResultat(
+                            personIdent = restPersonResultat.personIdent,
+                            vilkårResultater =
+                                listOf(
+                                    it.copy(
+                                        resultat = Resultat.OPPFYLT,
+                                        periodeFom = barnFødselsdato,
+                                        utdypendeVilkårsvurderinger =
+                                            listOfNotNull(
+                                                if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                                            ),
+                                    ),
                                 ),
-                            ),
                         ),
-                    ),
                 )
             }
         }
 
-        val restBehandlingEtterBehandlingsresultat = familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restBehandlingEtterRegistrertSøknad.data?.behandlingId!!,
-        ).data!!
+        val restBehandlingEtterBehandlingsresultat =
+            familieBaSakKlient().validerVilkårsvurdering(
+                behandlingId = restBehandlingEtterRegistrertSøknad.data?.behandlingId!!,
+            ).data!!
 
         val endretFom = barnFødselsdato.nesteMåned()
         val endretTom = endretFom.plusMonths(2)
 
-        val restEndretUtbetalingAndelUtvidetBarnetrygd = RestEndretUtbetalingAndel(
-            id = null,
-            personIdent = scenario.søker.ident,
-            prosent = BigDecimal(0),
-            fom = endretFom,
-            tom = endretTom,
-            årsak = Årsak.DELT_BOSTED,
-            avtaletidspunktDeltBosted = LocalDate.now(),
-            søknadstidspunkt = LocalDate.now(),
-            begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true,
-        )
+        val restEndretUtbetalingAndelUtvidetBarnetrygd =
+            RestEndretUtbetalingAndel(
+                id = null,
+                personIdent = scenario.søker.ident,
+                prosent = BigDecimal(0),
+                fom = endretFom,
+                tom = endretTom,
+                årsak = Årsak.DELT_BOSTED,
+                avtaletidspunktDeltBosted = LocalDate.now(),
+                søknadstidspunkt = LocalDate.now(),
+                begrunnelse = "begrunnelse",
+                erTilknyttetAndeler = true,
+            )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
             restBehandlingEtterBehandlingsresultat.behandlingId,
             restEndretUtbetalingAndelUtvidetBarnetrygd,
         )
 
-        val restEndretUtbetalingAndelOrdinærBarnetrygd = RestEndretUtbetalingAndel(
-            id = null,
-            personIdent = scenario.barna.first().ident,
-            prosent = BigDecimal(0),
-            fom = endretFom,
-            tom = endretTom,
-            årsak = Årsak.DELT_BOSTED,
-            avtaletidspunktDeltBosted = LocalDate.now(),
-            søknadstidspunkt = LocalDate.now(),
-            begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true,
-        )
+        val restEndretUtbetalingAndelOrdinærBarnetrygd =
+            RestEndretUtbetalingAndel(
+                id = null,
+                personIdent = scenario.barna.first().ident,
+                prosent = BigDecimal(0),
+                fom = endretFom,
+                tom = endretTom,
+                årsak = Årsak.DELT_BOSTED,
+                avtaletidspunktDeltBosted = LocalDate.now(),
+                søknadstidspunkt = LocalDate.now(),
+                begrunnelse = "begrunnelse",
+                erTilknyttetAndeler = true,
+            )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
             restBehandlingEtterBehandlingsresultat.behandlingId,

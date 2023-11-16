@@ -86,7 +86,10 @@ abstract class AbstractMockkSpringRunner {
         clearMocks()
     }
 
-    fun settToggleMock(toggle: String, value: Boolean) {
+    fun settToggleMock(
+        toggle: String,
+        value: Boolean,
+    ) {
         every { mockUnleashService.isEnabled(toggle) } returns value
         every { mockUnleashService.isEnabled(toggle, defaultValue = any()) } returns value
         every { mockUnleashService.isEnabled(toggle, properties = any()) } returns value

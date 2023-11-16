@@ -15,7 +15,6 @@ class SaksstatistikkEventListener(
     private val saksstatistikkService: SaksstatistikkService,
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 ) : ApplicationListener<SaksstatistikkEvent> {
-
     override fun onApplicationEvent(event: SaksstatistikkEvent) {
         if (event.behandlingId != null) {
             saksstatistikkService.mapTilBehandlingDVH(event.behandlingId)?.also {
@@ -45,6 +44,7 @@ class SaksstatistikkEventListener(
     }
 }
 
-val sakstatistikkObjectMapper: ObjectMapper = objectMapper.copy()
-    .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-    .configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false)
+val sakstatistikkObjectMapper: ObjectMapper =
+    objectMapper.copy()
+        .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+        .configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false)

@@ -36,38 +36,27 @@ import java.time.LocalDateTime
 class BehandlingServiceTest(
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val behandlingService: BehandlingService,
-
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-
     @Autowired
     private val beregningService: BeregningService,
-
     @Autowired
     private val personidentService: PersonidentService,
-
     @Autowired
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-
     @Autowired
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-
     @Autowired
     private val behandlingRepository: BehandlingRepository,
-
     @Autowired
     private val stegService: StegService,
-
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService,
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
@@ -87,14 +76,15 @@ class BehandlingServiceTest(
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val error = assertThrows<Feil> {
-            stegService.håndterNyBehandlingOgSendInfotrygdFeed(
-                nyOrdinærBehandling(
-                    søkersIdent = fnr,
-                    fagsakId = fagsak.id,
-                ),
-            )
-        }
+        val error =
+            assertThrows<Feil> {
+                stegService.håndterNyBehandlingOgSendInfotrygdFeed(
+                    nyOrdinærBehandling(
+                        søkersIdent = fnr,
+                        fagsakId = fagsak.id,
+                    ),
+                )
+            }
 
         assertEquals(feilmelding, error.message)
 
@@ -163,13 +153,14 @@ class BehandlingServiceTest(
         )
 
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn), true)
-        val testPersonopplysningsGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = søker,
-            barnasIdenter = listOf(barn),
-            søkerAktør = fagsak.aktør,
-            barnAktør = barnAktør,
-        )
+        val testPersonopplysningsGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søker,
+                barnasIdenter = listOf(barn),
+                søkerAktør = fagsak.aktør,
+                barnAktør = barnAktør,
+            )
         personopplysningGrunnlagRepository.save(testPersonopplysningsGrunnlag)
 
         assertEquals(

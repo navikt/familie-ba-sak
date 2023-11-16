@@ -40,7 +40,6 @@ class RolletilgangTest(
     @Autowired
     private val fagsakService: FagsakService,
 ) : WebSpringAuthTestRunner() {
-
     @Test
     fun `Skal kaste feil når innlogget veileder prøver å opprette fagsak gjennom rest-endepunkt`() {
         val fnr = randomFnr()
@@ -56,21 +55,23 @@ class RolletilgangTest(
                 ),
             ),
         )
-        val requestEntity = HttpEntity<String>(
-            objectMapper.writeValueAsString(
-                FagsakRequest(
-                    personIdent = fnr,
+        val requestEntity =
+            HttpEntity<String>(
+                objectMapper.writeValueAsString(
+                    FagsakRequest(
+                        personIdent = fnr,
+                    ),
                 ),
-            ),
-            header,
-        )
-
-        val error = assertThrows<HttpClientErrorException> {
-            restTemplate.postForEntity<Ressurs<Fagsak>>(
-                hentUrl("/api/fagsaker"),
-                requestEntity,
+                header,
             )
-        }
+
+        val error =
+            assertThrows<HttpClientErrorException> {
+                restTemplate.postForEntity<Ressurs<Fagsak>>(
+                    hentUrl("/api/fagsaker"),
+                    requestEntity,
+                )
+            }
 
         val ressurs: Ressurs<Fagsak> = objectMapper.readValue(error.responseBodyAsString)
 
@@ -97,14 +98,15 @@ class RolletilgangTest(
                 ),
             ),
         )
-        val requestEntity = HttpEntity<String>(
-            objectMapper.writeValueAsString(
-                FagsakRequest(
-                    personIdent = fnr,
+        val requestEntity =
+            HttpEntity<String>(
+                objectMapper.writeValueAsString(
+                    FagsakRequest(
+                        personIdent = fnr,
+                    ),
                 ),
-            ),
-            header,
-        )
+                header,
+            )
 
         val response = restTemplate.postForEntity<Ressurs<Fagsak>>(hentUrl("/api/fagsaker"), requestEntity)
         val ressurs = response.body
@@ -130,17 +132,19 @@ class RolletilgangTest(
                 ),
             ),
         )
-        val requestEntity = HttpEntity<String>(
-            objectMapper.writeValueAsString(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.data!!.id)),
-            header,
-        )
-
-        val error = assertThrows<HttpClientErrorException> {
-            restTemplate.postForEntity<Ressurs<Behandling>>(
-                hentUrl("/rolletilgang/test-behandlinger"),
-                requestEntity,
+        val requestEntity =
+            HttpEntity<String>(
+                objectMapper.writeValueAsString(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.data!!.id)),
+                header,
             )
-        }
+
+        val error =
+            assertThrows<HttpClientErrorException> {
+                restTemplate.postForEntity<Ressurs<Behandling>>(
+                    hentUrl("/rolletilgang/test-behandlinger"),
+                    requestEntity,
+                )
+            }
 
         val ressurs: Ressurs<Behandling> = objectMapper.readValue(error.responseBodyAsString)
 

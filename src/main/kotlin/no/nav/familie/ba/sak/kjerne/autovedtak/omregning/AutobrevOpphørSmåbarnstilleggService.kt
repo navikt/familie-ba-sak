@@ -72,12 +72,13 @@ class AutobrevOpphørSmåbarnstilleggService(
 
         autovedtakStegService.kjørBehandlingOmregning(
             mottakersAktør = behandling.fagsak.aktør,
-            behandlingsdata = OmregningBrevData(
-                aktør = behandling.fagsak.aktør,
-                behandlingsårsak = behandlingsårsak,
-                standardbegrunnelse = standardbegrunnelse,
-                fagsakId = fagsakId,
-            ),
+            behandlingsdata =
+                OmregningBrevData(
+                    aktør = behandling.fagsak.aktør,
+                    behandlingsårsak = behandlingsårsak,
+                    standardbegrunnelse = standardbegrunnelse,
+                    fagsakId = fagsakId,
+                ),
         )
     }
 

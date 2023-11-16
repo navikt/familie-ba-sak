@@ -10,7 +10,6 @@ class KorrigertVedtakService(
     private val korrigertVedtakRepository: KorrigertVedtakRepository,
     private val loggService: LoggService,
 ) {
-
     fun finnAktivtKorrigertVedtakPåBehandling(behandlingId: Long): KorrigertVedtak? =
         korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
 

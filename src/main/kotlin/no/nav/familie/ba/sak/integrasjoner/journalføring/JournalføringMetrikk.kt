@@ -10,32 +10,34 @@ import org.springframework.stereotype.Component
 
 @Component
 class JournalføringMetrikk {
-
     private val antallGenerellSak: Counter = Metrics.counter("journalfoering.behandling", "behandlingstype", "Fagsak")
 
-    private val antallTilBehandling = BehandlingType.values().associateWith {
-        Metrics.counter("journalfoering.behandling", "behandlingstype", it.visningsnavn)
-    }
+    private val antallTilBehandling =
+        BehandlingType.values().associateWith {
+            Metrics.counter("journalfoering.behandling", "behandlingstype", it.visningsnavn)
+        }
 
-    private val journalpostTittelMap = mapOf(
-        "søknad om ordinær barnetrygd" to "Søknad om ordinær barnetrygd",
-        "søknad om barnetrygd ordinær" to "Søknad om ordinær barnetrygd",
-        "søknad om utvidet barnetrygd" to "Søknad om utvidet barnetrygd",
-        "søknad om barnetrygd utvidet" to "Søknad om utvidet barnetrygd",
-        "ettersendelse til søknad om ordinær barnetrygd" to "Ettersendelse til søknad om ordinær barnetrygd",
-        "ettersendelse til søknad om barnetrygd ordinær" to "Ettersendelse til søknad om ordinær barnetrygd",
-        "ettersendelse til søknad om utvidet barnetrygd" to "Ettersendelse til søknad om utvidet barnetrygd",
-        "ettersendelse til søknad om barnetrygd utvidet" to "Ettersendelse til søknad om utvidet barnetrygd",
-        "tilleggskjema eøs" to "Tilleggskjema EØS",
-    )
-
-    private val antallJournalpostTittel = journalpostTittelMap.values.toSet().associateWith {
-        Metrics.counter(
-            "journalfoering.journalpost",
-            "tittel",
-            it,
+    private val journalpostTittelMap =
+        mapOf(
+            "søknad om ordinær barnetrygd" to "Søknad om ordinær barnetrygd",
+            "søknad om barnetrygd ordinær" to "Søknad om ordinær barnetrygd",
+            "søknad om utvidet barnetrygd" to "Søknad om utvidet barnetrygd",
+            "søknad om barnetrygd utvidet" to "Søknad om utvidet barnetrygd",
+            "ettersendelse til søknad om ordinær barnetrygd" to "Ettersendelse til søknad om ordinær barnetrygd",
+            "ettersendelse til søknad om barnetrygd ordinær" to "Ettersendelse til søknad om ordinær barnetrygd",
+            "ettersendelse til søknad om utvidet barnetrygd" to "Ettersendelse til søknad om utvidet barnetrygd",
+            "ettersendelse til søknad om barnetrygd utvidet" to "Ettersendelse til søknad om utvidet barnetrygd",
+            "tilleggskjema eøs" to "Tilleggskjema EØS",
         )
-    }
+
+    private val antallJournalpostTittel =
+        journalpostTittelMap.values.toSet().associateWith {
+            Metrics.counter(
+                "journalfoering.journalpost",
+                "tittel",
+                it,
+            )
+        }
 
     private val antallJournalpostTittelFritekst =
         Metrics.counter("journalfoering.journalpost", "tittel", "Fritekst")

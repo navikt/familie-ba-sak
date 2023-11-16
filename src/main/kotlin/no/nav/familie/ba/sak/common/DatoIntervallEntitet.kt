@@ -8,7 +8,6 @@ import java.time.LocalDate
 data class DatoIntervallEntitet(
     @Column(name = "fom")
     val fom: LocalDate? = null,
-
     @Column(name = "tom")
     val tom: LocalDate? = null,
 )

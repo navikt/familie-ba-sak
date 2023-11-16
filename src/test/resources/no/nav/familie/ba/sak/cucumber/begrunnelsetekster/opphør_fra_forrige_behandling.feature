@@ -200,3 +200,51 @@ Egenskap: Gyldige begrunnelser for opphør fra forrige behandling
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser  | Ugyldige begrunnelser      |
       | 01.12.2021 | 28.02.2022 | UTBETALING         |           |                       |                            |
       | 01.03.2022 |            | AVSLAG             |           | AVSLAG_BOSATT_I_RIKET | OPPHØR_IKKE_BOSATT_I_NORGE |
+
+  Scenario: Skal gi opphør fra forrige behandling-begrunnelse knyttet til bosatt i riket for søker som nå er ikke oppfylt med utdypende vilkår
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | INNVILGET           | FØDSELSHENDELSE  | Ja                        | NASJONAL            |
+      | 2            | 1        | 1                   | OPPHØRT             | NYE_OPPLYSNINGER | Nei                       | NASJONAL            |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 01.12.1985  |
+      | 1            | 2       | BARN       | 26.07.2023  |
+      | 2            | 1       | SØKER      | 01.12.1985  |
+      | 2            | 2       | BARN       | 26.07.2023  |
+
+    Og følgende dagens dato 14.11.2023
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
+      | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD                                |                  | 26.07.2023 |            | OPPFYLT  | Nei                  |                      |
+
+      | 2       | UNDER_18_ÅR                                                  |                  | 26.07.2023 | 25.07.2041 | OPPFYLT  | Nei                  |                      |
+      | 2       | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP,BOR_MED_SØKER,BOSATT_I_RIKET |                  | 26.07.2023 |            | OPPFYLT  | Nei                  |                      |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår                                                       | Utdypende vilkår         | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser |
+      | 1       | BOSATT_I_RIKET                                               | VURDERING_ANNET_GRUNNLAG | 01.07.2023 |            | IKKE_OPPFYLT | Nei                  |                      |
+      | 1       | LOVLIG_OPPHOLD                                               |                          | 26.07.2023 |            | OPPFYLT      | Nei                  |                      |
+
+      | 2       | GIFT_PARTNERSKAP,LOVLIG_OPPHOLD,BOSATT_I_RIKET,BOR_MED_SØKER |                          | 26.07.2023 |            | OPPFYLT      | Nei                  |                      |
+      | 2       | UNDER_18_ÅR                                                  |                          | 26.07.2023 | 25.07.2041 | OPPFYLT      | Nei                  |                      |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.08.2023 | 30.06.2029 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.07.2029 | 30.06.2041 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+
+
+    Når vedtaksperiodene genereres for behandling 2
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                       | Ugyldige begrunnelser |
+      | 01.08.2023 |          | OPPHØR             | NASJONALE_REGLER               | OPPHØR_UGYLDIG_KONTONUMMER_FRA_INNVILGELSE |                       |

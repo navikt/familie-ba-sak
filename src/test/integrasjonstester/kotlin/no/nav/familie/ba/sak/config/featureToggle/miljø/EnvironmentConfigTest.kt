@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.env.Environment
 
 class EnvironmentConfigTest {
-
     @Test
     fun `aktiv profil skal være aktiv`() {
         val env = mockk<Environment>().also { every { it.activeProfiles } returns arrayOf("dev") }

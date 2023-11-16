@@ -44,7 +44,10 @@ class SkatteetatenService(
         return SkatteetatenPersonerResponse(kombinertListe)
     }
 
-    fun finnPerioderMedUtvidetBarnetrygd(personer: List<String>, år: String): SkatteetatenPerioderResponse {
+    fun finnPerioderMedUtvidetBarnetrygd(
+        personer: List<String>,
+        år: String,
+    ): SkatteetatenPerioderResponse {
         val unikePersoner = personer.distinct()
         val perioderFraBaSak = hentPerioderMedUtvidetBarnetrygdFraBaSak(unikePersoner, år)
         LOG.info("Fant ${perioderFraBaSak.size} skatteetatenperioder fra ba-sak")
@@ -71,8 +74,9 @@ class SkatteetatenService(
                     SkatteetatenPerioder(
                         ident = personIdent,
                         perioder = perioder,
-                        sisteVedtakPaaIdent = resultatBaSakForPerson?.sisteVedtakPaaIdent
-                            ?: resultatInfotrygdForPerson!!.sisteVedtakPaaIdent,
+                        sisteVedtakPaaIdent =
+                            resultatBaSakForPerson?.sisteVedtakPaaIdent
+                                ?: resultatInfotrygdForPerson!!.sisteVedtakPaaIdent,
                     ),
                 )
             }
@@ -112,18 +116,20 @@ class SkatteetatenService(
         val skatteetatenPerioderMap =
             stonadPerioder.fold(mutableMapOf<String, SkatteetatenPerioder>()) { perioderMap, period ->
                 val ident = period.getIdent()
-                val nyList = listOf(
-                    SkatteetatenPeriode(
-                        fraMaaned = period.getFom().format(DateTimeFormatter.ofPattern("yyyy-MM")),
-                        delingsprosent = period.getProsent().tilDelingsprosent(),
-                        tomMaaned = period.getTom().format(DateTimeFormatter.ofPattern("yyyy-MM")),
-                    ),
-                )
-                val samletPerioder = if (perioderMap.containsKey(ident)) {
-                    perioderMap[ident]!!.perioder + nyList
-                } else {
-                    nyList
-                }
+                val nyList =
+                    listOf(
+                        SkatteetatenPeriode(
+                            fraMaaned = period.getFom().format(DateTimeFormatter.ofPattern("yyyy-MM")),
+                            delingsprosent = period.getProsent().tilDelingsprosent(),
+                            tomMaaned = period.getTom().format(DateTimeFormatter.ofPattern("yyyy-MM")),
+                        ),
+                    )
+                val samletPerioder =
+                    if (perioderMap.containsKey(ident)) {
+                        perioderMap[ident]!!.perioder + nyList
+                    } else {
+                        nyList
+                    }
                 perioderMap[ident] = SkatteetatenPerioder(ident, period.getEndretDato(), samletPerioder)
                 perioderMap
             }
@@ -133,8 +139,9 @@ class SkatteetatenService(
             SkatteetatenPerioder(
                 ident = it.second.ident,
                 sisteVedtakPaaIdent = it.second.sisteVedtakPaaIdent,
-                perioder = it.second.perioder.groupBy { periode -> periode.delingsprosent }.values
-                    .flatMap(::slåSammenSkatteetatenPeriode).toMutableList(),
+                perioder =
+                    it.second.perioder.groupBy { periode -> periode.delingsprosent }.values
+                        .flatMap(::slåSammenSkatteetatenPeriode).toMutableList(),
             )
         }
     }
@@ -183,11 +190,12 @@ fun String.tilDelingsprosent(): SkatteetatenPeriode.Delingsprosent =
         SkatteetatenPeriode.Delingsprosent.usikker
     }
 
-fun SkatteetatenPeriode.Delingsprosent.tilBigDecimal(): BigDecimal = when (this) {
-    SkatteetatenPeriode.Delingsprosent._0 -> BigDecimal.valueOf(100)
-    SkatteetatenPeriode.Delingsprosent._50 -> BigDecimal.valueOf(50)
-    else -> BigDecimal.valueOf(0)
-}
+fun SkatteetatenPeriode.Delingsprosent.tilBigDecimal(): BigDecimal =
+    when (this) {
+        SkatteetatenPeriode.Delingsprosent._0 -> BigDecimal.valueOf(100)
+        SkatteetatenPeriode.Delingsprosent._50 -> BigDecimal.valueOf(50)
+        else -> BigDecimal.valueOf(0)
+    }
 
 interface UtvidetSkatt {
     val fnr: String

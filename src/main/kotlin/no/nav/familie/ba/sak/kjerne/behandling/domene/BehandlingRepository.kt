@@ -8,7 +8,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 interface BehandlingRepository : JpaRepository<Behandling, Long> {
-
     @Query(value = "SELECT b FROM Behandling b WHERE b.id = :behandlingId")
     fun finnBehandling(behandlingId: Long): Behandling
 
@@ -19,7 +18,10 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnBehandlinger(fagsakId: Long): List<Behandling>
 
     @Query(value = "SELECT b FROM Behandling b WHERE b.fagsak.id = :fagsakId AND status = :status")
-    fun finnBehandlinger(fagsakId: Long, status: BehandlingStatus): List<Behandling>
+    fun finnBehandlinger(
+        fagsakId: Long,
+        status: BehandlingStatus,
+    ): List<Behandling>
 
     @Query(value = "SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id in :fagsakIder AND f.arkivert = false")
     fun finnBehandlinger(fagsakIder: Set<Long>): List<Behandling>
@@ -168,5 +170,8 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
             """,
         nativeQuery = true,
     )
-    fun hentBegrunnelserPåBehandlingIPeriode(behandlingId: Long, fomVedtaksperiode: LocalDate): List<String>
+    fun hentBegrunnelserPåBehandlingIPeriode(
+        behandlingId: Long,
+        fomVedtaksperiode: LocalDate,
+    ): List<String>
 }

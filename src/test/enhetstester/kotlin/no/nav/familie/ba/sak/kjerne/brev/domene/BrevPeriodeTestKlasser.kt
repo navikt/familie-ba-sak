@@ -34,23 +34,18 @@ import java.time.LocalDate
 
 data class BrevPeriodeTestConfig(
     val beskrivelse: String,
-
     val fom: LocalDate?,
     val tom: LocalDate?,
     val vedtaksperiodetype: Vedtaksperiodetype,
     val begrunnelser: List<Standardbegrunnelse>,
     val eøsBegrunnelser: List<EØSStandardbegrunnelse>?,
     val fritekster: List<String>,
-
     val personerPåBehandling: List<BrevPeriodeTestPerson>,
-
     val uregistrerteBarn: List<MinimertUregistrertBarn>,
     val erFørsteVedtaksperiodePåFagsak: Boolean = false,
     val brevMålform: Målform,
-
     val kompetanser: List<BrevPeriodeTestKompetanse>? = null,
     val kompetanserSomStopperRettFørPeriode: List<BrevPeriodeTestKompetanse>? = null,
-
     val forventetOutput: BrevPeriodeOutput?,
 ) {
     fun hentPersonerMedReduksjonFraForrigeBehandling(): List<BrevPeriodeTestPerson> =
@@ -94,9 +89,11 @@ data class BrevPeriodeTestPerson(
     val kompetanseIder: List<String>? = null,
 ) {
     fun tilMinimertPerson() = MinimertRestPerson(personIdent = personIdent, fødselsdato = fødselsdato, type = type)
-    fun tilUtbetalingsperiodeDetaljer() = utbetalinger.map {
-        it.tilMinimertUtbetalingsperiodeDetalj(this.tilMinimertPerson())
-    }
+
+    fun tilUtbetalingsperiodeDetaljer() =
+        utbetalinger.map {
+            it.tilMinimertUtbetalingsperiodeDetalj(this.tilMinimertPerson())
+        }
 
     fun tilMinimerteEndredeUtbetalingAndeler() =
         endredeUtbetalinger.map { it.tilMinimertRestEndretUtbetalingAndel(this.personIdent) }
@@ -196,27 +193,29 @@ data class BegrunnelseDataTestConfig(
     val avtaletidspunktDeltBosted: String?,
     val sokersRettTilUtvidet: String?,
 ) : TestBegrunnelse {
-
-    fun tilBegrunnelseData() = BegrunnelseData(
-        belop = Utils.formaterBeløp(this.belop),
-        gjelderSoker = this.gjelderSoker,
-        barnasFodselsdatoer = this.barnasFodselsdatoer,
-        fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = this.fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling,
-        fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling = this.fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling,
-        antallBarn = this.antallBarn,
-        antallBarnOppfyllerTriggereOgHarUtbetaling = this.antallBarnOppfyllerTriggereOgHarUtbetaling,
-        antallBarnOppfyllerTriggereOgHarNullutbetaling = this.antallBarnOppfyllerTriggereOgHarNullutbetaling,
-        maanedOgAarBegrunnelsenGjelderFor = this.maanedOgAarBegrunnelsenGjelderFor,
-        maalform = this.maalform,
-        apiNavn = this.apiNavn,
-        soknadstidspunkt = this.soknadstidspunkt ?: "",
-        avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: "",
-        sokersRettTilUtvidet = this.sokersRettTilUtvidet
-            ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat(),
-        vedtakBegrunnelseType = Standardbegrunnelse.values()
-            .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
-            ?: throw Feil("Fant ikke Standardbegrunnelse med apiNavn ${this.apiNavn}"),
-    )
+    fun tilBegrunnelseData() =
+        BegrunnelseData(
+            belop = Utils.formaterBeløp(this.belop),
+            gjelderSoker = this.gjelderSoker,
+            barnasFodselsdatoer = this.barnasFodselsdatoer,
+            fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = this.fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling,
+            fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling = this.fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling,
+            antallBarn = this.antallBarn,
+            antallBarnOppfyllerTriggereOgHarUtbetaling = this.antallBarnOppfyllerTriggereOgHarUtbetaling,
+            antallBarnOppfyllerTriggereOgHarNullutbetaling = this.antallBarnOppfyllerTriggereOgHarNullutbetaling,
+            maanedOgAarBegrunnelsenGjelderFor = this.maanedOgAarBegrunnelsenGjelderFor,
+            maalform = this.maalform,
+            apiNavn = this.apiNavn,
+            soknadstidspunkt = this.soknadstidspunkt ?: "",
+            avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: "",
+            sokersRettTilUtvidet =
+                this.sokersRettTilUtvidet
+                    ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat(),
+            vedtakBegrunnelseType =
+                Standardbegrunnelse.values()
+                    .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
+                    ?: throw Feil("Fant ikke Standardbegrunnelse med apiNavn ${this.apiNavn}"),
+        )
 }
 
 data class EØSBegrunnelseTestConfig(
@@ -230,20 +229,22 @@ data class EØSBegrunnelseTestConfig(
     val sokersAktivitet: KompetanseAktivitet,
     val sokersAktivitetsland: String?,
 ) : TestBegrunnelse {
-    fun tilEØSBegrunnelseData(): EØSBegrunnelseDataMedKompetanse = EØSBegrunnelseDataMedKompetanse(
-        apiNavn = this.apiNavn,
-        annenForeldersAktivitet = this.annenForeldersAktivitet,
-        annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
-        barnetsBostedsland = this.barnetsBostedsland,
-        barnasFodselsdatoer = this.barnasFodselsdatoer,
-        antallBarn = this.antallBarn,
-        maalform = this.maalform,
-        vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
-            .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
-            ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
-        sokersAktivitet = this.sokersAktivitet,
-        sokersAktivitetsland = this.sokersAktivitetsland,
-    )
+    fun tilEØSBegrunnelseData(): EØSBegrunnelseDataMedKompetanse =
+        EØSBegrunnelseDataMedKompetanse(
+            apiNavn = this.apiNavn,
+            annenForeldersAktivitet = this.annenForeldersAktivitet,
+            annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
+            barnetsBostedsland = this.barnetsBostedsland,
+            barnasFodselsdatoer = this.barnasFodselsdatoer,
+            antallBarn = this.antallBarn,
+            maalform = this.maalform,
+            vedtakBegrunnelseType =
+                EØSStandardbegrunnelse.values()
+                    .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
+                    ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
+            sokersAktivitet = this.sokersAktivitet,
+            sokersAktivitetsland = this.sokersAktivitetsland,
+        )
 }
 
 data class BrevPeriodeOutput(

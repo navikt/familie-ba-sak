@@ -49,14 +49,16 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
 
-        val andreEndredeAndelerPåBehandling = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandling.id)
-            .filter { it.id != endretUtbetalingAndelId }
+        val andreEndredeAndelerPåBehandling =
+            endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandling.id)
+                .filter { it.id != endretUtbetalingAndelId }
 
-        val gyldigTomEtterDagensDato = beregnGyldigTomIFremtiden(
-            andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
-            endretUtbetalingAndel = endretUtbetalingAndel,
-            andelTilkjentYtelser = andelTilkjentYtelser,
-        )
+        val gyldigTomEtterDagensDato =
+            beregnGyldigTomIFremtiden(
+                andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                andelTilkjentYtelser = andelTilkjentYtelser,
+            )
 
         validerTomDato(
             tomDato = endretUtbetalingAndel.tom,
@@ -132,7 +134,10 @@ class EndretUtbetalingAndelService(
         )
 
     @Transactional
-    fun kopierEndretUtbetalingAndelFraForrigeBehandling(behandling: Behandling, forrigeBehandling: Behandling) {
+    fun kopierEndretUtbetalingAndelFraForrigeBehandling(
+        behandling: Behandling,
+        forrigeBehandling: Behandling,
+    ) {
         endretUtbetalingAndelHentOgPersisterService.hentForBehandling(forrigeBehandling.id).forEach {
             endretUtbetalingAndelRepository.save(
                 it.copy(

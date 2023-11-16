@@ -84,17 +84,21 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
 
     val eksplisitteAvslagForPerson = vilkårResultaterForPerson.hentForskjøvetEksplisittAvslagTidslinje()
 
-    val kompetanseTidslinje = this.utfylteKompetanser.filtrerPåAktør(person.aktør)
-        .tilTidslinje().mapIkkeNull { KompetanseForVedtaksperiode(it) }
+    val kompetanseTidslinje =
+        this.utfylteKompetanser.filtrerPåAktør(person.aktør)
+            .tilTidslinje().mapIkkeNull { KompetanseForVedtaksperiode(it) }
 
-    val utenlandskPeriodebeløpTidslinje = utfylteUtenlandskPeriodebeløp.filtrerPåAktør(person.aktør)
-        .tilTidslinje().mapIkkeNull { UtenlandskPeriodebeløpForVedtaksperiode(it) }
+    val utenlandskPeriodebeløpTidslinje =
+        utfylteUtenlandskPeriodebeløp.filtrerPåAktør(person.aktør)
+            .tilTidslinje().mapIkkeNull { UtenlandskPeriodebeløpForVedtaksperiode(it) }
 
-    val valutakursTidslinje = utfylteValutakurs.filtrerPåAktør(person.aktør)
-        .tilTidslinje().mapIkkeNull { ValutakursForVedtaksperiode(it) }
+    val valutakursTidslinje =
+        utfylteValutakurs.filtrerPåAktør(person.aktør)
+            .tilTidslinje().mapIkkeNull { ValutakursForVedtaksperiode(it) }
 
-    val endredeUtbetalingerTidslinje = this.utfylteEndredeUtbetalinger.filtrerPåAktør(person.aktør)
-        .tilTidslinje().mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksperiode() }
+    val endredeUtbetalingerTidslinje =
+        this.utfylteEndredeUtbetalinger.filtrerPåAktør(person.aktør)
+            .tilTidslinje().mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksperiode() }
 
     val andelerTilkjentYtelseTidslinje =
         this.andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForVedtaksPeriodeTidslinje()

@@ -12,21 +12,31 @@ class UtenlandskPeriodebeløpService(
     utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp>>,
 ) {
-    val skjemaService = PeriodeOgBarnSkjemaService(
-        utenlandskPeriodebeløpRepository,
-        endringsabonnenter,
-    )
+    val skjemaService =
+        PeriodeOgBarnSkjemaService(
+            utenlandskPeriodebeløpRepository,
+            endringsabonnenter,
+        )
 
     fun hentUtenlandskePeriodebeløp(behandlingId: BehandlingId) =
         skjemaService.hentMedBehandlingId(behandlingId)
 
-    fun oppdaterUtenlandskPeriodebeløp(behandlingId: BehandlingId, utenlandskPeriodebeløp: UtenlandskPeriodebeløp) =
+    fun oppdaterUtenlandskPeriodebeløp(
+        behandlingId: BehandlingId,
+        utenlandskPeriodebeløp: UtenlandskPeriodebeløp,
+    ) =
         skjemaService.endreSkjemaer(behandlingId, utenlandskPeriodebeløp)
 
-    fun slettUtenlandskPeriodebeløp(behandlingId: BehandlingId, utenlandskPeriodebeløpId: Long) =
+    fun slettUtenlandskPeriodebeløp(
+        behandlingId: BehandlingId,
+        utenlandskPeriodebeløpId: Long,
+    ) =
         skjemaService.slettSkjema(behandlingId, utenlandskPeriodebeløpId)
 
     @Transactional
-    fun kopierOgErstattUtenlandskPeriodebeløp(fraBehandlingId: BehandlingId, tilBehandlingId: BehandlingId) =
+    fun kopierOgErstattUtenlandskPeriodebeløp(
+        fraBehandlingId: BehandlingId,
+        tilBehandlingId: BehandlingId,
+    ) =
         skjemaService.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
 }

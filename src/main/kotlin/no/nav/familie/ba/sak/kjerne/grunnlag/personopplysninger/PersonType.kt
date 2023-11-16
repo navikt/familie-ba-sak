@@ -9,9 +9,10 @@ enum class PersonType {
     BARN,
     ;
 
-    fun ytelseType() = when (this) {
-        SØKER -> YtelseType.UTVIDET_BARNETRYGD
-        BARN -> YtelseType.ORDINÆR_BARNETRYGD
-        ANNENPART -> throw Feil("Finner ikke ytelsetype for annen part")
-    }
+    fun ytelseType() =
+        when (this) {
+            SØKER -> YtelseType.UTVIDET_BARNETRYGD
+            BARN -> YtelseType.ORDINÆR_BARNETRYGD
+            ANNENPART -> throw Feil("Finner ikke ytelsetype for annen part")
+        }
 }

@@ -31,30 +31,33 @@ data class UtvidetBarnetrygdGenerator(
 
         val utvidetVilkårTidslinje = utvidetVilkår.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson(Vilkår.UTVIDET_BARNETRYGD)
 
-        val barnasAndelerFiltrertForPerioderBarnaBorMedSøker = andelerBarna.tilSeparateTidslinjerForBarna()
-            .leftJoin(tidslinjerMedPerioderBarnaBorMedSøker) { andelBarn, barnBorMedSøker ->
-                when (barnBorMedSøker) {
-                    true -> andelBarn
-                    else -> null
+        val barnasAndelerFiltrertForPerioderBarnaBorMedSøker =
+            andelerBarna.tilSeparateTidslinjerForBarna()
+                .leftJoin(tidslinjerMedPerioderBarnaBorMedSøker) { andelBarn, barnBorMedSøker ->
+                    when (barnBorMedSøker) {
+                        true -> andelBarn
+                        else -> null
+                    }
                 }
-            }
 
-        val størsteProsentTidslinje = barnasAndelerFiltrertForPerioderBarnaBorMedSøker.values
-            .kombinerUtenNullOgIkkeTom { andeler -> andeler.maxOf { it.prosent } }
+        val størsteProsentTidslinje =
+            barnasAndelerFiltrertForPerioderBarnaBorMedSøker.values
+                .kombinerUtenNullOgIkkeTom { andeler -> andeler.maxOf { it.prosent } }
 
-        val utvidetAndeler = utvidetVilkårTidslinje.kombinerMedKunVerdi(
-            størsteProsentTidslinje,
-            satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD),
-        ) { _, prosent, sats ->
-            val nasjonaltPeriodebeløp = sats.avrundetHeltallAvProsent(prosent)
-            AndelTilkjentYtelseForTidslinje(
-                aktør = søkerAktør,
-                beløp = nasjonaltPeriodebeløp,
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                sats = sats,
-                prosent = prosent,
-            )
-        }.tilAndelerTilkjentYtelse(tilkjentYtelse)
+        val utvidetAndeler =
+            utvidetVilkårTidslinje.kombinerMedKunVerdi(
+                størsteProsentTidslinje,
+                satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD),
+            ) { _, prosent, sats ->
+                val nasjonaltPeriodebeløp = sats.avrundetHeltallAvProsent(prosent)
+                AndelTilkjentYtelseForTidslinje(
+                    aktør = søkerAktør,
+                    beløp = nasjonaltPeriodebeløp,
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    sats = sats,
+                    prosent = prosent,
+                )
+            }.tilAndelerTilkjentYtelse(tilkjentYtelse)
 
         if (utvidetAndeler.isEmpty()) {
             throw FunksjonellFeil(

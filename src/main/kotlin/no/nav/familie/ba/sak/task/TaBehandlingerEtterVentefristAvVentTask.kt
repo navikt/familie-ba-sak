@@ -16,7 +16,6 @@ import java.time.LocalDate
     triggerTidVedFeilISekunder = 60,
 )
 class TaBehandlingerEtterVentefristAvVentTask(val settPåVentService: SettPåVentService) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val sakerPåVent = settPåVentService.finnAktiveSettPåVent()
 

@@ -21,7 +21,6 @@ class DokumentControllerTest(
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AbstractSpringIntegrationTest() {
-
     private val mockDokumentGenereringService: DokumentGenereringService = mockk()
     private val mockDokumentService: DokumentService = mockk()
     private val vedtakService: VedtakService = mockk(relaxed = true)

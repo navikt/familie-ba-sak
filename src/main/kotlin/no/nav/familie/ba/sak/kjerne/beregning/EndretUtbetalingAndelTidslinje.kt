@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 class EndretUtbetalingAndelTidslinje(
     private val endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
 ) : Tidslinje<EndretUtbetalingAndel, Måned>() {
-
     override fun lagPerioder(): Collection<Periode<EndretUtbetalingAndel, Måned>> {
         return endretUtbetalingAndeler.map {
             Periode(

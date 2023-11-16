@@ -24,7 +24,6 @@ import org.junit.jupiter.api.TestReporter
 import java.io.File
 
 class BrevperiodeTest {
-
     @Test
     @Disabled("Må sees nøyere på i forbindelse med brevperioder")
     fun test(testReporter: TestReporter) {
@@ -33,93 +32,103 @@ class BrevperiodeTest {
         val sanityBegrunnelser = testSanityKlient.hentBegrunnelserMap()
         val sanityEØSBegrunnelser = testSanityKlient.hentEØSBegrunnelserMap()
 
-        val antallFeil = testmappe.list()?.fold(0) { acc, it ->
+        val antallFeil =
+            testmappe.list()?.fold(0) { acc, it ->
 
-            val fil = File("$testmappe/$it")
+                val fil = File("$testmappe/$it")
 
-            val behandlingsresultatPersonTestConfig =
-                try {
-                    objectMapper.readValue<BrevPeriodeTestConfig>(fil.readText())
-                } catch (e: Exception) {
-                    testReporter.publishEntry("Feil i fil: $it")
-                    testReporter.publishEntry(e.message)
-                    return@fold acc + 1
+                val behandlingsresultatPersonTestConfig =
+                    try {
+                        objectMapper.readValue<BrevPeriodeTestConfig>(fil.readText())
+                    } catch (e: Exception) {
+                        testReporter.publishEntry("Feil i fil: $it")
+                        testReporter.publishEntry(e.message)
+                        return@fold acc + 1
+                    }
+
+                val minimertVedtaksperiode =
+                    MinimertVedtaksperiode(
+                        fom = behandlingsresultatPersonTestConfig.fom,
+                        tom = behandlingsresultatPersonTestConfig.tom,
+                        type = behandlingsresultatPersonTestConfig.vedtaksperiodetype,
+                        begrunnelser =
+                            behandlingsresultatPersonTestConfig
+                                .begrunnelser.map { it.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser) },
+                        fritekster = behandlingsresultatPersonTestConfig.fritekster,
+                        minimerteUtbetalingsperiodeDetaljer =
+                            behandlingsresultatPersonTestConfig
+                                .personerPåBehandling
+                                .flatMap { it.tilUtbetalingsperiodeDetaljer() },
+                        eøsBegrunnelser =
+                            behandlingsresultatPersonTestConfig.eøsBegrunnelser?.map {
+                                EØSBegrunnelseMedTriggere(
+                                    eøsBegrunnelse = it,
+                                    sanityEØSBegrunnelse = sanityEØSBegrunnelser[it]!!,
+                                )
+                            } ?: emptyList(),
+                    )
+
+                val restBehandlingsgrunnlagForBrev =
+                    RestBehandlingsgrunnlagForBrev(
+                        personerPåBehandling = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertPerson() },
+                        minimertePersonResultater = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertePersonResultater() },
+                        minimerteEndredeUtbetalingAndeler = behandlingsresultatPersonTestConfig.personerPåBehandling.flatMap { it.tilMinimerteEndredeUtbetalingAndeler() },
+                        fagsakType = FagsakType.NORMAL,
+                    )
+
+                val brevperiode =
+                    try {
+                        BrevPeriodeGenerator(
+                            minimertVedtaksperiode = minimertVedtaksperiode,
+                            restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
+                            uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
+                            erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
+                            brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
+                            barnMedReduksjonFraForrigeBehandlingIdent =
+                                behandlingsresultatPersonTestConfig.hentBarnMedReduksjonFraForrigeBehandling()
+                                    .map { it.personIdent },
+                            minimerteKompetanserForPeriode =
+                                behandlingsresultatPersonTestConfig.kompetanser?.map {
+                                    it.tilMinimertKompetanse(
+                                        behandlingsresultatPersonTestConfig.personerPåBehandling,
+                                    )
+                                } ?: emptyList(),
+                            minimerteKompetanserSomStopperRettFørPeriode =
+                                behandlingsresultatPersonTestConfig.kompetanserSomStopperRettFørPeriode?.map {
+                                    it.tilMinimertKompetanse(
+                                        behandlingsresultatPersonTestConfig.personerPåBehandling,
+                                    )
+                                } ?: emptyList(),
+                            dødeBarnForrigePeriode = emptyList(),
+                        ).genererBrevPeriode()
+                    } catch (e: Exception) {
+                        testReporter.publishEntry(
+                            "Feil i test: $it" +
+                                "\nFeilmelding: ${e.message}" +
+                                "\nFil: ${e.stackTrace.first()}" +
+                                "\n-----------------------------------\n",
+                        )
+                        return@fold acc + 1
+                    }
+
+                val feil =
+                    erLike(
+                        forventetOutput = behandlingsresultatPersonTestConfig.forventetOutput,
+                        output = brevperiode,
+                    )
+
+                if (feil.isNotEmpty()) {
+                    testReporter.publishEntry(
+                        it,
+                        "${behandlingsresultatPersonTestConfig.beskrivelse}\n\n" +
+                            feil.joinToString("\n\n") +
+                            "\n-----------------------------------\n",
+                    )
+                    acc + 1
+                } else {
+                    acc
                 }
-
-            val minimertVedtaksperiode =
-                MinimertVedtaksperiode(
-                    fom = behandlingsresultatPersonTestConfig.fom,
-                    tom = behandlingsresultatPersonTestConfig.tom,
-                    type = behandlingsresultatPersonTestConfig.vedtaksperiodetype,
-                    begrunnelser = behandlingsresultatPersonTestConfig
-                        .begrunnelser.map { it.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser) },
-                    fritekster = behandlingsresultatPersonTestConfig.fritekster,
-                    minimerteUtbetalingsperiodeDetaljer = behandlingsresultatPersonTestConfig
-                        .personerPåBehandling
-                        .flatMap { it.tilUtbetalingsperiodeDetaljer() },
-                    eøsBegrunnelser = behandlingsresultatPersonTestConfig.eøsBegrunnelser?.map {
-                        EØSBegrunnelseMedTriggere(
-                            eøsBegrunnelse = it,
-                            sanityEØSBegrunnelse = sanityEØSBegrunnelser[it]!!,
-                        )
-                    } ?: emptyList(),
-                )
-
-            val restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
-                personerPåBehandling = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertPerson() },
-                minimertePersonResultater = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertePersonResultater() },
-                minimerteEndredeUtbetalingAndeler = behandlingsresultatPersonTestConfig.personerPåBehandling.flatMap { it.tilMinimerteEndredeUtbetalingAndeler() },
-                fagsakType = FagsakType.NORMAL,
-            )
-
-            val brevperiode = try {
-                BrevPeriodeGenerator(
-                    minimertVedtaksperiode = minimertVedtaksperiode,
-                    restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-                    uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
-                    erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
-                    brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
-                    barnMedReduksjonFraForrigeBehandlingIdent = behandlingsresultatPersonTestConfig.hentBarnMedReduksjonFraForrigeBehandling()
-                        .map { it.personIdent },
-                    minimerteKompetanserForPeriode = behandlingsresultatPersonTestConfig.kompetanser?.map {
-                        it.tilMinimertKompetanse(
-                            behandlingsresultatPersonTestConfig.personerPåBehandling,
-                        )
-                    } ?: emptyList(),
-                    minimerteKompetanserSomStopperRettFørPeriode = behandlingsresultatPersonTestConfig.kompetanserSomStopperRettFørPeriode?.map {
-                        it.tilMinimertKompetanse(
-                            behandlingsresultatPersonTestConfig.personerPåBehandling,
-                        )
-                    } ?: emptyList(),
-                    dødeBarnForrigePeriode = emptyList(),
-                ).genererBrevPeriode()
-            } catch (e: Exception) {
-                testReporter.publishEntry(
-                    "Feil i test: $it" +
-                        "\nFeilmelding: ${e.message}" +
-                        "\nFil: ${e.stackTrace.first()}" +
-                        "\n-----------------------------------\n",
-                )
-                return@fold acc + 1
             }
-
-            val feil = erLike(
-                forventetOutput = behandlingsresultatPersonTestConfig.forventetOutput,
-                output = brevperiode,
-            )
-
-            if (feil.isNotEmpty()) {
-                testReporter.publishEntry(
-                    it,
-                    "${behandlingsresultatPersonTestConfig.beskrivelse}\n\n" +
-                        feil.joinToString("\n\n") +
-                        "\n-----------------------------------\n",
-                )
-                acc + 1
-            } else {
-                acc
-            }
-        }
 
         assert(antallFeil == 0)
     }
@@ -130,7 +139,11 @@ class BrevperiodeTest {
     ): List<String> {
         val feil = mutableListOf<String>()
 
-        fun validerFelt(forventet: String?, faktisk: String?, variabelNavn: String) {
+        fun validerFelt(
+            forventet: String?,
+            faktisk: String?,
+            variabelNavn: String,
+        ) {
             if (forventet != faktisk) {
                 feil.add(
                     "Forventet $variabelNavn var: '$forventet', men fikk '$faktisk'",
@@ -161,14 +174,15 @@ class BrevperiodeTest {
                 "belop",
             )
 
-            val forventedeBegrunnelser = forventetOutput.begrunnelser.map {
-                when (it) {
-                    is BegrunnelseDataTestConfig -> it.tilBegrunnelseData()
-                    is FritekstBegrunnelseTestConfig -> FritekstBegrunnelse(it.fritekst)
-                    is EØSBegrunnelseTestConfig -> it.tilEØSBegrunnelseData()
-                    else -> throw IllegalArgumentException("Ugyldig testconfig")
+            val forventedeBegrunnelser =
+                forventetOutput.begrunnelser.map {
+                    when (it) {
+                        is BegrunnelseDataTestConfig -> it.tilBegrunnelseData()
+                        is FritekstBegrunnelseTestConfig -> FritekstBegrunnelse(it.fritekst)
+                        is EØSBegrunnelseTestConfig -> it.tilEØSBegrunnelseData()
+                        else -> throw IllegalArgumentException("Ugyldig testconfig")
+                    }
                 }
-            }
 
             if (forventedeBegrunnelser.size != output.begrunnelser.size) {
                 feil.add(

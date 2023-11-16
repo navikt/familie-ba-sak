@@ -61,7 +61,6 @@ class AutovedtakSatsendringServiceTest(
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val registrerPersongrunnlag: RegistrerPersongrunnlag,
 ) : AbstractSpringIntegrationTest() {
-
     private lateinit var fagsak: Fagsak
     private lateinit var aktørBarn: Aktør
 
@@ -97,7 +96,6 @@ class AutovedtakSatsendringServiceTest(
 
     @Nested
     inner class ÅpenBehandling {
-
         @Test
         fun `Kan ikke sette åpen behandling på vent når behandlingen akkurat er opprettet`() {
             val behandling = opprettBehandling()
@@ -115,10 +113,11 @@ class AutovedtakSatsendringServiceTest(
             // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
             unmockkObject(SatsTidspunkt)
 
-            val satsendringTaskDto = SatsendringTaskDto(
-                behandling.fagsak.id,
-                YearMonth.of(2023, 3),
-            )
+            val satsendringTaskDto =
+                SatsendringTaskDto(
+                    behandling.fagsak.id,
+                    YearMonth.of(2023, 3),
+                )
             val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
 
             assertThat(satsendringResultat).isEqualTo(SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT)
@@ -142,10 +141,11 @@ class AutovedtakSatsendringServiceTest(
             // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
             unmockkObject(SatsTidspunkt)
 
-            val satsendringTaskDto = SatsendringTaskDto(
-                behandling.fagsak.id,
-                YearMonth.of(2023, 3),
-            )
+            val satsendringTaskDto =
+                SatsendringTaskDto(
+                    behandling.fagsak.id,
+                    YearMonth.of(2023, 3),
+                )
             val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
 
             assertThat(satsendringResultat).isEqualTo(SatsendringSvar.SATSENDRING_KJØRT_OK)
@@ -175,10 +175,11 @@ class AutovedtakSatsendringServiceTest(
             // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
             unmockkObject(SatsTidspunkt)
 
-            val satsendringTaskDto = SatsendringTaskDto(
-                behandling.fagsak.id,
-                YearMonth.of(2023, 3),
-            )
+            val satsendringTaskDto =
+                SatsendringTaskDto(
+                    behandling.fagsak.id,
+                    YearMonth.of(2023, 3),
+                )
             val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
 
             assertThat(satsendringResultat).isEqualTo(SatsendringSvar.SATSENDRING_KJØRT_OK)
@@ -197,16 +198,17 @@ class AutovedtakSatsendringServiceTest(
     }
 
     private fun opprettBehandling(): Behandling {
-        val behandling = behandlingService.opprettBehandling(
-            NyBehandling(
-                fagsakId = fagsak.id,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                søkersIdent = fagsak.aktør.aktivFødselsnummer(),
-            ),
-        )
+        val behandling =
+            behandlingService.opprettBehandling(
+                NyBehandling(
+                    fagsakId = fagsak.id,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    søkersIdent = fagsak.aktør.aktivFødselsnummer(),
+                ),
+            )
         registrerPersongrunnlag.utførStegOgAngiNeste(
             behandling,
             RegistrerPersongrunnlagDTO(fagsak.aktør.aktivFødselsnummer(), listOf(aktørBarn.aktivFødselsnummer())),
@@ -216,23 +218,28 @@ class AutovedtakSatsendringServiceTest(
 
     private fun lagTilkjentAndelOgFerdigstillBehandling(behandling: Behandling) {
         behandling.status = BehandlingStatus.AVSLUTTET
-        val avsluttetSteg = BehandlingStegTilstand(
-            behandling = behandling,
-            behandlingSteg = StegType.BEHANDLING_AVSLUTTET,
-        )
+        val avsluttetSteg =
+            BehandlingStegTilstand(
+                behandling = behandling,
+                behandlingSteg = StegType.BEHANDLING_AVSLUTTET,
+            )
         behandling.behandlingStegTilstand.add(avsluttetSteg)
         with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
-            val andel = lagAndelTilkjentYtelse(
-                fom = YearMonth.of(2021, 1), // Tidspunkt før siste satsendring
-                tom = YearMonth.of(
-                    2026,
-                    5,
-                ), // Tidspunkt etter siste satsendring. Dersom tom er før siste satsendring vil alle testene feile.
-                behandling = behandling,
-                beløp = 10,
-                aktør = aktørBarn,
-                tilkjentYtelse = this,
-            )
+            val andel =
+                lagAndelTilkjentYtelse(
+                    // Tidspunkt før siste satsendring
+                    fom = YearMonth.of(2021, 1),
+                    tom =
+                        YearMonth.of(
+                            2026,
+                            5,
+                        ),
+                    // Tidspunkt etter siste satsendring. Dersom tom er før siste satsendring vil alle testene feile.
+                    behandling = behandling,
+                    beløp = 10,
+                    aktør = aktørBarn,
+                    tilkjentYtelse = this,
+                )
             andelerTilkjentYtelse.add(andel)
             tilkjentYtelseRepository.saveAndFlush(this)
         }

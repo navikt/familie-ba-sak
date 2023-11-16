@@ -9,7 +9,6 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
     val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<S>,
     val endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<S>>,
 ) {
-
     fun hentMedBehandlingId(behandlingId: BehandlingId): Collection<S> {
         return periodeOgBarnSkjemaRepository.finnFraBehandlingId(behandlingId.id)
     }
@@ -18,7 +17,10 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         return periodeOgBarnSkjemaRepository.getReferenceById(id)
     }
 
-    fun endreSkjemaer(behandlingId: BehandlingId, oppdatering: S) {
+    fun endreSkjemaer(
+        behandlingId: BehandlingId,
+        oppdatering: S,
+    ) {
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
 
         val justertOppdatering = oppdatering.somInversOppdateringEllersNull(gjeldendeSkjemaer) ?: oppdatering
@@ -31,7 +33,10 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         )
     }
 
-    fun slettSkjema(behandlingId: BehandlingId, skjemaId: Long) {
+    fun slettSkjema(
+        behandlingId: BehandlingId,
+        skjemaId: Long,
+    ) {
         val skjemaTilSletting = periodeOgBarnSkjemaRepository.getReferenceById(skjemaId)
         feilHvis(skjemaTilSletting.behandlingId != behandlingId.id) {
             "Prøver å slette et skjema som ikke er koblet til behandlingen man sender inn"
@@ -39,17 +44,22 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
         val blanktSkjema = skjemaTilSletting.utenInnhold()
 
-        val oppdaterteKompetanser = gjeldendeSkjemaer.minus(skjemaTilSletting).plus(blanktSkjema)
-            .slåSammen().medBehandlingId(behandlingId)
+        val oppdaterteKompetanser =
+            gjeldendeSkjemaer.minus(skjemaTilSletting).plus(blanktSkjema)
+                .slåSammen().medBehandlingId(behandlingId)
 
         lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeSkjemaer, oppdaterteKompetanser)
     }
 
-    fun kopierOgErstattSkjemaer(fraBehandlingId: BehandlingId, tilBehandlingId: BehandlingId) {
+    fun kopierOgErstattSkjemaer(
+        fraBehandlingId: BehandlingId,
+        tilBehandlingId: BehandlingId,
+    ) {
         val gjeldendeTilSkjemaer = hentMedBehandlingId(tilBehandlingId)
-        val kopiAvFraSkjemaer = hentMedBehandlingId(fraBehandlingId)
-            .map { it.kopier() }
-            .medBehandlingId(tilBehandlingId)
+        val kopiAvFraSkjemaer =
+            hentMedBehandlingId(fraBehandlingId)
+                .map { it.kopier() }
+                .medBehandlingId(tilBehandlingId)
 
         periodeOgBarnSkjemaRepository.deleteAll(gjeldendeTilSkjemaer)
         periodeOgBarnSkjemaRepository.saveAll(kopiAvFraSkjemaer)

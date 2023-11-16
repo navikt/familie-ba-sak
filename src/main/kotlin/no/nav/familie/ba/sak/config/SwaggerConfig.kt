@@ -21,7 +21,6 @@ class SwaggerConfig(
     @Value("\${API_SCOPE}")
     val apiScope: String,
 ) {
-
     @Bean
     fun openApi(): OpenAPI {
         return OpenAPI()

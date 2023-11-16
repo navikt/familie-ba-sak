@@ -12,7 +12,6 @@ import java.time.LocalDate
     JsonSubTypes.Type(value = Opphørsperiode::class, name = "OPPHØR"),
 )
 interface Vedtaksperiode {
-
     val periodeFom: LocalDate?
     val periodeTom: LocalDate?
     val vedtaksperiodetype: Vedtaksperiodetype

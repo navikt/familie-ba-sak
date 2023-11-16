@@ -17,7 +17,6 @@ import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UtvidetVedtaksperiodeMedBegrunnelserTest {
-
     val barn1 = tilfeldigPerson(personType = PersonType.BARN)
     val barn2 = tilfeldigPerson(personType = PersonType.BARN)
     val barn3 = tilfeldigPerson(personType = PersonType.BARN)
@@ -27,53 +26,57 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
     fun `Skal kun legge på utbetalingsdetaljer som gjelder riktig andeler tilkjent ytelse for fortsatt innvilget`() {
         val behandling = lagBehandling()
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
-            søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
-            søkerAktør = søker.aktør,
-            barnAktør = listOf(barn1.aktør, barn2.aktør),
-        )
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
+                søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
+                søkerAktør = søker.aktør,
+                barnAktør = listOf(barn1.aktør, barn2.aktør),
+            )
 
         val fom = YearMonth.of(2018, 6)
         val tom = YearMonth.of(2018, 8)
 
-        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
-            behandlingId = behandling.id,
-            fom = fom,
-            tom = tom,
-            person = barn2,
-        )
-
-        val andelerTilkjentYtelse = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                behandling = behandling,
-                endretUtbetalingAndeler = emptyList(),
-                fom = fom.minusMonths(2),
-                tom = tom,
-                person = barn1,
-            ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                behandling = behandling,
-                endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
+        val endretUtbetalingAndel =
+            lagEndretUtbetalingAndel(
+                behandlingId = behandling.id,
                 fom = fom,
                 tom = tom,
                 person = barn2,
-            ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                behandling = behandling,
-                endretUtbetalingAndeler = emptyList(),
-                fom = tom.plusMonths(1),
-                tom = tom.plusMonths(3),
-                person = barn1,
-            ),
-        )
+            )
 
-        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
-            fom = null,
-            tom = null,
-            type = Vedtaksperiodetype.FORTSATT_INNVILGET,
-        )
+        val andelerTilkjentYtelse =
+            listOf(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    behandling = behandling,
+                    endretUtbetalingAndeler = emptyList(),
+                    fom = fom.minusMonths(2),
+                    tom = tom,
+                    person = barn1,
+                ),
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    behandling = behandling,
+                    endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
+                    fom = fom,
+                    tom = tom,
+                    person = barn2,
+                ),
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    behandling = behandling,
+                    endretUtbetalingAndeler = emptyList(),
+                    fom = tom.plusMonths(1),
+                    tom = tom.plusMonths(3),
+                    person = barn1,
+                ),
+            )
+
+        val vedtaksperiodeMedBegrunnelser =
+            lagVedtaksperiodeMedBegrunnelser(
+                fom = null,
+                tom = null,
+                type = Vedtaksperiodetype.FORTSATT_INNVILGET,
+            )
 
         val utvidetVedtaksperiodeMedBegrunnelser =
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(

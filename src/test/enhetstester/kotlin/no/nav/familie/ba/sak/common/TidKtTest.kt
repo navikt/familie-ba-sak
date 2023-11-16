@@ -6,7 +6,6 @@ import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 
 internal class TidKtTest {
-
     @Test
     fun `Test YearMonth range over flere måneder`() {
         assertEquals(4, (YearMonth.of(2021, 1)..YearMonth.of(2021, 4)).toList().size)

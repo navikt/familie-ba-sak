@@ -38,7 +38,6 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 class VilkårsvurderingStegTest {
-
     private val vilkårService: VilkårService = mockk()
     private val beregningService: BeregningService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
@@ -48,35 +47,39 @@ class VilkårsvurderingStegTest {
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService = mockk()
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService = mockk()
 
-    private val vilkårsvurderingSteg: VilkårsvurderingSteg = VilkårsvurderingSteg(
-        behandlingHentOgPersisterService,
-        behandlingstemaService,
-        vilkårService,
-        beregningService,
-        persongrunnlagService,
-        tilbakestillBehandlingService,
-        tilpassKompetanserTilRegelverkService,
-        vilkårsvurderingForNyBehandlingService,
-    )
+    private val vilkårsvurderingSteg: VilkårsvurderingSteg =
+        VilkårsvurderingSteg(
+            behandlingHentOgPersisterService,
+            behandlingstemaService,
+            vilkårService,
+            beregningService,
+            persongrunnlagService,
+            tilbakestillBehandlingService,
+            tilpassKompetanserTilRegelverkService,
+            vilkårsvurderingForNyBehandlingService,
+        )
 
-    val behandling = lagBehandling(
-        behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-        årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-    )
+    val behandling =
+        lagBehandling(
+            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+        )
     val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(1984, 1, 1))
     val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 1, 1))
 
     @BeforeEach
     fun setup() {
-        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
-            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
-        )
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
+                barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
+            )
         every { tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling) } returns Unit
-        every { beregningService.genererTilkjentYtelseFraVilkårsvurdering(any(), any()) } returns lagInitiellTilkjentYtelse(
-            behandling,
-        )
+        every { beregningService.genererTilkjentYtelseFraVilkårsvurdering(any(), any()) } returns
+            lagInitiellTilkjentYtelse(
+                behandling,
+            )
 
         every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
     }
@@ -84,26 +87,28 @@ class VilkårsvurderingStegTest {
     @Test
     fun `skal fortsette til neste steg når helmanuell migreringsbehandling har del bosted`() {
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
-        val søkerPersonResultat = lagPersonResultat(
-            vilkårsvurdering = vikårsvurdering,
-            person = søker,
-            resultat = Resultat.OPPFYLT,
-            periodeFom = søker.fødselsdato,
-            periodeTom = LocalDate.now(),
-            lagFullstendigVilkårResultat = true,
-            personType = PersonType.SØKER,
-            erDeltBosted = false,
-        )
-        val barnPersonResultat = lagPersonResultat(
-            vilkårsvurdering = vikårsvurdering,
-            person = barn,
-            resultat = Resultat.OPPFYLT,
-            periodeFom = barn.fødselsdato,
-            periodeTom = LocalDate.now(),
-            lagFullstendigVilkårResultat = true,
-            personType = PersonType.BARN,
-            erDeltBosted = true,
-        )
+        val søkerPersonResultat =
+            lagPersonResultat(
+                vilkårsvurdering = vikårsvurdering,
+                person = søker,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = søker.fødselsdato,
+                periodeTom = LocalDate.now(),
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.SØKER,
+                erDeltBosted = false,
+            )
+        val barnPersonResultat =
+            lagPersonResultat(
+                vilkårsvurdering = vikårsvurdering,
+                person = barn,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = barn.fødselsdato,
+                periodeTom = LocalDate.now(),
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.BARN,
+                erDeltBosted = true,
+            )
         vikårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
         every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurdering
 
@@ -117,13 +122,14 @@ class VilkårsvurderingStegTest {
 
         val behandling = lagBehandling()
 
-        val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>(behandling)
-            .forPerson(søker, MånedTidspunkt.nå())
-            .medVilkår("N>", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)
-            .forPerson(barn1, barn1.fødselsdato.tilMånedTidspunkt())
-            .medVilkår("+>", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
-            .medVilkår("N>", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
-            .byggPerson()
+        val vilkårsvurderingBygger =
+            VilkårsvurderingBuilder<Måned>(behandling)
+                .forPerson(søker, MånedTidspunkt.nå())
+                .medVilkår("N>", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)
+                .forPerson(barn1, barn1.fødselsdato.tilMånedTidspunkt())
+                .medVilkår("+>", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
+                .medVilkår("N>", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
+                .byggPerson()
 
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
         val søkerOgBarnPåBehandling = listOf(søker.tilPersonEnkel(), barn1.tilPersonEnkel())
@@ -141,15 +147,16 @@ class VilkårsvurderingStegTest {
 
         val behandling = lagBehandling()
 
-        val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>(behandling)
-            .forPerson(søker, MånedTidspunkt.nå())
-            .medVilkår("EEEEEEEEEEEEE", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)
-            .forPerson(barn1, MånedTidspunkt.nå())
-            .medVilkår("+++++++++++++", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
-            .medVilkår("   EEEENNNNEE", Vilkår.BOSATT_I_RIKET)
-            .medVilkår("     EEENNEEE", Vilkår.LOVLIG_OPPHOLD)
-            .medVilkår("NNNNNNNNNNEEE", Vilkår.BOR_MED_SØKER)
-            .byggPerson()
+        val vilkårsvurderingBygger =
+            VilkårsvurderingBuilder<Måned>(behandling)
+                .forPerson(søker, MånedTidspunkt.nå())
+                .medVilkår("EEEEEEEEEEEEE", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)
+                .forPerson(barn1, MånedTidspunkt.nå())
+                .medVilkår("+++++++++++++", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
+                .medVilkår("   EEEENNNNEE", Vilkår.BOSATT_I_RIKET)
+                .medVilkår("     EEENNEEE", Vilkår.LOVLIG_OPPHOLD)
+                .medVilkår("NNNNNNNNNNEEE", Vilkår.BOR_MED_SØKER)
+                .byggPerson()
 
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
         val søkerOgBarnPåBehandling = listOf(søker.tilPersonEnkel(), barn1.tilPersonEnkel())

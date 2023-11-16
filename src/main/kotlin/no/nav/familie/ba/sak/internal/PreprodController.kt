@@ -21,9 +21,10 @@ class PreprodController(
     private val tilgangService: TilgangService,
     private val environment: Environment,
 ) {
-
     @PutMapping(path = ["/{behandlingId}/fyll-ut-vilkarsvurdering"])
-    fun settFomPåTommeVilkårTilFødselsdato(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<String>> {
+    fun settFomPåTommeVilkårTilFødselsdato(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<String>> {
         val erProd = environment.activeProfiles.any { it == Profil.Prod.navn.trim() }
         val erDevPostgresPreprod = environment.activeProfiles.any { it == Profil.DevPostgresPreprod.navn.trim() }
         val erPreprod = environment.activeProfiles.any { it == Profil.Preprod.navn.trim() }

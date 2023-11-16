@@ -38,7 +38,6 @@ import org.springframework.web.client.RestTemplate
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
-
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService
 
@@ -106,7 +105,6 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
     }
 
     companion object {
-
         const val DEFAULT_ISSUER_ID = "azuread"
         const val DEFAULT_SUBJECT = "subject"
         const val DEFAULT_AUDIENCE = "some-audience"

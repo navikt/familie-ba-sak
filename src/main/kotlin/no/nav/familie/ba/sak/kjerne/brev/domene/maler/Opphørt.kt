@@ -6,7 +6,6 @@ data class Opphørt(
     override val mal: Brevmal,
     override val data: OpphørtData,
 ) : Vedtaksbrev {
-
     constructor(
         mal: Brevmal = Brevmal.VEDTAK_OPPHØRT,
         vedtakFellesfelter: VedtakFellesfelter,
@@ -14,25 +13,29 @@ data class Opphørt(
     ) :
         this(
             mal = mal,
-            data = OpphørtData(
-                delmalData = OpphørtData.Delmaler(
-                    signaturVedtak = SignaturVedtak(
-                        enhet = vedtakFellesfelter.enhet,
-                        saksbehandler = vedtakFellesfelter.saksbehandler,
-                        beslutter = vedtakFellesfelter.beslutter,
-                    ),
-                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
-                    feilutbetaling = erFeilutbetalingPåBehandling,
-                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
+            data =
+                OpphørtData(
+                    delmalData =
+                        OpphørtData.Delmaler(
+                            signaturVedtak =
+                                SignaturVedtak(
+                                    enhet = vedtakFellesfelter.enhet,
+                                    saksbehandler = vedtakFellesfelter.saksbehandler,
+                                    beslutter = vedtakFellesfelter.beslutter,
+                                ),
+                            hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                            feilutbetaling = erFeilutbetalingPåBehandling,
+                            korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
+                        ),
+                    flettefelter =
+                        FlettefelterForDokumentImpl(
+                            navn = vedtakFellesfelter.søkerNavn,
+                            fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
+                            organisasjonsnummer = vedtakFellesfelter.organisasjonsnummer,
+                            gjelder = vedtakFellesfelter.gjelder,
+                        ),
+                    perioder = vedtakFellesfelter.perioder,
                 ),
-                flettefelter = FlettefelterForDokumentImpl(
-                    navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
-                    organisasjonsnummer = vedtakFellesfelter.organisasjonsnummer,
-                    gjelder = vedtakFellesfelter.gjelder,
-                ),
-                perioder = vedtakFellesfelter.perioder,
-            ),
         )
 }
 
@@ -41,7 +44,6 @@ data class OpphørtData(
     override val flettefelter: FlettefelterForDokumentImpl,
     override val perioder: List<BrevPeriode>,
 ) : VedtaksbrevData {
-
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
         val feilutbetaling: Boolean,

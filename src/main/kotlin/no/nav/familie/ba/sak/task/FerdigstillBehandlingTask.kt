@@ -20,33 +20,37 @@ class FerdigstillBehandlingTask(
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     val stegService: StegService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val ferdigstillBehandling = objectMapper.readValue(task.payload, FerdigstillBehandlingDTO::class.java)
         stegService.håndterFerdigstillBehandling(
-            behandling = behandlingHentOgPersisterService.hent(
-                ferdigstillBehandling.behandlingsId,
-            ),
+            behandling =
+                behandlingHentOgPersisterService.hent(
+                    ferdigstillBehandling.behandlingsId,
+                ),
         )
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "ferdigstillBehandling"
 
-        fun opprettTask(søkerIdent: String, behandlingsId: Long): Task {
+        fun opprettTask(
+            søkerIdent: String,
+            behandlingsId: Long,
+        ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(
-                    FerdigstillBehandlingDTO(
-                        personIdent = søkerIdent,
-                        behandlingsId = behandlingsId,
+                payload =
+                    objectMapper.writeValueAsString(
+                        FerdigstillBehandlingDTO(
+                            personIdent = søkerIdent,
+                            behandlingsId = behandlingsId,
+                        ),
                     ),
-                ),
-                properties = Properties().apply {
-                    this["personIdent"] = søkerIdent
-                    this["behandlingsId"] = behandlingsId.toString()
-                },
+                properties =
+                    Properties().apply {
+                        this["personIdent"] = søkerIdent
+                        this["behandlingsId"] = behandlingsId.toString()
+                    },
             )
         }
     }

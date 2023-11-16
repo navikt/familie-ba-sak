@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 
 object SikkerhetContext {
-
     const val SYSTEM_FORKORTELSE = "VL"
     const val SYSTEM_NAVN = "System"
 

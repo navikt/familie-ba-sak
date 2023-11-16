@@ -20,19 +20,18 @@ import java.time.LocalDate
 class OpprettVurderFødselshendelseKonsekvensForYtelseOppgave(
     private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO = objectMapper.readValue(task.payload, OpprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO::class.java)
-        task.metadata["oppgaveId"] = oppgaveService.opprettOppgaveForFødselshendelse(
-            ident = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.ident,
-            oppgavetype = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.oppgavetype,
-            fristForFerdigstillelse = LocalDate.now(),
-            beskrivelse = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.beskrivelse,
-        )
+        task.metadata["oppgaveId"] =
+            oppgaveService.opprettOppgaveForFødselshendelse(
+                ident = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.ident,
+                oppgavetype = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.oppgavetype,
+                fristForFerdigstillelse = LocalDate.now(),
+                beskrivelse = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.beskrivelse,
+            )
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "opprettVurderFødselshendelseKonsekvensForYtelseOppgave"
 
         fun opprettTask(
@@ -42,13 +41,14 @@ class OpprettVurderFødselshendelseKonsekvensForYtelseOppgave(
         ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(
-                    OpprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO(
-                        ident,
-                        oppgavetype,
-                        beskrivelse,
+                payload =
+                    objectMapper.writeValueAsString(
+                        OpprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO(
+                            ident,
+                            oppgavetype,
+                            beskrivelse,
+                        ),
                     ),
-                ),
             )
         }
     }

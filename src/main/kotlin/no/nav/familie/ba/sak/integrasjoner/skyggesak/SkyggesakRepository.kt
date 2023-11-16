@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface SkyggesakRepository : JpaRepository<Skyggesak, Long> {
-
     @Query(value = "SELECT s FROM Skyggesak s WHERE s.sendtTidspunkt IS NULL")
     fun finnSkyggesakerKlareForSending(page: Pageable): List<Skyggesak>
 

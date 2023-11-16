@@ -11,34 +11,39 @@ import org.springframework.transaction.annotation.Transactional
 class RefusjonEøsService(
     @Autowired
     private val refusjonEøsRepository: RefusjonEøsRepository,
-
     @Autowired
     private val loggService: LoggService,
 ) {
-
     private fun hentRefusjonEøs(id: Long): RefusjonEøs {
         return refusjonEøsRepository.finnRefusjonEøs(id)
             ?: throw Feil("Finner ikke refusjon eøs med id=$id")
     }
 
     @Transactional
-    fun leggTilRefusjonEøsPeriode(refusjonEøs: RestRefusjonEøs, behandlingId: Long): Long {
-        val lagretPeriode = refusjonEøsRepository.save(
-            RefusjonEøs(
-                behandlingId = behandlingId,
-                fom = refusjonEøs.fom,
-                tom = refusjonEøs.tom,
-                refusjonsbeløp = refusjonEøs.refusjonsbeløp,
-                land = refusjonEøs.land,
-                refusjonAvklart = refusjonEøs.refusjonAvklart,
-            ),
-        )
+    fun leggTilRefusjonEøsPeriode(
+        refusjonEøs: RestRefusjonEøs,
+        behandlingId: Long,
+    ): Long {
+        val lagretPeriode =
+            refusjonEøsRepository.save(
+                RefusjonEøs(
+                    behandlingId = behandlingId,
+                    fom = refusjonEøs.fom,
+                    tom = refusjonEøs.tom,
+                    refusjonsbeløp = refusjonEøs.refusjonsbeløp,
+                    land = refusjonEøs.land,
+                    refusjonAvklart = refusjonEøs.refusjonAvklart,
+                ),
+            )
         loggService.loggRefusjonEøsPeriodeLagtTil(refusjonEøs = lagretPeriode)
         return lagretPeriode.id
     }
 
     @Transactional
-    fun fjernRefusjonEøsPeriode(id: Long, behandlingId: Long) {
+    fun fjernRefusjonEøsPeriode(
+        id: Long,
+        behandlingId: Long,
+    ) {
         loggService.loggRefusjonEøsPeriodeFjernet(
             refusjonEøs = hentRefusjonEøs(id),
         )
@@ -60,7 +65,10 @@ class RefusjonEøsService(
         )
 
     @Transactional
-    fun oppdaterRefusjonEøsPeriode(restRefusjonEøs: RestRefusjonEøs, id: Long) {
+    fun oppdaterRefusjonEøsPeriode(
+        restRefusjonEøs: RestRefusjonEøs,
+        id: Long,
+    ) {
         val refusjonEøs = hentRefusjonEøs(id)
 
         refusjonEøs.fom = restRefusjonEøs.fom

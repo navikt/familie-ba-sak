@@ -25,27 +25,27 @@ class KlageServiceTest {
     val fagsakService = mockk<FagsakService>()
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     val stegService = mockk<StegService>()
-    val klageService = KlageService(
-        fagsakService = fagsakService,
-        klageClient = mockk(),
-        integrasjonClient = mockk(),
-        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-        stegService = stegService,
-        vedtakService = mockk(),
-        tilbakekrevingKlient = mockk(),
-
-    )
+    val klageService =
+        KlageService(
+            fagsakService = fagsakService,
+            klageClient = mockk(),
+            integrasjonClient = mockk(),
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            stegService = stegService,
+            vedtakService = mockk(),
+            tilbakekrevingKlient = mockk(),
+        )
 
     @Nested
     inner class KanOppretteRevurdering {
-
         @Test
         internal fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {
             every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns false
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling(
-                status = BehandlingStatus.AVSLUTTET,
-            )
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns
+                lagBehandling(
+                    status = BehandlingStatus.AVSLUTTET,
+                )
 
             val result = klageService.kanOppretteRevurdering(0L)
 
@@ -57,9 +57,10 @@ class KlageServiceTest {
         internal fun `kan ikke opprette revurdering hvis det finnes åpen behandling`() {
             every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns true
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling(
-                status = BehandlingStatus.UTREDES,
-            )
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns
+                lagBehandling(
+                    status = BehandlingStatus.UTREDES,
+                )
 
             val result = klageService.kanOppretteRevurdering(0L)
 
@@ -82,34 +83,35 @@ class KlageServiceTest {
 
     @Nested
     inner class OpprettRevurderingKlage {
-
         @Test
         internal fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {
             val aktør = randomAktør()
             val fagsak = Fagsak(aktør = aktør)
-            val forrigeBehandling = lagBehandling(
-                behandlingKategori = BehandlingKategori.EØS,
-                underkategori = BehandlingUnderkategori.UTVIDET,
-                fagsak = fagsak,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                årsak = BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
-                status = BehandlingStatus.AVSLUTTET,
-            )
+            val forrigeBehandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.EØS,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
+                    status = BehandlingStatus.AVSLUTTET,
+                )
 
             every { fagsakService.hentPåFagsakId(any()) } returns fagsak
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns false
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns forrigeBehandling
 
-            val nyBehandling = NyBehandling(
-                kategori = forrigeBehandling.kategori,
-                underkategori = forrigeBehandling.underkategori,
-                søkersIdent = forrigeBehandling.fagsak.aktør.aktivFødselsnummer(),
-                behandlingType = BehandlingType.REVURDERING,
-                behandlingÅrsak = BehandlingÅrsak.KLAGE,
-                navIdent = SikkerhetContext.hentSaksbehandler(),
-                barnasIdenter = emptyList(),
-                fagsakId = forrigeBehandling.fagsak.id,
-            )
+            val nyBehandling =
+                NyBehandling(
+                    kategori = forrigeBehandling.kategori,
+                    underkategori = forrigeBehandling.underkategori,
+                    søkersIdent = forrigeBehandling.fagsak.aktør.aktivFødselsnummer(),
+                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingÅrsak = BehandlingÅrsak.KLAGE,
+                    navIdent = SikkerhetContext.hentSaksbehandler(),
+                    barnasIdenter = emptyList(),
+                    fagsakId = forrigeBehandling.fagsak.id,
+                )
 
             klageService.validerOgOpprettRevurderingKlage(fagsak.id)
 
@@ -120,9 +122,10 @@ class KlageServiceTest {
         internal fun `kan ikke opprette revurdering hvis det finnes åpen behandling`() {
             every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns true
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling(
-                status = BehandlingStatus.UTREDES,
-            )
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns
+                lagBehandling(
+                    status = BehandlingStatus.UTREDES,
+                )
 
             val result = klageService.validerOgOpprettRevurderingKlage(0L)
 

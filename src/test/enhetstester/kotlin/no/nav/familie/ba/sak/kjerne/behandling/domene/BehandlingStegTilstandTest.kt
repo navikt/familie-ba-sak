@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class BehandlingStegTilstandTest {
-
     @Test
     fun `Verifiser at siste steg får status IKKE_UTFØRT`() {
         val behandling = opprettBehandling()

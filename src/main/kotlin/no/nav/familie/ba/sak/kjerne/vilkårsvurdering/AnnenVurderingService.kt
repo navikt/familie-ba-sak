@@ -13,15 +13,18 @@ import org.springframework.transaction.annotation.Transactional
 class AnnenVurderingService(
     private val annenVurderingRepository: AnnenVurderingRepository,
 ) {
-
-    fun hent(personResultat: PersonResultat, annenVurderingType: AnnenVurderingType): AnnenVurdering? =
+    fun hent(
+        personResultat: PersonResultat,
+        annenVurderingType: AnnenVurderingType,
+    ): AnnenVurdering? =
         annenVurderingRepository.findBy(
             personResultat = personResultat,
             type = annenVurderingType,
         )
 
-    fun hent(annenVurderingId: Long): AnnenVurdering = annenVurderingRepository.findById(annenVurderingId)
-        .orElseThrow { error("Annen vurdering med id $annenVurderingId finnes ikke i db") }
+    fun hent(annenVurderingId: Long): AnnenVurdering =
+        annenVurderingRepository.findById(annenVurderingId)
+            .orElseThrow { error("Annen vurdering med id $annenVurderingId finnes ikke i db") }
 
     @Transactional
     fun endreAnnenVurdering(

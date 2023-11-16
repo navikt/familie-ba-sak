@@ -16,9 +16,10 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtakOmOvergangsstønadController(private val taskRepository: TaskRepositoryWrapper) {
-
     @PostMapping
-    fun håndterVedtakOmOvergangsstønad(@RequestBody personIdent: Personident): Ressurs<String> {
+    fun håndterVedtakOmOvergangsstønad(
+        @RequestBody personIdent: Personident,
+    ): Ressurs<String> {
         taskRepository.save(VedtakOmOvergangsstønadTask.opprettTask(personIdent.ident))
         return Ressurs.success("Ok", "Ok")
     }

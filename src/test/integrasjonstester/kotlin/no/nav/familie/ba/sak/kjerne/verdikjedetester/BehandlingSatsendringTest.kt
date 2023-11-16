@@ -55,7 +55,6 @@ class BehandlingSatsendringTest(
     @Autowired private val satskjøringRepository: SatskjøringRepository,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
-
     @BeforeEach
     fun setUp() {
         mockkObject(SatsTidspunkt)
@@ -93,9 +92,10 @@ class BehandlingSatsendringTest(
         val satsendingsvedtak = vedtakService.hentAktivForBehandling(behandlingId = satsendringBehandling!!.id)
         assertNull(satsendingsvedtak!!.stønadBrevPdF)
 
-        val aty = andelTilkjentYtelseMedEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-            satsendringBehandling.id,
-        )
+        val aty =
+            andelTilkjentYtelseMedEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
+                satsendringBehandling.id,
+            )
 
         val atyMedSenesteTilleggOrbaSats =
             aty.first { it.type == YtelseType.ORDINÆR_BARNETRYGD && it.stønadFom == YearMonth.of(2023, 7) }
@@ -128,46 +128,53 @@ class BehandlingSatsendringTest(
             .isCloseTo(LocalDateTime.now(), Assertions.within(30, ChronoUnit.SECONDS))
     }
 
-    private val matrikkeladresse = Matrikkeladresse(
-        matrikkelId = 123L,
-        bruksenhetsnummer = "H301",
-        tilleggsnavn = "navn",
-        postnummer = "0202",
-        kommunenummer = "2231",
-    )
-    private val restScenario = RestScenario(
-        søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(
-            bostedsadresser = mutableListOf(
-                Bostedsadresse(
-                    angittFlyttedato = LocalDate.now().minusYears(10),
-                    gyldigTilOgMed = null,
-                    matrikkeladresse = matrikkeladresse,
+    private val matrikkeladresse =
+        Matrikkeladresse(
+            matrikkelId = 123L,
+            bruksenhetsnummer = "H301",
+            tilleggsnavn = "navn",
+            postnummer = "0202",
+            kommunenummer = "2231",
+        )
+    private val restScenario =
+        RestScenario(
+            søker =
+                RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(
+                    bostedsadresser =
+                        mutableListOf(
+                            Bostedsadresse(
+                                angittFlyttedato = LocalDate.now().minusYears(10),
+                                gyldigTilOgMed = null,
+                                matrikkeladresse = matrikkeladresse,
+                            ),
+                        ),
                 ),
-            ),
-        ),
-        barna = listOf(
-            RestScenarioPerson(
-                fødselsdato = LocalDate.of(2023, 1, 1).toString(),
-                fornavn = "Barn",
-                etternavn = "Barnesen",
-            ).copy(
-                bostedsadresser = mutableListOf(
-                    Bostedsadresse(
-                        angittFlyttedato = LocalDate.now().minusYears(6),
-                        gyldigTilOgMed = null,
-                        matrikkeladresse = matrikkeladresse,
+            barna =
+                listOf(
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.of(2023, 1, 1).toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen",
+                    ).copy(
+                        bostedsadresser =
+                            mutableListOf(
+                                Bostedsadresse(
+                                    angittFlyttedato = LocalDate.now().minusYears(6),
+                                    gyldigTilOgMed = null,
+                                    matrikkeladresse = matrikkeladresse,
+                                ),
+                            ),
                     ),
                 ),
-            ),
-        ),
-    )
+        )
 
     private fun opprettBehandling(scenario: RestScenario) =
         behandleFødselshendelse(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!),
-            ),
+            nyBehandlingHendelse =
+                NyBehandlingHendelse(
+                    morsIdent = scenario.søker.ident!!,
+                    barnasIdenter = listOf(scenario.barna.first().ident!!),
+                ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,

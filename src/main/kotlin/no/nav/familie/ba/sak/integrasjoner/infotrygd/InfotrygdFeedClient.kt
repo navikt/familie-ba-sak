@@ -23,7 +23,6 @@ class InfotrygdFeedClient(
     @Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") private val clientUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "infotrygd_feed") {
-
     fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) {
         return try {
             sendFeedTilInfotrygd(
@@ -69,12 +68,14 @@ class InfotrygdFeedClient(
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
-    private fun sendFeedTilInfotrygd(endpoint: URI, feed: Any) {
+    private fun sendFeedTilInfotrygd(
+        endpoint: URI,
+        feed: Any,
+    ) {
         postForEntity<Ressurs<String>>(endpoint, feed)
     }
 
     companion object {
-
         private val logger: Logger = LoggerFactory.getLogger(InfotrygdFeedClient::class.java)
     }
 }

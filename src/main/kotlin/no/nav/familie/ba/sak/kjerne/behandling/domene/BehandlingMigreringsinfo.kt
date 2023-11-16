@@ -25,11 +25,8 @@ data class BehandlingMigreringsinfo(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandling: Behandling,
-
     val migreringsdato: LocalDate,
-
 ) : BaseEntitet()

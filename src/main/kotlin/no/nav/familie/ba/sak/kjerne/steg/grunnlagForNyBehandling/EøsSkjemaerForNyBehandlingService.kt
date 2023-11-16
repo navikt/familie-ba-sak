@@ -12,8 +12,10 @@ class EøsSkjemaerForNyBehandlingService(
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
     private val valutakursService: ValutakursService,
 ) {
-
-    fun kopierEøsSkjemaer(behandlingId: BehandlingId, forrigeBehandlingSomErVedtattId: BehandlingId?) {
+    fun kopierEøsSkjemaer(
+        behandlingId: BehandlingId,
+        forrigeBehandlingSomErVedtattId: BehandlingId?,
+    ) {
         if (forrigeBehandlingSomErVedtattId != null) {
             kompetanseService.kopierOgErstattKompetanser(
                 fraBehandlingId = forrigeBehandlingSomErVedtattId,

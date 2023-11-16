@@ -23,25 +23,28 @@ data class RestOppdaterJournalpost(
     val navIdent: String,
 ) {
     fun oppdaterMedDokumentOgSak(sak: Sak): OppdaterJournalpostRequest {
-        val dokument = DokumentInfo(
-            dokumentInfoId = this.dokumentInfoId,
-            tittel = this.dokumentTittel,
-            brevkode = null,
-            dokumentstatus = Dokumentstatus.FERDIGSTILT,
-            dokumentvarianter = null,
-            logiskeVedlegg = null,
-        )
+        val dokument =
+            DokumentInfo(
+                dokumentInfoId = this.dokumentInfoId,
+                tittel = this.dokumentTittel,
+                brevkode = null,
+                dokumentstatus = Dokumentstatus.FERDIGSTILT,
+                dokumentvarianter = null,
+                logiskeVedlegg = null,
+            )
 
         return OppdaterJournalpostRequest(
-            avsenderMottaker = AvsenderMottaker(
-                id = this.avsender.id,
-                idType = if (this.avsender.id != "") BrukerIdType.FNR else null,
-                navn = this.avsender.navn,
-            ),
-            bruker = Bruker(
-                this.bruker.id,
-                navn = this.bruker.navn,
-            ),
+            avsenderMottaker =
+                AvsenderMottaker(
+                    id = this.avsender.id,
+                    idType = if (this.avsender.id != "") BrukerIdType.FNR else null,
+                    navn = this.avsender.navn,
+                ),
+            bruker =
+                Bruker(
+                    this.bruker.id,
+                    navn = this.bruker.navn,
+                ),
             sak = sak,
             tittel = this.dokumentTittel,
             dokumenter = listOf(dokument),

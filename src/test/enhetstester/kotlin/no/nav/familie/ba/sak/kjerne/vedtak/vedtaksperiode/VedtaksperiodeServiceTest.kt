@@ -41,47 +41,51 @@ class VedtaksperiodeServiceTest {
     private val refusjonEøsRepository = mockk<RefusjonEøsRepository>()
     private val integrasjonClient = mockk<IntegrasjonClient>()
 
-    private val vedtaksperiodeService = spyk(
-        VedtaksperiodeService(
-            personidentService = mockk(),
-            persongrunnlagService = persongrunnlagService,
-            andelTilkjentYtelseRepository = mockk(),
-            vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
-            vedtakRepository = mockk(),
-            vilkårsvurderingService = mockk(relaxed = true),
-            sanityService = mockk(),
-            søknadGrunnlagService = mockk(relaxed = true),
-            endretUtbetalingAndelRepository = mockk(),
-            kompetanseRepository = mockk(),
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            feilutbetaltValutaRepository = feilutbetaltValutaRepository,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            småbarnstilleggService = småbarnstilleggService,
-            refusjonEøsRepository = refusjonEøsRepository,
-            integrasjonClient = integrasjonClient,
-            valutakursRepository = mockk(),
-            utenlandskPeriodebeløpRepository = mockk(),
-        ),
-    )
+    private val vedtaksperiodeService =
+        spyk(
+            VedtaksperiodeService(
+                personidentService = mockk(),
+                persongrunnlagService = persongrunnlagService,
+                andelTilkjentYtelseRepository = mockk(),
+                vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
+                vedtakRepository = mockk(),
+                vilkårsvurderingService = mockk(relaxed = true),
+                sanityService = mockk(),
+                søknadGrunnlagService = mockk(relaxed = true),
+                endretUtbetalingAndelRepository = mockk(),
+                kompetanseRepository = mockk(),
+                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+                feilutbetaltValutaRepository = feilutbetaltValutaRepository,
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                småbarnstilleggService = småbarnstilleggService,
+                refusjonEøsRepository = refusjonEøsRepository,
+                integrasjonClient = integrasjonClient,
+                valutakursRepository = mockk(),
+                utenlandskPeriodebeløpRepository = mockk(),
+            ),
+        )
 
     private val person = lagPerson()
-    private val forrigeBehandling = lagBehandling().also {
-        it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, StegType.BEHANDLING_AVSLUTTET))
-    }
+    private val forrigeBehandling =
+        lagBehandling().also {
+            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, StegType.BEHANDLING_AVSLUTTET))
+        }
     private val behandling = lagBehandling(fagsak = forrigeBehandling.fagsak)
     private val vedtak = lagVedtak(behandling)
 
     private val endringstidspunkt = LocalDate.of(2022, 11, 1)
-    private val ytelseOpphørtFørEndringstidspunkt = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-        fom = YearMonth.from(endringstidspunkt).minusMonths(3),
-        tom = YearMonth.from(endringstidspunkt).minusMonths(2),
-        person = person,
-    )
-    private val ytelseOpphørtSammeMåned = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-        fom = YearMonth.from(endringstidspunkt),
-        tom = YearMonth.from(endringstidspunkt).plusYears(18),
-        person = person,
-    )
+    private val ytelseOpphørtFørEndringstidspunkt =
+        lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            fom = YearMonth.from(endringstidspunkt).minusMonths(3),
+            tom = YearMonth.from(endringstidspunkt).minusMonths(2),
+            person = person,
+        )
+    private val ytelseOpphørtSammeMåned =
+        lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            fom = YearMonth.from(endringstidspunkt),
+            tom = YearMonth.from(endringstidspunkt).plusYears(18),
+            person = person,
+        )
 
     @BeforeEach
     fun init() {
@@ -119,44 +123,49 @@ class VedtaksperiodeServiceTest {
     @Test
     fun `EØS med periode med utløpt tom skal ikke ha årlig kontroll`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
-        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
-            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = LocalDate.now()),
-        )
+        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns
+            listOf(
+                lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = LocalDate.now()),
+            )
         assertFalse { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
     @Test
     fun `EØS med periode med løpende tom skal ha årlig kontroll`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
-        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
-            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = LocalDate.now().plusMonths(1)),
-        )
+        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns
+            listOf(
+                lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = LocalDate.now().plusMonths(1)),
+            )
         assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
     @Test
     fun `EØS med periode uten tom skal ha årlig kontroll`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
-        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
-            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null),
-        )
+        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns
+            listOf(
+                lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null),
+            )
         assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
     @Test
     fun `skal beskrive perioder med for mye utbetalt for behandling med feilutbetalt valuta`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
-        val perioder = listOf(
-            LocalDate.now() to LocalDate.now().plusYears(1),
-            LocalDate.now().plusYears(2) to LocalDate.now().plusYears(3),
-        )
+        val perioder =
+            listOf(
+                LocalDate.now() to LocalDate.now().plusYears(1),
+                LocalDate.now().plusYears(2) to LocalDate.now().plusYears(3),
+            )
         assertThat(vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)).isNull()
 
         every {
             feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id)
-        } returns perioder.map {
-            FeilutbetaltValuta(1L, fom = it.first, tom = it.second, 200, true)
-        }
+        } returns
+            perioder.map {
+                FeilutbetaltValuta(1L, fom = it.first, tom = it.second, 200, true)
+            }
         val periodebeskrivelser = vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)
 
         perioder.forEach { periode ->
@@ -175,16 +184,17 @@ class VedtaksperiodeServiceTest {
             ),
         ).isNull()
 
-        every { refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id) } returns listOf(
-            RefusjonEøs(
-                behandlingId = 1L,
-                fom = LocalDate.of(2020, 1, 1),
-                tom = LocalDate.of(2022, 1, 1),
-                refusjonsbeløp = 200,
-                land = "NO",
-                refusjonAvklart = true,
-            ),
-        )
+        every { refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id) } returns
+            listOf(
+                RefusjonEøs(
+                    behandlingId = 1L,
+                    fom = LocalDate.of(2020, 1, 1),
+                    tom = LocalDate.of(2022, 1, 1),
+                    refusjonsbeløp = 200,
+                    land = "NO",
+                    refusjonAvklart = true,
+                ),
+            )
 
         val perioder = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = true)
 
@@ -202,16 +212,17 @@ class VedtaksperiodeServiceTest {
             ),
         ).isNull()
 
-        every { refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id) } returns listOf(
-            RefusjonEøs(
-                behandlingId = 1L,
-                fom = LocalDate.of(2020, 1, 1),
-                tom = LocalDate.of(2022, 1, 1),
-                refusjonsbeløp = 200,
-                land = "NO",
-                refusjonAvklart = false,
-            ),
-        )
+        every { refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id) } returns
+            listOf(
+                RefusjonEøs(
+                    behandlingId = 1L,
+                    fom = LocalDate.of(2020, 1, 1),
+                    tom = LocalDate.of(2022, 1, 1),
+                    refusjonsbeløp = 200,
+                    land = "NO",
+                    refusjonAvklart = false,
+                ),
+            )
 
         val perioder = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = false)
 

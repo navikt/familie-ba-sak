@@ -28,7 +28,6 @@ data class GrBostedsadresseperiode(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Embedded
     val periode: DatoIntervallEntitet? = null,
 ) : BaseEntitet()

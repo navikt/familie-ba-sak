@@ -15,33 +15,34 @@ class BisysConfig(
     @Value("\${BISYS_CLIENT_ID:dummy}")
     private val bisysClientId: String,
 ) {
-
     @Bean
-    fun bisysFilter() = object : OncePerRequestFilter() {
-        override fun doFilterInternal(
-            request: HttpServletRequest,
-            response: HttpServletResponse,
-            filterChain: FilterChain,
-        ) {
-            val clientId: String? = try {
-                oidcUtil.getClaim("azp")
-            } catch (throwable: Throwable) {
-                null
+    fun bisysFilter() =
+        object : OncePerRequestFilter() {
+            override fun doFilterInternal(
+                request: HttpServletRequest,
+                response: HttpServletResponse,
+                filterChain: FilterChain,
+            ) {
+                val clientId: String? =
+                    try {
+                        oidcUtil.getClaim("azp")
+                    } catch (throwable: Throwable) {
+                        null
+                    }
+
+                if (clientId == null) {
+                    // Dersom requesten mangler auth token, skal ikke dette filteret gjøre autorisasjonen
+                    filterChain.doFilter(request, response)
+                } else if (bisysClientId == clientId && !request.requestURI.startsWith("/api/bisys")) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Kun autorisert for kall mot /api/bisys*")
+                } else {
+                    filterChain.doFilter(request, response)
+                }
             }
 
-            if (clientId == null) {
-                // Dersom requesten mangler auth token, skal ikke dette filteret gjøre autorisasjonen
-                filterChain.doFilter(request, response)
-            } else if (bisysClientId == clientId && !request.requestURI.startsWith("/api/bisys")) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Kun autorisert for kall mot /api/bisys*")
-            } else {
-                filterChain.doFilter(request, response)
-            }
+            override fun shouldNotFilter(request: HttpServletRequest) =
+                request.requestURI.contains("/internal") ||
+                    request.requestURI.startsWith("/swagger") ||
+                    request.requestURI.startsWith("/v2") // i bruk av swagger
         }
-
-        override fun shouldNotFilter(request: HttpServletRequest) =
-            request.requestURI.contains("/internal") ||
-                request.requestURI.startsWith("/swagger") ||
-                request.requestURI.startsWith("/v2") // i bruk av swagger
-    }
 }

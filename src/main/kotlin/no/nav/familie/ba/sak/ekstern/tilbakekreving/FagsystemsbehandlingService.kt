@@ -24,7 +24,6 @@ class FagsystemsbehandlingService(
     private val tilbakekrevingService: TilbakekrevingService,
     private val kafkaProducer: KafkaProducer,
 ) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentFagsystemsbehandling(request: HentFagsystemsbehandlingRequest): HentFagsystemsbehandlingRespons {
@@ -51,25 +50,27 @@ class FagsystemsbehandlingService(
         val arbeidsfordeling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId)
         val vedtaksdato = vedtakService.hentVedtaksdatoForBehandlingThrows(behandlingId)
 
-        val faktainfo = Faktainfo(
-            revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
-            revurderingsresultat = behandling.resultat.displayName,
-            tilbakekrevingsvalg = tilbakekrevingService.hentTilbakekrevingsvalg(behandlingId),
-        )
+        val faktainfo =
+            Faktainfo(
+                revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
+                revurderingsresultat = behandling.resultat.displayName,
+                tilbakekrevingsvalg = tilbakekrevingService.hentTilbakekrevingsvalg(behandlingId),
+            )
 
-        val hentFagsystemsbehandling = HentFagsystemsbehandling(
-            eksternFagsakId = request.eksternFagsakId,
-            eksternId = request.eksternId,
-            ytelsestype = request.ytelsestype,
-            regelverk = behandling.kategori.tilRegelverk(),
-            personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-            språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
-            enhetId = arbeidsfordeling.behandlendeEnhetId,
-            enhetsnavn = arbeidsfordeling.behandlendeEnhetNavn,
-            revurderingsvedtaksdato = vedtaksdato.toLocalDate(),
-            faktainfo = faktainfo,
-            institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak),
-        )
+        val hentFagsystemsbehandling =
+            HentFagsystemsbehandling(
+                eksternFagsakId = request.eksternFagsakId,
+                eksternId = request.eksternId,
+                ytelsestype = request.ytelsestype,
+                regelverk = behandling.kategori.tilRegelverk(),
+                personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
+                enhetId = arbeidsfordeling.behandlendeEnhetId,
+                enhetsnavn = arbeidsfordeling.behandlendeEnhetNavn,
+                revurderingsvedtaksdato = vedtaksdato.toLocalDate(),
+                faktainfo = faktainfo,
+                institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak),
+            )
 
         return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = hentFagsystemsbehandling)
     }

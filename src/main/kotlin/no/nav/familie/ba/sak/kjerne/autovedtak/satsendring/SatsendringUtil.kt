@@ -16,9 +16,10 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertFor(satst
     val sisteSatsForSatstype = SatsService.finnSisteSatsFor(satstype)
     val fomSisteSatsForSatstype = sisteSatsForSatstype.gyldigFom.toYearMonth()
 
-    val satsTyperMedTilsvarendeYtelsestype = satstype
-        .tilYtelseType()
-        .hentSatsTyper()
+    val satsTyperMedTilsvarendeYtelsestype =
+        satstype
+            .tilYtelseType()
+            .hentSatsTyper()
 
     return this.filter { it.stønadTom.isSameOrAfter(fomSisteSatsForSatstype) }
         .filter { it.type == satstype.tilYtelseType() }

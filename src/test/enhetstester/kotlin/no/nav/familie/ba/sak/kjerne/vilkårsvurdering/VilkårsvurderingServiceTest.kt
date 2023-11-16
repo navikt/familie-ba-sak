@@ -20,7 +20,6 @@ import org.hamcrest.CoreMatchers.`is` as Is
 
 @ExtendWith(MockKExtension::class)
 internal class VilkårsvurderingServiceTest {
-
     @MockK
     private lateinit var sanityService: SanityService
 
@@ -38,13 +37,14 @@ internal class VilkårsvurderingServiceTest {
         val vilkårTomDato = LocalDate.of(2020, 1, 1)
         val dødsfallsDato = LocalDate.of(2015, 1, 1)
 
-        val vilkårsvurdering = lagVilkårsvurdering(
-            søkerAktør = aktør,
-            behandling = behandling,
-            resultat = Resultat.IKKE_VURDERT,
-            søkerPeriodeFom = vilkårFomDato,
-            søkerPeriodeTom = vilkårTomDato,
-        )
+        val vilkårsvurdering =
+            lagVilkårsvurdering(
+                søkerAktør = aktør,
+                behandling = behandling,
+                resultat = Resultat.IKKE_VURDERT,
+                søkerPeriodeFom = vilkårFomDato,
+                søkerPeriodeTom = vilkårTomDato,
+            )
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns vilkårsvurdering
 
@@ -63,13 +63,14 @@ internal class VilkårsvurderingServiceTest {
         val vilkårTomDato = LocalDate.of(2020, 1, 1)
         val dødsfallsDato = LocalDate.of(2022, 1, 1)
 
-        val vilkårsvurdering = lagVilkårsvurdering(
-            søkerAktør = aktør,
-            behandling = behandling,
-            resultat = Resultat.IKKE_VURDERT,
-            søkerPeriodeFom = vilkårFomDato,
-            søkerPeriodeTom = vilkårTomDato,
-        )
+        val vilkårsvurdering =
+            lagVilkårsvurdering(
+                søkerAktør = aktør,
+                behandling = behandling,
+                resultat = Resultat.IKKE_VURDERT,
+                søkerPeriodeFom = vilkårFomDato,
+                søkerPeriodeTom = vilkårTomDato,
+            )
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns vilkårsvurdering
 
@@ -87,13 +88,14 @@ internal class VilkårsvurderingServiceTest {
         val vilkårFomDato = LocalDate.of(2000, 1, 1)
         val dødsfallsDato = LocalDate.of(2022, 1, 1)
 
-        val vilkårsvurdering = lagVilkårsvurdering(
-            søkerAktør = aktør,
-            behandling = behandling,
-            resultat = Resultat.IKKE_VURDERT,
-            søkerPeriodeFom = vilkårFomDato,
-            søkerPeriodeTom = null,
-        )
+        val vilkårsvurdering =
+            lagVilkårsvurdering(
+                søkerAktør = aktør,
+                behandling = behandling,
+                resultat = Resultat.IKKE_VURDERT,
+                søkerPeriodeFom = vilkårFomDato,
+                søkerPeriodeTom = null,
+            )
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns vilkårsvurdering
 

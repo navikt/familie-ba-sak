@@ -13,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
 internal class IdentHendelseTaskTest {
-
     @MockK(relaxed = true)
     private lateinit var personidentService: PersonidentService
 

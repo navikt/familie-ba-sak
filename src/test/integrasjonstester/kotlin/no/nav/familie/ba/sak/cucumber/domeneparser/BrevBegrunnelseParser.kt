@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
 object BrevBegrunnelseParser {
-
     fun mapBegrunnelser(dataTable: DataTable): List<SammenlignbarBegrunnelse> {
         return dataTable.asMaps().map { rad ->
             val regelverkForInkluderteBegrunnelser =
@@ -19,16 +18,18 @@ object BrevBegrunnelseParser {
                 parseValgfriEnum<Regelverk>(DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser.REGELVERK_EKSKLUDERTE_BEGRUNNELSER, rad)
                     ?: regelverkForInkluderteBegrunnelser
 
-            val inkluderteStandardBegrunnelser = hentForventedeBegrunnelser(
-                regelverkForInkluderteBegrunnelser,
-                DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser.INKLUDERTE_BEGRUNNELSER,
-                rad,
-            )
-            val ekskluderteStandardBegrunnelser = hentForventedeBegrunnelser(
-                regelverkForEkskluderteBegrunnelser,
-                DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser.EKSKLUDERTE_BEGRUNNELSER,
-                rad,
-            )
+            val inkluderteStandardBegrunnelser =
+                hentForventedeBegrunnelser(
+                    regelverkForInkluderteBegrunnelser,
+                    DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser.INKLUDERTE_BEGRUNNELSER,
+                    rad,
+                )
+            val ekskluderteStandardBegrunnelser =
+                hentForventedeBegrunnelser(
+                    regelverkForEkskluderteBegrunnelser,
+                    DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser.EKSKLUDERTE_BEGRUNNELSER,
+                    rad,
+                )
 
             SammenlignbarBegrunnelse(
                 fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad),

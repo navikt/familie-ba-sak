@@ -33,7 +33,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VilkårTilTilkjentYtelseTest {
-
     @BeforeEach
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
@@ -73,28 +72,30 @@ class VilkårTilTilkjentYtelseTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))
 
-        val vilkårsvurdering = TestVilkårsvurderingBuilder(sakType)
-            .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1, erDeltBosted)
-            .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2, erDeltBosted)
-            .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1, erDeltBosted)
-            .bygg()
+        val vilkårsvurdering =
+            TestVilkårsvurderingBuilder(sakType)
+                .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1, erDeltBosted)
+                .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2, erDeltBosted)
+                .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1, erDeltBosted)
+                .bygg()
 
         val delBeløp = if (erDeltBosted != null && erDeltBosted) 2 else 1
 
-        val forventetTilkjentYtelse = TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
-            .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp?.div(delBeløp), barn1Andel1Periode, barn1Andel1Type)
-            .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp?.div(delBeløp), barn1Andel2Periode, barn1Andel2Type)
-            .medAndelTilkjentYtelse(barn1, barn1Andel3Beløp?.div(delBeløp), barn1Andel3Periode, barn1Andel3Type)
-            .bygg()
+        val forventetTilkjentYtelse =
+            TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
+                .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp?.div(delBeløp), barn1Andel1Periode, barn1Andel1Type)
+                .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp?.div(delBeløp), barn1Andel2Periode, barn1Andel2Type)
+                .medAndelTilkjentYtelse(barn1, barn1Andel3Beløp?.div(delBeløp), barn1Andel3Periode, barn1Andel3Type)
+                .bygg()
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
-        val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
-            vilkårsvurdering = vilkårsvurdering,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL,
-
-        )
+        val faktiskTilkjentYtelse =
+            TilkjentYtelseUtils.beregnTilkjentYtelse(
+                vilkårsvurdering = vilkårsvurdering,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                fagsakType = FagsakType.NORMAL,
+            )
 
         Assertions.assertEquals(
             forventetTilkjentYtelse.andelerTilkjentYtelse,
@@ -125,52 +126,54 @@ class VilkårTilTilkjentYtelseTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))
 
-        val vilkårsvurdering = TestVilkårsvurderingBuilder(sakType)
-            .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1)
-            .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1)
-            .bygg()
+        val vilkårsvurdering =
+            TestVilkårsvurderingBuilder(sakType)
+                .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1)
+                .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1)
+                .bygg()
 
         val småbarnstilleggTestPeriode: TestPeriode? =
             if (småbarnstilleggPeriode != null) TestPeriode.parse(småbarnstilleggPeriode) else null
 
-        val forventetTilkjentYtelse = if (småbarnstilleggTestPeriode != null) {
-            TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
-                .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
-                .medAndelTilkjentYtelse(søker, søkerAndel1Beløp, søkerAndel1Periode, søkerAndel1Type)
-                .medAndelTilkjentYtelse(
-                    søker,
-                    sisteSmåbarnstilleggSatsTilTester(),
-                    småbarnstilleggPeriode,
-                    YtelseType.SMÅBARNSTILLEGG.name,
-                )
-                .bygg()
-        } else {
-            TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
-                .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
-                .medAndelTilkjentYtelse(søker, søkerAndel1Beløp, søkerAndel1Periode, søkerAndel1Type)
-                .bygg()
-        }
+        val forventetTilkjentYtelse =
+            if (småbarnstilleggTestPeriode != null) {
+                TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
+                    .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
+                    .medAndelTilkjentYtelse(søker, søkerAndel1Beløp, søkerAndel1Periode, søkerAndel1Type)
+                    .medAndelTilkjentYtelse(
+                        søker,
+                        sisteSmåbarnstilleggSatsTilTester(),
+                        småbarnstilleggPeriode,
+                        YtelseType.SMÅBARNSTILLEGG.name,
+                    )
+                    .bygg()
+            } else {
+                TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
+                    .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
+                    .medAndelTilkjentYtelse(søker, søkerAndel1Beløp, søkerAndel1Periode, søkerAndel1Type)
+                    .bygg()
+            }
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
-        val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
-            vilkårsvurdering = vilkårsvurdering,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL,
-
-        ) { aktør ->
-            if (småbarnstilleggTestPeriode != null) {
-                listOf(
-                    InternPeriodeOvergangsstønad(
-                        personIdent = aktør.aktivFødselsnummer(),
-                        fomDato = småbarnstilleggTestPeriode.fraOgMed,
-                        tomDato = småbarnstilleggTestPeriode.tilOgMed!!,
-                    ),
-                )
-            } else {
-                emptyList()
+        val faktiskTilkjentYtelse =
+            TilkjentYtelseUtils.beregnTilkjentYtelse(
+                vilkårsvurdering = vilkårsvurdering,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                fagsakType = FagsakType.NORMAL,
+            ) { aktør ->
+                if (småbarnstilleggTestPeriode != null) {
+                    listOf(
+                        InternPeriodeOvergangsstønad(
+                            personIdent = aktør.aktivFødselsnummer(),
+                            fomDato = småbarnstilleggTestPeriode.fraOgMed,
+                            tomDato = småbarnstilleggTestPeriode.tilOgMed!!,
+                        ),
+                    )
+                } else {
+                    emptyList()
+                }
             }
-        }
 
         Assertions.assertEquals(
             forventetTilkjentYtelse.andelerTilkjentYtelse,
@@ -213,30 +216,32 @@ class VilkårTilTilkjentYtelseTest {
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2020, 2, 1))
         val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2022, 4, 1))
 
-        val vilkårsvurdering = TestVilkårsvurderingBuilder("NASJONAL")
-            .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1)
-            .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2)
-            .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1)
-            .medPersonVilkårPeriode(barn2, barn2Vilkår1, barn2Periode1)
-            .bygg()
+        val vilkårsvurdering =
+            TestVilkårsvurderingBuilder("NASJONAL")
+                .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1)
+                .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2)
+                .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1)
+                .medPersonVilkårPeriode(barn2, barn2Vilkår1, barn2Periode1)
+                .bygg()
 
-        val forventetTilkjentYtelse = TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
-            .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
-            .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp, barn1Andel2Periode, barn1Andel2Type)
-            .medAndelTilkjentYtelse(barn1, barn1Andel3Beløp, barn1Andel3Periode, barn1Andel3Type)
-            .medAndelTilkjentYtelse(barn2, barn2Andel1Beløp, barn2Andel1Periode, barn2Andel1Type)
-            .medAndelTilkjentYtelse(barn2, barn2Andel2Beløp, barn2Andel2Periode, barn2Andel2Type)
-            .bygg()
+        val forventetTilkjentYtelse =
+            TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
+                .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
+                .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp, barn1Andel2Periode, barn1Andel2Type)
+                .medAndelTilkjentYtelse(barn1, barn1Andel3Beløp, barn1Andel3Periode, barn1Andel3Type)
+                .medAndelTilkjentYtelse(barn2, barn2Andel1Beløp, barn2Andel1Periode, barn2Andel1Type)
+                .medAndelTilkjentYtelse(barn2, barn2Andel2Beløp, barn2Andel2Periode, barn2Andel2Type)
+                .bygg()
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1, barn2)
 
-        val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
-            vilkårsvurdering = vilkårsvurdering,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL,
-
-        )
+        val faktiskTilkjentYtelse =
+            TilkjentYtelseUtils.beregnTilkjentYtelse(
+                vilkårsvurdering = vilkårsvurdering,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                fagsakType = FagsakType.NORMAL,
+            )
 
         Assertions.assertEquals(
             forventetTilkjentYtelse.andelerTilkjentYtelse,
@@ -246,13 +251,13 @@ class VilkårTilTilkjentYtelseTest {
 }
 
 class TestVilkårsvurderingBuilder(sakType: String) {
-
     private val identPersonResultatMap = mutableMapOf<String, PersonResultat>()
     private val vilkårsvurdering =
         Vilkårsvurdering(
-            behandling = lagBehandling(
-                behandlingKategori = BehandlingKategori.valueOf(sakType),
-            ),
+            behandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.valueOf(sakType),
+                ),
         )
 
     fun medPersonVilkårPeriode(
@@ -272,20 +277,22 @@ class TestVilkårsvurderingBuilder(sakType: String) {
 
         val testperiode = TestPeriode.parse(periode)
 
-        val vilkårsresultater = TestVilkårParser.parse(vilkår).map {
-            VilkårResultat(
-                personResultat = personResultat,
-                vilkårType = it,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = testperiode.fraOgMed,
-                periodeTom = testperiode.tilOgMed,
-                begrunnelse = "",
-                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                utdypendeVilkårsvurderinger = listOfNotNull(
-                    if (erDeltBosted == true) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
-                ),
-            )
-        }.toSet()
+        val vilkårsresultater =
+            TestVilkårParser.parse(vilkår).map {
+                VilkårResultat(
+                    personResultat = personResultat,
+                    vilkårType = it,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = testperiode.fraOgMed,
+                    periodeTom = testperiode.tilOgMed,
+                    begrunnelse = "",
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                    utdypendeVilkårsvurderinger =
+                        listOfNotNull(
+                            if (erDeltBosted == true) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                        ),
+                )
+            }.toSet()
 
         personResultat.setSortedVilkårResultater(
             personResultat.vilkårResultater.plus(vilkårsresultater)
@@ -303,12 +310,12 @@ class TestVilkårsvurderingBuilder(sakType: String) {
 }
 
 class TestTilkjentYtelseBuilder(val behandling: Behandling) {
-
-    private val tilkjentYtelse = TilkjentYtelse(
-        behandling = behandling,
-        opprettetDato = LocalDate.now(),
-        endretDato = LocalDate.now(),
-    )
+    private val tilkjentYtelse =
+        TilkjentYtelse(
+            behandling = behandling,
+            opprettetDato = LocalDate.now(),
+            endretDato = LocalDate.now(),
+        )
 
     fun medAndelTilkjentYtelse(
         person: Person,
@@ -346,9 +353,7 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
 }
 
 data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
-
     companion object {
-
         private val yearMonthRegex = """^(\d{4}-\d{2}).*?(\d{4}-\d{2})?$""".toRegex()
         private val localDateRegex = """^(\d{4}-\d{2}-\d{2}).*?(\d{4}-\d{2}-\d{2})?$""".toRegex()
 
@@ -392,7 +397,6 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
 }
 
 object TestVilkårParser {
-
     fun parse(s: String): List<Vilkår> {
         return s.split(',')
             .map {

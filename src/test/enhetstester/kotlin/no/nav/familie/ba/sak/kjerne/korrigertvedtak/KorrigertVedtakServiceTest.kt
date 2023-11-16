@@ -18,7 +18,6 @@ import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 internal class KorrigertVedtakServiceTest {
-
     @MockK
     private lateinit var korrigertVedtakRepository: KorrigertVedtakRepository
 

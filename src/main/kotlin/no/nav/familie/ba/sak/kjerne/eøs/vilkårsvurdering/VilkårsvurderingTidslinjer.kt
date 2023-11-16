@@ -31,11 +31,13 @@ class VilkårsvurderingTidslinjer(
     private val aktørTilPersonResultater =
         vilkårsvurdering.personResultater.associateBy { it.aktør }
 
-    private val vilkårsresultaterTidslinjeMap = aktørTilPersonResultater
-        .entries.associate { (aktør, personResultat) ->
-            aktør to personResultat.vilkårResultater.groupBy { it.vilkårType }
-                .map { it.value.tilVilkårRegelverkResultatTidslinje() }
-        }
+    private val vilkårsresultaterTidslinjeMap =
+        aktørTilPersonResultater
+            .entries.associate { (aktør, personResultat) ->
+                aktør to
+                    personResultat.vilkårResultater.groupBy { it.vilkårType }
+                        .map { it.value.tilVilkårRegelverkResultatTidslinje() }
+            }
 
     private val søkersTidslinje: SøkersTidslinjer =
         SøkersTidslinjer(
@@ -49,12 +51,13 @@ class VilkårsvurderingTidslinjer(
 
     private val barnasTidslinjer: Map<Aktør, BarnetsTidslinjer> =
         barna.map {
-            it.aktør to BarnetsTidslinjer(
-                tidslinjer = this,
-                aktør = it.aktør,
-                fagsakType = vilkårsvurdering.behandling.fagsak.type,
-                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
-            )
+            it.aktør to
+                BarnetsTidslinjer(
+                    tidslinjer = this,
+                    aktør = it.aktør,
+                    fagsakType = vilkårsvurdering.behandling.fagsak.type,
+                    behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
+                )
         }.toMap()
 
     fun forBarn(barn: Person) = barnasTidslinjer[barn.aktør]!!
@@ -72,15 +75,16 @@ class VilkårsvurderingTidslinjer(
         private val vilkårsresultatMånedTidslinjer =
             vilkårsresultatTidslinjer.map { it.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() }
 
-        val regelverkResultatTidslinje = vilkårsresultatMånedTidslinjer
-            .kombinerUtenNull {
-                kombinerVilkårResultaterTilRegelverkResultat(
-                    personType = PersonType.SØKER,
-                    alleVilkårResultater = it,
-                    fagsakType = fagsakType,
-                    behandlingUnderkategori = behandlingUnderkategori,
-                )
-            }
+        val regelverkResultatTidslinje =
+            vilkårsresultatMånedTidslinjer
+                .kombinerUtenNull {
+                    kombinerVilkårResultaterTilRegelverkResultat(
+                        personType = PersonType.SØKER,
+                        alleVilkårResultater = it,
+                        fagsakType = fagsakType,
+                        behandlingUnderkategori = behandlingUnderkategori,
+                    )
+                }
     }
 
     class BarnetsTidslinjer(
@@ -111,16 +115,17 @@ class VilkårsvurderingTidslinjer(
                 }
                 .beskjærEtter(erUnder18ÅrVilkårTidslinje)
 
-        val regelverkResultatTidslinje = egetRegelverkResultatTidslinje
-            .kombinerMed(søkersTidslinje.regelverkResultatTidslinje) { barnetsResultat, søkersResultat ->
-                KombinertRegelverkResultat(
-                    barnetsResultat = barnetsResultat,
-                    søkersResultat = søkersResultat,
-                )
-            }
-            // Barnets egne tidslinjer kan på dette tidspunktet strekke seg 18 år frem i tid,
-            // og mye lenger enn søkers regelverk-tidslinje, som skal være begrensningen. Derfor besjærer vi mot den
-            .beskjærEtter(søkersTidslinje.regelverkResultatTidslinje)
+        val regelverkResultatTidslinje =
+            egetRegelverkResultatTidslinje
+                .kombinerMed(søkersTidslinje.regelverkResultatTidslinje) { barnetsResultat, søkersResultat ->
+                    KombinertRegelverkResultat(
+                        barnetsResultat = barnetsResultat,
+                        søkersResultat = søkersResultat,
+                    )
+                }
+                // Barnets egne tidslinjer kan på dette tidspunktet strekke seg 18 år frem i tid,
+                // og mye lenger enn søkers regelverk-tidslinje, som skal være begrensningen. Derfor besjærer vi mot den
+                .beskjærEtter(søkersTidslinje.regelverkResultatTidslinje)
     }
 }
 

@@ -26,7 +26,6 @@ import java.time.Duration
 import java.time.LocalDate
 
 interface Vilkårsregel {
-
     fun vurder(): Evaluering
 }
 
@@ -34,7 +33,6 @@ data class VurderPersonErBosattIRiket(
     val adresser: List<GrBostedsadresse>,
     val vurderFra: LocalDate,
 ) : Vilkårsregel {
-
     override fun vurder(): Evaluering {
         if (adresser.any { !it.harGyldigFom() }) {
             val person = adresser.first().person
@@ -53,7 +51,9 @@ data class VurderPersonErBosattIRiket(
             return Evaluering.oppfylt(
                 VilkårOppfyltÅrsak.BOR_I_RIKET,
             )
-        } else if (adresser.filter { !it.harGyldigFom() }.size > 1) return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM)
+        } else if (adresser.filter { !it.harGyldigFom() }.size > 1) {
+            return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM)
+        }
 
         val adresserMedGyldigFom = adresser.filter { it.harGyldigFom() }
 
@@ -62,7 +62,8 @@ data class VurderPersonErBosattIRiket(
          * En person som mangler registrert bostedsadresse er utflyttet.
          * See: https://navikt.github.io/pdl/#_utflytting
          */
-        return if (adresserMedGyldigFom.isNotEmpty() && erPersonBosattFraVurderingstidspunktet(
+        return if (adresserMedGyldigFom.isNotEmpty() &&
+            erPersonBosattFraVurderingstidspunktet(
                 adresserMedGyldigFom,
                 vurderFra,
             )
@@ -84,15 +85,19 @@ data class VurderPersonErBosattIRiket(
         adresser: List<GrBostedsadresse>,
         vurderFra: LocalDate,
     ): Boolean {
-        val sisteAdresse = adresser
-            .filter { it.harGyldigFom() }
-            .maxByOrNull { it.periode?.fom!! } ?: return false
+        val sisteAdresse =
+            adresser
+                .filter { it.harGyldigFom() }
+                .maxByOrNull { it.periode?.fom!! } ?: return false
 
         return sisteAdresse.periode?.fom!!.toYearMonth()
             .isBefore(vurderFra.toYearMonth()) && sisteAdresse.periode?.tom == null
     }
 
-    private fun erPersonBosattFraVurderingstidspunktet(adresser: List<GrBostedsadresse>, vurderFra: LocalDate) =
+    private fun erPersonBosattFraVurderingstidspunktet(
+        adresser: List<GrBostedsadresse>,
+        vurderFra: LocalDate,
+    ) =
         hentMaxAvstandAvDagerMellomPerioder(
             adresser.mapNotNull { it.periode },
             vurderFra,
@@ -103,7 +108,6 @@ data class VurderPersonErBosattIRiket(
 data class VurderBarnErUnder18(
     val alder: Int,
 ) : Vilkårsregel {
-
     override fun vurder(): Evaluering =
         if (alder < 18) {
             Evaluering.oppfylt(VilkårOppfyltÅrsak.ER_UNDER_18_ÅR)
@@ -116,7 +120,6 @@ data class VurderBarnErBosattMedSøker(
     val søkerAdresser: List<GrBostedsadresse>,
     val barnAdresser: List<GrBostedsadresse>,
 ) : Vilkårsregel {
-
     override fun vurder(): Evaluering {
         return if (vurderOmPersonerBorSammen(
                 adresser = barnAdresser,
@@ -133,7 +136,6 @@ data class VurderBarnErBosattMedSøker(
 data class VurderBarnErUgift(
     val sivilstander: List<GrSivilstand>,
 ) : Vilkårsregel {
-
     override fun vurder(): Evaluering {
         val sivilstanderMedGyldigFom = sivilstander.filter { it.harGyldigFom() }
 
@@ -166,7 +168,6 @@ data class VurderPersonHarLovligOpphold(
     val annenForelderLovligOppholdFaktaEØS: LovligOppholdFaktaEØS?,
     val opphold: List<GrOpphold>,
 ) : Vilkårsregel {
-
     override fun vurder(): Evaluering {
         return when (morLovligOppholdFaktaEØS.statsborgerskap.hentSterkesteMedlemskap()) {
             Medlemskap.NORDEN -> Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
@@ -181,10 +182,11 @@ data class VurderPersonHarLovligOpphold(
                     Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)
                 }
             }
-            Medlemskap.EØS -> vurderLovligOppholdForEØSBorger(
-                morLovligOppholdFaktaEØS,
-                annenForelderLovligOppholdFaktaEØS,
-            )
+            Medlemskap.EØS ->
+                vurderLovligOppholdForEØSBorger(
+                    morLovligOppholdFaktaEØS,
+                    annenForelderLovligOppholdFaktaEØS,
+                )
             Medlemskap.STATSLØS, Medlemskap.UKJENT -> {
                 if (opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse()) {
                     Evaluering.oppfylt(VilkårOppfyltÅrsak.UKJENT_STATSBORGERSKAP_MED_LOVLIG_OPPHOLD)
@@ -241,9 +243,10 @@ private fun hentMaxAvstandAvDagerMellomPerioder(
         perioder.sortedBy { it.fom }
             .fold(mutableListOf()) { acc: MutableList<DatoIntervallEntitet>, datoIntervallEntitet: DatoIntervallEntitet ->
                 if (acc.isNotEmpty() && acc.last().tom == null) {
-                    val sisteDatoIntervall = acc.last().copy(
-                        tom = datoIntervallEntitet.fom?.minusDays(1),
-                    )
+                    val sisteDatoIntervall =
+                        acc.last().copy(
+                            tom = datoIntervallEntitet.fom?.minusDays(1),
+                        )
 
                     acc.removeLast()
                     acc.add(sisteDatoIntervall)
@@ -275,20 +278,21 @@ private fun hentMaxAvstandAvDagerMellomPerioder(
 
     if (perioderInnenAngittTidsrom.isEmpty()) return Duration.between(fom.atStartOfDay(), tom.atStartOfDay()).toDays()
 
-    val defaultAvstand = if (perioderInnenAngittTidsrom.first().fom!!.isAfter(fom)) {
-        Duration.between(
-            fom.atStartOfDay(),
-            perioderInnenAngittTidsrom.first().fom!!.atStartOfDay(),
-        )
-            .toDays()
-    } else if (perioderInnenAngittTidsrom.last().tom != null && perioderInnenAngittTidsrom.last().tom!!.isBefore(tom)) {
-        Duration.between(
-            perioderInnenAngittTidsrom.last().tom!!.atStartOfDay(),
-            tom.atStartOfDay(),
-        ).toDays()
-    } else {
-        0L
-    }
+    val defaultAvstand =
+        if (perioderInnenAngittTidsrom.first().fom!!.isAfter(fom)) {
+            Duration.between(
+                fom.atStartOfDay(),
+                perioderInnenAngittTidsrom.first().fom!!.atStartOfDay(),
+            )
+                .toDays()
+        } else if (perioderInnenAngittTidsrom.last().tom != null && perioderInnenAngittTidsrom.last().tom!!.isBefore(tom)) {
+            Duration.between(
+                perioderInnenAngittTidsrom.last().tom!!.atStartOfDay(),
+                tom.atStartOfDay(),
+            ).toDays()
+        } else {
+            0L
+        }
 
     return perioderInnenAngittTidsrom
         .zipWithNext()

@@ -20,12 +20,12 @@ internal class BrevmottakerControllerTest(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
 ) : AbstractSpringIntegrationTest() {
-
-    val brevmottakerController = BrevmottakerController(
-        brevmottakerService = brevmottakerService,
-        tilgangService = mockk(relaxed = true),
-        utvidetBehandlingService = mockk(relaxed = true),
-    )
+    val brevmottakerController =
+        BrevmottakerController(
+            brevmottakerService = brevmottakerService,
+            tilgangService = mockk(relaxed = true),
+            utvidetBehandlingService = mockk(relaxed = true),
+        )
 
     @Test
     @Tag("integration")
@@ -34,17 +34,17 @@ internal class BrevmottakerControllerTest(
             defaultFagsak(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
         val behandling = lagBehandling(fagsak = fagsak).let { behandlingRepository.save(it) }
 
-        val brevmottaker = RestBrevmottaker(
-            null,
-            MottakerType.FULLMEKTIG,
-            "navn",
-            "adresse",
-            null,
-            "postnummer",
-            "poststed",
-            "NO",
-
-        )
+        val brevmottaker =
+            RestBrevmottaker(
+                null,
+                MottakerType.FULLMEKTIG,
+                "navn",
+                "adresse",
+                null,
+                "postnummer",
+                "poststed",
+                "NO",
+            )
         brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottaker)
 
         brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottaker.copy(type = MottakerType.VERGE))

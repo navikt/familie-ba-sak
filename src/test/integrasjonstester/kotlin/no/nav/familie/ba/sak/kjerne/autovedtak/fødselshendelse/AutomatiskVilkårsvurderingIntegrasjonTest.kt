@@ -31,7 +31,6 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
     @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeEach
     fun truncate() {
         databaseCleanupService.truncate()
@@ -76,16 +75,17 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
         val barn = genererAutomatiskTestperson(LocalDate.parse("1999-10-10"), emptySet(), emptyList())
-        val søker = genererAutomatiskTestperson(
-            LocalDate.parse("1998-10-10"),
-            setOf(
-                ForelderBarnRelasjon(
-                    tilAktør(barnFnr),
-                    FORELDERBARNRELASJONROLLE.BARN,
+        val søker =
+            genererAutomatiskTestperson(
+                LocalDate.parse("1998-10-10"),
+                setOf(
+                    ForelderBarnRelasjon(
+                        tilAktør(barnFnr),
+                        FORELDERBARNRELASJONROLLE.BARN,
+                    ),
                 ),
-            ),
-            emptyList(),
-        )
+                emptyList(),
+            )
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barnFnr)) } returns barn
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns søker
 
@@ -102,34 +102,37 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
         val barn = genererAutomatiskTestperson(LocalDate.now(), emptySet(), emptyList())
-        val søker = genererAutomatiskTestperson(
-            LocalDate.parse("1998-10-10"),
-            setOf(
-                ForelderBarnRelasjon(
-                    tilAktør(barnFnr),
-                    FORELDERBARNRELASJONROLLE.BARN,
-                ),
-            ),
-            emptyList(),
-            bostedsadresser = listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = null,
-                    gyldigTilOgMed = null,
-                    vegadresse = Vegadresse(
-                        matrikkelId = 1111111111,
-                        husnummer = "36",
-                        husbokstav = "D",
-                        bruksenhetsnummer = null,
-                        adressenavn = "IkkeSamme -veien",
-                        kommunenummer = "5423",
-                        tilleggsnavn = null,
-                        postnummer = "9050",
+        val søker =
+            genererAutomatiskTestperson(
+                LocalDate.parse("1998-10-10"),
+                setOf(
+                    ForelderBarnRelasjon(
+                        tilAktør(barnFnr),
+                        FORELDERBARNRELASJONROLLE.BARN,
                     ),
-                    matrikkeladresse = null,
-                    ukjentBosted = null,
                 ),
-            ),
-        )
+                emptyList(),
+                bostedsadresser =
+                    listOf(
+                        Bostedsadresse(
+                            gyldigFraOgMed = null,
+                            gyldigTilOgMed = null,
+                            vegadresse =
+                                Vegadresse(
+                                    matrikkelId = 1111111111,
+                                    husnummer = "36",
+                                    husbokstav = "D",
+                                    bruksenhetsnummer = null,
+                                    adressenavn = "IkkeSamme -veien",
+                                    kommunenummer = "5423",
+                                    tilleggsnavn = null,
+                                    postnummer = "9050",
+                                ),
+                            matrikkeladresse = null,
+                            ukjentBosted = null,
+                        ),
+                    ),
+            )
 
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barnFnr)) } returns barn
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns søker

@@ -26,7 +26,6 @@ class IverksettMotOppdragTask(
     private val personidentService: PersonidentService,
     private val taskRepository: TaskRepositoryWrapper,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         stegService.håndterIverksettMotØkonomi(
@@ -38,24 +37,27 @@ class IverksettMotOppdragTask(
     override fun onCompletion(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         val personIdent = personidentService.hentAktør(iverksettingTask.personIdent).aktivFødselsnummer()
-        val statusFraOppdragTask = Task(
-            type = StatusFraOppdragTask.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(
-                StatusFraOppdragDTO(
-                    aktørId = iverksettingTask.personIdent,
-                    personIdent = personIdent,
-                    fagsystem = FAGSYSTEM,
-                    behandlingsId = iverksettingTask.behandlingsId,
-                    vedtaksId = iverksettingTask.vedtaksId,
-                ),
-            ),
-            properties = task.metadata,
-        )
+        val statusFraOppdragTask =
+            Task(
+                type = StatusFraOppdragTask.TASK_STEP_TYPE,
+                payload =
+                    objectMapper.writeValueAsString(
+                        StatusFraOppdragDTO(
+                            aktørId = iverksettingTask.personIdent,
+                            personIdent = personIdent,
+                            fagsystem = FAGSYSTEM,
+                            behandlingsId = iverksettingTask.behandlingsId,
+                            vedtaksId = iverksettingTask.vedtaksId,
+                        ),
+                    ),
+                properties = task.metadata,
+            )
 
-        val sendMeldingTilBisysTask = Task(
-            type = SendMeldingTilBisysTask.TASK_STEP_TYPE,
-            payload = iverksettingTask.behandlingsId.toString(),
-        )
+        val sendMeldingTilBisysTask =
+            Task(
+                type = SendMeldingTilBisysTask.TASK_STEP_TYPE,
+                payload = iverksettingTask.behandlingsId.toString(),
+            )
 
         taskRepository.save(statusFraOppdragTask)
         taskRepository.save(sendMeldingTilBisysTask)
@@ -64,7 +66,11 @@ class IverksettMotOppdragTask(
     companion object {
         const val TASK_STEP_TYPE = "iverksettMotOppdrag"
 
-        fun opprettTask(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String): Task {
+        fun opprettTask(
+            behandling: Behandling,
+            vedtak: Vedtak,
+            saksbehandlerId: String,
+        ): Task {
             return opprettTask(
                 behandling.fagsak.aktør,
                 behandling.id,
@@ -83,20 +89,22 @@ class IverksettMotOppdragTask(
         ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(
-                    IverksettingTaskDTO(
-                        personIdent = aktør.aktivFødselsnummer(),
-                        behandlingsId = behandlingsId,
-                        vedtaksId = vedtaksId,
-                        saksbehandlerId = saksbehandlerId,
+                payload =
+                    objectMapper.writeValueAsString(
+                        IverksettingTaskDTO(
+                            personIdent = aktør.aktivFødselsnummer(),
+                            behandlingsId = behandlingsId,
+                            vedtaksId = vedtaksId,
+                            saksbehandlerId = saksbehandlerId,
+                        ),
                     ),
-                ),
-                properties = Properties().apply {
-                    this["personIdent"] = aktør.aktivFødselsnummer()
-                    this["behandlingsId"] = behandlingsId.toString()
-                    this["vedtakId"] = vedtaksId.toString()
-                    this["fagsakId"] = fagsakId.toString()
-                },
+                properties =
+                    Properties().apply {
+                        this["personIdent"] = aktør.aktivFødselsnummer()
+                        this["behandlingsId"] = behandlingsId.toString()
+                        this["vedtakId"] = vedtaksId.toString()
+                        this["fagsakId"] = fagsakId.toString()
+                    },
             )
         }
     }

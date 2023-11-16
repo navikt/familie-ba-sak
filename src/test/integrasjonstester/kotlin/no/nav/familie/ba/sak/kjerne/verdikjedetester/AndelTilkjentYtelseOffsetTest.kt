@@ -61,18 +61,20 @@ class AndelTilkjentYtelseOffsetTest(
     fun `Skal ha riktig offset for andeler når man legger til ny andel`() {
         val personScenario1: RestScenario = lagScenario(barnFødselsdato)
         val fagsak1: RestMinimalFagsak = lagFagsak(personScenario = personScenario1)
-        val behandling1 = fullførBehandling(
-            fagsak = fagsak1,
-            personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
-        )
+        val behandling1 =
+            fullførBehandling(
+                fagsak = fagsak1,
+                personScenario = personScenario1,
+                barnFødselsdato = barnFødselsdato,
+            )
 
         // Legger til småbarnstillegg på søker
-        val behandling2: Behandling = fullførRevurderingMedOvergangstonad(
-            fagsak = fagsak1,
-            personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
-        )
+        val behandling2: Behandling =
+            fullførRevurderingMedOvergangstonad(
+                fagsak = fagsak1,
+                personScenario = personScenario1,
+                barnFødselsdato = barnFødselsdato,
+            )
 
         val andelerBehandling1 = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandling1.id)
         val offsetBehandling1 = andelerBehandling1.mapNotNull { it.periodeOffset }.map { it.toInt() }.sorted()
@@ -89,19 +91,21 @@ class AndelTilkjentYtelseOffsetTest(
         Assertions.assertEquals(offsetBehandling1 + forventetOffsetNyAndel, offsetBehandling2)
     }
 
-    fun lagScenario(barnFødselsdato: LocalDate): RestScenario = mockServerKlient().lagScenario(
-        RestScenario(
-            søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-            barna = listOf(
-                RestScenarioPerson(
-                    fødselsdato = barnFødselsdato.toString(),
-                    fornavn = "Barn",
-                    etternavn = "Barnesen",
-                    bostedsadresser = emptyList(),
-                ),
+    fun lagScenario(barnFødselsdato: LocalDate): RestScenario =
+        mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = barnFødselsdato.toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
+                            bostedsadresser = emptyList(),
+                        ),
+                    ),
             ),
-        ),
-    )
+        )
 
     fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak {
         return familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
@@ -113,9 +117,10 @@ class AndelTilkjentYtelseOffsetTest(
         barnFødselsdato: LocalDate,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = emptyList(),
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder = emptyList(),
+            )
 
         val restBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
@@ -127,11 +132,12 @@ class AndelTilkjentYtelseOffsetTest(
         val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
             RestRegistrerSøknad(
-                søknad = lagSøknadDTO(
-                    søkerIdent = fagsak.søkerFødselsnummer,
-                    barnasIdenter = personScenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.UTVIDET,
-                ),
+                søknad =
+                    lagSøknadDTO(
+                        søkerIdent = fagsak.søkerFødselsnummer,
+                        barnasIdenter = personScenario.barna.map { it.ident!! },
+                        underkategori = BehandlingUnderkategori.UTVIDET,
+                    ),
                 bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
@@ -152,7 +158,6 @@ class AndelTilkjentYtelseOffsetTest(
             lagToken = ::token,
             brevmalService = brevmalService,
             vedtaksperiodeService = vedtaksperiodeService,
-
         )
     }
 
@@ -164,16 +169,18 @@ class AndelTilkjentYtelseOffsetTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = listOf(
-                EksternPeriode(
-                    personIdent = personScenario.søker.ident!!,
-                    fomDato = barnFødselsdato.plusYears(1),
-                    tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF,
-                ),
-            ),
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder =
+                    listOf(
+                        EksternPeriode(
+                            personIdent = personScenario.søker.ident!!,
+                            fomDato = barnFødselsdato.plusYears(1),
+                            tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
+                            datakilde = Datakilde.EF,
+                        ),
+                    ),
+            )
 
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(

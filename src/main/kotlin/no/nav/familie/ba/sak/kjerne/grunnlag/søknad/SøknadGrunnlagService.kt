@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional
 class SøknadGrunnlagService(
     private val søknadGrunnlagRepository: SøknadGrunnlagRepository,
 ) {
-
     @Transactional
     fun lagreOgDeaktiverGammel(søknadGrunnlag: SøknadGrunnlag): SøknadGrunnlag {
         val aktivSøknadGrunnlag = søknadGrunnlagRepository.hentAktiv(søknadGrunnlag.behandlingId)

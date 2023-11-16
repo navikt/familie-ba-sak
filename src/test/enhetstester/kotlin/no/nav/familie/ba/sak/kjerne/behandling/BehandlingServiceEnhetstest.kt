@@ -26,7 +26,6 @@ import java.time.YearMonth
 
 @ExtendWith(MockKExtension::class)
 class BehandlingServiceEnhetstest {
-
     @MockK
     private lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 
@@ -79,11 +78,12 @@ class BehandlingServiceEnhetstest {
     fun `erLøpende - skal returnere true dersom det finnes andeler i en behandling hvor tom er etter YearMonth now`() {
         val behandling = lagBehandling()
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns listOf(
-            lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
-            lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
-            lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(3)),
-        )
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
+            listOf(
+                lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
+                lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
+                lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(3)),
+            )
         assertThat(behandlingService.erLøpende(behandling)).isTrue
     }
 
@@ -91,11 +91,12 @@ class BehandlingServiceEnhetstest {
     fun `erLøpende - skal returnere false dersom det finnes andeler i en behandling hvor tom er det samme som YearMonth now`() {
         val behandling = lagBehandling()
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns listOf(
-            lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
-            lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
-            lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now()),
-        )
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
+            listOf(
+                lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
+                lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
+                lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now()),
+            )
         assertThat(behandlingService.erLøpende(behandling)).isFalse
     }
 
@@ -103,11 +104,12 @@ class BehandlingServiceEnhetstest {
     fun `erLøpende - skal returnere false dersom alle andeler i en behandling har tom før YearMonth now`() {
         val behandling = lagBehandling()
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns listOf(
-            lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
-            lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
-            lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(1)),
-        )
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
+            listOf(
+                lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
+                lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
+                lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(1)),
+            )
         assertThat(behandlingService.erLøpende(behandling)).isFalse
     }
 }

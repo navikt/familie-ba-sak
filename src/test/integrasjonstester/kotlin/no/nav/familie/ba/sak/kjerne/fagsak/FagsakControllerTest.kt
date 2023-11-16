@@ -41,38 +41,27 @@ import org.springframework.data.domain.Pageable
 class FagsakControllerTest(
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val fagsakController: FagsakController,
-
     @Autowired
     private val behandlingService: BehandlingService,
-
     @Autowired
     private val mockIntegrasjonClient: IntegrasjonClient,
-
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
-
     @Autowired
     private val mockPersonidentService: PersonidentService,
-
     @Autowired
     private val aktørIdRepository: AktørIdRepository,
-
     @Autowired
     private val personidentRepository: PersonidentRepository,
-
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-
     @Autowired
     private val skyggesakRepository: SkyggesakRepository,
-
     @Autowired
     private val institusjonService: InstitusjonService,
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeEach
     fun init() {
         MDC.put(MDCConstants.MDC_CALL_ID, "00001111")
@@ -117,11 +106,12 @@ class FagsakControllerTest(
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
         assertEquals(fnr, fagsakService.hentNormalFagsak(tilAktør(fnr))?.aktør?.aktivFødselsnummer())
 
-        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
-            FagsakRequest(
-                personIdent = fnr,
-            ),
-        )
+        val eksisterendeRestFagsak =
+            fagsakController.hentEllerOpprettFagsak(
+                FagsakRequest(
+                    personIdent = fnr,
+                ),
+            )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
     }
@@ -146,11 +136,12 @@ class FagsakControllerTest(
         )
         personidentRepository.save(Personident(fødselsnummer = nyttFnr, aktør = aktør, aktiv = true))
 
-        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
-            FagsakRequest(
-                personIdent = nyttFnr,
-            ),
-        )
+        val eksisterendeRestFagsak =
+            fagsakController.hentEllerOpprettFagsak(
+                FagsakRequest(
+                    personIdent = nyttFnr,
+                ),
+            )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
         assertEquals(nyttFnr, eksisterendeRestFagsak.body!!.data?.søkerFødselsnummer)
@@ -161,9 +152,10 @@ class FagsakControllerTest(
     fun `Skal returnere eksisterende fagsak på person som allerede finnes basert på aktørid`() {
         val aktørId = randomAktør()
         val fagsakRequest = FagsakRequest(personIdent = aktørId.aktivFødselsnummer())
-        val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(
-            fagsakRequest,
-        )
+        val nyRestFagsak =
+            fagsakController.hentEllerOpprettFagsak(
+                fagsakRequest,
+            )
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(fagsakRequest)
@@ -223,14 +215,15 @@ class FagsakControllerTest(
     fun `Skal få valideringsfeil ved oppretting av fagsak av type INSTITUSJON uten FagsakInstitusjon satt`() {
         val fnr = randomFnr()
 
-        val exception = assertThrows<FunksjonellFeil> {
-            fagsakController.hentEllerOpprettFagsak(
-                FagsakRequest(
-                    personIdent = fnr,
-                    fagsakType = FagsakType.INSTITUSJON,
-                ),
-            )
-        }
+        val exception =
+            assertThrows<FunksjonellFeil> {
+                fagsakController.hentEllerOpprettFagsak(
+                    FagsakRequest(
+                        personIdent = fnr,
+                        fagsakType = FagsakType.INSTITUSJON,
+                    ),
+                )
+            }
         val fagsaker = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
         assert(fagsaker.status == Ressurs.Status.FEILET)
         assertEquals("Mangler påkrevd variabel orgnummer for institusjon", exception.message)
