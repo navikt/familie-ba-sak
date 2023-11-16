@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
@@ -52,7 +53,7 @@ fun genererVedtaksperioder(
         )
     }
 
-    if (vedtak.behandling.resultat.erFortsattInnvilget()) {
+    if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
         return lagFortsattInnvilgetPeriode(vedtak = vedtak)
     }
 

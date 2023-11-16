@@ -273,9 +273,6 @@ data class Behandling(
 
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
-    fun erTekniskEndringMedOpphør() =
-        erTekniskEndring() && resultat.erOpphør()
-
     fun erTekniskBehandling() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR || erTekniskEndring()
 
     fun erKorrigereVedtak() = opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV
@@ -353,19 +350,9 @@ enum class Behandlingsresultat(val displayName: String) {
 
     IKKE_VURDERT(displayName = "Ikke vurdert"),
     ;
-
-    fun kanIkkeSendesTilOppdrag(): Boolean =
-        this in listOf(FORTSATT_INNVILGET, AVSLÅTT, FORTSATT_OPPHØRT, ENDRET_UTEN_UTBETALING)
-
     fun erAvslått(): Boolean = this in listOf(AVSLÅTT, AVSLÅTT_OG_OPPHØRT, AVSLÅTT_OG_ENDRET, AVSLÅTT_ENDRET_OG_OPPHØRT)
 
     fun erFortsattInnvilget(): Boolean = this in listOf(FORTSATT_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET)
-
-    fun erOpphør(): Boolean = this in listOf(
-        OPPHØRT,
-        ENDRET_OG_OPPHØRT,
-        FORTSATT_OPPHØRT,
-    )
 }
 
 /**
@@ -457,7 +444,6 @@ enum class BehandlingStatus {
     AVSLUTTET,
     ;
 
-    fun erLåstMenIkkeAvsluttet() = this == FATTER_VEDTAK || this == IVERKSETTER_VEDTAK
     fun erLåstForVidereRedigering() = this != UTREDES
 }
 
