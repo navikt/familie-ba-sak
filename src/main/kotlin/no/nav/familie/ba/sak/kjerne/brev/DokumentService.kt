@@ -14,9 +14,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.erTilInstitusjon
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -90,7 +90,16 @@ class DokumentService(
         val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: error("Finnes ikke fagsak for fagsakId=$fagsakId")
         val søkersident = fagsak.aktør.aktivFødselsnummer()
 
-        val mottakere = lagMottakere(manueltBrevRequest, fagsak, behandling)
+        val brevmottakereFraBehandling = behandling?.let { brevmottakerService.hentBrevmottakere(it.id) } ?: emptyList()
+        val brevmottakere =
+            manueltBrevRequest.manuelleBrevmottakere + brevmottakereFraBehandling.map { ManuellBrevmottaker(it) }
+
+        val mottakere = lagMottakere(
+            manueltBrevRequest = manueltBrevRequest,
+            fagsak = fagsak,
+            behandling = behandling,
+            brevmottakere = brevmottakere,
+        )
         val journalposterTilDistribusjon = mutableMapOf<String, MottakerInfo>()
 
         mottakere.forEach { mottakerInfo ->
@@ -139,9 +148,9 @@ class DokumentService(
         manueltBrevRequest: ManueltBrevRequest,
         fagsak: Fagsak,
         behandling: Behandling?,
+        brevmottakere: List<ManuellBrevmottaker>,
     ): List<MottakerInfo> {
         val søkersident = fagsak.aktør.aktivFødselsnummer()
-        val brevmottakere = behandling?.let { brevmottakerService.hentBrevmottakere(it.id) } ?: emptyList()
         return when {
             behandling == null -> MottakerInfo(
                 brukerId = søkersident,
