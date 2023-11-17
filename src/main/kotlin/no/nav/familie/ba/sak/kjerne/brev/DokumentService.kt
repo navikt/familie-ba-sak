@@ -10,16 +10,26 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevInfoBehandling
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevInfoFagsak
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevInfoFagsakInstitusjon
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevInfoFraBehandling
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevInfoFraFagsak
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevInfoFraInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
+import no.nav.familie.ba.sak.kjerne.brev.domene.SøkerInfoManueltBrevBehandlingInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.domene.erTilInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.domene.MottakerInfo
 import no.nav.familie.ba.sak.kjerne.steg.domene.toList
@@ -73,9 +83,17 @@ class DokumentService(
 
     @Transactional
     fun sendManueltBrev(manueltBrevRequest: ManueltBrevRequest, behandling: Behandling? = null, fagsakId: Long) {
-        behandling?.let {
-            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = it.id)
+        if (behandling != null) {
+            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                behandlingId = behandling.id,
+            )
+        } else {
+            validerBrevmottakerService.validerAtFagsakIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                fagsakId = fagsakId,
+                manueltBrevRequest.manuelleBrevmottakere,
+            )
         }
+
         val generertBrev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest)
         val førsteside = if (manueltBrevRequest.brevmal.skalGenerereForside()) {
             Førsteside(

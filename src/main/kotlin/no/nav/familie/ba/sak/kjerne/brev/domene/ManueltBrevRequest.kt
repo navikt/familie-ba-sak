@@ -80,7 +80,7 @@ data class ManueltBrevRequest(
     val behandlingKategori: BehandlingKategori? = null,
     val vedrørende: Person? = null,
     val mottakerlandSed: List<String> = emptyList(),
-    val manuelleBrevmottakere: List<ManuellBrevmottaker>,
+    val manuelleBrevmottakere: List<ManuellBrevmottaker> = emptyList(),
 ) {
 
     override fun toString(): String {
