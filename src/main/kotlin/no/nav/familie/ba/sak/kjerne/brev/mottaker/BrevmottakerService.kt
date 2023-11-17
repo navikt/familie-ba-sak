@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBrevMottaker
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.domene.ManuellAdresseInfo
@@ -72,7 +73,7 @@ class BrevmottakerService(
         }
 
     fun lagMottakereFraBrevMottakere(
-        manueltRegistrerteMottakere: List<Brevmottaker>,
+        manueltRegistrerteMottakere: List<ManuellBrevmottaker>,
         søkersident: String,
         søkersnavn: String = hentMottakerNavn(søkersident),
     ): List<MottakerInfo> {
@@ -86,12 +87,12 @@ class BrevmottakerService(
                 .zeroSingleOrThrow {
                     FunksjonellFeil("Mottakerfeil: Det er registrert mer enn en utenlandsk adresse tilhørende bruker")
                 }?.let {
-                    lagMottakerInfoMedBrukerId(
-                        brukerId = søkersident,
-                        navn = søkersnavn,
-                        manuellAdresseInfo = lagManuellAdresseInfo(it),
-                    )
-                }
+                lagMottakerInfoMedBrukerId(
+                    brukerId = søkersident,
+                    navn = søkersnavn,
+                    manuellAdresseInfo = lagManuellAdresseInfo(it),
+                )
+            }
 
         // brev sendes til brukers (manuelt) registerte adresse (i utlandet)
         val bruker = manuellAdresseUtenlands ?: lagMottakerInfoMedBrukerId(brukerId = søkersident, navn = søkersnavn)
@@ -102,8 +103,8 @@ class BrevmottakerService(
                 .zeroSingleOrThrow {
                     FunksjonellFeil("Mottakerfeil: ${first().type.visningsnavn} kan ikke kombineres med ${last().type.visningsnavn}")
                 }?.let {
-                    lagMottakerInfoUtenBrukerId(navn = it.navn, manuellAdresseInfo = lagManuellAdresseInfo(it))
-                }
+                lagMottakerInfoUtenBrukerId(navn = it.navn, manuellAdresseInfo = lagManuellAdresseInfo(it))
+            }
 
         return listOfNotNull(bruker, manuellTilleggsmottaker)
     }
@@ -115,7 +116,7 @@ class BrevmottakerService(
         }
     }
 
-    private fun lagManuellAdresseInfo(brevmottaker: Brevmottaker) =
+    private fun lagManuellAdresseInfo(brevmottaker: ManuellBrevmottaker) =
         ManuellAdresseInfo(
             adresselinje1 = brevmottaker.adresselinje1,
             adresselinje2 = brevmottaker.adresselinje2,
