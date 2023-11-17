@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.Brevmottaker
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 
 data class RestBrevmottaker(
@@ -14,7 +14,7 @@ data class RestBrevmottaker(
     val landkode: String,
 )
 
-fun RestBrevmottaker.tilBrevMottaker(behandlingId: Long) = Brevmottaker(
+fun RestBrevmottaker.tilBrevMottaker(behandlingId: Long) = BrevmottakerDb(
     behandlingId = behandlingId,
     type = type,
     navn = navn,

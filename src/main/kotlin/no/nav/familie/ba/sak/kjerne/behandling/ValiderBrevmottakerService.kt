@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.Brevmottaker
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import org.springframework.stereotype.Service
@@ -13,7 +13,10 @@ class ValiderBrevmottakerService(
     private val persongrunnlagService: PersongrunnlagService,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
 ) {
-    fun validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId: Long, nyBrevmottaker: Brevmottaker? = null) {
+    fun validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+        behandlingId: Long,
+        nyBrevmottaker: BrevmottakerDb? = null,
+    ) {
         var brevmottakere = brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId)
         nyBrevmottaker?.let {
             brevmottakere += it

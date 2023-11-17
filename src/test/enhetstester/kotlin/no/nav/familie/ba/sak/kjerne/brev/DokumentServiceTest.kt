@@ -20,7 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.Brevmottaker
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -238,7 +238,7 @@ internal class DokumentServiceTest {
         val avsenderMottakere = mutableListOf<AvsenderMottaker>()
 
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns listOf(
-            Brevmottaker(
+            BrevmottakerDb(
                 behandlingId = behandling.id,
                 type = MottakerType.FULLMEKTIG,
                 navn = "Fullmektig navn",

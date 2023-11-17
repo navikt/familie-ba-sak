@@ -195,7 +195,7 @@ internal class BrevmottakerServiceTest {
 
     @Test
     fun `fjernBrevmottaker skal lagre logg på at brevmottaker fjernes`() {
-        val mocketBrevmottaker = mockk<Brevmottaker>()
+        val mocketBrevmottaker = mockk<BrevmottakerDb>()
 
         every { brevmottakerRepository.findByIdOrNull(200) } returns mocketBrevmottaker
         every { loggService.opprettBrevmottakerLogg(mocketBrevmottaker, true) } just runs
@@ -209,7 +209,7 @@ internal class BrevmottakerServiceTest {
     }
 
     private fun lagBrevMottaker(mottakerType: MottakerType, poststed: String = "Oslo", landkode: String = "NO") =
-        Brevmottaker(
+        BrevmottakerDb(
             behandlingId = 1,
             type = mottakerType,
             navn = "John Doe",
