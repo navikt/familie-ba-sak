@@ -75,6 +75,51 @@ data class SanityBegrunnelse(
         this.endretUtbetalingsperiodeTriggere.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE)
 }
 
+private fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
+    return TriggesAv(
+        vilkår = this.vilkaar.map { it.tilVilkår() }.toSet(),
+        personTyper =
+        if (this.rolle.isEmpty()) {
+            when {
+                this.inneholderVilkår(SanityVilkår.BOSATT_I_RIKET) -> setOf(PersonType.BARN, PersonType.SØKER)
+                this.inneholderVilkår(SanityVilkår.LOVLIG_OPPHOLD) -> setOf(PersonType.BARN, PersonType.SØKER)
+                this.inneholderVilkår(SanityVilkår.GIFT_PARTNERSKAP) -> setOf(PersonType.BARN)
+                this.inneholderVilkår(SanityVilkår.UNDER_18_ÅR) -> setOf(PersonType.BARN)
+                this.inneholderVilkår(SanityVilkår.BOR_MED_SOKER) -> setOf(PersonType.BARN)
+                else -> setOf(PersonType.BARN, PersonType.SØKER)
+            }
+        } else {
+            this.rolle.map { it.tilPersonType() }.toSet()
+        },
+        personerManglerOpplysninger = this.inneholderØvrigTrigger(ØvrigTrigger.MANGLER_OPPLYSNINGER),
+        satsendring = this.inneholderØvrigTrigger(ØvrigTrigger.SATSENDRING),
+        barnMedSeksårsdag = this.inneholderØvrigTrigger(ØvrigTrigger.BARN_MED_6_ÅRS_DAG),
+        vurderingAnnetGrunnlag = (
+            this.inneholderLovligOppholdTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG) ||
+                this.inneholderBosattIRiketTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG) ||
+                this.inneholderGiftPartnerskapTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG) ||
+                this.inneholderBorMedSøkerTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG)
+            ),
+        medlemskap = this.inneholderBosattIRiketTrigger(VilkårTrigger.MEDLEMSKAP),
+        deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
+        deltBostedSkalIkkeDeles = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED_SKAL_IKKE_DELES),
+        valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
+        valgbarhet = this.valgbarhet,
+        etterEndretUtbetaling =
+        this.endretUtbetalingsperiodeTriggere
+            .contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) ?: false,
+        endretUtbetalingSkalUtbetales =
+        this.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger
+            ?: EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
+        endringsaarsaker = this.endringsaarsaker.toSet(),
+        småbarnstillegg = this.inneholderUtvidetBarnetrygdTrigger(UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG),
+        gjelderFørstePeriode = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FØRSTE_PERIODE),
+        gjelderFraInnvilgelsestidspunkt = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT),
+        barnDød = this.inneholderØvrigTrigger(ØvrigTrigger.BARN_DØD),
+    )
+}
+
+
 enum class ØvrigTrigger {
     MANGLER_OPPLYSNINGER,
     SATSENDRING,
@@ -119,48 +164,4 @@ data class SanityEØSBegrunnelse(
     override val bosattIRiketTriggere: List<VilkårTrigger> = emptyList()
     override val giftPartnerskapTriggere: List<VilkårTrigger> = emptyList()
     override val borMedSokerTriggere: List<VilkårTrigger> = emptyList()
-}
-
-private fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
-    return TriggesAv(
-        vilkår = this.vilkaar.map { it.tilVilkår() }.toSet(),
-        personTyper =
-            if (this.rolle.isEmpty()) {
-                when {
-                    this.inneholderVilkår(SanityVilkår.BOSATT_I_RIKET) -> setOf(PersonType.BARN, PersonType.SØKER)
-                    this.inneholderVilkår(SanityVilkår.LOVLIG_OPPHOLD) -> setOf(PersonType.BARN, PersonType.SØKER)
-                    this.inneholderVilkår(SanityVilkår.GIFT_PARTNERSKAP) -> setOf(PersonType.BARN)
-                    this.inneholderVilkår(SanityVilkår.UNDER_18_ÅR) -> setOf(PersonType.BARN)
-                    this.inneholderVilkår(SanityVilkår.BOR_MED_SOKER) -> setOf(PersonType.BARN)
-                    else -> setOf(PersonType.BARN, PersonType.SØKER)
-                }
-            } else {
-                this.rolle.map { it.tilPersonType() }.toSet()
-            },
-        personerManglerOpplysninger = this.inneholderØvrigTrigger(ØvrigTrigger.MANGLER_OPPLYSNINGER),
-        satsendring = this.inneholderØvrigTrigger(ØvrigTrigger.SATSENDRING),
-        barnMedSeksårsdag = this.inneholderØvrigTrigger(ØvrigTrigger.BARN_MED_6_ÅRS_DAG),
-        vurderingAnnetGrunnlag = (
-            this.inneholderLovligOppholdTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG) ||
-                this.inneholderBosattIRiketTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG) ||
-                this.inneholderGiftPartnerskapTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG) ||
-                this.inneholderBorMedSøkerTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG)
-        ),
-        medlemskap = this.inneholderBosattIRiketTrigger(VilkårTrigger.MEDLEMSKAP),
-        deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
-        deltBostedSkalIkkeDeles = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED_SKAL_IKKE_DELES),
-        valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
-        valgbarhet = this.valgbarhet,
-        etterEndretUtbetaling =
-            this.endretUtbetalingsperiodeTriggere
-                .contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) ?: false,
-        endretUtbetalingSkalUtbetales =
-            this.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger
-                ?: EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
-        endringsaarsaker = this.endringsaarsaker.toSet(),
-        småbarnstillegg = this.inneholderUtvidetBarnetrygdTrigger(UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG),
-        gjelderFørstePeriode = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FØRSTE_PERIODE),
-        gjelderFraInnvilgelsestidspunkt = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT),
-        barnDød = this.inneholderØvrigTrigger(ØvrigTrigger.BARN_DØD),
-    )
 }

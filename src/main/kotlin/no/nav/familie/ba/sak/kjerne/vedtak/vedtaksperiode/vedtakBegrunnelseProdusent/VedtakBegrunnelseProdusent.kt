@@ -204,7 +204,7 @@ private fun hentStandardBegrunnelser(
     erUtbetalingEllerDeltBostedIPeriode: Boolean,
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
-): Map<Standardbegrunnelse, SanityBegrunnelse> {
+): Map<IVedtakBegrunnelse, ISanityBegrunnelse> {
     val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
 
     val relevantePeriodeResultaterForrigePeriode = hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode)
@@ -297,7 +297,7 @@ private fun hentStandardBegrunnelser(
         )
 
     val filtrertPåSkalVisesSelvOmIkkeEndring =
-        relevanteBegrunnelser.filtrerPåSkalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
+        (relevanteBegrunnelser as Map<IVedtakBegrunnelse, ISanityBegrunnelse>).filtrerPåSkalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
 
     return filtrertPåVilkårOgEndretUtbetaling +
         filtrertPåReduksjonFraForrigeBehandling +
@@ -308,7 +308,7 @@ private fun hentStandardBegrunnelser(
         filtrertPåSkalVisesSelvOmIkkeEndring
 }
 
-private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSkalVisesSelvOmIkkeEndring(
+private fun Map<IVedtakBegrunnelse, ISanityBegrunnelse>.filtrerPåSkalVisesSelvOmIkkeEndring(
     begrunnelseGrunnlagForPersonIPeriode: BegrunnelseGrunnlagForPersonIPeriode,
 ) = filterValues { begrunnelse ->
     val begrunnelseMatcherVilkår =
@@ -321,11 +321,10 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSkalVisesSelvO
                         }
 
                 SanityPeriodeResultat.IKKE_INNVILGET -> false
+                null -> false
             }
-
     val begrunnelseSkalVisesSelvOmIkkeEndring =
         ØvrigTrigger.SKAL_VISES_SELV_OM_IKKE_ENDRING in begrunnelse.ovrigeTriggere
-
     begrunnelseSkalVisesSelvOmIkkeEndring && begrunnelseMatcherVilkår
 }
 
@@ -440,7 +439,7 @@ private fun hentEØSStandardBegrunnelser(
     erUtbetalingEllerDeltBostedIPeriode: Boolean,
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
-): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
+): Map<IVedtakBegrunnelse, ISanityBegrunnelse> {
     val begrunnelserFiltrertPåPeriodetype =
         sanityEØSBegrunnelser.filterValues {
             it.periodeResultat in relevantePeriodeResultater
@@ -486,7 +485,10 @@ private fun hentEØSStandardBegrunnelser(
                 )
         }
 
-    return filtrertPåEndretVilkår + filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp + filtrertPåIngenEndringMedLikKompetanse + filtrertPåTilleggstekstMedLikKompetanse
+    val filtrertPåSkalVisesSelvOmIkkeEndring =
+        (begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType as Map<IVedtakBegrunnelse, ISanityBegrunnelse>).filtrerPåSkalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
+
+    return filtrertPåEndretVilkår + filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp + filtrertPåIngenEndringMedLikKompetanse + filtrertPåTilleggstekstMedLikKompetanse + filtrertPåSkalVisesSelvOmIkkeEndring
 }
 
 fun SanityBegrunnelse.erGjeldendeForRolle(
