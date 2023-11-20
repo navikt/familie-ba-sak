@@ -120,6 +120,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
                 sanityEØSBegrunnelser = grunnlag.sanityEØSBegrunnelser,
                 begrunnelseGrunnlag = begrunnelseGrunnlag,
                 relevantePeriodeResultater = relevantePeriodeResultater,
+                behandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.behandling,
                 erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode,
                 vedtaksperiode = this,
                 utvidetVilkårPåSøkerIPeriode = utvidetVilkårPåSøkerIPeriode,
@@ -328,7 +329,7 @@ private fun Map<IVedtakBegrunnelse, ISanityBegrunnelse>.filtrerPåSkalVisesSelvO
     begrunnelseSkalVisesSelvOmIkkeEndring && begrunnelseMatcherVilkår
 }
 
-private fun SanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean): Boolean =
+private fun ISanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean): Boolean =
     when {
         this.valgbarhet != Valgbarhet.AUTOMATISK -> !erAutomatiskBehandling
         ØvrigTrigger.ALLTID_AUTOMATISK in this.ovrigeTriggere -> erAutomatiskBehandling
@@ -434,6 +435,7 @@ private fun SanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling() =
 private fun hentEØSStandardBegrunnelser(
     vedtaksperiode: VedtaksperiodeMedBegrunnelser,
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
+    behandling: Behandling,
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
     relevantePeriodeResultater: List<SanityPeriodeResultat>,
     erUtbetalingEllerDeltBostedIPeriode: Boolean,
@@ -449,8 +451,11 @@ private fun hentEØSStandardBegrunnelser(
         begrunnelserFiltrertPåPeriodetype
             .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
 
+    val filtrertPåManuelleBegrunnelser = begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType
+        .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
+
     val filtrertPåEndretVilkår =
-        begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
+        filtrertPåManuelleBegrunnelser.filterValues {
             it.erGjeldendeForUtgjørendeVilkår(
                 begrunnelseGrunnlag,
                 utvidetVilkårPåSøkerIPeriode,
