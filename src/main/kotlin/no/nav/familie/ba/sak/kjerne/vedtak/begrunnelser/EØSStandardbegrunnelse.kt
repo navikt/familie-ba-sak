@@ -560,6 +560,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_UK_MIDLERTIDIG_DIFFERANSEUTBETALING {
         override val sanityApiNavn = "reduksjonUkMidlertidigDifferanseutbetaling"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_DELT_BOSTED_BEGGE_FORELDRE_IKKE_OMFATTET_NORSK_LOVVALG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+        override val sanityApiNavn = "reduksjonDeltBostedBeggeForeldreIkkeOmfattetNorskLovvalg"
+    },
+    REDUKSJON_SELVSTENDIG_RETT_BARN_FLYTTET_FRA_SØKER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+        override val sanityApiNavn = "reduksjonSelvstendigRettBarnFlyttetFraSoker"
     }, ;
 
     override val kanDelesOpp: Boolean = false
