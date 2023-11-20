@@ -224,6 +224,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstSekundaerIkkeFaattSvarPaaSed"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_TILLEGGSTEKST_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstDeltBosted"
+    },
+    INNVILGET_TILLEGGSTEKST_FULL_BARNETRYGD_HAR_AVTALE_DELT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstFullBarnetrygdHarAvtaleDelt"
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
