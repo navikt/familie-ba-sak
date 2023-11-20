@@ -245,6 +245,26 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetEnsligMindrearigFlyktning"
     },
+    INNVILGET_ENSLIG_MINDREÅRIG_LOVLIG_OPPHOLD_FØR_BOSATT_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEnsligMindrearigLovligOppholdForBosattINorge"
+    },
+    INNVILGET_ENSLIG_MINDREÅRIG_LOVLIG_OPPHOLD_SAMTIDIG_SOM_BOSATT_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEnsligMindrearigLovligOppholdSamtidigSomBosattINorge"
+    },
+    INNVILGET_ENSLIG_MINDREÅRIG_BOSATT_FØR_LOVLIG_OPPHOLD_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEnsligMindrearigBosattForLovligOppholdINorge"
+    },
+    INNVILGET_ENSLIG_MINDREÅRIG_FLYTTET_FRA_INSTITUSJON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEnsligMindrearigFlyttetFraInstitusjon"
+    },
+    INNVILGET_ENSLIG_MINDREÅRIG_FLYTTET_FRA_FOSTERHJEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEnsligMindrearigFlyttetFraFosterhjem"
+    },
     INNVILGET_VARETEKTSFENGSEL_GIFT {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetVaretektsfengselGift"
