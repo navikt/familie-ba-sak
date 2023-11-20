@@ -5,8 +5,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_GENERERING_AV_BREVOBJEKTER
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -73,7 +71,6 @@ class BrevService(
     private val saksbehandlerContext: SaksbehandlerContext,
     private val brevmalService: BrevmalService,
     private val refusjonEøsRepository: RefusjonEøsRepository,
-    private val unleashNext: UnleashNextMedContextService,
     private val integrasjonClient: IntegrasjonClient,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -311,20 +308,13 @@ class BrevService(
                 behandling = vedtak.behandling,
             )
 
-        val brevperioder =
-            if (unleashNext.isEnabled(NY_GENERERING_AV_BREVOBJEKTER, vedtak.behandling.id)) {
-                val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
-                vedtaksperioder.mapNotNull {
-                    it.lagBrevPeriode(
-                        grunnlagForBegrunnelse = grunnlagForBegrunnelser,
-                        landkoder = integrasjonClient.hentLandkoderISO2(),
-                    )
-                }
-            } else {
-                brevPerioderData.sorted().mapNotNull {
-                    it.tilBrevPeriodeGenerator().genererBrevPeriode()
-                }
-            }
+        val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
+        val brevperioder = vedtaksperioder.mapNotNull {
+            it.lagBrevPeriode(
+                grunnlagForBegrunnelse = grunnlagForBegrunnelser,
+                landkoder = integrasjonClient.hentLandkoderISO2(),
+            )
+        }
 
         val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(vedtak.behandling.id)
         val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(vedtak.behandling.id)

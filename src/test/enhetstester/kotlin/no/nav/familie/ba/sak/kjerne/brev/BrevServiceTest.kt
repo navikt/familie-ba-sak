@@ -29,7 +29,6 @@ class BrevServiceTest {
             saksbehandlerContext = saksbehandlerContext,
             brevmalService = brevmalService,
             refusjonEøsRepository = mockk(),
-            unleashNext = mockk(),
             integrasjonClient = mockk(),
         )
 
