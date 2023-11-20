@@ -461,6 +461,14 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetUtenlandsoppholdOverTreMaaneder"
     },
+    INNVILGET_FORTSATT_BOSATT_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFortsattBosattINorge"
+    },
+    INNVILGET_OVERGANG_FRA_EØS_TIL_NASJONAL_HELE_FAMILIEN_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetOvergangFraEosTilNasjonalHeleFamilienMedlem"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
