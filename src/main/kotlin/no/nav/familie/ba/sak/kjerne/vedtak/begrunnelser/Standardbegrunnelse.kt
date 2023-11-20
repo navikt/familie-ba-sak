@@ -1229,6 +1229,26 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorUgyldigKontonummerFraInnvilgelse"
     },
+    OPPHØR_ENSLIG_MINDREÅRIG_18_ÅR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorEnsligMindrearig18Aar"
+    },
+    OPPHØR_ENSLIG_MINDREÅRIG_FLYTTET_I_INSTITUSJON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorEnsligMindrearigFlyttetIInstitusjon"
+    },
+    OPPHØR_ENSLIG_MINDREÅRIG_FLYTTET_TIL_FOSTERHJEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorEnsligMindrearigFlyttetTilFosterhjem"
+    },
+    OPPHØR_ENSLIG_MINDREÅRIG_BOR_MED_OMSORGSPERSON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorEnsligMindrearigBorMedOmsorgsperson"
+    },
+    OPPHØR_ENSLIG_MINDREÅRIG_UTVANDRET {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorEnsligMindrearigUtvandret"
+    },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetSokerOgBarnBosattIRiket"
