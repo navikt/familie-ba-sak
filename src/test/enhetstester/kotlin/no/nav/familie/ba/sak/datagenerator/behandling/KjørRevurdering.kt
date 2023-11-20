@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.datagenerator.behandling
 
 import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_GENERERING_AV_BREVOBJEKTER
-import no.nav.familie.ba.sak.config.testSanityKlient
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -12,19 +10,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -32,15 +21,8 @@ import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentGyldigeBegrunnelserForVedtaksperiodeMinimert
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentYtelserForSøkerForrigeMåned
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserPerPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.ytelseErFraForrigePeriode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
@@ -51,7 +33,6 @@ import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.unleash.UnleashService
 import java.time.LocalDate
 import java.util.Properties
 
@@ -67,12 +48,8 @@ fun kjørStegprosessForBehandling(
     vilkårsvurderingService: VilkårsvurderingService,
     stegService: StegService,
     vedtaksperiodeService: VedtaksperiodeService,
-    endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     fagsakService: FagsakService,
-    persongrunnlagService: PersongrunnlagService,
-    andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     brevmalService: BrevmalService,
-    unleashService: UnleashService,
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
 
@@ -122,12 +99,6 @@ fun kjørStegprosessForBehandling(
             vedtakService = vedtakService,
             vedtaksperiodeService = vedtaksperiodeService,
             stegService = stegService,
-            persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
-            sanityBegrunnelser = testSanityKlient.hentBegrunnelserMap(),
-            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.id)!!,
-            unleashService = unleashService,
         )
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
@@ -183,34 +154,11 @@ private fun håndterSendtTilBeslutterSteg(
     vedtakService: VedtakService,
     vedtaksperiodeService: VedtaksperiodeService,
     stegService: StegService,
-    persongrunnlagService: PersongrunnlagService,
-    andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
-    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
-    vilkårsvurdering: Vilkårsvurdering,
-    unleashService: UnleashService,
 ): Behandling {
-    val andelerTilkjentYtelse =
-        andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId = behandlingEtterSimuleringSteg.id)
-
-    val persongrunnlag =
-        persongrunnlagService.hentAktivThrows(behandlingEtterSimuleringSteg.id)
-
-    val endredeUtbetalingAndeler =
-        endretUtbetalingAndelHentOgPersisterService.hentForBehandling(
-            behandlingEtterSimuleringSteg.id,
-        )
     leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
         behandling = behandlingEtterSimuleringSteg,
         vedtakService = vedtakService,
         vedtaksperiodeService = vedtaksperiodeService,
-        personopplysningGrunnlag = persongrunnlag,
-        andelerTilkjentYtelse = andelerTilkjentYtelse,
-        endredeUtbetalingAndeler = endredeUtbetalingAndeler,
-        sanityBegrunnelser = sanityBegrunnelser,
-        vilkårsvurdering = vilkårsvurdering,
-        unleashService = unleashService,
     )
     val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
     return behandlingEtterSendTilBeslutter
@@ -359,12 +307,6 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
     behandling: Behandling,
     vedtakService: VedtakService,
     vedtaksperiodeService: VedtaksperiodeService,
-    personopplysningGrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    endredeUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
-    vilkårsvurdering: Vilkårsvurdering,
-    unleashService: UnleashService,
 ) {
     val aktivtVedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
 
@@ -373,66 +315,13 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
 
     val vedtaksperiode = perisisterteVedtaksperioder.first()
 
-    if (unleashService.isEnabled(NY_GENERERING_AV_BREVOBJEKTER)) {
-        val grunnlagForBegrunnelse = vedtaksperiodeService.hentGrunnlagForBegrunnelse(behandling)
-        val begrunnelserPerPerson =
-            vedtaksperiode.hentGyldigeBegrunnelserPerPerson(grunnlagForBegrunnelse).values.flatten()
+    val grunnlagForBegrunnelse = vedtaksperiodeService.hentGrunnlagForBegrunnelse(behandling)
+    val begrunnelserPerPerson =
+        vedtaksperiode.hentGyldigeBegrunnelserPerPerson(grunnlagForBegrunnelse).values.flatten()
 
-        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
-            vedtaksperiodeId = vedtaksperiode.id,
-            standardbegrunnelserFraFrontend = begrunnelserPerPerson.filterIsInstance<Standardbegrunnelse>(),
-            eøsStandardbegrunnelserFraFrontend = begrunnelserPerPerson.filterIsInstance<EØSStandardbegrunnelse>(),
-        )
-    } else {
-        val utvidetVedtaksperiodeMedBegrunnelser =
-            vedtaksperiode.tilUtvidetVedtaksperiodeMedBegrunnelser(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-            )
-
-        val aktørerMedUtbetaling =
-            utvidetVedtaksperiodeMedBegrunnelser
-                .utbetalingsperiodeDetaljer
-                .map { personMedUtbetaling ->
-                    personopplysningGrunnlag.søkerOgBarn.find {
-                        it.aktør.aktivFødselsnummer() == personMedUtbetaling.person.personIdent
-                    }!!.aktør
-                }
-
-        val gyldigeStandardbegrunnelser =
-            hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
-                minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
-                sanityBegrunnelser = sanityBegrunnelser,
-                minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
-                minimertePersonresultater =
-                    vilkårsvurdering.personResultater
-                        .map { it.tilMinimertPersonResultat() },
-                aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
-                minimerteEndredeUtbetalingAndeler =
-                    endredeUtbetalingAndeler
-                        .map { it.tilMinimertEndretUtbetalingAndel() },
-                erFørsteVedtaksperiodePåFagsak =
-                    erFørsteVedtaksperiodePåFagsak(
-                        andelerTilkjentYtelse,
-                        utvidetVedtaksperiodeMedBegrunnelser.fom,
-                    ),
-                ytelserForSøkerForrigeMåned =
-                    hentYtelserForSøkerForrigeMåned(
-                        andelerTilkjentYtelse,
-                        utvidetVedtaksperiodeMedBegrunnelser,
-                    ),
-                ytelserForrigePerioder =
-                    andelerTilkjentYtelse.filter {
-                        ytelseErFraForrigePeriode(
-                            it,
-                            utvidetVedtaksperiodeMedBegrunnelser,
-                        )
-                    },
-            )
-        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
-            vedtaksperiodeId = vedtaksperiode.id,
-            standardbegrunnelserFraFrontend = gyldigeStandardbegrunnelser,
-            eøsStandardbegrunnelserFraFrontend = emptyList(),
-        )
-    }
+    vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
+        vedtaksperiodeId = vedtaksperiode.id,
+        standardbegrunnelserFraFrontend = begrunnelserPerPerson.filterIsInstance<Standardbegrunnelse>(),
+        eøsStandardbegrunnelserFraFrontend = begrunnelserPerPerson.filterIsInstance<EØSStandardbegrunnelse>(),
+    )
 }
