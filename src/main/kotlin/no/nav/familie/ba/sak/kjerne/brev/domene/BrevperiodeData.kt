@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeGenerator
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BrevBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 
 @Deprecated("Skal bort. Bruk GrunnlagForBegrunnelse i stedet")
@@ -18,26 +16,7 @@ data class BrevperiodeData(
     val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>,
     val dødeBarnForrigePeriode: List<String>,
 ) : Comparable<BrevperiodeData> {
-    fun tilBrevPeriodeGenerator() =
-        BrevPeriodeGenerator(
-            restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-            uregistrerteBarn = uregistrerteBarn,
-            brevMålform = brevMålform,
-            minimertVedtaksperiode = minimertVedtaksperiode,
-            barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
-            minimerteKompetanserForPeriode = minimerteKompetanserForPeriode,
-            minimerteKompetanserSomStopperRettFørPeriode = minimerteKompetanserSomStopperRettFørPeriode,
-            dødeBarnForrigePeriode = dødeBarnForrigePeriode,
-        )
 
-    fun hentBegrunnelserOgFritekster(): List<BrevBegrunnelse> {
-        val brevPeriodeGenerator = this.tilBrevPeriodeGenerator()
-        return brevPeriodeGenerator.byggBegrunnelserOgFritekster(
-            begrunnelserGrunnlagMedPersoner = brevPeriodeGenerator.hentBegrunnelsegrunnlagMedPersoner(),
-            eøsBegrunnelserMedKompetanser = brevPeriodeGenerator.hentEøsBegrunnelserMedKompetanser(),
-        )
-    }
 
     fun tilBrevperiodeForLogging() =
         minimertVedtaksperiode.tilBrevPeriodeForLogging(

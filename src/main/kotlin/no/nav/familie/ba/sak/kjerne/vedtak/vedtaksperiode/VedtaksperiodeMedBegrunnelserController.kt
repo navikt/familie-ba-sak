@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_GENERERING_AV_BREVOBJEKTER
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -10,7 +8,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
-import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -41,10 +38,8 @@ class VedtaksperiodeMedBegrunnelserController(
     private val tilgangService: TilgangService,
     private val brevKlient: BrevKlient,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val brevPeriodeService: BrevPeriodeService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val integrasjonClient: IntegrasjonClient,
-    private val unleashService: UnleashNextMedContextService,
 ) {
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
     fun oppdaterVedtaksperiodeStandardbegrunnelser(
@@ -144,19 +139,14 @@ class VedtaksperiodeMedBegrunnelserController(
 
         val vedtaksperiode = vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
 
-        val brevBegrunnelser =
-            if (unleashService.isEnabled(NY_GENERERING_AV_BREVOBJEKTER, behandlingId)) {
-                val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(behandlingId)
-                val begrunnelsesGrunnlagPerPerson = vedtaksperiode.finnBegrunnelseGrunnlagPerPerson(grunnlagForBegrunnelser)
+        val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(behandlingId)
+        val begrunnelsesGrunnlagPerPerson = vedtaksperiode.finnBegrunnelseGrunnlagPerPerson(grunnlagForBegrunnelser)
 
-                vedtaksperiode.hentBegrunnelser(
-                    grunnlagForBegrunnelse = grunnlagForBegrunnelser,
-                    begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
-                    landkoder = integrasjonClient.hentLandkoderISO2(),
-                )
-            } else {
-                brevPeriodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId)
-            }
+        val brevBegrunnelser = vedtaksperiode.hentBegrunnelser(
+            grunnlagForBegrunnelse = grunnlagForBegrunnelser,
+            begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+            landkoder = integrasjonClient.hentLandkoderISO2(),
+        )
 
         val begrunnelser =
             brevBegrunnelser.map {

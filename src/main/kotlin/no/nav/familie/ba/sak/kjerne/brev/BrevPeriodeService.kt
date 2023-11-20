@@ -30,7 +30,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.dødeBarnForrigePeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BrevBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
@@ -230,17 +229,5 @@ class BrevPeriodeService(
         } else {
             emptyList()
         }
-    }
-
-    fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<BrevBegrunnelse> {
-        val vedtaksperiodeMedBegrunnelser =
-            vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
-
-        val begrunnelseDataForVedtaksperiode =
-            hentBrevperioderData(
-                vedtaksperioder = listOf(vedtaksperiodeMedBegrunnelser),
-                behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling,
-            ).single()
-        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
     }
 }

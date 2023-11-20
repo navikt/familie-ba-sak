@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingA
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
@@ -22,18 +21,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 import java.time.YearMonth
-
-fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
-    Utils.slåSammen(
-        this
-            .filter { it.type == PersonType.BARN }
-            .sortedBy { person ->
-                person.fødselsdato
-            }
-            .map { person ->
-                person.fødselsdato.tilKortString()
-            },
-    )
 
 fun List<LocalDate>.tilSammenslåttKortString(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
 
@@ -49,16 +36,6 @@ fun hentBarnasFødselsdatoerForAvslagsbegrunnelse(
         uregistrerteBarn.mapNotNull { it.fødselsdato }
     val alleBarnaFødselsdatoer = registrerteBarnFødselsdatoer + uregistrerteBarnFødselsdatoer
     return alleBarnaFødselsdatoer.tilSammenslåttKortString()
-}
-
-fun hentAntallBarnForAvslagsbegrunnelse(
-    barnIBegrunnelse: List<MinimertRestPerson>,
-    barnPåBehandling: List<MinimertRestPerson>,
-    uregistrerteBarn: List<MinimertUregistrertBarn>,
-    gjelderSøker: Boolean,
-): Int {
-    val antallRegistrerteBarn = if (gjelderSøker) barnPåBehandling.size else barnIBegrunnelse.size
-    return antallRegistrerteBarn + uregistrerteBarn.size
 }
 
 fun hentRestBehandlingsgrunnlagForBrev(
