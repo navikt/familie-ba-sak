@@ -300,6 +300,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorSelvstendigRettUtsendtArbedstakerFraAnnetEosLand"
     },
+    OPPHØR_DELT_BOSTED_BEGGE_FORELDRE_IKKE_OMFATTET_NORSK_LOVGIVNING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorDeltBostedBeggeForeldreIkkeOmfattetNorskLovgivning"
+    },
+    OPPHØR_SELVSTENDIG_RETT_BARN_FLYTTET_FRA_SØKER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSelvstendigRettBarnFlyttetFraSoker"
+    },
     AVSLAG_EØS_IKKE_EØS_BORGER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosIkkeEosBorger"
