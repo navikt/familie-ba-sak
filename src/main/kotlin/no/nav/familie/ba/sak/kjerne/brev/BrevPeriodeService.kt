@@ -87,7 +87,6 @@ class BrevPeriodeService(
                     }
                 }
 
-        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
 
         val restBehandlingsgrunnlagForBrev =
@@ -106,7 +105,6 @@ class BrevPeriodeService(
                 uregistrerteBarn = uregistrerteBarn,
                 skalLogge = skalLogge,
                 kompetanser = kompetanser.toList(),
-                sanityBegrunnelser = sanityBegrunnelser,
                 sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             )
         }
@@ -119,7 +117,6 @@ class BrevPeriodeService(
         andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         uregistrerteBarn: List<BarnMedOpplysninger>,
         kompetanser: List<Kompetanse>,
-        sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
         sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
         skalLogge: Boolean = true,
     ): BrevperiodeData {
@@ -139,7 +136,6 @@ class BrevPeriodeService(
 
         val minimertVedtaksperiode =
             utvidetVedtaksperiodeMedBegrunnelse.tilMinimertVedtaksperiode(
-                sanityBegrunnelser = sanityBegrunnelser,
                 sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             )
 

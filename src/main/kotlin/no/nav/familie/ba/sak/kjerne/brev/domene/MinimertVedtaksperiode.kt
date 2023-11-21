@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevPeriodeTestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
@@ -20,7 +19,6 @@ data class MinimertVedtaksperiode(
 )
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
-    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
 ): MinimertVedtaksperiode {
     return MinimertVedtaksperiode(
@@ -29,13 +27,13 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
         type = this.type,
         fritekster = this.fritekster,
         minimerteUtbetalingsperiodeDetaljer = this.utbetalingsperiodeDetaljer.map { it.tilMinimertUtbetalingsperiodeDetalj() },
-        begrunnelser = this.begrunnelser.map { it.tilBegrunnelseMedTriggere(sanityBegrunnelser) },
+        begrunnelser = this.begrunnelser.map { it.tilBegrunnelseMedTriggere() },
         eøsBegrunnelser =
-            this.eøsBegrunnelser.mapNotNull {
-                it.begrunnelse.tilEØSBegrunnelseMedTriggere(
-                    sanityEØSBegrunnelser,
-                )
-            },
+        this.eøsBegrunnelser.mapNotNull {
+            it.begrunnelse.tilEØSBegrunnelseMedTriggere(
+                sanityEØSBegrunnelser,
+            )
+        },
     )
 }
 
