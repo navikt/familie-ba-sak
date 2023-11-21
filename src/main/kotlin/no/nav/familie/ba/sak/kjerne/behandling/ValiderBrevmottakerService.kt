@@ -1,11 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import org.springframework.stereotype.Service
 
@@ -14,7 +15,7 @@ class ValiderBrevmottakerService(
     private val brevmottakerRepository: BrevmottakerRepository,
     private val persongrunnlagService: PersongrunnlagService,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
-    private val fagsakService: FagsakService,
+    private val fagsakRepository: FagsakRepository,
 ) {
     fun validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
         behandlingId: Long,
@@ -48,7 +49,7 @@ class ValiderBrevmottakerService(
         val erManuellBrevmottaker = manuelleBrevmottakere.isNotEmpty()
         if (!erManuellBrevmottaker) return
 
-        val fagsak = fagsakService.hentPåFagsakId(fagsakId)
+        val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: throw Feil("Fant ikke fagsak $fagsakId")
         val strengtFortroligePersonIdenter =
             familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(listOf(fagsak.aktør.aktivFødselsnummer()))
 
