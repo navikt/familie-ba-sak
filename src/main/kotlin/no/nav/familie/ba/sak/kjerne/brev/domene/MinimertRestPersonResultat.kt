@@ -30,10 +30,3 @@ fun PersonResultat.tilMinimertPersonResultat() =
         minimerteVilkårResultater = this.vilkårResultater.map { it.tilMinimertVilkårResultat() },
         minimerteAndreVurderinger = this.andreVurderinger.map { it.tilMinimertAnnenVurdering() },
     )
-
-fun List<MinimertRestPersonResultat>.harPersonerSomManglerOpplysninger(): Boolean =
-    this.any { personResultat ->
-        personResultat.minimerteAndreVurderinger.any {
-            it.type == AnnenVurderingType.OPPLYSNINGSPLIKT && it.resultat == Resultat.IKKE_OPPFYLT
-        }
-    }
