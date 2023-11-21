@@ -550,7 +550,6 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
 
     override fun delOpp(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-        triggesAv: TriggesAv,
         periode: NullablePeriode,
     ): List<BrevBegrunnelseGrunnlagMedPersoner> {
         throw Feil("Begrunnelse $this kan ikke deles opp.")

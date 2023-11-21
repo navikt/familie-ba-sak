@@ -1561,7 +1561,6 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
 
     override fun delOpp(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-        triggesAv: TriggesAv,
         periode: NullablePeriode,
     ): List<BrevBegrunnelseGrunnlagMedPersoner> {
         if (!this.kanDelesOpp) {
@@ -1588,7 +1587,6 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
                     BrevBegrunnelseGrunnlagMedPersoner(
                         standardbegrunnelse = this,
                         vedtakBegrunnelseType = this.vedtakBegrunnelseType,
-                        triggesAv = triggesAv,
                         personIdenter = it.value.map { endringsperiode -> endringsperiode.personIdent },
                         avtaletidspunktDeltBosted = it.key,
                     )
@@ -1604,16 +1602,3 @@ private fun endringsperiodeGjelderBarn(
     personerPåBehandling: List<MinimertRestPerson>,
     personIdentFraEndringsperiode: String,
 ) = personerPåBehandling.find { person -> person.personIdent == personIdentFraEndringsperiode }?.type == PersonType.BARN
-
-val endretUtbetalingsperiodeBegrunnelser: Set<Standardbegrunnelse> =
-    setOf(
-        Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY,
-        Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING_FØR_SOKNAD_NY,
-        Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALT_UTVIDET_NY,
-        Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY,
-        Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING,
-        Standardbegrunnelse.ENDRET_UTBETALING_SEKUNDÆR_DELT_BOSTED_FULL_UTBETALING_FØR_SØKNAD,
-        Standardbegrunnelse.ENDRET_UTBETALING_ETTERBETALT_UTVIDET_DEL_FRA_AVTALETIDSPUNKT_SØKT_FOR_PRAKTISERT_DELT,
-        Standardbegrunnelse.ENDRET_UTBETALING_ALLEREDE_UTBETALT_FORELDRE_BOR_SAMMEN,
-        Standardbegrunnelse.ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS,
-    )

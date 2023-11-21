@@ -18,7 +18,6 @@ sealed interface IVedtakBegrunnelse {
 
     fun delOpp(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-        triggesAv: TriggesAv,
         periode: NullablePeriode,
     ): List<BrevBegrunnelseGrunnlagMedPersoner>
 
