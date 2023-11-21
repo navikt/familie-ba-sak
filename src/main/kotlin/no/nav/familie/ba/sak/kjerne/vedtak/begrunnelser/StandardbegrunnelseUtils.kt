@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -55,30 +54,3 @@ fun Standardbegrunnelse.tilVedtaksbegrunnelse(
         standardbegrunnelse = this,
     )
 }
-
-fun VedtakBegrunnelseType.periodeErOppyltForYtelseType(
-    ytelseType: YtelseType,
-    ytelseTyperForPeriode: Set<YtelseType>,
-    ytelserGjeldeneForSøkerForrigeMåned: List<YtelseType>,
-): Boolean {
-    return when (this) {
-        VedtakBegrunnelseType.INNVILGET, VedtakBegrunnelseType.INSTITUSJON_INNVILGET ->
-            ytelseTyperForPeriode.contains(
-                ytelseType,
-            )
-
-        VedtakBegrunnelseType.REDUKSJON, VedtakBegrunnelseType.INSTITUSJON_REDUKSJON ->
-            !ytelseTyperForPeriode.contains(
-                ytelseType,
-            ) &&
-                ytelseOppfyltForrigeMåned(ytelseType, ytelserGjeldeneForSøkerForrigeMåned)
-
-        else -> false
-    }
-}
-
-private fun ytelseOppfyltForrigeMåned(
-    ytelseType: YtelseType,
-    ytelserGjeldeneForSøkerForrigeMåned: List<YtelseType>,
-) = ytelserGjeldeneForSøkerForrigeMåned
-    .any { it == ytelseType }
