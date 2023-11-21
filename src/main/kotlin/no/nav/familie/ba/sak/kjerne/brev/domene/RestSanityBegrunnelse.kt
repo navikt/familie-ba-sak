@@ -47,10 +47,6 @@ data class RestSanityBegrunnelse(
         return SanityBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
-            vilkaar =
-                vilkaar?.mapNotNull {
-                    it.finnEnumverdi<SanityVilkår>(apiNavn)
-                } ?: emptyList(),
             vilkår =
                 vilkaar?.mapNotNull {
                     it.finnEnumverdi<SanityVilkår>(apiNavn)

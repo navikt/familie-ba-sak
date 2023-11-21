@@ -39,7 +39,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
@@ -1287,7 +1286,7 @@ fun lagRestSanityBegrunnelse(
 fun lagSanityBegrunnelse(
     apiNavn: String = "",
     navnISystem: String = "",
-    vilkaar: List<SanityVilkår> = emptyList(),
+    vilkår: Set<Vilkår> = emptySet(),
     rolle: List<VilkårRolle> = emptyList(),
     lovligOppholdTriggere: List<VilkårTrigger> = emptyList(),
     bosattIRiketTriggere: List<VilkårTrigger> = emptyList(),
@@ -1307,7 +1306,7 @@ fun lagSanityBegrunnelse(
     SanityBegrunnelse(
         apiNavn = apiNavn,
         navnISystem = navnISystem,
-        vilkaar = vilkaar,
+        vilkår = vilkår,
         rolle = rolle,
         lovligOppholdTriggere = lovligOppholdTriggere,
         bosattIRiketTriggere = bosattIRiketTriggere,

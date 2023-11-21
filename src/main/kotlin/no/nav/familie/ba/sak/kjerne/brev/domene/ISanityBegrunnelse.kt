@@ -56,8 +56,6 @@ data class SanityBegrunnelse(
     override val valgbarhet: Valgbarhet? = null,
     override val periodeType: BrevPeriodeType? = null,
     override val begrunnelseTypeForPerson: VedtakBegrunnelseType? = null,
-    @Deprecated("Bruk vilkår")
-    val vilkaar: List<SanityVilkår> = emptyList(),
     val rolle: List<VilkårRolle> = emptyList(),
     val ovrigeTriggere: List<ØvrigTrigger> = emptyList(),
     val hjemler: List<String> = emptyList(),
