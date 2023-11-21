@@ -156,9 +156,9 @@ class VedtaksperiodeService(
                     validerSatsendring(
                         fom = vedtaksperiodeMedBegrunnelser.fom,
                         harBarnMedSeksårsdagPåFom =
-                        persongrunnlag.harBarnMedSeksårsdagPåFom(
-                            vedtaksperiodeMedBegrunnelser.fom,
-                        ),
+                            persongrunnlag.harBarnMedSeksårsdagPåFom(
+                                vedtaksperiodeMedBegrunnelser.fom,
+                            ),
                     )
                 }
 
