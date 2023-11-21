@@ -1,3 +1,4 @@
+
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
@@ -6,7 +7,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.hentSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
-import no.nav.familie.ba.sak.kjerne.brev.tilSammenslåttKortString
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -64,7 +64,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
             EØSBegrunnelseDataUtenKompetanse(
                 vedtakBegrunnelseType = this.vedtakBegrunnelseType,
                 apiNavn = sanityBegrunnelse.apiNavn,
-                barnasFodselsdatoer = barnasFødselsdatoer.tilSammenslåttKortString(),
+                barnasFodselsdatoer = Utils.slåSammen(barnasFødselsdatoer.sorted().map { it.tilKortString() }),
                 antallBarn = barnasFødselsdatoer.size,
                 maalform = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform.tilSanityFormat(),
                 gjelderSoker = gjelderSøker,
