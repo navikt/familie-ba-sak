@@ -73,15 +73,15 @@ class DokumentService(
 
     @Transactional
     fun sendManueltBrev(manueltBrevRequest: ManueltBrevRequest, behandling: Behandling? = null, fagsakId: Long) {
-        if (behandling != null) {
-            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
-                behandlingId = behandling.id,
-                barnLagtTilIBrev = manueltBrevRequest.barnIBrev,
-            )
-        } else {
+        if (behandling == null) {
             validerBrevmottakerService.validerAtFagsakIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
                 fagsakId = fagsakId,
                 manueltBrevRequest.manuelleBrevmottakere,
+                barnLagtTilIBrev = manueltBrevRequest.barnIBrev,
+            )
+        } else {
+            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                behandlingId = behandling.id,
                 barnLagtTilIBrev = manueltBrevRequest.barnIBrev,
             )
         }
