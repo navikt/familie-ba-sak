@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import java.time.LocalDate
 
@@ -20,12 +19,5 @@ fun RestPerson.tilMinimertPerson() =
     MinimertRestPerson(
         personIdent = this.personIdent,
         fødselsdato = fødselsdato ?: throw Feil("Fødselsdato mangler"),
-        type = this.type,
-    )
-
-fun Person.tilMinimertPerson() =
-    MinimertRestPerson(
-        personIdent = this.aktør.aktivFødselsnummer(),
-        fødselsdato = this.fødselsdato,
         type = this.type,
     )
