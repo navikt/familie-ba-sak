@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.tilSammenslåttKortString
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetanse
@@ -95,10 +94,6 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
         }
     }
 }
-
-private fun GrunnlagForBegrunnelse.hent(
-    aktør: Aktør,
-) = behandlingsGrunnlagForVedtaksperioder.persongrunnlag.personer.single { it.aktør == aktør }
 
 fun hentBarnasFødselsdatoerForAvslagsbegrunnelse(
     barnIBegrunnelse: List<Person>,
