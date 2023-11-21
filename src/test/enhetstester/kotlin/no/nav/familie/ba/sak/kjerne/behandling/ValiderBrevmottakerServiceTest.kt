@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasj
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -19,10 +20,12 @@ class ValiderBrevmottakerServiceTest {
     private val brevmottakerRepository = mockk<BrevmottakerRepository>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val familieIntegrasjonerTilgangskontrollService = mockk<FamilieIntegrasjonerTilgangskontrollService>()
+    private val fagsakRepository = mockk<FagsakRepository>()
     val validerBrevmottakerService = ValiderBrevmottakerService(
-        brevmottakerRepository,
-        persongrunnlagService,
-        familieIntegrasjonerTilgangskontrollService,
+        brevmottakerRepository = brevmottakerRepository,
+        persongrunnlagService = persongrunnlagService,
+        familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
+        fagsakRepository = fagsakRepository,
     )
 
     private val behandlingId = 0L
