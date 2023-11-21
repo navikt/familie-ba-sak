@@ -7,10 +7,11 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 
 fun <T : Tidsenhet> String.somBoolskTidslinje(t: Tidspunkt<T>) = this.tilCharTidslinje(t).somBoolsk()
 
-fun <T : Tidsenhet> Tidslinje<Char, T>.somBoolsk() = this.map {
-    when (it?.lowercaseChar()) {
-        't' -> true
-        'f' -> false
-        else -> null
+fun <T : Tidsenhet> Tidslinje<Char, T>.somBoolsk() =
+    this.map {
+        when (it?.lowercaseChar()) {
+            't' -> true
+            'f' -> false
+            else -> null
+        }
     }
-}

@@ -31,7 +31,6 @@ import java.util.concurrent.CompletableFuture
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SendMeldingTilBisysTaskTest {
-
     data class Mocks(
         val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
         val kafkaProducer: DefaultKafkaProducer,
@@ -48,11 +47,12 @@ class SendMeldingTilBisysTaskTest {
 
         val forrigeBehandling = lagBehandling(defaultFagsak(), førsteSteg = StegType.BEHANDLING_AVSLUTTET)
 
-        val nyBehandling = lagBehandling(
-            forrigeBehandling.fagsak,
-            resultat = Behandlingsresultat.OPPHØRT,
-            førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG,
-        )
+        val nyBehandling =
+            lagBehandling(
+                forrigeBehandling.fagsak,
+                resultat = Behandlingsresultat.OPPHØRT,
+                førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG,
+            )
 
         every { behandlingHentOgPersisterServiceMock.hent(forrigeBehandling.id) } returns forrigeBehandling
         every { behandlingHentOgPersisterServiceMock.hent(nyBehandling.id) } returns nyBehandling
@@ -79,27 +79,29 @@ class SendMeldingTilBisysTaskTest {
 
         val barn1 = lagPerson(type = PersonType.BARN)
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.of(2037, 12),
-                    prosent = BigDecimal(100),
-                    person = barn1,
-                ),
-            )
-        }
-        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
-            // Barn1 opphør fra 04/2022
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.of(2022, 3),
-                    prosent = BigDecimal(100),
-                    person = barn1,
-                ),
-            )
-        }
+        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns
+            lagInitiellTilkjentYtelse().also {
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                    ),
+                )
+            }
+        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns
+            lagInitiellTilkjentYtelse().also {
+                // Barn1 opphør fra 04/2022
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2022, 3),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                    ),
+                )
+            }
 
         val meldingSlot = slot<String>()
         every {
@@ -129,35 +131,37 @@ class SendMeldingTilBisysTaskTest {
 
         val barn1 = lagPerson(type = PersonType.BARN)
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.of(2037, 12),
-                    prosent = BigDecimal(100),
-                    person = barn1,
-                ),
-            )
-        }
-        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
-            // Barn1 reduser fra 04/2022
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.of(2022, 3),
-                    prosent = BigDecimal(100),
-                    person = barn1,
-                ),
-            )
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2022, 4),
-                    tom = YearMonth.of(2037, 12),
-                    prosent = BigDecimal(50),
-                    person = barn1,
-                ),
-            )
-        }
+        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns
+            lagInitiellTilkjentYtelse().also {
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                    ),
+                )
+            }
+        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns
+            lagInitiellTilkjentYtelse().also {
+                // Barn1 reduser fra 04/2022
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2022, 3),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2022, 4),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(50),
+                        person = barn1,
+                    ),
+                )
+            }
 
         val meldingSlot = slot<String>()
         every {
@@ -190,79 +194,81 @@ class SendMeldingTilBisysTaskTest {
         val barn2 = lagPerson(type = PersonType.BARN)
         val barn3 = lagPerson(type = PersonType.BARN)
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.of(2037, 12),
-                    prosent = BigDecimal(100),
-                    person = barn1,
-                ),
-            )
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.of(2037, 12),
-                    prosent = BigDecimal(100),
-                    person = barn2,
-                ),
-            )
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2019, 1),
-                    tom = YearMonth.of(2036, 12),
-                    prosent = BigDecimal(100),
-                    person = barn3,
-                ),
-            )
-        }
-        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
-            // Barn1 opphør fra 04/2022
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.of(2022, 3),
-                    prosent = BigDecimal(100),
-                    person = barn1,
-                ),
-            )
+        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns
+            lagInitiellTilkjentYtelse().also {
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(100),
+                        person = barn2,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2019, 1),
+                        tom = YearMonth.of(2036, 12),
+                        prosent = BigDecimal(100),
+                        person = barn3,
+                    ),
+                )
+            }
+        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns
+            lagInitiellTilkjentYtelse().also {
+                // Barn1 opphør fra 04/2022
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2022, 3),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                    ),
+                )
 
-            // Barn2 redusert fra 02/2026
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.of(2026, 1),
-                    prosent = BigDecimal(100),
-                    person = barn2,
-                ),
-            )
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2026, 2),
-                    tom = YearMonth.of(2037, 12),
-                    prosent = BigDecimal(50),
-                    person = barn2,
-                ),
-            )
+                // Barn2 redusert fra 02/2026
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2026, 1),
+                        prosent = BigDecimal(100),
+                        person = barn2,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2026, 2),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(50),
+                        person = barn2,
+                    ),
+                )
 
-            // Barn3 redusert fra 04/2019 og opphørt fra 10/2019
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2019, 1),
-                    tom = YearMonth.of(2019, 4),
-                    prosent = BigDecimal(100),
-                    person = barn3,
-                ),
-            )
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2019, 5),
-                    tom = YearMonth.of(2019, 9),
-                    prosent = BigDecimal(50),
-                    person = barn3,
-                ),
-            )
-        }
+                // Barn3 redusert fra 04/2019 og opphørt fra 10/2019
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2019, 1),
+                        tom = YearMonth.of(2019, 4),
+                        prosent = BigDecimal(100),
+                        person = barn3,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2019, 5),
+                        tom = YearMonth.of(2019, 9),
+                        prosent = BigDecimal(50),
+                        person = barn3,
+                    ),
+                )
+            }
 
         val endretPerioder = sendMeldingTilBisysTask.finnBarnEndretOpplysning(behandling[1])
         val barn1Perioder = endretPerioder[barn1.aktør.aktivFødselsnummer()]
@@ -296,35 +302,37 @@ class SendMeldingTilBisysTaskTest {
 
         val barn1 = lagPerson(type = PersonType.BARN)
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.of(2021, 1),
-                    prosent = BigDecimal(100),
-                    person = barn1,
-                ),
-            )
-        }
-        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
-            // Barn1 legger til period fra 04/2022
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1),
-                    tom = YearMonth.of(2022, 3),
-                    prosent = BigDecimal(100),
-                    person = barn1,
-                ),
-            )
-            it.andelerTilkjentYtelse.add(
-                lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2022, 4),
-                    tom = YearMonth.of(2037, 12),
-                    prosent = BigDecimal(100),
-                    person = barn1,
-                ),
-            )
-        }
+        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns
+            lagInitiellTilkjentYtelse().also {
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2021, 1),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                    ),
+                )
+            }
+        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns
+            lagInitiellTilkjentYtelse().also {
+                // Barn1 legger til period fra 04/2022
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2022, 3),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2022, 4),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                    ),
+                )
+            }
 
         sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].id))
 

@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPerson
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 
 sealed interface IVedtakBegrunnelse {
-
     val sanityApiNavn: String
     val vedtakBegrunnelseType: VedtakBegrunnelseType
     val kanDelesOpp: Boolean
@@ -43,7 +42,10 @@ fun IVedtakBegrunnelse.erAvslagUregistrerteBarnBegrunnelse() =
     this in setOf(Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN, EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN)
 
 class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>(List::class.java) {
-    override fun deserialize(jsonParser: JsonParser?, p1: DeserializationContext?): List<IVedtakBegrunnelse> {
+    override fun deserialize(
+        jsonParser: JsonParser?,
+        p1: DeserializationContext?,
+    ): List<IVedtakBegrunnelse> {
         val node: ArrayNode = jsonParser!!.codec.readTree(jsonParser)
         return node
             .map { it.asText() }
@@ -54,7 +56,6 @@ class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>
 @Converter
 class IVedtakBegrunnelseListConverter :
     AttributeConverter<List<IVedtakBegrunnelse>, String> {
-
     override fun convertToDatabaseColumn(vedtakbegrunnelser: List<IVedtakBegrunnelse>) =
         vedtakbegrunnelser.joinToString(";") { it.enumnavnTilString() }
 

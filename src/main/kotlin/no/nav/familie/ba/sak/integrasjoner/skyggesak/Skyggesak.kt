@@ -20,10 +20,8 @@ data class Skyggesak(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Column(name = "fk_fagsak_id", nullable = false, updatable = false)
     val fagsakId: Long,
-
     @Column(name = "sendt_tid")
     var sendtTidspunkt: LocalDateTime? = null,
 )

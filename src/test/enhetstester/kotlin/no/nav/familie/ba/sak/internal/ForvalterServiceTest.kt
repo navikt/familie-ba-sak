@@ -42,7 +42,6 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 class ForvalterServiceTest {
-
     private val økonomiService = mockk<ØkonomiService>()
     private val vedtakService = mockk<VedtakService>()
     private val beregningService = mockk<BeregningService>()
@@ -65,47 +64,50 @@ class ForvalterServiceTest {
     private val aktørMergeLoggRepository = mockk<AktørMergeLoggRepository>(relaxed = true)
     private val personidentRepository = mockk<PersonidentRepository>()
 
-    private val service = ForvalterService(
-        økonomiService,
-        vedtakService,
-        beregningService,
-        behandlingHentOgPersisterService,
-        stegService,
-        fagsakService,
-        behandlingService,
-        taskRepository,
-        autovedtakService,
-        fagsakRepository,
-        behandlingRepository,
-        tilkjentYtelseValideringService,
-        arbeidsfordelingService,
-        infotrygdService,
-        persongrunnlagService,
-        pdlIdentRestClient,
-        personidentService,
-        aktørIdRepository,
-        aktørMergeLoggRepository,
-        personidentRepository,
-    )
+    private val service =
+        ForvalterService(
+            økonomiService,
+            vedtakService,
+            beregningService,
+            behandlingHentOgPersisterService,
+            stegService,
+            fagsakService,
+            behandlingService,
+            taskRepository,
+            autovedtakService,
+            fagsakRepository,
+            behandlingRepository,
+            tilkjentYtelseValideringService,
+            arbeidsfordelingService,
+            infotrygdService,
+            persongrunnlagService,
+            pdlIdentRestClient,
+            personidentService,
+            aktørIdRepository,
+            aktørMergeLoggRepository,
+            personidentRepository,
+        )
 
     private val barnetsGamleAktør = tilAktør(randomFnr())
     private val barnetsNyeAktør = tilAktør(randomFnr())
     private val fagsak = defaultFagsak()
     private val behandling = lagBehandling(fagsak)
     private val søkerAktør = fagsak.aktør
-    private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-        behandlingId = behandling.id,
-        søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
-        barnasIdenter = listOf(barnetsGamleAktør.aktivFødselsnummer()),
-    )
+    private val personopplysningGrunnlag =
+        lagTestPersonopplysningGrunnlag(
+            behandlingId = behandling.id,
+            søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+            barnasIdenter = listOf(barnetsGamleAktør.aktivFødselsnummer()),
+        )
 
     @Test
     fun `Skal kunne patche barnets ident for en fagsak hvor gammel ident er en historisk ident av ny ident`() {
-        val dto = PatchIdentForBarnPåFagsak(
-            fagsakId = fagsak.id,
-            gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-            nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
-        )
+        val dto =
+            PatchIdentForBarnPåFagsak(
+                fagsakId = fagsak.id,
+                gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
+                nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
+            )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
         every { pdlIdentRestClient.hentIdenter(barnetsNyeAktør.aktivFødselsnummer(), true) } returns
@@ -135,11 +137,12 @@ class ForvalterServiceTest {
 
     @Test
     fun `Skal kaste feil ved patching av ident hvis ident på barnet ikke finnes på fagsaken`() {
-        val dto = PatchIdentForBarnPåFagsak(
-            fagsakId = fagsak.id,
-            gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-            nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
-        )
+        val dto =
+            PatchIdentForBarnPåFagsak(
+                fagsakId = fagsak.id,
+                gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
+                nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
+            )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns emptySet()
 
@@ -150,11 +153,12 @@ class ForvalterServiceTest {
 
     @Test
     fun `Skal kaste feil ved patching av ident hvis gammel ident ikke er historisk av ny ident`() {
-        val dto = PatchIdentForBarnPåFagsak(
-            fagsakId = fagsak.id,
-            gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-            nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
-        )
+        val dto =
+            PatchIdentForBarnPåFagsak(
+                fagsakId = fagsak.id,
+                gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
+                nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
+            )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
         every { pdlIdentRestClient.hentIdenter(barnetsNyeAktør.aktivFødselsnummer(), true) } returns emptyList()
@@ -166,12 +170,13 @@ class ForvalterServiceTest {
 
     @Test
     fun `Skal kaste feil ved patching av ident hvis ny personident allerede eksisterer i personident`() {
-        val dto = PatchIdentForBarnPåFagsak(
-            fagsakId = fagsak.id,
-            gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-            nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
-            skalSjekkeAtGammelIdentErHistoriskAvNyIdent = false,
-        )
+        val dto =
+            PatchIdentForBarnPåFagsak(
+                fagsakId = fagsak.id,
+                gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
+                nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
+                skalSjekkeAtGammelIdentErHistoriskAvNyIdent = false,
+            )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
         every { pdlIdentRestClient.hentIdenter(barnetsNyeAktør.aktivFødselsnummer(), true) } returns
@@ -189,12 +194,13 @@ class ForvalterServiceTest {
 
     @Test
     fun `Skal kunne patche barnets ident for en fagsak hvor gammel ident ikke er en historisk ident av ny ident, men man har valgt å overstyre`() {
-        val dto = PatchIdentForBarnPåFagsak(
-            fagsakId = fagsak.id,
-            gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-            nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
-            skalSjekkeAtGammelIdentErHistoriskAvNyIdent = false,
-        )
+        val dto =
+            PatchIdentForBarnPåFagsak(
+                fagsakId = fagsak.id,
+                gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
+                nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
+                skalSjekkeAtGammelIdentErHistoriskAvNyIdent = false,
+            )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
         every { pdlIdentRestClient.hentIdenter(barnetsNyeAktør.aktivFødselsnummer(), true) } returns

@@ -27,15 +27,16 @@ object UtvidetBarnetrygdUtil {
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         val tidslinjerMedPerioderBarnaBorMedSøker = finnPerioderBarnaBorMedSøker(personResultater)
 
-        val andelerTilkjentYtelseUtvidet = UtvidetBarnetrygdGenerator(
-            behandlingId = tilkjentYtelse.behandling.id,
-            tilkjentYtelse = tilkjentYtelse,
-        )
-            .lagUtvidetBarnetrygdAndeler(
-                utvidetVilkår = utvidetVilkår,
-                andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer.map { it.andel },
-                tidslinjerMedPerioderBarnaBorMedSøker = tidslinjerMedPerioderBarnaBorMedSøker,
+        val andelerTilkjentYtelseUtvidet =
+            UtvidetBarnetrygdGenerator(
+                behandlingId = tilkjentYtelse.behandling.id,
+                tilkjentYtelse = tilkjentYtelse,
             )
+                .lagUtvidetBarnetrygdAndeler(
+                    utvidetVilkår = utvidetVilkår,
+                    andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer.map { it.andel },
+                    tidslinjerMedPerioderBarnaBorMedSøker = tidslinjerMedPerioderBarnaBorMedSøker,
+                )
 
         return TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet,
@@ -45,28 +46,34 @@ object UtvidetBarnetrygdUtil {
 
     private fun finnPerioderBarnaBorMedSøker(personResultater: Set<PersonResultat>) =
         personResultater.associate { personResultat ->
-            personResultat.aktør to personResultat.vilkårResultater
-                .lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOR_MED_SØKER)
-                .map { vilkårResultat ->
-                    vilkårResultat?.utdypendeVilkårsvurderinger?.none {
-                        it in listOf(
-                            UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER,
-                            UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER,
-                        )
+            personResultat.aktør to
+                personResultat.vilkårResultater
+                    .lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOR_MED_SØKER)
+                    .map { vilkårResultat ->
+                        vilkårResultat?.utdypendeVilkårsvurderinger?.none {
+                            it in
+                                listOf(
+                                    UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER,
+                                    UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER,
+                                )
+                        }
                     }
-                }
         }
 
     internal fun finnUtvidetVilkår(vilkårsvurdering: Vilkårsvurdering): List<VilkårResultat> {
-        val utvidetVilkårResultater = vilkårsvurdering.personResultater
-            .flatMap { it.vilkårResultater }
-            .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT }
+        val utvidetVilkårResultater =
+            vilkårsvurdering.personResultater
+                .flatMap { it.vilkårResultater }
+                .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT }
 
         utvidetVilkårResultater.forEach { validerUtvidetVilkårsresultat(vilkårResultat = it, utvidetVilkårResultater = utvidetVilkårResultater) }
         return utvidetVilkårResultater
     }
 
-    internal fun validerUtvidetVilkårsresultat(vilkårResultat: VilkårResultat, utvidetVilkårResultater: List<VilkårResultat>) {
+    internal fun validerUtvidetVilkårsresultat(
+        vilkårResultat: VilkårResultat,
+        utvidetVilkårResultater: List<VilkårResultat>,
+    ) {
         val fom = vilkårResultat.periodeFom?.toYearMonth()
         val tom = vilkårResultat.periodeTom?.toYearMonth()
 

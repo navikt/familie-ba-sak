@@ -17,9 +17,10 @@ class FinnSakerMedFlereMigreringsbehandlingerTaskTest {
         every { forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlinger(any()) } returns
             listOf(Pair(1, "fnr1"), Pair(2, "fnr2"))
 
-        val exception = assertThrows<IllegalStateException> {
-            task.doTask(Task(type = FinnSakerMedFlereMigreringsbehandlingerTask.TASK_STEP_TYPE, payload = "2023-10"))
-        }
+        val exception =
+            assertThrows<IllegalStateException> {
+                task.doTask(Task(type = FinnSakerMedFlereMigreringsbehandlingerTask.TASK_STEP_TYPE, payload = "2023-10"))
+            }
 
         assertThat(exception.message).isEqualTo(
             """

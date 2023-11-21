@@ -34,42 +34,44 @@ fun lagVedtaksperioderTest(
     kompetanse: Collection<Kompetanse>,
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
 ): String {
-    val test = """
+    val test =
+        """
 # language: no
 # encoding: UTF-8
 
 Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric(10)}
 
   Bakgrunn:""" +
-        hentTekstForFagsak(behandling) +
-        hentTekstForBehandlinger(behandling, forrigeBehandling) +
-        hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
-        """
+            hentTekstForFagsak(behandling) +
+            hentTekstForBehandlinger(behandling, forrigeBehandling) +
+            hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
+            """
       
   Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
     Og følgende dagens dato ${LocalDate.now().tilddMMyyyy()}""" +
-        lagPersonresultaterTekst(forrigeBehandling) +
-        lagPersonresultaterTekst(behandling) +
-        hentTekstForVilkårresultater(
-            personResultaterForrigeBehandling?.sorterPåFøselsdato(persongrunnlagForrigeBehandling!!),
-            forrigeBehandling?.id,
-        ) +
-        hentTekstForVilkårresultater(personResultater.sorterPåFøselsdato(persongrunnlag), behandling.id) +
-        hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
-        hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
-        hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
+            lagPersonresultaterTekst(forrigeBehandling) +
+            lagPersonresultaterTekst(behandling) +
+            hentTekstForVilkårresultater(
+                personResultaterForrigeBehandling?.sorterPåFøselsdato(persongrunnlagForrigeBehandling!!),
+                forrigeBehandling?.id,
+            ) +
+            hentTekstForVilkårresultater(personResultater.sorterPåFøselsdato(persongrunnlag), behandling.id) +
+            hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
+            hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
+            hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
     Når vedtaksperioder med begrunnelser genereres for behandling ${behandling.id}""" +
-        hentTekstForVedtaksperioder(vedtaksperioder) + """
+            hentTekstForVedtaksperioder(vedtaksperioder) + """
     """
 
     return test.anonymiser(persongrunnlag, persongrunnlagForrigeBehandling, forrigeBehandling, behandling)
 }
 
-private fun lagPersonresultaterTekst(behandling: Behandling?) = behandling?.let {
-    """
+private fun lagPersonresultaterTekst(behandling: Behandling?) =
+    behandling?.let {
+        """
     Og lag personresultater for behandling ${it.id}"""
-} ?: ""
+    } ?: ""
 
 private fun hentTekstForFagsak(behandling: Behandling) =
     """
@@ -77,7 +79,10 @@ private fun hentTekstForFagsak(behandling: Behandling) =
       | FagsakId | Fagsaktype |
       | 1 | ${behandling.fagsak.type} |"""
 
-private fun hentTekstForBehandlinger(behandling: Behandling, forrigeBehandling: Behandling?) =
+private fun hentTekstForBehandlinger(
+    behandling: Behandling,
+    forrigeBehandling: Behandling?,
+) =
     """
 
     Gitt følgende vedtak
@@ -156,23 +161,25 @@ private fun hentTekstForTilkjentYtelse(
         hentAndelRader(andelerForrigeBehandling) +
         hentAndelRader(andeler)
 
-private fun hentAndelRader(andeler: List<AndelTilkjentYtelse>?): String = andeler
-    ?.sortedWith(compareBy({ it.aktør.aktivFødselsnummer() }, { it.stønadFom }, { it.stønadTom }))
-    ?.joinToString("") {
-        """
+private fun hentAndelRader(andeler: List<AndelTilkjentYtelse>?): String =
+    andeler
+        ?.sortedWith(compareBy({ it.aktør.aktivFødselsnummer() }, { it.stønadFom }, { it.stønadTom }))
+        ?.joinToString("") {
+            """
       | ${it.aktør.aktørId} |${it.behandlingId}|${
-            it.stønadFom.førsteDagIInneværendeMåned().tilddMMyyyy()
-        }|${
-            it.stønadTom.sisteDagIInneværendeMåned().tilddMMyyyy()
-        }|${it.kalkulertUtbetalingsbeløp}| ${it.type} | ${it.prosent} | ${it.sats} | """
-    } ?: ""
+                it.stønadFom.førsteDagIInneværendeMåned().tilddMMyyyy()
+            }|${
+                it.stønadTom.sisteDagIInneværendeMåned().tilddMMyyyy()
+            }|${it.kalkulertUtbetalingsbeløp}| ${it.type} | ${it.prosent} | ${it.sats} | """
+        } ?: ""
 
 private fun hentTekstForEndretUtbetaling(
     endredeUtbetalinger: List<EndretUtbetalingAndel>,
     endredeUtbetalingerForrigeBehandling: List<EndretUtbetalingAndel>?,
 ): String {
-    val rader = hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
-        hentEndretUtbetalingRader(endredeUtbetalinger)
+    val rader =
+        hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
+            hentEndretUtbetalingRader(endredeUtbetalinger)
 
     return if (rader.isEmpty()) {
         ""
@@ -203,8 +210,9 @@ private fun hentTekstForKompetanse(
     kompetanse: Collection<Kompetanse>,
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
 ): String {
-    val rader = hentKompetanseRader(kompetanseForrigeBehandling) +
-        hentKompetanseRader(kompetanse)
+    val rader =
+        hentKompetanseRader(kompetanseForrigeBehandling) +
+            hentKompetanseRader(kompetanse)
 
     return if (rader.isEmpty()) {
         ""

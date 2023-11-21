@@ -58,7 +58,6 @@ class DokumentService(
     private val brevmottakerService: BrevmottakerService,
     private val validerBrevmottakerService: ValiderBrevmottakerService,
 ) {
-
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
@@ -87,15 +86,16 @@ class DokumentService(
         }
 
         val generertBrev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest)
-        val førsteside = if (manueltBrevRequest.brevmal.skalGenerereForside()) {
-            Førsteside(
-                språkkode = manueltBrevRequest.mottakerMålform.tilSpråkkode(),
-                navSkjemaId = "NAV 33.00-07",
-                overskriftstittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07",
-            )
-        } else {
-            null
-        }
+        val førsteside =
+            if (manueltBrevRequest.brevmal.skalGenerereForside()) {
+                Førsteside(
+                    språkkode = manueltBrevRequest.mottakerMålform.tilSpråkkode(),
+                    navSkjemaId = "NAV 33.00-07",
+                    overskriftstittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07",
+                )
+            } else {
+                null
+            }
 
         val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: error("Finnes ikke fagsak for fagsakId=$fagsakId")
         val søkersident = fagsak.aktør.aktivFødselsnummer()
@@ -112,18 +112,20 @@ class DokumentService(
         val journalposterTilDistribusjon = mutableMapOf<String, MottakerInfo>()
 
         mottakere.forEach { mottakerInfo ->
-            val journalpostId = utgåendeJournalføringService.journalførManueltBrev(
-                fnr = fagsak.aktør.aktivFødselsnummer(),
-                fagsakId = fagsakId.toString(),
-                journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
-                brev = generertBrev,
-                førsteside = førsteside,
-                dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
-                avsenderMottaker = utledAvsenderMottaker(manueltBrevRequest, mottakerInfo),
-                // mottakersnavn fyller ut kun når manuell mottaker finnes
-                tilManuellMottakerEllerVerge = mottakerInfo.navn != null &&
-                    mottakerInfo.navn != brevmottakerService.hentMottakerNavn(søkersident),
-            ).also { journalposterTilDistribusjon[it] = mottakerInfo }
+            val journalpostId =
+                utgåendeJournalføringService.journalførManueltBrev(
+                    fnr = fagsak.aktør.aktivFødselsnummer(),
+                    fagsakId = fagsakId.toString(),
+                    journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
+                    brev = generertBrev,
+                    førsteside = førsteside,
+                    dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
+                    avsenderMottaker = utledAvsenderMottaker(manueltBrevRequest, mottakerInfo),
+                    // mottakersnavn fyller ut kun når manuell mottaker finnes
+                    tilManuellMottakerEllerVerge =
+                        mottakerInfo.navn != null &&
+                            mottakerInfo.navn != brevmottakerService.hentMottakerNavn(søkersident),
+                ).also { journalposterTilDistribusjon[it] = mottakerInfo }
 
             behandling?.let {
                 journalføringRepository.save(
@@ -141,13 +143,14 @@ class DokumentService(
         if (behandling != null && manueltBrevRequest.brevmal.setterBehandlingPåVent()) {
             settPåVentService.settBehandlingPåVent(
                 behandlingId = behandling.id,
-                frist = LocalDate.now()
-                    .plusDays(
-                        manueltBrevRequest.brevmal.ventefristDager(
-                            manuellFrist = manueltBrevRequest.antallUkerSvarfrist?.let { it * 7 }?.toLong(),
-                            behandlingKategori = behandling.kategori,
+                frist =
+                    LocalDate.now()
+                        .plusDays(
+                            manueltBrevRequest.brevmal.ventefristDager(
+                                manuellFrist = manueltBrevRequest.antallUkerSvarfrist?.let { it * 7 }?.toLong(),
+                                behandlingKategori = behandling.kategori,
+                            ),
                         ),
-                    ),
                 årsak = manueltBrevRequest.brevmal.venteårsak(),
             )
         }
@@ -209,13 +212,15 @@ class DokumentService(
     }
 
     private fun leggTilOpplysningspliktIVilkårsvurdering(behandling: Behandling) {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
-            ?: vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
-                behandling = behandling,
-                bekreftEndringerViaFrontend = false,
-                forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService
-                    .hentForrigeBehandlingSomErVedtatt(behandling),
-            )
+        val vilkårsvurdering =
+            vilkårsvurderingService.hentAktivForBehandling(behandling.id)
+                ?: vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+                    behandling = behandling,
+                    bekreftEndringerViaFrontend = false,
+                    forrigeBehandlingSomErVedtatt =
+                        behandlingHentOgPersisterService
+                            .hentForrigeBehandlingSomErVedtatt(behandling),
+                )
         vilkårsvurdering.personResultater.single { it.erSøkersResultater() }
             .leggTilBlankAnnenVurdering(AnnenVurderingType.OPPLYSNINGSPLIKT)
     }
@@ -227,22 +232,24 @@ class DokumentService(
         fagsak: Fagsak,
     ) = journalposterTilDistribusjon.forEach { journalPostTilDistribusjon ->
         DistribuerDokumentTask.opprettDistribuerDokumentTask(
-            distribuerDokumentDTO = DistribuerDokumentDTO(
-                personEllerInstitusjonIdent = journalPostTilDistribusjon.value.brukerId,
-                behandlingId = behandling?.id,
-                journalpostId = journalPostTilDistribusjon.key,
-                brevmal = manueltBrevRequest.brevmal,
-                erManueltSendt = true,
-                manuellAdresseInfo = journalPostTilDistribusjon.value.manuellAdresseInfo,
-            ),
-            properties = Properties().apply
-                {
-                    this["fagsakIdent"] = fagsak.aktør.aktivFødselsnummer()
-                    this["mottakerIdent"] = journalPostTilDistribusjon.value.brukerId
-                    this["journalpostId"] = journalPostTilDistribusjon.key
-                    this["behandlingId"] = behandling?.id.toString()
-                    this["fagsakId"] = fagsak.id.toString()
-                },
+            distribuerDokumentDTO =
+                DistribuerDokumentDTO(
+                    personEllerInstitusjonIdent = journalPostTilDistribusjon.value.brukerId,
+                    behandlingId = behandling?.id,
+                    journalpostId = journalPostTilDistribusjon.key,
+                    brevmal = manueltBrevRequest.brevmal,
+                    erManueltSendt = true,
+                    manuellAdresseInfo = journalPostTilDistribusjon.value.manuellAdresseInfo,
+                ),
+            properties =
+                Properties().apply
+                    {
+                        this["fagsakIdent"] = fagsak.aktør.aktivFødselsnummer()
+                        this["mottakerIdent"] = journalPostTilDistribusjon.value.brukerId
+                        this["journalpostId"] = journalPostTilDistribusjon.key
+                        this["behandlingId"] = behandling?.id.toString()
+                        this["fagsakId"] = fagsak.id.toString()
+                    },
         ).also { taskRepository.save(it) }
     }
 }

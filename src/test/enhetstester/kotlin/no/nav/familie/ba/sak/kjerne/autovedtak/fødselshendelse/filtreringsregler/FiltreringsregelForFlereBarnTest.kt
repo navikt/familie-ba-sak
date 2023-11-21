@@ -50,7 +50,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class FiltreringsregelForFlereBarnTest {
-
     val barnAktør0 = randomAktør()
     val barnAktør1 = randomAktør()
     val gyldigAktør = randomAktør()
@@ -65,18 +64,19 @@ class FiltreringsregelForFlereBarnTest {
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     val tilkjentYtelseValideringServiceMock = mockk<TilkjentYtelseValideringService>()
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
-    val filtreringsreglerService = FiltreringsreglerService(
-        personopplysningerService = personopplysningerServiceMock,
-        personidentService = personidentService,
-        personopplysningGrunnlagRepository = personopplysningGrunnlagRepositoryMock,
-        localDateService = localDateServiceMock,
-        fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
-        behandlingService = behandlingServiceMock,
-        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-        tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
-        vilkårsvurderingRepository = vilkårsvurderingRepository,
-        andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-    )
+    val filtreringsreglerService =
+        FiltreringsreglerService(
+            personopplysningerService = personopplysningerServiceMock,
+            personidentService = personidentService,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepositoryMock,
+            localDateService = localDateServiceMock,
+            fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
+            behandlingService = behandlingServiceMock,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
+            vilkårsvurderingRepository = vilkårsvurderingRepository,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+        )
 
     init {
         val fødselshendelsefiltreringResultatSlot = slot<List<FødselshendelsefiltreringResultat>>()
@@ -87,9 +87,10 @@ class FiltreringsregelForFlereBarnTest {
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
-        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(
-            genererFaktaMedTidligereBarn(1, 3, 7, 0),
-        )
+        val evalueringer =
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
+                genererFaktaMedTidligereBarn(1, 3, 7, 0),
+            )
 
         Assertions.assertThat(evalueringer.erOppfylt()).isFalse
         Assertions.assertThat(
@@ -101,9 +102,10 @@ class FiltreringsregelForFlereBarnTest {
 
     @Test
     fun `Regelevaluering skal resultere i JA når det har ikke gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
-        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(
-            genererFaktaMedTidligereBarn(0, 0, 0, 5),
-        )
+        val evalueringer =
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
+                genererFaktaMedTidligereBarn(0, 0, 0, 5),
+            )
 
         Assertions.assertThat(evalueringer.erOppfylt()).isTrue
     }
@@ -113,30 +115,31 @@ class FiltreringsregelForFlereBarnTest {
         val behandling = lagBehandling()
         val personInfo = generePersonInfoMedBarn(setOf(barnAktør0, barnAktør1))
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, aktiv = true).apply {
-            personer.addAll(
-                listOf(
-                    genererPerson(
-                        type = PersonType.SØKER,
-                        personopplysningGrunnlag = this,
-                        aktør = gyldigAktør,
+        val personopplysningGrunnlag =
+            PersonopplysningGrunnlag(behandlingId = behandling.id, aktiv = true).apply {
+                personer.addAll(
+                    listOf(
+                        genererPerson(
+                            type = PersonType.SØKER,
+                            personopplysningGrunnlag = this,
+                            aktør = gyldigAktør,
+                        ),
+                        genererPerson(
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = this,
+                            aktør = barnAktør0,
+                            fødselsDato = LocalDate.now().minusMonths(1),
+                            dødsfallDato = LocalDate.now().toString(),
+                        ),
+                        genererPerson(
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = this,
+                            aktør = barnAktør1,
+                            fødselsDato = LocalDate.now().minusMonths(1),
+                        ),
                     ),
-                    genererPerson(
-                        type = PersonType.BARN,
-                        personopplysningGrunnlag = this,
-                        aktør = barnAktør0,
-                        fødselsDato = LocalDate.now().minusMonths(1),
-                        dødsfallDato = LocalDate.now().toString(),
-                    ),
-                    genererPerson(
-                        type = PersonType.BARN,
-                        personopplysningGrunnlag = this,
-                        aktør = barnAktør1,
-                        fødselsDato = LocalDate.now().minusMonths(1),
-                    ),
-                ),
-            )
-        }
+                )
+            }
 
         every { personopplysningGrunnlagRepositoryMock.findByBehandlingAndAktiv(any()) } returns personopplysningGrunnlag
 
@@ -148,12 +151,13 @@ class FiltreringsregelForFlereBarnTest {
 
         every { personidentService.hentAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
 
-        val andelTilkjentytelse = listOf(
-            MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
-        )
-            .map {
-                lagAndelTilkjentYtelse(it.fom, it.tom)
-            }
+        val andelTilkjentytelse =
+            listOf(
+                MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
+            )
+                .map {
+                    lagAndelTilkjentYtelse(it.fom, it.tom)
+                }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
 
         every {
@@ -169,34 +173,38 @@ class FiltreringsregelForFlereBarnTest {
 
         val sisteVedtatteBehandling = lagBehandling()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns sisteVedtatteBehandling
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
-            gyldigAktør.tilPerson(personopplysningGrunnlag)!!,
-            listOf(barnAktør0.tilPerson(personopplysningGrunnlag)!!, barnAktør1.tilPerson(personopplysningGrunnlag)!!),
-            behandling,
-            overstyrendeVilkårResultater = mapOf(
-                Pair(
-                    gyldigAktør.aktørId,
-                    listOf(
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                            periodeFom = LocalDate.of(2020, 11, 1),
-                            periodeTom = LocalDate.of(2021, 2, 1),
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                gyldigAktør.tilPerson(personopplysningGrunnlag)!!,
+                listOf(barnAktør0.tilPerson(personopplysningGrunnlag)!!, barnAktør1.tilPerson(personopplysningGrunnlag)!!),
+                behandling,
+                overstyrendeVilkårResultater =
+                    mapOf(
+                        Pair(
+                            gyldigAktør.aktørId,
+                            listOf(
+                                lagVilkårResultat(
+                                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                                    periodeFom = LocalDate.of(2020, 11, 1),
+                                    periodeTom = LocalDate.of(2021, 2, 1),
+                                ),
+                            ),
                         ),
                     ),
-                ),
-            ),
-        )
+            )
 
-        val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
-            NyBehandlingHendelse(
-                morsIdent = gyldigAktør.aktivFødselsnummer(),
-                barnasIdenter = listOf(
-                    barnAktør0.aktivFødselsnummer(),
-                    barnAktør1.aktivFødselsnummer(),
+        val fødselshendelsefiltreringResultater =
+            filtreringsreglerService.kjørFiltreringsregler(
+                NyBehandlingHendelse(
+                    morsIdent = gyldigAktør.aktivFødselsnummer(),
+                    barnasIdenter =
+                        listOf(
+                            barnAktør0.aktivFødselsnummer(),
+                            barnAktør1.aktivFødselsnummer(),
+                        ),
                 ),
-            ),
-            behandling,
-        )
+                behandling,
+            )
 
         Assertions.assertThat(fødselshendelsefiltreringResultater.erOppfylt()).isFalse
         Assertions.assertThat(
@@ -211,29 +219,30 @@ class FiltreringsregelForFlereBarnTest {
         val behandling = lagBehandling()
         val personInfo = generePersonInfoMedBarn(setOf(barnAktør0, barnAktør1))
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, aktiv = true).apply {
-            personer.addAll(
-                listOf(
-                    genererPerson(
-                        type = PersonType.SØKER,
-                        personopplysningGrunnlag = this,
-                        aktør = gyldigAktør,
+        val personopplysningGrunnlag =
+            PersonopplysningGrunnlag(behandlingId = behandling.id, aktiv = true).apply {
+                personer.addAll(
+                    listOf(
+                        genererPerson(
+                            type = PersonType.SØKER,
+                            personopplysningGrunnlag = this,
+                            aktør = gyldigAktør,
+                        ),
+                        genererPerson(
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = this,
+                            aktør = barnAktør0,
+                            fødselsDato = LocalDate.now().minusMonths(1),
+                        ),
+                        genererPerson(
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = this,
+                            aktør = barnAktør1,
+                            fødselsDato = LocalDate.now().minusMonths(1),
+                        ),
                     ),
-                    genererPerson(
-                        type = PersonType.BARN,
-                        personopplysningGrunnlag = this,
-                        aktør = barnAktør0,
-                        fødselsDato = LocalDate.now().minusMonths(1),
-                    ),
-                    genererPerson(
-                        type = PersonType.BARN,
-                        personopplysningGrunnlag = this,
-                        aktør = barnAktør1,
-                        fødselsDato = LocalDate.now().minusMonths(1),
-                    ),
-                ),
-            )
-        }
+                )
+            }
 
         every { personopplysningGrunnlagRepositoryMock.findByBehandlingAndAktiv(any()) } returns personopplysningGrunnlag
 
@@ -255,44 +264,49 @@ class FiltreringsregelForFlereBarnTest {
 
         every { tilkjentYtelseValideringServiceMock.barnetrygdLøperForAnnenForelder(any(), any()) } returns false
 
-        val andelTilkjentytelse = listOf(
-            MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
-        )
-            .map {
-                lagAndelTilkjentYtelse(it.fom, it.tom)
-            }
+        val andelTilkjentytelse =
+            listOf(
+                MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
+            )
+                .map {
+                    lagAndelTilkjentYtelse(it.fom, it.tom)
+                }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
 
         val sisteVedtatteBehandling = lagBehandling()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns sisteVedtatteBehandling
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
-            gyldigAktør.tilPerson(personopplysningGrunnlag)!!,
-            listOf(barnAktør0.tilPerson(personopplysningGrunnlag)!!, barnAktør1.tilPerson(personopplysningGrunnlag)!!),
-            behandling,
-            overstyrendeVilkårResultater = mapOf(
-                Pair(
-                    gyldigAktør.aktørId,
-                    listOf(
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                            periodeFom = LocalDate.of(2020, 11, 1),
-                            periodeTom = LocalDate.of(2021, 2, 1),
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                gyldigAktør.tilPerson(personopplysningGrunnlag)!!,
+                listOf(barnAktør0.tilPerson(personopplysningGrunnlag)!!, barnAktør1.tilPerson(personopplysningGrunnlag)!!),
+                behandling,
+                overstyrendeVilkårResultater =
+                    mapOf(
+                        Pair(
+                            gyldigAktør.aktørId,
+                            listOf(
+                                lagVilkårResultat(
+                                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                                    periodeFom = LocalDate.of(2020, 11, 1),
+                                    periodeTom = LocalDate.of(2021, 2, 1),
+                                ),
+                            ),
                         ),
                     ),
-                ),
-            ),
-        )
+            )
 
-        val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
-            NyBehandlingHendelse(
-                morsIdent = gyldigAktør.aktivFødselsnummer(),
-                barnasIdenter = listOf(
-                    barnAktør0.aktivFødselsnummer(),
-                    barnAktør1.aktivFødselsnummer(),
+        val fødselshendelsefiltreringResultater =
+            filtreringsreglerService.kjørFiltreringsregler(
+                NyBehandlingHendelse(
+                    morsIdent = gyldigAktør.aktivFødselsnummer(),
+                    barnasIdenter =
+                        listOf(
+                            barnAktør0.aktivFødselsnummer(),
+                            barnAktør1.aktivFødselsnummer(),
+                        ),
                 ),
-            ),
-            behandling,
-        )
+                behandling,
+            )
 
         Assertions.assertThat(fødselshendelsefiltreringResultater.erOppfylt()).isTrue
     }
@@ -319,15 +333,17 @@ class FiltreringsregelForFlereBarnTest {
             .apply {
                 this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this))
                 if (dødsfallDato != null) {
-                    this.dødsfall = lagDødsfallFraPdl(
-                        person = this,
-                        dødsfallDatoFraPdl = dødsfallDato,
-                        dødsfallAdresseFraPdl = PdlKontaktinformasjonForDødsboAdresse(
-                            adresselinje1 = "Gate 1",
-                            postnummer = "1234",
-                            poststedsnavn = "Oslo",
-                        ),
-                    )
+                    this.dødsfall =
+                        lagDødsfallFraPdl(
+                            person = this,
+                            dødsfallDatoFraPdl = dødsfallDato,
+                            dødsfallAdresseFraPdl =
+                                PdlKontaktinformasjonForDødsboAdresse(
+                                    adresselinje1 = "Gate 1",
+                                    postnummer = "1234",
+                                    poststedsnavn = "Oslo",
+                                ),
+                        )
                 }
             }
     }
@@ -346,13 +362,14 @@ class FiltreringsregelForFlereBarnTest {
             adressebeskyttelseGradering = adressebeskyttelsegradering,
             bostedsadresser = bostedsadresse?.let { mutableListOf(it) } ?: mutableListOf(Bostedsadresse()),
             sivilstander = listOf(Sivilstand(type = sivilstand)),
-            forelderBarnRelasjon = barn?.map {
-                ForelderBarnRelasjon(
-                    aktør = it,
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    navn = "navn $it",
-                )
-            }?.toSet() ?: emptySet(),
+            forelderBarnRelasjon =
+                barn?.map {
+                    ForelderBarnRelasjon(
+                        aktør = it,
+                        relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                        navn = "navn $it",
+                    )
+                }?.toSet() ?: emptySet(),
         )
     }
 
@@ -363,14 +380,16 @@ class FiltreringsregelForFlereBarnTest {
         dagerFodselForrigeFodsel: Long,
     ): FiltreringsreglerFakta {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktør)
-        val barn = listOf(
-            tilfeldigPerson(LocalDate.now().minusMonths(manaderFodselEtt)).copy(aktør = barnAktør0),
-            tilfeldigPerson(LocalDate.now().minusMonths(manaderFodselTo)).copy(aktør = barnAktør1),
-        )
+        val barn =
+            listOf(
+                tilfeldigPerson(LocalDate.now().minusMonths(manaderFodselEtt)).copy(aktør = barnAktør0),
+                tilfeldigPerson(LocalDate.now().minusMonths(manaderFodselTo)).copy(aktør = barnAktør1),
+            )
 
-        val restenAvBarna: List<PersonInfo> = listOf(
-            PersonInfo(LocalDate.now().minusMonths(manaderFodselForrigeFodsel).minusDays(dagerFodselForrigeFodsel)),
-        )
+        val restenAvBarna: List<PersonInfo> =
+            listOf(
+                PersonInfo(LocalDate.now().minusMonths(manaderFodselForrigeFodsel).minusDays(dagerFodselForrigeFodsel)),
+            )
 
         return FiltreringsreglerFakta(
             mor = mor,

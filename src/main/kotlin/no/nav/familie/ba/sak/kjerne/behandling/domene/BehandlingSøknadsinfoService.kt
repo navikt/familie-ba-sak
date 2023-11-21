@@ -13,16 +13,20 @@ import java.time.LocalTime
 class BehandlingSøknadsinfoService(
     private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
 ) {
-
     @Transactional
-    fun lagreNedSøknadsinfo(mottattDato: LocalDate, søknadsinfo: Søknadsinfo?, behandling: Behandling) {
-        val behandlingSøknadsinfo = BehandlingSøknadsinfo(
-            behandling = behandling,
-            mottattDato = mottattDato.atStartOfDay(),
-            journalpostId = søknadsinfo?.journalpostId,
-            brevkode = søknadsinfo?.brevkode,
-            erDigital = søknadsinfo?.erDigital,
-        )
+    fun lagreNedSøknadsinfo(
+        mottattDato: LocalDate,
+        søknadsinfo: Søknadsinfo?,
+        behandling: Behandling,
+    ) {
+        val behandlingSøknadsinfo =
+            BehandlingSøknadsinfo(
+                behandling = behandling,
+                mottattDato = mottattDato.atStartOfDay(),
+                journalpostId = søknadsinfo?.journalpostId,
+                brevkode = søknadsinfo?.brevkode,
+                erDigital = søknadsinfo?.erDigital,
+            )
         behandlingSøknadsinfoRepository.save(behandlingSøknadsinfo)
     }
 
@@ -30,7 +34,10 @@ class BehandlingSøknadsinfoService(
         return behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId).minOfOrNull { it.mottattDato }
     }
 
-    fun hentSøknadsstatistikk(fom: LocalDate, tom: LocalDate): SøknadsstatistikkForPeriode {
+    fun hentSøknadsstatistikk(
+        fom: LocalDate,
+        tom: LocalDate,
+    ): SøknadsstatistikkForPeriode {
         val antallSøknaderPerGruppe =
             behandlingSøknadsinfoRepository.hentAntallSøknaderIPeriode(fom.atStartOfDay(), tom.atTime(LocalTime.MAX))
 
@@ -47,18 +54,20 @@ class BehandlingSøknadsinfoService(
         return SøknadsstatistikkForPeriode(
             fom = fom,
             tom = tom,
-            ordinærBarnetrygd = AntallSøknader(
-                totalt = antallOrdinære,
-                papirsøknader = antallOrdinære - antallOrdinæreDigitale,
-                digitaleSøknader = antallOrdinæreDigitale,
-                digitaliseringsgrad = antallOrdinæreDigitale / antallOrdinære.toFloat(),
-            ),
-            utvidetBarnetrygd = AntallSøknader(
-                totalt = antallUtvidet,
-                papirsøknader = antallUtvidet - antallUtvidetDigitale,
-                digitaleSøknader = antallUtvidetDigitale,
-                digitaliseringsgrad = antallUtvidetDigitale / antallUtvidet.toFloat(),
-            ),
+            ordinærBarnetrygd =
+                AntallSøknader(
+                    totalt = antallOrdinære,
+                    papirsøknader = antallOrdinære - antallOrdinæreDigitale,
+                    digitaleSøknader = antallOrdinæreDigitale,
+                    digitaliseringsgrad = antallOrdinæreDigitale / antallOrdinære.toFloat(),
+                ),
+            utvidetBarnetrygd =
+                AntallSøknader(
+                    totalt = antallUtvidet,
+                    papirsøknader = antallUtvidet - antallUtvidetDigitale,
+                    digitaleSøknader = antallUtvidetDigitale,
+                    digitaliseringsgrad = antallUtvidetDigitale / antallUtvidet.toFloat(),
+                ),
         )
     }
 }

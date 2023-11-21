@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class RollestyringMotDatabase {
-
     @Autowired
     private lateinit var rolleConfig: RolleConfig
 

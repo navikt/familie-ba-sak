@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Primary
 
 @TestConfiguration
 class SaksstatistikkEventPublisherFailSafe : SaksstatistikkEventPublisher() {
-
     @Bean
     @Primary
     fun safeSaksstatistikkEventPublisher(): SaksstatistikkEventPublisher {

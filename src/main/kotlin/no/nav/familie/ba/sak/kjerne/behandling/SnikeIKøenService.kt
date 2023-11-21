@@ -18,11 +18,13 @@ class SnikeIKøenService(
     private val loggService: LoggService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
-    fun settAktivBehandlingTilPåMaskinellVent(behandlingId: Long, årsak: SettPåMaskinellVentÅrsak) {
+    fun settAktivBehandlingTilPåMaskinellVent(
+        behandlingId: Long,
+        årsak: SettPåMaskinellVentÅrsak,
+    ) {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         if (!behandling.aktiv) {
             error("Behandling=$behandlingId er ikke aktiv")
@@ -88,7 +90,10 @@ class SnikeIKøenService(
         behandlingRepository.saveAndFlush(behandlingPåVent)
     }
 
-    private fun validerBehandlinger(aktivBehandling: Behandling?, behandlingPåVent: Behandling) {
+    private fun validerBehandlinger(
+        aktivBehandling: Behandling?,
+        behandlingPåVent: Behandling,
+    ) {
         if (behandlingPåVent.aktiv) {
             error("Åpen behandling har feil tilstand $behandlingPåVent")
         }

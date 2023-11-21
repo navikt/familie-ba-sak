@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.time.LocalDate
 
 object VilkårsvurderingMigreringUtils {
-
     fun utledPeriodeFom(
         oppfylteVilkårResultaterForType: List<VilkårResultat>,
         vilkår: Vilkår,
@@ -45,19 +44,21 @@ object VilkårsvurderingMigreringUtils {
         person: Person,
         nyMigreringsdato: LocalDate,
     ): List<VilkårResultatMedNyPeriode> {
-        val vilkårTyperForPerson = oppfylteVilkårResultaterForPerson
-            .map { it.vilkårType }
+        val vilkårTyperForPerson =
+            oppfylteVilkårResultaterForPerson
+                .map { it.vilkårType }
 
         return vilkårTyperForPerson.map { vilkår ->
 
             val oppfylteVilkårResultaterForType = oppfylteVilkårResultaterForPerson.filter { it.vilkårType == vilkår }
 
-            val fom = utledPeriodeFom(
-                oppfylteVilkårResultaterForType = oppfylteVilkårResultaterForType,
-                vilkår = vilkår,
-                person = person,
-                nyMigreringsdato = nyMigreringsdato,
-            )
+            val fom =
+                utledPeriodeFom(
+                    oppfylteVilkårResultaterForType = oppfylteVilkårResultaterForType,
+                    vilkår = vilkår,
+                    person = person,
+                    nyMigreringsdato = nyMigreringsdato,
+                )
 
             val tom: LocalDate? =
                 utledPeriodeTom(

@@ -7,13 +7,16 @@ enum class Uendelighet {
 }
 
 interface Tidsenhet
+
 class Dag : Tidsenhet
+
 class Måned : Tidsenhet
 
 abstract class Tidspunkt<T : Tidsenhet> internal constructor(
     internal open val uendelighet: Uendelighet,
 ) : Comparable<Tidspunkt<T>> {
     abstract fun flytt(tidsenheter: Long): Tidspunkt<T>
+
     internal abstract fun medUendelighet(uendelighet: Uendelighet): Tidspunkt<T>
 
     // Betrakter to uendeligheter som like, selv underliggende tidspunkt kan være forskjellig

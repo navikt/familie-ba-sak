@@ -27,7 +27,6 @@ import java.time.Duration
 )
 @Profile("!mock-rest-template-config")
 class RestTemplateConfig {
-
     @Bean("jwtBearerClientCredentials")
     fun restTemplateJwtBearerClientCredentials(
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
@@ -119,10 +118,11 @@ class RestTemplateConfig {
     }
 }
 
-val restTemplate = RestTemplate(
-    listOf(
-        StringHttpMessageConverter(StandardCharsets.UTF_8),
-        ByteArrayHttpMessageConverter(),
-        MappingJackson2HttpMessageConverter(objectMapper),
-    ),
-)
+val restTemplate =
+    RestTemplate(
+        listOf(
+            StringHttpMessageConverter(StandardCharsets.UTF_8),
+            ByteArrayHttpMessageConverter(),
+            MappingJackson2HttpMessageConverter(objectMapper),
+        ),
+    )

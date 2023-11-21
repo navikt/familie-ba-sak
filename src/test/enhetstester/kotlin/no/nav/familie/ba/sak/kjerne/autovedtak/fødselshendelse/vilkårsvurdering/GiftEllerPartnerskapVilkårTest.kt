@@ -10,7 +10,6 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
 class GiftEllerPartnerskapVilkårTest {
-
     @Test
     fun `Gift-vilkår gir resultat JA for fødselshendelse når sivilstand er uoppgitt`() {
         val evaluering = vilkår.vurderVilkår(barn)
@@ -18,7 +17,6 @@ class GiftEllerPartnerskapVilkårTest {
     }
 
     companion object {
-
         val vilkår = Vilkår.GIFT_PARTNERSKAP
         val barn =
             tilfeldigPerson(personType = PersonType.BARN).apply {

@@ -13,18 +13,19 @@ class InternPeriodeOvergangsstønadTest {
     @Test
     fun `Skal slå sammen perioder som er sammenhengende`() {
         val personIdent = randomFnr()
-        val sammenslåttePerioder = listOf(
-            InternPeriodeOvergangsstønad(
-                fomDato = LocalDate.now().minusMonths(6).førsteDagIInneværendeMåned(),
-                tomDato = LocalDate.now().minusMonths(3).sisteDagIMåned(),
-                personIdent = personIdent,
-            ),
-            InternPeriodeOvergangsstønad(
-                fomDato = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned(),
-                tomDato = LocalDate.now().sisteDagIMåned(),
-                personIdent = personIdent,
-            ),
-        ).slåSammenSammenhengendePerioder()
+        val sammenslåttePerioder =
+            listOf(
+                InternPeriodeOvergangsstønad(
+                    fomDato = LocalDate.now().minusMonths(6).førsteDagIInneværendeMåned(),
+                    tomDato = LocalDate.now().minusMonths(3).sisteDagIMåned(),
+                    personIdent = personIdent,
+                ),
+                InternPeriodeOvergangsstønad(
+                    fomDato = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned(),
+                    tomDato = LocalDate.now().sisteDagIMåned(),
+                    personIdent = personIdent,
+                ),
+            ).slåSammenSammenhengendePerioder()
 
         assertEquals(1, sammenslåttePerioder.size)
     }
@@ -32,18 +33,19 @@ class InternPeriodeOvergangsstønadTest {
     @Test
     fun `Skal ikke slå sammen perioder som ikke er sammenhengende`() {
         val personIdent = randomFnr()
-        val sammenslåttePerioder = listOf(
-            InternPeriodeOvergangsstønad(
-                fomDato = LocalDate.now().minusMonths(6).førsteDagIInneværendeMåned(),
-                tomDato = LocalDate.now().minusMonths(4).sisteDagIMåned(),
-                personIdent = personIdent,
-            ),
-            InternPeriodeOvergangsstønad(
-                fomDato = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned(),
-                tomDato = LocalDate.now().sisteDagIMåned(),
-                personIdent = personIdent,
-            ),
-        ).slåSammenSammenhengendePerioder()
+        val sammenslåttePerioder =
+            listOf(
+                InternPeriodeOvergangsstønad(
+                    fomDato = LocalDate.now().minusMonths(6).førsteDagIInneværendeMåned(),
+                    tomDato = LocalDate.now().minusMonths(4).sisteDagIMåned(),
+                    personIdent = personIdent,
+                ),
+                InternPeriodeOvergangsstønad(
+                    fomDato = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned(),
+                    tomDato = LocalDate.now().sisteDagIMåned(),
+                    personIdent = personIdent,
+                ),
+            ).slåSammenSammenhengendePerioder()
 
         assertEquals(2, sammenslåttePerioder.size)
     }

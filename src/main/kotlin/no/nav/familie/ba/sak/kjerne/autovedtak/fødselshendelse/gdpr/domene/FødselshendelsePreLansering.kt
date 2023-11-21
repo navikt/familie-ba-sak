@@ -31,27 +31,20 @@ data class FødselshendelsePreLansering(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandlingId: Long,
-
     @OneToOne(optional = false)
     @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
-
     @Column(name = "ny_behandling_hendelse", nullable = false, updatable = false, columnDefinition = "TEXT")
     val nyBehandlingHendelse: String = "",
-
     @Column(name = "filtreringsregler_input", columnDefinition = "TEXT")
     val filtreringsreglerInput: String = "",
-
     @Column(name = "filtreringsregler_output", columnDefinition = "TEXT")
     val filtreringsreglerOutput: String = "",
-
     @Column(name = "vilkaarsvurderinger_for_foedselshendelse", columnDefinition = "TEXT")
     var vilkårsvurderingerForFødselshendelse: String = "",
 ) : BaseEntitet() {
-
     override fun hashCode(): Int {
         return Objects.hashCode(id)
     }

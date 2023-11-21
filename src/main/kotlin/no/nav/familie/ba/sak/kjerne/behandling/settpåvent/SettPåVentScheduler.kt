@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class SettPåVentScheduler(val taskRepository: TaskRepositoryWrapper) {
-
     @Scheduled(cron = "0 0 7 * * *")
     fun taBehandlingerEtterVentefristAvVent() {
         when (LeaderClient.isLeader()) {
@@ -27,7 +26,6 @@ class SettPåVentScheduler(val taskRepository: TaskRepositoryWrapper) {
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(SettPåVentScheduler::class.java)
     }
 }

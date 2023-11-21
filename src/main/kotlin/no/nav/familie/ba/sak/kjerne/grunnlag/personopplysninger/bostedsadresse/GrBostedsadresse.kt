@@ -43,16 +43,13 @@ abstract class GrBostedsadresse(
         allocationSize = 50,
     )
     open val id: Long = 0,
-
     @Embedded
     open var periode: DatoIntervallEntitet? = null,
-
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "fk_po_person_id")
     open var person: Person? = null,
 ) : BaseEntitet() {
-
     abstract fun toSecureString(): String
 
     abstract fun tilFrontendString(): String
@@ -70,16 +67,16 @@ abstract class GrBostedsadresse(
         return periode!!.erInnenfor(LocalDate.now())
     }
 
-    fun tilRestRegisteropplysning() = RestRegisteropplysning(
-        fom = this.periode?.fom.takeIf { it != fregManglendeFlytteDato },
-        tom = this.periode?.tom,
-        verdi = this.tilFrontendString(),
-    )
+    fun tilRestRegisteropplysning() =
+        RestRegisteropplysning(
+            fom = this.periode?.fom.takeIf { it != fregManglendeFlytteDato },
+            tom = this.periode?.tom,
+            verdi = this.tilFrontendString(),
+        )
 
     fun harGyldigFom() = this.periode?.fom != null && this.periode?.fom != fregManglendeFlytteDato
 
     companion object {
-
         // Når flyttedato er satt til 0001-01-01, så mangler den egentlig.
         // Det er en feil i Freg, som har arvet mangelfulle data fra DSF.
         val fregManglendeFlytteDato = LocalDate.of(1, 1, 1)
@@ -93,29 +90,36 @@ abstract class GrBostedsadresse(
             return this.sortedBy { it.periode?.fom }.lastOrNull()
         }
 
-        fun fraBostedsadresse(bostedsadresse: Bostedsadresse, person: Person): GrBostedsadresse {
-            val mappetAdresse = when {
-                bostedsadresse.vegadresse != null -> {
-                    GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!)
-                }
+        fun fraBostedsadresse(
+            bostedsadresse: Bostedsadresse,
+            person: Person,
+        ): GrBostedsadresse {
+            val mappetAdresse =
+                when {
+                    bostedsadresse.vegadresse != null -> {
+                        GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!)
+                    }
 
-                bostedsadresse.matrikkeladresse != null -> {
-                    GrMatrikkeladresse.fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!)
-                }
+                    bostedsadresse.matrikkeladresse != null -> {
+                        GrMatrikkeladresse.fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!)
+                    }
 
-                bostedsadresse.ukjentBosted != null -> {
-                    GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!)
-                }
+                    bostedsadresse.ukjentBosted != null -> {
+                        GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!)
+                    }
 
-                else -> throw Feil("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra bostedadresse")
-            }
+                    else -> throw Feil("Vegadresse, matrikkeladresse og ukjent bosted har verdi null ved mapping fra bostedadresse")
+                }
             return mappetAdresse.also {
                 it.person = person
                 it.periode = DatoIntervallEntitet(bostedsadresse.angittFlyttedato, bostedsadresse.gyldigTilOgMed)
             }
         }
 
-        fun erSammeAdresse(adresse: GrBostedsadresse?, andreAdresse: GrBostedsadresse?): Boolean {
+        fun erSammeAdresse(
+            adresse: GrBostedsadresse?,
+            andreAdresse: GrBostedsadresse?,
+        ): Boolean {
             return adresse != null &&
                 adresse !is GrUkjentBosted &&
                 adresse == andreAdresse
@@ -127,18 +131,22 @@ fun List<GrBostedsadresse>.filtrerGjeldendeNå(): List<GrBostedsadresse> {
     return this.filter { it.gjeldendeNå() }
 }
 
-fun vurderOmPersonerBorSammen(adresser: List<GrBostedsadresse>, andreAdresser: List<GrBostedsadresse>): Boolean {
-    return adresser.isNotEmpty() && adresser.any {
-        andreAdresser.any { søkerAdresse ->
-            val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
-            val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
+fun vurderOmPersonerBorSammen(
+    adresser: List<GrBostedsadresse>,
+    andreAdresser: List<GrBostedsadresse>,
+): Boolean {
+    return adresser.isNotEmpty() &&
+        adresser.any {
+            andreAdresser.any { søkerAdresse ->
+                val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
+                val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
 
-            val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
-            val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
+                val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
+                val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
 
-            søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&
-                søkerAdresseTom.isSameOrAfter(barnAdresseTom) &&
-                GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
+                søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&
+                    søkerAdresseTom.isSameOrAfter(barnAdresseTom) &&
+                    GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
+            }
         }
-    }
 }

@@ -40,42 +40,47 @@ fun Standardbegrunnelse.triggesForPeriode(
 ): Boolean {
     val triggesAv = sanityBegrunnelser[this]?.triggesAv ?: return false
 
-    val aktuellePersoner = minimertePersoner
-        .filter { person -> triggesAv.personTyper.contains(person.type) }
-        .filter { person ->
-            if (this.vedtakBegrunnelseType.erInnvilget()) {
-                aktørIderMedUtbetaling.contains(person.aktørId) || person.type == PersonType.SØKER
-            } else {
-                true
+    val aktuellePersoner =
+        minimertePersoner
+            .filter { person -> triggesAv.personTyper.contains(person.type) }
+            .filter { person ->
+                if (this.vedtakBegrunnelseType.erInnvilget()) {
+                    aktørIderMedUtbetaling.contains(person.aktørId) || person.type == PersonType.SØKER
+                } else {
+                    true
+                }
             }
-        }
 
     val ytelseTyperForPeriode = minimertVedtaksperiode.ytelseTyperForPeriode
 
-    fun hentPersonerForUtgjørendeVilkår() = hentPersonerForAlleUtgjørendeVilkår(
-        minimertePersonResultater = minimertePersonResultater,
-        vedtaksperiode = Periode(
-            fom = minimertVedtaksperiode.fom ?: TIDENES_MORGEN,
-            tom = minimertVedtaksperiode.tom ?: TIDENES_ENDE,
-        ),
-        oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
-        aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertRestPerson() },
-        triggesAv = triggesAv,
-        begrunnelse = this,
-        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-    )
+    fun hentPersonerForUtgjørendeVilkår() =
+        hentPersonerForAlleUtgjørendeVilkår(
+            minimertePersonResultater = minimertePersonResultater,
+            vedtaksperiode =
+                Periode(
+                    fom = minimertVedtaksperiode.fom ?: TIDENES_MORGEN,
+                    tom = minimertVedtaksperiode.tom ?: TIDENES_ENDE,
+                ),
+            oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
+            aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertRestPerson() },
+            triggesAv = triggesAv,
+            begrunnelse = this,
+            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+        )
 
     return when {
         !triggesAv.valgbar -> false
 
-        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) && !triggesAv.erEndret() -> this.vedtakBegrunnelseType.periodeErOppyltForYtelseType(
-            ytelseType = if (triggesAv.småbarnstillegg) YtelseType.SMÅBARNSTILLEGG else YtelseType.UTVIDET_BARNETRYGD,
-            ytelseTyperForPeriode = ytelseTyperForPeriode,
-            ytelserGjeldeneForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
-        ) || when {
-            triggesAv.vilkår.any { it != Vilkår.UTVIDET_BARNETRYGD } -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
-            else -> false
-        }
+        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) && !triggesAv.erEndret() ->
+            this.vedtakBegrunnelseType.periodeErOppyltForYtelseType(
+                ytelseType = if (triggesAv.småbarnstillegg) YtelseType.SMÅBARNSTILLEGG else YtelseType.UTVIDET_BARNETRYGD,
+                ytelseTyperForPeriode = ytelseTyperForPeriode,
+                ytelserGjeldeneForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
+            ) ||
+                when {
+                    triggesAv.vilkår.any { it != Vilkår.UTVIDET_BARNETRYGD } -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
+                    else -> false
+                }
         triggesAv.personerManglerOpplysninger -> minimertePersonResultater.harPersonerSomManglerOpplysninger()
         triggesAv.barnMedSeksårsdag ->
             minimertePersoner.harBarnMedSeksårsdagPåFom(minimertVedtaksperiode.fom)
@@ -89,16 +94,18 @@ fun Standardbegrunnelse.triggesForPeriode(
                 triggesAv,
             )
 
-        triggesAv.erEndret() && !triggesAv.etterEndretUtbetaling -> erEndretTriggerErOppfylt(
-            triggesAv = triggesAv,
-            minimerteEndredeUtbetalingAndeler = minimerteEndredeUtbetalingAndeler,
-            minimertVedtaksperiode = minimertVedtaksperiode,
-        )
+        triggesAv.erEndret() && !triggesAv.etterEndretUtbetaling ->
+            erEndretTriggerErOppfylt(
+                triggesAv = triggesAv,
+                minimerteEndredeUtbetalingAndeler = minimerteEndredeUtbetalingAndeler,
+                minimertVedtaksperiode = minimertVedtaksperiode,
+            )
         triggesAv.gjelderFraInnvilgelsestidspunkt -> false
-        triggesAv.barnDød -> dødeBarnForrigePeriode(
-            ytelserForrigePeriode,
-            minimertePersoner.filter { it.type === PersonType.BARN },
-        ).any()
+        triggesAv.barnDød ->
+            dødeBarnForrigePeriode(
+                ytelserForrigePeriode,
+                minimertePersoner.filter { it.type === PersonType.BARN },
+            ).any()
         else -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
     }
 }
@@ -108,9 +115,10 @@ fun dødeBarnForrigePeriode(
     barnIBehandling: List<MinimertPerson>,
 ): List<String> {
     return barnIBehandling.filter { barn ->
-        val ytelserForrigePeriodeForBarn = ytelserForrigePeriode.filter {
-            it.aktør.aktivFødselsnummer() == barn.aktivPersonIdent
-        }
+        val ytelserForrigePeriodeForBarn =
+            ytelserForrigePeriode.filter {
+                it.aktør.aktivFødselsnummer() == barn.aktivPersonIdent
+            }
         var barnDødeForrigePeriode = false
         if (barn.erDød() && ytelserForrigePeriodeForBarn.isNotEmpty()) {
             val fom =
@@ -130,14 +138,16 @@ private fun erEndretTriggerErOppfylt(
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
 ): Boolean {
-    val endredeAndelerSomOverlapperVedtaksperiode = minimertVedtaksperiode
-        .finnEndredeAndelerISammePeriode(minimerteEndredeUtbetalingAndeler)
+    val endredeAndelerSomOverlapperVedtaksperiode =
+        minimertVedtaksperiode
+            .finnEndredeAndelerISammePeriode(minimerteEndredeUtbetalingAndeler)
 
     return endredeAndelerSomOverlapperVedtaksperiode.any { minimertEndretAndel ->
         triggesAv.erTriggereOppfyltForEndretUtbetaling(
             minimertEndretAndel = minimertEndretAndel,
-            minimerteUtbetalingsperiodeDetaljer = minimertVedtaksperiode
-                .utbetalingsperioder.map { it.tilMinimertUtbetalingsperiodeDetalj() },
+            minimerteUtbetalingsperiodeDetaljer =
+                minimertVedtaksperiode
+                    .utbetalingsperioder.map { it.tilMinimertUtbetalingsperiodeDetalj() },
         )
     }
 }
@@ -182,14 +192,16 @@ fun VedtakBegrunnelseType.periodeErOppyltForYtelseType(
     ytelserGjeldeneForSøkerForrigeMåned: List<YtelseType>,
 ): Boolean {
     return when (this) {
-        VedtakBegrunnelseType.INNVILGET, VedtakBegrunnelseType.INSTITUSJON_INNVILGET -> ytelseTyperForPeriode.contains(
-            ytelseType,
-        )
+        VedtakBegrunnelseType.INNVILGET, VedtakBegrunnelseType.INSTITUSJON_INNVILGET ->
+            ytelseTyperForPeriode.contains(
+                ytelseType,
+            )
 
-        VedtakBegrunnelseType.REDUKSJON, VedtakBegrunnelseType.INSTITUSJON_REDUKSJON -> !ytelseTyperForPeriode.contains(
-            ytelseType,
-        ) &&
-            ytelseOppfyltForrigeMåned(ytelseType, ytelserGjeldeneForSøkerForrigeMåned)
+        VedtakBegrunnelseType.REDUKSJON, VedtakBegrunnelseType.INSTITUSJON_REDUKSJON ->
+            !ytelseTyperForPeriode.contains(
+                ytelseType,
+            ) &&
+                ytelseOppfyltForrigeMåned(ytelseType, ytelserGjeldeneForSøkerForrigeMåned)
 
         else -> false
     }

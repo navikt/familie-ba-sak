@@ -8,7 +8,6 @@ val MANGLER_AVHENGIGHETER = IllegalArgumentException("Det er ikke sendt med noen
 abstract class TidslinjeMedAvhengigheter<I, T : Tidsenhet>(
     private val foregåendeTidslinjer: Collection<Tidslinje<*, T>>,
 ) : Tidslinje<I, T>() {
-
     init {
         if (foregåendeTidslinjer.isEmpty()) {
             throw MANGLER_AVHENGIGHETER

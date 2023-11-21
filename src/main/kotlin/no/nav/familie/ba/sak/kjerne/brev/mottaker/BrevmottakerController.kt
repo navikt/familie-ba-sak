@@ -61,7 +61,9 @@ class BrevmottakerController(
     }
 
     @GetMapping(path = ["{behandlingId}"], produces = [APPLICATION_JSON_VALUE])
-    fun hentBrevmottakere(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestBrevmottaker>>> {
+    fun hentBrevmottakere(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<List<RestBrevmottaker>>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,

@@ -20,7 +20,6 @@ class SkyggesakScheduler(
     val fagsakRepository: FagsakRepository,
     val integrasjonClient: IntegrasjonClient,
 ) {
-
     @Scheduled(fixedDelay = 60000)
     fun opprettSkyggesaker() {
         if (LeaderClient.isLeader() == true) {

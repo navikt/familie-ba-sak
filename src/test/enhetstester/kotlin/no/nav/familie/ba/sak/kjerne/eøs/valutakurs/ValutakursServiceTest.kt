@@ -30,16 +30,18 @@ internal class ValutakursServiceTest {
     val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs> = mockPeriodeBarnSkjemaRepository()
     val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository = mockk()
 
-    val valutakursService = ValutakursService(
-        valutakursRepository,
-        emptyList(),
-    )
+    val valutakursService =
+        ValutakursService(
+            valutakursRepository,
+            emptyList(),
+        )
 
-    val tilpassValutakurserTilUtenlandskePeriodebeløpService = TilpassValutakurserTilUtenlandskePeriodebeløpService(
-        valutakursRepository,
-        utenlandskPeriodebeløpRepository,
-        emptyList(),
-    )
+    val tilpassValutakurserTilUtenlandskePeriodebeløpService =
+        TilpassValutakurserTilUtenlandskePeriodebeløpService(
+            valutakursRepository,
+            utenlandskPeriodebeløpRepository,
+            emptyList(),
+        )
 
     @BeforeEach
     fun init() {
@@ -58,9 +60,10 @@ internal class ValutakursServiceTest {
             .medKurs("4444   555 666", "EUR", barn1, barn2, barn3)
             .lagreTil(valutakursRepository)
 
-        val utenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
-            .medBeløp("  777777777", "EUR", "N", barn1)
-            .bygg()
+        val utenlandskePeriodebeløp =
+            UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
+                .medBeløp("  777777777", "EUR", "N", barn1)
+                .bygg()
 
         every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id) } returns utenlandskePeriodebeløp
 
@@ -68,9 +71,10 @@ internal class ValutakursServiceTest {
 
         val faktiskeValutakurser = valutakursService.hentValutakurser(behandlingId)
 
-        val forventedeValutakurser = ValutakursBuilder(jan(2020), behandlingId)
-            .medKurs("  44$$$555$", "EUR", barn1)
-            .bygg()
+        val forventedeValutakurser =
+            ValutakursBuilder(jan(2020), behandlingId)
+                .medKurs("  44$$$555$", "EUR", barn1)
+                .bygg()
 
         assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)
     }
@@ -79,18 +83,19 @@ internal class ValutakursServiceTest {
     fun `slette et valutakurs-skjema skal resultere i et skjema uten innhold, men som fortsatt har valutakoden`() {
         val behandlingId = BehandlingId(10L)
 
-        val lagretValutakurs = valutakursRepository.saveAll(
-            listOf(
-                Valutakurs(
-                    fom = YearMonth.now(),
-                    tom = YearMonth.now(),
-                    barnAktører = setOf(tilfeldigPerson().aktør),
-                    valutakursdato = LocalDate.now(),
-                    valutakode = "EUR",
-                    kurs = BigDecimal.TEN,
-                ),
-            ).medBehandlingId(behandlingId),
-        ).single()
+        val lagretValutakurs =
+            valutakursRepository.saveAll(
+                listOf(
+                    Valutakurs(
+                        fom = YearMonth.now(),
+                        tom = YearMonth.now(),
+                        barnAktører = setOf(tilfeldigPerson().aktør),
+                        valutakursdato = LocalDate.now(),
+                        valutakode = "EUR",
+                        kurs = BigDecimal.TEN,
+                    ),
+                ).medBehandlingId(behandlingId),
+            ).single()
 
         valutakursService.slettValutakurs(behandlingId, lagretValutakurs.id)
 
@@ -120,14 +125,20 @@ internal class ValutakursServiceTest {
         valutakursService.oppdaterValutakurs(behandlingId, oppdatertKompetanse)
 
         // Forventer skjema uten innhold (MEN MED VALUTAKODE) fra oppdatert dato og fremover
-        val forventedeValutakurser = ValutakursBuilder(jan(2020), behandlingId)
-            .medKurs("444$>", "EUR", barn1)
-            .bygg()
+        val forventedeValutakurser =
+            ValutakursBuilder(jan(2020), behandlingId)
+                .medKurs("444$>", "EUR", barn1)
+                .bygg()
 
         val faktiskeValutakurser = valutakursService.hentValutakurser(behandlingId)
         assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)
     }
 }
 
-fun valutakurs(tidspunkt: Tidspunkt<Måned>, s: String, valutakode: String, vararg barn: Person) =
+fun valutakurs(
+    tidspunkt: Tidspunkt<Måned>,
+    s: String,
+    valutakode: String,
+    vararg barn: Person,
+) =
     ValutakursBuilder(tidspunkt).medKurs(s, valutakode, *barn).bygg().first()

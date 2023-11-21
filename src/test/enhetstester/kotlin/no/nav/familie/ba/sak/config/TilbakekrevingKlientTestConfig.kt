@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Profile
 
 @TestConfiguration
 class TilbakekrevingKlientTestConfig {
-
     @Bean
     @Profile("mock-tilbakekreving-klient")
     @Primary

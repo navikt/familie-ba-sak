@@ -19,7 +19,6 @@ class SatsendringStatistikk(
     private val satskjøringRepository: SatskjøringRepository,
     private val startSatsendring: StartSatsendring,
 ) {
-
     val satsendringGauge =
         MultiGauge.builder("satsendring").register(Metrics.globalRegistry)
 
@@ -37,36 +36,37 @@ class SatsendringStatistikk(
             val antallTriggetTotalt = satskjøringRepository.countBySatsTidspunkt(satsTidspunkt)
             val antallLøpendeFagsakerTotalt = fagsakRepository.finnAntallFagsakerLøpende()
 
-            val rows = listOf(
-                MultiGauge.Row.of(
-                    Tags.of(
-                        "satsendring",
-                        "totalt",
+            val rows =
+                listOf(
+                    MultiGauge.Row.of(
+                        Tags.of(
+                            "satsendring",
+                            "totalt",
+                        ),
+                        antallTriggetTotalt,
                     ),
-                    antallTriggetTotalt,
-                ),
-                MultiGauge.Row.of(
-                    Tags.of(
-                        "satsendring",
-                        "antallkjort",
+                    MultiGauge.Row.of(
+                        Tags.of(
+                            "satsendring",
+                            "antallkjort",
+                        ),
+                        antallKjørt,
                     ),
-                    antallKjørt,
-                ),
-                MultiGauge.Row.of(
-                    Tags.of(
-                        "satsendring",
-                        "antallfagsaker",
+                    MultiGauge.Row.of(
+                        Tags.of(
+                            "satsendring",
+                            "antallfagsaker",
+                        ),
+                        antallLøpendeFagsakerTotalt,
                     ),
-                    antallLøpendeFagsakerTotalt,
-                ),
-                MultiGauge.Row.of(
-                    Tags.of(
-                        "satsendring",
-                        "antallgjenstaaende",
+                    MultiGauge.Row.of(
+                        Tags.of(
+                            "satsendring",
+                            "antallgjenstaaende",
+                        ),
+                        antallLøpendeFagsakerTotalt - antallKjørt,
                     ),
-                    antallLøpendeFagsakerTotalt - antallKjørt,
-                ),
-            )
+                )
 
             satsendringGauge.register(rows, true)
         } finally {

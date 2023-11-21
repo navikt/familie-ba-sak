@@ -6,18 +6,21 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class DiskresjonskodeUtilsTest {
-    val personUtenDiskresjonskode = IdentMedAdressebeskyttelse(
-        ident = "IDENT_UTEN",
-        adressebeskyttelsegradering = null,
-    )
-    val personFortrolig = IdentMedAdressebeskyttelse(
-        ident = "IDENT_FORTROLIG",
-        adressebeskyttelsegradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG,
-    ) // Kode 7
-    val personStrengtFortrolig = IdentMedAdressebeskyttelse(
-        ident = "IDENT_STRENGT_FORTROLIG",
-        adressebeskyttelsegradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
-    ) // Kode 6
+    val personUtenDiskresjonskode =
+        IdentMedAdressebeskyttelse(
+            ident = "IDENT_UTEN",
+            adressebeskyttelsegradering = null,
+        )
+    val personFortrolig =
+        IdentMedAdressebeskyttelse(
+            ident = "IDENT_FORTROLIG",
+            adressebeskyttelsegradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG,
+        ) // Kode 7
+    val personStrengtFortrolig =
+        IdentMedAdressebeskyttelse(
+            ident = "IDENT_STRENGT_FORTROLIG",
+            adressebeskyttelsegradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
+        ) // Kode 6
 
     @Test
     fun `ingen har adressebeskyttelse - skal gi null`() {

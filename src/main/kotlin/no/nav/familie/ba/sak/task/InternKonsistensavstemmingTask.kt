@@ -26,13 +26,13 @@ import kotlin.system.measureTimeMillis
 class InternKonsistensavstemmingTask(
     val internKonsistensavstemmingService: InternKonsistensavstemmingService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val fagsakIder: Set<Long> = objectMapper.readValue(task.payload)
 
-        val tidBrukt = measureTimeMillis {
-            internKonsistensavstemmingService.validerLikUtbetalingIAndeleneOgUtbetalingsoppdraget(fagsakIder)
-        }
+        val tidBrukt =
+            measureTimeMillis {
+                internKonsistensavstemmingService.validerLikUtbetalingIAndeleneOgUtbetalingsoppdraget(fagsakIder)
+            }
 
         logger.info(
             "Fullført intern konsistensavstemming på fagsak ${fagsakIder.min()} til ${fagsakIder.max()}. " +
@@ -41,11 +41,15 @@ class InternKonsistensavstemmingTask(
     }
 
     companion object {
-        fun opprettTask(fagsakIder: Set<Long>, startTid: LocalDateTime): Task {
-            val metadata = Properties().apply {
-                this["fagsakerIder"] = "${fagsakIder.min()} til ${fagsakIder.max()}"
-                this[MDCConstants.MDC_CALL_ID] = MDC.get(MDCConstants.MDC_CALL_ID) ?: ""
-            }
+        fun opprettTask(
+            fagsakIder: Set<Long>,
+            startTid: LocalDateTime,
+        ): Task {
+            val metadata =
+                Properties().apply {
+                    this["fagsakerIder"] = "${fagsakIder.min()} til ${fagsakIder.max()}"
+                    this[MDCConstants.MDC_CALL_ID] = MDC.get(MDCConstants.MDC_CALL_ID) ?: ""
+                }
 
             return Task(
                 type = this.TASK_STEP_TYPE,

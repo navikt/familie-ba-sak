@@ -14,17 +14,18 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
 object BehandlingsresultatUtils {
-
     internal fun skalUtledeSøknadsresultatForBehandling(behandling: Behandling): Boolean {
-        return behandling.erManuellMigrering() || behandling.opprettetÅrsak in listOf(
-            BehandlingÅrsak.SØKNAD,
-            BehandlingÅrsak.FØDSELSHENDELSE,
-            BehandlingÅrsak.KLAGE,
-        )
+        return behandling.erManuellMigrering() || behandling.opprettetÅrsak in
+            listOf(
+                BehandlingÅrsak.SØKNAD,
+                BehandlingÅrsak.FØDSELSHENDELSE,
+                BehandlingÅrsak.KLAGE,
+            )
     }
 
     internal fun kombinerResultaterTilBehandlingsresultat(
-        søknadsresultat: Søknadsresultat?, // Søknadsresultat er null hvis det ikke er en søknad/fødselshendelse/manuell migrering
+        // Søknadsresultat er null hvis det ikke er en søknad/fødselshendelse/manuell migrering
+        søknadsresultat: Søknadsresultat?,
         endringsresultat: Endringsresultat,
         opphørsresultat: Opphørsresultat,
     ): Behandlingsresultat {
@@ -89,25 +90,27 @@ object BehandlingsresultatUtils {
 }
 
 fun hentUtbetalingstidslinjeForSøker(andeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): LocalDateTimeline<Int> {
-    val utvidetTidslinje = LocalDateTimeline(
-        andeler.filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
-            .map {
+    val utvidetTidslinje =
+        LocalDateTimeline(
+            andeler.filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
+                .map {
+                    LocalDateSegment(
+                        it.stønadFom.førsteDagIInneværendeMåned(),
+                        it.stønadTom.sisteDagIInneværendeMåned(),
+                        it.kalkulertUtbetalingsbeløp,
+                    )
+                },
+        )
+    val småbarnstilleggAndeler =
+        LocalDateTimeline(
+            andeler.filter { it.type == YtelseType.SMÅBARNSTILLEGG }.map {
                 LocalDateSegment(
                     it.stønadFom.førsteDagIInneværendeMåned(),
                     it.stønadTom.sisteDagIInneværendeMåned(),
                     it.kalkulertUtbetalingsbeløp,
                 )
             },
-    )
-    val småbarnstilleggAndeler = LocalDateTimeline(
-        andeler.filter { it.type == YtelseType.SMÅBARNSTILLEGG }.map {
-            LocalDateSegment(
-                it.stønadFom.førsteDagIInneværendeMåned(),
-                it.stønadTom.sisteDagIInneværendeMåned(),
-                it.kalkulertUtbetalingsbeløp,
-            )
-        },
-    )
+        )
 
     return utvidetTidslinje.combine(
         småbarnstilleggAndeler,

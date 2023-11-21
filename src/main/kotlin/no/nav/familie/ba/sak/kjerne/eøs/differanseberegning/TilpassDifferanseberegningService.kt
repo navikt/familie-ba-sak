@@ -25,18 +25,18 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val barnasDifferanseberegningEndretAbonnenter: List<BarnasDifferanseberegningEndretAbonnent>,
 ) : TilkjentYtelseEndretAbonnent {
-
     @Transactional
     override fun endretTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) {
         val behandlingId = BehandlingId(tilkjentYtelse.behandling.id)
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
-        val oppdaterteAndeler = beregnDifferanse(
-            tilkjentYtelse.andelerTilkjentYtelse,
-            utenlandskePeriodebeløp,
-            valutakurser,
-        )
+        val oppdaterteAndeler =
+            beregnDifferanse(
+                tilkjentYtelse.andelerTilkjentYtelse,
+                utenlandskePeriodebeløp,
+                valutakurser,
+            )
 
         val oppdatertTilkjentYtelse = tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
         barnasDifferanseberegningEndretAbonnenter.forEach { it.barnasDifferanseberegningEndret(oppdatertTilkjentYtelse) }
@@ -57,11 +57,12 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
 
-        val oppdaterteAndeler = beregnDifferanse(
-            tilkjentYtelse.andelerTilkjentYtelse,
-            utenlandskePeriodebeløp,
-            valutakurser,
-        )
+        val oppdaterteAndeler =
+            beregnDifferanse(
+                tilkjentYtelse.andelerTilkjentYtelse,
+                utenlandskePeriodebeløp,
+                valutakurser,
+            )
 
         val oppdatertTilkjentYtelse = tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
         barnasDifferanseberegningEndretAbonnenter.forEach { it.barnasDifferanseberegningEndret(oppdatertTilkjentYtelse) }
@@ -74,17 +75,20 @@ class TilpassDifferanseberegningEtterValutakursService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val barnasDifferanseberegningEndretAbonnenter: List<BarnasDifferanseberegningEndretAbonnent>,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs> {
-
     @Transactional
-    override fun skjemaerEndret(behandlingId: BehandlingId, valutakurser: Collection<Valutakurs>) {
+    override fun skjemaerEndret(
+        behandlingId: BehandlingId,
+        valutakurser: Collection<Valutakurs>,
+    ) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
-        val oppdaterteAndeler = beregnDifferanse(
-            tilkjentYtelse.andelerTilkjentYtelse,
-            utenlandskePeriodebeløp,
-            valutakurser,
-        )
+        val oppdaterteAndeler =
+            beregnDifferanse(
+                tilkjentYtelse.andelerTilkjentYtelse,
+                utenlandskePeriodebeløp,
+                valutakurser,
+            )
 
         val oppdatertTilkjentYtelse = tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
         barnasDifferanseberegningEndretAbonnenter.forEach { it.barnasDifferanseberegningEndret(oppdatertTilkjentYtelse) }
@@ -98,10 +102,11 @@ class TilpassDifferanseberegningSøkersYtelserService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) : BarnasDifferanseberegningEndretAbonnent {
     override fun barnasDifferanseberegningEndret(tilkjentYtelse: TilkjentYtelse) {
-        val oppdaterteAndeler = tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
-            barna = persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
-            kompetanser = kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id),
-        )
+        val oppdaterteAndeler =
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
+                kompetanser = kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id),
+            )
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
 }

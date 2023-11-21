@@ -37,7 +37,6 @@ fun VedtaksperiodeMedBegrunnelser.lagBrevPeriode(
         begrunnelserOgFritekster = begrunnelserOgFritekster,
         begrunnelseGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
         grunnlagForBegrunnelse = grunnlagForBegrunnelse,
-
     )
 }
 
@@ -78,10 +77,11 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
     val barnMedUtbetaling = begrunnelseGrunnlagPerPerson.finnBarnMedUtbetaling().keys
     val beløp = begrunnelseGrunnlagPerPerson.hentTotaltUtbetaltIPeriode()
 
-    val brevPeriodeType = hentBrevPeriodeType(
-        vedtaksperiodeMedBegrunnelser = this,
-        erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson),
-    )
+    val brevPeriodeType =
+        hentBrevPeriodeType(
+            vedtaksperiodeMedBegrunnelser = this,
+            erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson),
+        )
 
     return BrevPeriode(
         fom = this.fom?.tilMånedÅr() ?: "",
@@ -91,10 +91,11 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
         brevPeriodeType = brevPeriodeType,
         antallBarn = barnMedUtbetaling.size.toString(),
         barnasFodselsdager = barnMedUtbetaling.tilBarnasFødselsdatoer(),
-        duEllerInstitusjonen = hentDuEllerInstitusjonenTekst(
-            brevPeriodeType = brevPeriodeType,
-            fagsakType = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioder.behandling.fagsak.type,
-        ),
+        duEllerInstitusjonen =
+            hentDuEllerInstitusjonenTekst(
+                brevPeriodeType = brevPeriodeType,
+                fagsakType = grunnlagForBegrunnelse.behandlingsGrunnlagForVedtaksperioder.behandling.fagsak.type,
+            ),
     )
 }
 
@@ -129,14 +130,18 @@ private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling() 
         }
 
 fun Set<Person>.tilBarnasFødselsdatoer(): String {
-    val barnasFødselsdatoerListe: List<String> = this.filter { it.type == PersonType.BARN }
-        .sortedBy { it.fødselsdato }
-        .map { it.fødselsdato.tilKortString() }
+    val barnasFødselsdatoerListe: List<String> =
+        this.filter { it.type == PersonType.BARN }
+            .sortedBy { it.fødselsdato }
+            .map { it.fødselsdato.tilKortString() }
 
     return Utils.slåSammen(barnasFødselsdatoerListe)
 }
 
-private fun hentDuEllerInstitusjonenTekst(brevPeriodeType: BrevPeriodeType, fagsakType: FagsakType): String =
+private fun hentDuEllerInstitusjonenTekst(
+    brevPeriodeType: BrevPeriodeType,
+    fagsakType: FagsakType,
+): String =
     when (fagsakType) {
         FagsakType.INSTITUSJON -> {
             when (brevPeriodeType) {

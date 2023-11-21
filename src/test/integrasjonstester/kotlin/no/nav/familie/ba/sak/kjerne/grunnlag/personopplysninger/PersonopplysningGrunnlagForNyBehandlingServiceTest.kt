@@ -23,26 +23,19 @@ import java.time.YearMonth
 import kotlin.reflect.full.declaredMemberProperties
 
 class PersonopplysningGrunnlagForNyBehandlingServiceTest(
-
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val behandlingService: BehandlingService,
-
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-
     @Autowired
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-
     @Autowired
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-
     @Autowired
     private val personopplysningGrunnlagForNyBehandlingService: PersonopplysningGrunnlagForNyBehandlingService,
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun `opprettKopiEllerNyttPersonopplysningGrunnlag - skal opprette nytt PersonopplysningGrunnlag som kopi av personopplysningsgrunnlag fra forrige behandling ved satsendring`() {
         val morId = randomFnr()
@@ -85,15 +78,17 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
         assertThat(grunnlagFraFørsteBehandling.personer.any { it.aktør.aktivFødselsnummer() == morId })
         assertThat(grunnlagFraFørsteBehandling.personer.any { it.aktør.aktivFødselsnummer() == barnId })
 
-        val satsendring = lagBehandling(
-            fagsak,
-            behandlingType = BehandlingType.REVURDERING,
-            årsak = BehandlingÅrsak.SATSENDRING,
-        )
+        val satsendring =
+            lagBehandling(
+                fagsak,
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.SATSENDRING,
+            )
 
-        val satsendringBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            satsendring,
-        )
+        val satsendringBehandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                satsendring,
+            )
 
         personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
             satsendringBehandling,
@@ -158,15 +153,17 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
         assertThat(grunnlagFraFørsteBehandling.personer.any { it.aktør.aktivFødselsnummer() == barn1Id }).isTrue
         assertThat(grunnlagFraFørsteBehandling.personer.any { it.aktør.aktivFødselsnummer() == barn2Id }).isTrue
 
-        val satsendring = lagBehandling(
-            fagsak,
-            behandlingType = BehandlingType.REVURDERING,
-            årsak = BehandlingÅrsak.SATSENDRING,
-        )
+        val satsendring =
+            lagBehandling(
+                fagsak,
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.SATSENDRING,
+            )
 
-        val satsendringBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            satsendring,
-        )
+        val satsendringBehandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                satsendring,
+            )
 
         personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
             satsendringBehandling,

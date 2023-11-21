@@ -33,11 +33,12 @@ fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal): BigDecimal =
 fun AndelTilkjentYtelse?.oppdaterDifferanseberegning(
     utenlandskPeriodebeløpINorskeKroner: BigDecimal?,
 ): AndelTilkjentYtelse? {
-    val nyAndelTilkjentYtelse = when {
-        this == null -> null
-        utenlandskPeriodebeløpINorskeKroner == null -> this.utenDifferanseberegning()
-        else -> this.medDifferanseberegning(utenlandskPeriodebeløpINorskeKroner)
-    }
+    val nyAndelTilkjentYtelse =
+        when {
+            this == null -> null
+            utenlandskPeriodebeløpINorskeKroner == null -> this.utenDifferanseberegning()
+            else -> this.medDifferanseberegning(utenlandskPeriodebeløpINorskeKroner)
+        }
 
     return nyAndelTilkjentYtelse
 }
@@ -45,12 +46,14 @@ fun AndelTilkjentYtelse?.oppdaterDifferanseberegning(
 fun AndelTilkjentYtelse.medDifferanseberegning(
     utenlandskPeriodebeløpINorskeKroner: BigDecimal,
 ): AndelTilkjentYtelse {
-    val avrundetUtenlandskPeriodebeløp = utenlandskPeriodebeløpINorskeKroner
-        .toBigInteger().intValueExact() // Fjern desimaler for å gi fordel til søker
+    val avrundetUtenlandskPeriodebeløp =
+        utenlandskPeriodebeløpINorskeKroner
+            .toBigInteger().intValueExact() // Fjern desimaler for å gi fordel til søker
 
-    val nyttDifferanseberegnetBeløp = (
-        nasjonaltPeriodebeløp
-            ?: kalkulertUtbetalingsbeløp
+    val nyttDifferanseberegnetBeløp =
+        (
+            nasjonaltPeriodebeløp
+                ?: kalkulertUtbetalingsbeløp
         ) - avrundetUtenlandskPeriodebeløp
 
     return copy(

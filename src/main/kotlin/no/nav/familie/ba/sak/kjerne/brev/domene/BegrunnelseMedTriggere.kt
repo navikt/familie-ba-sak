@@ -32,19 +32,20 @@ data class BegrunnelseMedTriggere(
                 periode = periode,
             )
         } else {
-            val personidenterGjeldendeForBegrunnelse: Set<String> = hentPersonidenterGjeldendeForBegrunnelse(
-                begrunnelse = this.standardbegrunnelse,
-                triggesAv = this.triggesAv,
-                vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
-                periode = periode,
-                vedtaksperiodetype = vedtaksperiodetype,
-                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-                identerMedUtbetalingPåPeriode = identerMedUtbetalingPåPeriode,
-                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-                identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent,
-                minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
-                dødeBarnForrigePeriode = dødeBarnForrigePeriode,
-            )
+            val personidenterGjeldendeForBegrunnelse: Set<String> =
+                hentPersonidenterGjeldendeForBegrunnelse(
+                    begrunnelse = this.standardbegrunnelse,
+                    triggesAv = this.triggesAv,
+                    vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
+                    periode = periode,
+                    vedtaksperiodetype = vedtaksperiodetype,
+                    restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
+                    identerMedUtbetalingPåPeriode = identerMedUtbetalingPåPeriode,
+                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                    identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent,
+                    minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
+                    dødeBarnForrigePeriode = dødeBarnForrigePeriode,
+                )
 
             if (
                 personidenterGjeldendeForBegrunnelse.isEmpty() &&
@@ -67,16 +68,18 @@ data class BegrunnelseMedTriggere(
         }
     }
 
-    fun tilBrevBegrunnelseGrunnlagForLogging() = BrevBegrunnelseGrunnlagForLogging(
-        standardbegrunnelse = this.standardbegrunnelse,
-    )
+    fun tilBrevBegrunnelseGrunnlagForLogging() =
+        BrevBegrunnelseGrunnlagForLogging(
+            standardbegrunnelse = this.standardbegrunnelse,
+        )
 }
 
 fun Vedtaksbegrunnelse.tilBegrunnelseMedTriggere(
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
 ): BegrunnelseMedTriggere {
-    val sanityBegrunnelse = sanityBegrunnelser[this.standardbegrunnelse]
-        ?: throw Feil("Finner ikke sanityBegrunnelse med apiNavn=${this.standardbegrunnelse.sanityApiNavn}")
+    val sanityBegrunnelse =
+        sanityBegrunnelser[this.standardbegrunnelse]
+            ?: throw Feil("Finner ikke sanityBegrunnelse med apiNavn=${this.standardbegrunnelse.sanityApiNavn}")
     return BegrunnelseMedTriggere(
         standardbegrunnelse = this.standardbegrunnelse,
         triggesAv = sanityBegrunnelse.triggesAv,

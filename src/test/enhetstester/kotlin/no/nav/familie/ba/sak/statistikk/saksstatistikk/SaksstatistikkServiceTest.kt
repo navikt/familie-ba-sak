@@ -80,65 +80,56 @@ import kotlin.random.Random.Default.nextInt
 internal class SaksstatistikkServiceTest(
     @MockK(relaxed = true)
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-
     @MockK(relaxed = true)
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
-
     @MockK
     private val arbeidsfordelingService: ArbeidsfordelingService,
-
     @MockK
     private val totrinnskontrollService: TotrinnskontrollService,
-
     @MockK
     private val fagsakService: FagsakService,
-
     @MockK
     private val personopplysningerService: PersonopplysningerService,
-
     @MockK
     private val personidentService: PersonidentService,
-
     @MockK
     private val persongrunnlagService: PersongrunnlagService,
-
     @MockK
     private val vedtakService: VedtakService,
-
     @MockK
     private val vedtaksperiodeService: VedtaksperiodeService,
-
     @MockK
     private val settPåVentService: SettPåVentService,
-
 ) {
-
-    private val sakstatistikkService = SaksstatistikkService(
-        behandlingHentOgPersisterService,
-        behandlingSøknadsinfoService,
-        arbeidsfordelingService,
-        totrinnskontrollService,
-        vedtakService,
-        fagsakService,
-        personopplysningerService,
-        persongrunnlagService,
-        vedtaksperiodeService,
-        settPåVentService,
-    )
+    private val sakstatistikkService =
+        SaksstatistikkService(
+            behandlingHentOgPersisterService,
+            behandlingSøknadsinfoService,
+            arbeidsfordelingService,
+            totrinnskontrollService,
+            vedtakService,
+            fagsakService,
+            personopplysningerService,
+            persongrunnlagService,
+            vedtaksperiodeService,
+            settPåVentService,
+        )
 
     @BeforeAll
     fun init() {
         MockKAnnotations.init()
 
-        every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
-            behandlendeEnhetId = "4820",
-            behandlendeEnhetNavn = "Nav",
-            behandlingId = 1,
-        )
-        every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet(
-            "4821",
-            "NAV",
-        )
+        every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns
+            ArbeidsfordelingPåBehandling(
+                behandlendeEnhetId = "4820",
+                behandlendeEnhetNavn = "Nav",
+                behandlingId = 1,
+            )
+        every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns
+            Arbeidsfordelingsenhet(
+                "4821",
+                "NAV",
+            )
 
         every { settPåVentService.finnAktivSettPåVentPåBehandling(any()) } returns lagSettPåVent()
     }
@@ -150,9 +141,10 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Skal mappe henleggelsesårsak til behandlingDVH for henlagt behandling`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE).also {
-            it.resultat = Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
-        }
+        val behandling =
+            lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE).also {
+                it.resultat = Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
+            }
 
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
@@ -167,9 +159,10 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Skal mappe til behandlingDVH for Automatisk rute`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, skalBehandlesAutomatisk = true).also {
-            it.resultat = Behandlingsresultat.INNVILGET
-        }
+        val behandling =
+            lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, skalBehandlesAutomatisk = true).also {
+                it.resultat = Behandlingsresultat.INNVILGET
+            }
 
         val vedtak = lagVedtak(behandling)
         val vedtaksperiodeMedBegrunnelser =
@@ -177,17 +170,19 @@ internal class SaksstatistikkServiceTest(
 
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(
-            vedtaksperiodeMedBegrunnelser,
-        )
-        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
-            saksbehandler = SYSTEM_NAVN,
-            saksbehandlerId = SYSTEM_FORKORTELSE,
-            beslutter = SYSTEM_NAVN,
-            beslutterId = SYSTEM_FORKORTELSE,
-            godkjent = true,
-            behandling = behandling,
-        )
+        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns
+            listOf(
+                vedtaksperiodeMedBegrunnelser,
+            )
+        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns
+            Totrinnskontroll(
+                saksbehandler = SYSTEM_NAVN,
+                saksbehandlerId = SYSTEM_FORKORTELSE,
+                beslutter = SYSTEM_NAVN,
+                beslutterId = SYSTEM_FORKORTELSE,
+                godkjent = true,
+                behandling = behandling,
+            )
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
@@ -229,14 +224,15 @@ internal class SaksstatistikkServiceTest(
         val behandling =
             lagBehandling(årsak = BehandlingÅrsak.SØKNAD).also { it.resultat = Behandlingsresultat.AVSLÅTT }
 
-        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
-            saksbehandler = "Saksbehandler",
-            saksbehandlerId = "saksbehandlerId",
-            beslutter = "Beslutter",
-            beslutterId = "beslutterId",
-            godkjent = true,
-            behandling = behandling,
-        )
+        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns
+            Totrinnskontroll(
+                saksbehandler = "Saksbehandler",
+                saksbehandlerId = "saksbehandlerId",
+                beslutter = "Beslutter",
+                beslutterId = "beslutterId",
+                godkjent = true,
+                behandling = behandling,
+            )
 
         val vedtak = lagVedtak(behandling)
 
@@ -247,26 +243,29 @@ internal class SaksstatistikkServiceTest(
 
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
-        every { persongrunnlagService.hentBarna(any<Behandling>()) } returns listOf(
-            tilfeldigPerson()
-                .copy(aktør = randomAktør("01010000001")),
-        )
+        every { persongrunnlagService.hentBarna(any<Behandling>()) } returns
+            listOf(
+                tilfeldigPerson()
+                    .copy(aktør = randomAktør("01010000001")),
+            )
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(
-            vedtaksperiodeMedBegrunnelser,
-        )
+        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns
+            listOf(
+                vedtaksperiodeMedBegrunnelser,
+            )
 
         val mottattDato = LocalDateTime.now()
         every { behandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns mottattDato
 
         val tidSattPåVent = now()
         val frist = now().plusWeeks(3)
-        every { settPåVentService.finnAktivSettPåVentPåBehandling(any()) } returns lagSettPåVent(
-            tidSattPåVent = tidSattPåVent,
-            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
-            frist = frist,
-        )
+        every { settPåVentService.finnAktivSettPåVentPåBehandling(any()) } returns
+            lagSettPåVent(
+                tidSattPåVent = tidSattPåVent,
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+                frist = frist,
+            )
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
@@ -323,27 +322,31 @@ internal class SaksstatistikkServiceTest(
 
         every { personidentService.hentAktør("12345678910") } returns Aktør("1234567891000")
         every { personidentService.hentAktør("12345678911") } returns Aktør("1234567891100")
-        every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns PersonInfo(
-            fødselsdato = LocalDate.of(
-                2017,
-                3,
-                1,
-            ),
-            bostedsadresser = mutableListOf(
-                Bostedsadresse(
-                    vegadresse = Vegadresse(
-                        matrikkelId = 1111,
-                        husnummer = null,
-                        husbokstav = null,
-                        bruksenhetsnummer = null,
-                        adressenavn = null,
-                        kommunenummer = null,
-                        tilleggsnavn = null,
-                        postnummer = "2222",
+        every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns
+            PersonInfo(
+                fødselsdato =
+                    LocalDate.of(
+                        2017,
+                        3,
+                        1,
                     ),
-                ),
-            ),
-        )
+                bostedsadresser =
+                    mutableListOf(
+                        Bostedsadresse(
+                            vegadresse =
+                                Vegadresse(
+                                    matrikkelId = 1111,
+                                    husnummer = null,
+                                    husbokstav = null,
+                                    bruksenhetsnummer = null,
+                                    adressenavn = null,
+                                    kommunenummer = null,
+                                    tilleggsnavn = null,
+                                    postnummer = "2222",
+                                ),
+                        ),
+                    ),
+            )
 
         every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns null
 
@@ -366,13 +369,15 @@ internal class SaksstatistikkServiceTest(
         every { personidentService.hentAktør("12345678910") } returns Aktør("1234567891000")
         every { personidentService.hentAktør("12345678911") } returns Aktør("1234567891100")
 
-        every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns PersonInfo(
-            fødselsdato = LocalDate.of(
-                2017,
-                3,
-                1,
-            ),
-        )
+        every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns
+            PersonInfo(
+                fødselsdato =
+                    LocalDate.of(
+                        2017,
+                        3,
+                        1,
+                    ),
+            )
         every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(tilAktør("12345678910")) } returns "SE"
 
         every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns null
@@ -397,11 +402,12 @@ internal class SaksstatistikkServiceTest(
         every { personidentService.hentAktør(any()) } returns randomAktørId
         every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any()) } returns "SE"
 
-        every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(
-            1,
-            tilfeldigPerson(personType = PersonType.BARN),
-            tilfeldigPerson(personType = PersonType.SØKER),
-        )
+        every { persongrunnlagService.hentAktiv(any()) } returns
+            lagTestPersonopplysningGrunnlag(
+                1,
+                tilfeldigPerson(personType = PersonType.BARN),
+                tilfeldigPerson(personType = PersonType.SØKER),
+            )
 
         every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns lagBehandling(fagsak)
 
@@ -417,19 +423,21 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Enum-verdier brukt i behandlingDVH skal validere mot json schema`() {
-        val enumVerdier = listOf(
-            BehandlingType.values(),
-            BehandlingStatus.values(),
-            BehandlingUnderkategori.values(),
-            BehandlingÅrsak.values(),
-            BehandlingKategori.values(),
-            Behandlingsresultat.values(),
-            SettPåVentÅrsak.values(),
-        )
+        val enumVerdier =
+            listOf(
+                BehandlingType.values(),
+                BehandlingStatus.values(),
+                BehandlingUnderkategori.values(),
+                BehandlingÅrsak.values(),
+                BehandlingKategori.values(),
+                Behandlingsresultat.values(),
+                SettPåVentÅrsak.values(),
+            )
 
-        val alleMuligeResultatBegrunnelser = Standardbegrunnelse.values().map {
-            ResultatBegrunnelseDVH(now(), now(), it.vedtakBegrunnelseType.name, it.name)
-        }
+        val alleMuligeResultatBegrunnelser =
+            Standardbegrunnelse.values().map {
+                ResultatBegrunnelseDVH(now(), now(), it.vedtakBegrunnelseType.name, it.name)
+            }
 
         for (i in 0..enumVerdier.maxOf { it.size }) {
             val enumI = enumVerdier.map { it.getOrElse(i) { _ -> it.first() } }
@@ -441,45 +449,47 @@ internal class SaksstatistikkServiceTest(
             val behandlingsresultat = enumI[5].name
             val settPåVentÅrsak = enumI[6].name
 
-            val behandlingDVH = BehandlingDVH(
-                funksjonellTid = ZonedDateTime.now(),
-                tekniskTid = ZonedDateTime.now(),
-                mottattDato = LocalDateTime.now().atZone(SaksstatistikkService.TIMEZONE),
-                registrertDato = LocalDateTime.now().atZone(SaksstatistikkService.TIMEZONE),
-                behandlingId = nextInt(100000000, 999999999).toString(),
-                funksjonellId = UUID.randomUUID().toString(),
-                sakId = nextInt(100000000, 999999999).toString(),
-                behandlingType = behandlingType.name,
-                behandlingStatus = behandlingStatus,
-                behandlingKategori = behandlingUnderkategori,
-                behandlingAarsak = behandlingAarsak,
-                automatiskBehandlet = nextBoolean(),
-                utenlandstilsnitt = behandlingKategori,
-                ansvarligEnhetKode = "EnhetKodeA",
-                behandlendeEnhetKode = "EnhetKodeB",
-                ansvarligEnhetType = "NORG",
-                behandlendeEnhetType = "NORG",
-                totrinnsbehandling = nextBoolean(),
-                avsender = "familie-ba-sak",
-                versjon = Utils.hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
-                // Ikke påkrevde felt
-                vedtaksDato = now(),
-                relatertBehandlingId = nextInt(100000000, 999999999).toString(),
-                vedtakId = nextInt(100000000, 999999999).toString(),
-                resultat = behandlingsresultat,
-                behandlingTypeBeskrivelse = behandlingType.visningsnavn,
-                resultatBegrunnelser = alleMuligeResultatBegrunnelser,
-                behandlingOpprettetAv = "behandling.opprettetAv",
-                behandlingOpprettetType = "saksbehandlerId",
-                behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
-                beslutter = "beslutterId",
-                saksbehandler = "saksbehandlerId",
-                settPaaVent = SettPåVent(
-                    frist = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
-                    tidSattPaaVent = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
-                    aarsak = settPåVentÅrsak,
-                ),
-            )
+            val behandlingDVH =
+                BehandlingDVH(
+                    funksjonellTid = ZonedDateTime.now(),
+                    tekniskTid = ZonedDateTime.now(),
+                    mottattDato = LocalDateTime.now().atZone(SaksstatistikkService.TIMEZONE),
+                    registrertDato = LocalDateTime.now().atZone(SaksstatistikkService.TIMEZONE),
+                    behandlingId = nextInt(100000000, 999999999).toString(),
+                    funksjonellId = UUID.randomUUID().toString(),
+                    sakId = nextInt(100000000, 999999999).toString(),
+                    behandlingType = behandlingType.name,
+                    behandlingStatus = behandlingStatus,
+                    behandlingKategori = behandlingUnderkategori,
+                    behandlingAarsak = behandlingAarsak,
+                    automatiskBehandlet = nextBoolean(),
+                    utenlandstilsnitt = behandlingKategori,
+                    ansvarligEnhetKode = "EnhetKodeA",
+                    behandlendeEnhetKode = "EnhetKodeB",
+                    ansvarligEnhetType = "NORG",
+                    behandlendeEnhetType = "NORG",
+                    totrinnsbehandling = nextBoolean(),
+                    avsender = "familie-ba-sak",
+                    versjon = Utils.hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
+                    // Ikke påkrevde felt
+                    vedtaksDato = now(),
+                    relatertBehandlingId = nextInt(100000000, 999999999).toString(),
+                    vedtakId = nextInt(100000000, 999999999).toString(),
+                    resultat = behandlingsresultat,
+                    behandlingTypeBeskrivelse = behandlingType.visningsnavn,
+                    resultatBegrunnelser = alleMuligeResultatBegrunnelser,
+                    behandlingOpprettetAv = "behandling.opprettetAv",
+                    behandlingOpprettetType = "saksbehandlerId",
+                    behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
+                    beslutter = "beslutterId",
+                    saksbehandler = "saksbehandlerId",
+                    settPaaVent =
+                        SettPåVent(
+                            frist = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
+                            tidSattPaaVent = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
+                            aarsak = settPåVentÅrsak,
+                        ),
+                )
             try {
                 validerJsonMotSchema(
                     sakstatistikkObjectMapper.writeValueAsString(behandlingDVH),
@@ -500,19 +510,20 @@ internal class SaksstatistikkServiceTest(
             PersonType.values().map { personType -> AktørDVH(randomAktør().aktørId.toLong(), personType.name) }
 
         FagsakStatus.values().forEach {
-            val sakDvh = SakDVH(
-                funksjonellTid = ZonedDateTime.now(),
-                tekniskTid = ZonedDateTime.now(),
-                opprettetDato = now(),
-                funksjonellId = UUID.randomUUID().toString(),
-                sakId = nextInt(100000000, 999999999).toString(),
-                aktorId = deltagere.first().aktorId,
-                aktorer = deltagere,
-                sakStatus = it.name,
-                avsender = "familie-ba-sak",
-                versjon = Utils.hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
-                bostedsland = "NO",
-            )
+            val sakDvh =
+                SakDVH(
+                    funksjonellTid = ZonedDateTime.now(),
+                    tekniskTid = ZonedDateTime.now(),
+                    opprettetDato = now(),
+                    funksjonellId = UUID.randomUUID().toString(),
+                    sakId = nextInt(100000000, 999999999).toString(),
+                    aktorId = deltagere.first().aktorId,
+                    aktorer = deltagere,
+                    sakStatus = it.name,
+                    avsender = "familie-ba-sak",
+                    versjon = Utils.hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
+                    bostedsland = "NO",
+                )
             try {
                 validerJsonMotSchema(
                     sakstatistikkObjectMapper.writeValueAsString(sakDvh),
@@ -527,17 +538,22 @@ internal class SaksstatistikkServiceTest(
         }
     }
 
-    fun validerJsonMotSchema(json: String, schemaPath: String) {
+    fun validerJsonMotSchema(
+        json: String,
+        schemaPath: String,
+    ) {
         val api = MedeiaJacksonApi()
-        val behandlingSchemaValidator = api.loadSchema(
-            UrlSchemaSource(
-                object {}::class.java.getResource(schemaPath)!!,
-            ),
-        )
-        val validatedParser = api.decorateJsonParser(
-            behandlingSchemaValidator,
-            JsonFactory().createParser(json.toByteArray(Charset.defaultCharset())),
-        )
+        val behandlingSchemaValidator =
+            api.loadSchema(
+                UrlSchemaSource(
+                    object {}::class.java.getResource(schemaPath)!!,
+                ),
+            )
+        val validatedParser =
+            api.decorateJsonParser(
+                behandlingSchemaValidator,
+                JsonFactory().createParser(json.toByteArray(Charset.defaultCharset())),
+            )
         api.parseAll(validatedParser)
     }
 }

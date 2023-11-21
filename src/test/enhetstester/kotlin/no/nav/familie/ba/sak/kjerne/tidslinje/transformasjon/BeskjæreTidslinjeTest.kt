@@ -18,7 +18,6 @@ import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class BeskjæreTidslinjeTest {
-
     @Test
     fun `skal beskjære endelig tidslinje på begge sider`() {
         val hovedlinje = "aaaaaa".tilCharTidslinje(des(2001))

@@ -15,14 +15,16 @@ class SlåSammenSkjemaTest {
 
     @Test
     fun testSlåSammenPåfølgendePerioder() {
-        val kompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("SSS", barn1)
-            .medKompetanse("   SSS", barn1)
-            .byggKompetanser()
+        val kompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("SSS", barn1)
+                .medKompetanse("   SSS", barn1)
+                .byggKompetanser()
 
-        val forventedeKompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("SSSSSS", barn1)
-            .byggKompetanser()
+        val forventedeKompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("SSSSSS", barn1)
+                .byggKompetanser()
 
         val faktiskeKompetanser = kompetanser.slåSammen()
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
@@ -30,14 +32,16 @@ class SlåSammenSkjemaTest {
 
     @Test
     fun testSlåSammenForPerioderMedMellomrom() {
-        val kompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("SSS", barn1, barn2, barn3)
-            .medKompetanse("    SSS", barn1, barn2, barn3)
-            .byggKompetanser()
+        val kompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("SSS", barn1, barn2, barn3)
+                .medKompetanse("    SSS", barn1, barn2, barn3)
+                .byggKompetanser()
 
-        val forventedeKompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("SSS SSS", barn1, barn2, barn3)
-            .byggKompetanser()
+        val forventedeKompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("SSS SSS", barn1, barn2, barn3)
+                .byggKompetanser()
 
         val faktiskeKompetanser = kompetanser.slåSammen()
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -45,14 +49,16 @@ class SlåSammenSkjemaTest {
 
     @Test
     fun testSlåSammenForPerioderDerTidligstePeriodeHarÅpemTOM() {
-        val kompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("->", barn1, barn2, barn3)
-            .medKompetanse("   -----", barn1, barn2, barn3)
-            .byggKompetanser()
+        val kompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("->", barn1, barn2, barn3)
+                .medKompetanse("   -----", barn1, barn2, barn3)
+                .byggKompetanser()
 
-        val forventedeKompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("->", barn1, barn2, barn3)
-            .byggKompetanser()
+        val forventedeKompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("->", barn1, barn2, barn3)
+                .byggKompetanser()
 
         val faktiskeKompetanser = kompetanser.slåSammen()
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -61,14 +67,16 @@ class SlåSammenSkjemaTest {
 
     @Test
     fun testSlåSammenForPerioderMedOverlapp() {
-        val kompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("-----", barn1, barn2, barn3)
-            .medKompetanse("   -----", barn1, barn2, barn3)
-            .byggKompetanser()
+        val kompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("-----", barn1, barn2, barn3)
+                .medKompetanse("   -----", barn1, barn2, barn3)
+                .byggKompetanser()
 
-        val forventedeKompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("--------", barn1, barn2, barn3)
-            .byggKompetanser()
+        val forventedeKompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("--------", barn1, barn2, barn3)
+                .byggKompetanser()
 
         val faktiskeKompetanser = kompetanser.slåSammen()
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -76,14 +84,16 @@ class SlåSammenSkjemaTest {
 
     @Test
     fun testSlåSammneForPerioderDerSenestePeriodeHarÅpemTOM() {
-        val kompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("------", barn1, barn2, barn3)
-            .medKompetanse("   ----->", barn1, barn2, barn3)
-            .byggKompetanser()
+        val kompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("------", barn1, barn2, barn3)
+                .medKompetanse("   ----->", barn1, barn2, barn3)
+                .byggKompetanser()
 
-        val forventedeKompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("->", barn1, barn2, barn3)
-            .byggKompetanser()
+        val forventedeKompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("->", barn1, barn2, barn3)
+                .byggKompetanser()
 
         val faktiskeKompetanser = kompetanser.slåSammen()
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -93,21 +103,23 @@ class SlåSammenSkjemaTest {
 
     @Test
     fun komplekseSlåSammenKommpetanserTest() {
-        val kompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("SSSSSSS", barn1)
-            .medKompetanse("SSSPPSS", barn2)
-            .medKompetanse("-SSSSSS", barn3)
-            .byggKompetanser()
+        val kompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("SSSSSSS", barn1)
+                .medKompetanse("SSSPPSS", barn2)
+                .medKompetanse("-SSSSSS", barn3)
+                .byggKompetanser()
 
-        val forventedeKompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse(" SS  SS", barn1, barn2, barn3)
-            .medKompetanse("S      ", barn1, barn2)
-            .medKompetanse("   SS  ", barn1, barn3)
-            .medKompetanse("       ", barn2, barn3)
-            .medKompetanse("       ", barn1)
-            .medKompetanse("   PP  ", barn2)
-            .medKompetanse("-      ", barn3)
-            .byggKompetanser()
+        val forventedeKompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse(" SS  SS", barn1, barn2, barn3)
+                .medKompetanse("S      ", barn1, barn2)
+                .medKompetanse("   SS  ", barn1, barn3)
+                .medKompetanse("       ", barn2, barn3)
+                .medKompetanse("       ", barn1)
+                .medKompetanse("   PP  ", barn2)
+                .medKompetanse("-      ", barn3)
+                .byggKompetanser()
 
         val faktiskeKompetanser = kompetanser.slåSammen()
         Assertions.assertEquals(6, faktiskeKompetanser.size)
@@ -116,16 +128,18 @@ class SlåSammenSkjemaTest {
 
     @Test
     fun slåSammenEnkeltBarnSomSkillerSegHeltUt() {
-        val kompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("SSS", barn1)
-            .medKompetanse("---------", barn2, barn3)
-            .medKompetanse("   SSSS", barn1)
-            .byggKompetanser()
+        val kompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("SSS", barn1)
+                .medKompetanse("---------", barn2, barn3)
+                .medKompetanse("   SSSS", barn1)
+                .byggKompetanser()
 
-        val forventedeKompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("SSSSSSS", barn1)
-            .medKompetanse("---------", barn2, barn3)
-            .byggKompetanser()
+        val forventedeKompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("SSSSSSS", barn1)
+                .medKompetanse("---------", barn2, barn3)
+                .byggKompetanser()
 
         val faktiskeKompetanser = kompetanser.slåSammen()
         Assertions.assertEquals(2, faktiskeKompetanser.size)

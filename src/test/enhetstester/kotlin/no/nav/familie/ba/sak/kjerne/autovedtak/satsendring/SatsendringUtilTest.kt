@@ -15,39 +15,40 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
 class SatsendringUtilTest {
-
-    private val UGYLDIG_SATS = 1000
+    private val ugyldigSats = 1000
 
     @Test
     fun `Skal returnere true dersom vi har siste sats`() {
-        val andelerMedSisteSats = SatsType.values()
-            .filter { it != SatsType.FINN_SVAL }
-            .map {
-                val sisteSats = SatsService.finnSisteSatsFor(it)
-                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                    fom = sisteSats.gyldigFom.toYearMonth(),
-                    tom = sisteSats.gyldigTom.toYearMonth(),
-                    sats = sisteSats.beløp,
-                    ytelseType = it.tilYtelseType(),
-                )
-            }
+        val andelerMedSisteSats =
+            SatsType.values()
+                .filter { it != SatsType.FINN_SVAL }
+                .map {
+                    val sisteSats = SatsService.finnSisteSatsFor(it)
+                    lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                        fom = sisteSats.gyldigFom.toYearMonth(),
+                        tom = sisteSats.gyldigTom.toYearMonth(),
+                        sats = sisteSats.beløp,
+                        ytelseType = it.tilYtelseType(),
+                    )
+                }
 
         assertTrue(andelerMedSisteSats.erOppdatertMedSisteSatser())
     }
 
     @Test
     fun `Skal returnere true dersom vi har siste sats selv om alle perioder er fram i tid`() {
-        val andelerMedSisteSats = SatsType.values()
-            .filter { it != SatsType.FINN_SVAL }
-            .map {
-                val sisteSats = SatsService.finnSisteSatsFor(it)
-                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                    fom = sisteSats.gyldigFom.toYearMonth().plusYears(1),
-                    tom = sisteSats.gyldigFom.toYearMonth().plusYears(1),
-                    sats = sisteSats.beløp,
-                    ytelseType = it.tilYtelseType(),
-                )
-            }
+        val andelerMedSisteSats =
+            SatsType.values()
+                .filter { it != SatsType.FINN_SVAL }
+                .map {
+                    val sisteSats = SatsService.finnSisteSatsFor(it)
+                    lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                        fom = sisteSats.gyldigFom.toYearMonth().plusYears(1),
+                        tom = sisteSats.gyldigFom.toYearMonth().plusYears(1),
+                        sats = sisteSats.beløp,
+                        ytelseType = it.tilYtelseType(),
+                    )
+                }
 
         assertTrue(andelerMedSisteSats.erOppdatertMedSisteSatser())
     }
@@ -58,14 +59,15 @@ class SatsendringUtilTest {
             .filter { it != SatsType.FINN_SVAL }
             .forEach {
                 val sisteSats = SatsService.finnSisteSatsFor(it)
-                val andelerMedFeilSats = listOf(
-                    lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                        fom = sisteSats.gyldigFom.toYearMonth(),
-                        tom = sisteSats.gyldigTom.toYearMonth(),
-                        sats = sisteSats.beløp - 1,
-                        ytelseType = it.tilYtelseType(),
-                    ),
-                )
+                val andelerMedFeilSats =
+                    listOf(
+                        lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                            fom = sisteSats.gyldigFom.toYearMonth(),
+                            tom = sisteSats.gyldigTom.toYearMonth(),
+                            sats = sisteSats.beløp - 1,
+                            ytelseType = it.tilYtelseType(),
+                        ),
+                    )
 
                 assertFalse(andelerMedFeilSats.erOppdatertMedSisteSatser())
             }
@@ -77,14 +79,15 @@ class SatsendringUtilTest {
             .filter { it != SatsType.FINN_SVAL }
             .forEach {
                 val sisteSats = SatsService.finnSisteSatsFor(it)
-                val andelerSomErFørSisteSats = listOf(
-                    lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                        fom = sisteSats.gyldigFom.toYearMonth().minusMonths(100),
-                        tom = sisteSats.gyldigFom.toYearMonth().minusMonths(1),
-                        sats = sisteSats.beløp - 1,
-                        ytelseType = it.tilYtelseType(),
-                    ),
-                )
+                val andelerSomErFørSisteSats =
+                    listOf(
+                        lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                            fom = sisteSats.gyldigFom.toYearMonth().minusMonths(100),
+                            tom = sisteSats.gyldigFom.toYearMonth().minusMonths(1),
+                            sats = sisteSats.beløp - 1,
+                            ytelseType = it.tilYtelseType(),
+                        ),
+                    )
 
                 assertTrue(andelerSomErFørSisteSats.erOppdatertMedSisteSatser())
             }
@@ -96,15 +99,16 @@ class SatsendringUtilTest {
             .filter { it != SatsType.FINN_SVAL }
             .forEach {
                 val sisteSats = SatsService.finnSisteSatsFor(it)
-                val andelerMedFeilSats = listOf(
-                    lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                        fom = sisteSats.gyldigFom.toYearMonth(),
-                        tom = sisteSats.gyldigTom.toYearMonth(),
-                        sats = sisteSats.beløp - 1,
-                        prosent = BigDecimal.ZERO,
-                        ytelseType = it.tilYtelseType(),
-                    ),
-                )
+                val andelerMedFeilSats =
+                    listOf(
+                        lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                            fom = sisteSats.gyldigFom.toYearMonth(),
+                            tom = sisteSats.gyldigTom.toYearMonth(),
+                            sats = sisteSats.beløp - 1,
+                            prosent = BigDecimal.ZERO,
+                            ytelseType = it.tilYtelseType(),
+                        ),
+                    )
 
                 assertTrue(andelerMedFeilSats.erOppdatertMedSisteSatser())
             }
@@ -163,7 +167,7 @@ class SatsendringUtilTest {
                 SatsType.SMA,
                 behandling,
                 YtelseType.SMÅBARNSTILLEGG,
-                UGYLDIG_SATS,
+                ugyldigSats,
             )
 
         Assertions.assertThat(atyMedUgyldigSatsSmåbarnstillegg.erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -173,7 +177,7 @@ class SatsendringUtilTest {
                 SatsType.UTVIDET_BARNETRYGD,
                 behandling,
                 YtelseType.UTVIDET_BARNETRYGD,
-                UGYLDIG_SATS,
+                ugyldigSats,
             )
 
         Assertions.assertThat(atyMedUglydligSatsUtvidet.erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -183,7 +187,7 @@ class SatsendringUtilTest {
                 SatsType.ORBA,
                 behandling,
                 YtelseType.ORDINÆR_BARNETRYGD,
-                UGYLDIG_SATS,
+                ugyldigSats,
             )
 
         Assertions.assertThat(atyMedUgyldigSatsBareOrba.erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -193,7 +197,7 @@ class SatsendringUtilTest {
                 SatsType.TILLEGG_ORBA,
                 behandling,
                 YtelseType.ORDINÆR_BARNETRYGD,
-                UGYLDIG_SATS,
+                ugyldigSats,
             )
 
         Assertions.assertThat(atyMedUgyldigSatsTilleggOrba.erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -207,7 +211,7 @@ class SatsendringUtilTest {
                 SatsType.SMA,
                 behandling,
                 YtelseType.SMÅBARNSTILLEGG,
-                UGYLDIG_SATS,
+                ugyldigSats,
             )
 
         val atyMedGyldigUtvidet =
@@ -255,7 +259,7 @@ class SatsendringUtilTest {
                 person = lagPerson(),
                 aktør = lagPerson().aktør,
                 periodeIdOffset = 1,
-                beløp = UGYLDIG_SATS,
+                beløp = ugyldigSats,
             )
 
         Assertions.assertThat(listOf(atySomGårUtPåSatstidspunktUgyldig).erOppdatertMedSisteSatser()).isEqualTo(false)
@@ -309,7 +313,7 @@ class SatsendringUtilTest {
                 person = lagPerson(),
                 aktør = lagPerson().aktør,
                 periodeIdOffset = 1,
-                beløp = UGYLDIG_SATS,
+                beløp = ugyldigSats,
             )
 
         Assertions.assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatser()).isEqualTo(false)

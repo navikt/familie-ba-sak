@@ -25,21 +25,22 @@ class SystemOnlyPdlRestClient(
     @Qualifier("jwtBearerClientCredentials") override val restTemplate: RestOperations,
     override val personidentService: PersonidentService,
 ) : PdlRestClient(pdlBaseUrl, restTemplate, personidentService) {
-
     @Cacheable("adressebeskyttelse", cacheManager = "shortCache")
     fun hentAdressebeskyttelse(aktør: Aktør): List<Adressebeskyttelse> {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-            query = hentGraphqlQuery("hent-adressebeskyttelse"),
-        )
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
+                query = hentGraphqlQuery("hent-adressebeskyttelse"),
+            )
 
-        val pdlResponse: PdlBaseResponse<PdlAdressebeskyttelseResponse> = kallEksternTjeneste(
-            tjeneste = "pdl",
-            uri = pdlUri,
-            formål = "Hent adressebeskyttelse",
-        ) {
-            postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
-        }
+        val pdlResponse: PdlBaseResponse<PdlAdressebeskyttelseResponse> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent adressebeskyttelse",
+            ) {
+                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+            }
 
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
@@ -51,18 +52,20 @@ class SystemOnlyPdlRestClient(
 
     @Cacheable("adressebeskyttelsebolk", cacheManager = "shortCache")
     fun hentAdressebeskyttelseBolk(personIdentList: List<String>): Map<String, PdlAdressebeskyttelsePerson> {
-        val pdlPersonRequest = PdlPersonBolkRequest(
-            variables = PdlPersonBolkRequestVariables(personIdentList),
-            query = hentGraphqlQuery("hent-adressebeskyttelse-bolk"),
-        )
+        val pdlPersonRequest =
+            PdlPersonBolkRequest(
+                variables = PdlPersonBolkRequestVariables(personIdentList),
+                query = hentGraphqlQuery("hent-adressebeskyttelse-bolk"),
+            )
 
-        val pdlResponse: PdlBolkResponse<PdlAdressebeskyttelsePerson> = kallEksternTjeneste(
-            tjeneste = "pdl",
-            uri = pdlUri,
-            formål = "Hent adressebeskyttelse i bolk",
-        ) {
-            postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
-        }
+        val pdlResponse: PdlBolkResponse<PdlAdressebeskyttelsePerson> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent adressebeskyttelse i bolk",
+            ) {
+                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+            }
 
         return feilsjekkOgReturnerData(
             pdlResponse = pdlResponse,

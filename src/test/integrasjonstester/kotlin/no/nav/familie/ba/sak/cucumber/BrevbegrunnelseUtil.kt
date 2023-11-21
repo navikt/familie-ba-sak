@@ -33,10 +33,11 @@ enum class Begrunnelsetype {
 fun parseBegrunnelser(dataTable: DataTable): List<BegrunnelseMedData> {
     return dataTable.asMaps().map { rad: Tabellrad ->
 
-        val type = parseValgfriEnum<Begrunnelsetype>(
-            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.TYPE,
-            rad,
-        ) ?: Begrunnelsetype.STANDARD
+        val type =
+            parseValgfriEnum<Begrunnelsetype>(
+                BrevPeriodeParser.DomenebegrepBrevBegrunnelse.TYPE,
+                rad,
+            ) ?: Begrunnelsetype.STANDARD
 
         when (type) {
             Begrunnelsetype.STANDARD -> parseStandardBegrunnelse(rad)
@@ -48,75 +49,86 @@ fun parseBegrunnelser(dataTable: DataTable): List<BegrunnelseMedData> {
 fun parseStandardBegrunnelse(rad: Tabellrad) =
     BegrunnelseData(
         vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-        apiNavn = parseEnum<Standardbegrunnelse>(
-            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BEGRUNNELSE,
-            rad,
-        ).sanityApiNavn,
-
+        apiNavn =
+            parseEnum<Standardbegrunnelse>(
+                BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BEGRUNNELSE,
+                rad,
+            ).sanityApiNavn,
         gjelderSoker = parseValgfriBoolean(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.GJELDER_SØKER, rad) ?: false,
-        barnasFodselsdatoer = parseValgfriString(
-            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDATOER,
-            rad,
-        ) ?: "",
-
+        barnasFodselsdatoer =
+            parseValgfriString(
+                BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDATOER,
+                rad,
+            ) ?: "",
         antallBarn = parseValgfriInt(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.ANTALL_BARN, rad) ?: 0,
-
-        maanedOgAarBegrunnelsenGjelderFor = parseValgfriString(
-            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅNED_OG_ÅR_BEGRUNNELSEN_GJELDER_FOR,
-            rad,
-        ),
-        maalform = (parseValgfriEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad) ?: Målform.NB)
-            .tilSanityFormat(),
+        maanedOgAarBegrunnelsenGjelderFor =
+            parseValgfriString(
+                BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅNED_OG_ÅR_BEGRUNNELSEN_GJELDER_FOR,
+                rad,
+            ),
+        maalform =
+            (parseValgfriEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad) ?: Målform.NB)
+                .tilSanityFormat(),
         belop = parseValgfriString(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BELØP, rad)?.replace(' ', ' ') ?: "",
-        soknadstidspunkt = parseValgfriString(
-            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.SØKNADSTIDSPUNKT,
-            rad,
-        ) ?: "",
-        avtaletidspunktDeltBosted = parseValgfriString(
-            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.AVTALETIDSPUNKT_DELT_BOSTED,
-            rad,
-        ) ?: "",
-        sokersRettTilUtvidet = parseValgfriEnum<SøkersRettTilUtvidet>(
-            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.SØKERS_RETT_TIL_UTVIDET,
-            rad,
-        )?.tilSanityFormat() ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat(),
+        soknadstidspunkt =
+            parseValgfriString(
+                BrevPeriodeParser.DomenebegrepBrevBegrunnelse.SØKNADSTIDSPUNKT,
+                rad,
+            ) ?: "",
+        avtaletidspunktDeltBosted =
+            parseValgfriString(
+                BrevPeriodeParser.DomenebegrepBrevBegrunnelse.AVTALETIDSPUNKT_DELT_BOSTED,
+                rad,
+            ) ?: "",
+        sokersRettTilUtvidet =
+            parseValgfriEnum<SøkersRettTilUtvidet>(
+                BrevPeriodeParser.DomenebegrepBrevBegrunnelse.SØKERS_RETT_TIL_UTVIDET,
+                rad,
+            )?.tilSanityFormat() ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat(),
     )
 
 fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
     val gjelderSoker = parseValgfriBoolean(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.GJELDER_SØKER, rad)
 
-    val annenForeldersAktivitet = parseValgfriEnum<KompetanseAktivitet>(
-        VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITET,
-        rad,
-    )
-    val annenForeldersAktivitetsland = parseValgfriString(
-        VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITETSLAND,
-        rad,
-    )
-    val barnetsBostedsland = parseValgfriString(
-        VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.BARNETS_BOSTEDSLAND,
-        rad,
-    )
-    val søkersAktivitet = parseValgfriEnum<KompetanseAktivitet>(
-        VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITET,
-        rad,
-    )
-    val søkersAktivitetsland = parseValgfriString(
-        VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITETSLAND,
-        rad,
-    )
+    val annenForeldersAktivitet =
+        parseValgfriEnum<KompetanseAktivitet>(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITET,
+            rad,
+        )
+    val annenForeldersAktivitetsland =
+        parseValgfriString(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITETSLAND,
+            rad,
+        )
+    val barnetsBostedsland =
+        parseValgfriString(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.BARNETS_BOSTEDSLAND,
+            rad,
+        )
+    val søkersAktivitet =
+        parseValgfriEnum<KompetanseAktivitet>(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITET,
+            rad,
+        )
+    val søkersAktivitetsland =
+        parseValgfriString(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITETSLAND,
+            rad,
+        )
 
     val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
 
-    val apiNavn = parseEnum<EØSStandardbegrunnelse>(
-        BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BEGRUNNELSE,
-        rad,
-    ).sanityApiNavn
+    val apiNavn =
+        parseEnum<EØSStandardbegrunnelse>(
+            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BEGRUNNELSE,
+            rad,
+        ).sanityApiNavn
 
-    val barnasFodselsdatoer = parseValgfriString(
-        BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDATOER,
-        rad,
-    ) ?: ""
+    val barnasFodselsdatoer =
+        parseValgfriString(
+            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BARNAS_FØDSELSDATOER,
+            rad,
+        ) ?: ""
 
     val antallBarn = parseInt(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.ANTALL_BARN, rad)
 
@@ -138,7 +150,6 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
             barnasFodselsdatoer = barnasFodselsdatoer,
             antallBarn = antallBarn,
             maalform = målform,
-
             annenForeldersAktivitet = annenForeldersAktivitet,
             annenForeldersAktivitetsland = annenForeldersAktivitetsland,
             barnetsBostedsland = barnetsBostedsland,
@@ -150,7 +161,6 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
             vedtakBegrunnelseType = vedtakBegrunnelseType,
             apiNavn = apiNavn,
             barnasFodselsdatoer = barnasFodselsdatoer,
-
             antallBarn = antallBarn,
             maalform = målform,
             gjelderSoker = gjelderSoker,
@@ -158,11 +168,12 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
     }
 }
 
-fun parseNullableDato(fom: String) = if (fom.uppercase() in listOf("NULL", "-", "")) {
-    null
-} else {
-    LocalDate.parse(
-        fom,
-        norskDatoFormatter,
-    )
-}
+fun parseNullableDato(fom: String) =
+    if (fom.uppercase() in listOf("NULL", "-", "")) {
+        null
+    } else {
+        LocalDate.parse(
+            fom,
+            norskDatoFormatter,
+        )
+    }

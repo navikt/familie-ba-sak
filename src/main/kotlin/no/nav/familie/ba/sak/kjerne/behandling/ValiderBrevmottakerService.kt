@@ -29,10 +29,11 @@ class ValiderBrevmottakerService(
         brevmottakere.takeIf { it.isNotEmpty() } ?: return
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandlingId) ?: return
-        val personIdenter = personopplysningGrunnlag.søkerOgBarn
-            .takeIf { it.isNotEmpty() }
-            ?.map { it.aktør.aktivFødselsnummer() }
-            ?: return
+        val personIdenter =
+            personopplysningGrunnlag.søkerOgBarn
+                .takeIf { it.isNotEmpty() }
+                ?.map { it.aktør.aktivFødselsnummer() }
+                ?: return
         val strengtFortroligePersonIdenter =
             familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
                 (personIdenter + barnLagtTilIBrev).toSet().toList(),

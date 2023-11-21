@@ -18,18 +18,18 @@ data class BrevperiodeData(
     val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>,
     val dødeBarnForrigePeriode: List<String>,
 ) : Comparable<BrevperiodeData> {
-
-    fun tilBrevPeriodeGenerator() = BrevPeriodeGenerator(
-        restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-        uregistrerteBarn = uregistrerteBarn,
-        brevMålform = brevMålform,
-        minimertVedtaksperiode = minimertVedtaksperiode,
-        barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
-        minimerteKompetanserForPeriode = minimerteKompetanserForPeriode,
-        minimerteKompetanserSomStopperRettFørPeriode = minimerteKompetanserSomStopperRettFørPeriode,
-        dødeBarnForrigePeriode = dødeBarnForrigePeriode,
-    )
+    fun tilBrevPeriodeGenerator() =
+        BrevPeriodeGenerator(
+            restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
+            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+            uregistrerteBarn = uregistrerteBarn,
+            brevMålform = brevMålform,
+            minimertVedtaksperiode = minimertVedtaksperiode,
+            barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
+            minimerteKompetanserForPeriode = minimerteKompetanserForPeriode,
+            minimerteKompetanserSomStopperRettFørPeriode = minimerteKompetanserSomStopperRettFørPeriode,
+            dødeBarnForrigePeriode = dødeBarnForrigePeriode,
+        )
 
     fun hentBegrunnelserOgFritekster(): List<BrevBegrunnelse> {
         val brevPeriodeGenerator = this.tilBrevPeriodeGenerator()
@@ -48,9 +48,10 @@ data class BrevperiodeData(
         )
 
     override fun compareTo(other: BrevperiodeData): Int {
-        val fomCompared = (this.minimertVedtaksperiode.fom ?: TIDENES_MORGEN).compareTo(
-            other.minimertVedtaksperiode.fom ?: TIDENES_MORGEN,
-        )
+        val fomCompared =
+            (this.minimertVedtaksperiode.fom ?: TIDENES_MORGEN).compareTo(
+                other.minimertVedtaksperiode.fom ?: TIDENES_MORGEN,
+            )
 
         return when {
             this.erGenereltAvslag() -> 1

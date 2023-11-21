@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class PdlGraphqlTest {
-
     private val mapper = objectMapper
 
     @Test
@@ -46,9 +45,10 @@ class PdlGraphqlTest {
 
     @Test
     fun testForelderBarnRelasjon() {
-        val resp = mapper.readValue<PdlBaseResponse<PdlHentPersonRelasjonerResponse>>(
-            File(getFile("pdl/pdlForelderBarnRelasjonResponse.json")),
-        )
+        val resp =
+            mapper.readValue<PdlBaseResponse<PdlHentPersonRelasjonerResponse>>(
+                File(getFile("pdl/pdlForelderBarnRelasjonResponse.json")),
+            )
         assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsRolle).isEqualTo(
             FORELDERBARNRELASJONROLLE.BARN,
         )
@@ -65,17 +65,19 @@ class PdlGraphqlTest {
 
     @Test
     fun testUkjentBostedAdresse() {
-        val resp = mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(
-            File(getFile("pdl/pdlUkjentBostedAdresseOkResponse.json")),
-        )
+        val resp =
+            mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(
+                File(getFile("pdl/pdlUkjentBostedAdresseOkResponse.json")),
+            )
         assertThat(resp.data.person!!.bostedsadresse.first().ukjentBosted?.bostedskommune).isEqualTo("Oslo")
     }
 
     @Test
     fun testAdressebeskyttelse() {
-        val resp = mapper.readValue<PdlBaseResponse<PdlAdressebeskyttelseResponse>>(
-            File(getFile("pdl/pdlAdressebeskyttelseResponse.json")),
-        )
+        val resp =
+            mapper.readValue<PdlBaseResponse<PdlAdressebeskyttelseResponse>>(
+                File(getFile("pdl/pdlAdressebeskyttelseResponse.json")),
+            )
         assertThat(resp.data.person!!.adressebeskyttelse.first().gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
     }
 

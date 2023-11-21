@@ -34,10 +34,11 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
 ): UtvidetVedtaksperiodeMedBegrunnelser {
-    val utbetalingsperiodeDetaljer = this.hentUtbetalingsperiodeDetaljer(
-        andelerTilkjentYtelse = andelerTilkjentYtelse,
-        personopplysningGrunnlag = personopplysningGrunnlag,
-    )
+    val utbetalingsperiodeDetaljer =
+        this.hentUtbetalingsperiodeDetaljer(
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+        )
 
     return UtvidetVedtaksperiodeMedBegrunnelser(
         id = this.id,

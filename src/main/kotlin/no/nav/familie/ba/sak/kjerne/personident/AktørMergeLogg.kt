@@ -19,14 +19,9 @@ data class AktørMergeLogg(
         sequenceName = "AKTOER_MERGE_LOGG_SEQ",
         allocationSize = 50,
     ) val id: Long = 0,
-
     @Column(name = "fk_fagsak_id", nullable = false, updatable = false)
     val fagsakId: Long,
-
     @Column(name = "historisk_aktoer_id", updatable = false, length = 50) val historiskAktørId: String,
-
     @Column(name = "ny_aktoer_id", updatable = false, length = 50) val nyAktørId: String,
-
     @Column(name = "merge_tid") var mergeTidspunkt: LocalDateTime,
-
 )

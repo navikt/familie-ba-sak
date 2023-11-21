@@ -15,7 +15,6 @@ import org.slf4j.MDC
 import org.springframework.mock.web.MockHttpServletRequest
 
 internal class AuditLoggerTest {
-
     private val auditLogger = AuditLogger("familie-ba-sak")
     private val navIdent = "Z1234567"
     private val method = "POST"
@@ -66,10 +65,11 @@ internal class AuditLoggerTest {
 
     private fun getMessage() = listAppender.list[0].message.replace("""end=\d+""".toRegex(), "end=123")
 
-    private val expectedBaseLog = "CEF:0|Familie|familie-ba-sak|1.0|audit:access|Saksbehandling|INFO|end=123 " +
-        "suid=Z1234567 " +
-        "duid=12345678901 " +
-        "sproc=00001111 " +
-        "requestMethod=POST " +
-        "request=/api/test/123 "
+    private val expectedBaseLog =
+        "CEF:0|Familie|familie-ba-sak|1.0|audit:access|Saksbehandling|INFO|end=123 " +
+            "suid=Z1234567 " +
+            "duid=12345678901 " +
+            "sproc=00001111 " +
+            "requestMethod=POST " +
+            "request=/api/test/123 "
 }

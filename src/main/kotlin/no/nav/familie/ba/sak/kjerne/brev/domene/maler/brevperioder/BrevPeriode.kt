@@ -15,7 +15,6 @@ data class BrevPeriode(
     val type: Flettefelt,
     val duEllerInstitusjonen: Flettefelt,
 ) {
-
     constructor(
         fom: String,
         tom: String,

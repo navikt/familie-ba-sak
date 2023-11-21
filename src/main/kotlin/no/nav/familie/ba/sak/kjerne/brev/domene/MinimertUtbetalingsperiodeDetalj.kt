@@ -17,14 +17,15 @@ data class MinimertUtbetalingsperiodeDetalj(
     val prosent: BigDecimal,
 )
 
-fun UtbetalingsperiodeDetalj.tilMinimertUtbetalingsperiodeDetalj() = MinimertUtbetalingsperiodeDetalj(
-    person = this.person.tilMinimertPerson(),
-    ytelseType = this.ytelseType,
-    utbetaltPerMnd = this.utbetaltPerMnd,
-    erPåvirketAvEndring = this.erPåvirketAvEndring,
-    prosent = this.prosent,
-    endringsårsak = this.endringsårsak,
-)
+fun UtbetalingsperiodeDetalj.tilMinimertUtbetalingsperiodeDetalj() =
+    MinimertUtbetalingsperiodeDetalj(
+        person = this.person.tilMinimertPerson(),
+        ytelseType = this.ytelseType,
+        utbetaltPerMnd = this.utbetaltPerMnd,
+        erPåvirketAvEndring = this.erPåvirketAvEndring,
+        prosent = this.prosent,
+        endringsårsak = this.endringsårsak,
+    )
 
 fun List<MinimertUtbetalingsperiodeDetalj>.antallBarn(): Int =
     this.filter { it.person.type == PersonType.BARN }.size

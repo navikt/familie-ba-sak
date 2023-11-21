@@ -17,15 +17,15 @@ class RegistrerPersongrunnlag(
     private val personopplysningGrunnlagForNyBehandlingService: PersonopplysningGrunnlagForNyBehandlingService,
     private val eøsSkjemaerForNyBehandlingService: EøsSkjemaerForNyBehandlingService,
 ) : BehandlingSteg<RegistrerPersongrunnlagDTO> {
-
     @Transactional
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
         data: RegistrerPersongrunnlagDTO,
     ): StegType {
-        val forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
-            behandling,
-        )
+        val forrigeBehandlingSomErVedtatt =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
+                behandling,
+            )
 
         personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
             behandling = behandling,
@@ -41,13 +41,14 @@ class RegistrerPersongrunnlag(
         )
 
         eøsSkjemaerForNyBehandlingService.kopierEøsSkjemaer(
-            forrigeBehandlingSomErVedtattId = if (forrigeBehandlingSomErVedtatt != null) {
-                BehandlingId(
-                    forrigeBehandlingSomErVedtatt.id,
-                )
-            } else {
-                null
-            },
+            forrigeBehandlingSomErVedtattId =
+                if (forrigeBehandlingSomErVedtatt != null) {
+                    BehandlingId(
+                        forrigeBehandlingSomErVedtatt.id,
+                    )
+                } else {
+                    null
+                },
             behandlingId = BehandlingId(behandling.id),
         )
 

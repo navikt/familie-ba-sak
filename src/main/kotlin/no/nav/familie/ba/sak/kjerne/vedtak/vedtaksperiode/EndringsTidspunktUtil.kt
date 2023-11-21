@@ -25,14 +25,16 @@ fun utledEndringstidspunkt(
 ): LocalDate {
     val grunnlagTidslinjePerPerson =
         behandlingsGrunnlagForVedtaksperioder.copy(
-            personResultater = behandlingsGrunnlagForVedtaksperioder
-                .personResultater.beholdKunOppfylteVilkårResultater(),
+            personResultater =
+                behandlingsGrunnlagForVedtaksperioder
+                    .personResultater.beholdKunOppfylteVilkårResultater(),
         ).utledGrunnlagTidslinjePerPerson()
             .mapValues { it.value.vedtaksperiodeGrunnlagForPerson }
     val grunnlagTidslinjePerPersonForrigeBehandling =
         behandlingsGrunnlagForVedtaksperioderForrigeBehandling?.copy(
-            personResultater = behandlingsGrunnlagForVedtaksperioderForrigeBehandling
-                .personResultater.beholdKunOppfylteVilkårResultater(),
+            personResultater =
+                behandlingsGrunnlagForVedtaksperioderForrigeBehandling
+                    .personResultater.beholdKunOppfylteVilkårResultater(),
         )?.utledGrunnlagTidslinjePerPerson()
             ?.mapValues { it.value.vedtaksperiodeGrunnlagForPerson } ?: emptyMap()
 
@@ -54,9 +56,10 @@ fun utledEndringstidspunkt(
     return datoTidligsteForskjell
 }
 
-private fun Set<PersonResultat>.beholdKunOppfylteVilkårResultater(): Set<PersonResultat> = map {
-    it.tilKopiForNyVilkårsvurdering(it.vilkårsvurdering)
-}.toSet()
+private fun Set<PersonResultat>.beholdKunOppfylteVilkårResultater(): Set<PersonResultat> =
+    map {
+        it.tilKopiForNyVilkårsvurdering(it.vilkårsvurdering)
+    }.toSet()
 
 private fun loggEndringstidspunktOgEndringer(
     grunnlagTidslinjePerPerson: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned>>,
@@ -67,12 +70,14 @@ private fun loggEndringstidspunktOgEndringer(
     val grunnlagDenneBehandlingen = grunnlagTidslinjePerPerson[aktørMedFørsteForandring]
     val grunnlagForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling[aktørMedFørsteForandring]
 
-    val grunnlagIPeriodeMedEndring = grunnlagDenneBehandlingen?.innholdForTidspunkt(
-        datoTidligsteForskjell.toYearMonth().tilTidspunktEllerUendeligSent(),
-    )?.innhold
-    val grunnlagIPeriodeMedEndringForrigeBehanlding = grunnlagForrigeBehandling?.innholdForTidspunkt(
-        datoTidligsteForskjell.toYearMonth().tilTidspunktEllerUendeligSent(),
-    )?.innhold
+    val grunnlagIPeriodeMedEndring =
+        grunnlagDenneBehandlingen?.innholdForTidspunkt(
+            datoTidligsteForskjell.toYearMonth().tilTidspunktEllerUendeligSent(),
+        )?.innhold
+    val grunnlagIPeriodeMedEndringForrigeBehanlding =
+        grunnlagForrigeBehandling?.innholdForTidspunkt(
+            datoTidligsteForskjell.toYearMonth().tilTidspunktEllerUendeligSent(),
+        )?.innhold
 
     val endringer = mutableListOf<String>()
 
@@ -124,32 +129,35 @@ private fun loggEndringstidspunktOgEndringer(
     secureLogger.info("Ved endringstidspunktet $datoTidligsteForskjell er det endring for $aktørMedFørsteForandring")
 }
 
-private fun Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<Boolean, Måned>>.finnTidligsteForskjell() = this
-    .map { (aktørOgRolleForVedtaksgrunnlag, erPeriodeLikTidslinje) ->
-        val førsteEndringForAktør = erPeriodeLikTidslinje.perioder()
-            .filter { it.innhold == false }
-            .minOfOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid().førsteDagIInneværendeMåned() }
-            ?: TIDENES_ENDE
+private fun Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<Boolean, Måned>>.finnTidligsteForskjell() =
+    this
+        .map { (aktørOgRolleForVedtaksgrunnlag, erPeriodeLikTidslinje) ->
+            val førsteEndringForAktør =
+                erPeriodeLikTidslinje.perioder()
+                    .filter { it.innhold == false }
+                    .minOfOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid().førsteDagIInneværendeMåned() }
+                    ?: TIDENES_ENDE
 
-        aktørOgRolleForVedtaksgrunnlag to førsteEndringForAktør
-    }.minByOrNull { it.second }
+            aktørOgRolleForVedtaksgrunnlag to førsteEndringForAktør
+        }.minByOrNull { it.second }
 
 private fun VedtaksperiodeGrunnlagForPerson?.erLik(
     grunnlagForVedtaksperiodeForrigeBehandling: VedtaksperiodeGrunnlagForPerson?,
-): Boolean = when (this) {
-    is VedtaksperiodeGrunnlagForPersonVilkårInnvilget ->
-        grunnlagForVedtaksperiodeForrigeBehandling is VedtaksperiodeGrunnlagForPersonVilkårInnvilget &&
-            this.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
-                grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode,
-            ) &&
-            this.kompetanse == grunnlagForVedtaksperiodeForrigeBehandling.kompetanse &&
-            this.endretUtbetalingAndel == grunnlagForVedtaksperiodeForrigeBehandling.endretUtbetalingAndel &&
-            this.overgangsstønad == grunnlagForVedtaksperiodeForrigeBehandling.overgangsstønad &&
-            this.andeler.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.andeler.toSet()
+): Boolean =
+    when (this) {
+        is VedtaksperiodeGrunnlagForPersonVilkårInnvilget ->
+            grunnlagForVedtaksperiodeForrigeBehandling is VedtaksperiodeGrunnlagForPersonVilkårInnvilget &&
+                this.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
+                    grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode,
+                ) &&
+                this.kompetanse == grunnlagForVedtaksperiodeForrigeBehandling.kompetanse &&
+                this.endretUtbetalingAndel == grunnlagForVedtaksperiodeForrigeBehandling.endretUtbetalingAndel &&
+                this.overgangsstønad == grunnlagForVedtaksperiodeForrigeBehandling.overgangsstønad &&
+                this.andeler.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.andeler.toSet()
 
-    is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
-        grunnlagForVedtaksperiodeForrigeBehandling is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget &&
-            this.vilkårResultaterForVedtaksperiode.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode.toSet()
+        is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
+            grunnlagForVedtaksperiodeForrigeBehandling is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget &&
+                this.vilkårResultaterForVedtaksperiode.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode.toSet()
 
-    null -> grunnlagForVedtaksperiodeForrigeBehandling == null
-}
+        null -> grunnlagForVedtaksperiodeForrigeBehandling == null
+    }

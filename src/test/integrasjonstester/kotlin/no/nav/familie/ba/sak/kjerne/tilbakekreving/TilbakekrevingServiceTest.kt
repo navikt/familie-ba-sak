@@ -49,7 +49,6 @@ class TilbakekrevingServiceTest(
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val brevmottakerRepository: BrevmottakerRepository,
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
@@ -58,18 +57,19 @@ class TilbakekrevingServiceTest(
     @Test
     @Tag("integration")
     fun `tilbakekreving skal bli OPPRETT_TILBAKEKREVING_MED_VARSEL når man oppretter tilbakekreving med varsel`() {
-        val behandling = kjørStegprosessForFGB(
-            tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandling =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         val restTilbakekreving = opprettRestTilbakekreving()
         tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
@@ -87,19 +87,20 @@ class TilbakekrevingServiceTest(
     @Test
     @Tag("integration")
     fun `tilbakekreving skal bli OPPRETT_TILBAKEKREVING_MED_VARSEL når man oppretter tilbakekreving med varsel for institusjon`() {
-        val behandling = kjørStegprosessForFGB(
-            tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-            søkerFnr = "09121079074",
-            barnasIdenter = listOf("09121079074"),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            institusjon = InstitusjonInfo(orgNummer = "998765432", tssEksternId = "8000000"),
-            brevmalService = brevmalService,
-        )
+        val behandling =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+                søkerFnr = "09121079074",
+                barnasIdenter = listOf("09121079074"),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                institusjon = InstitusjonInfo(orgNummer = "998765432", tssEksternId = "8000000"),
+                brevmalService = brevmalService,
+            )
 
         val restTilbakekreving = opprettRestTilbakekreving()
         tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
@@ -117,19 +118,20 @@ class TilbakekrevingServiceTest(
     @Test
     @Tag("integration")
     fun `tilbakekreving skal bli OPPRETT_TILBAKEKREVING_MED_VARSEL når man oppretter tilbakekreving med varsel for mindreårig med verge`() {
-        val behandling = kjørStegprosessForFGB(
-            tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-            søkerFnr = "10031000033",
-            barnasIdenter = listOf("10031000033"),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            verge = VergeInfo("04068203010"),
-            brevmalService = brevmalService,
-        )
+        val behandling =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+                søkerFnr = "10031000033",
+                barnasIdenter = listOf("10031000033"),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                verge = VergeInfo("04068203010"),
+                brevmalService = brevmalService,
+            )
 
         val restTilbakekreving = opprettRestTilbakekreving()
         tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
@@ -149,19 +151,20 @@ class TilbakekrevingServiceTest(
     @ArgumentsSource(TestProvider::class)
     @Suppress("SENSELESS_COMPARISON")
     fun `lagOpprettTilbakekrevingRequest sender brevmottakere i kall mot familie-tilbake`(arguments: Triple<VergeInfo, MottakerType, Vergetype>) {
-        val behandling = kjørStegprosessForFGB(
-            tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-            søkerFnr = if (arguments.first != null) ClientMocks.barnFnr[0] else randomFnr(),
-            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-            verge = arguments.first,
-        )
+        val behandling =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+                søkerFnr = if (arguments.first != null) ClientMocks.barnFnr[0] else randomFnr(),
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+                verge = arguments.first,
+            )
 
         val brevmottaker = BrevmottakerDb(
             behandlingId = behandling.id,

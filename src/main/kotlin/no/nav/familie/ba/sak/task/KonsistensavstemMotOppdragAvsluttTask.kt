@@ -19,14 +19,14 @@ import java.time.LocalDateTime
 @TaskStepBeskrivelse(
     taskStepType = KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE,
     beskrivelse = "Avslutt Konsistensavstemming mot oppdrag",
-    maxAntallFeil = 10, // 2.5 time bør være nok tid for å att alle datataskene har kjørt
+    maxAntallFeil = 10,
+    // 2.5 time bør være nok tid for å att alle datataskene har kjørt
 )
 class KonsistensavstemMotOppdragAvsluttTask(
     val avstemmingService: AvstemmingService,
     val dataChunkRepository: DataChunkRepository,
     val batchService: BatchService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val konsistensavstemmingAvsluttTask =
             objectMapper.readValue(task.payload, KonsistensavstemmingAvsluttTaskDTO::class.java)

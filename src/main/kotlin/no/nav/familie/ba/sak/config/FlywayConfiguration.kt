@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Profile
 @Profile("!dev")
 @ConditionalOnProperty("spring.flyway.enabled")
 data class FlywayConfiguration(private val role: String) {
-
     @Bean
     fun flywayConfig(): FlywayConfigurationCustomizer {
         return FlywayConfigurationCustomizer { c: FluentConfiguration ->

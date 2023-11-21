@@ -25,16 +25,13 @@ class VedtaksbegrunnelseFritekst(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "fk_vedtaksperiode_id")
     val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-
     @Column(name = "fritekst", updatable = false)
     val fritekst: String,
 ) {
-
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksbegrunnelseFritekst =
         VedtaksbegrunnelseFritekst(
             vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,

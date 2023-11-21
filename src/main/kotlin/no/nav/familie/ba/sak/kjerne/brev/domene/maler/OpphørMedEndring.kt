@@ -6,7 +6,6 @@ data class OpphørMedEndring(
     override val mal: Brevmal,
     override val data: OpphørMedEndringData,
 ) : Vedtaksbrev {
-
     constructor(
         mal: Brevmal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
         vedtakFellesfelter: VedtakFellesfelter,
@@ -18,29 +17,33 @@ data class OpphørMedEndring(
     ) :
         this(
             mal = mal,
-            data = OpphørMedEndringData(
-                delmalData = OpphørMedEndringData.Delmaler(
-                    signaturVedtak = SignaturVedtak(
-                        enhet = vedtakFellesfelter.enhet,
-                        saksbehandler = vedtakFellesfelter.saksbehandler,
-                        beslutter = vedtakFellesfelter.beslutter,
-                    ),
-                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
-                    feilutbetaling = erFeilutbetalingPåBehandling,
-                    etterbetaling = etterbetaling,
-                    etterbetalingInstitusjon = etterbetalingInstitusjon,
-                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
-                    refusjonEosAvklart = refusjonEosAvklart,
-                    refusjonEosUavklart = refusjonEosUavklart,
+            data =
+                OpphørMedEndringData(
+                    delmalData =
+                        OpphørMedEndringData.Delmaler(
+                            signaturVedtak =
+                                SignaturVedtak(
+                                    enhet = vedtakFellesfelter.enhet,
+                                    saksbehandler = vedtakFellesfelter.saksbehandler,
+                                    beslutter = vedtakFellesfelter.beslutter,
+                                ),
+                            hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                            feilutbetaling = erFeilutbetalingPåBehandling,
+                            etterbetaling = etterbetaling,
+                            etterbetalingInstitusjon = etterbetalingInstitusjon,
+                            korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
+                            refusjonEosAvklart = refusjonEosAvklart,
+                            refusjonEosUavklart = refusjonEosUavklart,
+                        ),
+                    flettefelter =
+                        FlettefelterForDokumentImpl(
+                            gjelder = flettefelt(vedtakFellesfelter.gjelder),
+                            navn = flettefelt(vedtakFellesfelter.søkerNavn),
+                            fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer),
+                            organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
+                        ),
+                    perioder = vedtakFellesfelter.perioder,
                 ),
-                flettefelter = FlettefelterForDokumentImpl(
-                    gjelder = flettefelt(vedtakFellesfelter.gjelder),
-                    navn = flettefelt(vedtakFellesfelter.søkerNavn),
-                    fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer),
-                    organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
-                ),
-                perioder = vedtakFellesfelter.perioder,
-            ),
         )
 }
 

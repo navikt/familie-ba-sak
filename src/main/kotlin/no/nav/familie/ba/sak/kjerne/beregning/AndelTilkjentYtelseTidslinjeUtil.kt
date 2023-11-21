@@ -43,14 +43,18 @@ fun Tidslinje<AndelTilkjentYtelse, Måned>.tilAndelTilkjentYtelse(): List<AndelT
         }.filterNotNull()
 }
 
-fun AndelTilkjentYtelse.tilPeriode() = Periode(
-    this.stønadFom.tilTidspunkt(),
-    this.stønadTom.tilTidspunkt(),
-    // Ta bort periode, slik at det ikke blir med på innholdet som vurderes for likhet
-    this.medPeriode(null, null),
-)
+fun AndelTilkjentYtelse.tilPeriode() =
+    Periode(
+        this.stønadFom.tilTidspunkt(),
+        this.stønadTom.tilTidspunkt(),
+        // Ta bort periode, slik at det ikke blir med på innholdet som vurderes for likhet
+        this.medPeriode(null, null),
+    )
 
-fun AndelTilkjentYtelse.medPeriode(fraOgMed: YearMonth?, tilOgMed: YearMonth?) =
+fun AndelTilkjentYtelse.medPeriode(
+    fraOgMed: YearMonth?,
+    tilOgMed: YearMonth?,
+) =
     copy(
         id = 0,
         stønadFom = fraOgMed ?: MIN_MÅNED,
@@ -60,14 +64,15 @@ fun AndelTilkjentYtelse.medPeriode(fraOgMed: YearMonth?, tilOgMed: YearMonth?) =
 /**
  * Ivaretar fom og tom, slik at eventuelle splitter blir med videre.
  */
-fun Iterable<AndelTilkjentYtelse>.tilTidslinjeForSøkersYtelse(ytelseType: YtelseType) = this
-    .filter { it.erSøkersAndel() }
-    .filter { it.type == ytelseType }
-    .let {
-        tidslinje {
-            it.map { Periode(it.stønadFom.tilTidspunkt(), it.stønadTom.tilTidspunkt(), it) }
+fun Iterable<AndelTilkjentYtelse>.tilTidslinjeForSøkersYtelse(ytelseType: YtelseType) =
+    this
+        .filter { it.erSøkersAndel() }
+        .filter { it.type == ytelseType }
+        .let {
+            tidslinje {
+                it.map { Periode(it.stønadFom.tilTidspunkt(), it.stønadTom.tilTidspunkt(), it) }
+            }
         }
-    }
 
 fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunAndelerTilOgMed3År(barna: List<Person>): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
     val barnasErInntil3ÅrTidslinjer = barna.associate { it.aktør to erTilogMed3ÅrTidslinje(it.fødselsdato) }
@@ -119,17 +124,18 @@ fun Tidslinje<AndelTilkjentYtelseForTidslinje, Måned>.tilAndelerTilkjentYtelse(
 /**
  * Lager tidslinje med AndelTilkjentYtelseForTidslinje-objekter, som derfor er "trygg" mtp DB-endringer
  */
-fun Iterable<AndelTilkjentYtelse>.tilTryggTidslinjeForSøkersYtelse(ytelseType: YtelseType) = this
-    .filter { it.erSøkersAndel() }
-    .filter { it.type == ytelseType }
-    .let {
-        tidslinje {
-            it.map {
-                Periode(
-                    it.stønadFom.tilTidspunkt(),
-                    it.stønadTom.tilTidspunkt(),
-                    it.tilpassTilTidslinje(),
-                )
+fun Iterable<AndelTilkjentYtelse>.tilTryggTidslinjeForSøkersYtelse(ytelseType: YtelseType) =
+    this
+        .filter { it.erSøkersAndel() }
+        .filter { it.type == ytelseType }
+        .let {
+            tidslinje {
+                it.map {
+                    Periode(
+                        it.stønadFom.tilTidspunkt(),
+                        it.stønadTom.tilTidspunkt(),
+                        it.tilpassTilTidslinje(),
+                    )
+                }
             }
         }
-    }

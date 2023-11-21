@@ -44,7 +44,6 @@ class AutobrevSmåbarnstilleggOpphørTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
-
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
 
     @Test
@@ -56,11 +55,12 @@ class AutobrevSmåbarnstilleggOpphørTest(
             personScenario = personScenario1,
             barnFødselsdato = barnFødselsdato,
         )
-        val fagsak1behandling2: Behandling = fullførRevurderingMedOvergangstonad(
-            fagsak = fagsak1,
-            personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
-        )
+        val fagsak1behandling2: Behandling =
+            fullførRevurderingMedOvergangstonad(
+                fagsak = fagsak1,
+                personScenario = personScenario1,
+                barnFødselsdato = barnFødselsdato,
+            )
         startEnRevurderingNyeOpplysningerMenIkkeFullfør(
             fagsak = fagsak1,
             personScenario = personScenario1,
@@ -74,11 +74,12 @@ class AutobrevSmåbarnstilleggOpphørTest(
             personScenario = personScenario2,
             barnFødselsdato = barnFødselsdato,
         )
-        val fagsak2behandling2: Behandling = fullførRevurderingMedOvergangstonad(
-            fagsak = fagsak2,
-            personScenario = personScenario2,
-            barnFødselsdato = barnFødselsdato,
-        )
+        val fagsak2behandling2: Behandling =
+            fullførRevurderingMedOvergangstonad(
+                fagsak = fagsak2,
+                personScenario = personScenario2,
+                barnFødselsdato = barnFødselsdato,
+            )
 
         val andelerForSmåbarnstilleggFagsak1Behandling2 =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = fagsak2behandling2.id)
@@ -99,19 +100,21 @@ class AutobrevSmåbarnstilleggOpphørTest(
         assertFalse(fagsaker.contains(fagsak1.id))
     }
 
-    fun lagScenario(barnFødselsdato: LocalDate): RestScenario = mockServerKlient().lagScenario(
-        RestScenario(
-            søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-            barna = listOf(
-                RestScenarioPerson(
-                    fødselsdato = barnFødselsdato.toString(),
-                    fornavn = "Barn",
-                    etternavn = "Barnesen",
-                    bostedsadresser = emptyList(),
-                ),
+    fun lagScenario(barnFødselsdato: LocalDate): RestScenario =
+        mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = barnFødselsdato.toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
+                            bostedsadresser = emptyList(),
+                        ),
+                    ),
             ),
-        ),
-    )
+        )
 
     fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak {
         return familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
@@ -123,9 +126,10 @@ class AutobrevSmåbarnstilleggOpphørTest(
         barnFødselsdato: LocalDate,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = emptyList(),
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder = emptyList(),
+            )
 
         val restBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
@@ -137,11 +141,12 @@ class AutobrevSmåbarnstilleggOpphørTest(
         val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
             RestRegistrerSøknad(
-                søknad = lagSøknadDTO(
-                    søkerIdent = fagsak.søkerFødselsnummer,
-                    barnasIdenter = personScenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.UTVIDET,
-                ),
+                søknad =
+                    lagSøknadDTO(
+                        søkerIdent = fagsak.søkerFødselsnummer,
+                        barnasIdenter = personScenario.barna.map { it.ident!! },
+                        underkategori = BehandlingUnderkategori.UTVIDET,
+                    ),
                 bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
@@ -173,16 +178,18 @@ class AutobrevSmåbarnstilleggOpphørTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = listOf(
-                EksternPeriode(
-                    personIdent = personScenario.søker.ident!!,
-                    fomDato = barnFødselsdato.plusYears(1),
-                    tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF,
-                ),
-            ),
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder =
+                    listOf(
+                        EksternPeriode(
+                            personIdent = personScenario.søker.ident!!,
+                            fomDato = barnFødselsdato.plusYears(1),
+                            tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
+                            datakilde = Datakilde.EF,
+                        ),
+                    ),
+            )
 
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
@@ -216,16 +223,18 @@ class AutobrevSmåbarnstilleggOpphørTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = listOf(
-                EksternPeriode(
-                    personIdent = personScenario.søker.ident!!,
-                    fomDato = barnFødselsdato.plusYears(1),
-                    tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF,
-                ),
-            ),
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder =
+                    listOf(
+                        EksternPeriode(
+                            personIdent = personScenario.søker.ident!!,
+                            fomDato = barnFødselsdato.plusYears(1),
+                            tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
+                            datakilde = Datakilde.EF,
+                        ),
+                    ),
+            )
 
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(

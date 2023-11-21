@@ -49,7 +49,6 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
 ) : AbstractVerdikjedetest() {
-
     @BeforeEach
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
@@ -63,31 +62,36 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
     @Test
     fun `Skal journalføre og behandle ordinær nasjonal sak`() {
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.now().minusMonths(6).toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                        bostedsadresser = emptyList(),
-                    ),
+        val scenario =
+            mockServerKlient().lagScenario(
+                RestScenario(
+                    søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
+                    barna =
+                        listOf(
+                            RestScenarioPerson(
+                                fødselsdato = LocalDate.now().minusMonths(6).toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen",
+                                bostedsadresser = emptyList(),
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
-        val fagsakId: Ressurs<String> = familieBaSakKlient().journalfør(
-            journalpostId = "1234",
-            oppgaveId = "5678",
-            journalførendeEnhet = "4833",
-            restJournalføring = lagMockRestJournalføring(
-                bruker = NavnOgIdent(
-                    navn = scenario.søker.navn,
-                    id = scenario.søker.ident!!,
-                ),
-            ),
-        )
+        val fagsakId: Ressurs<String> =
+            familieBaSakKlient().journalfør(
+                journalpostId = "1234",
+                oppgaveId = "5678",
+                journalførendeEnhet = "4833",
+                restJournalføring =
+                    lagMockRestJournalføring(
+                        bruker =
+                            NavnOgIdent(
+                                navn = scenario.søker.navn,
+                                id = scenario.søker.ident!!,
+                            ),
+                    ),
+            )
 
         assertEquals(Ressurs.Status.SUKSESS, fagsakId.status)
 
@@ -101,10 +105,11 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakEtterJournalføring.data!!)
         val restRegistrerSøknad =
             RestRegistrerSøknad(
-                søknad = lagSøknadDTO(
-                    søkerIdent = scenario.søker.ident,
-                    barnasIdenter = scenario.barna.map { it.ident!! },
-                ),
+                søknad =
+                    lagSøknadDTO(
+                        søkerIdent = scenario.søker.ident,
+                        barnasIdenter = scenario.barna.map { it.ident!! },
+                    ),
                 bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
@@ -125,15 +130,16 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                     behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,
                     restPersonResultat =
-                    RestPersonResultat(
-                        personIdent = restPersonResultat.personIdent,
-                        vilkårResultater = listOf(
-                            it.copy(
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.now().minusMonths(2),
-                            ),
+                        RestPersonResultat(
+                            personIdent = restPersonResultat.personIdent,
+                            vilkårResultater =
+                                listOf(
+                                    it.copy(
+                                        resultat = Resultat.OPPFYLT,
+                                        periodeFom = LocalDate.now().minusMonths(2),
+                                    ),
+                                ),
                         ),
-                    ),
                 )
             }
         }
@@ -171,18 +177,21 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
         )
 
-        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
-        )
+        val vedtaksperioderMedBegrunnelser =
+            vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+                restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+            )
 
         val vedtaksperiode = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiode.id,
-            restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                standardbegrunnelser = listOf(
-                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+            restPutVedtaksperiodeMedStandardbegrunnelser =
+                RestPutVedtaksperiodeMedStandardbegrunnelser(
+                    standardbegrunnelser =
+                        listOf(
+                            Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+                        ),
                 ),
-            ),
         )
 
         val restUtvidetBehandlingEtterSendTilBeslutter =
@@ -197,21 +206,23 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         val restUtvidetBehandlingEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
                 behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
-                restBeslutningPåVedtak = RestBeslutningPåVedtak(
-                    Beslutning.GODKJENT,
-                ),
-                beslutterHeaders = HttpHeaders().apply {
-                    setBearerAuth(
-                        token(
-                            mapOf(
-                                "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
-                                "azp" to "azp-test",
-                                "name" to "Mock McMockface Beslutter",
-                                "NAVident" to "Z0000",
+                restBeslutningPåVedtak =
+                    RestBeslutningPåVedtak(
+                        Beslutning.GODKJENT,
+                    ),
+                beslutterHeaders =
+                    HttpHeaders().apply {
+                        setBearerAuth(
+                            token(
+                                mapOf(
+                                    "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
+                                    "azp" to "azp-test",
+                                    "name" to "Mock McMockface Beslutter",
+                                    "NAVident" to "Z0000",
+                                ),
                             ),
-                        ),
-                    )
-                },
+                        )
+                    },
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
@@ -226,7 +237,6 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             vedtakService = vedtakService,
             stegService = stegService,
             brevmalService = brevmalService,
-
         )
     }
 
@@ -234,34 +244,39 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
     fun `Skal journalføre og behandle utvidet nasjonal sak`() {
         settToggleMock(FeatureToggleConfig.TEKNISK_ENDRING, true)
 
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-12-12", fornavn = "Mor", etternavn = "Søker"),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.now().minusMonths(6).toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                        bostedsadresser = emptyList(),
-                    ),
+        val scenario =
+            mockServerKlient().lagScenario(
+                RestScenario(
+                    søker = RestScenarioPerson(fødselsdato = "1996-12-12", fornavn = "Mor", etternavn = "Søker"),
+                    barna =
+                        listOf(
+                            RestScenarioPerson(
+                                fødselsdato = LocalDate.now().minusMonths(6).toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen",
+                                bostedsadresser = emptyList(),
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
-        val fagsakId: Ressurs<String> = familieBaSakKlient().journalfør(
-            journalpostId = "1234",
-            oppgaveId = "5678",
-            journalførendeEnhet = "4833",
-            restJournalføring = lagMockRestJournalføring(
-                bruker = NavnOgIdent(
-                    navn = scenario.søker.navn,
-                    id = scenario.søker.ident!!,
-                ),
-            ).copy(
-                journalpostTittel = "Søknad om utvidet barnetrygd",
-                underkategori = BehandlingUnderkategori.UTVIDET,
-            ),
-        )
+        val fagsakId: Ressurs<String> =
+            familieBaSakKlient().journalfør(
+                journalpostId = "1234",
+                oppgaveId = "5678",
+                journalførendeEnhet = "4833",
+                restJournalføring =
+                    lagMockRestJournalføring(
+                        bruker =
+                            NavnOgIdent(
+                                navn = scenario.søker.navn,
+                                id = scenario.søker.ident!!,
+                            ),
+                    ).copy(
+                        journalpostTittel = "Søknad om utvidet barnetrygd",
+                        underkategori = BehandlingUnderkategori.UTVIDET,
+                    ),
+            )
 
         assertEquals(Ressurs.Status.SUKSESS, fagsakId.status)
 
@@ -278,11 +293,12 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         val restRegistrerSøknad =
             RestRegistrerSøknad(
-                søknad = lagSøknadDTO(
-                    søkerIdent = scenario.søker.ident,
-                    barnasIdenter = scenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.UTVIDET,
-                ),
+                søknad =
+                    lagSøknadDTO(
+                        søkerIdent = scenario.søker.ident,
+                        barnasIdenter = scenario.barna.map { it.ident!! },
+                        underkategori = BehandlingUnderkategori.UTVIDET,
+                    ),
                 bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
@@ -308,15 +324,16 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                     behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,
                     restPersonResultat =
-                    RestPersonResultat(
-                        personIdent = restPersonResultat.personIdent,
-                        vilkårResultater = listOf(
-                            it.copy(
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.now().minusMonths(2),
-                            ),
+                        RestPersonResultat(
+                            personIdent = restPersonResultat.personIdent,
+                            vilkårResultater =
+                                listOf(
+                                    it.copy(
+                                        resultat = Resultat.OPPFYLT,
+                                        periodeFom = LocalDate.now().minusMonths(2),
+                                    ),
+                                ),
                         ),
-                    ),
                 )
             }
         }
@@ -354,19 +371,22 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
         )
 
-        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
-        )
+        val vedtaksperioderMedBegrunnelser =
+            vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+                restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+            )
 
         val vedtaksperiode = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
 
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiode.id,
-            restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                standardbegrunnelser = listOf(
-                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+            restPutVedtaksperiodeMedStandardbegrunnelser =
+                RestPutVedtaksperiodeMedStandardbegrunnelser(
+                    standardbegrunnelser =
+                        listOf(
+                            Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+                        ),
                 ),
-            ),
         )
 
         val restUtvidetBehandlingEtterSendTilBeslutter =
@@ -381,21 +401,23 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         val restUtvidetBehandlingEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
                 behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
-                restBeslutningPåVedtak = RestBeslutningPåVedtak(
-                    Beslutning.GODKJENT,
-                ),
-                beslutterHeaders = HttpHeaders().apply {
-                    setBearerAuth(
-                        token(
-                            mapOf(
-                                "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
-                                "azp" to "azp-test",
-                                "name" to "Mock McMockface Beslutter",
-                                "NAVident" to "Z0000",
+                restBeslutningPåVedtak =
+                    RestBeslutningPåVedtak(
+                        Beslutning.GODKJENT,
+                    ),
+                beslutterHeaders =
+                    HttpHeaders().apply {
+                        setBearerAuth(
+                            token(
+                                mapOf(
+                                    "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
+                                    "azp" to "azp-test",
+                                    "name" to "Mock McMockface Beslutter",
+                                    "NAVident" to "Z0000",
+                                ),
                             ),
-                        ),
-                    )
-                },
+                        )
+                    },
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
@@ -410,7 +432,6 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             vedtakService = vedtakService,
             stegService = stegService,
             brevmalService = brevmalService,
-
         )
     }
 }

@@ -7,7 +7,6 @@ import org.springframework.core.env.Profiles
 import org.testcontainers.containers.PostgreSQLContainer
 
 class DbContainerInitializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
-
     override fun initialize(applicationContext: ConfigurableApplicationContext) {
         // Only start Postgres when not running in CI
         if (!applicationContext.environment.acceptsProfiles(Profiles.of("ci"))) {

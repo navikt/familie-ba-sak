@@ -32,21 +32,25 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return Vilkårsvurdering(behandling = behandling).apply {
             when {
                 behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
-                    personResultater = lagPersonResultaterForFødselshendelse(
-                        vilkårsvurdering = this,
-                        barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert,
-                    )
+                    personResultater =
+                        lagPersonResultaterForFødselshendelse(
+                            vilkårsvurdering = this,
+                            barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert,
+                        )
                 }
 
                 !behandling.skalBehandlesAutomatisk -> {
-                    personResultater = lagPersonResultaterForManuellVilkårsvurdering(
-                        vilkårsvurdering = this,
-                    )
+                    personResultater =
+                        lagPersonResultaterForManuellVilkårsvurdering(
+                            vilkårsvurdering = this,
+                        )
                 }
 
-                else -> personResultater = lagPersonResultaterForTomVilkårsvurdering(
-                    vilkårsvurdering = this,
-                )
+                else ->
+                    personResultater =
+                        lagPersonResultaterForTomVilkårsvurdering(
+                            vilkårsvurdering = this,
+                        )
             }
         }
     }
@@ -58,12 +62,13 @@ data class VilkårsvurderingForNyBehandlingUtils(
         løpendeUnderkategori: BehandlingUnderkategori?,
         aktørerMedUtvidetAndelerIForrigeBehandling: List<Aktør>,
     ): Vilkårsvurdering {
-        val (vilkårsvurdering) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
-            aktivVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
-            initiellVilkårsvurdering = initiellVilkårsvurdering,
-            løpendeUnderkategori = løpendeUnderkategori,
-            aktørerMedUtvidetAndelerIForrigeBehandling = aktørerMedUtvidetAndelerIForrigeBehandling,
-        )
+        val (vilkårsvurdering) =
+            VilkårsvurderingUtils.flyttResultaterTilInitielt(
+                aktivVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
+                initiellVilkårsvurdering = initiellVilkårsvurdering,
+                løpendeUnderkategori = løpendeUnderkategori,
+                aktørerMedUtvidetAndelerIForrigeBehandling = aktørerMedUtvidetAndelerIForrigeBehandling,
+            )
 
         return if (behandling.type == BehandlingType.REVURDERING) {
             hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering)
@@ -84,7 +89,8 @@ data class VilkårsvurderingForNyBehandlingUtils(
                         personResultat.vilkårResultater.filter { it.vilkårType == vilkårType }
                             .maxByOrNull { it.periodeTom ?: TIDENES_ENDE }
 
-                    if (vilkårAvTypeMedSenesteTom != null && dødsDato.isBefore(
+                    if (vilkårAvTypeMedSenesteTom != null &&
+                        dødsDato.isBefore(
                             vilkårAvTypeMedSenesteTom.periodeTom ?: TIDENES_ENDE,
                         ) && dødsDato.isAfter(vilkårAvTypeMedSenesteTom.periodeFom)
                     ) {
@@ -110,21 +116,23 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
-            val vilkårForPerson = Vilkår.hentVilkårFor(
-                personType = person.type,
-                fagsakType = vilkårsvurdering.behandling.fagsak.type,
-                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
-            )
-
-            val vilkårResultater = vilkårForPerson.map { vilkår ->
-                genererVilkårResultatForEtVilkårPåEnPerson(
-                    person = person,
-                    annenForelder = annenForelder,
-                    eldsteBarnSinFødselsdato = eldsteBarnSomVurderesSinFødselsdato,
-                    personResultat = personResultat,
-                    vilkår = vilkår,
+            val vilkårForPerson =
+                Vilkår.hentVilkårFor(
+                    personType = person.type,
+                    fagsakType = vilkårsvurdering.behandling.fagsak.type,
+                    behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
                 )
-            }
+
+            val vilkårResultater =
+                vilkårForPerson.map { vilkår ->
+                    genererVilkårResultatForEtVilkårPåEnPerson(
+                        person = person,
+                        annenForelder = annenForelder,
+                        eldsteBarnSinFødselsdato = eldsteBarnSomVurderesSinFødselsdato,
+                        personResultat = personResultat,
+                        vilkår = vilkår,
+                    )
+                }
 
             personResultat.setSortedVilkårResultater(vilkårResultater.toSet())
 
@@ -146,22 +154,24 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
-            val vilkårForPerson = Vilkår.hentVilkårFor(
-                personType = person.type,
-                fagsakType = vilkårsvurdering.behandling.fagsak.type,
-                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
-            )
-
-            val vilkårResultater = vilkårForPerson.map { vilkår ->
-                VilkårResultat(
-                    personResultat = personResultat,
-                    erAutomatiskVurdert = true,
-                    resultat = Resultat.IKKE_VURDERT,
-                    vilkårType = vilkår,
-                    begrunnelse = "",
-                    sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+            val vilkårForPerson =
+                Vilkår.hentVilkårFor(
+                    personType = person.type,
+                    fagsakType = vilkårsvurdering.behandling.fagsak.type,
+                    behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
                 )
-            }.toSortedSet(VilkårResultat.VilkårResultatComparator)
+
+            val vilkårResultater =
+                vilkårForPerson.map { vilkår ->
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        erAutomatiskVurdert = true,
+                        resultat = Resultat.IKKE_VURDERT,
+                        vilkårType = vilkår,
+                        begrunnelse = "",
+                        sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+                    )
+                }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
             personResultat.setSortedVilkårResultater(vilkårResultater)
 
@@ -177,9 +187,10 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
-            val oppfylteVilkårResultaterForPerson = forrigeBehandlingVilkårsvurdering.personResultater
-                .single { it.aktør == person.aktør }.vilkårResultater
-                .filter { it.erOppfylt() }
+            val oppfylteVilkårResultaterForPerson =
+                forrigeBehandlingVilkårsvurdering.personResultater
+                    .single { it.aktør == person.aktør }.vilkårResultater
+                    .filter { it.erOppfylt() }
 
             val vilkårResultaterMedNyPeriode =
                 VilkårsvurderingMigreringUtils.finnVilkårResultaterMedNyPeriodePgaNyMigreringsdato(
@@ -188,21 +199,22 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     nyMigreringsdato,
                 )
 
-            val kopierteVilkårResultater = oppfylteVilkårResultaterForPerson.map { oppfyltVilkårResultat ->
-                val vilkårResultatMedNyPeriode =
-                    vilkårResultaterMedNyPeriode.find { it.vilkårResultat.id == oppfyltVilkårResultat.id }
-                oppfyltVilkårResultat.kopierMedParent(personResultat).also { kopiertVilkårResultat ->
-                    if (vilkårResultatMedNyPeriode != null) {
-                        kopiertVilkårResultat.sistEndretIBehandlingId =
-                            if (vilkårResultatMedNyPeriode.harNyPeriode()) vilkårsvurdering.behandling.id else kopiertVilkårResultat.sistEndretIBehandlingId
-                        kopiertVilkårResultat.periodeFom = vilkårResultatMedNyPeriode.fom
-                        kopiertVilkårResultat.periodeTom = vilkårResultatMedNyPeriode.tom
-                        if (kopiertVilkårResultat.begrunnelse.isEmpty()) {
-                            kopiertVilkårResultat.begrunnelse = "Migrering"
+            val kopierteVilkårResultater =
+                oppfylteVilkårResultaterForPerson.map { oppfyltVilkårResultat ->
+                    val vilkårResultatMedNyPeriode =
+                        vilkårResultaterMedNyPeriode.find { it.vilkårResultat.id == oppfyltVilkårResultat.id }
+                    oppfyltVilkårResultat.kopierMedParent(personResultat).also { kopiertVilkårResultat ->
+                        if (vilkårResultatMedNyPeriode != null) {
+                            kopiertVilkårResultat.sistEndretIBehandlingId =
+                                if (vilkårResultatMedNyPeriode.harNyPeriode()) vilkårsvurdering.behandling.id else kopiertVilkårResultat.sistEndretIBehandlingId
+                            kopiertVilkårResultat.periodeFom = vilkårResultatMedNyPeriode.fom
+                            kopiertVilkårResultat.periodeTom = vilkårResultatMedNyPeriode.tom
+                            if (kopiertVilkårResultat.begrunnelse.isEmpty()) {
+                                kopiertVilkårResultat.begrunnelse = "Migrering"
+                            }
                         }
                     }
-                }
-            }.toSet()
+                }.toSet()
 
             personResultat.setSortedVilkårResultater(kopierteVilkårResultater)
 
@@ -221,38 +233,43 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
-            val vilkårTyperForPerson = Vilkår.hentVilkårFor(
-                personType = person.type,
-                fagsakType = vilkårsvurdering.behandling.fagsak.type,
-                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
-            )
-            val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
-                val fom = when {
-                    vilkår.gjelderAlltidFraBarnetsFødselsdato() -> person.fødselsdato
-                    nyMigreringsdato.isBefore(person.fødselsdato) -> person.fødselsdato
-                    else -> nyMigreringsdato
-                }
-
-                val tom: LocalDate? = when (vilkår) {
-                    Vilkår.UNDER_18_ÅR -> person.fødselsdato.plusYears(18)
-                        .minusDays(1)
-
-                    else -> null
-                }
-
-                val begrunnelse = "Migrering"
-
-                VilkårResultat(
-                    personResultat = personResultat,
-                    erAutomatiskVurdert = false,
-                    resultat = Resultat.OPPFYLT,
-                    vilkårType = vilkår,
-                    periodeFom = fom,
-                    periodeTom = tom,
-                    begrunnelse = begrunnelse,
-                    sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+            val vilkårTyperForPerson =
+                Vilkår.hentVilkårFor(
+                    personType = person.type,
+                    fagsakType = vilkårsvurdering.behandling.fagsak.type,
+                    behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
                 )
-            }.toSortedSet(VilkårResultat.VilkårResultatComparator)
+            val vilkårResultater =
+                vilkårTyperForPerson.map { vilkår ->
+                    val fom =
+                        when {
+                            vilkår.gjelderAlltidFraBarnetsFødselsdato() -> person.fødselsdato
+                            nyMigreringsdato.isBefore(person.fødselsdato) -> person.fødselsdato
+                            else -> nyMigreringsdato
+                        }
+
+                    val tom: LocalDate? =
+                        when (vilkår) {
+                            Vilkår.UNDER_18_ÅR ->
+                                person.fødselsdato.plusYears(18)
+                                    .minusDays(1)
+
+                            else -> null
+                        }
+
+                    val begrunnelse = "Migrering"
+
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        erAutomatiskVurdert = false,
+                        resultat = Resultat.OPPFYLT,
+                        vilkårType = vilkår,
+                        periodeFom = fom,
+                        periodeTom = tom,
+                        begrunnelse = begrunnelse,
+                        sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+                    )
+                }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
             personResultat.setSortedVilkårResultater(vilkårResultater)
 

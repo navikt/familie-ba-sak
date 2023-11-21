@@ -28,7 +28,6 @@ class TilbakekrevingKlient(
     @Value("\${FAMILIE_TILBAKE_API_URL}") private val familieTilbakeUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "Tilbakekreving") {
-
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
         val uri = URI.create("$familieTilbakeUri/dokument/forhandsvis-varselbrev")
 
@@ -40,9 +39,10 @@ class TilbakekrevingKlient(
             postForEntity(
                 uri = uri,
                 payload = forhåndsvisVarselbrevRequest,
-                httpHeaders = HttpHeaders().apply {
-                    accept = listOf(MediaType.APPLICATION_PDF)
-                },
+                httpHeaders =
+                    HttpHeaders().apply {
+                        accept = listOf(MediaType.APPLICATION_PDF)
+                    },
             )
         }
     }
@@ -62,11 +62,12 @@ class TilbakekrevingKlient(
     fun harÅpenTilbakekrevingsbehandling(fagsakId: Long): Boolean {
         val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/$fagsakId/finnesApenBehandling/v1")
 
-        val finnesBehandlingsresponsDto: FinnesBehandlingsresponsDto = kallEksternTjenesteRessurs(
-            tjeneste = "familie-tilbake",
-            uri = uri,
-            formål = "Sjekker om en fagsak har åpen tilbakekrevingsbehandling",
-        ) { getForEntity(uri) }
+        val finnesBehandlingsresponsDto: FinnesBehandlingsresponsDto =
+            kallEksternTjenesteRessurs(
+                tjeneste = "familie-tilbake",
+                uri = uri,
+                formål = "Sjekker om en fagsak har åpen tilbakekrevingsbehandling",
+            ) { getForEntity(uri) }
 
         return finnesBehandlingsresponsDto.finnesÅpenBehandling
     }
@@ -92,9 +93,10 @@ class TilbakekrevingKlient(
     }
 
     fun kanTilbakekrevingsbehandlingOpprettesManuelt(fagsakId: Long): KanBehandlingOpprettesManueltRespons {
-        val uri = URI.create(
-            "$familieTilbakeUri/ytelsestype/${Ytelsestype.BARNETRYGD}/fagsak/$fagsakId/kanBehandlingOpprettesManuelt/v1",
-        )
+        val uri =
+            URI.create(
+                "$familieTilbakeUri/ytelsestype/${Ytelsestype.BARNETRYGD}/fagsak/$fagsakId/kanBehandlingOpprettesManuelt/v1",
+            )
 
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-tilbake",

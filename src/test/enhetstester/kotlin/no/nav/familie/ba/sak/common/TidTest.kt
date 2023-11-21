@@ -14,7 +14,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 internal class TidTest {
-
     @Test
     fun `skal finne siste dag i måneden før 2020-03-01`() {
         assertEquals(dato("2020-02-29"), dato("2020-03-01").sisteDagIForrigeMåned())
@@ -97,38 +96,42 @@ internal class TidTest {
         val vilkår: Vilkår = mockk(relaxed = true)
         val vilkårsvurdering = lagVilkårsvurdering(personAktørId, behandling, resultat)
 
-        val personResultat = PersonResultat(
-            vilkårsvurdering = vilkårsvurdering,
-            aktør = personAktørId,
-        )
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = personAktørId,
+            )
 
-        val førsteVilkårResultat = VilkårResultat(
-            personResultat = personResultat,
-            resultat = resultat,
-            vilkårType = vilkår,
-            periodeFom = LocalDate.of(2020, 1, 1),
-            periodeTom = LocalDate.of(2020, 3, 25),
-            begrunnelse = "",
-            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
-        )
-        val etterfølgendeVilkårResultat = VilkårResultat(
-            personResultat = personResultat,
-            resultat = resultat,
-            vilkårType = vilkår,
-            periodeFom = LocalDate.of(2020, 3, 31),
-            periodeTom = LocalDate.of(2020, 6, 1),
-            begrunnelse = "",
-            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
-        )
-        val ikkeEtterfølgendeVilkårResultat = VilkårResultat(
-            personResultat = personResultat,
-            resultat = resultat,
-            vilkårType = vilkår,
-            periodeFom = LocalDate.of(2020, 5, 1),
-            periodeTom = LocalDate.of(2020, 6, 1),
-            begrunnelse = "",
-            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
-        )
+        val førsteVilkårResultat =
+            VilkårResultat(
+                personResultat = personResultat,
+                resultat = resultat,
+                vilkårType = vilkår,
+                periodeFom = LocalDate.of(2020, 1, 1),
+                periodeTom = LocalDate.of(2020, 3, 25),
+                begrunnelse = "",
+                sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+            )
+        val etterfølgendeVilkårResultat =
+            VilkårResultat(
+                personResultat = personResultat,
+                resultat = resultat,
+                vilkårType = vilkår,
+                periodeFom = LocalDate.of(2020, 3, 31),
+                periodeTom = LocalDate.of(2020, 6, 1),
+                begrunnelse = "",
+                sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+            )
+        val ikkeEtterfølgendeVilkårResultat =
+            VilkårResultat(
+                personResultat = personResultat,
+                resultat = resultat,
+                vilkårType = vilkår,
+                periodeFom = LocalDate.of(2020, 5, 1),
+                periodeTom = LocalDate.of(2020, 6, 1),
+                begrunnelse = "",
+                sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+            )
 
         assertTrue(førsteVilkårResultat.erEtterfølgendePeriode(etterfølgendeVilkårResultat))
         assertFalse(førsteVilkårResultat.erEtterfølgendePeriode(ikkeEtterfølgendeVilkårResultat))
@@ -166,14 +169,15 @@ internal class TidTest {
 
     @Test
     fun `skal slå sammen overlappende perioder med samme startdato`() {
-        val result = slåSammenOverlappendePerioder(
-            listOf(
-                DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 2, 1)),
-                DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 3, 1)),
-                DatoIntervallEntitet(LocalDate.of(2005, 1, 1), LocalDate.of(2005, 3, 1)),
-                DatoIntervallEntitet(LocalDate.of(2005, 1, 1), LocalDate.of(2005, 2, 1)),
-            ),
-        )
+        val result =
+            slåSammenOverlappendePerioder(
+                listOf(
+                    DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 2, 1)),
+                    DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 3, 1)),
+                    DatoIntervallEntitet(LocalDate.of(2005, 1, 1), LocalDate.of(2005, 3, 1)),
+                    DatoIntervallEntitet(LocalDate.of(2005, 1, 1), LocalDate.of(2005, 2, 1)),
+                ),
+            )
 
         Assertions.assertThat(result)
             .hasSize(2)
@@ -183,12 +187,13 @@ internal class TidTest {
 
     @Test
     fun `skal ikke slå sammen perioder som ligger inntil hverandre`() {
-        val result = slåSammenOverlappendePerioder(
-            listOf(
-                DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 1, 31)),
-                DatoIntervallEntitet(LocalDate.of(2004, 2, 1), LocalDate.of(2004, 2, 28)),
-            ),
-        )
+        val result =
+            slåSammenOverlappendePerioder(
+                listOf(
+                    DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 1, 31)),
+                    DatoIntervallEntitet(LocalDate.of(2004, 2, 1), LocalDate.of(2004, 2, 28)),
+                ),
+            )
 
         Assertions.assertThat(result)
             .hasSize(2)
@@ -234,15 +239,16 @@ internal class TidTest {
 
     @Test
     fun `det skal kun finnes en periode med tom = null  etter sammenslåing`() {
-        val result = slåSammenOverlappendePerioder(
-            listOf(
-                DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 1, 1)),
-                DatoIntervallEntitet(LocalDate.of(2005, 1, 1), null),
-                DatoIntervallEntitet(LocalDate.of(2005, 5, 1), LocalDate.of(2005, 6, 1)),
-                DatoIntervallEntitet(LocalDate.of(2006, 1, 1), null),
-                DatoIntervallEntitet(LocalDate.of(2006, 5, 1), LocalDate.of(2006, 6, 1)),
-            ),
-        )
+        val result =
+            slåSammenOverlappendePerioder(
+                listOf(
+                    DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 1, 1)),
+                    DatoIntervallEntitet(LocalDate.of(2005, 1, 1), null),
+                    DatoIntervallEntitet(LocalDate.of(2005, 5, 1), LocalDate.of(2005, 6, 1)),
+                    DatoIntervallEntitet(LocalDate.of(2006, 1, 1), null),
+                    DatoIntervallEntitet(LocalDate.of(2006, 5, 1), LocalDate.of(2006, 6, 1)),
+                ),
+            )
         Assertions.assertThat(result).hasSize(2)
         Assertions.assertThat(result.filter { it.tom != null }).hasSize(1)
     }
@@ -257,50 +263,50 @@ internal class TidTest {
 
     @Test
     fun `sjekk for om to måned perioder helt eller delvis er overlappende`() {
-        val jan2020_aug2020 = MånedPeriode(YearMonth.of(2020, 1), YearMonth.of(2020, 8))
-        val jul2020_des2020 = MånedPeriode(YearMonth.of(2020, 7), YearMonth.of(2020, 12))
-        val des2019_sep2021 = MånedPeriode(YearMonth.of(2019, 12), YearMonth.of(2020, 9))
+        val jan2020Aug2020 = MånedPeriode(YearMonth.of(2020, 1), YearMonth.of(2020, 8))
+        val jul2020Des2020 = MånedPeriode(YearMonth.of(2020, 7), YearMonth.of(2020, 12))
+        val des2019Sep2021 = MånedPeriode(YearMonth.of(2019, 12), YearMonth.of(2020, 9))
         val jan2020 = MånedPeriode(YearMonth.of(2020, 1), YearMonth.of(2020, 1))
         val aug2020 = MånedPeriode(YearMonth.of(2020, 8), YearMonth.of(2020, 8))
         val des2019 = MånedPeriode(YearMonth.of(2019, 12), YearMonth.of(2019, 12))
         val sep2021 = MånedPeriode(YearMonth.of(2021, 9), YearMonth.of(2021, 9))
 
-        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(jul2020_des2020))
-        assertTrue(jul2020_des2020.overlapperHeltEllerDelvisMed(jan2020_aug2020))
-        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(des2019_sep2021))
-        assertTrue(des2019_sep2021.overlapperHeltEllerDelvisMed(jan2020_aug2020))
-        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(jan2020))
-        assertTrue(jan2020.overlapperHeltEllerDelvisMed(jan2020_aug2020))
-        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(aug2020))
-        assertTrue(aug2020.overlapperHeltEllerDelvisMed(jan2020_aug2020))
-        assertFalse(jan2020_aug2020.overlapperHeltEllerDelvisMed(des2019))
-        assertFalse(des2019.overlapperHeltEllerDelvisMed(jan2020_aug2020))
-        assertFalse(jan2020_aug2020.overlapperHeltEllerDelvisMed(sep2021))
-        assertFalse(sep2021.overlapperHeltEllerDelvisMed(jan2020_aug2020))
+        assertTrue(jan2020Aug2020.overlapperHeltEllerDelvisMed(jul2020Des2020))
+        assertTrue(jul2020Des2020.overlapperHeltEllerDelvisMed(jan2020Aug2020))
+        assertTrue(jan2020Aug2020.overlapperHeltEllerDelvisMed(des2019Sep2021))
+        assertTrue(des2019Sep2021.overlapperHeltEllerDelvisMed(jan2020Aug2020))
+        assertTrue(jan2020Aug2020.overlapperHeltEllerDelvisMed(jan2020))
+        assertTrue(jan2020.overlapperHeltEllerDelvisMed(jan2020Aug2020))
+        assertTrue(jan2020Aug2020.overlapperHeltEllerDelvisMed(aug2020))
+        assertTrue(aug2020.overlapperHeltEllerDelvisMed(jan2020Aug2020))
+        assertFalse(jan2020Aug2020.overlapperHeltEllerDelvisMed(des2019))
+        assertFalse(des2019.overlapperHeltEllerDelvisMed(jan2020Aug2020))
+        assertFalse(jan2020Aug2020.overlapperHeltEllerDelvisMed(sep2021))
+        assertFalse(sep2021.overlapperHeltEllerDelvisMed(jan2020Aug2020))
     }
 
     @Test
     fun `sjekk for om to perioder helt eller delvis er overlappende`() {
-        val jan2020_aug2020 = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 8, 1))
-        val jul2020_des2020 = Periode(LocalDate.of(2020, 7, 1), LocalDate.of(2020, 12, 1))
-        val des2019_sep2021 = Periode(LocalDate.of(2019, 12, 1), LocalDate.of(2020, 9, 1))
+        val jan2020Aug2020 = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 8, 1))
+        val jul2020Des2020 = Periode(LocalDate.of(2020, 7, 1), LocalDate.of(2020, 12, 1))
+        val des2019Sep2021 = Periode(LocalDate.of(2019, 12, 1), LocalDate.of(2020, 9, 1))
         val jan2020 = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 1))
         val aug2020 = Periode(LocalDate.of(2020, 8, 1), LocalDate.of(2020, 8, 1))
         val des2019 = Periode(LocalDate.of(2019, 12, 1), LocalDate.of(2019, 12, 1))
         val sep2021 = Periode(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 9, 1))
 
-        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(jul2020_des2020))
-        assertTrue(jul2020_des2020.overlapperHeltEllerDelvisMed(jan2020_aug2020))
-        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(des2019_sep2021))
-        assertTrue(des2019_sep2021.overlapperHeltEllerDelvisMed(jan2020_aug2020))
-        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(jan2020))
-        assertTrue(jan2020.overlapperHeltEllerDelvisMed(jan2020_aug2020))
-        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(aug2020))
-        assertTrue(aug2020.overlapperHeltEllerDelvisMed(jan2020_aug2020))
-        assertFalse(jan2020_aug2020.overlapperHeltEllerDelvisMed(des2019))
-        assertFalse(des2019.overlapperHeltEllerDelvisMed(jan2020_aug2020))
-        assertFalse(jan2020_aug2020.overlapperHeltEllerDelvisMed(sep2021))
-        assertFalse(sep2021.overlapperHeltEllerDelvisMed(jan2020_aug2020))
+        assertTrue(jan2020Aug2020.overlapperHeltEllerDelvisMed(jul2020Des2020))
+        assertTrue(jul2020Des2020.overlapperHeltEllerDelvisMed(jan2020Aug2020))
+        assertTrue(jan2020Aug2020.overlapperHeltEllerDelvisMed(des2019Sep2021))
+        assertTrue(des2019Sep2021.overlapperHeltEllerDelvisMed(jan2020Aug2020))
+        assertTrue(jan2020Aug2020.overlapperHeltEllerDelvisMed(jan2020))
+        assertTrue(jan2020.overlapperHeltEllerDelvisMed(jan2020Aug2020))
+        assertTrue(jan2020Aug2020.overlapperHeltEllerDelvisMed(aug2020))
+        assertTrue(aug2020.overlapperHeltEllerDelvisMed(jan2020Aug2020))
+        assertFalse(jan2020Aug2020.overlapperHeltEllerDelvisMed(des2019))
+        assertFalse(des2019.overlapperHeltEllerDelvisMed(jan2020Aug2020))
+        assertFalse(jan2020Aug2020.overlapperHeltEllerDelvisMed(sep2021))
+        assertFalse(sep2021.overlapperHeltEllerDelvisMed(jan2020Aug2020))
     }
 
     private fun dato(s: String): LocalDate {

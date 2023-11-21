@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
 import java.util.UUID
+
 data class HentAlleIdenterTilPsysResponseDTO(
     val meldingstype: Meldingstype,
     val requestId: UUID,
@@ -9,5 +10,7 @@ data class HentAlleIdenterTilPsysResponseDTO(
 )
 
 enum class Meldingstype {
-    START, DATA, SLUTT
+    START,
+    DATA,
+    SLUTT,
 }

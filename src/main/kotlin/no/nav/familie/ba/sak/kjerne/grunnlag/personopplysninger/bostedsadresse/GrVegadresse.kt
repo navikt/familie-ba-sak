@@ -16,30 +16,21 @@ import java.util.Objects
 data class GrVegadresse(
     @Column(name = "matrikkel_id")
     val matrikkelId: Long?,
-
     @Column(name = "husnummer")
     val husnummer: String?,
-
     @Column(name = "husbokstav")
     val husbokstav: String?,
-
     @Column(name = "bruksenhetsnummer")
     val bruksenhetsnummer: String?,
-
     @Column(name = "adressenavn")
     val adressenavn: String?,
-
     @Column(name = "kommunenummer")
     val kommunenummer: String?,
-
     @Column(name = "tilleggsnavn")
     val tilleggsnavn: String?,
-
     @Column(name = "postnummer")
     val postnummer: String?,
-
 ) : GrBostedsadresse() {
-
     override fun tilKopiForNyPerson(): GrBostedsadresse =
         GrVegadresse(
             matrikkelId,
@@ -55,17 +46,18 @@ data class GrVegadresse(
     override fun toSecureString(): String {
         return """VegadresseDao(husnummer=$husnummer,husbokstav=$husbokstav,matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,
 |           adressenavn=$adressenavn,kommunenummer=$kommunenummer,tilleggsnavn=$tilleggsnavn,postnummer=$postnummer
-        """.trimMargin()
+            """.trimMargin()
     }
 
     override fun toString(): String {
         return "Vegadresse(detaljer skjult)"
     }
 
-    override fun tilFrontendString() = """${
-        adressenavn.nullableTilString()
-            .storForbokstav()
-    } ${husnummer.nullableTilString()}${husbokstav.nullableTilString()}${postnummer.let { ", $it" }}""".trimMargin()
+    override fun tilFrontendString() =
+        """${
+            adressenavn.nullableTilString()
+                .storForbokstav()
+        } ${husnummer.nullableTilString()}${husbokstav.nullableTilString()}${postnummer.let { ", $it" }}""".trimMargin()
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
@@ -84,14 +76,13 @@ data class GrVegadresse(
                             (husnummer == otherVegadresse.husnummer) &&
                             (husbokstav == otherVegadresse.husbokstav) &&
                             (postnummer == otherVegadresse.postnummer)
-                        )
-                )
+                    )
+            )
     }
 
     override fun hashCode(): Int = Objects.hash(matrikkelId)
 
     companion object {
-
         fun fraVegadresse(vegadresse: Vegadresse): GrVegadresse =
             GrVegadresse(
                 matrikkelId = vegadresse.matrikkelId,

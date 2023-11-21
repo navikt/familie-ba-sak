@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RestTidslinjerTest {
-
     @Test
     fun `når barnet har løpende vilkår, skal likevel rest-tidslinjene for regelverk og oppfylt vilkår være avsluttet ved 18 år`() {
         val barnsFødselsdato = 13.jan(2020)
@@ -28,22 +27,25 @@ internal class RestTidslinjerTest {
         val behandling = lagBehandling()
         val startMåned = barnsFødselsdato.tilInneværendeMåned()
 
-        val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>(behandling)
-            .forPerson(søker, startMåned)
-            .medVilkår("EEEEEEEEEEEEEEEEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
-            .medVilkår("EEEEEEEEEEEEEEEEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
-            .forPerson(barn1, startMåned)
-            .medVilkår("+++++++++>", Vilkår.UNDER_18_ÅR)
-            .medVilkår(" EEEE++EE>", Vilkår.BOSATT_I_RIKET)
-            .medVilkår("EEEEEEEEE>", Vilkår.LOVLIG_OPPHOLD)
-            .medVilkår("EEEENNEEE>", Vilkår.BOR_MED_SØKER)
-            .medVilkår("+++++++++>", Vilkår.GIFT_PARTNERSKAP)
+        val vilkårsvurderingBygger =
+            VilkårsvurderingBuilder<Måned>(behandling)
+                .forPerson(søker, startMåned)
+                .medVilkår("EEEEEEEEEEEEEEEEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
+                .medVilkår("EEEEEEEEEEEEEEEEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
+                .forPerson(barn1, startMåned)
+                .medVilkår("+++++++++>", Vilkår.UNDER_18_ÅR)
+                .medVilkår(" EEEE++EE>", Vilkår.BOSATT_I_RIKET)
+                .medVilkår("EEEEEEEEE>", Vilkår.LOVLIG_OPPHOLD)
+                .medVilkår("EEEENNEEE>", Vilkår.BOR_MED_SØKER)
+                .medVilkår("+++++++++>", Vilkår.GIFT_PARTNERSKAP)
 
-        val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
-            vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
-                .tilPersonEnkelSøkerOgBarn(),
-        )
+        val vilkårsvurderingTidslinjer =
+            VilkårsvurderingTidslinjer(
+                vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
+                søkerOgBarn =
+                    lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+                        .tilPersonEnkelSøkerOgBarn(),
+            )
 
         val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()
         val barnetsTidslinjer = restTidslinjer.barnasTidslinjer[barn1.aktør.aktivFødselsnummer()]!!
@@ -78,28 +80,31 @@ internal class RestTidslinjerTest {
 
         val behandling = lagBehandling()
 
-        val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>(behandling)
-            .forPerson(søker, søkersFødselsdato.tilInneværendeMåned())
-            .medVilkår("E>", Vilkår.BOSATT_I_RIKET)
-            .medVilkår("E>", Vilkår.LOVLIG_OPPHOLD)
-            .forPerson(barn1, barn1Fødselsdato.tilInneværendeMåned())
-            .medVilkår("+>", Vilkår.UNDER_18_ÅR)
-            .medVilkår("E>", Vilkår.BOSATT_I_RIKET)
-            .medVilkår("E>", Vilkår.LOVLIG_OPPHOLD)
-            .medVilkår("E>", Vilkår.BOR_MED_SØKER)
-            .medVilkår("+>", Vilkår.GIFT_PARTNERSKAP)
-            .forPerson(barn2, barn2Fødselsdato.tilInneværendeMåned())
-            .medVilkår("+>", Vilkår.UNDER_18_ÅR)
-            .medVilkår("E>", Vilkår.BOSATT_I_RIKET)
-            .medVilkår("E>", Vilkår.LOVLIG_OPPHOLD)
-            .medVilkår("E>", Vilkår.BOR_MED_SØKER)
-            .medVilkår("+>", Vilkår.GIFT_PARTNERSKAP)
+        val vilkårsvurderingBygger =
+            VilkårsvurderingBuilder<Måned>(behandling)
+                .forPerson(søker, søkersFødselsdato.tilInneværendeMåned())
+                .medVilkår("E>", Vilkår.BOSATT_I_RIKET)
+                .medVilkår("E>", Vilkår.LOVLIG_OPPHOLD)
+                .forPerson(barn1, barn1Fødselsdato.tilInneværendeMåned())
+                .medVilkår("+>", Vilkår.UNDER_18_ÅR)
+                .medVilkår("E>", Vilkår.BOSATT_I_RIKET)
+                .medVilkår("E>", Vilkår.LOVLIG_OPPHOLD)
+                .medVilkår("E>", Vilkår.BOR_MED_SØKER)
+                .medVilkår("+>", Vilkår.GIFT_PARTNERSKAP)
+                .forPerson(barn2, barn2Fødselsdato.tilInneværendeMåned())
+                .medVilkår("+>", Vilkår.UNDER_18_ÅR)
+                .medVilkår("E>", Vilkår.BOSATT_I_RIKET)
+                .medVilkår("E>", Vilkår.LOVLIG_OPPHOLD)
+                .medVilkår("E>", Vilkår.BOR_MED_SØKER)
+                .medVilkår("+>", Vilkår.GIFT_PARTNERSKAP)
 
-        val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
-            vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
-                .tilPersonEnkelSøkerOgBarn(),
-        )
+        val vilkårsvurderingTidslinjer =
+            VilkårsvurderingTidslinjer(
+                vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
+                søkerOgBarn =
+                    lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
+                        .tilPersonEnkelSøkerOgBarn(),
+            )
 
         val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()
         val søkersTidslinjer = restTidslinjer.søkersTidslinjer

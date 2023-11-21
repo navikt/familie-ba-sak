@@ -5,7 +5,6 @@ import java.sql.Date
 import java.time.YearMonth
 
 class YearMonthConverter : AttributeConverter<YearMonth, Date> {
-
     override fun convertToDatabaseColumn(yearMonth: YearMonth?): Date? {
         return yearMonth?.let {
             Date.valueOf(it.toLocalDate())
