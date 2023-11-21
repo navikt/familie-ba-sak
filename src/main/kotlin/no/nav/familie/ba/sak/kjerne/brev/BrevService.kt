@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -62,7 +63,6 @@ class BrevService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val simuleringService: SimuleringService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val brevPeriodeService: BrevPeriodeService,
     private val sanityService: SanityService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
@@ -302,11 +302,10 @@ class BrevService(
         }
 
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
-        val brevPerioderData =
-            brevPeriodeService.hentBrevperioderData(
-                vedtaksperioder = vedtaksperioder,
-                behandling = vedtak.behandling,
-            )
+
+        val minimerteVedtaksperioder =
+            vedtaksperioder.map { it.tilMinimertVedtaksperiode(sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()) }
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
 
         val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
         val brevperioder = vedtaksperioder.mapNotNull {
@@ -322,8 +321,8 @@ class BrevService(
         val hjemler =
             hentHjemler(
                 behandlingId = vedtak.behandling.id,
-                minimerteVedtaksperioder = brevPerioderData.map { it.minimertVedtaksperiode },
-                målform = brevPerioderData.first().brevMålform,
+                minimerteVedtaksperioder = minimerteVedtaksperioder,
+                målform = personopplysningGrunnlag.søker.målform,
                 vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null,
                 refusjonEøsHjemmelSkalMedIBrev = refusjonEøs.isNotEmpty(),
             )

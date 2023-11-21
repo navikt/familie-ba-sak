@@ -17,15 +17,6 @@ data class BrevperiodeData(
     val dødeBarnForrigePeriode: List<String>,
 ) : Comparable<BrevperiodeData> {
 
-
-    fun tilBrevperiodeForLogging() =
-        minimertVedtaksperiode.tilBrevPeriodeForLogging(
-            restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
-            uregistrerteBarn = this.uregistrerteBarn,
-            brevMålform = this.brevMålform,
-            barnMedReduksjonFraForrigeBehandlingIdent = this.barnMedReduksjonFraForrigeBehandlingIdent,
-        )
-
     override fun compareTo(other: BrevperiodeData): Int {
         val fomCompared =
             (this.minimertVedtaksperiode.fom ?: TIDENES_MORGEN).compareTo(

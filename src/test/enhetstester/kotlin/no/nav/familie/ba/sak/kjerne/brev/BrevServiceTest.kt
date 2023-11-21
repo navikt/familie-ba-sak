@@ -20,7 +20,6 @@ class BrevServiceTest {
             arbeidsfordelingService = mockk(),
             simuleringService = mockk(),
             vedtaksperiodeService = mockk(),
-            brevPeriodeService = mockk(),
             sanityService = mockk(),
             vilkårsvurderingService = mockk(),
             korrigertEtterbetalingService = mockk(),
