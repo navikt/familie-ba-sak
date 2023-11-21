@@ -308,6 +308,42 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorSelvstendigRettBarnFlyttetFraSoker"
     },
+    OPPHOR_SELVSTENDIG_RETT_OPPHOR_FRA_START {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSelvstendigRettOpphorFraStart"
+    },
+    OPPHOR_SELVSTENDIG_RETT_VAR_IKKE_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EOS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSelvstendigRettVarIkkeUtsendtArbeidstakerFraAnnetEosLand"
+    },
+    OPPHOR_BARN_BODDE_IKKE_I_ET_EOS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorBarnBoddeIkkeIEtEosLand"
+    },
+    OPPHOR_SEPARASJONSAVTALEN_GJALDT_IKKE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSeparasjonsavtalenGjaldtIkke"
+    },
+    OPPHOR_NORGE_VAR_IKKE_SENTRUM_FOR_LIVSINTERESSE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorNorgeVarIkkeSentrumForLivsinteresse"
+    },
+    OPPHOR_HADDE_IKKE_ANSVAR_FOR_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorHaddeIkkeAnsvarForBarn"
+    },
+    OPPHOR_HADDE_IKKE_OPPHOLDSRETT_SOM_FAMILIEMEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorHaddeIkkeOppholdsrettSomFamiliemedlem"
+    },
+    OPPHOR_SOKER_OG_BARN_BODDE_IKKE_I_EOS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSokerOgBarnBoddeIkkeIEosLand"
+    },
+    OPPHOR_SOKER_BODDE_IKKE_I_EOS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSokerBoddeIkkeIEosLand"
+    },
     AVSLAG_EØS_IKKE_EØS_BORGER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosIkkeEosBorger"
