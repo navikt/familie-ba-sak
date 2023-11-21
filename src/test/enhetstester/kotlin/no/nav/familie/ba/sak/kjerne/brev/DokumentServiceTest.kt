@@ -39,7 +39,6 @@ import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class DokumentServiceTest {
@@ -242,7 +241,6 @@ internal class DokumentServiceTest {
     }
 
     @Test
-    @Disabled // Feiler kun pga en refaktorering (BrevmottakerService:97). Mulig det er 'callOriginal()' som er fragile ¯\_(ツ)_/¯
     fun `sendManueltBrev skal sende manuelt brev til FULLMEKTIG og bruker som har FULLMEKTIG manuelt brev mottaker`() {
         val behandling = lagBehandling()
         val søkersident = behandling.fagsak.aktør.aktivFødselsnummer()
@@ -260,7 +258,6 @@ internal class DokumentServiceTest {
                 landkode = "NO",
             ),
         )
-        every { brevmottakerService.lagMottakereFraBrevMottakere(any(), any(), any()) } answers { callOriginal() }
         every { brevmottakerService.hentMottakerNavn(søkersident) } returns "søker"
         every {
             utgåendeJournalføringService.journalførManueltBrev(
@@ -277,6 +274,7 @@ internal class DokumentServiceTest {
 
         every { journalføringRepository.save(any()) } returns mockk()
         every { taskRepository.save(any()) } returns mockk()
+        every { fagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
 
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
