@@ -71,7 +71,11 @@ class DokumentService(
     }
 
     @Transactional
-    fun sendManueltBrev(manueltBrevRequest: ManueltBrevRequest, behandling: Behandling? = null, fagsakId: Long) {
+    fun sendManueltBrev(
+        manueltBrevRequest: ManueltBrevRequest,
+        behandling: Behandling? = null,
+        fagsakId: Long,
+    ) {
         if (behandling == null) {
             validerBrevmottakerService.validerAtFagsakIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
                 fagsakId = fagsakId,
@@ -104,11 +108,12 @@ class DokumentService(
         val brevmottakere =
             manueltBrevRequest.manuelleBrevmottakere + brevmottakereFraBehandling.map { ManuellBrevmottaker(it) }
 
-        val mottakere = lagMottakere(
-            manueltBrevRequest = manueltBrevRequest,
-            fagsak = fagsak,
-            brevmottakere = brevmottakere,
-        )
+        val mottakere =
+            lagMottakere(
+                manueltBrevRequest = manueltBrevRequest,
+                fagsak = fagsak,
+                brevmottakere = brevmottakere,
+            )
         val journalposterTilDistribusjon = mutableMapOf<String, MottakerInfo>()
 
         mottakere.forEach { mottakerInfo ->
@@ -163,20 +168,23 @@ class DokumentService(
     ): List<MottakerInfo> {
         val søkersident = fagsak.aktør.aktivFødselsnummer()
         return when {
-            manueltBrevRequest.erTilInstitusjon -> MottakerInfo(
-                brukerId = checkNotNull(fagsak.institusjon).orgNummer,
-                brukerIdType = BrukerIdType.ORGNR,
-                erInstitusjonVerge = false,
-            ).toList()
-            brevmottakere.isNotEmpty() -> brevmottakerService.lagMottakereFraBrevMottakere(
-                brevmottakere,
-                søkersident,
-            )
-            else -> MottakerInfo(
-                brukerIdType = BrukerIdType.FNR,
-                brukerId = søkersident,
-                erInstitusjonVerge = false,
-            ).toList()
+            manueltBrevRequest.erTilInstitusjon ->
+                MottakerInfo(
+                    brukerId = checkNotNull(fagsak.institusjon).orgNummer,
+                    brukerIdType = BrukerIdType.ORGNR,
+                    erInstitusjonVerge = false,
+                ).toList()
+            brevmottakere.isNotEmpty() ->
+                brevmottakerService.lagMottakereFraBrevMottakere(
+                    brevmottakere,
+                    søkersident,
+                )
+            else ->
+                MottakerInfo(
+                    brukerIdType = BrukerIdType.FNR,
+                    brukerId = søkersident,
+                    erInstitusjonVerge = false,
+                ).toList()
         }
     }
 

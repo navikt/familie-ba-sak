@@ -64,10 +64,11 @@ class JournalførVedtaksbrev(
         } else {
             val brevMottakere = brevmottakerService.hentBrevmottakere(behandling.id)
             if (brevMottakere.isNotEmpty()) {
-                mottakere += brevmottakerService.lagMottakereFraBrevMottakere(
-                    brevMottakere.map { ManuellBrevmottaker(it) },
-                    søkersident,
-                )
+                mottakere +=
+                    brevmottakerService.lagMottakereFraBrevMottakere(
+                        brevMottakere.map { ManuellBrevmottaker(it) },
+                        søkersident,
+                    )
             } else {
                 mottakere += MottakerInfo(søkersident, BrukerIdType.FNR, false)
             }

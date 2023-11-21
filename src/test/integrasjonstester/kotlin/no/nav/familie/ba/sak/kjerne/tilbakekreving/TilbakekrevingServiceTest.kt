@@ -166,15 +166,16 @@ class TilbakekrevingServiceTest(
                 verge = arguments.first,
             )
 
-        val brevmottaker = BrevmottakerDb(
-            behandlingId = behandling.id,
-            type = arguments.second,
-            navn = "Donald Duck",
-            adresselinje1 = "Andebyveien 1",
-            postnummer = "0000",
-            poststed = "OSLO",
-            landkode = "NO",
-        )
+        val brevmottaker =
+            BrevmottakerDb(
+                behandlingId = behandling.id,
+                type = arguments.second,
+                navn = "Donald Duck",
+                adresselinje1 = "Andebyveien 1",
+                postnummer = "0000",
+                poststed = "OSLO",
+                landkode = "NO",
+            )
         brevmottakerRepository.saveAndFlush(brevmottaker)
 
         val opprettTilbakekrevingRequest = tilbakekrevingService.lagOpprettTilbakekrevingRequest(behandling)
@@ -185,7 +186,10 @@ class TilbakekrevingServiceTest(
         assertEquals(arguments.third, actualBrevmottaker.vergetype)
     }
 
-    private fun assertBrevmottakerEquals(expected: BrevmottakerDb, actual: TilbakekrevingBrevmottaker) {
+    private fun assertBrevmottakerEquals(
+        expected: BrevmottakerDb,
+        actual: TilbakekrevingBrevmottaker,
+    ) {
         assertEquals(expected.navn, actual.navn)
         assertEquals(expected.type.name, actual.type.name)
         assertEquals(expected.adresselinje1, actual.manuellAdresseInfo?.adresselinje1)

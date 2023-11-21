@@ -21,23 +21,25 @@ class ValiderBrevmottakerServiceTest {
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val familieIntegrasjonerTilgangskontrollService = mockk<FamilieIntegrasjonerTilgangskontrollService>()
     private val fagsakRepository = mockk<FagsakRepository>()
-    val validerBrevmottakerService = ValiderBrevmottakerService(
-        brevmottakerRepository = brevmottakerRepository,
-        persongrunnlagService = persongrunnlagService,
-        familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
-        fagsakRepository = fagsakRepository,
-    )
+    val validerBrevmottakerService =
+        ValiderBrevmottakerService(
+            brevmottakerRepository = brevmottakerRepository,
+            persongrunnlagService = persongrunnlagService,
+            familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
+            fagsakRepository = fagsakRepository,
+        )
 
     private val behandlingId = 0L
-    val brevmottaker = BrevmottakerDb(
-        behandlingId = behandlingId,
-        type = MottakerType.DØDSBO,
-        navn = "Donald Duck",
-        adresselinje1 = "Andebyveien 1",
-        postnummer = "0000",
-        poststed = "OSLO",
-        landkode = "NO",
-    )
+    val brevmottaker =
+        BrevmottakerDb(
+            behandlingId = behandlingId,
+            type = MottakerType.DØDSBO,
+            navn = "Donald Duck",
+            adresselinje1 = "Andebyveien 1",
+            postnummer = "0000",
+            poststed = "OSLO",
+            landkode = "NO",
+        )
     val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
     @Test

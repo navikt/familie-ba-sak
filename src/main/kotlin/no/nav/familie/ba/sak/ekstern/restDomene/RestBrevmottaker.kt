@@ -14,13 +14,14 @@ data class RestBrevmottaker(
     val landkode: String,
 )
 
-fun RestBrevmottaker.tilBrevMottaker(behandlingId: Long) = BrevmottakerDb(
-    behandlingId = behandlingId,
-    type = type,
-    navn = navn,
-    adresselinje1 = adresselinje1,
-    adresselinje2 = adresselinje2,
-    postnummer = postnummer.trim(),
-    poststed = poststed.trim(),
-    landkode = landkode,
-)
+fun RestBrevmottaker.tilBrevMottaker(behandlingId: Long) =
+    BrevmottakerDb(
+        behandlingId = behandlingId,
+        type = type,
+        navn = navn,
+        adresselinje1 = adresselinje1,
+        adresselinje2 = adresselinje2,
+        postnummer = postnummer.trim(),
+        poststed = poststed.trim(),
+        landkode = landkode,
+    )

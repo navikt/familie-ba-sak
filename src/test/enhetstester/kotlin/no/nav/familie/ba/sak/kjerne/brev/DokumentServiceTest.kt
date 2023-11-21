@@ -52,15 +52,16 @@ internal class DokumentServiceTest {
     val organisasjonService = mockk<OrganisasjonService>(relaxed = true)
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>(relaxed = true)
     val personidentService = mockk<PersonidentService>()
-    val brevmottakerService = spyk<BrevmottakerService>(
-        BrevmottakerService(
-            brevmottakerRepository = mockk(),
-            loggService = mockk(),
-            personidentService = personidentService,
-            personopplysningerService = mockk(),
-            validerBrevmottakerService = mockk(),
-        ),
-    )
+    val brevmottakerService =
+        spyk<BrevmottakerService>(
+            BrevmottakerService(
+                brevmottakerRepository = mockk(),
+                loggService = mockk(),
+                personidentService = personidentService,
+                personopplysningerService = mockk(),
+                validerBrevmottakerService = mockk(),
+            ),
+        )
 
     private val dokumentService: DokumentService =
         spyk(
@@ -250,17 +251,18 @@ internal class DokumentServiceTest {
         val manueltBrevRequest = ManueltBrevRequest(mottakerIdent = søkersident, brevmal = Brevmal.SVARTIDSBREV)
         val avsenderMottakere = mutableListOf<AvsenderMottaker>()
 
-        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns listOf(
-            BrevmottakerDb(
-                behandlingId = behandling.id,
-                type = MottakerType.FULLMEKTIG,
-                navn = "Fullmektig navn",
-                adresselinje1 = "Test adresse",
-                postnummer = "0000",
-                poststed = "Oslo",
-                landkode = "NO",
-            ),
-        )
+        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+            listOf(
+                BrevmottakerDb(
+                    behandlingId = behandling.id,
+                    type = MottakerType.FULLMEKTIG,
+                    navn = "Fullmektig navn",
+                    adresselinje1 = "Test adresse",
+                    postnummer = "0000",
+                    poststed = "Oslo",
+                    landkode = "NO",
+                ),
+            )
         every { brevmottakerService.hentMottakerNavn(søkersident) } returns "søker"
         every {
             utgåendeJournalføringService.journalførManueltBrev(
@@ -305,16 +307,17 @@ internal class DokumentServiceTest {
         val aktør = randomAktør()
         val fagsak = Fagsak(aktør = aktør)
         val søkersident = aktør.aktivFødselsnummer()
-        val brevmottakere = listOf(
-            ManuellBrevmottaker(
-                type = MottakerType.FULLMEKTIG,
-                navn = "Fullmektig navn",
-                adresselinje1 = "Test adresse",
-                postnummer = "0000",
-                poststed = "Oslo",
-                landkode = "NO",
-            ),
-        )
+        val brevmottakere =
+            listOf(
+                ManuellBrevmottaker(
+                    type = MottakerType.FULLMEKTIG,
+                    navn = "Fullmektig navn",
+                    adresselinje1 = "Test adresse",
+                    postnummer = "0000",
+                    poststed = "Oslo",
+                    landkode = "NO",
+                ),
+            )
         val manueltBrevRequest =
             ManueltBrevRequest(
                 mottakerIdent = søkersident,

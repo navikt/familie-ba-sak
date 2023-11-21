@@ -51,11 +51,12 @@ internal class BrevmottakerServiceTest {
         val brevmottakere = listOf(lagBrevMottakerDb(mottakerType = MottakerType.FULLMEKTIG))
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
-        val mottakerInfo = brevmottakerService.lagMottakereFraBrevMottakere(
-            brevmottakere.map { ManuellBrevmottaker(it) },
-            søkersident,
-            søkersnavn,
-        )
+        val mottakerInfo =
+            brevmottakerService.lagMottakereFraBrevMottakere(
+                brevmottakere.map { ManuellBrevmottaker(it) },
+                søkersident,
+                søkersnavn,
+            )
         assertTrue { mottakerInfo.size == 2 }
 
         assertEquals(søkersnavn, mottakerInfo.first().navn)
@@ -78,11 +79,12 @@ internal class BrevmottakerServiceTest {
             )
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
-        val mottakerInfo = brevmottakerService.lagMottakereFraBrevMottakere(
-            brevmottakere.map { ManuellBrevmottaker(it) },
-            søkersident,
-            søkersnavn,
-        )
+        val mottakerInfo =
+            brevmottakerService.lagMottakereFraBrevMottakere(
+                brevmottakere.map { ManuellBrevmottaker(it) },
+                søkersident,
+                søkersnavn,
+            )
         assertTrue { mottakerInfo.size == 2 }
 
         assertEquals(søkersnavn, mottakerInfo.first().navn)
@@ -106,11 +108,12 @@ internal class BrevmottakerServiceTest {
             )
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
-        val mottakerInfo = brevmottakerService.lagMottakereFraBrevMottakere(
-            brevmottakere.map { ManuellBrevmottaker(it) },
-            søkersident,
-            søkersnavn,
-        )
+        val mottakerInfo =
+            brevmottakerService.lagMottakereFraBrevMottakere(
+                brevmottakere.map { ManuellBrevmottaker(it) },
+                søkersident,
+                søkersnavn,
+            )
         assertTrue { mottakerInfo.size == 2 }
 
         assertEquals(søkersnavn, mottakerInfo.first().navn)
@@ -133,11 +136,12 @@ internal class BrevmottakerServiceTest {
             )
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
-        val mottakerInfo = brevmottakerService.lagMottakereFraBrevMottakere(
-            brevmottakere.map { ManuellBrevmottaker(it) },
-            søkersident,
-            søkersnavn,
-        )
+        val mottakerInfo =
+            brevmottakerService.lagMottakereFraBrevMottakere(
+                brevmottakere.map { ManuellBrevmottaker(it) },
+                søkersident,
+                søkersnavn,
+            )
         assertTrue { mottakerInfo.size == 1 }
 
         assertEquals(søkersnavn, mottakerInfo.first().navn)
@@ -157,11 +161,12 @@ internal class BrevmottakerServiceTest {
             )
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
-        val mottakerInfo = brevmottakerService.lagMottakereFraBrevMottakere(
-            brevmottakere.map { ManuellBrevmottaker(it) },
-            søkersident,
-            søkersnavn,
-        )
+        val mottakerInfo =
+            brevmottakerService.lagMottakereFraBrevMottakere(
+                brevmottakere.map { ManuellBrevmottaker(it) },
+                søkersident,
+                søkersnavn,
+            )
         assertTrue { mottakerInfo.size == 1 }
 
         assertEquals(søkersnavn, mottakerInfo.first().navn)
@@ -248,13 +253,13 @@ internal class BrevmottakerServiceTest {
         poststed: String = "Oslo",
         landkode: String = "NO",
     ) = Brevmottaker(
-            behandlingId = 1,
-            type = mottakerType,
-            navn = "John Doe",
-            adresselinje1 = "adresse 1",
-            adresselinje2 = "adresse 2",
-            postnummer = "000",
-            poststed = poststed,
-            landkode = landkode,
-        )
+        behandlingId = 1,
+        type = mottakerType,
+        navn = "John Doe",
+        adresselinje1 = "adresse 1",
+        adresselinje2 = "adresse 2",
+        postnummer = "000",
+        poststed = poststed,
+        landkode = landkode,
+    )
 }
