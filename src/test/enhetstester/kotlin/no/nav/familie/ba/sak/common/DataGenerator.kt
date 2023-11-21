@@ -82,7 +82,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -1044,6 +1043,7 @@ fun lagVedtaksperiodeMedBegrunnelser(
     tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
     type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
     begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
+    eøsBegrunnelser: MutableSet<EØSBegrunnelse> = mutableSetOf(),
     fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
 ) = VedtaksperiodeMedBegrunnelser(
     vedtak = vedtak,
@@ -1052,6 +1052,7 @@ fun lagVedtaksperiodeMedBegrunnelser(
     type = type,
     begrunnelser = begrunnelser,
     fritekster = fritekster,
+    eøsBegrunnelser = eøsBegrunnelser,
 )
 
 fun lagUtvidetVedtaksperiodeMedBegrunnelser(
@@ -1162,7 +1163,6 @@ fun lagEndretUtbetalingAndel(
     årsak: Årsak = Årsak.DELT_BOSTED,
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
-    standardbegrunnelser: List<Standardbegrunnelse> = emptyList(),
 ) =
     EndretUtbetalingAndel(
         id = id,
@@ -1357,43 +1357,6 @@ fun lagSanityEøsBegrunnelse(
         fagsakType = fagsakType,
         tema = tema,
         periodeType = periodeType,
-        valgbarhet = valgbarhet,
-    )
-
-fun lagTriggesAv(
-    vilkår: Set<Vilkår> = emptySet(),
-    personTyper: Set<PersonType> = setOf(PersonType.BARN, PersonType.SØKER),
-    personerManglerOpplysninger: Boolean = false,
-    satsendring: Boolean = false,
-    barnMedSeksårsdag: Boolean = false,
-    vurderingAnnetGrunnlag: Boolean = false,
-    medlemskap: Boolean = false,
-    deltbosted: Boolean = false,
-    valgbar: Boolean = true,
-    valgbarhet: Valgbarhet? = null,
-    endringsaarsaker: Set<Årsak> = emptySet(),
-    etterEndretUtbetaling: Boolean = false,
-    endretUtbetalingSkalUtbetales: EndretUtbetalingsperiodeDeltBostedTriggere = EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
-    småbarnstillegg: Boolean = false,
-): TriggesAv =
-    TriggesAv(
-        vilkår = vilkår,
-        personTyper = personTyper,
-        personerManglerOpplysninger = personerManglerOpplysninger,
-        satsendring = satsendring,
-        barnMedSeksårsdag = barnMedSeksårsdag,
-        vurderingAnnetGrunnlag = vurderingAnnetGrunnlag,
-        medlemskap = medlemskap,
-        deltbosted = deltbosted,
-        valgbar = valgbar,
-        endringsaarsaker = endringsaarsaker,
-        etterEndretUtbetaling = etterEndretUtbetaling,
-        endretUtbetalingSkalUtbetales = endretUtbetalingSkalUtbetales,
-        småbarnstillegg = småbarnstillegg,
-        barnDød = false,
-        deltBostedSkalIkkeDeles = false,
-        gjelderFraInnvilgelsestidspunkt = false,
-        gjelderFørstePeriode = false,
         valgbarhet = valgbarhet,
     )
 

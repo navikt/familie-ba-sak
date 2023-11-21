@@ -1,14 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import com.fasterxml.jackson.annotation.JsonValue
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
-import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentRelevanteEndringsperioderForBegrunnelse
 
 val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 
@@ -1606,62 +1598,4 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     @JsonValue
     override fun enumnavnTilString(): String =
         Standardbegrunnelse::class.simpleName + "$" + this.name
-
-    override fun delOpp(
-        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-        triggesAv: TriggesAv,
-        periode: NullablePeriode,
-    ): List<BrevBegrunnelseGrunnlagMedPersoner> {
-        if (!this.kanDelesOpp) {
-            throw Feil("Begrunnelse $this kan ikke deles opp.")
-        }
-        return when (this) {
-            Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING -> {
-                val deltBostedEndringsperioder =
-                    this.hentRelevanteEndringsperioderForBegrunnelse(
-                        minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
-                        vedtaksperiode = periode,
-                    )
-                        .filter { it.årsak == Årsak.DELT_BOSTED }
-                        .filter { endringsperiode ->
-                            endringsperiodeGjelderBarn(
-                                personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
-                                personIdentFraEndringsperiode = endringsperiode.personIdent,
-                            )
-                        }
-                val deltBostedEndringsperioderGruppertPåAvtaledato =
-                    deltBostedEndringsperioder.groupBy { it.avtaletidspunktDeltBosted }
-
-                deltBostedEndringsperioderGruppertPåAvtaledato.map {
-                    BrevBegrunnelseGrunnlagMedPersoner(
-                        standardbegrunnelse = this,
-                        vedtakBegrunnelseType = this.vedtakBegrunnelseType,
-                        triggesAv = triggesAv,
-                        personIdenter = it.value.map { endringsperiode -> endringsperiode.personIdent },
-                        avtaletidspunktDeltBosted = it.key,
-                    )
-                }
-            }
-
-            else -> throw Feil("Oppdeling av begrunnelse $this er ikke støttet.")
-        }
-    }
 }
-
-private fun endringsperiodeGjelderBarn(
-    personerPåBehandling: List<MinimertRestPerson>,
-    personIdentFraEndringsperiode: String,
-) = personerPåBehandling.find { person -> person.personIdent == personIdentFraEndringsperiode }?.type == PersonType.BARN
-
-val endretUtbetalingsperiodeBegrunnelser: Set<Standardbegrunnelse> =
-    setOf(
-        Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY,
-        Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING_FØR_SOKNAD_NY,
-        Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALT_UTVIDET_NY,
-        Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY,
-        Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING,
-        Standardbegrunnelse.ENDRET_UTBETALING_SEKUNDÆR_DELT_BOSTED_FULL_UTBETALING_FØR_SØKNAD,
-        Standardbegrunnelse.ENDRET_UTBETALING_ETTERBETALT_UTVIDET_DEL_FRA_AVTALETIDSPUNKT_SØKT_FOR_PRAKTISERT_DELT,
-        Standardbegrunnelse.ENDRET_UTBETALING_ALLEREDE_UTBETALT_FORELDRE_BOR_SAMMEN,
-        Standardbegrunnelse.ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS,
-    )

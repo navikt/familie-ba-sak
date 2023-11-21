@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.lagOgValiderPeriodeFraVilkår
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelseDeserializer
@@ -20,14 +18,7 @@ data class MinimertVilkårResultat(
     val erEksplisittAvslagPåSøknad: Boolean?,
     @JsonDeserialize(using = IVedtakBegrunnelseDeserializer::class)
     val standardbegrunnelser: List<IVedtakBegrunnelse>,
-) {
-    fun toPeriode(): Periode =
-        lagOgValiderPeriodeFraVilkår(
-            this.periodeFom,
-            this.periodeTom,
-            this.erEksplisittAvslagPåSøknad,
-        )
-}
+)
 
 fun VilkårResultat.tilMinimertVilkårResultat() =
     MinimertVilkårResultat(

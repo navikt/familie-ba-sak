@@ -7,20 +7,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import jakarta.persistence.AttributeConverter
 import jakarta.persistence.Converter
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
-import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 
 sealed interface IVedtakBegrunnelse {
     val sanityApiNavn: String
     val vedtakBegrunnelseType: VedtakBegrunnelseType
     val kanDelesOpp: Boolean
-
-    fun delOpp(
-        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-        triggesAv: TriggesAv,
-        periode: NullablePeriode,
-    ): List<BrevBegrunnelseGrunnlagMedPersoner>
 
     fun enumnavnTilString(): String
 
