@@ -86,11 +86,13 @@ class TilkjentYtelseValideringService(
     fun finnAktørerMedUgyldigEtterbetalingsperiode(
         behandlingId: Long,
     ): List<Aktør> {
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
+        val tilkjentYtelse = beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = behandlingId)
+
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
-                behandling = behandlingHentOgPersisterService.hent(behandlingId),
+                behandling = behandling,
             )
         val forrigeAndelerTilkjentYtelse =
             forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
@@ -98,8 +100,8 @@ class TilkjentYtelseValideringService(
 
         return finnAktørIderMedUgyldigEtterbetalingsperiode(
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse ?: emptyList(),
-            andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-            kravDato = tilkjentYtelse.behandling.opprettetTidspunkt,
+            andelerTilkjentYtelse = tilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
+            kravDato = behandling.opprettetTidspunkt,
         )
     }
 
