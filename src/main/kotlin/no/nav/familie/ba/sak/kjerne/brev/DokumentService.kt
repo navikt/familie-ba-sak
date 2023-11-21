@@ -76,11 +76,13 @@ class DokumentService(
         if (behandling != null) {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
                 behandlingId = behandling.id,
+                barnLagtTilIBrev = manueltBrevRequest.barnIBrev,
             )
         } else {
             validerBrevmottakerService.validerAtFagsakIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
                 fagsakId = fagsakId,
                 manueltBrevRequest.manuelleBrevmottakere,
+                barnLagtTilIBrev = manueltBrevRequest.barnIBrev,
             )
         }
 

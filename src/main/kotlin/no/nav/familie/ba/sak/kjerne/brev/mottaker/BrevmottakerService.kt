@@ -31,7 +31,11 @@ class BrevmottakerService(
     fun leggTilBrevmottaker(restBrevMottaker: RestBrevmottaker, behandlingId: Long) {
         val brevmottaker = restBrevMottaker.tilBrevMottaker(behandlingId)
 
-        validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId, brevmottaker)
+        validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+            behandlingId = behandlingId,
+            nyBrevmottaker = brevmottaker,
+            barnLagtTilIBrev = emptyList(),
+        )
 
         loggService.opprettBrevmottakerLogg(
             brevmottaker = brevmottaker,

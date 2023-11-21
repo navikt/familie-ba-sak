@@ -197,7 +197,13 @@ internal class BrevmottakerServiceTest {
     fun `leggTilBrevmottaker skal lagre logg på at brevmottaker legges til`() {
         val restBrevmottaker = mockk<RestBrevmottaker>(relaxed = true)
 
-        every { validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(any(), any()) } just runs
+        every {
+            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                any(),
+                any(),
+                any(),
+            )
+        } just runs
         every { loggService.opprettBrevmottakerLogg(any(), false) } just runs
         every { brevmottakerRepository.save(any()) } returns mockk()
 

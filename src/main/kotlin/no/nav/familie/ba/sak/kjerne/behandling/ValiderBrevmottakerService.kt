@@ -20,6 +20,7 @@ class ValiderBrevmottakerService(
     fun validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
         behandlingId: Long,
         nyBrevmottaker: BrevmottakerDb? = null,
+        barnLagtTilIBrev: List<String>,
     ) {
         var brevmottakere = brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId)
         nyBrevmottaker?.let {
@@ -33,7 +34,9 @@ class ValiderBrevmottakerService(
             ?.map { it.aktør.aktivFødselsnummer() }
             ?: return
         val strengtFortroligePersonIdenter =
-            familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter)
+            familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
+                (personIdenter + barnLagtTilIBrev).toSet().toList(),
+            )
         if (strengtFortroligePersonIdenter.isNotEmpty()) {
             val melding = "Behandlingen (id: $behandlingId) inneholder ${strengtFortroligePersonIdenter.size} person(er) med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere (${brevmottakere.size} stk)."
             val frontendFeilmelding =
@@ -45,19 +48,20 @@ class ValiderBrevmottakerService(
     fun validerAtFagsakIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
         fagsakId: Long,
         manuelleBrevmottakere: List<ManuellBrevmottaker>,
+        barnLagtTilIBrev: List<String>,
     ) {
         val erManuellBrevmottaker = manuelleBrevmottakere.isNotEmpty()
         if (!erManuellBrevmottaker) return
 
         val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: throw Feil("Fant ikke fagsak $fagsakId")
         val strengtFortroligePersonIdenter =
-            familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(listOf(fagsak.aktør.aktivFødselsnummer()))
+            familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(listOf(fagsak.aktør.aktivFødselsnummer()) + barnLagtTilIBrev)
 
         if (strengtFortroligePersonIdenter.isNotEmpty()) {
             val melding =
-                "Fagsak $fagsakId inneholder person med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere (${manuelleBrevmottakere.size} stk)."
+                "Brev på fagsak $fagsakId inneholder person med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere (${manuelleBrevmottakere.size} stk)."
             val frontendFeilmelding =
-                "Fagsak inneholder personer med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere."
+                "Brevet inneholder personer med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere."
             throw FunksjonellFeil(melding, frontendFeilmelding)
         }
     }
