@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.hentOverstyrtDokumenttittel
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -61,7 +62,10 @@ class JournalførVedtaksbrev(
         } else {
             val brevMottakere = brevmottakerService.hentBrevmottakere(behandling.id)
             if (brevMottakere.isNotEmpty()) {
-                mottakere += brevmottakerService.lagMottakereFraBrevMottakere(brevMottakere, søkersident)
+                mottakere += brevmottakerService.lagMottakereFraBrevMottakere(
+                    brevMottakere.map { ManuellBrevmottaker(it) },
+                    søkersident,
+                )
             } else {
                 mottakere += MottakerInfo(søkersident, BrukerIdType.FNR, false)
             }
