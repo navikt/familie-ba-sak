@@ -220,6 +220,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstSekundaerIkkeFaattSvarPaaSed"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_TILLEGGSTEKST_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstDeltBosted"
+    },
+    INNVILGET_TILLEGGSTEKST_FULL_BARNETRYGD_HAR_AVTALE_DELT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstFullBarnetrygdHarAvtaleDelt"
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
@@ -287,6 +295,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_SELVSTENDIG_RETT_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorSelvstendigRettUtsendtArbedstakerFraAnnetEosLand"
+    },
+    OPPHØR_DELT_BOSTED_BEGGE_FORELDRE_IKKE_OMFATTET_NORSK_LOVGIVNING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorDeltBostedBeggeForeldreIkkeOmfattetNorskLovgivning"
+    },
+    OPPHØR_SELVSTENDIG_RETT_BARN_FLYTTET_FRA_SØKER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSelvstendigRettBarnFlyttetFraSoker"
     },
     AVSLAG_EØS_IKKE_EØS_BORGER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
@@ -540,6 +556,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_UK_MIDLERTIDIG_DIFFERANSEUTBETALING {
         override val sanityApiNavn = "reduksjonUkMidlertidigDifferanseutbetaling"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_DELT_BOSTED_BEGGE_FORELDRE_IKKE_OMFATTET_NORSK_LOVVALG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+        override val sanityApiNavn = "reduksjonDeltBostedBeggeForeldreIkkeOmfattetNorskLovvalg"
+    },
+    REDUKSJON_SELVSTENDIG_RETT_BARN_FLYTTET_FRA_SØKER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+        override val sanityApiNavn = "reduksjonSelvstendigRettBarnFlyttetFraSoker"
     }, ;
 
     override val kanDelesOpp: Boolean = false

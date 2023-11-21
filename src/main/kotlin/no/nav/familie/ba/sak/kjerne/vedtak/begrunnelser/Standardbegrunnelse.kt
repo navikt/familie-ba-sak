@@ -237,6 +237,26 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetEnsligMindrearigFlyktning"
     },
+    INNVILGET_ENSLIG_MINDREÅRIG_LOVLIG_OPPHOLD_FØR_BOSATT_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEnsligMindrearigLovligOppholdForBosattINorge"
+    },
+    INNVILGET_ENSLIG_MINDREÅRIG_LOVLIG_OPPHOLD_SAMTIDIG_SOM_BOSATT_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEnsligMindrearigLovligOppholdSamtidigSomBosattINorge"
+    },
+    INNVILGET_ENSLIG_MINDREÅRIG_BOSATT_FØR_LOVLIG_OPPHOLD_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEnsligMindrearigBosattForLovligOppholdINorge"
+    },
+    INNVILGET_ENSLIG_MINDREÅRIG_FLYTTET_FRA_INSTITUSJON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEnsligMindrearigFlyttetFraInstitusjon"
+    },
+    INNVILGET_ENSLIG_MINDREÅRIG_FLYTTET_FRA_FOSTERHJEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEnsligMindrearigFlyttetFraFosterhjem"
+    },
     INNVILGET_VARETEKTSFENGSEL_GIFT {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetVaretektsfengselGift"
@@ -432,6 +452,14 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     INNVILGET_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetUtenlandsoppholdOverTreMaaneder"
+    },
+    INNVILGET_FORTSATT_BOSATT_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFortsattBosattINorge"
+    },
+    INNVILGET_OVERGANG_FRA_EØS_TIL_NASJONAL_HELE_FAMILIEN_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetOvergangFraEosTilNasjonalHeleFamilienMedlem"
     },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
@@ -1192,6 +1220,26 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_UGYLDIG_KONTONUMMER_FRA_INNVILGELSE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorUgyldigKontonummerFraInnvilgelse"
+    },
+    OPPHØR_ENSLIG_MINDREÅRIG_18_ÅR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorEnsligMindrearig18Aar"
+    },
+    OPPHØR_ENSLIG_MINDREÅRIG_FLYTTET_I_INSTITUSJON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorEnsligMindrearigFlyttetIInstitusjon"
+    },
+    OPPHØR_ENSLIG_MINDREÅRIG_FLYTTET_TIL_FOSTERHJEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorEnsligMindrearigFlyttetTilFosterhjem"
+    },
+    OPPHØR_ENSLIG_MINDREÅRIG_BOR_MED_OMSORGSPERSON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorEnsligMindrearigBorMedOmsorgsperson"
+    },
+    OPPHØR_ENSLIG_MINDREÅRIG_UTVANDRET {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorEnsligMindrearigUtvandret"
     },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
