@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
@@ -16,27 +15,12 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 import java.time.YearMonth
 
 fun List<LocalDate>.tilSammenslåttKortString(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
-
-fun hentBarnasFødselsdatoerForAvslagsbegrunnelse(
-    barnIBegrunnelse: List<MinimertRestPerson>,
-    barnPåBehandling: List<MinimertRestPerson>,
-    uregistrerteBarn: List<MinimertUregistrertBarn>,
-    gjelderSøker: Boolean,
-): String {
-    val registrerteBarnFødselsdatoer =
-        if (gjelderSøker) barnPåBehandling.map { it.fødselsdato } else barnIBegrunnelse.map { it.fødselsdato }
-    val uregistrerteBarnFødselsdatoer =
-        uregistrerteBarn.mapNotNull { it.fødselsdato }
-    val alleBarnaFødselsdatoer = registrerteBarnFødselsdatoer + uregistrerteBarnFødselsdatoer
-    return alleBarnaFødselsdatoer.tilSammenslåttKortString()
-}
 
 fun hentRestBehandlingsgrunnlagForBrev(
     persongrunnlag: PersonopplysningGrunnlag,
