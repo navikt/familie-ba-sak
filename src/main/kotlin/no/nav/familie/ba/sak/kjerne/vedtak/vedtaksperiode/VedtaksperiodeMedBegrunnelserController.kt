@@ -142,11 +142,12 @@ class VedtaksperiodeMedBegrunnelserController(
         val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(behandlingId)
         val begrunnelsesGrunnlagPerPerson = vedtaksperiode.finnBegrunnelseGrunnlagPerPerson(grunnlagForBegrunnelser)
 
-        val brevBegrunnelser = vedtaksperiode.hentBegrunnelser(
-            grunnlagForBegrunnelse = grunnlagForBegrunnelser,
-            begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
-            landkoder = integrasjonClient.hentLandkoderISO2(),
-        )
+        val brevBegrunnelser =
+            vedtaksperiode.hentBegrunnelser(
+                grunnlagForBegrunnelse = grunnlagForBegrunnelser,
+                begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+                landkoder = integrasjonClient.hentLandkoderISO2(),
+            )
 
         val begrunnelser =
             brevBegrunnelser.map {

@@ -1052,7 +1052,7 @@ fun lagVedtaksperiodeMedBegrunnelser(
     type = type,
     begrunnelser = begrunnelser,
     fritekster = fritekster,
-    eøsBegrunnelser = eøsBegrunnelser
+    eøsBegrunnelser = eøsBegrunnelser,
 )
 
 fun lagUtvidetVedtaksperiodeMedBegrunnelser(

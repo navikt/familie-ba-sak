@@ -1550,5 +1550,4 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     @JsonValue
     override fun enumnavnTilString(): String =
         Standardbegrunnelse::class.simpleName + "$" + this.name
-
 }

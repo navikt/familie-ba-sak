@@ -32,4 +32,3 @@ enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
         return this == AVSLAG || this == INSTITUSJON_AVSLAG || this == EØS_AVSLAG
     }
 }
-

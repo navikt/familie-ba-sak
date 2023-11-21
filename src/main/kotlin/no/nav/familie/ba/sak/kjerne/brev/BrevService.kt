@@ -308,12 +308,13 @@ class BrevService(
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
 
         val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
-        val brevperioder = vedtaksperioder.mapNotNull {
-            it.lagBrevPeriode(
-                grunnlagForBegrunnelse = grunnlagForBegrunnelser,
-                landkoder = integrasjonClient.hentLandkoderISO2(),
-            )
-        }
+        val brevperioder =
+            vedtaksperioder.mapNotNull {
+                it.lagBrevPeriode(
+                    grunnlagForBegrunnelse = grunnlagForBegrunnelser,
+                    landkoder = integrasjonClient.hentLandkoderISO2(),
+                )
+            }
 
         val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(vedtak.behandling.id)
         val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(vedtak.behandling.id)

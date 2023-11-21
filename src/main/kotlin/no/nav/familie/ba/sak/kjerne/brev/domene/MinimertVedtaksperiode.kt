@@ -26,10 +26,10 @@ fun VedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
         fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
         begrunnelser = this.begrunnelser.map { it.standardbegrunnelse },
         eøsBegrunnelser =
-        this.eøsBegrunnelser.mapNotNull {
-            it.begrunnelse.tilEØSBegrunnelseMedTriggere(
-                sanityEØSBegrunnelser,
-            )
-        },
+            this.eøsBegrunnelser.mapNotNull {
+                it.begrunnelse.tilEØSBegrunnelseMedTriggere(
+                    sanityEØSBegrunnelser,
+                )
+            },
     )
 }

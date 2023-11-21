@@ -23,11 +23,9 @@ fun RestPerson.tilMinimertPerson() =
         type = this.type,
     )
 
-
 fun Person.tilMinimertPerson() =
     MinimertRestPerson(
         personIdent = this.aktør.aktivFødselsnummer(),
         fødselsdato = this.fødselsdato,
         type = this.type,
     )
-

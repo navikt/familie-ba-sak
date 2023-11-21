@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 class BrevPeriodeUtilTest {
-
     @Test
     fun `Skal plukke ut kompetansene i perioden`() {
         val barnAktør1 = Aktør(aktørId = "1111111111111")
@@ -45,4 +44,3 @@ class BrevPeriodeUtilTest {
         )
     }
 }
-

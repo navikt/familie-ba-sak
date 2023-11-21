@@ -52,21 +52,21 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                            vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                                vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
-                            vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                                vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
+                            ),
                         ),
-                    ),
                 ),
             )
 
@@ -104,19 +104,19 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                            ),
                         ),
-                    ),
                 ),
             )
 
@@ -155,19 +155,19 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                            ),
                         ),
-                    ),
                 ),
             )
 
@@ -220,19 +220,19 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                            ),
                         ),
-                    ),
                 ),
             )
 
@@ -274,33 +274,33 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                            ),
                         ),
-                    ),
                 ),
             )
 
@@ -357,33 +357,33 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                            ),
                         ),
-                    ),
                 ),
             )
 
@@ -441,33 +441,33 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                            ),
                         ),
-                    ),
                 ),
             )
 
@@ -525,33 +525,33 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                            ),
                         ),
-                    ),
                 ),
             )
 
@@ -608,33 +608,33 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                            ),
                         ),
-                    ),
                 ),
             )
 
