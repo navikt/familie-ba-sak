@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
@@ -143,14 +144,54 @@ internal class BrevUtilsTest {
     }
 
     @Test
+    fun `hentHjemmeltekst skal inkludere hjemmel for fritekst`() {
+        val vedtaksperiodeMedBegrunnelser =
+            lagVedtaksperiodeMedBegrunnelser(
+                begrunnelser =
+                mutableSetOf(
+                    lagVedtaksbegrunnelse(
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                    ),
+                ),
+            )
+
+        vedtaksperiodeMedBegrunnelser.fritekster.add(
+            VedtaksbegrunnelseFritekst(
+                fritekst = "Dette er en fritekst",
+                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser
+            )
+        )
+
+        Assertions.assertEquals(
+            "barnetrygdloven §§ 2, 4, 10 og 11",
+            hentHjemmeltekst(
+                vedtaksperioder = listOf(vedtaksperiodeMedBegrunnelser),
+                standardbegrunnelseTilSanityBegrunnelse =
+                mapOf(
+                    Standardbegrunnelse.INNVILGET_SATSENDRING to
+                        lagSanityBegrunnelse(
+                            apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                            hjemler = listOf("10"),
+                        ),
+                ),
+                eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
+                opplysningspliktHjemlerSkalMedIBrev = false,
+                målform = Målform.NB,
+                refusjonEøsHjemmelSkalMedIBrev = false,
+                erFritekstIBrev = vedtaksperiodeMedBegrunnelser.fritekster.isNotEmpty()
+            ),
+        )
+    }
+
+    @Test
     fun `hentHjemmeltekst skal inkludere hjemmel 17 og 18 hvis opplysningsplikt ikke er oppfylt`() {
         val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        mutableSetOf(
-                            lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                    mutableSetOf(
+                        lagVedtaksbegrunnelse(
+                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                             ),
                         ),
                 ),
