@@ -51,12 +51,12 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                            vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                                vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -74,18 +74,18 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 vedtaksperioder = vedtaksperioderMedBegrunnelser,
                 standardbegrunnelseTilSanityBegrunnelse =
-                mapOf(
-                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
-                        lagSanityBegrunnelse(
-                            apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                            hjemler = listOf("11", "4", "2", "10"),
-                        ),
-                    Standardbegrunnelse.INNVILGET_SATSENDRING to
-                        lagSanityBegrunnelse(
-                            apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                            hjemler = listOf("10"),
-                        ),
-                ),
+                    mapOf(
+                        Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                            lagSanityBegrunnelse(
+                                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                                hjemler = listOf("11", "4", "2", "10"),
+                            ),
+                        Standardbegrunnelse.INNVILGET_SATSENDRING to
+                            lagSanityBegrunnelse(
+                                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                                hjemler = listOf("10"),
+                            ),
+                    ),
                 eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = false,
@@ -100,11 +100,11 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -121,18 +121,18 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 vedtaksperioder = vedtaksperioderMedBegrunnelser,
                 standardbegrunnelseTilSanityBegrunnelse =
-                mapOf(
-                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
-                        lagSanityBegrunnelse(
-                            apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                            hjemler = listOf("11", "4", "2", "10"),
-                        ),
-                    Standardbegrunnelse.INNVILGET_SATSENDRING to
-                        lagSanityBegrunnelse(
-                            apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                            hjemler = listOf("10"),
-                        ),
-                ),
+                    mapOf(
+                        Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                            lagSanityBegrunnelse(
+                                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                                hjemler = listOf("11", "4", "2", "10"),
+                            ),
+                        Standardbegrunnelse.INNVILGET_SATSENDRING to
+                            lagSanityBegrunnelse(
+                                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                                hjemler = listOf("10"),
+                            ),
+                    ),
                 eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
@@ -148,11 +148,11 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -169,23 +169,23 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 vedtaksperioder = vedtaksperioderMedBegrunnelser,
                 standardbegrunnelseTilSanityBegrunnelse =
-                mapOf(
-                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
-                        lagSanityBegrunnelse(
-                            apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                            hjemler = listOf("11", "4", "2", "10"),
-                        ),
-                    Standardbegrunnelse.INNVILGET_SATSENDRING to
-                        lagSanityBegrunnelse(
-                            apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                            hjemler = listOf("10"),
-                        ),
-                ),
+                    mapOf(
+                        Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                            lagSanityBegrunnelse(
+                                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                                hjemler = listOf("11", "4", "2", "10"),
+                            ),
+                        Standardbegrunnelse.INNVILGET_SATSENDRING to
+                            lagSanityBegrunnelse(
+                                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                                hjemler = listOf("10"),
+                            ),
+                    ),
                 eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
                 opplysningspliktHjemlerSkalMedIBrev = true,
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false
+                erFritekstIBrev = false,
             ),
         )
     }
@@ -201,7 +201,7 @@ internal class BrevUtilsTest {
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = true,
-                erFritekstIBrev = false
+                erFritekstIBrev = false,
             ),
         )
     }
@@ -212,11 +212,11 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -263,18 +263,18 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -332,7 +332,7 @@ internal class BrevUtilsTest {
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false
+                erFritekstIBrev = false,
             ),
         )
     }
@@ -343,18 +343,18 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -413,7 +413,7 @@ internal class BrevUtilsTest {
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false
+                erFritekstIBrev = false,
             ),
         )
     }
@@ -424,18 +424,18 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -494,7 +494,7 @@ internal class BrevUtilsTest {
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NN,
                 refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false
+                erFritekstIBrev = false,
             ),
         )
     }
@@ -505,18 +505,18 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -574,7 +574,7 @@ internal class BrevUtilsTest {
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NN,
                 refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false
+                erFritekstIBrev = false,
             ),
         )
     }
@@ -585,18 +585,18 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
                         ),
-                    ),
                     eøsBegrunnelser =
-                    mutableSetOf(
-                        EØSBegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = mockk(),
-                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                        mutableSetOf(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = mockk(),
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                            ),
                         ),
-                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -658,7 +658,7 @@ internal class BrevUtilsTest {
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NN,
                 refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false
+                erFritekstIBrev = false,
             ),
         )
     }

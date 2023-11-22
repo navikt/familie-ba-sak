@@ -98,8 +98,8 @@ fun hentHjemmeltekst(
     val ordinæreHjemler =
         hentOrdinæreHjemler(
             hjemler =
-            (sanityStandardbegrunnelser.flatMap { it.hjemler } + sanityEøsBegrunnelser.flatMap { it.hjemler })
-                .toMutableSet(),
+                (sanityStandardbegrunnelser.flatMap { it.hjemler } + sanityEøsBegrunnelser.flatMap { it.hjemler })
+                    .toMutableSet(),
             opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev,
             finnesVedtaksperiodeMedFritekst = erFritekstIBrev,
         )
