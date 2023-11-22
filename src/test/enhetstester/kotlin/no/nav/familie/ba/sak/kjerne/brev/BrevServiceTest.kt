@@ -20,7 +20,6 @@ class BrevServiceTest {
             arbeidsfordelingService = mockk(),
             simuleringService = mockk(),
             vedtaksperiodeService = mockk(),
-            brevPeriodeService = mockk(),
             sanityService = mockk(),
             vilkårsvurderingService = mockk(),
             korrigertEtterbetalingService = mockk(),
@@ -29,7 +28,6 @@ class BrevServiceTest {
             saksbehandlerContext = saksbehandlerContext,
             brevmalService = brevmalService,
             refusjonEøsRepository = mockk(),
-            unleashNext = mockk(),
             integrasjonClient = mockk(),
         )
 

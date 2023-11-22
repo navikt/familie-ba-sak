@@ -4,11 +4,8 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityEøsBegrunnelse
-import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
-import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.config.testSanityKlient
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -53,25 +50,23 @@ internal class BrevUtilsTest {
     fun `hentHjemmeltekst skal returnere sorterte hjemler`() {
         val utvidetVedtaksperioderMedBegrunnelser =
             listOf(
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                                 vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
                                 vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
             )
 
@@ -81,7 +76,6 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder =
                     utvidetVedtaksperioderMedBegrunnelser.map {
                         it.tilMinimertVedtaksperiode(
-                            testSanityKlient.hentBegrunnelserMap(),
                             emptyMap(),
                         )
                     },
@@ -108,23 +102,21 @@ internal class BrevUtilsTest {
     fun `hentHjemmeltekst skal ikke inkludere hjemmel 17 og 18 hvis opplysningsplikt er oppfylt`() {
         val utvidetVedtaksperioderMedBegrunnelser =
             listOf(
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
             )
 
@@ -134,7 +126,6 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder =
                     utvidetVedtaksperioderMedBegrunnelser.map {
                         it.tilMinimertVedtaksperiode(
-                            sanityBegrunnelser = testSanityKlient.hentBegrunnelserMap(),
                             sanityEØSBegrunnelser = emptyMap(),
                         )
                     },
@@ -162,23 +153,21 @@ internal class BrevUtilsTest {
     fun `hentHjemmeltekst skal inkludere hjemmel 17 og 18 hvis opplysningsplikt ikke er oppfylt`() {
         val utvidetVedtaksperioderMedBegrunnelser =
             listOf(
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
             )
 
@@ -188,7 +177,6 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder =
                     utvidetVedtaksperioderMedBegrunnelser.map {
                         it.tilMinimertVedtaksperiode(
-                            sanityBegrunnelser = testSanityKlient.hentBegrunnelserMap(),
                             sanityEØSBegrunnelser = emptyMap(),
                         )
                     },
@@ -230,23 +218,21 @@ internal class BrevUtilsTest {
     fun `Skal gi riktig hjemmeltekst ved hjemler både fra barnetrygdloven og folketrygdloven`() {
         val utvidetVedtaksperioderMedBegrunnelser =
             listOf(
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
             )
 
@@ -271,7 +257,6 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder =
                     utvidetVedtaksperioderMedBegrunnelser.map {
                         it.tilMinimertVedtaksperiode(
-                            sanityBegrunnelser = sanityBegrunnelser,
                             sanityEØSBegrunnelser = emptyMap(),
                         )
                     },
@@ -287,37 +272,35 @@ internal class BrevUtilsTest {
     fun `Skal gi riktig formattering ved hjemler fra barnetrygdloven og 2 EØS-forordninger`() {
         val utvidetVedtaksperioderMedBegrunnelser =
             listOf(
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                             ),
                         ),
                     eøsBegrunnelser =
-                        listOf(
+                        mutableSetOf(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = mockk(),
                                 begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
                             ),
                         ),
                     eøsBegrunnelser =
-                        listOf(
+                        mutableSetOf(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = mockk(),
                                 begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
             )
 
@@ -357,7 +340,6 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder =
                     utvidetVedtaksperioderMedBegrunnelser.map {
                         it.tilMinimertVedtaksperiode(
-                            sanityBegrunnelser = sanityBegrunnelser,
                             sanityEØSBegrunnelser = sanityEøsBegrunnelser,
                         )
                     },
@@ -373,37 +355,35 @@ internal class BrevUtilsTest {
     fun `Skal gi riktig formattering ved hjemler fra Separasjonsavtale og to EØS-forordninger`() {
         val utvidetVedtaksperioderMedBegrunnelser =
             listOf(
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                             ),
                         ),
                     eøsBegrunnelser =
-                        listOf(
+                        mutableSetOf(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = mockk(),
                                 begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
                             ),
                         ),
                     eøsBegrunnelser =
-                        listOf(
+                        mutableSetOf(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = mockk(),
                                 begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
             )
 
@@ -444,7 +424,6 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder =
                     utvidetVedtaksperioderMedBegrunnelser.map {
                         it.tilMinimertVedtaksperiode(
-                            sanityBegrunnelser = sanityBegrunnelser,
                             sanityEØSBegrunnelser = sanityEøsBegrunnelser,
                         )
                     },
@@ -460,37 +439,35 @@ internal class BrevUtilsTest {
     fun `Skal gi riktig formattering ved nynorsk og hjemler fra Separasjonsavtale og to EØS-forordninger`() {
         val utvidetVedtaksperioderMedBegrunnelser =
             listOf(
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                             ),
                         ),
                     eøsBegrunnelser =
-                        listOf(
+                        mutableSetOf(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = mockk(),
                                 begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
                             ),
                         ),
                     eøsBegrunnelser =
-                        listOf(
+                        mutableSetOf(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = mockk(),
                                 begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
             )
 
@@ -531,7 +508,6 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder =
                     utvidetVedtaksperioderMedBegrunnelser.map {
                         it.tilMinimertVedtaksperiode(
-                            sanityBegrunnelser = sanityBegrunnelser,
                             sanityEØSBegrunnelser = sanityEøsBegrunnelser,
                         )
                     },
@@ -547,37 +523,35 @@ internal class BrevUtilsTest {
     fun `Skal slå sammen hjemlene riktig når det er 3 eller flere hjemler på 'siste' hjemmeltype`() {
         val utvidetVedtaksperioderMedBegrunnelser =
             listOf(
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                             ),
                         ),
                     eøsBegrunnelser =
-                        listOf(
+                        mutableSetOf(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = mockk(),
                                 begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
                             ),
                         ),
                     eøsBegrunnelser =
-                        listOf(
+                        mutableSetOf(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = mockk(),
                                 begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
             )
 
@@ -617,7 +591,6 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder =
                     utvidetVedtaksperioderMedBegrunnelser.map {
                         it.tilMinimertVedtaksperiode(
-                            sanityBegrunnelser = sanityBegrunnelser,
                             sanityEØSBegrunnelser = sanityEøsBegrunnelser,
                         )
                     },
@@ -633,37 +606,35 @@ internal class BrevUtilsTest {
     fun `Skal kun ta med en hjemmel 1 gang hvis flere begrunnelser er knyttet til samme hjemmel`() {
         val utvidetVedtaksperioderMedBegrunnelser =
             listOf(
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                             ),
                         ),
                     eøsBegrunnelser =
-                        listOf(
+                        mutableSetOf(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = mockk(),
                                 begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
-                lagUtvidetVedtaksperiodeMedBegrunnelser(
+                lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        listOf(
+                        mutableSetOf(
                             lagVedtaksbegrunnelse(
                                 standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
                             ),
                         ),
                     eøsBegrunnelser =
-                        listOf(
+                        mutableSetOf(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = mockk(),
                                 begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
                             ),
                         ),
-                    utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
                 ),
             )
 
@@ -707,7 +678,6 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder =
                     utvidetVedtaksperioderMedBegrunnelser.map {
                         it.tilMinimertVedtaksperiode(
-                            sanityBegrunnelser = sanityBegrunnelser,
                             sanityEØSBegrunnelser = sanityEøsBegrunnelser,
                         )
                     },

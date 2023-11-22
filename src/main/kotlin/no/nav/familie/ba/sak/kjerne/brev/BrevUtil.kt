@@ -90,7 +90,7 @@ fun hentHjemmeltekst(
     val sanityStandardbegrunnelser =
         minimerteVedtaksperioder.flatMap { vedtaksperiode ->
             vedtaksperiode.begrunnelser.mapNotNull { begrunnelse ->
-                sanityBegrunnelser[begrunnelse.standardbegrunnelse]
+                sanityBegrunnelser[begrunnelse]
             }
         }
 

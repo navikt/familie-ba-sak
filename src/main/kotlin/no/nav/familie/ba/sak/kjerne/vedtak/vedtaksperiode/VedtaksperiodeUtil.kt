@@ -8,21 +8,11 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtaksperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.endretUtbetalingsperiodeBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentUtbetalingsperiodeDetaljer
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
@@ -174,151 +164,6 @@ private fun utledTom(
     gammeltSegment: LocalDateSegment<Int>,
     overlappendePeriode: LocalDateSegment<Int>,
 ) = if (gammeltSegment.tom > overlappendePeriode.tom) overlappendePeriode.tom else gammeltSegment.tom
-
-fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
-    minimertVedtaksperiode: MinimertVedtaksperiode,
-    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
-    minimertePersoner: List<MinimertPerson>,
-    minimertePersonresultater: List<MinimertRestPersonResultat>,
-    aktørIderMedUtbetaling: List<String>,
-    minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
-    erFørsteVedtaksperiodePåFagsak: Boolean,
-    ytelserForSøkerForrigeMåned: List<YtelseType>,
-    ytelserForrigePerioder: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-): List<Standardbegrunnelse> {
-    val tillateBegrunnelserForVedtakstype =
-        Standardbegrunnelse.entries
-            .filter {
-                minimertVedtaksperiode.type.tillatteBegrunnelsestyper.contains(it.vedtakBegrunnelseType)
-            }.filter {
-                if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
-                    endretUtbetalingsperiodeBegrunnelser.contains(it)
-                } else {
-                    true
-                }
-            }
-
-    return when (minimertVedtaksperiode.type) {
-        Vedtaksperiodetype.FORTSATT_INNVILGET,
-        Vedtaksperiodetype.AVSLAG,
-        -> tillateBegrunnelserForVedtakstype
-
-        Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING ->
-            velgRedusertBegrunnelser(
-                tillateBegrunnelserForVedtakstype,
-                sanityBegrunnelser,
-                minimertVedtaksperiode,
-                minimertePersonresultater,
-                minimertePersoner,
-                aktørIderMedUtbetaling,
-                minimerteEndredeUtbetalingAndeler,
-                erFørsteVedtaksperiodePåFagsak,
-                ytelserForSøkerForrigeMåned,
-                ytelserForrigePerioder,
-            )
-
-        else -> {
-            velgUtbetalingsbegrunnelser(
-                tillateBegrunnelserForVedtakstype,
-                sanityBegrunnelser,
-                minimertVedtaksperiode,
-                minimertePersonresultater,
-                minimertePersoner,
-                aktørIderMedUtbetaling,
-                minimerteEndredeUtbetalingAndeler,
-                erFørsteVedtaksperiodePåFagsak,
-                ytelserForSøkerForrigeMåned,
-                ytelserForrigePerioder,
-            )
-        }
-    }
-}
-
-private fun velgRedusertBegrunnelser(
-    tillateBegrunnelserForVedtakstype: List<Standardbegrunnelse>,
-    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
-    minimertVedtaksperiode: MinimertVedtaksperiode,
-    minimertePersonresultater: List<MinimertRestPersonResultat>,
-    minimertePersoner: List<MinimertPerson>,
-    aktørIderMedUtbetaling: List<String>,
-    minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
-    erFørsteVedtaksperiodePåFagsak: Boolean,
-    ytelserForSøkerForrigeMåned: List<YtelseType>,
-    ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-): List<Standardbegrunnelse> {
-    val redusertBegrunnelser =
-        tillateBegrunnelserForVedtakstype.filter {
-            sanityBegrunnelser[it]?.triggesAv?.gjelderFraInnvilgelsestidspunkt ?: false
-        }
-    if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
-        val utbetalingsbegrunnelser =
-            velgUtbetalingsbegrunnelser(
-                Standardbegrunnelse.entries,
-                sanityBegrunnelser,
-                minimertVedtaksperiode,
-                minimertePersonresultater,
-                minimertePersoner,
-                aktørIderMedUtbetaling,
-                minimerteEndredeUtbetalingAndeler,
-                erFørsteVedtaksperiodePåFagsak,
-                ytelserForSøkerForrigeMåned,
-                ytelserForrigePeriode,
-            )
-        return redusertBegrunnelser + utbetalingsbegrunnelser
-    }
-    return redusertBegrunnelser
-}
-
-private fun velgUtbetalingsbegrunnelser(
-    tillateBegrunnelserForVedtakstype: List<Standardbegrunnelse>,
-    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
-    minimertVedtaksperiode: MinimertVedtaksperiode,
-    minimertePersonresultater: List<MinimertRestPersonResultat>,
-    minimertePersoner: List<MinimertPerson>,
-    aktørIderMedUtbetaling: List<String>,
-    minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
-    erFørsteVedtaksperiodePåFagsak: Boolean,
-    ytelserForSøkerForrigeMåned: List<YtelseType>,
-    ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-): List<Standardbegrunnelse> {
-    val standardbegrunnelser: MutableSet<Standardbegrunnelse> =
-        tillateBegrunnelserForVedtakstype.filter { !it.vedtakBegrunnelseType.erFortsattInnvilget() }
-            .filter { sanityBegrunnelser[it]?.triggesAv?.valgbar ?: false }
-            .fold(mutableSetOf()) { acc, standardBegrunnelse ->
-                if (standardBegrunnelse.triggesForPeriode(
-                        minimertVedtaksperiode = minimertVedtaksperiode,
-                        minimertePersonResultater = minimertePersonresultater,
-                        minimertePersoner = minimertePersoner,
-                        aktørIderMedUtbetaling = aktørIderMedUtbetaling,
-                        minimerteEndredeUtbetalingAndeler = minimerteEndredeUtbetalingAndeler,
-                        sanityBegrunnelser = sanityBegrunnelser,
-                        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-                        ytelserForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
-                        ytelserForrigePeriode = ytelserForrigePeriode,
-                    )
-                ) {
-                    acc.add(standardBegrunnelse)
-                }
-
-                acc
-            }
-
-    val fantIngenbegrunnelserOgSkalDerforBrukeFortsattInnvilget =
-        minimertVedtaksperiode.type == Vedtaksperiodetype.UTBETALING && standardbegrunnelser.isEmpty()
-
-    return if (fantIngenbegrunnelserOgSkalDerforBrukeFortsattInnvilget) {
-        tillateBegrunnelserForVedtakstype.filter { it.vedtakBegrunnelseType.erFortsattInnvilget() }
-    } else {
-        standardbegrunnelser.toList()
-    }
-}
-
-fun hentYtelserForSøkerForrigeMåned(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
-) = andelerTilkjentYtelse.filter {
-    it.type.erKnyttetTilSøker() && ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelser)
-}.map { it.type }
 
 fun ytelseErFraForrigePeriode(
     ytelse: AndelTilkjentYtelseMedEndreteUtbetalinger,
