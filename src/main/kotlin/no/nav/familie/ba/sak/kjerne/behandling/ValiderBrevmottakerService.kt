@@ -60,9 +60,9 @@ class ValiderBrevmottakerService(
 
         if (strengtFortroligePersonIdenter.isNotEmpty()) {
             val melding =
-                "Brev på fagsak $fagsakId inneholder person med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere (${manuelleBrevmottakere.size} stk)."
+                "Brev på fagsak $fagsakId inneholder person med strengt fortrolig adressebeskyttelse og kan ikke sendes til manuelle brevmottakere (${manuelleBrevmottakere.size} stk)."
             val frontendFeilmelding =
-                "Brevet inneholder personer med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere."
+                "Brevet inneholder personer med strengt fortrolig adressebeskyttelse og kan ikke sendes til manuelle brevmottakere."
             throw FunksjonellFeil(melding, frontendFeilmelding)
         }
     }
