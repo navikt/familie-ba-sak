@@ -377,10 +377,9 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
     val sanityBegrunnelse = sanityBegrunnelser[vedtakBegrunnelse] ?: return emptyList()
 
-    val triggesAv = sanityBegrunnelse.triggesAv
     val visningsnavn = sanityBegrunnelse.navnISystem
 
-    return if (triggesAv.vilkår.isEmpty()) {
+    return if (sanityBegrunnelse.vilkår.isEmpty()) {
         listOf(
             RestVedtakBegrunnelseTilknyttetVilkår(
                 id = vedtakBegrunnelse.enumnavnTilString(),
@@ -389,7 +388,7 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
             ),
         )
     } else {
-        triggesAv.vilkår.map {
+        sanityBegrunnelse.vilkår.map {
             RestVedtakBegrunnelseTilknyttetVilkår(
                 id = vedtakBegrunnelse.enumnavnTilString(),
                 navn = visningsnavn,

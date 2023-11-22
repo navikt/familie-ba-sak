@@ -47,10 +47,6 @@ data class RestSanityBegrunnelse(
         return SanityBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
-            vilkaar =
-                vilkaar?.mapNotNull {
-                    it.finnEnumverdi<SanityVilkår>(apiNavn)
-                } ?: emptyList(),
             vilkår =
                 vilkaar?.mapNotNull {
                     it.finnEnumverdi<SanityVilkår>(apiNavn)
@@ -220,24 +216,3 @@ enum class Tema {
     EØS,
     FELLES,
 }
-
-fun SanityBegrunnelse.inneholderVilkår(vilkår: SanityVilkår) =
-    this.vilkaar.contains(vilkår)
-
-fun SanityBegrunnelse.inneholderØvrigTrigger(øvrigTrigger: ØvrigTrigger) =
-    this.ovrigeTriggere.contains(øvrigTrigger)
-
-fun SanityBegrunnelse.inneholderLovligOppholdTrigger(vilkårTrigger: VilkårTrigger) =
-    this.lovligOppholdTriggere.contains(vilkårTrigger)
-
-fun SanityBegrunnelse.inneholderBosattIRiketTrigger(vilkårTrigger: VilkårTrigger) =
-    this.bosattIRiketTriggere.contains(vilkårTrigger)
-
-fun SanityBegrunnelse.inneholderGiftPartnerskapTrigger(vilkårTrigger: VilkårTrigger) =
-    this.giftPartnerskapTriggere.contains(vilkårTrigger)
-
-fun SanityBegrunnelse.inneholderBorMedSøkerTrigger(vilkårTrigger: VilkårTrigger) =
-    this.borMedSokerTriggere.contains(vilkårTrigger)
-
-fun SanityBegrunnelse.inneholderUtvidetBarnetrygdTrigger(utvidetBarnetrygdTrigger: UtvidetBarnetrygdTrigger) =
-    this.utvidetBarnetrygdTriggere.contains(utvidetBarnetrygdTrigger)
