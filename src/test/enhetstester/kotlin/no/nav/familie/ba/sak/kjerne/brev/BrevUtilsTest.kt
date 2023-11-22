@@ -148,18 +148,18 @@ internal class BrevUtilsTest {
         val vedtaksperiodeMedBegrunnelser =
             lagVedtaksperiodeMedBegrunnelser(
                 begrunnelser =
-                mutableSetOf(
-                    lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                    mutableSetOf(
+                        lagVedtaksbegrunnelse(
+                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                        ),
                     ),
-                ),
             )
 
         vedtaksperiodeMedBegrunnelser.fritekster.add(
             VedtaksbegrunnelseFritekst(
                 fritekst = "Dette er en fritekst",
-                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser
-            )
+                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            ),
         )
 
         Assertions.assertEquals(
@@ -167,18 +167,18 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 vedtaksperioder = listOf(vedtaksperiodeMedBegrunnelser),
                 standardbegrunnelseTilSanityBegrunnelse =
-                mapOf(
-                    Standardbegrunnelse.INNVILGET_SATSENDRING to
-                        lagSanityBegrunnelse(
-                            apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                            hjemler = listOf("10"),
-                        ),
-                ),
+                    mapOf(
+                        Standardbegrunnelse.INNVILGET_SATSENDRING to
+                            lagSanityBegrunnelse(
+                                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                                hjemler = listOf("10"),
+                            ),
+                    ),
                 eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = vedtaksperiodeMedBegrunnelser.fritekster.isNotEmpty()
+                erFritekstIBrev = vedtaksperiodeMedBegrunnelser.fritekster.isNotEmpty(),
             ),
         )
     }
@@ -189,9 +189,9 @@ internal class BrevUtilsTest {
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                    mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                             ),
                         ),
                 ),
