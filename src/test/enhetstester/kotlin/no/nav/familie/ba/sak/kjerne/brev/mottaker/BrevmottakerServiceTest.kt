@@ -252,7 +252,7 @@ internal class BrevmottakerServiceTest {
         mottakerType: MottakerType,
         poststed: String = "Oslo",
         landkode: String = "NO",
-    ) = Brevmottaker(
+    ) = BrevmottakerDb(
         behandlingId = 1,
         type = mottakerType,
         navn = "John Doe",
