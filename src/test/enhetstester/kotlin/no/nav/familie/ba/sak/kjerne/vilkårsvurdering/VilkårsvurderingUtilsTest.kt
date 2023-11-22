@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfallFraPdl
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -198,7 +197,7 @@ class VilkårsvurderingUtilsTest {
             mapOf(
                 Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
                     SanityBegrunnelse(
-                        vilkaar = emptyList(),
+                        vilkår = emptySet(),
                         apiNavn = "innvilgetBosattIRiket",
                         navnISystem = "",
                     ),
@@ -217,7 +216,7 @@ class VilkårsvurderingUtilsTest {
             mapOf(
                 Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
                     SanityBegrunnelse(
-                        vilkaar = listOf(SanityVilkår.BOSATT_I_RIKET, SanityVilkår.LOVLIG_OPPHOLD),
+                        vilkår = setOf(Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD),
                         apiNavn = "innvilgetBosattIRiket",
                         navnISystem = "",
                     ),

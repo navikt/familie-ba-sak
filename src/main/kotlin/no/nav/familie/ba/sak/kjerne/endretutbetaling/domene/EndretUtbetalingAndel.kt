@@ -17,12 +17,9 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
-import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
@@ -144,16 +141,6 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     this.person = person
     return this
 }
-
-fun hentPersonerForEtterEndretUtbetalingsperiode(
-    minimerteEndredeUtbetalingAndeler: List<MinimertRestEndretAndel>,
-    fom: LocalDate?,
-    endringsaarsaker: Set<Årsak>,
-) = minimerteEndredeUtbetalingAndeler.filter { endretUtbetalingAndel ->
-    endretUtbetalingAndel.periode.tom.sisteDagIInneværendeMåned()
-        .erDagenFør(fom) &&
-        endringsaarsaker.contains(endretUtbetalingAndel.årsak)
-}.map { it.personIdent }
 
 sealed interface IEndretUtbetalingAndel
 

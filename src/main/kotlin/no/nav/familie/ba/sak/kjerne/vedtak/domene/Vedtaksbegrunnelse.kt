@@ -13,13 +13,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
-import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.common.erDagenFør
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
@@ -146,36 +140,4 @@ data class EØSBegrunnelseDataUtenKompetanse(
     val gjelderSoker: Boolean,
 ) : EØSBegrunnelseData() {
     override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
-}
-
-enum class SøkersRettTilUtvidet {
-    SØKER_FÅR_UTVIDET,
-    SØKER_HAR_RETT_MEN_FÅR_IKKE,
-    SØKER_HAR_IKKE_RETT,
-    ;
-
-    fun tilSanityFormat() =
-        when (this) {
-            SØKER_FÅR_UTVIDET -> "sokerFaarUtvidet"
-            SØKER_HAR_RETT_MEN_FÅR_IKKE -> "sokerHarRettMenFaarIkke"
-            SØKER_HAR_IKKE_RETT -> "sokerHarIkkeRett"
-        }
-}
-
-fun IVedtakBegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
-    minimerteRestEndredeAndeler: List<MinimertRestEndretAndel>,
-    vedtaksperiode: NullablePeriode,
-) = when (this.vedtakBegrunnelseType) {
-    VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> {
-        minimerteRestEndredeAndeler.filter {
-            it.periode.tom.sisteDagIInneværendeMåned()
-                ?.erDagenFør(vedtaksperiode.fom?.førsteDagIInneværendeMåned()) == true
-        }
-    }
-
-    VedtakBegrunnelseType.ENDRET_UTBETALING -> {
-        minimerteRestEndredeAndeler.filter { it.erOverlappendeMed(vedtaksperiode.tilNullableMånedPeriode()) }
-    }
-
-    else -> emptyList()
 }

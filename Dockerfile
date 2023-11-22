@@ -1,4 +1,4 @@
-FROM ghcr.io/navikt/baseimages/temurin:17
+FROM ghcr.io/navikt/baseimages/temurin:21
 
 ENV APPD_ENABLED=true
 ENV APP_NAME=familie-ba-sak
