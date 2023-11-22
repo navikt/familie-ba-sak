@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -52,10 +53,11 @@ internal class DokumentServiceTest {
     val organisasjonService = mockk<OrganisasjonService>(relaxed = true)
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>(relaxed = true)
     val personidentService = mockk<PersonidentService>()
+    val brevmottakerRepository = mockk<BrevmottakerRepository>()
     val brevmottakerService =
         spyk<BrevmottakerService>(
             BrevmottakerService(
-                brevmottakerRepository = mockk(),
+                brevmottakerRepository = brevmottakerRepository,
                 loggService = mockk(),
                 personidentService = personidentService,
                 personopplysningerService = mockk(),
@@ -116,6 +118,7 @@ internal class DokumentServiceTest {
                     organisasjonsnummer = brukerId,
                     navn = "Testinstitusjon",
                 )
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
             runCatching {
                 dokumentService.sendManueltBrev(
@@ -164,6 +167,7 @@ internal class DokumentServiceTest {
 
             every { journalføringRepository.save(any()) } returns
                 DbJournalpost(behandling = behandling, journalpostId = "id")
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
             sendBrev(brevmal, behandling)
 
@@ -202,6 +206,7 @@ internal class DokumentServiceTest {
 
             every { journalføringRepository.save(any()) } returns
                 DbJournalpost(behandling = behandling, journalpostId = "id")
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
             sendBrev(brevmal, behandling)
 
@@ -233,6 +238,7 @@ internal class DokumentServiceTest {
             every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns vilkårsvurdering
             every { journalføringRepository.save(any()) } returns
                 DbJournalpost(behandling = behandling, journalpostId = "id")
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
             sendBrev(brevmal, behandling)
 
