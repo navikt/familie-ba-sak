@@ -124,7 +124,7 @@ fun Behandling.validerRekkefølgeOgUnikhetPåSteg(): Boolean {
             (
                 forrigeBehandlingStegTilstand!!.behandlingSteg.rekkefølge != it.behandlingSteg.rekkefølge ||
                     forrigeBehandlingStegTilstand!!.behandlingSteg == it.behandlingSteg
-                )
+            )
         ) {
             throw Feil("Rekkefølge på steg registrert på behandling $id er feil eller redundante.")
         }
