@@ -36,7 +36,7 @@ class BrevmottakerService(
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
             behandlingId = behandlingId,
             nyBrevmottaker = brevmottaker,
-            barnLagtTilIBrev = emptyList(),
+            ekstraBarnLagtTilIBrev = emptyList(),
         )
 
         loggService.opprettBrevmottakerLogg(
@@ -91,12 +91,12 @@ class BrevmottakerService(
                 .zeroSingleOrThrow {
                     FunksjonellFeil("Mottakerfeil: Det er registrert mer enn en utenlandsk adresse tilhørende bruker")
                 }?.let {
-                    lagMottakerInfoMedBrukerId(
-                        brukerId = søkersident,
-                        navn = søkersnavn,
-                        manuellAdresseInfo = lagManuellAdresseInfo(it),
-                    )
-                }
+                lagMottakerInfoMedBrukerId(
+                    brukerId = søkersident,
+                    navn = søkersnavn,
+                    manuellAdresseInfo = lagManuellAdresseInfo(it),
+                )
+            }
 
         // brev sendes til brukers (manuelt) registerte adresse (i utlandet)
         val bruker = manuellAdresseUtenlands ?: lagMottakerInfoMedBrukerId(brukerId = søkersident, navn = søkersnavn)
@@ -107,8 +107,8 @@ class BrevmottakerService(
                 .zeroSingleOrThrow {
                     FunksjonellFeil("Mottakerfeil: ${first().type.visningsnavn} kan ikke kombineres med ${last().type.visningsnavn}")
                 }?.let {
-                    lagMottakerInfoUtenBrukerId(navn = it.navn, manuellAdresseInfo = lagManuellAdresseInfo(it))
-                }
+                lagMottakerInfoUtenBrukerId(navn = it.navn, manuellAdresseInfo = lagManuellAdresseInfo(it))
+            }
 
         return listOfNotNull(bruker, manuellTilleggsmottaker)
     }

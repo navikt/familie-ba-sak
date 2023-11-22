@@ -20,7 +20,7 @@ class ValiderBrevmottakerService(
     fun validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
         behandlingId: Long,
         nyBrevmottaker: BrevmottakerDb? = null,
-        barnLagtTilIBrev: List<String>,
+        ekstraBarnLagtTilIBrev: List<String>,
     ) {
         var brevmottakere = brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId)
         nyBrevmottaker?.let {
@@ -36,7 +36,7 @@ class ValiderBrevmottakerService(
                 ?: return
         val strengtFortroligePersonIdenter =
             familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
-                (personIdenter + barnLagtTilIBrev).toSet().toList(),
+                (personIdenter + ekstraBarnLagtTilIBrev).toSet().toList(),
             )
         if (strengtFortroligePersonIdenter.isNotEmpty()) {
             val melding = "Behandlingen (id: $behandlingId) inneholder ${strengtFortroligePersonIdenter.size} person(er) med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere (${brevmottakere.size} stk)."

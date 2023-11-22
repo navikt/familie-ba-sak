@@ -48,7 +48,7 @@ class ValiderBrevmottakerServiceTest {
 
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
             behandlingId,
-            barnLagtTilIBrev = emptyList(),
+            ekstraBarnLagtTilIBrev = emptyList(),
         )
 
         verify(exactly = 1) { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) }
@@ -76,7 +76,7 @@ class ValiderBrevmottakerServiceTest {
         assertThatThrownBy {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
                 behandlingId,
-                barnLagtTilIBrev = emptyList(),
+                ekstraBarnLagtTilIBrev = emptyList(),
             )
         }.isInstanceOf(FunksjonellFeil::class.java).hasMessageContaining("strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere")
     }
@@ -93,7 +93,7 @@ class ValiderBrevmottakerServiceTest {
 
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
             behandlingId,
-            barnLagtTilIBrev = emptyList(),
+            ekstraBarnLagtTilIBrev = emptyList(),
         )
         verify(exactly = 1) {
             familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
@@ -117,7 +117,7 @@ class ValiderBrevmottakerServiceTest {
 
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
             behandlingId,
-            barnLagtTilIBrev = emptyList(),
+            ekstraBarnLagtTilIBrev = emptyList(),
         )
     }
 
@@ -138,7 +138,7 @@ class ValiderBrevmottakerServiceTest {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
                 behandlingId,
                 brevmottaker,
-                barnLagtTilIBrev = emptyList(),
+                ekstraBarnLagtTilIBrev = emptyList(),
             )
         }.isInstanceOf(FunksjonellFeil::class.java).hasMessageContaining("strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere")
     }
