@@ -12,12 +12,9 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -25,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -42,20 +38,13 @@ class VilkårsvurderingFlyttResultaterTest(
     @Autowired
     private val personidentService: PersonidentService,
     @Autowired
-    private val persongrunnlagService: PersongrunnlagService,
-    @Autowired
     private val vedtakService: VedtakService,
     @Autowired
     private val stegService: StegService,
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired
-    private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
-    @Autowired
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    @Autowired
     private val brevmalService: BrevmalService,
-    @Autowired private val unleashService: UnleashService,
 ) : AbstractSpringIntegrationTest() {
     @BeforeAll
     fun init() {
@@ -133,12 +122,8 @@ class VilkårsvurderingFlyttResultaterTest(
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
                 vedtaksperiodeService = vedtaksperiodeService,
-                endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
                 fagsakService = fagsakService,
-                persongrunnlagService = persongrunnlagService,
-                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
                 brevmalService = brevmalService,
-                unleashService = unleashService,
             )
 
         val vilkårsvurderingFraForrigeBehandlingFørNyRevurdering =
@@ -157,12 +142,8 @@ class VilkårsvurderingFlyttResultaterTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             fagsakService = fagsakService,
-            persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
-            unleashService = unleashService,
         )
 
         // Sjekker at vilkårsvurderingen fra forrige behandling ikke er endret
