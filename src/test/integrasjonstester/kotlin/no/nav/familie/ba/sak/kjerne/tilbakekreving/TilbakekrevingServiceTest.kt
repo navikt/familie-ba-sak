@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.Brevmottaker
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -167,7 +167,7 @@ class TilbakekrevingServiceTest(
             )
 
         val brevmottaker =
-            Brevmottaker(
+            BrevmottakerDb(
                 behandlingId = behandling.id,
                 type = arguments.second,
                 navn = "Donald Duck",
@@ -187,7 +187,7 @@ class TilbakekrevingServiceTest(
     }
 
     private fun assertBrevmottakerEquals(
-        expected: Brevmottaker,
+        expected: BrevmottakerDb,
         actual: TilbakekrevingBrevmottaker,
     ) {
         assertEquals(expected.navn, actual.navn)

@@ -7,9 +7,10 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.Brevmottaker
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -19,16 +20,18 @@ class ValiderBrevmottakerServiceTest {
     private val brevmottakerRepository = mockk<BrevmottakerRepository>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val familieIntegrasjonerTilgangskontrollService = mockk<FamilieIntegrasjonerTilgangskontrollService>()
+    private val fagsakRepository = mockk<FagsakRepository>()
     val validerBrevmottakerService =
         ValiderBrevmottakerService(
-            brevmottakerRepository,
-            persongrunnlagService,
-            familieIntegrasjonerTilgangskontrollService,
+            brevmottakerRepository = brevmottakerRepository,
+            persongrunnlagService = persongrunnlagService,
+            familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
+            fagsakRepository = fagsakRepository,
         )
 
     private val behandlingId = 0L
     val brevmottaker =
-        Brevmottaker(
+        BrevmottakerDb(
             behandlingId = behandlingId,
             type = MottakerType.DØDSBO,
             navn = "Donald Duck",
@@ -45,6 +48,7 @@ class ValiderBrevmottakerServiceTest {
 
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
             behandlingId,
+            ekstraBarnLagtTilIBrev = emptyList(),
         )
 
         verify(exactly = 1) { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) }
@@ -72,6 +76,7 @@ class ValiderBrevmottakerServiceTest {
         assertThatThrownBy {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
                 behandlingId,
+                ekstraBarnLagtTilIBrev = emptyList(),
             )
         }.isInstanceOf(FunksjonellFeil::class.java).hasMessageContaining("strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere")
     }
@@ -88,6 +93,7 @@ class ValiderBrevmottakerServiceTest {
 
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
             behandlingId,
+            ekstraBarnLagtTilIBrev = emptyList(),
         )
         verify(exactly = 1) {
             familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
@@ -111,6 +117,7 @@ class ValiderBrevmottakerServiceTest {
 
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
             behandlingId,
+            ekstraBarnLagtTilIBrev = emptyList(),
         )
     }
 
@@ -131,6 +138,7 @@ class ValiderBrevmottakerServiceTest {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
                 behandlingId,
                 brevmottaker,
+                ekstraBarnLagtTilIBrev = emptyList(),
             )
         }.isInstanceOf(FunksjonellFeil::class.java).hasMessageContaining("strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere")
     }

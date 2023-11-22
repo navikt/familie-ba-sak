@@ -42,7 +42,10 @@ class SendTilBeslutter(
         behandling: Behandling,
         stegService: StegService?,
     ) {
-        validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = behandling.id)
+        validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+            behandlingId = behandling.id,
+            ekstraBarnLagtTilIBrev = emptyList(),
+        )
         vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
             ?.validerAtAlleAnndreVurderingerErVurdert()
 

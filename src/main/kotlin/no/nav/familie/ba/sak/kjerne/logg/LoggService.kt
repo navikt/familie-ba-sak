@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.Brevmottaker
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -590,7 +590,7 @@ class LoggService(
     }
 
     fun opprettBrevmottakerLogg(
-        brevmottaker: Brevmottaker,
+        brevmottaker: BrevmottakerDb,
         brevmottakerFjernet: Boolean,
     ) {
         val lagtTilEllerFjernet = if (brevmottakerFjernet) "fjernet" else "lagt til"
