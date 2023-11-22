@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -48,16 +47,16 @@ internal class BrevUtilsTest {
 
     @Test
     fun `hentHjemmeltekst skal returnere sorterte hjemler`() {
-        val utvidetVedtaksperioderMedBegrunnelser =
+        val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        mutableSetOf(
-                            lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                                vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
-                            ),
+                    mutableSetOf(
+                        lagVedtaksbegrunnelse(
+                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
                         ),
+                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -73,42 +72,39 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "barnetrygdloven §§ 2, 4, 10 og 11",
             hentHjemmeltekst(
-                minimerteVedtaksperioder =
-                    utvidetVedtaksperioderMedBegrunnelser.map {
-                        it.tilMinimertVedtaksperiode(
-                            emptyMap(),
-                        )
-                    },
-                sanityBegrunnelser =
-                    mapOf(
-                        Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
-                            lagSanityBegrunnelse(
-                                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                                hjemler = listOf("11", "4", "2", "10"),
-                            ),
-                        Standardbegrunnelse.INNVILGET_SATSENDRING to
-                            lagSanityBegrunnelse(
-                                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                                hjemler = listOf("10"),
-                            ),
-                    ),
+                vedtaksperioder = vedtaksperioderMedBegrunnelser,
+                standardbegrunnelseTilSanityBegrunnelse =
+                mapOf(
+                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                        lagSanityBegrunnelse(
+                            apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                            hjemler = listOf("11", "4", "2", "10"),
+                        ),
+                    Standardbegrunnelse.INNVILGET_SATSENDRING to
+                        lagSanityBegrunnelse(
+                            apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                            hjemler = listOf("10"),
+                        ),
+                ),
+                eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = false,
+                erFritekstIBrev = false,
             ),
         )
     }
 
     @Test
     fun `hentHjemmeltekst skal ikke inkludere hjemmel 17 og 18 hvis opplysningsplikt er oppfylt`() {
-        val utvidetVedtaksperioderMedBegrunnelser =
+        val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        mutableSetOf(
-                            lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                            ),
+                    mutableSetOf(
+                        lagVedtaksbegrunnelse(
+                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                         ),
+                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -123,43 +119,40 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "barnetrygdloven §§ 2, 4, 10 og 11",
             hentHjemmeltekst(
-                minimerteVedtaksperioder =
-                    utvidetVedtaksperioderMedBegrunnelser.map {
-                        it.tilMinimertVedtaksperiode(
-                            sanityEØSBegrunnelser = emptyMap(),
-                        )
-                    },
-                sanityBegrunnelser =
-                    mapOf(
-                        Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
-                            lagSanityBegrunnelse(
-                                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                                hjemler = listOf("11", "4", "2", "10"),
-                            ),
-                        Standardbegrunnelse.INNVILGET_SATSENDRING to
-                            lagSanityBegrunnelse(
-                                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                                hjemler = listOf("10"),
-                            ),
-                    ),
+                vedtaksperioder = vedtaksperioderMedBegrunnelser,
+                standardbegrunnelseTilSanityBegrunnelse =
+                mapOf(
+                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                        lagSanityBegrunnelse(
+                            apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                            hjemler = listOf("11", "4", "2", "10"),
+                        ),
+                    Standardbegrunnelse.INNVILGET_SATSENDRING to
+                        lagSanityBegrunnelse(
+                            apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                            hjemler = listOf("10"),
+                        ),
+                ),
+                eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = false,
+                erFritekstIBrev = false,
             ),
         )
     }
 
     @Test
     fun `hentHjemmeltekst skal inkludere hjemmel 17 og 18 hvis opplysningsplikt ikke er oppfylt`() {
-        val utvidetVedtaksperioderMedBegrunnelser =
+        val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        mutableSetOf(
-                            lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                            ),
+                    mutableSetOf(
+                        lagVedtaksbegrunnelse(
+                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                         ),
+                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -174,28 +167,25 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "barnetrygdloven §§ 2, 4, 10, 11, 17 og 18",
             hentHjemmeltekst(
-                minimerteVedtaksperioder =
-                    utvidetVedtaksperioderMedBegrunnelser.map {
-                        it.tilMinimertVedtaksperiode(
-                            sanityEØSBegrunnelser = emptyMap(),
-                        )
-                    },
-                sanityBegrunnelser =
-                    mapOf(
-                        Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
-                            lagSanityBegrunnelse(
-                                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                                hjemler = listOf("11", "4", "2", "10"),
-                            ),
-                        Standardbegrunnelse.INNVILGET_SATSENDRING to
-                            lagSanityBegrunnelse(
-                                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                                hjemler = listOf("10"),
-                            ),
-                    ),
+                vedtaksperioder = vedtaksperioderMedBegrunnelser,
+                standardbegrunnelseTilSanityBegrunnelse =
+                mapOf(
+                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                        lagSanityBegrunnelse(
+                            apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                            hjemler = listOf("11", "4", "2", "10"),
+                        ),
+                    Standardbegrunnelse.INNVILGET_SATSENDRING to
+                        lagSanityBegrunnelse(
+                            apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                            hjemler = listOf("10"),
+                        ),
+                ),
+                eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
                 opplysningspliktHjemlerSkalMedIBrev = true,
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = false,
+                erFritekstIBrev = false
             ),
         )
     }
@@ -205,26 +195,28 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "EØS-forordning 987/2009 artikkel 60",
             hentHjemmeltekst(
-                minimerteVedtaksperioder = emptyList(),
-                sanityBegrunnelser = emptyMap(),
+                vedtaksperioder = emptyList(),
+                standardbegrunnelseTilSanityBegrunnelse = emptyMap(),
+                eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = true,
+                erFritekstIBrev = false
             ),
         )
     }
 
     @Test
     fun `Skal gi riktig hjemmeltekst ved hjemler både fra barnetrygdloven og folketrygdloven`() {
-        val utvidetVedtaksperioderMedBegrunnelser =
+        val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        mutableSetOf(
-                            lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM,
-                            ),
+                    mutableSetOf(
+                        lagVedtaksbegrunnelse(
+                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM,
                         ),
+                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -254,38 +246,35 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "barnetrygdloven §§ 4, 10 og 11 og folketrygdloven §§ 2-5 og 2-8",
             hentHjemmeltekst(
-                minimerteVedtaksperioder =
-                    utvidetVedtaksperioderMedBegrunnelser.map {
-                        it.tilMinimertVedtaksperiode(
-                            sanityEØSBegrunnelser = emptyMap(),
-                        )
-                    },
-                sanityBegrunnelser = sanityBegrunnelser,
+                vedtaksperioder = vedtaksperioderMedBegrunnelser,
+                standardbegrunnelseTilSanityBegrunnelse = sanityBegrunnelser,
+                eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = false,
+                erFritekstIBrev = false,
             ),
         )
     }
 
     @Test
     fun `Skal gi riktig formattering ved hjemler fra barnetrygdloven og 2 EØS-forordninger`() {
-        val utvidetVedtaksperioderMedBegrunnelser =
+        val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        mutableSetOf(
-                            lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                            ),
+                    mutableSetOf(
+                        lagVedtaksbegrunnelse(
+                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                         ),
+                    ),
                     eøsBegrunnelser =
-                        mutableSetOf(
-                            EØSBegrunnelse(
-                                vedtaksperiodeMedBegrunnelser = mockk(),
-                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
-                            ),
+                    mutableSetOf(
+                        EØSBegrunnelse(
+                            vedtaksperiodeMedBegrunnelser = mockk(),
+                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
                         ),
+                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -337,38 +326,35 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "barnetrygdloven §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 11-16 og EØS-forordning 987/2009 artikkel 58 og 60",
             hentHjemmeltekst(
-                minimerteVedtaksperioder =
-                    utvidetVedtaksperioderMedBegrunnelser.map {
-                        it.tilMinimertVedtaksperiode(
-                            sanityEØSBegrunnelser = sanityEøsBegrunnelser,
-                        )
-                    },
-                sanityBegrunnelser = sanityBegrunnelser,
+                vedtaksperioder = vedtaksperioderMedBegrunnelser,
+                standardbegrunnelseTilSanityBegrunnelse = sanityBegrunnelser,
+                eøsStandardbegrunnelseTilSanityBegrunnelse = sanityEøsBegrunnelser,
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = false,
+                erFritekstIBrev = false
             ),
         )
     }
 
     @Test
     fun `Skal gi riktig formattering ved hjemler fra Separasjonsavtale og to EØS-forordninger`() {
-        val utvidetVedtaksperioderMedBegrunnelser =
+        val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        mutableSetOf(
-                            lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                            ),
+                    mutableSetOf(
+                        lagVedtaksbegrunnelse(
+                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                         ),
+                    ),
                     eøsBegrunnelser =
-                        mutableSetOf(
-                            EØSBegrunnelse(
-                                vedtaksperiodeMedBegrunnelser = mockk(),
-                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
-                            ),
+                    mutableSetOf(
+                        EØSBegrunnelse(
+                            vedtaksperiodeMedBegrunnelser = mockk(),
+                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
                         ),
+                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -421,38 +407,35 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "Separasjonsavtalen mellom Storbritannia og Norge artikkel 29, barnetrygdloven §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 11-16 og EØS-forordning 987/2009 artikkel 58 og 60",
             hentHjemmeltekst(
-                minimerteVedtaksperioder =
-                    utvidetVedtaksperioderMedBegrunnelser.map {
-                        it.tilMinimertVedtaksperiode(
-                            sanityEØSBegrunnelser = sanityEøsBegrunnelser,
-                        )
-                    },
-                sanityBegrunnelser = sanityBegrunnelser,
+                vedtaksperioder = vedtaksperioderMedBegrunnelser,
+                standardbegrunnelseTilSanityBegrunnelse = sanityBegrunnelser,
+                eøsStandardbegrunnelseTilSanityBegrunnelse = sanityEøsBegrunnelser,
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = false,
+                erFritekstIBrev = false
             ),
         )
     }
 
     @Test
     fun `Skal gi riktig formattering ved nynorsk og hjemler fra Separasjonsavtale og to EØS-forordninger`() {
-        val utvidetVedtaksperioderMedBegrunnelser =
+        val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        mutableSetOf(
-                            lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                            ),
+                    mutableSetOf(
+                        lagVedtaksbegrunnelse(
+                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                         ),
+                    ),
                     eøsBegrunnelser =
-                        mutableSetOf(
-                            EØSBegrunnelse(
-                                vedtaksperiodeMedBegrunnelser = mockk(),
-                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
-                            ),
+                    mutableSetOf(
+                        EØSBegrunnelse(
+                            vedtaksperiodeMedBegrunnelser = mockk(),
+                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
                         ),
+                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -505,38 +488,35 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 11-16 og EØS-forordning 987/2009 artikkel 58 og 60",
             hentHjemmeltekst(
-                minimerteVedtaksperioder =
-                    utvidetVedtaksperioderMedBegrunnelser.map {
-                        it.tilMinimertVedtaksperiode(
-                            sanityEØSBegrunnelser = sanityEøsBegrunnelser,
-                        )
-                    },
-                sanityBegrunnelser = sanityBegrunnelser,
+                vedtaksperioder = vedtaksperioderMedBegrunnelser,
+                standardbegrunnelseTilSanityBegrunnelse = sanityBegrunnelser,
+                eøsStandardbegrunnelseTilSanityBegrunnelse = sanityEøsBegrunnelser,
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NN,
                 refusjonEøsHjemmelSkalMedIBrev = false,
+                erFritekstIBrev = false
             ),
         )
     }
 
     @Test
     fun `Skal slå sammen hjemlene riktig når det er 3 eller flere hjemler på 'siste' hjemmeltype`() {
-        val utvidetVedtaksperioderMedBegrunnelser =
+        val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        mutableSetOf(
-                            lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                            ),
+                    mutableSetOf(
+                        lagVedtaksbegrunnelse(
+                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                         ),
+                    ),
                     eøsBegrunnelser =
-                        mutableSetOf(
-                            EØSBegrunnelse(
-                                vedtaksperiodeMedBegrunnelser = mockk(),
-                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
-                            ),
+                    mutableSetOf(
+                        EØSBegrunnelse(
+                            vedtaksperiodeMedBegrunnelser = mockk(),
+                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
                         ),
+                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -588,38 +568,35 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11 og EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68",
             hentHjemmeltekst(
-                minimerteVedtaksperioder =
-                    utvidetVedtaksperioderMedBegrunnelser.map {
-                        it.tilMinimertVedtaksperiode(
-                            sanityEØSBegrunnelser = sanityEøsBegrunnelser,
-                        )
-                    },
-                sanityBegrunnelser = sanityBegrunnelser,
+                vedtaksperioder = vedtaksperioderMedBegrunnelser,
+                standardbegrunnelseTilSanityBegrunnelse = sanityBegrunnelser,
+                eøsStandardbegrunnelseTilSanityBegrunnelse = sanityEøsBegrunnelser,
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NN,
                 refusjonEøsHjemmelSkalMedIBrev = false,
+                erFritekstIBrev = false
             ),
         )
     }
 
     @Test
     fun `Skal kun ta med en hjemmel 1 gang hvis flere begrunnelser er knyttet til samme hjemmel`() {
-        val utvidetVedtaksperioderMedBegrunnelser =
+        val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
-                        mutableSetOf(
-                            lagVedtaksbegrunnelse(
-                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                            ),
+                    mutableSetOf(
+                        lagVedtaksbegrunnelse(
+                            standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
                         ),
+                    ),
                     eøsBegrunnelser =
-                        mutableSetOf(
-                            EØSBegrunnelse(
-                                vedtaksperiodeMedBegrunnelser = mockk(),
-                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
-                            ),
+                    mutableSetOf(
+                        EØSBegrunnelse(
+                            vedtaksperiodeMedBegrunnelser = mockk(),
+                            begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
                         ),
+                    ),
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
                     begrunnelser =
@@ -675,16 +652,13 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68 og EØS-forordning 987/2009 artikkel 58",
             hentHjemmeltekst(
-                minimerteVedtaksperioder =
-                    utvidetVedtaksperioderMedBegrunnelser.map {
-                        it.tilMinimertVedtaksperiode(
-                            sanityEØSBegrunnelser = sanityEøsBegrunnelser,
-                        )
-                    },
-                sanityBegrunnelser = sanityBegrunnelser,
+                vedtaksperioder = vedtaksperioderMedBegrunnelser,
+                standardbegrunnelseTilSanityBegrunnelse = sanityBegrunnelser,
+                eøsStandardbegrunnelseTilSanityBegrunnelse = sanityEøsBegrunnelser,
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NN,
                 refusjonEøsHjemmelSkalMedIBrev = false,
+                erFritekstIBrev = false
             ),
         )
     }
