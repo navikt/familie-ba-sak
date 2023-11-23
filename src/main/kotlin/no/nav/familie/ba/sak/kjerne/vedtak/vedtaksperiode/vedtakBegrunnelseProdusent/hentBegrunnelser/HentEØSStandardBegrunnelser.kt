@@ -33,6 +33,7 @@ internal fun hentEØSStandardBegrunnelser(
             .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
             .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
 
+    @Suppress("UNCHECKED_CAST")
     val filtrertPåEndretVilkår =
         filtrertPåManuelleBegrunnelser.filterValues {
             it.erGjeldendeForUtgjørendeVilkår(
@@ -40,7 +41,7 @@ internal fun hentEØSStandardBegrunnelser(
                 utvidetVilkårPåSøkerIPeriode,
                 utvidetVilkårPåSøkerIForrigePeriode,
             )
-        }
+        } as Map<IVedtakBegrunnelse, ISanityBegrunnelse>
 
     val filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp =
         filtrertPåManuelleBegrunnelser.filterValues { begrunnelse ->
@@ -79,16 +80,11 @@ internal fun hentEØSStandardBegrunnelser(
             it.erGjeldendeForOpphørFraForrigeBehandling(begrunnelseGrunnlag)
         }
 
-    @Suppress("UNCHECKED_CAST")
     val filtrertPåHendelser =
-        (filtrertPåEndretVilkår as Map<IVedtakBegrunnelse, ISanityBegrunnelse>).filtrerPåHendelser(
-            begrunnelseGrunnlag,
-            vedtaksperiode.fom,
-        )
+        filtrertPåEndretVilkår.filtrerPåHendelser(begrunnelseGrunnlag, vedtaksperiode.fom)
 
-    @Suppress("UNCHECKED_CAST")
     val filtrertPåSkalVisesSelvOmIkkeEndring =
-        (filtrertPåEndretVilkår as Map<IVedtakBegrunnelse, ISanityBegrunnelse>).filtrerPåSkalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
+        filtrertPåEndretVilkår.filtrerPåSkalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
 
     return filtrertPåEndretVilkår +
         filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp +
