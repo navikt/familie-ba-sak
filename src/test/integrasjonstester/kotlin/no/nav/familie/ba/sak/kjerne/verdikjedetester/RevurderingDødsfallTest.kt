@@ -10,12 +10,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -27,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,13 +36,9 @@ class RevurderingDødsfallTest(
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val persongrunnlagService: PersongrunnlagService,
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
-    @Autowired private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
-    @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     @Autowired private val brevmalService: BrevmalService,
-    @Autowired private val unleashService: UnleashService,
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Dødsfall bruker skal kjøre gjennom`() {
@@ -118,12 +110,8 @@ class RevurderingDødsfallTest(
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
                 vedtaksperiodeService = vedtaksperiodeService,
-                endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
                 fagsakService = fagsakService,
-                persongrunnlagService = persongrunnlagService,
-                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
                 brevmalService = brevmalService,
-                unleashService = unleashService,
             )
 
         val restFagsakEtterBehandlingAvsluttet =
@@ -194,12 +182,8 @@ class RevurderingDødsfallTest(
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
                 vedtaksperiodeService = vedtaksperiodeService,
-                endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
                 fagsakService = fagsakService,
-                persongrunnlagService = persongrunnlagService,
-                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
                 brevmalService = brevmalService,
-                unleashService = unleashService,
             )
         }
     }

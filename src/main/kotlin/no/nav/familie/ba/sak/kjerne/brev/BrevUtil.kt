@@ -13,14 +13,15 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVIL
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET_OG_ENDRET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET_OG_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 
 fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
@@ -80,26 +81,19 @@ fun hjemlerTilHjemmeltekst(
 }
 
 fun hentHjemmeltekst(
-    minimerteVedtaksperioder: List<MinimertVedtaksperiode>,
-    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
+    vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
+    standardbegrunnelseTilSanityBegrunnelse: Map<Standardbegrunnelse, SanityBegrunnelse>,
+    eøsStandardbegrunnelseTilSanityBegrunnelse: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
     opplysningspliktHjemlerSkalMedIBrev: Boolean = false,
     målform: Målform,
     vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false,
     refusjonEøsHjemmelSkalMedIBrev: Boolean = false,
+    erFritekstIBrev: Boolean,
 ): String {
     val sanityStandardbegrunnelser =
-        minimerteVedtaksperioder.flatMap { vedtaksperiode ->
-            vedtaksperiode.begrunnelser.mapNotNull { begrunnelse ->
-                sanityBegrunnelser[begrunnelse.standardbegrunnelse]
-            }
-        }
-
+        vedtaksperioder.flatMap { vedtaksperiode -> vedtaksperiode.begrunnelser.mapNotNull { begrunnelse -> standardbegrunnelseTilSanityBegrunnelse[begrunnelse.standardbegrunnelse] } }
     val sanityEøsBegrunnelser =
-        minimerteVedtaksperioder.flatMap { vedtaksperiode ->
-            vedtaksperiode.eøsBegrunnelser.map { begrunnelse ->
-                begrunnelse.sanityEØSBegrunnelse
-            }
-        }
+        vedtaksperioder.flatMap { vedtaksperiode -> vedtaksperiode.eøsBegrunnelser.mapNotNull { eøsBegrunnelse -> eøsStandardbegrunnelseTilSanityBegrunnelse[eøsBegrunnelse.begrunnelse] } }
 
     val ordinæreHjemler =
         hentOrdinæreHjemler(
@@ -107,7 +101,7 @@ fun hentHjemmeltekst(
                 (sanityStandardbegrunnelser.flatMap { it.hjemler } + sanityEøsBegrunnelser.flatMap { it.hjemler })
                     .toMutableSet(),
             opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev,
-            finnesVedtaksperiodeMedFritekst = minimerteVedtaksperioder.flatMap { it.fritekster }.isNotEmpty(),
+            finnesVedtaksperiodeMedFritekst = erFritekstIBrev,
         )
 
     val forvaltningsloverHjemler = hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev)

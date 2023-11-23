@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.erTilInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
@@ -75,9 +76,19 @@ class DokumentService(
         behandling: Behandling? = null,
         fagsakId: Long,
     ) {
-        behandling?.let {
-            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = it.id)
+        if (behandling == null) {
+            validerBrevmottakerService.validerAtFagsakIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                fagsakId = fagsakId,
+                manueltBrevRequest.manuelleBrevmottakere,
+                barnLagtTilIBrev = manueltBrevRequest.barnIBrev,
+            )
+        } else {
+            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                behandlingId = behandling.id,
+                ekstraBarnLagtTilIBrev = manueltBrevRequest.barnIBrev,
+            )
         }
+
         val generertBrev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest)
         val førsteside =
             if (manueltBrevRequest.brevmal.skalGenerereForside()) {
@@ -93,7 +104,16 @@ class DokumentService(
         val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: error("Finnes ikke fagsak for fagsakId=$fagsakId")
         val søkersident = fagsak.aktør.aktivFødselsnummer()
 
-        val mottakere = lagMottakere(manueltBrevRequest, fagsak, behandling)
+        val brevmottakereFraBehandling = behandling?.let { brevmottakerService.hentBrevmottakere(it.id) } ?: emptyList()
+        val brevmottakere =
+            manueltBrevRequest.manuelleBrevmottakere + brevmottakereFraBehandling.map { ManuellBrevmottaker(it) }
+
+        val mottakere =
+            lagMottakere(
+                manueltBrevRequest = manueltBrevRequest,
+                fagsak = fagsak,
+                brevmottakere = brevmottakere,
+            )
         val journalposterTilDistribusjon = mutableMapOf<String, MottakerInfo>()
 
         mottakere.forEach { mottakerInfo ->
@@ -144,17 +164,10 @@ class DokumentService(
     private fun lagMottakere(
         manueltBrevRequest: ManueltBrevRequest,
         fagsak: Fagsak,
-        behandling: Behandling?,
+        brevmottakere: List<ManuellBrevmottaker>,
     ): List<MottakerInfo> {
         val søkersident = fagsak.aktør.aktivFødselsnummer()
-        val brevmottakere = behandling?.let { brevmottakerService.hentBrevmottakere(it.id) } ?: emptyList()
         return when {
-            behandling == null ->
-                MottakerInfo(
-                    brukerId = søkersident,
-                    brukerIdType = BrukerIdType.FNR,
-                    erInstitusjonVerge = false,
-                ).toList()
             manueltBrevRequest.erTilInstitusjon ->
                 MottakerInfo(
                     brukerId = checkNotNull(fagsak.institusjon).orgNummer,

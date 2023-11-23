@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBrevMottaker
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.domene.ManuellAdresseInfo
@@ -32,7 +33,11 @@ class BrevmottakerService(
     ) {
         val brevmottaker = restBrevMottaker.tilBrevMottaker(behandlingId)
 
-        validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId, brevmottaker)
+        validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+            behandlingId = behandlingId,
+            nyBrevmottaker = brevmottaker,
+            ekstraBarnLagtTilIBrev = emptyList(),
+        )
 
         loggService.opprettBrevmottakerLogg(
             brevmottaker = brevmottaker,
@@ -72,7 +77,7 @@ class BrevmottakerService(
         }
 
     fun lagMottakereFraBrevMottakere(
-        manueltRegistrerteMottakere: List<Brevmottaker>,
+        manueltRegistrerteMottakere: List<ManuellBrevmottaker>,
         søkersident: String,
         søkersnavn: String = hentMottakerNavn(søkersident),
     ): List<MottakerInfo> {
@@ -115,7 +120,7 @@ class BrevmottakerService(
         }
     }
 
-    private fun lagManuellAdresseInfo(brevmottaker: Brevmottaker) =
+    private fun lagManuellAdresseInfo(brevmottaker: ManuellBrevmottaker) =
         ManuellAdresseInfo(
             adresselinje1 = brevmottaker.adresselinje1,
             adresselinje2 = brevmottaker.adresselinje2,

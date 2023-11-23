@@ -33,6 +33,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboer
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevMedÅrsaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollEøs
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.VarselbrevMedÅrsakerOgBarn
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
@@ -41,6 +43,26 @@ import java.time.LocalDate
 interface Person {
     val navn: String
     val fødselsnummer: String
+}
+
+data class ManuellBrevmottaker(
+    val type: MottakerType,
+    val navn: String,
+    val adresselinje1: String,
+    val adresselinje2: String? = "",
+    val postnummer: String,
+    val poststed: String,
+    val landkode: String,
+) {
+    constructor(brevmottakerDb: BrevmottakerDb) : this(
+        type = brevmottakerDb.type,
+        navn = brevmottakerDb.navn,
+        adresselinje1 = brevmottakerDb.adresselinje1,
+        adresselinje2 = brevmottakerDb.adresselinje2,
+        postnummer = brevmottakerDb.postnummer,
+        poststed = brevmottakerDb.poststed,
+        landkode = brevmottakerDb.landkode,
+    )
 }
 
 data class ManueltBrevRequest(
@@ -58,6 +80,7 @@ data class ManueltBrevRequest(
     val behandlingKategori: BehandlingKategori? = null,
     val vedrørende: Person? = null,
     val mottakerlandSed: List<String> = emptyList(),
+    val manuelleBrevmottakere: List<ManuellBrevmottaker> = emptyList(),
 ) {
     override fun toString(): String {
         return "${ManueltBrevRequest::class}, $brevmal"

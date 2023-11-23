@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndre
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -147,11 +148,11 @@ class VedtaksperiodeService(
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             standardbegrunnelserFraFrontend.mapNotNull {
-                val triggesAv =
-                    sanityBegrunnelser[it]?.triggesAv
+                val sanityBegrunnelse =
+                    sanityBegrunnelser[it]
                         ?: return@mapNotNull null
 
-                if (triggesAv.satsendring) {
+                if (sanityBegrunnelse.ovrigeTriggere.contains(ØvrigTrigger.SATSENDRING)) {
                     validerSatsendring(
                         fom = vedtaksperiodeMedBegrunnelser.fom,
                         harBarnMedSeksårsdagPåFom =
