@@ -156,12 +156,16 @@ fun hentTemaSomPeriodeErVurdertEtter(
     val harKompetanseDennePerioden = begrunnelseGrunnlag.dennePerioden.kompetanse != null
     val harMistetKompetanseDennePerioden =
         !harKompetanseDennePerioden && begrunnelseGrunnlag.forrigePeriode?.kompetanse != null
-    val harGåttFraEøsTilNasjonal =
-        harMistetKompetanseDennePerioden && begrunnelseGrunnlag.dennePerioden.andeler.any { it.nasjonaltPeriodebeløp != 0 }
+    val fårUtbetaltNasjonalt = begrunnelseGrunnlag.dennePerioden.andeler.any { it.nasjonaltPeriodebeløp != 0 }
+    val harGåttFraEøsTilNasjonal = harMistetKompetanseDennePerioden && fårUtbetaltNasjonalt
+
+    val harMistetKompetanseDenneBehandlingen =
+        !harKompetanseDennePerioden && begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.kompetanse != null
 
     return when {
         harGåttFraEøsTilNasjonal -> Tema.NASJONAL
         harKompetanseDennePerioden || harMistetKompetanseDennePerioden -> Tema.EØS
+        harMistetKompetanseDenneBehandlingen -> Tema.EØS
         else -> Tema.NASJONAL
     }
 }

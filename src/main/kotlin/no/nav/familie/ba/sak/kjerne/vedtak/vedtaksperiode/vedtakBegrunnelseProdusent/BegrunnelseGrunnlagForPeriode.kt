@@ -6,7 +6,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 sealed interface IBegrunnelseGrunnlagForPeriode {
     val dennePerioden: BegrunnelseGrunnlagForPersonIPeriode
     val forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?
-    val erSmåbarnstilleggIForrigeBehandlingPeriode: Boolean
+    val sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?
+
+    fun erSmåbarnstilleggIForrigeBehandlingPeriode() =
+        sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
 
     companion object {
         fun opprett(
@@ -23,6 +26,7 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                         sammePeriodeForrigeBehandling = sammePeriodeForrigeBehandling,
                     )
                 }
+
                 Vedtaksperiodetype.OPPHØR -> {
                     BegrunnelseGrunnlagForPeriodeMedOpphør(
                         dennePerioden = dennePerioden,
@@ -30,8 +34,13 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
                         sammePeriodeForrigeBehandling = sammePeriodeForrigeBehandling,
                     )
                 }
+
                 else -> {
-                    BegrunnelseGrunnlagForPeriode(dennePerioden, forrigePeriode, sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true)
+                    BegrunnelseGrunnlagForPeriode(
+                        dennePerioden,
+                        forrigePeriode,
+                        sammePeriodeForrigeBehandling,
+                    )
                 }
             }
     }
@@ -40,23 +49,17 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
 data class BegrunnelseGrunnlagForPeriode(
     override val dennePerioden: BegrunnelseGrunnlagForPersonIPeriode,
     override val forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
-    override val erSmåbarnstilleggIForrigeBehandlingPeriode: Boolean,
+    override val sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?,
 ) : IBegrunnelseGrunnlagForPeriode
 
 data class BegrunnelseGrunnlagForPeriodeMedReduksjonPåTversAvBehandlinger(
     override val dennePerioden: BegrunnelseGrunnlagForPersonIPeriode,
     override val forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
-    val sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?,
-) : IBegrunnelseGrunnlagForPeriode {
-    override val erSmåbarnstilleggIForrigeBehandlingPeriode =
-        sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
-}
+    override val sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?,
+) : IBegrunnelseGrunnlagForPeriode
 
 data class BegrunnelseGrunnlagForPeriodeMedOpphør(
     override val dennePerioden: BegrunnelseGrunnlagForPersonIPeriode,
     override val forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
-    val sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?,
-) : IBegrunnelseGrunnlagForPeriode {
-    override val erSmåbarnstilleggIForrigeBehandlingPeriode =
-        sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
-}
+    override val sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?,
+) : IBegrunnelseGrunnlagForPeriode

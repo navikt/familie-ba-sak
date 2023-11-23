@@ -9,8 +9,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.begrunnelseGjelderOpphørFraForrigeBehandling
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.begrunnelseGjelderReduksjonFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForBrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erLikKompetanseIPeriode
@@ -29,22 +27,11 @@ internal fun hentEØSStandardBegrunnelser(
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
 ): Map<IVedtakBegrunnelse, ISanityBegrunnelse> {
-    val begrunnelserFiltrertPåPeriodetype =
-        sanityEØSBegrunnelser.filterValues {
-            it.periodeResultat in relevantePeriodeResultater
-        }
-
-    val begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType =
-        begrunnelserFiltrertPåPeriodetype
-            .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
-
     val filtrertPåManuelleBegrunnelser =
-        begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType
+        sanityEØSBegrunnelser
+            .filterValues { it.periodeResultat in relevantePeriodeResultater }
+            .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
             .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
-
-    val relevanteBegrunnelser =
-        filtrertPåManuelleBegrunnelser
-            .filterValues { !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && !it.begrunnelseGjelderOpphørFraForrigeBehandling() }
 
     val filtrertPåEndretVilkår =
         filtrertPåManuelleBegrunnelser.filterValues {
@@ -56,7 +43,7 @@ internal fun hentEØSStandardBegrunnelser(
         }
 
     val filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp =
-        begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues { begrunnelse ->
+        filtrertPåManuelleBegrunnelser.filterValues { begrunnelse ->
             val endringIKompetanseValutakursEllerUtenlandskPeriodebeløp =
                 erEndringIKompetanse(begrunnelseGrunnlag) || erEndringIValutakurs(begrunnelseGrunnlag) ||
                     erEndringIUtenlandskPeriodebeløp(
@@ -67,7 +54,7 @@ internal fun hentEØSStandardBegrunnelser(
         }
 
     val filtrertPåIngenEndringMedLikKompetanse =
-        begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
+        filtrertPåManuelleBegrunnelser.filterValues {
             SanityPeriodeResultat.INGEN_ENDRING in relevantePeriodeResultater &&
                 it.erLikKompetanseIPeriode(
                     begrunnelseGrunnlag,
@@ -75,30 +62,42 @@ internal fun hentEØSStandardBegrunnelser(
         }
 
     val filtrertPåTilleggstekstMedLikKompetanse =
-        begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
+        filtrertPåManuelleBegrunnelser.filterValues {
             it.valgbarhet == Valgbarhet.TILLEGGSTEKST &&
                 it.erLikKompetanseIPeriode(
                     begrunnelseGrunnlag,
                 )
         }
 
+    val filtrertPåReduksjonFraForrigeBehandling =
+        filtrertPåManuelleBegrunnelser.filterValues {
+            it.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag)
+        }
+
+    val filtrertPåOpphørFraForrigeBehandling =
+        filtrertPåManuelleBegrunnelser.filterValues {
+            it.erGjeldendeForOpphørFraForrigeBehandling(begrunnelseGrunnlag)
+        }
+
     @Suppress("UNCHECKED_CAST")
     val filtrertPåHendelser =
-        (relevanteBegrunnelser as Map<IVedtakBegrunnelse, ISanityBegrunnelse>).filtrerPåHendelser(
+        (filtrertPåEndretVilkår as Map<IVedtakBegrunnelse, ISanityBegrunnelse>).filtrerPåHendelser(
             begrunnelseGrunnlag,
             vedtaksperiode.fom,
         )
 
     @Suppress("UNCHECKED_CAST")
     val filtrertPåSkalVisesSelvOmIkkeEndring =
-        (relevanteBegrunnelser as Map<IVedtakBegrunnelse, ISanityBegrunnelse>).filtrerPåSkalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
+        (filtrertPåEndretVilkår as Map<IVedtakBegrunnelse, ISanityBegrunnelse>).filtrerPåSkalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
 
     return filtrertPåEndretVilkår +
         filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp +
         filtrertPåIngenEndringMedLikKompetanse +
         filtrertPåTilleggstekstMedLikKompetanse +
         filtrertPåSkalVisesSelvOmIkkeEndring +
-        filtrertPåHendelser
+        filtrertPåHendelser +
+        filtrertPåOpphørFraForrigeBehandling +
+        filtrertPåReduksjonFraForrigeBehandling
 }
 
 private fun erEndringIKompetanse(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) =
