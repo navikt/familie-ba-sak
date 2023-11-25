@@ -10,6 +10,6 @@ COPY --from=javaagent --chown=nonroot:nonroot /instrumentations/java/javaagent.j
 COPY --chown=nonroot:nonroot ./target/familie-ba-sak.jar /app/app.jar
 WORKDIR /app
 # TLS Config works around an issue in OpenJDK... See: https://github.com/kubernetes-client/java/issues/854
-ENTRYPOINT [ "java", "-javaagent:/app/javaagent.jar", "-Djdk.tls.client.protocols=TLSv1.2", "-jar", "/app/app.jar" ]
+ENTRYPOINT [ "java", "-javaagent:/app/javaagent.jar", "-Djdk.tls.client.protocols=TLSv1.2", "-jar", "/app/app.jar", "-XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError" ]
 
 ENV APP_NAME=familie-ba-sak
