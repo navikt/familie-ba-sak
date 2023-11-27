@@ -37,9 +37,9 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
 
                 else -> {
                     BegrunnelseGrunnlagForPeriode(
-                        dennePerioden,
-                        forrigePeriode,
-                        sammePeriodeForrigeBehandling,
+                        dennePerioden = dennePerioden,
+                        forrigePeriode = forrigePeriode,
+                        sammePeriodeForrigeBehandling = sammePeriodeForrigeBehandling,
                     )
                 }
             }

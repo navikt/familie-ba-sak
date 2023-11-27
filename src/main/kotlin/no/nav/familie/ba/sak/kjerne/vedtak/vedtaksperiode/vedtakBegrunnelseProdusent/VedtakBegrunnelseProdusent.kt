@@ -159,13 +159,13 @@ fun hentTemaSomPeriodeErVurdertEtter(
     val fårUtbetaltNasjonalt = begrunnelseGrunnlag.dennePerioden.andeler.any { it.nasjonaltPeriodebeløp != 0 }
     val harGåttFraEøsTilNasjonal = harMistetKompetanseDennePerioden && fårUtbetaltNasjonalt
 
-    val harMistetKompetanseDenneBehandlingen =
+    val harMistetKompetanseIPeriodeSidenForrigeBehandling =
         !harKompetanseDennePerioden && begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.kompetanse != null
 
     return when {
         harGåttFraEøsTilNasjonal -> Tema.NASJONAL
         harKompetanseDennePerioden || harMistetKompetanseDennePerioden -> Tema.EØS
-        harMistetKompetanseDenneBehandlingen -> Tema.EØS
+        harMistetKompetanseIPeriodeSidenForrigeBehandling -> Tema.EØS
         else -> Tema.NASJONAL
     }
 }
@@ -196,17 +196,16 @@ internal fun Map<IVedtakBegrunnelse, ISanityBegrunnelse>.filtrerPåSkalVisesSelv
     begrunnelseGrunnlagForPersonIPeriode: BegrunnelseGrunnlagForPersonIPeriode,
 ) = filterValues { begrunnelse ->
     val begrunnelseMatcherVilkår =
-        begrunnelse.periodeResultat != null &&
-            when (begrunnelse.periodeResultat) {
-                SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING, SanityPeriodeResultat.REDUKSJON ->
-                    begrunnelse.vilkår.isNotEmpty() &&
-                        begrunnelse.vilkår.all { vilkår ->
-                            begrunnelseGrunnlagForPersonIPeriode.vilkårResultater.any { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT }
-                        }
+        when (begrunnelse.periodeResultat) {
+            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING, SanityPeriodeResultat.REDUKSJON ->
+                begrunnelse.vilkår.isNotEmpty() &&
+                    begrunnelse.vilkår.all { vilkår ->
+                        begrunnelseGrunnlagForPersonIPeriode.vilkårResultater.any { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT }
+                    }
 
-                SanityPeriodeResultat.IKKE_INNVILGET -> false
-                null -> false
-            }
+            SanityPeriodeResultat.IKKE_INNVILGET -> false
+            null -> false
+        }
     val begrunnelseSkalVisesSelvOmIkkeEndring =
         ØvrigTrigger.SKAL_VISES_SELV_OM_IKKE_ENDRING in begrunnelse.ovrigeTriggere
     begrunnelseSkalVisesSelvOmIkkeEndring && begrunnelseMatcherVilkår
