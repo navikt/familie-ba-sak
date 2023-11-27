@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component
 class InternKonsistensavstemmingScheduler(
     val taskService: TaskService,
 ) {
-
     @Scheduled(cron = "0 0 0 29 * *")
     fun startInternKonsistensavstemming() {
         if (LeaderClient.isLeader() == true) {

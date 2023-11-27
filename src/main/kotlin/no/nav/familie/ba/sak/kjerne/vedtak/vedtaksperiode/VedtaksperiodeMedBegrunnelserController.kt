@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_GENERERING_AV_BREVOBJEKTER
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -11,14 +8,12 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
-import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.finnBegrunnelseGrunnlagPerPerson
@@ -43,12 +38,9 @@ class VedtaksperiodeMedBegrunnelserController(
     private val tilgangService: TilgangService,
     private val brevKlient: BrevKlient,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val brevPeriodeService: BrevPeriodeService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val integrasjonClient: IntegrasjonClient,
-    private val unleashService: UnleashNextMedContextService,
 ) {
-
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
     fun oppdaterVedtaksperiodeStandardbegrunnelser(
         @PathVariable
@@ -63,9 +55,10 @@ class VedtaksperiodeMedBegrunnelserController(
             handling = OPPDATERE_BEGRUNNELSER_HANDLING,
         )
 
-        val standardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
-            IVedtakBegrunnelse.konverterTilEnumVerdi(it)
-        }
+        val standardbegrunnelser =
+            restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
+                IVedtakBegrunnelse.konverterTilEnumVerdi(it)
+            }
 
         val nasjonalebegrunnelser = standardbegrunnelser.filterIsInstance<Standardbegrunnelse>()
         val eøsStandardbegrunnelser = standardbegrunnelser.filterIsInstance<EØSStandardbegrunnelse>()
@@ -134,7 +127,9 @@ class VedtaksperiodeMedBegrunnelserController(
     }
 
     @GetMapping("/brevbegrunnelser/{vedtaksperiodeId}")
-    fun genererBrevBegrunnelserForPeriode(@PathVariable vedtaksperiodeId: Long): ResponseEntity<Ressurs<Set<String>>> {
+    fun genererBrevBegrunnelserForPeriode(
+        @PathVariable vedtaksperiodeId: Long,
+    ): ResponseEntity<Ressurs<Set<String>>> {
         val behandlingId = vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId)
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -144,27 +139,23 @@ class VedtaksperiodeMedBegrunnelserController(
 
         val vedtaksperiode = vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
 
-        val brevBegrunnelser = if (unleashService.isEnabled(NY_GENERERING_AV_BREVOBJEKTER, behandlingId)) {
-            val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(behandlingId)
-            val begrunnelsesGrunnlagPerPerson = vedtaksperiode.finnBegrunnelseGrunnlagPerPerson(grunnlagForBegrunnelser)
+        val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(behandlingId)
+        val begrunnelsesGrunnlagPerPerson = vedtaksperiode.finnBegrunnelseGrunnlagPerPerson(grunnlagForBegrunnelser)
 
+        val brevBegrunnelser =
             vedtaksperiode.hentBegrunnelser(
                 grunnlagForBegrunnelse = grunnlagForBegrunnelser,
                 begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
                 landkoder = integrasjonClient.hentLandkoderISO2(),
             )
-        } else {
-            brevPeriodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId)
-        }
 
-        val begrunnelser = brevBegrunnelser.map {
-            when (it) {
-                is FritekstBegrunnelse -> it.fritekst
-                is BegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
-                is EØSBegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
-                else -> throw Feil("Ukjent begrunnelsestype")
+        val begrunnelser =
+            brevBegrunnelser.map {
+                when (it) {
+                    is FritekstBegrunnelse -> it.fritekst
+                    is BegrunnelseMedData -> brevKlient.hentBegrunnelsestekst(it, vedtaksperiode)
+                }
             }
-        }
 
         return ResponseEntity.ok(Ressurs.Companion.success(begrunnelser.toSet()))
     }
@@ -172,11 +163,12 @@ class VedtaksperiodeMedBegrunnelserController(
     @GetMapping(path = ["/behandling/{behandlingId}/hent-vedtaksperioder"])
     fun hentRestUtvidetVedtaksperiodeMedBegrunnelser(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> = ResponseEntity.ok(
-        Ressurs.success(
-            vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId),
-        ),
-    )
+    ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> =
+        ResponseEntity.ok(
+            Ressurs.success(
+                vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId),
+            ),
+        )
 
     companion object {
         const val OPPDATERE_BEGRUNNELSER_HANDLING = "oppdatere vedtaksperiode med begrunnelser"

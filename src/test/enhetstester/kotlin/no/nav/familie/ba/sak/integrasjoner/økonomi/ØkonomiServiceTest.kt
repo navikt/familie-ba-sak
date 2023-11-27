@@ -110,24 +110,25 @@ internal class ØkonomiServiceTest {
     }
 
     private fun setupMocks(toggelPå: Boolean) {
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(
-            listOf(
-                Utbetalingsperiode(
-                    erEndringPåEksisterendePeriode = false,
-                    opphør = null,
-                    periodeId = 1,
-                    forrigePeriodeId = null,
-                    datoForVedtak = LocalDate.now(),
-                    klassifisering = "BATR",
-                    vedtakdatoFom = inneværendeMåned().førsteDagIInneværendeMåned(),
-                    vedtakdatoTom = inneværendeMåned().sisteDagIInneværendeMåned(),
-                    sats = BigDecimal(1054),
-                    satsType = Utbetalingsperiode.SatsType.MND,
-                    utbetalesTil = "13455678910",
-                    behandlingId = 1,
+        val utbetalingsoppdrag =
+            lagUtbetalingsoppdrag(
+                listOf(
+                    Utbetalingsperiode(
+                        erEndringPåEksisterendePeriode = false,
+                        opphør = null,
+                        periodeId = 1,
+                        forrigePeriodeId = null,
+                        datoForVedtak = LocalDate.now(),
+                        klassifisering = "BATR",
+                        vedtakdatoFom = inneværendeMåned().førsteDagIInneværendeMåned(),
+                        vedtakdatoTom = inneværendeMåned().sisteDagIInneværendeMåned(),
+                        sats = BigDecimal(1054),
+                        satsType = Utbetalingsperiode.SatsType.MND,
+                        utbetalesTil = "13455678910",
+                        behandlingId = 1,
+                    ),
                 ),
-            ),
-        )
+            )
         every {
             kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
                 any(),

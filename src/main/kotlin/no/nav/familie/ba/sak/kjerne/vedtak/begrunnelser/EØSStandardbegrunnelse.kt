@@ -1,12 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import com.fasterxml.jackson.annotation.JsonValue
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
-import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 
 enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     INNVILGET_PRIMÆRLAND_UK_STANDARD {
@@ -208,6 +202,30 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetSelvstendigRettSekundaerlandUkOgUtlandStandard"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_SELVSTENDIG_RETT_TILLEGGSTEKST_VEDTAK_FØR_SED {
+        override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstVedtakForSed"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SELVSTENDIG_RETT_TILLEGGSTEKST_SEKUNDÆR_FULL_UTBETALING {
+        override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstSekundaerFullUtbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SELVSTENDIG_RETT_TILLEGGSTEKST_NULLUTBETALING {
+        override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstNullutbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SELVSTENDIG_RETT_TILLEGGSTEKST_SEKUNDÆR_IKKE_FÅTT_SVAR_PÅ_SED {
+        override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstSekundaerIkkeFaattSvarPaaSed"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_TILLEGGSTEKST_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstDeltBosted"
+    },
+    INNVILGET_TILLEGGSTEKST_FULL_BARNETRYGD_HAR_AVTALE_DELT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstFullBarnetrygdHarAvtaleDelt"
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
@@ -275,6 +293,50 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_SELVSTENDIG_RETT_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorSelvstendigRettUtsendtArbedstakerFraAnnetEosLand"
+    },
+    OPPHØR_DELT_BOSTED_BEGGE_FORELDRE_IKKE_OMFATTET_NORSK_LOVGIVNING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorDeltBostedBeggeForeldreIkkeOmfattetNorskLovgivning"
+    },
+    OPPHØR_SELVSTENDIG_RETT_BARN_FLYTTET_FRA_SØKER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSelvstendigRettBarnFlyttetFraSoker"
+    },
+    OPPHOR_SELVSTENDIG_RETT_OPPHOR_FRA_START {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSelvstendigRettOpphorFraStart"
+    },
+    OPPHOR_SELVSTENDIG_RETT_VAR_IKKE_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EOS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSelvstendigRettVarIkkeUtsendtArbeidstakerFraAnnetEosLand"
+    },
+    OPPHOR_BARN_BODDE_IKKE_I_ET_EOS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorBarnBoddeIkkeIEtEosLand"
+    },
+    OPPHOR_SEPARASJONSAVTALEN_GJALDT_IKKE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSeparasjonsavtalenGjaldtIkke"
+    },
+    OPPHOR_NORGE_VAR_IKKE_SENTRUM_FOR_LIVSINTERESSE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorNorgeVarIkkeSentrumForLivsinteresse"
+    },
+    OPPHOR_HADDE_IKKE_ANSVAR_FOR_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorHaddeIkkeAnsvarForBarn"
+    },
+    OPPHOR_HADDE_IKKE_OPPHOLDSRETT_SOM_FAMILIEMEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorHaddeIkkeOppholdsrettSomFamiliemedlem"
+    },
+    OPPHOR_SOKER_OG_BARN_BODDE_IKKE_I_EOS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSokerOgBarnBoddeIkkeIEosLand"
+    },
+    OPPHOR_SOKER_BODDE_IKKE_I_EOS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSokerBoddeIkkeIEosLand"
     },
     AVSLAG_EØS_IKKE_EØS_BORGER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
@@ -351,6 +413,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     AVSLAG_SELVSTENDIG_RETT_BOR_IKKE_FAST_MED_BARNET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagSelvstendigRettBorIkkeFastMedBarnet"
+    },
+    AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagSelvstendigRettForeldreneBorSammen"
     },
     FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD {
         override val sanityApiNavn = "fortsattInnvilgetPrimaerlandStandard"
@@ -516,53 +582,26 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_TILLEGGSTEKST_VALUTAJUSTERING {
         override val sanityApiNavn = "reduksjonTilleggstekstValutajustering"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_TILLEGGSTEKST_NULLUTBETALING {
+        override val sanityApiNavn = "reduksjonTilleggstekstNullutbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_UK_MIDLERTIDIG_DIFFERANSEUTBETALING {
+        override val sanityApiNavn = "reduksjonUkMidlertidigDifferanseutbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_DELT_BOSTED_BEGGE_FORELDRE_IKKE_OMFATTET_NORSK_LOVVALG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+        override val sanityApiNavn = "reduksjonDeltBostedBeggeForeldreIkkeOmfattetNorskLovvalg"
+    },
+    REDUKSJON_SELVSTENDIG_RETT_BARN_FLYTTET_FRA_SØKER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+        override val sanityApiNavn = "reduksjonSelvstendigRettBarnFlyttetFraSoker"
     }, ;
 
     override val kanDelesOpp: Boolean = false
 
-    override fun delOpp(
-        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-        triggesAv: TriggesAv,
-        periode: NullablePeriode,
-    ): List<BrevBegrunnelseGrunnlagMedPersoner> {
-        throw Feil("Begrunnelse $this kan ikke deles opp.")
-    }
-
     @JsonValue
     override fun enumnavnTilString(): String = EØSStandardbegrunnelse::class.simpleName + "$" + this.name
-
-    fun tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>): EØSBegrunnelseMedTriggere? {
-        val sanityEØSBegrunnelse = sanityEØSBegrunnelser[this] ?: return null
-        return EØSBegrunnelseMedTriggere(
-            eøsBegrunnelse = this,
-            sanityEØSBegrunnelse = sanityEØSBegrunnelse,
-        )
-    }
-
-    companion object {
-        fun eøsPraksisendringBegrunnelser(): Set<EØSStandardbegrunnelse> = setOf(
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_STANDARD,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_OG_STANDARD,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UTSENDT_ARBEIDSTAKER,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_FÅR_YTELSE_I_UTLANDET,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_FÅR_YTELSE_I_UTLANDET,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_STANDARD,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_UK_STANDARD,
-            EØSStandardbegrunnelse.INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_UK_OG_UTLAND_STANDARD,
-            EØSStandardbegrunnelse.OPPHØR_SELVSTENDIG_RETT_OPPHØR,
-            EØSStandardbegrunnelse.OPPHØR_SELVSTENDIG_RETT_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EØS_LAND,
-            EØSStandardbegrunnelse.AVSLAG_SELVSTENDIG_RETT_STANDARD_AVSLAG,
-            EØSStandardbegrunnelse.AVSLAG_SELVSTENDIG_RETT_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EØS_LAND,
-            EØSStandardbegrunnelse.AVSLAG_SELVSTENDIG_RETT_BOR_IKKE_FAST_MED_BARNET,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_STANDARD,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_UK_OG_UTLAND_STANDARD,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_STANDARD,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_UK_STANDARD,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDAERLAND_UK_OG_UTLAND_STANDARD,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_FÅR_YTELSE_I_UTLANDET,
-            EØSStandardbegrunnelse.FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_FÅR_YTELSE_I_UTLANDET,
-        )
-    }
 }

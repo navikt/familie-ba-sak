@@ -48,7 +48,6 @@ import java.time.YearMonth
 import kotlin.random.Random
 
 class EndretUtbetalingAndelValideringTest {
-
     val søker = lagPerson(type = PersonType.SØKER)
     val barn = lagPerson(type = PersonType.BARN)
     val endretUtbetalingAndelUtvidetNullutbetaling =
@@ -60,33 +59,35 @@ class EndretUtbetalingAndelValideringTest {
     fun `skal sjekke at en endret periode ikke overlapper med eksisterende endringsperioder`() {
         val barn1 = tilfeldigPerson()
         val barn2 = tilfeldigPerson()
-        val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = 1,
-            person = barn1,
-            fom = YearMonth.of(2020, 2),
-            tom = YearMonth.of(2020, 6),
-            årsak = Årsak.DELT_BOSTED,
-            begrunnelse = "begrunnelse",
-            prosent = BigDecimal(100),
-            søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now(),
-        )
-
-        val feil = assertThrows<FunksjonellFeil> {
-            validerIngenOverlappendeEndring(
-                endretUtbetalingAndel,
-                listOf(
-                    endretUtbetalingAndel.copy(
-                        fom = YearMonth.of(2018, 4),
-                        tom = YearMonth.of(2019, 2),
-                    ),
-                    endretUtbetalingAndel.copy(
-                        fom = YearMonth.of(2020, 4),
-                        tom = YearMonth.of(2021, 2),
-                    ),
-                ),
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                person = barn1,
+                fom = YearMonth.of(2020, 2),
+                tom = YearMonth.of(2020, 6),
+                årsak = Årsak.DELT_BOSTED,
+                begrunnelse = "begrunnelse",
+                prosent = BigDecimal(100),
+                søknadstidspunkt = LocalDate.now(),
+                avtaletidspunktDeltBosted = LocalDate.now(),
             )
-        }
+
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                validerIngenOverlappendeEndring(
+                    endretUtbetalingAndel,
+                    listOf(
+                        endretUtbetalingAndel.copy(
+                            fom = YearMonth.of(2018, 4),
+                            tom = YearMonth.of(2019, 2),
+                        ),
+                        endretUtbetalingAndel.copy(
+                            fom = YearMonth.of(2020, 4),
+                            tom = YearMonth.of(2021, 2),
+                        ),
+                    ),
+                )
+            }
         assertEquals(
             "Perioden som blir forsøkt lagt til overlapper med eksisterende periode på person.",
             feil.melding,
@@ -117,120 +118,130 @@ class EndretUtbetalingAndelValideringTest {
         val barn1 = tilfeldigPerson()
         val barn2 = tilfeldigPerson()
 
-        val andelTilkjentYtelser = listOf(
-            lagAndelTilkjentYtelse(
+        val andelTilkjentYtelser =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2020, 2),
+                    tom = YearMonth.of(2020, 4),
+                    person = barn1,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2020, 7),
+                    tom = YearMonth.of(2020, 10),
+                    person = barn1,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2018, 10),
+                    tom = YearMonth.of(2021, 10),
+                    person = barn2,
+                ),
+            )
+
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                person = barn1,
                 fom = YearMonth.of(2020, 2),
-                tom = YearMonth.of(2020, 4),
-                person = barn1,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = YearMonth.of(2020, 7),
-                tom = YearMonth.of(2020, 10),
-                person = barn1,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = YearMonth.of(2018, 10),
-                tom = YearMonth.of(2021, 10),
-                person = barn2,
-            ),
-        )
+                tom = YearMonth.of(2020, 6),
+                årsak = Årsak.DELT_BOSTED,
+                begrunnelse = "begrunnelse",
+                prosent = BigDecimal(100),
+                søknadstidspunkt = LocalDate.now(),
+                avtaletidspunktDeltBosted = LocalDate.now(),
+            )
 
-        val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = 1,
-            person = barn1,
-            fom = YearMonth.of(2020, 2),
-            tom = YearMonth.of(2020, 6),
-            årsak = Årsak.DELT_BOSTED,
-            begrunnelse = "begrunnelse",
-            prosent = BigDecimal(100),
-            søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now(),
-        )
-
-        var feil = assertThrows<FunksjonellFeil> {
-            validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, emptyList())
-        }
+        var feil =
+            assertThrows<FunksjonellFeil> {
+                validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, emptyList())
+            }
         assertEquals(
             "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
             feil.melding,
         )
 
-        val endretUtbetalingAndelerSomIkkeValiderer = listOf(
-            endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 11)),
-            endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 4)),
-            endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 11)),
-        )
+        val endretUtbetalingAndelerSomIkkeValiderer =
+            listOf(
+                endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 11)),
+                endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 4)),
+                endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 11)),
+            )
 
         endretUtbetalingAndelerSomIkkeValiderer.forEach {
-            feil = assertThrows {
-                validerPeriodeInnenforTilkjentytelse(it, andelTilkjentYtelser)
-            }
+            feil =
+                assertThrows {
+                    validerPeriodeInnenforTilkjentytelse(it, andelTilkjentYtelser)
+                }
             assertEquals(
                 "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
                 feil.melding,
             )
         }
 
-        val endretUtbetalingAndelerSomValiderer = listOf(
-            endretUtbetalingAndel,
-            endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 10)),
-            endretUtbetalingAndel.copy(fom = YearMonth.of(2018, 10), tom = YearMonth.of(2021, 10), person = barn2),
-        )
+        val endretUtbetalingAndelerSomValiderer =
+            listOf(
+                endretUtbetalingAndel,
+                endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 10)),
+                endretUtbetalingAndel.copy(fom = YearMonth.of(2018, 10), tom = YearMonth.of(2021, 10), person = barn2),
+            )
 
         endretUtbetalingAndelerSomValiderer.forEach { validerPeriodeInnenforTilkjentytelse(it, andelTilkjentYtelser) }
     }
 
     @Test
     fun `Skal kaste feil hvis endringsperiode med årsak delt bosted ikke overlapper helt med delt bosted periode`() {
-        val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = 1,
-            person = tilfeldigPerson(),
-            fom = YearMonth.of(2020, 2),
-            tom = YearMonth.of(2020, 6),
-            årsak = Årsak.DELT_BOSTED,
-            begrunnelse = "begrunnelse",
-            prosent = BigDecimal(100),
-            søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now(),
-        )
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                person = tilfeldigPerson(),
+                fom = YearMonth.of(2020, 2),
+                tom = YearMonth.of(2020, 6),
+                årsak = Årsak.DELT_BOSTED,
+                begrunnelse = "begrunnelse",
+                prosent = BigDecimal(100),
+                søknadstidspunkt = LocalDate.now(),
+                avtaletidspunktDeltBosted = LocalDate.now(),
+            )
         assertThrows<FunksjonellFeil> {
             validerDeltBosted(
                 endretUtbetalingAndel = endretUtbetalingAndel,
-                deltBostedPerioder = listOf(
-                    MånedPeriode(
-                        fom = YearMonth.of(2020, 2),
-                        tom = YearMonth.of(2020, 4),
+                deltBostedPerioder =
+                    listOf(
+                        MånedPeriode(
+                            fom = YearMonth.of(2020, 2),
+                            tom = YearMonth.of(2020, 4),
+                        ),
                     ),
-                ),
             )
         }
 
         assertThrows<FunksjonellFeil> {
             validerDeltBosted(
                 endretUtbetalingAndel = endretUtbetalingAndel,
-                deltBostedPerioder = listOf(
-                    MånedPeriode(
-                        fom = YearMonth.of(2020, 7),
-                        tom = YearMonth.of(2020, 10),
+                deltBostedPerioder =
+                    listOf(
+                        MånedPeriode(
+                            fom = YearMonth.of(2020, 7),
+                            tom = YearMonth.of(2020, 10),
+                        ),
                     ),
-                ),
             )
         }
     }
 
     @Test
     fun `Skal kaste feil hvis endringsårsak er delt bosted og det ikke eksisterer delt bosted perioder`() {
-        val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = 1,
-            person = tilfeldigPerson(),
-            fom = YearMonth.of(2020, 2),
-            tom = YearMonth.of(2020, 6),
-            årsak = Årsak.DELT_BOSTED,
-            begrunnelse = "begrunnelse",
-            prosent = BigDecimal(100),
-            søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now(),
-        )
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                person = tilfeldigPerson(),
+                fom = YearMonth.of(2020, 2),
+                tom = YearMonth.of(2020, 6),
+                årsak = Årsak.DELT_BOSTED,
+                begrunnelse = "begrunnelse",
+                prosent = BigDecimal(100),
+                søknadstidspunkt = LocalDate.now(),
+                avtaletidspunktDeltBosted = LocalDate.now(),
+            )
         assertThrows<FunksjonellFeil> {
             validerDeltBosted(
                 endretUtbetalingAndel = endretUtbetalingAndel,
@@ -241,37 +252,40 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal ikke kaste feil hvis endringsperiode med årsak delt bosted overlapper helt med delt bosted periode`() {
-        val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = 1,
-            person = tilfeldigPerson(),
-            fom = YearMonth.of(2020, 2),
-            tom = YearMonth.of(2020, 6),
-            årsak = Årsak.DELT_BOSTED,
-            begrunnelse = "begrunnelse",
-            prosent = BigDecimal(100),
-            søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now(),
-        )
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                person = tilfeldigPerson(),
+                fom = YearMonth.of(2020, 2),
+                tom = YearMonth.of(2020, 6),
+                årsak = Årsak.DELT_BOSTED,
+                begrunnelse = "begrunnelse",
+                prosent = BigDecimal(100),
+                søknadstidspunkt = LocalDate.now(),
+                avtaletidspunktDeltBosted = LocalDate.now(),
+            )
         assertDoesNotThrow {
             validerDeltBosted(
                 endretUtbetalingAndel = endretUtbetalingAndel,
-                deltBostedPerioder = listOf(
-                    MånedPeriode(
-                        fom = YearMonth.of(2020, 2),
-                        tom = YearMonth.of(2020, 6),
+                deltBostedPerioder =
+                    listOf(
+                        MånedPeriode(
+                            fom = YearMonth.of(2020, 2),
+                            tom = YearMonth.of(2020, 6),
+                        ),
                     ),
-                ),
             )
         }
         assertDoesNotThrow {
             validerDeltBosted(
                 endretUtbetalingAndel = endretUtbetalingAndel,
-                deltBostedPerioder = listOf(
-                    MånedPeriode(
-                        fom = YearMonth.of(2020, 1),
-                        tom = YearMonth.of(2020, 7),
+                deltBostedPerioder =
+                    listOf(
+                        MånedPeriode(
+                            fom = YearMonth.of(2020, 1),
+                            tom = YearMonth.of(2020, 7),
+                        ),
                     ),
-                ),
             )
         }
     }
@@ -282,14 +296,15 @@ class EndretUtbetalingAndelValideringTest {
         val endretUtbetalingAndel2 = lagEndretUtbetalingAndel(person = tilfeldigPerson())
         validerAtAlleOpprettedeEndringerErUtfylt(listOf(endretUtbetalingAndel1, endretUtbetalingAndel2))
 
-        val feil = assertThrows<FunksjonellFeil> {
-            validerAtAlleOpprettedeEndringerErUtfylt(
-                listOf(
-                    endretUtbetalingAndel1,
-                    endretUtbetalingAndel2.copy(fom = null),
-                ),
-            )
-        }
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                validerAtAlleOpprettedeEndringerErUtfylt(
+                    listOf(
+                        endretUtbetalingAndel1,
+                        endretUtbetalingAndel2.copy(fom = null),
+                    ),
+                )
+            }
         assertEquals(
             "Det er opprettet instanser av EndretUtbetalingandel som ikke er fylt ut før navigering til neste steg.",
             feil.melding,
@@ -299,9 +314,10 @@ class EndretUtbetalingAndelValideringTest {
     @Test
     fun `sjekk at alle endrede utbetalingsandeler er tilknyttet andeltilkjentytelser`() {
         val endretUtbetalingAndel1 = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(person = tilfeldigPerson())
-        val feil = assertThrows<FunksjonellFeil> {
-            validerAtEndringerErTilknyttetAndelTilkjentYtelse(listOf(endretUtbetalingAndel1))
-        }
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                validerAtEndringerErTilknyttetAndelTilkjentYtelse(listOf(endretUtbetalingAndel1))
+            }
         assertEquals(
             "Det er opprettet instanser av EndretUtbetalingandel som ikke er tilknyttet noen andeler. De må enten lagres eller slettes av SB.",
             feil.melding,
@@ -380,19 +396,20 @@ class EndretUtbetalingAndelValideringTest {
         }
         personResultatForPerson.setSortedVilkårResultater(vilkårResultaterForPerson)
 
-        vilkårsvurdering.personResultater = setOf(
-            personResultatForPerson,
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                person = lagPerson(type = PersonType.BARN, fødselsdato = fom.minusYears(4)),
-                resultat = Resultat.OPPFYLT,
-                personType = PersonType.BARN,
-                periodeFom = fom.minusMonths(3),
-                periodeTom = tom.plusMonths(4),
-                erDeltBosted = true,
-                vilkårType = Vilkår.BOR_MED_SØKER,
-            ),
-        )
+        vilkårsvurdering.personResultater =
+            setOf(
+                personResultatForPerson,
+                lagPersonResultat(
+                    vilkårsvurdering = vilkårsvurdering,
+                    person = lagPerson(type = PersonType.BARN, fødselsdato = fom.minusYears(4)),
+                    resultat = Resultat.OPPFYLT,
+                    personType = PersonType.BARN,
+                    periodeFom = fom.minusMonths(3),
+                    periodeTom = tom.plusMonths(4),
+                    erDeltBosted = true,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                ),
+            )
 
         val deltBostedPerioder = finnDeltBostedPerioder(person = barn, vilkårsvurdering = vilkårsvurdering)
 
@@ -462,20 +479,21 @@ class EndretUtbetalingAndelValideringTest {
         }
         personResultatForPerson.setSortedVilkårResultater(vilkårResultaterForPerson)
 
-        vilkårsvurdering.personResultater = setOf(
-            personResultatForPerson,
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                person = lagPerson(type = PersonType.BARN, fødselsdato = fom1.minusYears(5)),
-                resultat = Resultat.OPPFYLT,
-                personType = PersonType.BARN,
-                periodeFom = fom1.minusMonths(3),
-                periodeTom = tom2.plusMonths(4),
-                erDeltBosted = true,
-                vilkårType = Vilkår.BOR_MED_SØKER,
-                lagFullstendigVilkårResultat = true,
-            ),
-        )
+        vilkårsvurdering.personResultater =
+            setOf(
+                personResultatForPerson,
+                lagPersonResultat(
+                    vilkårsvurdering = vilkårsvurdering,
+                    person = lagPerson(type = PersonType.BARN, fødselsdato = fom1.minusYears(5)),
+                    resultat = Resultat.OPPFYLT,
+                    personType = PersonType.BARN,
+                    periodeFom = fom1.minusMonths(3),
+                    periodeTom = tom2.plusMonths(4),
+                    erDeltBosted = true,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    lagFullstendigVilkårResultat = true,
+                ),
+            )
 
         val deltBostedPerioder = finnDeltBostedPerioder(person = barn, vilkårsvurdering = vilkårsvurdering)
 
@@ -551,20 +569,21 @@ class EndretUtbetalingAndelValideringTest {
         }
         personResultatForPerson.setSortedVilkårResultater(vilkårResultaterForPerson)
 
-        vilkårsvurdering.personResultater = setOf(
-            personResultatForPerson,
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                person = lagPerson(type = PersonType.BARN, fødselsdato = fomBarn2),
-                resultat = Resultat.OPPFYLT,
-                personType = PersonType.BARN,
-                periodeFom = fomBarn2,
-                periodeTom = fomBarn1,
-                erDeltBosted = true,
-                vilkårType = Vilkår.BOR_MED_SØKER,
-                lagFullstendigVilkårResultat = true,
-            ),
-        )
+        vilkårsvurdering.personResultater =
+            setOf(
+                personResultatForPerson,
+                lagPersonResultat(
+                    vilkårsvurdering = vilkårsvurdering,
+                    person = lagPerson(type = PersonType.BARN, fødselsdato = fomBarn2),
+                    resultat = Resultat.OPPFYLT,
+                    personType = PersonType.BARN,
+                    periodeFom = fomBarn2,
+                    periodeTom = fomBarn1,
+                    erDeltBosted = true,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    lagFullstendigVilkårResultat = true,
+                ),
+            )
 
         val deltBostedPerioder = finnDeltBostedPerioder(person = søker, vilkårsvurdering = vilkårsvurdering)
 
@@ -634,20 +653,21 @@ class EndretUtbetalingAndelValideringTest {
         }
         personResultatForPerson.setSortedVilkårResultater(vilkårResultaterForPerson)
 
-        vilkårsvurdering.personResultater = setOf(
-            personResultatForPerson,
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                person = lagPerson(type = PersonType.BARN, fødselsdato = fomBarn2),
-                resultat = Resultat.OPPFYLT,
-                personType = PersonType.BARN,
-                periodeFom = fomBarn2,
-                periodeTom = tomBarn1,
-                erDeltBosted = true,
-                vilkårType = Vilkår.BOR_MED_SØKER,
-                lagFullstendigVilkårResultat = true,
-            ),
-        )
+        vilkårsvurdering.personResultater =
+            setOf(
+                personResultatForPerson,
+                lagPersonResultat(
+                    vilkårsvurdering = vilkårsvurdering,
+                    person = lagPerson(type = PersonType.BARN, fødselsdato = fomBarn2),
+                    resultat = Resultat.OPPFYLT,
+                    personType = PersonType.BARN,
+                    periodeFom = fomBarn2,
+                    periodeTom = tomBarn1,
+                    erDeltBosted = true,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    lagFullstendigVilkårResultat = true,
+                ),
+            )
 
         val deltBostedPerioder = finnDeltBostedPerioder(person = søker, vilkårsvurdering = vilkårsvurdering)
 
@@ -663,22 +683,23 @@ class EndretUtbetalingAndelValideringTest {
         val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(4))
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
-        vilkårsvurdering.personResultater = setOf(
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                person = barn1,
-                periodeFom = LocalDate.now().minusMonths(7),
-                periodeTom = LocalDate.now(),
-                resultat = Resultat.OPPFYLT,
-            ),
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                person = barn2,
-                periodeFom = LocalDate.now().minusMonths(4),
-                periodeTom = LocalDate.now(),
-                resultat = Resultat.OPPFYLT,
-            ),
-        )
+        vilkårsvurdering.personResultater =
+            setOf(
+                lagPersonResultat(
+                    vilkårsvurdering = vilkårsvurdering,
+                    person = barn1,
+                    periodeFom = LocalDate.now().minusMonths(7),
+                    periodeTom = LocalDate.now(),
+                    resultat = Resultat.OPPFYLT,
+                ),
+                lagPersonResultat(
+                    vilkårsvurdering = vilkårsvurdering,
+                    person = barn2,
+                    periodeFom = LocalDate.now().minusMonths(4),
+                    periodeTom = LocalDate.now(),
+                    resultat = Resultat.OPPFYLT,
+                ),
+            )
 
         val deltBostedPerioder = finnDeltBostedPerioder(person = barn1, vilkårsvurdering = vilkårsvurdering)
 
@@ -720,13 +741,14 @@ class EndretUtbetalingAndelValideringTest {
             person = person,
             årsak = Årsak.DELT_BOSTED,
             prosent = prosent,
-            andelTilkjentYtelser = mutableListOf(
-                lagAndelTilkjentYtelse(
-                    fom = fomUtvidet,
-                    tom = tomUtvidet,
-                    ytelseType = ytelsestype,
+            andelTilkjentYtelser =
+                mutableListOf(
+                    lagAndelTilkjentYtelse(
+                        fom = fomUtvidet,
+                        tom = tomUtvidet,
+                        ytelseType = ytelsestype,
+                    ),
                 ),
-            ),
         )
     }
 
@@ -780,24 +802,26 @@ class EndretUtbetalingAndelValideringTest {
         mockkStatic(YearMonth::class)
         every { YearMonth.now() } returns innværendeMåned
 
-        val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = 1,
-            person = tilfeldigPerson(),
-            fom = YearMonth.of(2022, 2),
-            tom = YearMonth.of(2022, 6),
-            årsak = Årsak.ALLEREDE_UTBETALT,
-            begrunnelse = "begrunnelse",
-            prosent = BigDecimal(100),
-            søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now(),
-        )
-
-        val feilmelding = assertThrows<FunksjonellFeil> {
-            validerÅrsak(
-                endretUtbetalingAndel = endretUtbetalingAndel,
-                vilkårsvurdering = mockk(),
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                person = tilfeldigPerson(),
+                fom = YearMonth.of(2022, 2),
+                tom = YearMonth.of(2022, 6),
+                årsak = Årsak.ALLEREDE_UTBETALT,
+                begrunnelse = "begrunnelse",
+                prosent = BigDecimal(100),
+                søknadstidspunkt = LocalDate.now(),
+                avtaletidspunktDeltBosted = LocalDate.now(),
             )
-        }.frontendFeilmelding
+
+        val feilmelding =
+            assertThrows<FunksjonellFeil> {
+                validerÅrsak(
+                    endretUtbetalingAndel = endretUtbetalingAndel,
+                    vilkårsvurdering = mockk(),
+                )
+            }.frontendFeilmelding
 
         assertEquals(
             "Du har valgt årsaken allerede utbetalt. Du kan ikke velge denne årsaken og en til og med dato frem i tid. Ta kontakt med superbruker om du er usikker på hva du skal gjøre.",
@@ -812,17 +836,18 @@ class EndretUtbetalingAndelValideringTest {
         mockkStatic(YearMonth::class)
         every { YearMonth.now() } returns innværendeMåned
 
-        val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = 1,
-            person = tilfeldigPerson(),
-            fom = YearMonth.of(2022, 2),
-            tom = YearMonth.of(2022, 6),
-            årsak = Årsak.ALLEREDE_UTBETALT,
-            begrunnelse = "begrunnelse",
-            prosent = BigDecimal(100),
-            søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now(),
-        )
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                person = tilfeldigPerson(),
+                fom = YearMonth.of(2022, 2),
+                tom = YearMonth.of(2022, 6),
+                årsak = Årsak.ALLEREDE_UTBETALT,
+                begrunnelse = "begrunnelse",
+                prosent = BigDecimal(100),
+                søknadstidspunkt = LocalDate.now(),
+                avtaletidspunktDeltBosted = LocalDate.now(),
+            )
 
         assertDoesNotThrow {
             validerÅrsak(

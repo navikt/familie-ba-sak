@@ -22,25 +22,26 @@ import org.springframework.web.client.HttpClientErrorException
 class SamhandlerController(
     private val institusjonService: InstitusjonService,
 ) {
-
     @GetMapping(path = ["/orgnr/{orgnr}"])
     fun hentSamhandlerDataForOrganisasjon(
         @PathVariable("orgnr") orgNummer: String,
-    ): Ressurs<SamhandlerInfo> = try {
-        Ressurs.success(institusjonService.hentSamhandler(orgNummer).copy(orgNummer = orgNummer))
-    } catch (e: Exception) {
-        if (e.erNotFound()) {
-            throw FunksjonellFeil(
-                "Finner ikke institusjon. Kontakt NØS for å opprette TSS-ident.",
-                httpStatus = HttpStatus.NOT_FOUND,
-                throwable = e,
-            )
+    ): Ressurs<SamhandlerInfo> =
+        try {
+            Ressurs.success(institusjonService.hentSamhandler(orgNummer).copy(orgNummer = orgNummer))
+        } catch (e: Exception) {
+            if (e.erNotFound()) {
+                throw FunksjonellFeil(
+                    "Finner ikke institusjon. Kontakt NØS for å opprette TSS-ident.",
+                    httpStatus = HttpStatus.NOT_FOUND,
+                    throwable = e,
+                )
+            }
+            throw e
         }
-        throw e
-    }
 
-    fun Exception.erNotFound() = (this is RessursException && httpStatus == HttpStatus.NOT_FOUND) ||
-        (this is HttpClientErrorException && statusCode == HttpStatus.NOT_FOUND)
+    fun Exception.erNotFound() =
+        (this is RessursException && httpStatus == HttpStatus.NOT_FOUND) ||
+            (this is HttpClientErrorException && statusCode == HttpStatus.NOT_FOUND)
 
     @PostMapping(path = ["/navn"])
     fun søkSamhandlerinfoFraNavn(

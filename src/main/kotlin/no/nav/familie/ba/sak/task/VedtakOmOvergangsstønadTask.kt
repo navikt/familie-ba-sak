@@ -20,7 +20,6 @@ class VedtakOmOvergangsstønadTask(
     private val autovedtakStegService: AutovedtakStegService,
     private val personidentService: PersonidentService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val personIdent = task.payload
         logger.info("Håndterer vedtak om overgangsstønad. Se secureLog for detaljer")
@@ -28,15 +27,15 @@ class VedtakOmOvergangsstønadTask(
 
         val aktør = personidentService.hentAktør(personIdent)
 
-        val responseFraService = autovedtakStegService.kjørBehandlingSmåbarnstillegg(
-            mottakersAktør = aktør,
-            aktør = aktør,
-        )
+        val responseFraService =
+            autovedtakStegService.kjørBehandlingSmåbarnstillegg(
+                mottakersAktør = aktør,
+                aktør = aktør,
+            )
         secureLogger.info("Håndterte vedtak om overgangsstønad for person $personIdent:\n$responseFraService")
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "vedtakOmOvergangsstønadTask"
         private val logger = LoggerFactory.getLogger(VedtakOmOvergangsstønadTask::class.java)
 
@@ -44,9 +43,10 @@ class VedtakOmOvergangsstønadTask(
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = personIdent,
-                properties = Properties().apply {
-                    this["personIdent"] = personIdent
-                },
+                properties =
+                    Properties().apply {
+                        this["personIdent"] = personIdent
+                    },
             )
         }
     }

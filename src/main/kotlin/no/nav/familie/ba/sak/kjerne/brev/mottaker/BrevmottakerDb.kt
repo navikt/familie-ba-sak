@@ -17,42 +17,33 @@ import org.hibernate.Hibernate
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Brevmottaker")
 @Table(name = "BREVMOTTAKER")
-data class Brevmottaker(
+data class BrevmottakerDb(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "brevmottaker_seq_generator")
     @SequenceGenerator(name = "brevmottaker_seq_generator", sequenceName = "brevmottaker_seq", allocationSize = 50)
     val id: Long = 0,
-
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     var type: MottakerType,
-
     @Column(name = "navn", nullable = false, length = 70)
     var navn: String,
-
     @Column(name = "adresselinje_1", nullable = false, length = 40)
     var adresselinje1: String,
-
     @Column(name = "adresselinje_2", length = 40)
     var adresselinje2: String? = null,
-
     @Column(name = "postnummer", nullable = false, length = 10)
     var postnummer: String,
-
     @Column(name = "poststed", nullable = false, length = 30)
     var poststed: String,
-
     @Column(name = "landkode", nullable = false, length = 2)
     var landkode: String,
 ) : BaseEntitet() {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
-        other as Brevmottaker
+        other as BrevmottakerDb
 
         return id == other.id
     }

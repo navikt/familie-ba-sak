@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.t
 class VilkårResultatTidslinje(
     private val vilkårResultater: Collection<VilkårResultat>,
 ) : Tidslinje<VilkårResultat, Dag>() {
-
     override fun lagPerioder(): List<Periode<VilkårResultat, Dag>> =
         vilkårResultater.map {
             Periode(

@@ -26,7 +26,6 @@ class FerdigstillBehandling(
     private val loggService: LoggService,
     private val snikeIKøenService: SnikeIKøenService,
 ) : BehandlingSteg<String> {
-
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
         data: String,
@@ -88,7 +87,6 @@ class FerdigstillBehandling(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(FerdigstillBehandling::class.java)
     }
 }

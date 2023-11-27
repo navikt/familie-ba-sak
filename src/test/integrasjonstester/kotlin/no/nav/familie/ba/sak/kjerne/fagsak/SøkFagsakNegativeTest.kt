@@ -30,7 +30,6 @@ import org.springframework.test.context.ContextConfiguration
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 class SøkFagsakNegativeTest {
-
     @Autowired
     lateinit var fagsakService: FagsakService
 

@@ -29,7 +29,10 @@ class PdlIdentRestClient(
     private val hentIdenterQuery = hentGraphqlQuery("hentIdenter")
 
     @Cacheable("identer", cacheManager = "shortCache")
-    fun hentIdenter(personIdent: String, historikk: Boolean): List<IdentInformasjon> {
+    fun hentIdenter(
+        personIdent: String,
+        historikk: Boolean,
+    ): List<IdentInformasjon> {
         val pdlIdenter = hentIdenter(personIdent)
 
         return if (historikk) {
@@ -40,21 +43,23 @@ class PdlIdentRestClient(
     }
 
     private fun hentIdenter(personIdent: String): PdlIdenter {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(personIdent),
-            query = hentIdenterQuery,
-        )
-        val pdlResponse: PdlBaseResponse<PdlHentIdenterResponse> = kallEksternTjeneste(
-            tjeneste = "pdl",
-            uri = pdlUri,
-            formål = "Hent identer",
-        ) {
-            postForEntity(
-                pdlUri,
-                pdlPersonRequest,
-                httpHeaders(),
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(personIdent),
+                query = hentIdenterQuery,
             )
-        }
+        val pdlResponse: PdlBaseResponse<PdlHentIdenterResponse> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent identer",
+            ) {
+                postForEntity(
+                    pdlUri,
+                    pdlPersonRequest,
+                    httpHeaders(),
+                )
+            }
 
         return feilsjekkOgReturnerData(
             ident = personIdent,
@@ -74,7 +79,6 @@ class PdlIdentRestClient(
     }
 
     companion object {
-
         private const val PATH_GRAPHQL = "graphql"
         private const val PDL_TEMA = "BAR"
     }

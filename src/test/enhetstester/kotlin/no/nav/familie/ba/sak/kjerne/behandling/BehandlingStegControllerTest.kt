@@ -15,19 +15,19 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class BehandlingStegControllerTest {
-
     private val unleashService = mockk<UnleashNextMedContextService>()
     private val tilgangServiceMock = mockk<TilgangService>()
     private val behandlingHentOgPersisterServiceMock = mockk<BehandlingHentOgPersisterService>()
     private val stegServiceMock = mockk<StegService>()
     private val utvidetBehandlingServiceMock = mockk<UtvidetBehandlingService>()
-    private val behandlingStegController = BehandlingStegController(
-        behandlingHentOgPersisterService = behandlingHentOgPersisterServiceMock,
-        stegService = stegServiceMock,
-        tilgangService = tilgangServiceMock,
-        unleashService = unleashService,
-        utvidetBehandlingService = utvidetBehandlingServiceMock,
-    )
+    private val behandlingStegController =
+        BehandlingStegController(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterServiceMock,
+            stegService = stegServiceMock,
+            tilgangService = tilgangServiceMock,
+            unleashService = unleashService,
+            utvidetBehandlingService = utvidetBehandlingServiceMock,
+        )
 
     @Test
     fun `Skal kaste feil hvis saksbehandler uten teknisk endring-tilgang prøver å henlegge en behandling med årsak=teknisk endring`() {
@@ -47,10 +47,11 @@ class BehandlingStegControllerTest {
         assertThrows<FunksjonellFeil> {
             behandlingStegController.henleggBehandlingOgSendBrev(
                 behandlingId = behandling.id,
-                henleggInfo = RestHenleggBehandlingInfo(
-                    begrunnelse = "dette er en begrunnelse",
-                    årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
-                ),
+                henleggInfo =
+                    RestHenleggBehandlingInfo(
+                        begrunnelse = "dette er en begrunnelse",
+                        årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
+                    ),
             )
         }
     }

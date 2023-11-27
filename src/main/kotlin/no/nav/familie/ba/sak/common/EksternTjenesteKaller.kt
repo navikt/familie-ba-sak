@@ -9,6 +9,7 @@ import org.springframework.web.client.HttpClientErrorException
 import java.net.URI
 
 val eksternTjenesteKallerLogger = LoggerFactory.getLogger("eksternTjenesteKaller")
+
 inline fun <reified Data> kallEksternTjeneste(
     tjeneste: String,
     uri: URI,
@@ -118,11 +119,12 @@ private fun opprettIntegrasjonsException(
     exception: Exception,
     formål: String,
 ): IntegrasjonException {
-    val melding = if (exception is RessursException) {
-        exception.ressurs.melding
-    } else {
-        exception.message
-    }
+    val melding =
+        if (exception is RessursException) {
+            exception.ressurs.melding
+        } else {
+            exception.message
+        }
     return IntegrasjonException(
         msg = "${
             lagEksternKallPreMelding(

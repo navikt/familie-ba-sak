@@ -35,7 +35,6 @@ import java.time.format.DateTimeParseException
 
 @ControllerAdvice
 class ApiExceptionHandler {
-
     private val logger = LoggerFactory.getLogger(ApiExceptionHandler::class.java)
 
     @ExceptionHandler(JwtTokenUnauthorizedException::class)

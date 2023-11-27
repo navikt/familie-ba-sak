@@ -48,26 +48,19 @@ import java.time.YearMonth
 internal class StønadsstatistikkServiceTest(
     @MockK(relaxed = true)
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-
     @MockK
     private val persongrunnlagService: PersongrunnlagService,
-
     @MockK
     private val vedtakService: VedtakService,
-
     @MockK
     private val personopplysningerService: PersonopplysningerService,
-
     @MockK
     private val kompetanseService: KompetanseService,
-
     @MockK
     private val vedtakRepository: VedtakRepository,
-
     @MockK
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
-
     private val stønadsstatistikkService =
         StønadsstatistikkService(
             behandlingHentOgPersisterService,
@@ -89,65 +82,69 @@ internal class StønadsstatistikkServiceTest(
 
         val vedtak = lagVedtak(behandling)
 
-        val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-            barn1.fødselsdato.nesteMåned(),
-            barn1.fødselsdato.plusYears(3).toYearMonth(),
-            YtelseType.ORDINÆR_BARNETRYGD,
-            behandling = behandling,
-            person = barn1,
-            aktør = barn1.aktør,
-            periodeIdOffset = 1,
+        val andelTilkjentYtelseBarn1 =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                barn1.fødselsdato.nesteMåned(),
+                barn1.fødselsdato.plusYears(3).toYearMonth(),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                behandling = behandling,
+                person = barn1,
+                aktør = barn1.aktør,
+                periodeIdOffset = 1,
+            )
+        val andelTilkjentYtelseBarn2PeriodeMed0Beløp =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                barn2.fødselsdato.nesteMåned(),
+                barn2.fødselsdato.plusYears(18).forrigeMåned(),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                behandling = behandling,
+                person = barn2,
+                beløp = 0,
+                aktør = barn2.aktør,
+                prosent = BigDecimal(0),
+                periodeIdOffset = null,
+            )
 
-        )
-        val andelTilkjentYtelseBarn2PeriodeMed0Beløp = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-            barn2.fødselsdato.nesteMåned(),
-            barn2.fødselsdato.plusYears(18).forrigeMåned(),
-            YtelseType.ORDINÆR_BARNETRYGD,
-            behandling = behandling,
-            person = barn2,
-            beløp = 0,
-            aktør = barn2.aktør,
-            prosent = BigDecimal(0),
-            periodeIdOffset = null,
-        )
+        val kompetanseperioder =
+            setOf<no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse>(
+                no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse(
+                    fom = YearMonth.now(),
+                    tom = null,
+                    barnAktører = setOf(barn1.aktør),
+                    søkersAktivitet = KompetanseAktivitet.ARBEIDER,
+                    annenForeldersAktivitet = KompetanseAktivitet.I_ARBEID,
+                    annenForeldersAktivitetsland = "PL",
+                    barnetsBostedsland = "PL",
+                    resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                ),
+                no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse(
+                    fom = null,
+                    tom = null,
+                    barnAktører = emptySet(),
+                    søkersAktivitet = null,
+                    annenForeldersAktivitet = null,
+                    annenForeldersAktivitetsland = null,
+                    barnetsBostedsland = null,
+                    resultat = null,
+                ),
+            )
 
-        val kompetanseperioder = setOf<no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse>(
-            no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse(
-                fom = YearMonth.now(),
-                tom = null,
-                barnAktører = setOf(barn1.aktør),
-                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
-                annenForeldersAktivitet = KompetanseAktivitet.I_ARBEID,
-                annenForeldersAktivitetsland = "PL",
-                barnetsBostedsland = "PL",
-                resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            ),
-            no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse(
-                fom = null,
-                tom = null,
-                barnAktører = emptySet(),
-                søkersAktivitet = null,
-                annenForeldersAktivitet = null,
-                annenForeldersAktivitetsland = null,
-                barnetsBostedsland = null,
-                resultat = null,
-            ),
-        )
+        val andelTilkjentYtelseSøker =
+            lagAndelTilkjentYtelseUtvidet(
+                barn2.fødselsdato.nesteMåned().toString(),
+                barn2.fødselsdato.plusYears(2).toYearMonth().toString(),
+                YtelseType.UTVIDET_BARNETRYGD,
+                behandling = behandling,
+                person = personopplysningGrunnlag.søker,
+                periodeIdOffset = 3,
+            )
 
-        val andelTilkjentYtelseSøker = lagAndelTilkjentYtelseUtvidet(
-            barn2.fødselsdato.nesteMåned().toString(),
-            barn2.fødselsdato.plusYears(2).toYearMonth().toString(),
-            YtelseType.UTVIDET_BARNETRYGD,
-            behandling = behandling,
-            person = personopplysningGrunnlag.søker,
-            periodeIdOffset = 3,
-        )
-
-        val andelerTilkjentYtelse = listOf(
-            andelTilkjentYtelseBarn1,
-            andelTilkjentYtelseBarn2PeriodeMed0Beløp,
-            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelseSøker),
-        )
+        val andelerTilkjentYtelse =
+            listOf(
+                andelTilkjentYtelseBarn1,
+                andelTilkjentYtelseBarn2PeriodeMed0Beløp,
+                AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelseSøker),
+            )
 
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { kompetanseService.hentKompetanser(any()) } returns kompetanseperioder
@@ -284,8 +281,9 @@ internal class StønadsstatistikkServiceTest(
      */
     @Test
     fun `Skal gi feil hvis det kommer en ny BehandlingType som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
-        val behandlingsTypeIBasak = enumValues<BehandlingType>().map { it.name }
-            .filter { it != BehandlingType.TEKNISK_OPPHØR.name } // TEKNISK_OPPHØR er ikke i bruk
+        val behandlingsTypeIBasak =
+            enumValues<BehandlingType>().map { it.name }
+                .filter { it != BehandlingType.TEKNISK_OPPHØR.name } // TEKNISK_OPPHØR er ikke i bruk
         val behandlingsTypeFraStønadskontrakt = ikkeAvvikleteEnumverdier<BehandlingTypeV2>()
 
         assertThat(behandlingsTypeIBasak)

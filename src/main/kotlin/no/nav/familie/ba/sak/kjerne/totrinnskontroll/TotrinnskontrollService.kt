@@ -18,7 +18,6 @@ class TotrinnskontrollService(
     private val totrinnskontrollRepository: TotrinnskontrollRepository,
     private val saksbehandlerContext: SaksbehandlerContext,
 ) {
-
     fun hentAktivForBehandling(behandlingId: Long): Totrinnskontroll? {
         return totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId)
     }
@@ -44,8 +43,9 @@ class TotrinnskontrollService(
         beslutning: Beslutning,
         kontrollerteSider: List<String> = emptyList(),
     ): Totrinnskontroll {
-        val totrinnskontroll = hentAktivForBehandling(behandlingId = behandling.id)
-            ?: throw Feil(message = "Kan ikke beslutte et vedtak som ikke er sendt til beslutter")
+        val totrinnskontroll =
+            hentAktivForBehandling(behandlingId = behandling.id)
+                ?: throw Feil(message = "Kan ikke beslutte et vedtak som ikke er sendt til beslutter")
 
         totrinnskontroll.beslutter = beslutter
         totrinnskontroll.beslutterId = beslutterId
@@ -101,7 +101,6 @@ class TotrinnskontrollService(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(TotrinnskontrollService::class.java)
     }
 }

@@ -15,21 +15,24 @@ fun <T : PeriodeOgBarnSkjema<T>> Collection<T>.slåSammen(): Collection<T> {
         return this
     }
 
-    val kompetanseSettTidslinje: Tidslinje<Set<T>, Måned> = this.map { it.tilTidslinje() }
-        .kombinerUtenNull {
-            it.groupingBy { it.utenBarn() }.reduce { _, acc, kompetanse -> acc.leggSammenBarn(kompetanse) }
-                .values.toSet()
+    val kompetanseSettTidslinje: Tidslinje<Set<T>, Måned> =
+        this.map { it.tilTidslinje() }
+            .kombinerUtenNull {
+                it.groupingBy { it.utenBarn() }.reduce { _, acc, kompetanse -> acc.leggSammenBarn(kompetanse) }
+                    .values.toSet()
+            }
+
+    val kompetanserSlåttSammenVertikalt =
+        kompetanseSettTidslinje.perioder().flatMap { periode ->
+            periode.innhold?.settFomOgTom(periode) ?: emptyList()
         }
 
-    val kompetanserSlåttSammenVertikalt = kompetanseSettTidslinje.perioder().flatMap { periode ->
-        periode.innhold?.settFomOgTom(periode) ?: emptyList()
-    }
-
-    val kompetanseSlåttSammenHorisontalt = kompetanserSlåttSammenVertikalt
-        .groupBy { it.utenPeriode() }
-        .mapValues { (_, kompetanser) -> kompetanser.tilTidslinje().slåSammenLike() }
-        .mapValues { (_, tidslinje) -> tidslinje.perioder() }
-        .values.flatten().mapNotNull { periode -> periode.innhold?.settFomOgTom(periode) }
+    val kompetanseSlåttSammenHorisontalt =
+        kompetanserSlåttSammenVertikalt
+            .groupBy { it.utenPeriode() }
+            .mapValues { (_, kompetanser) -> kompetanser.tilTidslinje().slåSammenLike() }
+            .mapValues { (_, tidslinje) -> tidslinje.perioder() }
+            .values.flatten().mapNotNull { periode -> periode.innhold?.settFomOgTom(periode) }
 
     return kompetanseSlåttSammenHorisontalt
 }

@@ -24,40 +24,41 @@ class PersonopplysningerService(
     private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
 ) {
-
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<Aktør, FORELDERBARNRELASJONROLLE>>()
         val relasjonsidenter = personinfo.forelderBarnRelasjon.map { it.aktør.aktivFødselsnummer() }
         val tilgangPerIdent = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(relasjonsidenter)
-        val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
-            if (tilgangPerIdent.getValue(it.aktør.aktivFødselsnummer()).harTilgang) {
-                try {
-                    val relasjonsinfo = hentPersoninfoEnkel(it.aktør)
-                    ForelderBarnRelasjon(
-                        aktør = it.aktør,
-                        relasjonsrolle = it.relasjonsrolle,
-                        fødselsdato = relasjonsinfo.fødselsdato,
-                        navn = relasjonsinfo.navn,
-                        adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering,
-                    )
-                } catch (pdlPersonKanIkkeBehandlesIFagsystem: PdlPersonKanIkkeBehandlesIFagsystem) {
-                    logger.warn("Ignorerer relasjon: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
-                    secureLogger.warn("Ignorerer relasjon ${it.aktør.aktivFødselsnummer()} til ${aktør.aktivFødselsnummer()}: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+        val forelderBarnRelasjon =
+            personinfo.forelderBarnRelasjon.mapNotNull {
+                if (tilgangPerIdent.getValue(it.aktør.aktivFødselsnummer()).harTilgang) {
+                    try {
+                        val relasjonsinfo = hentPersoninfoEnkel(it.aktør)
+                        ForelderBarnRelasjon(
+                            aktør = it.aktør,
+                            relasjonsrolle = it.relasjonsrolle,
+                            fødselsdato = relasjonsinfo.fødselsdato,
+                            navn = relasjonsinfo.navn,
+                            adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering,
+                        )
+                    } catch (pdlPersonKanIkkeBehandlesIFagsystem: PdlPersonKanIkkeBehandlesIFagsystem) {
+                        logger.warn("Ignorerer relasjon: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                        secureLogger.warn("Ignorerer relasjon ${it.aktør.aktivFødselsnummer()} til ${aktør.aktivFødselsnummer()}: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                        null
+                    }
+                } else {
+                    identerMedAdressebeskyttelse.add(Pair(it.aktør, it.relasjonsrolle))
                     null
                 }
-            } else {
-                identerMedAdressebeskyttelse.add(Pair(it.aktør, it.relasjonsrolle))
-                null
-            }
-        }.toSet()
+            }.toSet()
 
-        val forelderBarnRelasjonMaskert = identerMedAdressebeskyttelse.map {
-            ForelderBarnRelasjonMaskert(
-                relasjonsrolle = it.second,
-                adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first),
-            )
-        }.toSet()
+        val forelderBarnRelasjonMaskert =
+            identerMedAdressebeskyttelse.map {
+                ForelderBarnRelasjonMaskert(
+                    relasjonsrolle = it.second,
+                    adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first),
+                )
+            }.toSet()
         return personinfo.copy(
             forelderBarnRelasjon = forelderBarnRelasjon,
             forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert,
@@ -72,7 +73,10 @@ class PersonopplysningerService(
         return hentPersoninfoMedQuery(aktør, PersonInfoQuery.NAVN_OG_ADRESSE)
     }
 
-    private fun hentPersoninfoMedQuery(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
+    private fun hentPersoninfoMedQuery(
+        aktør: Aktør,
+        personInfoQuery: PersonInfoQuery,
+    ): PersonInfo {
         return pdlRestClient.hentPerson(aktør, personInfoQuery)
     }
 
@@ -81,8 +85,9 @@ class PersonopplysningerService(
     }
 
     fun harVerge(aktør: Aktør): VergeResponse {
-        val harVerge = pdlRestClient.hentVergemaalEllerFremtidsfullmakt(aktør)
-            .any { it.type != "stadfestetFremtidsfullmakt" }
+        val harVerge =
+            pdlRestClient.hentVergemaalEllerFremtidsfullmakt(aktør)
+                .any { it.type != "stadfestetFremtidsfullmakt" }
 
         return VergeResponse(harVerge)
     }
@@ -91,11 +96,12 @@ class PersonopplysningerService(
         return pdlRestClient.hentStatsborgerskapUtenHistorikk(aktør).firstOrNull() ?: UKJENT_STATSBORGERSKAP
     }
 
-    fun hentGjeldendeOpphold(aktør: Aktør): Opphold = pdlRestClient.hentOppholdUtenHistorikk(aktør).firstOrNull()
-        ?: throw Feil(
-            message = "Bruker mangler opphold",
-            frontendFeilmelding = "Person (${aktør.aktivFødselsnummer()}) mangler opphold.",
-        )
+    fun hentGjeldendeOpphold(aktør: Aktør): Opphold =
+        pdlRestClient.hentOppholdUtenHistorikk(aktør).firstOrNull()
+            ?: throw Feil(
+                message = "Bruker mangler opphold",
+                frontendFeilmelding = "Person (${aktør.aktivFødselsnummer()}) mangler opphold.",
+            )
 
     fun hentLandkodeAlpha2UtenlandskBostedsadresse(aktør: Aktør): String {
         val landkode = pdlRestClient.hentUtenlandskBostedsadresse(aktør)?.landkode
@@ -117,7 +123,6 @@ class PersonopplysningerService(
         systemOnlyPdlRestClient.hentAdressebeskyttelse(aktør).tilAdressebeskyttelse()
 
     companion object {
-
         const val UKJENT_LANDKODE = "ZZ"
         const val PDL_UKJENT_LANDKODE = "XUK"
         val UKJENT_STATSBORGERSKAP =

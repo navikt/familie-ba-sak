@@ -13,14 +13,16 @@ import java.time.LocalDate
 
 fun filterBortUrelevanteVedtakSimuleringPosteringer(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
-): List<ØkonomiSimuleringMottaker> = økonomiSimuleringMottakere.map {
-    it.copy(
-        økonomiSimuleringPostering = it.økonomiSimuleringPostering.filter { postering ->
-            postering.posteringType == PosteringType.FEILUTBETALING ||
-                postering.posteringType == PosteringType.YTELSE
-        },
-    )
-}
+): List<ØkonomiSimuleringMottaker> =
+    økonomiSimuleringMottakere.map {
+        it.copy(
+            økonomiSimuleringPostering =
+                it.økonomiSimuleringPostering.filter { postering ->
+                    postering.posteringType == PosteringType.FEILUTBETALING ||
+                        postering.posteringType == PosteringType.YTELSE
+                },
+        )
+    }
 
 fun vedtakSimuleringMottakereTilRestSimulering(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
@@ -45,8 +47,9 @@ fun vedtakSimuleringMottakereTilRestSimulering(
         perioder = perioder,
         fomDatoNestePeriode = nestePeriode?.fom,
         etterbetaling = hentTotalEtterbetaling(perioder, nestePeriode?.fom),
-        feilutbetaling = hentTotalFeilutbetaling(perioder, nestePeriode?.fom)
-            .let { if (it < BigDecimal.ZERO) BigDecimal.ZERO else it },
+        feilutbetaling =
+            hentTotalFeilutbetaling(perioder, nestePeriode?.fom)
+                .let { if (it < BigDecimal.ZERO) BigDecimal.ZERO else it },
         fom = perioder.minOfOrNull { it.fom },
         tomDatoNestePeriode = nestePeriode?.tom,
         forfallsdatoNestePeriode = nestePeriode?.forfallsdato,
@@ -61,9 +64,10 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
     if (økonomiSimuleringMottakere.isEmpty()) {
         return emptyList()
     }
-    val simuleringPerioder = filterBortUrelevanteVedtakSimuleringPosteringer(økonomiSimuleringMottakere)
-        .flatMap { it.økonomiSimuleringPostering }
-        .groupBy { it.fom }
+    val simuleringPerioder =
+        filterBortUrelevanteVedtakSimuleringPosteringer(økonomiSimuleringMottakere)
+            .flatMap { it.økonomiSimuleringPostering }
+            .groupBy { it.fom }
 
     val tidSimuleringHentet = økonomiSimuleringMottakere.first().opprettetTidspunkt.toLocalDate()
 
@@ -84,11 +88,12 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
 }
 
 fun hentNyttBeløpIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
-    val sumPositiveYtelser = periode
-        .filter { it.posteringType == PosteringType.YTELSE }
-        .filter { it.beløp > BigDecimal.ZERO }
-        .filter { !it.erManuellPostering }
-        .sumOf { it.beløp }
+    val sumPositiveYtelser =
+        periode
+            .filter { it.posteringType == PosteringType.YTELSE }
+            .filter { it.beløp > BigDecimal.ZERO }
+            .filter { !it.erManuellPostering }
+            .sumOf { it.beløp }
     val feilutbetaling = hentFeilutbetalingIPeriode(periode, false)
 
     return if (feilutbetaling > BigDecimal.ZERO) {
@@ -110,18 +115,22 @@ fun hentNegativFeilutbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>
             postering.beløp < BigDecimal.ZERO
     }.sumOf { it.beløp }
 
-fun hentFeilutbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>, inkluderManuellePosteringer: Boolean) =
+fun hentFeilutbetalingIPeriode(
+    periode: List<ØkonomiSimuleringPostering>,
+    inkluderManuellePosteringer: Boolean,
+) =
     periode
         .filter { it.posteringType == PosteringType.FEILUTBETALING }
         .filter { inkluderManuellePosteringer || !it.erManuellPostering }
         .sumOf { it.beløp }
 
 fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
-    val sumNegativeYtelser = periode
-        .filter { it.posteringType == PosteringType.YTELSE }
-        .filter { !it.erManuellPostering }
-        .filter { it.beløp < BigDecimal.ZERO }
-        .sumOf { it.beløp }
+    val sumNegativeYtelser =
+        periode
+            .filter { it.posteringType == PosteringType.YTELSE }
+            .filter { !it.erManuellPostering }
+            .filter { it.beløp < BigDecimal.ZERO }
+            .sumOf { it.beløp }
 
     val feilutbetaling = hentFeilutbetalingIPeriode(periode, false)
 
@@ -137,10 +146,11 @@ fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): B
 }
 
 fun hentManuellPosteringIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
-    val sumManuellePosteringer = periode
-        .filter { it.posteringType == PosteringType.YTELSE }
-        .filter { it.erManuellPostering }
-        .sumOf { it.beløp }
+    val sumManuellePosteringer =
+        periode
+            .filter { it.posteringType == PosteringType.YTELSE }
+            .filter { it.erManuellPostering }
+            .sumOf { it.beløp }
 
     val manuellFeilutbetaling = hentManuellFeilutbetalingIPeriode(periode)
 
@@ -175,39 +185,48 @@ fun hentEtterbetalingIPeriode(
 
     return when {
         periodeHarPositivFeilutbetaling -> BigDecimal.ZERO
-        else -> maxOf(
-            BigDecimal.ZERO,
-            // Vi justerer etterbetalingsbeløp med negativ feilutbetaling i periode (redusert feilutbetaling).
-            // Negative feilutbetalinger oppstår når man øker ytelsen i en periode det er registrert feilutbetaling på tidligere og tilbakekrevingsbehandlingen ikke er avsluttet.
-            // Ved overførig til Oppdrag/økonomi vil registrert feilutbetaling bli redusert.
-            // https://confluence.adeo.no/display/TFA/Tolkning+av+simulerte+posteringer+fra+oppdragsystemet
-            (resultat + hentNegativFeilutbetalingIPeriode(periodeMedForfallFørTidSimuleringHentet)),
-        )
+        else ->
+            maxOf(
+                BigDecimal.ZERO,
+                // Vi justerer etterbetalingsbeløp med negativ feilutbetaling i periode (redusert feilutbetaling).
+                // Negative feilutbetalinger oppstår når man øker ytelsen i en periode det er registrert feilutbetaling på tidligere og tilbakekrevingsbehandlingen ikke er avsluttet.
+                // Ved overførig til Oppdrag/økonomi vil registrert feilutbetaling bli redusert.
+                // https://confluence.adeo.no/display/TFA/Tolkning+av+simulerte+posteringer+fra+oppdragsystemet
+                (resultat + hentNegativFeilutbetalingIPeriode(periodeMedForfallFørTidSimuleringHentet)),
+            )
     }
 }
 
-fun hentTotalEtterbetaling(simuleringPerioder: List<SimuleringsPeriode>, fomDatoNestePeriode: LocalDate?): BigDecimal {
+fun hentTotalEtterbetaling(
+    simuleringPerioder: List<SimuleringsPeriode>,
+    fomDatoNestePeriode: LocalDate?,
+): BigDecimal {
     return simuleringPerioder.filter {
         (fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode)
     }.sumOf { it.etterbetaling }.takeIf { it > BigDecimal.ZERO } ?: BigDecimal.ZERO
 }
 
-fun hentTotalFeilutbetaling(simuleringPerioder: List<SimuleringsPeriode>, fomDatoNestePeriode: LocalDate?): BigDecimal {
+fun hentTotalFeilutbetaling(
+    simuleringPerioder: List<SimuleringsPeriode>,
+    fomDatoNestePeriode: LocalDate?,
+): BigDecimal {
     return simuleringPerioder
         .filter { fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode }
         .sumOf { it.feilutbetaling }
 }
 
 fun SimuleringMottaker.tilBehandlingSimuleringMottaker(behandling: Behandling): ØkonomiSimuleringMottaker {
-    val behandlingSimuleringMottaker = ØkonomiSimuleringMottaker(
-        mottakerNummer = this.mottakerNummer,
-        mottakerType = this.mottakerType,
-        behandling = behandling,
-    )
+    val behandlingSimuleringMottaker =
+        ØkonomiSimuleringMottaker(
+            mottakerNummer = this.mottakerNummer,
+            mottakerType = this.mottakerType,
+            behandling = behandling,
+        )
 
-    behandlingSimuleringMottaker.økonomiSimuleringPostering = this.simulertPostering.map {
-        it.tilVedtakSimuleringPostering(behandlingSimuleringMottaker)
-    }
+    behandlingSimuleringMottaker.økonomiSimuleringPostering =
+        this.simulertPostering.map {
+            it.tilVedtakSimuleringPostering(behandlingSimuleringMottaker)
+        }
 
     return behandlingSimuleringMottaker
 }

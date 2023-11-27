@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service
 class SanityService(
     private val sanityKlient: SanityKlient,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Cacheable("sanityBegrunnelser", cacheManager = "shortCache")

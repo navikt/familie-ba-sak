@@ -16,8 +16,8 @@
     <description>Saksbehandling Barnetrygd</description>
 
     <properties>
-        <java.version>17</java.version>
-        <kotlin.version>1.9.20</kotlin.version>
+        <java.version>21</java.version>
+        <kotlin.version>1.9.21</kotlin.version>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
@@ -25,7 +25,7 @@
         <prosessering.version>2.20231026103714_2f17845</prosessering.version>
         <felles.version>2.20231023162434_fa320ce</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20231101161029_4d64011</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20231120101853_79af021</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230912090318_2267c05</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20230927085000_900743f</utbetalingsgenerator.version>
@@ -33,10 +33,10 @@
         <cucumber.version>7.14.0</cucumber.version>
         <mockk.version>1.13.5</mockk.version>
         <wiremock.version>3.3.1</wiremock.version>
-        <token-validation-spring.version>3.1.7</token-validation-spring.version>
+        <token-validation-spring.version>3.1.8</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.2.0</springdoc.version>
-        <sentry.version>6.33.0</sentry.version>
+        <sentry.version>6.34.0</sentry.version>
         <kotlinx.version>1.7.3</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -46,12 +46,12 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.19.1</testcontainers.postgresql.version>
+        <testcontainers.postgresql.version>1.19.2</testcontainers.postgresql.version>
         <unleash.version>8.4.0</unleash.version>
         <maven.model.version>3.9.5</maven.model.version>
-        <jackson.module.kotlin.version>2.15.3</jackson.module.kotlin.version>
+        <jackson.module.kotlin.version>2.16.0</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
-        <fpsak-tidslinje.version>2.6.8</fpsak-tidslinje.version>
+        <fpsak-tidslinje.version>2.7.1</fpsak-tidslinje.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
     </properties>
 
@@ -165,6 +165,12 @@
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
             <version>${unleash.version}</version>
+        </dependency>
+
+        <dependency> <!-- Overstyrer versjon default i spring pga sikkerhetshull https://security.snyk.io/package/maven/org.yaml:snakeyaml -->
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.2</version>
         </dependency>
 
         <!-- https://github.com/spring-projects/spring-boot/issues/33044#issuecomment-1379812611 -->
@@ -438,9 +444,9 @@
                     </executions>
                     <dependencies>
                         <dependency>
-                            <groupId>com.pinterest</groupId>
-                            <artifactId>ktlint</artifactId>
-                            <version>0.50.0</version>
+                            <groupId>com.pinterest.ktlint</groupId>
+                            <artifactId>ktlint-cli</artifactId>
+                            <version>1.0.1</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -527,6 +533,20 @@
                             </rules>
                             <fail>true</fail>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- For å få dependency graph i SLSA som pushes av docker-build-push parameter byosbom -->
+                <groupId>org.cyclonedx</groupId>
+                <artifactId>cyclonedx-maven-plugin</artifactId>
+                <version>2.7.10</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>makeAggregateBom</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

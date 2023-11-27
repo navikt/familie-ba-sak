@@ -7,26 +7,35 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
 object RessursUtils {
-
     private val logger = LoggerFactory.getLogger(RessursUtils::class.java)
 
     fun <T> unauthorized(errorMessage: String): ResponseEntity<Ressurs<T>> =
         ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Ressurs.failure(errorMessage))
 
-    fun <T> badRequest(errorMessage: String, throwable: Throwable): ResponseEntity<Ressurs<T>> =
+    fun <T> badRequest(
+        errorMessage: String,
+        throwable: Throwable,
+    ): ResponseEntity<Ressurs<T>> =
         errorResponse(HttpStatus.BAD_REQUEST, errorMessage, throwable)
 
     fun <T> forbidden(errorMessage: String): ResponseEntity<Ressurs<T>> =
         ikkeTilgangResponse(errorMessage)
 
-    fun <T> illegalState(errorMessage: String, throwable: Throwable): ResponseEntity<Ressurs<T>> =
+    fun <T> illegalState(
+        errorMessage: String,
+        throwable: Throwable,
+    ): ResponseEntity<Ressurs<T>> =
         errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, throwable)
 
-    fun <T> funksjonellFeil(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<T>> = funksjonellErrorResponse(
-        funksjonellFeil,
-    )
+    fun <T> funksjonellFeil(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<T>> =
+        funksjonellErrorResponse(
+            funksjonellFeil,
+        )
 
-    fun <T> frontendFeil(feil: Feil, throwable: Throwable?): ResponseEntity<Ressurs<T>> =
+    fun <T> frontendFeil(
+        feil: Feil,
+        throwable: Throwable?,
+    ): ResponseEntity<Ressurs<T>> =
         frontendErrorResponse(feil, throwable)
 
     fun <T> ok(data: T): ResponseEntity<Ressurs<T>> = ResponseEntity.ok(Ressurs.success(data))
@@ -66,7 +75,10 @@ object RessursUtils {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Ressurs.ikkeTilgang(errorMessage))
     }
 
-    private fun <T> frontendErrorResponse(feil: Feil, throwable: Throwable?): ResponseEntity<Ressurs<T>> {
+    private fun <T> frontendErrorResponse(
+        feil: Feil,
+        throwable: Throwable?,
+    ): ResponseEntity<Ressurs<T>> {
         val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
 
         secureLogger.info(

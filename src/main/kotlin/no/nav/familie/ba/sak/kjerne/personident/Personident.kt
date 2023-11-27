@@ -24,20 +24,15 @@ data class Personident(
     // Validator kommer virke først i Spring 3.0 grunnet at hibernate tatt i bruke Jakarta.
     @Pattern(regexp = VALID_FØDSELSNUMMER)
     val fødselsnummer: String,
-
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
-
     @Column(name = "aktiv", nullable = false)
     var aktiv: Boolean = true,
-
     @Column(name = "gjelder_til", columnDefinition = "DATE")
     var gjelderTil: LocalDateTime? = null,
-
 ) : BaseEntitet() {
-
     init {
         require(VALID.matcher(fødselsnummer).matches()) {
             "Ugyldig fødselsnummer, støtter kun 11 siffer.)"
@@ -48,7 +43,7 @@ data class Personident(
         return """Personident(aktørId=${aktør.aktørId},
                         |aktiv=$aktiv
                         |gjelderTil=$gjelderTil)
-        """.trimMargin()
+            """.trimMargin()
     }
 
     override fun equals(other: Any?): Boolean {

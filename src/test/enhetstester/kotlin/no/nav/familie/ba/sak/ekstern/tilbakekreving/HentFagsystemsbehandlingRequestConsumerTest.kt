@@ -38,7 +38,6 @@ import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class HentFagsystemsbehandlingRequestConsumerTest {
-
     private lateinit var hentFagsystemsbehandlingRequestConsumer: HentFagsystemsbehandlingRequestConsumer
     private lateinit var fagsystemsbehandlingService: FagsystemsbehandlingService
 
@@ -56,38 +55,42 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
     private val keySlot = slot<String>()
     private val behandlingIdSlot = slot<String>()
 
-    val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, skalBehandlesAutomatisk = true).also {
-        it.resultat = Behandlingsresultat.INNVILGET
-    }
+    val behandling =
+        lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, skalBehandlesAutomatisk = true).also {
+            it.resultat = Behandlingsresultat.INNVILGET
+        }
 
     @BeforeAll
     fun init() {
-        fagsystemsbehandlingService = spyk(
-            FagsystemsbehandlingService(
-                behandlingHentOgPersisterService,
-                persongrunnlagService,
-                arbeidsfordelingService,
-                vedtakService,
-                tilbakekrevingService,
-                kafkaProducer,
-            ),
-        )
+        fagsystemsbehandlingService =
+            spyk(
+                FagsystemsbehandlingService(
+                    behandlingHentOgPersisterService,
+                    persongrunnlagService,
+                    arbeidsfordelingService,
+                    vedtakService,
+                    tilbakekrevingService,
+                    kafkaProducer,
+                ),
+            )
         hentFagsystemsbehandlingRequestConsumer = HentFagsystemsbehandlingRequestConsumer(fagsystemsbehandlingService)
 
         acknowledgment = mockk()
         every { acknowledgment.acknowledge() } returns Unit
 
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
-        every { persongrunnlagService.hentAktivThrows(any()) } returns lagTestPersonopplysningGrunnlag(
-            behandling.id,
-            tilfeldigPerson(personType = PersonType.BARN),
-            tilfeldigPerson(personType = PersonType.SØKER),
-        )
-        every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
-            behandlendeEnhetId = "4820",
-            behandlendeEnhetNavn = "Nav",
-            behandlingId = behandling.id,
-        )
+        every { persongrunnlagService.hentAktivThrows(any()) } returns
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                tilfeldigPerson(personType = PersonType.BARN),
+                tilfeldigPerson(personType = PersonType.SØKER),
+            )
+        every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns
+            ArbeidsfordelingPåBehandling(
+                behandlendeEnhetId = "4820",
+                behandlendeEnhetNavn = "Nav",
+                behandlingId = behandling.id,
+            )
         every { vedtakService.hentVedtaksdatoForBehandlingThrows(any()) } returns LocalDateTime.now()
         every { tilbakekrevingService.hentTilbakekrevingsvalg(any()) } returns Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
         every { kafkaProducer.sendFagsystemsbehandlingResponsForTopicTilbakekreving(any(), any(), any()) } returns Unit

@@ -54,10 +54,11 @@ class SimuleringService(
             return null
         }
 
-        val brukNyUtbetalingsoppdragGenerator = unleashService.isEnabled(
-            FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-            mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
-        )
+        val brukNyUtbetalingsoppdragGenerator =
+            unleashService.isEnabled(
+                FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+                mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
+            )
 
         /**
          * SOAP integrasjonen støtter ikke full epost som MQ,
@@ -124,9 +125,10 @@ class SimuleringService(
                 behandling.status == BehandlingStatus.AVSLUTTET
 
         val simulering = hentSimuleringPåBehandling(behandlingId)
-        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
-            økonomiSimuleringMottakere = simulering,
-        )
+        val restSimulering =
+            vedtakSimuleringMottakereTilRestSimulering(
+                økonomiSimuleringMottakere = simulering,
+            )
 
         return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
             oppdaterSimuleringPåBehandling(behandling)
@@ -141,12 +143,13 @@ class SimuleringService(
                 simulering.forfallsdatoNestePeriode != null &&
                     simulering.tidSimuleringHentet < simulering.forfallsdatoNestePeriode &&
                     LocalDate.now() > simulering.forfallsdatoNestePeriode
-                )
+            )
 
     @Transactional
     fun oppdaterSimuleringPåBehandling(behandling: Behandling): List<ØkonomiSimuleringMottaker> {
-        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
-            ?: throw Feil("Fant ikke aktivt vedtak på behandling${behandling.id}")
+        val aktivtVedtak =
+            vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
+                ?: throw Feil("Fant ikke aktivt vedtak på behandling${behandling.id}")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "opprette simulering",
@@ -253,9 +256,10 @@ class SimuleringService(
 
     private fun List<SimuleringsPeriode>.harKunNegativeResultater() = all { it.resultat <= BigDecimal.ZERO }
 
-    private fun List<SimuleringsPeriode>.harMaks1KroneIResultatPerBarn(antallBarn: Int) = all {
-        it.resultat.abs() <= BigDecimal(antallBarn)
-    }
+    private fun List<SimuleringsPeriode>.harMaks1KroneIResultatPerBarn(antallBarn: Int) =
+        all {
+            it.resultat.abs() <= BigDecimal(antallBarn)
+        }
 
     private fun List<SimuleringsPeriode>.harTotaltAvvikUnderBeløpsgrense() =
         sumOf { it.resultat }.abs() < BigDecimal(MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK)

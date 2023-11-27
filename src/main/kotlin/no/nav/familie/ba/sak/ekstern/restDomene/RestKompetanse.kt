@@ -21,19 +21,21 @@ data class RestKompetanse(
     val erAnnenForelderOmfattetAvNorskLovgivning: Boolean? = false,
 ) : AbstractUtfyltStatus<RestKompetanse>() {
     override fun medUtfyltStatus(): RestKompetanse {
-        var antallUtfylteFelter = finnAntallUtfylt(
-            listOf(
-                this.annenForeldersAktivitet,
-                this.barnetsBostedsland,
-                this.annenForeldersAktivitetsland,
-                this.resultat,
-                this.søkersAktivitet,
-                this.søkersAktivitetsland,
-            ),
-        )
+        var antallUtfylteFelter =
+            finnAntallUtfylt(
+                listOf(
+                    this.annenForeldersAktivitet,
+                    this.barnetsBostedsland,
+                    this.annenForeldersAktivitetsland,
+                    this.resultat,
+                    this.søkersAktivitet,
+                    this.søkersAktivitetsland,
+                ),
+            )
         if (annenForeldersAktivitetsland == null) {
             antallUtfylteFelter += (
-                if (annenForeldersAktivitet in listOf(
+                if (annenForeldersAktivitet in
+                    listOf(
                         KompetanseAktivitet.INAKTIV,
                         KompetanseAktivitet.IKKE_AKTUELT,
                     )
@@ -42,7 +44,7 @@ data class RestKompetanse(
                 } else {
                     0
                 }
-                )
+            )
         }
         if (søkersAktivitetsland == null) {
             antallUtfylteFelter += (if (søkersAktivitet == KompetanseAktivitet.INAKTIV) 1 else 0)
@@ -51,29 +53,31 @@ data class RestKompetanse(
     }
 }
 
-fun Kompetanse.tilRestKompetanse() = RestKompetanse(
-    id = this.id,
-    fom = this.fom,
-    tom = this.tom,
-    barnIdenter = this.barnAktører.map { it.aktivFødselsnummer() },
-    søkersAktivitet = this.søkersAktivitet,
-    søkersAktivitetsland = this.søkersAktivitetsland,
-    annenForeldersAktivitet = this.annenForeldersAktivitet,
-    annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
-    barnetsBostedsland = this.barnetsBostedsland,
-    resultat = this.resultat,
-    erAnnenForelderOmfattetAvNorskLovgivning = this.erAnnenForelderOmfattetAvNorskLovgivning,
-).medUtfyltStatus()
+fun Kompetanse.tilRestKompetanse() =
+    RestKompetanse(
+        id = this.id,
+        fom = this.fom,
+        tom = this.tom,
+        barnIdenter = this.barnAktører.map { it.aktivFødselsnummer() },
+        søkersAktivitet = this.søkersAktivitet,
+        søkersAktivitetsland = this.søkersAktivitetsland,
+        annenForeldersAktivitet = this.annenForeldersAktivitet,
+        annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
+        barnetsBostedsland = this.barnetsBostedsland,
+        resultat = this.resultat,
+        erAnnenForelderOmfattetAvNorskLovgivning = this.erAnnenForelderOmfattetAvNorskLovgivning,
+    ).medUtfyltStatus()
 
-fun RestKompetanse.tilKompetanse(barnAktører: List<Aktør>) = Kompetanse(
-    fom = this.fom,
-    tom = this.tom,
-    barnAktører = barnAktører.toSet(),
-    søkersAktivitet = this.søkersAktivitet,
-    søkersAktivitetsland = this.søkersAktivitetsland,
-    annenForeldersAktivitet = this.annenForeldersAktivitet,
-    annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
-    barnetsBostedsland = this.barnetsBostedsland,
-    resultat = this.resultat,
-    erAnnenForelderOmfattetAvNorskLovgivning = this.erAnnenForelderOmfattetAvNorskLovgivning,
-)
+fun RestKompetanse.tilKompetanse(barnAktører: List<Aktør>) =
+    Kompetanse(
+        fom = this.fom,
+        tom = this.tom,
+        barnAktører = barnAktører.toSet(),
+        søkersAktivitet = this.søkersAktivitet,
+        søkersAktivitetsland = this.søkersAktivitetsland,
+        annenForeldersAktivitet = this.annenForeldersAktivitet,
+        annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
+        barnetsBostedsland = this.barnetsBostedsland,
+        resultat = this.resultat,
+        erAnnenForelderOmfattetAvNorskLovgivning = this.erAnnenForelderOmfattetAvNorskLovgivning,
+    )

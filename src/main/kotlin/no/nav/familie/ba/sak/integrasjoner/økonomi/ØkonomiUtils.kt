@@ -8,7 +8,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 object ØkonomiUtils {
-
     /**
      * Deler andeler inn i gruppene de skal kjedes i. Utbetalingsperioder kobles i kjeder per person, per type.
      *
@@ -16,8 +15,9 @@ object ØkonomiUtils {
      * @return ident med kjedegruppe.
      */
     fun grupperAndeler(andeler: List<AndelTilkjentYtelseForUtbetalingsoppdrag>): Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
-        val grupperteAndeler = andeler
-            .groupBy { IdentOgYtelse(it.aktør.aktivFødselsnummer(), it.type) }
+        val grupperteAndeler =
+            andeler
+                .groupBy { IdentOgYtelse(it.aktør.aktivFødselsnummer(), it.type) }
 
         if (grupperteAndeler.keys.count { it.type == YtelseType.SMÅBARNSTILLEGG } > 1) {
             throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
@@ -98,8 +98,9 @@ object ØkonomiUtils {
                         oppdatertKjede = oppdatertKjede,
                     )
                 beståendeFraForrige?.forEach { bestående ->
-                    val beståendeIOppdatert = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
-                        ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand.")
+                    val beståendeIOppdatert =
+                        oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
+                            ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand.")
                     beståendeIOppdatert.periodeOffset = bestående.periodeOffset
                     beståendeIOppdatert.forrigePeriodeOffset = bestående.forrigePeriodeOffset
                     beståendeIOppdatert.kildeBehandlingId = bestående.kildeBehandlingId
@@ -205,7 +206,7 @@ private fun AndelTilkjentYtelseForUtbetalingsoppdrag.erTilsvarendeForUtbetaling(
             this.stønadTom == other.stønadTom &&
             this.kalkulertUtbetalingsbeløp == other.kalkulertUtbetalingsbeløp &&
             this.type == other.type
-        )
+    )
 }
 
 fun Utbetalingsoppdrag.harLøpendeUtbetaling() =

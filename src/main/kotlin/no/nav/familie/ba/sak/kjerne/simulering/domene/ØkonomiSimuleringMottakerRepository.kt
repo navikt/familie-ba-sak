@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.transaction.annotation.Transactional
 
 interface ØkonomiSimuleringMottakerRepository : JpaRepository<ØkonomiSimuleringMottaker, Long> {
-
     @Query(value = "SELECT sm FROM OkonomiSimuleringMottaker sm JOIN sm.behandling b WHERE b.id = :behandlingId")
     fun findByBehandlingId(behandlingId: Long): List<ØkonomiSimuleringMottaker>
 

@@ -38,12 +38,14 @@ class SendTilBeslutter(
     private val automatiskBeslutningService: AutomatiskBeslutningService,
     private val validerBrevmottakerService: ValiderBrevmottakerService,
 ) : BehandlingSteg<String> {
-
     override fun preValiderSteg(
         behandling: Behandling,
         stegService: StegService?,
     ) {
-        validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = behandling.id)
+        validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+            behandlingId = behandling.id,
+            ekstraBarnLagtTilIBrev = emptyList(),
+        )
         vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
             ?.validerAtAlleAnndreVurderingerErVurdert()
 
@@ -71,11 +73,12 @@ class SendTilBeslutter(
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling)
 
         if (!automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)) {
-            val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
-                behandlingId = behandling.id,
-                oppgavetype = Oppgavetype.GodkjenneVedtak,
-                fristForFerdigstillelse = LocalDate.now(),
-            )
+            val godkjenneVedtakTask =
+                OpprettOppgaveTask.opprettTask(
+                    behandlingId = behandling.id,
+                    oppgavetype = Oppgavetype.GodkjenneVedtak,
+                    fristForFerdigstillelse = LocalDate.now(),
+                )
             loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = false)
             taskRepository.save(godkjenneVedtakTask)
         } else {
@@ -121,7 +124,7 @@ fun Behandling.validerRekkefølgeOgUnikhetPåSteg(): Boolean {
             (
                 forrigeBehandlingStegTilstand!!.behandlingSteg.rekkefølge != it.behandlingSteg.rekkefølge ||
                     forrigeBehandlingStegTilstand!!.behandlingSteg == it.behandlingSteg
-                )
+            )
         ) {
             throw Feil("Rekkefølge på steg registrert på behandling $id er feil eller redundante.")
         }

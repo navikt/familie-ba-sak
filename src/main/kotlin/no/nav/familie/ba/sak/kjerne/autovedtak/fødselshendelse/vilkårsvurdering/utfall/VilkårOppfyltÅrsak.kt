@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.EvalueringÅrsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 enum class VilkårOppfyltÅrsak(val beskrivelse: String, val vilkår: Vilkår) : EvalueringÅrsak {
-
     // Under 18 år
     ER_UNDER_18_ÅR("Barn er under 18 år", Vilkår.UNDER_18_ÅR),
 

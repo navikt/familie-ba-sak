@@ -85,8 +85,9 @@ class ForvalterService(
 
         val forrigeBehandlingSendtTilØkonomi =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
-        val erBehandlingOpprettetEtterDenneSomErSendtTilØkonomi = forrigeBehandlingSendtTilØkonomi != null &&
-            forrigeBehandlingSendtTilØkonomi.aktivertTidspunkt.isAfter(behandling.aktivertTidspunkt)
+        val erBehandlingOpprettetEtterDenneSomErSendtTilØkonomi =
+            forrigeBehandlingSendtTilØkonomi != null &&
+                forrigeBehandlingSendtTilØkonomi.aktivertTidspunkt.isAfter(behandling.aktivertTidspunkt)
 
         if (tilkjentYtelse.utbetalingsoppdrag != null) {
             throw Feil("Behandling $behandlingId har allerede opprettet utbetalingsoppdrag")
@@ -106,15 +107,16 @@ class ForvalterService(
     fun kjørForenkletSatsendringFor(fagsakId: Long) {
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
 
-        val nyBehandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                behandlingType = BehandlingType.REVURDERING,
-                behandlingÅrsak = BehandlingÅrsak.SATSENDRING,
-                søkersIdent = fagsak.aktør.aktivFødselsnummer(),
-                skalBehandlesAutomatisk = true,
-                fagsakId = fagsakId,
-            ),
-        )
+        val nyBehandling =
+            stegService.håndterNyBehandling(
+                NyBehandling(
+                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingÅrsak = BehandlingÅrsak.SATSENDRING,
+                    søkersIdent = fagsak.aktør.aktivFødselsnummer(),
+                    skalBehandlesAutomatisk = true,
+                    fagsakId = fagsakId,
+                ),
+            )
 
         val behandlingEtterVilkårsvurdering =
             stegService.håndterVilkårsvurdering(nyBehandling)
@@ -201,9 +203,10 @@ class ForvalterService(
     }
 
     fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(fraÅrMåned: YearMonth): List<Pair<Long, String>> {
-        val løpendeFagsakerMedFlereMigreringsbehandlinger = fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger(
-            fraÅrMåned.førsteDagIInneværendeMåned().atStartOfDay(),
-        )
+        val løpendeFagsakerMedFlereMigreringsbehandlinger =
+            fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger(
+                fraÅrMåned.førsteDagIInneværendeMåned().atStartOfDay(),
+            )
 
         return løpendeFagsakerMedFlereMigreringsbehandlinger.filter { infotrygdService.harLøpendeSakIInfotrygd(listOf(it.fødselsnummer)) }
             .map { Pair(it.fagsakId, it.fødselsnummer) }
@@ -223,8 +226,9 @@ class ForvalterService(
             throw IllegalArgumentException("ident som skal patches er lik ident som det skal patches til")
         }
 
-        val aktørForBarnSomSkalPatches = persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId = dto.fagsakId)
-            ?.singleOrNull { it.type == PersonType.BARN && it.aktør.aktivFødselsnummer() == dto.gammelIdent.ident }?.aktør ?: error("Fant ikke ident som skal patches som barn på fagsak=${dto.fagsakId}")
+        val aktørForBarnSomSkalPatches =
+            persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId = dto.fagsakId)
+                ?.singleOrNull { it.type == PersonType.BARN && it.aktør.aktivFødselsnummer() == dto.gammelIdent.ident }?.aktør ?: error("Fant ikke ident som skal patches som barn på fagsak=${dto.fagsakId}")
 
         val identer = pdlIdentRestClient.hentIdenter(personIdent = dto.nyIdent.ident, historikk = true)
         if (dto.skalSjekkeAtGammelIdentErHistoriskAvNyIdent) {
@@ -252,7 +256,6 @@ class ForvalterService(
                 fagsakId = dto.fagsakId,
                 historiskAktørId = aktørForBarnSomSkalPatches.aktørId,
                 nyAktørId = nyAktør.aktørId,
-
                 mergeTidspunkt = LocalDateTime.now(),
             ),
         )

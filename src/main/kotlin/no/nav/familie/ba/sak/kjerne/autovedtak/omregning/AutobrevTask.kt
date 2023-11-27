@@ -25,7 +25,6 @@ class AutobrevTask(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val opprettTaskService: OpprettTaskService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         opprettTaskerForReduksjonPgaAlder()
         opprettTaskerForReduksjonSmåbarnstillegg()
@@ -45,11 +44,12 @@ class AutobrevTask(
     }
 
     private fun opprettTaskerForReduksjonSmåbarnstillegg() {
-        val berørteFagsaker = behandlingHentOgPersisterService.partitionByIverksatteBehandlinger {
-            fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
-                iverksatteLøpendeBehandlinger = it,
-            )
-        }
+        val berørteFagsaker =
+            behandlingHentOgPersisterService.partitionByIverksatteBehandlinger {
+                fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
+                    iverksatteLøpendeBehandlinger = it,
+                )
+            }
         logger.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med opphør av småbarnstillegg.")
         berørteFagsaker.forEach { fagsakId ->
             opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(
@@ -67,7 +67,6 @@ class AutobrevTask(
         }
 
     companion object {
-
         const val TASK_STEP_TYPE = "AutobrevTask"
         private val logger: Logger = LoggerFactory.getLogger(AutobrevTask::class.java)
     }

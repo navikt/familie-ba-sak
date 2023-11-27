@@ -4,7 +4,6 @@ data class SignaturDelmal(
     val enhet: Flettefelt,
     val saksbehandler: Flettefelt,
 ) {
-
     constructor(enhet: String, saksbehandlerNavn: String) : this(
         enhet = flettefelt(enhet),
         saksbehandler = flettefelt(saksbehandlerNavn),
@@ -16,7 +15,6 @@ data class SignaturVedtak(
     val saksbehandler: Flettefelt,
     val beslutter: Flettefelt,
 ) {
-
     constructor(enhet: String, saksbehandler: String, beslutter: String) : this(
         flettefelt(enhet),
         flettefelt(saksbehandler),
@@ -27,7 +25,6 @@ data class SignaturVedtak(
 data class Etterbetaling(
     val etterbetalingsbelop: Flettefelt,
 ) {
-
     constructor(etterbetalingsbeløp: String) : this(
         flettefelt(etterbetalingsbeløp),
     )
@@ -36,7 +33,6 @@ data class Etterbetaling(
 data class EtterbetalingInstitusjon(
     val etterbetalingsbelop: Flettefelt,
 ) {
-
     constructor(etterbetalingsbeløp: String) : this(
         flettefelt(etterbetalingsbeløp),
     )
@@ -45,7 +41,6 @@ data class EtterbetalingInstitusjon(
 data class Hjemmeltekst(
     val hjemler: Flettefelt,
 ) {
-
     constructor(hjemler: String) : this(
         flettefelt(hjemler),
     )
@@ -54,7 +49,6 @@ data class Hjemmeltekst(
 data class AutoUnderskrift(
     val enhet: Flettefelt,
 ) {
-
     constructor(enhet: String) : this(
         flettefelt(enhet),
     )
@@ -63,7 +57,6 @@ data class AutoUnderskrift(
 data class KorrigertVedtakData(
     val datoKorrigertVedtak: Flettefelt,
 ) {
-
     constructor(datoKorrigertVedtak: String) : this(
         flettefelt(datoKorrigertVedtak),
     )
@@ -72,7 +65,6 @@ data class KorrigertVedtakData(
 data class FeilutbetaltValuta(
     val perioderMedForMyeUtbetalt: Flettefelt,
 ) {
-
     constructor(perioderMedForMyeUtbetalt: Set<String>) : this(
         flettefelt(perioderMedForMyeUtbetalt.toList()),
     )

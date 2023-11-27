@@ -31,7 +31,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class EndretUtbetalingAndelServiceTest {
-
     private val mockEndretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
     private val mockPersongrunnlagService = mockk<PersongrunnlagService>()
     private val mockPersonopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
@@ -44,77 +43,84 @@ class EndretUtbetalingAndelServiceTest {
     @BeforeEach
     fun setup() {
         val beregningService = mockk<BeregningService>()
-        endretUtbetalingAndelService = EndretUtbetalingAndelService(
-            endretUtbetalingAndelRepository = mockEndretUtbetalingAndelRepository,
-            personopplysningGrunnlagRepository = mockPersonopplysningGrunnlagRepository,
-            beregningService = beregningService,
-            persongrunnlagService = mockPersongrunnlagService,
-            andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository,
-            vilkårsvurderingService = mockVilkårsvurderingService,
-            endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService,
-        )
+        endretUtbetalingAndelService =
+            EndretUtbetalingAndelService(
+                endretUtbetalingAndelRepository = mockEndretUtbetalingAndelRepository,
+                personopplysningGrunnlagRepository = mockPersonopplysningGrunnlagRepository,
+                beregningService = beregningService,
+                persongrunnlagService = mockPersongrunnlagService,
+                andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository,
+                vilkårsvurderingService = mockVilkårsvurderingService,
+                endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService,
+            )
     }
 
     @Test
     fun `Skal kaste feil hvis endringsperiode har årsak delt bosted, men ikke overlapper med delt bosted perioder`() {
         val behandling = lagBehandling()
         val barn = lagPerson(type = PersonType.BARN)
-        val endretUtbetalingAndel = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-            behandlingId = behandling.id,
-            person = barn,
-            årsak = Årsak.DELT_BOSTED,
-            fom = YearMonth.now().minusMonths(5),
-            tom = YearMonth.now().minusMonths(1),
-        )
+        val endretUtbetalingAndel =
+            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                behandlingId = behandling.id,
+                person = barn,
+                årsak = Årsak.DELT_BOSTED,
+                fom = YearMonth.now().minusMonths(5),
+                tom = YearMonth.now().minusMonths(1),
+            )
         val restEndretUtbetalingAndel = endretUtbetalingAndel.tilRestEndretUtbetalingAndel()
 
-        val andelerTilkjentYtelse = listOf<AndelTilkjentYtelse>(
-            lagAndelTilkjentYtelse(
-                person = barn,
-                fom = YearMonth.now().minusMonths(10),
-                tom = YearMonth.now().plusMonths(5),
-            ),
-            lagAndelTilkjentYtelse(
-                person = barn,
-                fom = YearMonth.now().plusMonths(6),
-                tom = YearMonth.now().plusMonths(11),
-            ),
-        )
+        val andelerTilkjentYtelse =
+            listOf<AndelTilkjentYtelse>(
+                lagAndelTilkjentYtelse(
+                    person = barn,
+                    fom = YearMonth.now().minusMonths(10),
+                    tom = YearMonth.now().plusMonths(5),
+                ),
+                lagAndelTilkjentYtelse(
+                    person = barn,
+                    fom = YearMonth.now().plusMonths(6),
+                    tom = YearMonth.now().plusMonths(11),
+                ),
+            )
 
-        val vilkårsvurderingUtenDeltBosted = Vilkårsvurdering(
-            behandling = behandling,
-        )
-        vilkårsvurderingUtenDeltBosted.personResultater = setOf(
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurderingUtenDeltBosted,
-                person = barn,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = endretUtbetalingAndel.fom?.minusMonths(1)?.førsteDagIInneværendeMåned(),
-                periodeTom = LocalDate.now(),
-                erDeltBosted = false,
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN,
-                vilkårType = Vilkår.BOR_MED_SØKER,
-            ),
-        )
+        val vilkårsvurderingUtenDeltBosted =
+            Vilkårsvurdering(
+                behandling = behandling,
+            )
+        vilkårsvurderingUtenDeltBosted.personResultater =
+            setOf(
+                lagPersonResultat(
+                    vilkårsvurdering = vilkårsvurderingUtenDeltBosted,
+                    person = barn,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = endretUtbetalingAndel.fom?.minusMonths(1)?.førsteDagIInneværendeMåned(),
+                    periodeTom = LocalDate.now(),
+                    erDeltBosted = false,
+                    lagFullstendigVilkårResultat = true,
+                    personType = PersonType.BARN,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                ),
+            )
 
         every { mockEndretUtbetalingAndelRepository.getReferenceById(any()) } returns endretUtbetalingAndel.endretUtbetalingAndel
         every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), behandling) } returns listOf(barn)
-        every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns lagTestPersonopplysningGrunnlag(
-            behandling.id,
-            barn,
-        )
+        every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                barn,
+            )
         every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id) } returns andelerTilkjentYtelse
         every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandling.id) } returns emptyList()
         every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) } returns vilkårsvurderingUtenDeltBosted
 
-        val feil = assertThrows<FunksjonellFeil> {
-            endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
-                behandling = behandling,
-                endretUtbetalingAndelId = endretUtbetalingAndel.id,
-                restEndretUtbetalingAndel = restEndretUtbetalingAndel,
-            )
-        }
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+                    behandling = behandling,
+                    endretUtbetalingAndelId = endretUtbetalingAndel.id,
+                    restEndretUtbetalingAndel = restEndretUtbetalingAndel,
+                )
+            }
         Assertions.assertEquals(
             "Du har valgt årsaken 'delt bosted', denne samstemmer ikke med vurderingene gjort på vilkårsvurderingssiden i perioden du har valgt.",
             feil.frontendFeilmelding,

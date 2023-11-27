@@ -20,7 +20,6 @@ class KompetanseRepositoryTest(
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val kompetanseRepository: KompetanseRepository,
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun `Skal lagre flere kompetanser med gjenbruk av flere aktører`() {
         val søker = aktørIdRepository.save(randomAktør())
@@ -30,17 +29,19 @@ class KompetanseRepositoryTest(
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandling(fagsak))
 
-        val kompetanse = kompetanseRepository.save(
-            lagKompetanse(
-                barnAktører = setOf(barn1, barn2),
-            ).also { it.behandlingId = behandling.id },
-        )
+        val kompetanse =
+            kompetanseRepository.save(
+                lagKompetanse(
+                    barnAktører = setOf(barn1, barn2),
+                ).also { it.behandlingId = behandling.id },
+            )
 
-        val kompetanse2 = kompetanseRepository.save(
-            lagKompetanse(
-                barnAktører = setOf(barn1, barn2),
-            ).also { it.behandlingId = behandling.id },
-        )
+        val kompetanse2 =
+            kompetanseRepository.save(
+                lagKompetanse(
+                    barnAktører = setOf(barn1, barn2),
+                ).also { it.behandlingId = behandling.id },
+            )
 
         assertEquals(kompetanse.barnAktører, kompetanse2.barnAktører)
     }
@@ -53,18 +54,19 @@ class KompetanseRepositoryTest(
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandling(fagsak))
 
-        val kompetanse = kompetanseRepository.save(
-            lagKompetanse(
-                behandlingId = behandling.id,
-                barnAktører = setOf(barn1),
-                fom = YearMonth.of(2020, 1),
-                tom = YearMonth.of(2021, 12),
-                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
-                annenForeldersAktivitet = KompetanseAktivitet.MOTTAR_PENSJON,
-                annenForeldersAktivitetsland = "pl",
-                barnetsBostedsland = "sl",
-            ),
-        )
+        val kompetanse =
+            kompetanseRepository.save(
+                lagKompetanse(
+                    behandlingId = behandling.id,
+                    barnAktører = setOf(barn1),
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2021, 12),
+                    søkersAktivitet = KompetanseAktivitet.ARBEIDER,
+                    annenForeldersAktivitet = KompetanseAktivitet.MOTTAR_PENSJON,
+                    annenForeldersAktivitetsland = "pl",
+                    barnetsBostedsland = "sl",
+                ),
+            )
 
         val hentedeKompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandling.id)
 

@@ -29,10 +29,14 @@ class InfotrygdService(
             }
     }
 
-    fun hentInfotrygdstønaderForSøker(ident: String, historikk: Boolean = false): InfotrygdSøkResponse<Stønad> {
-        val søkerIdenter = personidentService.hentIdenter(personIdent = ident, historikk = true)
-            .filter { it.gruppe == "FOLKEREGISTERIDENT" }
-            .map { it.ident }
+    fun hentInfotrygdstønaderForSøker(
+        ident: String,
+        historikk: Boolean = false,
+    ): InfotrygdSøkResponse<Stønad> {
+        val søkerIdenter =
+            personidentService.hentIdenter(personIdent = ident, historikk = true)
+                .filter { it.gruppe == "FOLKEREGISTERIDENT" }
+                .map { it.ident }
         return infotrygdBarnetrygdClient.hentStønader(søkerIdenter, emptyList(), historikk)
     }
 
@@ -46,15 +50,24 @@ class InfotrygdService(
             }
     }
 
-    fun harÅpenSakIInfotrygd(søkerIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
+    fun harÅpenSakIInfotrygd(
+        søkerIdenter: List<String>,
+        barnasIdenter: List<String> = emptyList(),
+    ): Boolean {
         return infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(søkerIdenter, barnasIdenter)
     }
 
-    fun harLøpendeSakIInfotrygd(søkerIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
+    fun harLøpendeSakIInfotrygd(
+        søkerIdenter: List<String>,
+        barnasIdenter: List<String> = emptyList(),
+    ): Boolean {
         return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkerIdenter, barnasIdenter)
     }
 
-    fun harSendtbrev(søkerIdenter: List<String>, brevkoder: List<InfotrygdBrevkode>): Boolean {
+    fun harSendtbrev(
+        søkerIdenter: List<String>,
+        brevkoder: List<InfotrygdBrevkode>,
+    ): Boolean {
         if (brevkoder.isEmpty()) {
             return false
         }

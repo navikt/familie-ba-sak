@@ -34,7 +34,6 @@ import org.hamcrest.CoreMatchers.`is` as Is
 
 @ExtendWith(MockKExtension::class)
 internal class BehandlingsresultatServiceTest {
-
     @MockK
     private lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 
@@ -66,11 +65,12 @@ internal class BehandlingsresultatServiceTest {
     fun `finnPersonerFremstiltKravFor skal returnere tom liste dersom behandlingen ikke er søknad, fødselshendelse eller manuell migrering`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
 
-        val personerFramstiltForKrav = behandlingsresultatService.finnPersonerFremstiltKravFor(
-            behandling = behandling,
-            søknadDTO = null,
-            forrigeBehandling = null,
-        )
+        val personerFramstiltForKrav =
+            behandlingsresultatService.finnPersonerFremstiltKravFor(
+                behandling = behandling,
+                søknadDTO = null,
+                forrigeBehandling = null,
+            )
 
         assertThat(personerFramstiltForKrav, Is(emptyList()))
     }
@@ -79,19 +79,21 @@ internal class BehandlingsresultatServiceTest {
     fun `finnPersonerFremstiltKravFor skal returnere aktør som person framstilt krav for dersom det er søkt for utvidet barnetrygd`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
 
-        val barnSomIkkeErKryssetAvFor = BarnMedOpplysninger(
-            ident = randomFnr(),
-            navn = "barn1",
-            inkludertISøknaden = false,
-            erFolkeregistrert = true,
-        )
+        val barnSomIkkeErKryssetAvFor =
+            BarnMedOpplysninger(
+                ident = randomFnr(),
+                navn = "barn1",
+                inkludertISøknaden = false,
+                erFolkeregistrert = true,
+            )
 
-        val søknadDto = SøknadDTO(
-            underkategori = BehandlingUnderkategoriDTO.UTVIDET,
-            barnaMedOpplysninger = listOf(barnSomIkkeErKryssetAvFor),
-            søkerMedOpplysninger = mockk(),
-            endringAvOpplysningerBegrunnelse = "",
-        )
+        val søknadDto =
+            SøknadDTO(
+                underkategori = BehandlingUnderkategoriDTO.UTVIDET,
+                barnaMedOpplysninger = listOf(barnSomIkkeErKryssetAvFor),
+                søkerMedOpplysninger = mockk(),
+                endringAvOpplysningerBegrunnelse = "",
+            )
 
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
 
@@ -110,19 +112,21 @@ internal class BehandlingsresultatServiceTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val barn = lagPerson(type = PersonType.BARN)
 
-        val barnSomErKryssetAvFor = BarnMedOpplysninger(
-            ident = barn.aktør.aktivFødselsnummer(),
-            navn = "barn1",
-            inkludertISøknaden = true,
-            erFolkeregistrert = true,
-        )
+        val barnSomErKryssetAvFor =
+            BarnMedOpplysninger(
+                ident = barn.aktør.aktivFødselsnummer(),
+                navn = "barn1",
+                inkludertISøknaden = true,
+                erFolkeregistrert = true,
+            )
 
-        val søknadDto = SøknadDTO(
-            underkategori = BehandlingUnderkategoriDTO.UTVIDET,
-            barnaMedOpplysninger = listOf(barnSomErKryssetAvFor),
-            søkerMedOpplysninger = mockk(),
-            endringAvOpplysningerBegrunnelse = "",
-        )
+        val søknadDto =
+            SøknadDTO(
+                underkategori = BehandlingUnderkategoriDTO.UTVIDET,
+                barnaMedOpplysninger = listOf(barnSomErKryssetAvFor),
+                søkerMedOpplysninger = mockk(),
+                endringAvOpplysningerBegrunnelse = "",
+            )
 
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
         every { personidentService.hentAktør(barn.aktør.aktivFødselsnummer()) } returns barn.aktør
@@ -144,37 +148,42 @@ internal class BehandlingsresultatServiceTest {
         val barn1Fnr = randomFnr()
         val mocketAktør = mockk<Aktør>()
 
-        val barnSomErKryssetAvFor = BarnMedOpplysninger(
-            ident = barn1Fnr,
-            navn = "barn1",
-            inkludertISøknaden = true,
-            erFolkeregistrert = true,
-        )
+        val barnSomErKryssetAvFor =
+            BarnMedOpplysninger(
+                ident = barn1Fnr,
+                navn = "barn1",
+                inkludertISøknaden = true,
+                erFolkeregistrert = true,
+            )
 
-        val barnSomIkkeErKryssetAvFor = BarnMedOpplysninger(
-            ident = randomFnr(),
-            navn = "barn2",
-            inkludertISøknaden = false,
-            erFolkeregistrert = true,
-        )
+        val barnSomIkkeErKryssetAvFor =
+            BarnMedOpplysninger(
+                ident = randomFnr(),
+                navn = "barn2",
+                inkludertISøknaden = false,
+                erFolkeregistrert = true,
+            )
 
-        val barnSomErKryssetAvForMenIkkeFolkeregistrert = BarnMedOpplysninger(
-            ident = randomFnr(),
-            navn = "barn3",
-            inkludertISøknaden = true,
-            erFolkeregistrert = false,
-        )
+        val barnSomErKryssetAvForMenIkkeFolkeregistrert =
+            BarnMedOpplysninger(
+                ident = randomFnr(),
+                navn = "barn3",
+                inkludertISøknaden = true,
+                erFolkeregistrert = false,
+            )
 
-        val søknadDto = SøknadDTO(
-            underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
-            barnaMedOpplysninger = listOf(
-                barnSomErKryssetAvFor,
-                barnSomIkkeErKryssetAvFor,
-                barnSomErKryssetAvForMenIkkeFolkeregistrert,
-            ),
-            søkerMedOpplysninger = mockk(),
-            endringAvOpplysningerBegrunnelse = "",
-        )
+        val søknadDto =
+            SøknadDTO(
+                underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
+                barnaMedOpplysninger =
+                    listOf(
+                        barnSomErKryssetAvFor,
+                        barnSomIkkeErKryssetAvFor,
+                        barnSomErKryssetAvForMenIkkeFolkeregistrert,
+                    ),
+                søkerMedOpplysninger = mockk(),
+                endringAvOpplysningerBegrunnelse = "",
+            )
 
         every { personidentService.hentAktør(barn1Fnr) } returns mocketAktør
 
@@ -212,10 +221,11 @@ internal class BehandlingsresultatServiceTest {
 
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere eksisterende personer fra persongrunnlaget dersom behandlingen er en manuell migrering`() {
-        val behandling = lagBehandling(
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-        )
+        val behandling =
+            lagBehandling(
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            )
         val eksisterendeBarn = lagPerson()
         val eksisterendePersonpplysningGrunnlag =
             PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(eksisterendeBarn))
@@ -239,26 +249,29 @@ internal class BehandlingsresultatServiceTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val barn = lagPerson(type = PersonType.BARN)
 
-        val barnSomErKryssetAvFor = BarnMedOpplysninger(
-            ident = barn.aktør.aktivFødselsnummer(),
-            navn = "barn1",
-            inkludertISøknaden = true,
-            erFolkeregistrert = true,
-        )
+        val barnSomErKryssetAvFor =
+            BarnMedOpplysninger(
+                ident = barn.aktør.aktivFødselsnummer(),
+                navn = "barn1",
+                inkludertISøknaden = true,
+                erFolkeregistrert = true,
+            )
 
-        val duplikatBarnSomErKryssetAvFor = BarnMedOpplysninger(
-            ident = barn.aktør.aktivFødselsnummer(),
-            navn = "barn1",
-            inkludertISøknaden = true,
-            erFolkeregistrert = true,
-        )
+        val duplikatBarnSomErKryssetAvFor =
+            BarnMedOpplysninger(
+                ident = barn.aktør.aktivFødselsnummer(),
+                navn = "barn1",
+                inkludertISøknaden = true,
+                erFolkeregistrert = true,
+            )
 
-        val søknadDto = SøknadDTO(
-            underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
-            barnaMedOpplysninger = listOf(barnSomErKryssetAvFor, duplikatBarnSomErKryssetAvFor),
-            søkerMedOpplysninger = mockk(),
-            endringAvOpplysningerBegrunnelse = "",
-        )
+        val søknadDto =
+            SøknadDTO(
+                underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
+                barnaMedOpplysninger = listOf(barnSomErKryssetAvFor, duplikatBarnSomErKryssetAvFor),
+                søkerMedOpplysninger = mockk(),
+                endringAvOpplysningerBegrunnelse = "",
+            )
 
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
         every { personidentService.hentAktør(barn.aktør.aktivFødselsnummer()) } returns barn.aktør

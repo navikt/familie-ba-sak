@@ -13,28 +13,33 @@ class UnleashNextMedContextService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
 ) {
-    fun isEnabled(toggleId: String, behandlingId: Long): Boolean {
+    fun isEnabled(
+        toggleId: String,
+        behandlingId: Long,
+    ): Boolean {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         return unleashService.isEnabled(
             toggleId,
-            properties = mapOf(
-                UnleashContextFields.FAGSAK_ID to behandling.fagsak.id.toString(),
-                UnleashContextFields.BEHANDLING_ID to behandling.id.toString(),
-                UnleashContextFields.ENHET_ID to arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId,
-                UnleashContextFields.NAV_IDENT to SikkerhetContext.hentSaksbehandler(),
-                UnleashContextFields.EPOST to SikkerhetContext.hentSaksbehandlerEpost(),
-            ),
+            properties =
+                mapOf(
+                    UnleashContextFields.FAGSAK_ID to behandling.fagsak.id.toString(),
+                    UnleashContextFields.BEHANDLING_ID to behandling.id.toString(),
+                    UnleashContextFields.ENHET_ID to arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId,
+                    UnleashContextFields.NAV_IDENT to SikkerhetContext.hentSaksbehandler(),
+                    UnleashContextFields.EPOST to SikkerhetContext.hentSaksbehandlerEpost(),
+                ),
         )
     }
 
     fun isEnabled(toggleId: String): Boolean {
         return unleashService.isEnabled(
             toggleId,
-            properties = mapOf(
-                UnleashContextFields.NAV_IDENT to SikkerhetContext.hentSaksbehandler(),
-                UnleashContextFields.EPOST to SikkerhetContext.hentSaksbehandlerEpost(),
-            ),
+            properties =
+                mapOf(
+                    UnleashContextFields.NAV_IDENT to SikkerhetContext.hentSaksbehandler(),
+                    UnleashContextFields.EPOST to SikkerhetContext.hentSaksbehandlerEpost(),
+                ),
         )
     }
 }

@@ -35,7 +35,6 @@ class FamilieBaSakKlient(
     restOperations: RestOperations,
     private val headers: HttpHeaders,
 ) : AbstractRestClient(restOperations, "familie-ba-sak") {
-
     fun opprettFagsak(søkersIdent: String): Ressurs<RestMinimalFagsak> {
         val uri = URI.create("$baSakUrl/api/fagsaker")
 
@@ -208,7 +207,10 @@ class FamilieBaSakKlient(
         return postForEntity(uri, restBeslutningPåVedtak, beslutterHeaders)
     }
 
-    fun forhaandsvisHenleggelseBrev(behandlingId: Long, manueltBrevRequest: ManueltBrevRequest): Ressurs<ByteArray> {
+    fun forhaandsvisHenleggelseBrev(
+        behandlingId: Long,
+        manueltBrevRequest: ManueltBrevRequest,
+    ): Ressurs<ByteArray> {
         val uri = URI.create("$baSakUrl/api/dokument/forhaandsvis-brev/$behandlingId")
         return postForEntity(uri, manueltBrevRequest, headers)
     }

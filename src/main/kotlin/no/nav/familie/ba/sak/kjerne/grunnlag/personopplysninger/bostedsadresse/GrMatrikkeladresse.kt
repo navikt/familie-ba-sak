@@ -14,21 +14,15 @@ import java.util.Objects
 data class GrMatrikkeladresse(
     @Column(name = "matrikkel_id")
     val matrikkelId: Long?,
-
     @Column(name = "bruksenhetsnummer")
     val bruksenhetsnummer: String?,
-
     @Column(name = "tilleggsnavn")
     val tilleggsnavn: String?,
-
     @Column(name = "postnummer")
     val postnummer: String?,
-
     @Column(name = "kommunenummer")
     val kommunenummer: String?,
-
 ) : GrBostedsadresse() {
-
     override fun tilKopiForNyPerson(): GrBostedsadresse =
         GrMatrikkeladresse(
             matrikkelId,
@@ -41,7 +35,7 @@ data class GrMatrikkeladresse(
     override fun toSecureString(): String {
         return """MatrikkeladresseDao(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
 |               postnummer=$postnummer,kommunenummer=$kommunenummer
-        """.trimMargin()
+            """.trimMargin()
     }
 
     override fun toString(): String {
@@ -65,7 +59,6 @@ data class GrMatrikkeladresse(
     override fun hashCode(): Int = Objects.hash(matrikkelId)
 
     companion object {
-
         fun fraMatrikkeladresse(matrikkeladresse: Matrikkeladresse): GrMatrikkeladresse =
             GrMatrikkeladresse(
                 matrikkelId = matrikkeladresse.matrikkelId,

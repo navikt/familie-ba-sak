@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class EnvService(private val environment: Environment) {
-
     fun erProd() = environment.erAktiv(Profil.Prod)
 
     fun erPreprod() = environment.erAktiv(Profil.Preprod)

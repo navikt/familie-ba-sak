@@ -20,15 +20,15 @@ import org.springframework.stereotype.Component
 class VilkårsvurderingMetrics(
     private val persongrunnlagService: PersongrunnlagService,
 ) {
-
     private val vilkårsvurderingUtfall = mutableMapOf<PersonType, Map<String, Counter>>()
     private val vilkårsvurderingFørsteUtfall = mutableMapOf<PersonType, Map<String, Counter>>()
 
-    val personTypeToDisplayedType = mapOf(
-        PersonType.SØKER to "Mor",
-        PersonType.BARN to "Barn",
-        PersonType.ANNENPART to "Medforelder",
-    )
+    val personTypeToDisplayedType =
+        mapOf(
+            PersonType.SØKER to "Mor",
+            PersonType.BARN to "Barn",
+            PersonType.ANNENPART to "Medforelder",
+        )
 
     enum class VilkårTellerType(val navn: String) {
         UTFALL("familie.ba.behandling.vilkaarsvurdering"),
@@ -78,16 +78,19 @@ class VilkårsvurderingMetrics(
     }
 
     fun tellMetrikker(vilkårsvurdering: Vilkårsvurdering) {
-        val personer = persongrunnlagService.hentSøkerOgBarnPåBehandling(vilkårsvurdering.behandling.id)
-            ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
+        val personer =
+            persongrunnlagService.hentSøkerOgBarnPåBehandling(vilkårsvurdering.behandling.id)
+                ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
-            val person = personer.firstOrNull { it.aktør == personResultat.aktør }
-                ?: error("Finner ikke person")
+            val person =
+                personer.firstOrNull { it.aktør == personResultat.aktør }
+                    ?: error("Finner ikke person")
 
-            val negativeVilkår = personResultat.vilkårResultater.filter { vilkårResultat ->
-                vilkårResultat.resultat == Resultat.IKKE_OPPFYLT
-            }
+            val negativeVilkår =
+                personResultat.vilkårResultater.filter { vilkårResultat ->
+                    vilkårResultat.resultat == Resultat.IKKE_OPPFYLT
+                }
 
             if (negativeVilkår.isNotEmpty()) {
                 logger.info("Behandling: ${vilkårsvurdering.behandling.id}, personType=${person.type}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
@@ -135,13 +138,15 @@ class VilkårsvurderingMetrics(
         vilkårsvurdering: Vilkårsvurdering,
         vilkår: Vilkår,
     ): List<Pair<PersonEnkel, VilkårResultat?>> {
-        val personer = persongrunnlagService.hentSøkerOgBarnPåBehandling(vilkårsvurdering.behandling.id)
-            ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
+        val personer =
+            persongrunnlagService.hentSøkerOgBarnPåBehandling(vilkårsvurdering.behandling.id)
+                ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
         return personer.map { person ->
-            val personResultat = vilkårsvurdering.personResultater.firstOrNull { personResultat ->
-                personResultat.aktør == person.aktør
-            }
+            val personResultat =
+                vilkårsvurdering.personResultater.firstOrNull { personResultat ->
+                    personResultat.aktør == person.aktør
+                }
 
             Pair(
                 person,
@@ -152,11 +157,13 @@ class VilkårsvurderingMetrics(
 
     private fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(vilkårResultat: VilkårResultat) {
         val behandlingId = vilkårResultat.personResultat?.vilkårsvurdering?.behandling?.id!!
-        val personer = persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
-            ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
+        val personer =
+            persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
+                ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
-        val person = personer.firstOrNull { it.aktør == vilkårResultat.personResultat?.aktør }
-            ?: error("Finner ikke person")
+        val person =
+            personer.firstOrNull { it.aktør == vilkårResultat.personResultat?.aktør }
+                ?: error("Finner ikke person")
 
         logger.info("Første vilkår med feil=$vilkårResultat, på personType=${person.type}, på behandling $behandlingId")
         secureLogger.info("Første vilkår med feil=$vilkårResultat, på person=${person.aktør.aktivFødselsnummer()}, på behandling $behandlingId")

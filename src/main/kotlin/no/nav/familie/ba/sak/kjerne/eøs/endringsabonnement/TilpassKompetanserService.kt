@@ -47,10 +47,11 @@ class TilpassKompetanserTilRegelverkService(
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>,
 ) {
-    val skjemaService = PeriodeOgBarnSkjemaService(
-        kompetanseRepository,
-        endringsabonnenter,
-    )
+    val skjemaService =
+        PeriodeOgBarnSkjemaService(
+            kompetanseRepository,
+            endringsabonnenter,
+        )
 
     @Transactional
     fun tilpassKompetanserTilRegelverk(behandlingId: BehandlingId) {
@@ -64,13 +65,14 @@ class TilpassKompetanserTilRegelverkService(
         val annenForelderOmfattetAvNorskLovgivningTidslinje =
             vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = behandlingId)
 
-        val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
-            gjeldendeKompetanser,
-            barnasRegelverkResultatTidslinjer,
-            barnasSkalIkkeUtbetalesTidslinjer,
-            annenForelderOmfattetAvNorskLovgivningTidslinje,
-            brukBarnetsRegelverkVedBlandetResultat = unleashNext.isEnabled(ENDRET_EØS_REGELVERKFILTER_FOR_BARN),
-        ).medBehandlingId(behandlingId)
+        val oppdaterteKompetanser =
+            tilpassKompetanserTilRegelverk(
+                gjeldendeKompetanser,
+                barnasRegelverkResultatTidslinjer,
+                barnasSkalIkkeUtbetalesTidslinjer,
+                annenForelderOmfattetAvNorskLovgivningTidslinje,
+                brukBarnetsRegelverkVedBlandetResultat = unleashNext.isEnabled(ENDRET_EØS_REGELVERKFILTER_FOR_BARN),
+            ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
     }
@@ -83,10 +85,11 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>,
 ) : EndretUtbetalingAndelerOppdatertAbonnent {
-    val skjemaService = PeriodeOgBarnSkjemaService(
-        kompetanseRepository,
-        endringsabonnenter,
-    )
+    val skjemaService =
+        PeriodeOgBarnSkjemaService(
+            kompetanseRepository,
+            endringsabonnenter,
+        )
 
     @Transactional
     override fun endretUtbetalingAndelerOppdatert(
@@ -97,19 +100,21 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
         val barnasRegelverkResultatTidslinjer =
             vilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId)
 
-        val barnasSkalIkkeUtbetalesTidslinjer = endretUtbetalingAndeler
-            .tilBarnasSkalIkkeUtbetalesTidslinjer()
+        val barnasSkalIkkeUtbetalesTidslinjer =
+            endretUtbetalingAndeler
+                .tilBarnasSkalIkkeUtbetalesTidslinjer()
 
         val annenForelderOmfattetAvNorskLovgivningTidslinje =
             vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = behandlingId)
 
-        val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
-            gjeldendeKompetanser,
-            barnasRegelverkResultatTidslinjer,
-            barnasSkalIkkeUtbetalesTidslinjer,
-            annenForelderOmfattetAvNorskLovgivningTidslinje,
-            brukBarnetsRegelverkVedBlandetResultat = unleashNext.isEnabled(ENDRET_EØS_REGELVERKFILTER_FOR_BARN),
-        ).medBehandlingId(behandlingId)
+        val oppdaterteKompetanser =
+            tilpassKompetanserTilRegelverk(
+                gjeldendeKompetanser,
+                barnasRegelverkResultatTidslinjer,
+                barnasSkalIkkeUtbetalesTidslinjer,
+                annenForelderOmfattetAvNorskLovgivningTidslinje,
+                brukBarnetsRegelverkVedBlandetResultat = unleashNext.isEnabled(ENDRET_EØS_REGELVERKFILTER_FOR_BARN),
+            ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
     }
@@ -122,15 +127,16 @@ fun tilpassKompetanserTilRegelverk(
     annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean, Måned> = TomTidslinje<Boolean, Måned>(),
     brukBarnetsRegelverkVedBlandetResultat: Boolean = true,
 ): Collection<Kompetanse> {
-    val barnasEøsRegelverkTidslinjer = barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer(
-        brukBarnetsRegelverkVedBlandetResultat,
-    )
-        .leftJoin(barnasSkalIkkeUtbetalesTidslinjer) { regelverk, harEtterbetaling3År ->
-            when (harEtterbetaling3År) {
-                true -> null // ta bort regelverk hvis barnet har etterbetaling 3 år
-                else -> regelverk
+    val barnasEøsRegelverkTidslinjer =
+        barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer(
+            brukBarnetsRegelverkVedBlandetResultat,
+        )
+            .leftJoin(barnasSkalIkkeUtbetalesTidslinjer) { regelverk, harEtterbetaling3År ->
+                when (harEtterbetaling3År) {
+                    true -> null // ta bort regelverk hvis barnet har etterbetaling 3 år
+                    else -> regelverk
+                }
             }
-        }
 
     return gjeldendeKompetanser.tilSeparateTidslinjerForBarna()
         .outerJoin(barnasEøsRegelverkTidslinjer) { kompetanse, regelverk ->
@@ -186,9 +192,10 @@ private fun <I, T : Tidsenhet> Tidslinje<I, T>.flyttTilOgMed(tilTidspunkt: Tidsp
         TomTidslinje()
     } else {
         object : Tidslinje<I, T>() {
-            override fun lagPerioder(): Collection<Periode<I, T>> = tidslinje.perioder()
-                .filter { it.fraOgMed <= tilTidspunkt }
-                .replaceLast { Periode(it.fraOgMed, tilTidspunkt, it.innhold) }
+            override fun lagPerioder(): Collection<Periode<I, T>> =
+                tidslinje.perioder()
+                    .filter { it.fraOgMed <= tilTidspunkt }
+                    .replaceLast { Periode(it.fraOgMed, tilTidspunkt, it.innhold) }
         }
     }
 }

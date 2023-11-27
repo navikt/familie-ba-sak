@@ -55,43 +55,30 @@ import kotlin.reflect.full.declaredMemberProperties
 class VilkårsvurderingForNyBehandlingServiceTest(
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val behandlingService: BehandlingService,
-
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-
     @Autowired
     private val personidentService: PersonidentService,
-
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
-
     @Autowired
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
-
     @Autowired
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
-
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-
     @Autowired
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-
     @Autowired
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-
     @Autowired
     private val personRepository: PersonRepository,
-
     @Autowired
     private val aktørIdRepository: AktørIdRepository,
-
 ) : AbstractSpringIntegrationTest() {
     @BeforeAll
     fun init() {
@@ -106,28 +93,31 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val barnetsFødselsdato = LocalDate.now().minusMonths(6)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val forrigeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.MIGRERING,
-            ),
-        )
-        val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = forrigeBehandling.id,
-            søkerPersonIdent = fnr,
-            barnasIdenter = listOf(barnFnr),
-            barnasFødselsdatoer = listOf(barnetsFødselsdato),
-            søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
-            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
-        )
+        val forrigeBehandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    årsak = BehandlingÅrsak.MIGRERING,
+                ),
+            )
+        val forrigePersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = forrigeBehandling.id,
+                søkerPersonIdent = fnr,
+                barnasIdenter = listOf(barnFnr),
+                barnasFødselsdatoer = listOf(barnetsFødselsdato),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
 
         var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
-        val søkerPersonResultat = PersonResultat(
-            vilkårsvurdering = forrigeVilkårsvurdering,
-            aktør = personidentService.hentOgLagreAktør(fnr, true),
-        )
+        val søkerPersonResultat =
+            PersonResultat(
+                vilkårsvurdering = forrigeVilkårsvurdering,
+                aktør = personidentService.hentOgLagreAktør(fnr, true),
+            )
         søkerPersonResultat.setSortedVilkårResultater(
             lagSøkerVilkårResultat(
                 søkerPersonResultat = søkerPersonResultat,
@@ -135,10 +125,11 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 behandlingId = forrigeBehandling.id,
             ),
         )
-        val barnPersonResultat = PersonResultat(
-            vilkårsvurdering = forrigeVilkårsvurdering,
-            aktør = personidentService.hentOgLagreAktør(barnFnr, true),
-        )
+        val barnPersonResultat =
+            PersonResultat(
+                vilkårsvurdering = forrigeVilkårsvurdering,
+                aktør = personidentService.hentOgLagreAktør(barnFnr, true),
+            )
         barnPersonResultat.setSortedVilkårResultater(
             lagBarnVilkårResultat(
                 barnPersonResultat = barnPersonResultat,
@@ -149,31 +140,35 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             ),
         )
 
-        forrigeVilkårsvurdering = forrigeVilkårsvurdering.apply {
-            personResultater = setOf(
-                søkerPersonResultat,
-                barnPersonResultat,
-            )
-        }
+        forrigeVilkårsvurdering =
+            forrigeVilkårsvurdering.apply {
+                personResultater =
+                    setOf(
+                        søkerPersonResultat,
+                        barnPersonResultat,
+                    )
+            }
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
 
         markerBehandlingSomAvsluttet(forrigeBehandling)
 
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-            ),
-        )
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = fnr,
-            barnasIdenter = listOf(barnFnr),
-            barnasFødselsdatoer = listOf(barnetsFødselsdato),
-            søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
-            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
-        )
+        val behandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                ),
+            )
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = fnr,
+                barnasIdenter = listOf(barnFnr),
+                barnasFødselsdatoer = listOf(barnetsFødselsdato),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.now().minusMonths(5)
@@ -226,28 +221,31 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val barnetsFødselsdato = LocalDate.now().minusYears(10)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val forrigeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.MIGRERING,
-            ),
-        )
-        val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = forrigeBehandling.id,
-            søkerPersonIdent = fnr,
-            barnasIdenter = listOf(barnFnr),
-            barnasFødselsdatoer = listOf(barnetsFødselsdato),
-            søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
-            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
-        )
+        val forrigeBehandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    årsak = BehandlingÅrsak.MIGRERING,
+                ),
+            )
+        val forrigePersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = forrigeBehandling.id,
+                søkerPersonIdent = fnr,
+                barnasIdenter = listOf(barnFnr),
+                barnasFødselsdatoer = listOf(barnetsFødselsdato),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
 
         var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
-        val søkerPersonResultat = PersonResultat(
-            vilkårsvurdering = forrigeVilkårsvurdering,
-            aktør = personidentService.hentOgLagreAktør(fnr, true),
-        )
+        val søkerPersonResultat =
+            PersonResultat(
+                vilkårsvurdering = forrigeVilkårsvurdering,
+                aktør = personidentService.hentOgLagreAktør(fnr, true),
+            )
         søkerPersonResultat.setSortedVilkårResultater(
             lagSøkerVilkårResultat(
                 søkerPersonResultat = søkerPersonResultat,
@@ -255,10 +253,11 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 behandlingId = forrigeBehandling.id,
             ),
         )
-        val barnPersonResultat = PersonResultat(
-            vilkårsvurdering = forrigeVilkårsvurdering,
-            aktør = personidentService.hentOgLagreAktør(barnFnr, true),
-        )
+        val barnPersonResultat =
+            PersonResultat(
+                vilkårsvurdering = forrigeVilkårsvurdering,
+                aktør = personidentService.hentOgLagreAktør(barnFnr, true),
+            )
         barnPersonResultat.setSortedVilkårResultater(
             setOf(
                 lagVilkårResultat(
@@ -311,31 +310,35 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 ),
             ),
         )
-        forrigeVilkårsvurdering = forrigeVilkårsvurdering.apply {
-            personResultater = setOf(
-                søkerPersonResultat,
-                barnPersonResultat,
-            )
-        }
+        forrigeVilkårsvurdering =
+            forrigeVilkårsvurdering.apply {
+                personResultater =
+                    setOf(
+                        søkerPersonResultat,
+                        barnPersonResultat,
+                    )
+            }
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
 
         markerBehandlingSomAvsluttet(forrigeBehandling)
 
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-            ),
-        )
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = fnr,
-            barnasIdenter = listOf(barnFnr),
-            barnasFødselsdatoer = listOf(barnetsFødselsdato),
-            søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
-            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
-        )
+        val behandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                ),
+            )
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = fnr,
+                barnasIdenter = listOf(barnFnr),
+                barnasFødselsdatoer = listOf(barnetsFødselsdato),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
@@ -394,29 +397,32 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val nyMigreringsdato = LocalDate.now().minusYears(5)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val forrigeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.MIGRERING,
-            ),
-        )
-        val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = forrigeBehandling.id,
-            søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
-            barnasFødselsdatoer = listOf(barnetsFødselsdato),
-            søkerFødselsdato = søkerFødselsdato,
-            søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
-            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
-        )
+        val forrigeBehandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    årsak = BehandlingÅrsak.MIGRERING,
+                ),
+            )
+        val forrigePersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = forrigeBehandling.id,
+                søkerPersonIdent = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
+                barnasFødselsdatoer = listOf(barnetsFødselsdato),
+                søkerFødselsdato = søkerFødselsdato,
+                søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
 
         var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
-        val søkerPersonResultat = PersonResultat(
-            vilkårsvurdering = forrigeVilkårsvurdering,
-            aktør = personidentService.hentOgLagreAktør(søkerFnr, true),
-        )
+        val søkerPersonResultat =
+            PersonResultat(
+                vilkårsvurdering = forrigeVilkårsvurdering,
+                aktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+            )
         søkerPersonResultat.setSortedVilkårResultater(
             lagSøkerVilkårResultat(
                 søkerPersonResultat = søkerPersonResultat,
@@ -424,10 +430,11 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 behandlingId = forrigeBehandling.id,
             ),
         )
-        val barnPersonResultat = PersonResultat(
-            vilkårsvurdering = forrigeVilkårsvurdering,
-            aktør = personidentService.hentOgLagreAktør(barnFnr, true),
-        )
+        val barnPersonResultat =
+            PersonResultat(
+                vilkårsvurdering = forrigeVilkårsvurdering,
+                aktør = personidentService.hentOgLagreAktør(barnFnr, true),
+            )
         barnPersonResultat.setSortedVilkårResultater(
             setOf(
                 lagVilkårResultat(
@@ -480,32 +487,36 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 ),
             ),
         )
-        forrigeVilkårsvurdering = forrigeVilkårsvurdering.apply {
-            personResultater = setOf(
-                søkerPersonResultat,
-                barnPersonResultat,
-            )
-        }
+        forrigeVilkårsvurdering =
+            forrigeVilkårsvurdering.apply {
+                personResultater =
+                    setOf(
+                        søkerPersonResultat,
+                        barnPersonResultat,
+                    )
+            }
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
 
         markerBehandlingSomAvsluttet(forrigeBehandling)
 
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-            ),
-        )
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
-            barnasFødselsdatoer = listOf(barnetsFødselsdato),
-            søkerFødselsdato = søkerFødselsdato,
-            søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
-            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
-        )
+        val behandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                ),
+            )
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
+                barnasFødselsdatoer = listOf(barnetsFødselsdato),
+                søkerFødselsdato = søkerFødselsdato,
+                søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering =
@@ -548,11 +559,12 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         }
         Assertions.assertTrue {
             barnVilkårResultat.filter {
-                it.vilkårType !in listOf(
-                    Vilkår.GIFT_PARTNERSKAP,
-                    Vilkår.UNDER_18_ÅR,
-                    Vilkår.BOR_MED_SØKER,
-                )
+                it.vilkårType !in
+                    listOf(
+                        Vilkår.GIFT_PARTNERSKAP,
+                        Vilkår.UNDER_18_ÅR,
+                        Vilkår.BOR_MED_SØKER,
+                    )
             }.all {
                 it.periodeFom == nyMigreringsdato &&
                     it.periodeTom == null
@@ -569,29 +581,32 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val nyMigreringsdato = LocalDate.now().minusYears(5)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val forrigeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.MIGRERING,
-            ),
-        )
-        val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = forrigeBehandling.id,
-            søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
-            barnasFødselsdatoer = listOf(barnetsFødselsdato),
-            søkerFødselsdato = søkerFødselsdato,
-            søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
-            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
-        )
+        val forrigeBehandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    årsak = BehandlingÅrsak.MIGRERING,
+                ),
+            )
+        val forrigePersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = forrigeBehandling.id,
+                søkerPersonIdent = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
+                barnasFødselsdatoer = listOf(barnetsFødselsdato),
+                søkerFødselsdato = søkerFødselsdato,
+                søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
 
         var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
-        val søkerPersonResultat = PersonResultat(
-            vilkårsvurdering = forrigeVilkårsvurdering,
-            aktør = personidentService.hentOgLagreAktør(søkerFnr, true),
-        )
+        val søkerPersonResultat =
+            PersonResultat(
+                vilkårsvurdering = forrigeVilkårsvurdering,
+                aktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+            )
         val deltBostedTom = nyMigreringsdato.plusYears(2)
         val deltBostedBegrunnelse = "Dette er en kopiert begrunnelse"
         søkerPersonResultat.setSortedVilkårResultater(
@@ -611,10 +626,11 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 ),
             ),
         )
-        val barnPersonResultat = PersonResultat(
-            vilkårsvurdering = forrigeVilkårsvurdering,
-            aktør = personidentService.hentOgLagreAktør(barnFnr, true),
-        )
+        val barnPersonResultat =
+            PersonResultat(
+                vilkårsvurdering = forrigeVilkårsvurdering,
+                aktør = personidentService.hentOgLagreAktør(barnFnr, true),
+            )
         barnPersonResultat.setSortedVilkårResultater(
             lagBarnVilkårResultat(
                 barnPersonResultat = barnPersonResultat,
@@ -623,32 +639,36 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 periodeFom = nyMigreringsdato.plusMonths(5),
             ),
         )
-        forrigeVilkårsvurdering = forrigeVilkårsvurdering.apply {
-            personResultater = setOf(
-                søkerPersonResultat,
-                barnPersonResultat,
-            )
-        }
+        forrigeVilkårsvurdering =
+            forrigeVilkårsvurdering.apply {
+                personResultater =
+                    setOf(
+                        søkerPersonResultat,
+                        barnPersonResultat,
+                    )
+            }
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
 
         markerBehandlingSomAvsluttet(forrigeBehandling)
 
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-            ),
-        )
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
-            barnasFødselsdatoer = listOf(barnetsFødselsdato),
-            søkerFødselsdato = søkerFødselsdato,
-            søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
-            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
-        )
+        val behandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                ),
+            )
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
+                barnasFødselsdatoer = listOf(barnetsFødselsdato),
+                søkerFødselsdato = søkerFødselsdato,
+                søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering =
@@ -682,29 +702,32 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val forrigeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.MIGRERING,
-            ),
-        )
-        val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = forrigeBehandling.id,
-            søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
-            barnasFødselsdatoer = listOf(barnetsFødselsdato),
-            søkerFødselsdato = søkerFødselsdato,
-            søkerAktør = søkerAktør,
-            barnAktør = barnAktør,
-        )
+        val forrigeBehandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    årsak = BehandlingÅrsak.MIGRERING,
+                ),
+            )
+        val forrigePersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = forrigeBehandling.id,
+                søkerPersonIdent = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
+                barnasFødselsdatoer = listOf(barnetsFødselsdato),
+                søkerFødselsdato = søkerFødselsdato,
+                søkerAktør = søkerAktør,
+                barnAktør = barnAktør,
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
 
         var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
-        val søkerPersonResultat = PersonResultat(
-            vilkårsvurdering = forrigeVilkårsvurdering,
-            aktør = personidentService.hentOgLagreAktør(søkerFnr, true),
-        )
+        val søkerPersonResultat =
+            PersonResultat(
+                vilkårsvurdering = forrigeVilkårsvurdering,
+                aktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+            )
         val deltBostedTom = nyMigreringsdato.plusYears(2)
         val deltBostedBegrunnelse = "Dette er en kopiert begrunnelse"
         søkerPersonResultat.setSortedVilkårResultater(
@@ -724,10 +747,11 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 ),
             ),
         )
-        val barnPersonResultat = PersonResultat(
-            vilkårsvurdering = forrigeVilkårsvurdering,
-            aktør = personidentService.hentOgLagreAktør(barnFnr, true),
-        )
+        val barnPersonResultat =
+            PersonResultat(
+                vilkårsvurdering = forrigeVilkårsvurdering,
+                aktør = personidentService.hentOgLagreAktør(barnFnr, true),
+            )
         barnPersonResultat.setSortedVilkårResultater(
             lagBarnVilkårResultat(
                 barnPersonResultat = barnPersonResultat,
@@ -736,34 +760,38 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 periodeFom = nyMigreringsdato.plusMonths(5),
             ),
         )
-        forrigeVilkårsvurdering = forrigeVilkårsvurdering.apply {
-            personResultater = setOf(
-                søkerPersonResultat,
-                barnPersonResultat,
-            )
-        }
+        forrigeVilkårsvurdering =
+            forrigeVilkårsvurdering.apply {
+                personResultater =
+                    setOf(
+                        søkerPersonResultat,
+                        barnPersonResultat,
+                    )
+            }
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
 
         markerBehandlingSomAvsluttet(forrigeBehandling)
 
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-            ),
-        )
+        val behandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                ),
+            )
         // val oppdatertBarnAktør = listOf(leggTilNyIdentPåAktør(barnAktør.first(), randomFnr()))
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
-            // Justerer barnets fødselsdato slik at eksisterende vilkår for UNDER_18 og GIFT_PARNTERSKAP får "feil" fom og tom
-            barnasFødselsdatoer = listOf(barnetsFødselsdato.minusMonths(2)),
-            søkerFødselsdato = søkerFødselsdato,
-            søkerAktør = søkerAktør,
-            barnAktør = barnAktør,
-        )
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
+                // Justerer barnets fødselsdato slik at eksisterende vilkår for UNDER_18 og GIFT_PARNTERSKAP får "feil" fom og tom
+                barnasFødselsdatoer = listOf(barnetsFødselsdato.minusMonths(2)),
+                søkerFødselsdato = søkerFødselsdato,
+                søkerAktør = søkerAktør,
+                barnAktør = barnAktør,
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering =
@@ -793,28 +821,31 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val barnFnr = randomFnr()
         val barnetsFødselsdato = LocalDate.of(2020, 8, 15)
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-            ),
-        )
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = fnr,
-            barnasIdenter = listOf(barnFnr),
-            barnasFødselsdatoer = listOf(barnetsFødselsdato),
-            søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
-            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
-        )
+        val behandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                ),
+            )
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = fnr,
+                barnasIdenter = listOf(barnFnr),
+                barnasFødselsdatoer = listOf(barnetsFødselsdato),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
-        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForHelmanuellMigrering(
-            behandling,
-            nyMigreringsdato,
-        )
+        val vilkårsvurdering =
+            vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForHelmanuellMigrering(
+                behandling,
+                nyMigreringsdato,
+            )
 
         Assertions.assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         Assertions.assertTrue { vilkårsvurdering.personResultater.size == 2 }
@@ -860,28 +891,31 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val barnFnr = randomFnr()
         val barnetsFødselsdato = LocalDate.of(2021, 8, 15)
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-            ),
-        )
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = fnr,
-            barnasIdenter = listOf(barnFnr),
-            barnasFødselsdatoer = listOf(barnetsFødselsdato),
-            søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
-            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
-        )
+        val behandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                ),
+            )
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = fnr,
+                barnasIdenter = listOf(barnFnr),
+                barnasFødselsdatoer = listOf(barnetsFødselsdato),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
-        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForHelmanuellMigrering(
-            behandling,
-            nyMigreringsdato,
-        )
+        val vilkårsvurdering =
+            vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForHelmanuellMigrering(
+                behandling,
+                nyMigreringsdato,
+            )
 
         Assertions.assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         Assertions.assertTrue { vilkårsvurdering.personResultater.size == 2 }
@@ -928,36 +962,40 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                årsak = BehandlingÅrsak.SØKNAD,
-            ),
-        )
+        val behandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.SØKNAD,
+                ),
+            )
 
-        val personopplysningGrunnlag = persongrunnlagService.lagreOgDeaktiverGammel(
-            PersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-            ),
-        )
+        val personopplysningGrunnlag =
+            persongrunnlagService.lagreOgDeaktiverGammel(
+                PersonopplysningGrunnlag(
+                    behandlingId = behandling.id,
+                ),
+            )
 
-        val søker = personRepository.saveAndFlush(
-            lagPerson(
-                personIdent = PersonIdent(søkerFnr),
-                type = PersonType.SØKER,
-                aktør = søkerAktør,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-            ),
-        )
-        val barn = personRepository.saveAndFlush(
-            lagPerson(
-                personIdent = PersonIdent(barnFnr),
-                type = PersonType.BARN,
-                aktør = barnAktør[0],
-                personopplysningGrunnlag = personopplysningGrunnlag,
-            ),
-        )
+        val søker =
+            personRepository.saveAndFlush(
+                lagPerson(
+                    personIdent = PersonIdent(søkerFnr),
+                    type = PersonType.SØKER,
+                    aktør = søkerAktør,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                ),
+            )
+        val barn =
+            personRepository.saveAndFlush(
+                lagPerson(
+                    personIdent = PersonIdent(barnFnr),
+                    type = PersonType.BARN,
+                    aktør = barnAktør[0],
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                ),
+            )
 
         val vilkårsvurdering =
             lagVilkårsvurderingMedOverstyrendeResultater(
@@ -969,22 +1007,23 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        val endredeUtbetalingsAndeler = listOf(
-            lagEndretUtbetalingAndel(
-                behandlingId = behandling.id,
-                barn = barn,
-                fom = YearMonth.now(),
-                tom = YearMonth.now().plusMonths(6),
-                prosent = 50,
-            ),
-            lagEndretUtbetalingAndel(
-                behandlingId = behandling.id,
-                barn = barn,
-                fom = YearMonth.now().plusMonths(7),
-                tom = YearMonth.now().plusMonths(12),
-                prosent = 100,
-            ),
-        )
+        val endredeUtbetalingsAndeler =
+            listOf(
+                lagEndretUtbetalingAndel(
+                    behandlingId = behandling.id,
+                    barn = barn,
+                    fom = YearMonth.now(),
+                    tom = YearMonth.now().plusMonths(6),
+                    prosent = 50,
+                ),
+                lagEndretUtbetalingAndel(
+                    behandlingId = behandling.id,
+                    barn = barn,
+                    fom = YearMonth.now().plusMonths(7),
+                    tom = YearMonth.now().plusMonths(12),
+                    prosent = 100,
+                ),
+            )
 
         endretUtbetalingAndelRepository.saveAllAndFlush(endredeUtbetalingsAndeler)
 
@@ -992,31 +1031,35 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
         markerBehandlingSomAvsluttet(behandling)
 
-        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.REVURDERING,
-                årsak = BehandlingÅrsak.SATSENDRING,
-            ),
-        )
+        val behandling2 =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.SATSENDRING,
+                ),
+            )
 
-        val personopplysningGrunnlagB2 = persongrunnlagService.lagreOgDeaktiverGammel(
-            PersonopplysningGrunnlag(
-                behandlingId = behandling2.id,
-            ),
-        )
-        val søkerB2 = lagPerson(
-            personIdent = PersonIdent(søkerFnr),
-            type = PersonType.SØKER,
-            aktør = søkerAktør,
-            personopplysningGrunnlag = personopplysningGrunnlagB2,
-        )
-        val barnB2 = lagPerson(
-            personIdent = PersonIdent(barnFnr),
-            type = PersonType.BARN,
-            aktør = barnAktør[0],
-            personopplysningGrunnlag = personopplysningGrunnlagB2,
-        )
+        val personopplysningGrunnlagB2 =
+            persongrunnlagService.lagreOgDeaktiverGammel(
+                PersonopplysningGrunnlag(
+                    behandlingId = behandling2.id,
+                ),
+            )
+        val søkerB2 =
+            lagPerson(
+                personIdent = PersonIdent(søkerFnr),
+                type = PersonType.SØKER,
+                aktør = søkerAktør,
+                personopplysningGrunnlag = personopplysningGrunnlagB2,
+            )
+        val barnB2 =
+            lagPerson(
+                personIdent = PersonIdent(barnFnr),
+                type = PersonType.BARN,
+                aktør = barnAktør[0],
+                personopplysningGrunnlag = personopplysningGrunnlagB2,
+            )
 
         personopplysningGrunnlagB2.personer.addAll(listOf(søkerB2, barnB2))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlagB2)
@@ -1058,7 +1101,10 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         return behandlingHentOgPersisterService.lagreOgFlush(behandling)
     }
 
-    private fun leggTilNyIdentPåAktør(aktør: Aktør, nyttFnr: String): Aktør {
+    private fun leggTilNyIdentPåAktør(
+        aktør: Aktør,
+        nyttFnr: String,
+    ): Aktør {
         aktør.personidenter.filter { it.aktiv }.map {
             it.aktiv = false
             it.gjelderTil = LocalDateTime.now()

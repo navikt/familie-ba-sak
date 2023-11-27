@@ -13,24 +13,23 @@ import org.junit.jupiter.api.Test
 class BrevServiceTest {
     val saksbehandlerContext = mockk<SaksbehandlerContext>()
     val brevmalService = mockk<BrevmalService>()
-    val brevService = BrevService(
-        totrinnskontrollService = mockk(),
-        persongrunnlagService = mockk(),
-        arbeidsfordelingService = mockk(),
-        simuleringService = mockk(),
-        vedtaksperiodeService = mockk(),
-        brevPeriodeService = mockk(),
-        sanityService = mockk(),
-        vilkårsvurderingService = mockk(),
-        korrigertEtterbetalingService = mockk(),
-        organisasjonService = mockk(),
-        korrigertVedtakService = mockk(),
-        saksbehandlerContext = saksbehandlerContext,
-        brevmalService = brevmalService,
-        refusjonEøsRepository = mockk(),
-        unleashNext = mockk(),
-        integrasjonClient = mockk(),
-    )
+    val brevService =
+        BrevService(
+            totrinnskontrollService = mockk(),
+            persongrunnlagService = mockk(),
+            arbeidsfordelingService = mockk(),
+            simuleringService = mockk(),
+            vedtaksperiodeService = mockk(),
+            sanityService = mockk(),
+            vilkårsvurderingService = mockk(),
+            korrigertEtterbetalingService = mockk(),
+            organisasjonService = mockk(),
+            korrigertVedtakService = mockk(),
+            saksbehandlerContext = saksbehandlerContext,
+            brevmalService = brevmalService,
+            refusjonEøsRepository = mockk(),
+            integrasjonClient = mockk(),
+        )
 
     @BeforeEach
     fun setUp() {
@@ -41,10 +40,11 @@ class BrevServiceTest {
     fun `Saksbehandler blir hentet fra sikkerhetscontext og beslutter viser placeholder tekst under behandling`() {
         val behandling = lagBehandling()
 
-        val (saksbehandler, beslutter) = brevService.hentSaksbehandlerOgBeslutter(
-            behandling = behandling,
-            totrinnskontroll = null,
-        )
+        val (saksbehandler, beslutter) =
+            brevService.hentSaksbehandlerOgBeslutter(
+                behandling = behandling,
+                totrinnskontroll = null,
+            )
 
         Assertions.assertEquals("saksbehandlerNavn", saksbehandler)
         Assertions.assertEquals("Beslutter", beslutter)
@@ -55,14 +55,16 @@ class BrevServiceTest {
         val behandling = lagBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
 
-        val (saksbehandler, beslutter) = brevService.hentSaksbehandlerOgBeslutter(
-            behandling = behandling,
-            totrinnskontroll = Totrinnskontroll(
+        val (saksbehandler, beslutter) =
+            brevService.hentSaksbehandlerOgBeslutter(
                 behandling = behandling,
-                saksbehandler = "Mock Saksbehandler",
-                saksbehandlerId = "mock.saksbehandler@nav.no",
-            ),
-        )
+                totrinnskontroll =
+                    Totrinnskontroll(
+                        behandling = behandling,
+                        saksbehandler = "Mock Saksbehandler",
+                        saksbehandlerId = "mock.saksbehandler@nav.no",
+                    ),
+            )
 
         Assertions.assertEquals("Mock Saksbehandler", saksbehandler)
         Assertions.assertEquals("saksbehandlerNavn", beslutter)
@@ -73,14 +75,16 @@ class BrevServiceTest {
         val behandling = lagBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
 
-        val (saksbehandler, beslutter) = brevService.hentSaksbehandlerOgBeslutter(
-            behandling = behandling,
-            totrinnskontroll = Totrinnskontroll(
+        val (saksbehandler, beslutter) =
+            brevService.hentSaksbehandlerOgBeslutter(
                 behandling = behandling,
-                saksbehandler = "System",
-                saksbehandlerId = "systembruker",
-            ),
-        )
+                totrinnskontroll =
+                    Totrinnskontroll(
+                        behandling = behandling,
+                        saksbehandler = "System",
+                        saksbehandlerId = "systembruker",
+                    ),
+            )
 
         Assertions.assertEquals("System", saksbehandler)
         Assertions.assertEquals("saksbehandlerNavn", beslutter)
@@ -91,16 +95,18 @@ class BrevServiceTest {
         val behandling = lagBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
 
-        val (saksbehandler, beslutter) = brevService.hentSaksbehandlerOgBeslutter(
-            behandling = behandling,
-            totrinnskontroll = Totrinnskontroll(
+        val (saksbehandler, beslutter) =
+            brevService.hentSaksbehandlerOgBeslutter(
                 behandling = behandling,
-                saksbehandler = "Mock Saksbehandler",
-                saksbehandlerId = "mock.saksbehandler@nav.no",
-                beslutter = "Mock Beslutter",
-                beslutterId = "mock.beslutter@nav.no",
-            ),
-        )
+                totrinnskontroll =
+                    Totrinnskontroll(
+                        behandling = behandling,
+                        saksbehandler = "Mock Saksbehandler",
+                        saksbehandlerId = "mock.saksbehandler@nav.no",
+                        beslutter = "Mock Beslutter",
+                        beslutterId = "mock.beslutter@nav.no",
+                    ),
+            )
 
         Assertions.assertEquals("Mock Saksbehandler", saksbehandler)
         Assertions.assertEquals("Mock Beslutter", beslutter)

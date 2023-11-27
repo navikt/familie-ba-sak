@@ -13,7 +13,6 @@ class DistribuerVedtaksbrev(
     private val dokumentDistribueringService: DokumentDistribueringService,
     private val taskRepository: TaskRepositoryWrapper,
 ) : BehandlingSteg<DistribuerDokumentDTO> {
-
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
         data: DistribuerDokumentDTO,
@@ -26,10 +25,11 @@ class DistribuerVedtaksbrev(
 
         val søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer()
 
-        val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
-            søkerIdent = søkerIdent,
-            behandlingsId = data.behandlingId!!,
-        )
+        val ferdigstillBehandlingTask =
+            FerdigstillBehandlingTask.opprettTask(
+                søkerIdent = søkerIdent,
+                behandlingsId = data.behandlingId!!,
+            )
         taskRepository.save(ferdigstillBehandlingTask)
 
         return hentNesteStegForNormalFlyt(behandling)
@@ -40,7 +40,6 @@ class DistribuerVedtaksbrev(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(DistribuerVedtaksbrev::class.java)
     }
 }

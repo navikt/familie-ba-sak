@@ -25,7 +25,6 @@ import java.time.YearMonth
 
 @ExtendWith(MockKExtension::class)
 class ValutakursControllerTest {
-
     @MockK
     private lateinit var valutakursService: ValutakursService
 

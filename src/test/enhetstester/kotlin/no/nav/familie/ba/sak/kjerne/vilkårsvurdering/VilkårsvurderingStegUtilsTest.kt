@@ -24,7 +24,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class VilkårsvurderingStegUtilsTest {
-
     lateinit var vilkårResultat1: VilkårResultat
     lateinit var vilkårResultat2: VilkårResultat
     lateinit var vilkårResultat3: VilkårResultat
@@ -45,44 +44,48 @@ class VilkårsvurderingStegUtilsTest {
 
         vilkårsvurdering = lagVilkårsvurdering(personAktørId, behandling, resultat)
 
-        personResultat = PersonResultat(
-            vilkårsvurdering = vilkårsvurdering,
-            aktør = personAktørId,
-        )
+        personResultat =
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = personAktørId,
+            )
 
-        vilkårResultat1 = VilkårResultat(
-            id = 1,
-            personResultat = personResultat,
-            vilkårType = vilkår,
-            resultat = resultat,
-            resultatBegrunnelse = null,
-            periodeFom = LocalDate.of(2010, 1, 1),
-            periodeTom = LocalDate.of(2010, 6, 1),
-            begrunnelse = "",
-            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-        )
-        vilkårResultat2 = VilkårResultat(
-            id = 2,
-            personResultat = personResultat,
-            vilkårType = vilkår,
-            resultat = resultat,
-            resultatBegrunnelse = null,
-            periodeFom = LocalDate.of(2010, 6, 2),
-            periodeTom = LocalDate.of(2010, 8, 1),
-            begrunnelse = "",
-            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-        )
-        vilkårResultat3 = VilkårResultat(
-            id = 3,
-            personResultat = personResultat,
-            vilkårType = vilkår,
-            resultat = resultat,
-            resultatBegrunnelse = null,
-            periodeFom = LocalDate.of(2010, 8, 2),
-            periodeTom = LocalDate.of(2010, 12, 1),
-            begrunnelse = "",
-            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-        )
+        vilkårResultat1 =
+            VilkårResultat(
+                id = 1,
+                personResultat = personResultat,
+                vilkårType = vilkår,
+                resultat = resultat,
+                resultatBegrunnelse = null,
+                periodeFom = LocalDate.of(2010, 1, 1),
+                periodeTom = LocalDate.of(2010, 6, 1),
+                begrunnelse = "",
+                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+            )
+        vilkårResultat2 =
+            VilkårResultat(
+                id = 2,
+                personResultat = personResultat,
+                vilkårType = vilkår,
+                resultat = resultat,
+                resultatBegrunnelse = null,
+                periodeFom = LocalDate.of(2010, 6, 2),
+                periodeTom = LocalDate.of(2010, 8, 1),
+                begrunnelse = "",
+                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+            )
+        vilkårResultat3 =
+            VilkårResultat(
+                id = 3,
+                personResultat = personResultat,
+                vilkårType = vilkår,
+                resultat = resultat,
+                resultatBegrunnelse = null,
+                periodeFom = LocalDate.of(2010, 8, 2),
+                periodeTom = LocalDate.of(2010, 12, 1),
+                begrunnelse = "",
+                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+            )
         personResultat.setSortedVilkårResultater(
             setOf(
                 vilkårResultat1,
@@ -92,21 +95,25 @@ class VilkårsvurderingStegUtilsTest {
         )
     }
 
-    private fun assertPeriode(expected: Periode, actual: Periode) {
+    private fun assertPeriode(
+        expected: Periode,
+        actual: Periode,
+    ) {
         assertEquals(expected.fom, actual.fom)
         assertEquals(expected.tom, actual.tom)
     }
 
     @Test
     fun `periode erstattes dersom en periode med overlappende tidsintervall legges til`() {
-        val restVilkårResultat = RestVilkårResultat(
-            2, vilkår, resultat,
-            LocalDate.of(2010, 6, 2), LocalDate.of(2011, 9, 1),
-            "",
-            "",
-            LocalDateTime.now(),
-            behandling.id,
-        )
+        val restVilkårResultat =
+            RestVilkårResultat(
+                2, vilkår, resultat,
+                LocalDate.of(2010, 6, 2), LocalDate.of(2011, 9, 1),
+                "",
+                "",
+                LocalDateTime.now(),
+                behandling.id,
+            )
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
             restVilkårResultat,
@@ -132,14 +139,15 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `periode splittes dersom en periode med inneklemt tidsintervall legges til`() {
-        val restVilkårResultat = RestVilkårResultat(
-            2, vilkår, resultat,
-            LocalDate.of(2010, 3, 5), LocalDate.of(2010, 5, 20),
-            "",
-            "",
-            LocalDateTime.now(),
-            behandling.id,
-        )
+        val restVilkårResultat =
+            RestVilkårResultat(
+                2, vilkår, resultat,
+                LocalDate.of(2010, 3, 5), LocalDate.of(2010, 5, 20),
+                "",
+                "",
+                LocalDateTime.now(),
+                behandling.id,
+            )
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
@@ -179,14 +187,15 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `fom-dato flyttes korrekt`() {
-        val restVilkårResultat = RestVilkårResultat(
-            2, vilkår, resultat,
-            LocalDate.of(2010, 4, 2), LocalDate.of(2010, 8, 1),
-            "",
-            "",
-            LocalDateTime.now(),
-            behandling.id,
-        )
+        val restVilkårResultat =
+            RestVilkårResultat(
+                2, vilkår, resultat,
+                LocalDate.of(2010, 4, 2), LocalDate.of(2010, 8, 1),
+                "",
+                "",
+                LocalDateTime.now(),
+                behandling.id,
+            )
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
@@ -219,14 +228,15 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `tom-dato flyttes korrekt`() {
-        val restVilkårResultat = RestVilkårResultat(
-            2, vilkår, resultat,
-            LocalDate.of(2010, 6, 2), LocalDate.of(2010, 9, 1),
-            "",
-            "",
-            LocalDateTime.now(),
-            behandling.id,
-        )
+        val restVilkårResultat =
+            RestVilkårResultat(
+                2, vilkår, resultat,
+                LocalDate.of(2010, 6, 2), LocalDate.of(2010, 9, 1),
+                "",
+                "",
+                LocalDateTime.now(),
+                behandling.id,
+            )
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
@@ -328,22 +338,24 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `Skal nullstille periode hvis det kun finnes en periode`() {
-        val mockPersonResultat = PersonResultat(
-            vilkårsvurdering = vilkårsvurdering,
-            aktør = randomAktør(),
-        )
+        val mockPersonResultat =
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = randomAktør(),
+            )
 
-        val mockVilkårResultat = VilkårResultat(
-            id = 1,
-            personResultat = mockPersonResultat,
-            vilkårType = vilkår,
-            resultat = resultat,
-            resultatBegrunnelse = null,
-            periodeFom = LocalDate.of(2010, 1, 1),
-            periodeTom = LocalDate.of(2010, 6, 1),
-            begrunnelse = "",
-            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-        )
+        val mockVilkårResultat =
+            VilkårResultat(
+                id = 1,
+                personResultat = mockPersonResultat,
+                vilkårType = vilkår,
+                resultat = resultat,
+                resultatBegrunnelse = null,
+                periodeFom = LocalDate.of(2010, 1, 1),
+                periodeTom = LocalDate.of(2010, 6, 1),
+                begrunnelse = "",
+                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+            )
         mockPersonResultat.setSortedVilkårResultater(setOf(mockVilkårResultat))
 
         VilkårsvurderingUtils.muterPersonResultatDelete(
@@ -372,25 +384,27 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `Skal tilpasse vilkår for endret vilkår når begge mangler tom-dato`() {
-        val vilkårResultat = VilkårResultat(
-            personResultat = personResultat,
-            vilkårType = vilkår,
-            resultat = resultat,
-            periodeFom = LocalDate.of(2020, 1, 1),
-            begrunnelse = "",
-            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-        )
-        val restVilkårResultat = RestVilkårResultat(
-            id = 1,
-            vilkårType = vilkår,
-            resultat = resultat,
-            periodeFom = LocalDate.of(2020, 6, 1),
-            periodeTom = null,
-            begrunnelse = "",
-            endretAv = "",
-            endretTidspunkt = LocalDateTime.now(),
-            behandlingId = behandling.id,
-        )
+        val vilkårResultat =
+            VilkårResultat(
+                personResultat = personResultat,
+                vilkårType = vilkår,
+                resultat = resultat,
+                periodeFom = LocalDate.of(2020, 1, 1),
+                begrunnelse = "",
+                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+            )
+        val restVilkårResultat =
+            RestVilkårResultat(
+                id = 1,
+                vilkårType = vilkår,
+                resultat = resultat,
+                periodeFom = LocalDate.of(2020, 6, 1),
+                periodeTom = null,
+                begrunnelse = "",
+                endretAv = "",
+                endretTidspunkt = LocalDateTime.now(),
+                behandlingId = behandling.id,
+            )
 
         VilkårsvurderingUtils.tilpassVilkårForEndretVilkår(personResultat, vilkårResultat, restVilkårResultat)
 
@@ -412,10 +426,11 @@ class VilkårsvurderingStegUtilsTest {
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT),
             )
 
-        val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
-            initiellVilkårsvurdering = initiellVilkårvurdering,
-            aktivVilkårsvurdering = aktivVilkårsvurdering,
-        )
+        val (initiell, _) =
+            VilkårsvurderingUtils.flyttResultaterTilInitielt(
+                initiellVilkårsvurdering = initiellVilkårvurdering,
+                aktivVilkårsvurdering = aktivVilkårsvurdering,
+            )
 
         val opprettetBosattIRiket =
             initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
@@ -442,10 +457,11 @@ class VilkårsvurderingStegUtilsTest {
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT),
             )
 
-        val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
-            initiellVilkårsvurdering = initiellVilkårvurdering,
-            aktivVilkårsvurdering = aktivVilkårsvurdering,
-        )
+        val (initiell, _) =
+            VilkårsvurderingUtils.flyttResultaterTilInitielt(
+                initiellVilkårsvurdering = initiellVilkårvurdering,
+                aktivVilkårsvurdering = aktivVilkårsvurdering,
+            )
 
         val opprettetBosattIRiket =
             initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
@@ -468,10 +484,11 @@ class VilkårsvurderingStegUtilsTest {
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.IKKE_OPPFYLT),
             )
 
-        val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
-            initiellVilkårsvurdering = initiellVilkårsvurdering,
-            aktivVilkårsvurdering = activeVilkårvurdering,
-        )
+        val (initiell, _) =
+            VilkårsvurderingUtils.flyttResultaterTilInitielt(
+                initiellVilkårsvurdering = initiellVilkårsvurdering,
+                aktivVilkårsvurdering = activeVilkårvurdering,
+            )
 
         val opprettetBosattIRiket =
             initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
@@ -485,14 +502,16 @@ class VilkårsvurderingStegUtilsTest {
         behandling: Behandling,
         resultater: List<Resultat>,
     ): Vilkårsvurdering {
-        val vilkårsvurdering = Vilkårsvurdering(
-            behandling = behandling,
-        )
+        val vilkårsvurdering =
+            Vilkårsvurdering(
+                behandling = behandling,
+            )
         var månedsteller = 0L
-        val personResultat = PersonResultat(
-            vilkårsvurdering = vilkårsvurdering,
-            aktør = søkerAktør,
-        )
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = søkerAktør,
+            )
         personResultat.setSortedVilkårResultater(
             resultater.map {
                 VilkårResultat(

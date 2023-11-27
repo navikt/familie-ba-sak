@@ -16,29 +16,31 @@ import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Test
 
 internal class AutobrevTaskTest {
-
     val fagsakRepository = mockk<FagsakRepository>()
     val opprettTaskService = mockk<OpprettTaskService>()
     val behandlingService = mockk<BehandlingService>()
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
 
-    private val autobrevTask = AutobrevTask(
-        fagsakRepository = fagsakRepository,
-        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-        opprettTaskService = opprettTaskService,
-    )
+    private val autobrevTask =
+        AutobrevTask(
+            fagsakRepository = fagsakRepository,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            opprettTaskService = opprettTaskService,
+        )
 
-    private val autoBrevTask = Task(
-        type = AutobrevTask.TASK_STEP_TYPE,
-        payload = "",
-    )
+    private val autoBrevTask =
+        Task(
+            type = AutobrevTask.TASK_STEP_TYPE,
+            payload = "",
+        )
 
     @Test
     fun `oppretter autobrev tasker for 6 år, 2 for 18 år og 1 for småbarnstillegg`() {
-        val fagsaker = setOf(
-            Fagsak(1, aktør = tilAktør(randomFnr())),
-            Fagsak(2, aktør = tilAktør(randomFnr())),
-        )
+        val fagsaker =
+            setOf(
+                Fagsak(1, aktør = tilAktør(randomFnr())),
+                Fagsak(2, aktør = tilAktør(randomFnr())),
+            )
 
         every { fagsakRepository.finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(any(), any()) } answers { fagsaker }
         every { fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(any()) } returns listOf(1L)

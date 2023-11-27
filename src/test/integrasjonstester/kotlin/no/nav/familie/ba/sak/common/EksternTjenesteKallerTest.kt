@@ -26,7 +26,6 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
-
     @Autowired
     @Qualifier("jwtBearer")
     lateinit var restOperations: RestOperations
@@ -35,10 +34,11 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun setUp() {
-        integrasjonClient = IntegrasjonClient(
-            URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations,
-        )
+        integrasjonClient =
+            IntegrasjonClient(
+                URI.create(wireMockServer.baseUrl() + "/api"),
+                restOperations,
+            )
     }
 
     @AfterEach

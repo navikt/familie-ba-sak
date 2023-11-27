@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class SaksstatistikkEventPublisher {
-
     @Autowired
     lateinit var applicationEventPublisher: ApplicationEventPublisher
 

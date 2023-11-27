@@ -37,19 +37,25 @@ class SatsendringController(
     private val logger = LoggerFactory.getLogger(SatsendringController::class.java)
 
     @GetMapping(path = ["/kjorsatsendring/{fagsakId}"])
-    fun utførSatsendringITaskPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
+    fun utførSatsendringITaskPåFagsak(
+        @PathVariable fagsakId: Long,
+    ): ResponseEntity<Ressurs<String>> {
         startSatsendring.opprettSatsendringForFagsak(fagsakId)
         return ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsak $fagsakId"))
     }
 
     @PostMapping(path = ["/kjorsatsendring"])
-    fun utførSatsendringITaskPåFagsaker(@RequestBody fagsaker: Set<Long>): ResponseEntity<Ressurs<String>> {
+    fun utførSatsendringITaskPåFagsaker(
+        @RequestBody fagsaker: Set<Long>,
+    ): ResponseEntity<Ressurs<String>> {
         fagsaker.forEach { startSatsendring.opprettSatsendringForFagsak(it) }
         return ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsakene $fagsaker"))
     }
 
     @PutMapping(path = ["/{fagsakId}/kjor-satsendring-synkront"])
-    fun utførSatsendringSynkrontPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<Unit>> {
+    fun utførSatsendringSynkrontPåFagsak(
+        @PathVariable fagsakId: Long,
+    ): ResponseEntity<Ressurs<Unit>> {
         tilgangService.validerTilgangTilHandlingOgFagsak(
             fagsakId = fagsakId,
             handling = "Valider vi kan kjøre satsendring",
@@ -62,12 +68,16 @@ class SatsendringController(
     }
 
     @GetMapping(path = ["/{fagsakId}/kan-kjore-satsendring"])
-    fun kanKjøreSatsendringPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<Boolean>> {
+    fun kanKjøreSatsendringPåFagsak(
+        @PathVariable fagsakId: Long,
+    ): ResponseEntity<Ressurs<Boolean>> {
         return ResponseEntity.ok(Ressurs.success(startSatsendring.kanGjennomføreSatsendringManuelt(fagsakId)))
     }
 
     @PostMapping(path = ["/kjorsatsendringForListeMedIdenter"])
-    fun utførSatsendringPåListeIdenter(@RequestBody listeMedIdenter: Set<String>): ResponseEntity<Ressurs<String>> {
+    fun utførSatsendringPåListeIdenter(
+        @RequestBody listeMedIdenter: Set<String>,
+    ): ResponseEntity<Ressurs<String>> {
         listeMedIdenter.forEach {
             startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(it)
         }
@@ -79,11 +89,12 @@ class SatsendringController(
         @RequestBody behandlinger: Set<String>,
         @PathVariable valideringsdato: String,
     ): ResponseEntity<Ressurs<String>> {
-        val dato = try {
-            LocalDate.parse(valideringsdato).also { assert(it.isAfter(LocalDate.now().plusMonths(1))) }
-        } catch (e: Exception) {
-            return badRequest("Ugyldig dato", e)
-        }
+        val dato =
+            try {
+                LocalDate.parse(valideringsdato).also { assert(it.isAfter(LocalDate.now().plusMonths(1))) }
+            } catch (e: Exception) {
+                return badRequest("Ugyldig dato", e)
+            }
         behandlinger.forEach {
             opprettTaskService.opprettHenleggBehandlingTask(
                 behandlingId = it.toLong(),

@@ -22,7 +22,6 @@ class DistribuerDokumentTask(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val dokumentDistribueringService: DokumentDistribueringService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val distribuerDokumentDTO = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
 
@@ -52,7 +51,6 @@ class DistribuerDokumentTask(
     }
 
     companion object {
-
         fun opprettDistribuerDokumentTask(
             distribuerDokumentDTO: DistribuerDokumentDTO,
             properties: Properties,

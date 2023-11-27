@@ -41,41 +41,29 @@ import java.time.LocalDate
 class SøknadGrunnlagTest(
     @Autowired
     private val søknadGrunnlagService: SøknadGrunnlagService,
-
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val stegService: StegService,
-
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
-
     @Autowired
     private val personidentService: PersonidentService,
-
     @Autowired
     private val vedtakService: VedtakService,
-
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
-
     @Autowired
     private val beregningService: BeregningService,
-
     @Autowired
     private val utvidetBehandlingService: UtvidetBehandlingService,
-
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
-
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-
     @Autowired
     private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
@@ -88,9 +76,10 @@ class SøknadGrunnlagTest(
         val søkerAktør = personidentService.hentAktør(søkerIdent)
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
-        val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling(søkerIdent, fagsak.id),
-        )
+        val behandling =
+            stegService.håndterNyBehandling(
+                lagNyBehandling(søkerIdent, fagsak.id),
+            )
 
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
         søknadGrunnlagService.lagreOgDeaktiverGammel(
@@ -114,9 +103,10 @@ class SøknadGrunnlagTest(
         val søkerAktør = personidentService.hentAktør(søkerIdent)
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
-        val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling(søkerIdent, fagsak.id),
-        )
+        val behandling =
+            stegService.håndterNyBehandling(
+                lagNyBehandling(søkerIdent, fagsak.id),
+            )
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
 
         val barnIdent2 = randomFnr()
@@ -150,34 +140,39 @@ class SøknadGrunnlagTest(
 
         val søkerAktør = personidentService.hentAktør(søkerIdent)
 
-        val søknadDTO = SøknadDTO(
-            underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
-            søkerMedOpplysninger = SøkerMedOpplysninger(
-                ident = søkerIdent,
-            ),
-            barnaMedOpplysninger = listOf(
-                BarnMedOpplysninger(
-                    ident = folkeregistrertBarn,
-                ),
-                BarnMedOpplysninger(
-                    ident = uregistrertBarn,
-                    erFolkeregistrert = false,
-                ),
-            ),
-            endringAvOpplysningerBegrunnelse = "",
-        )
+        val søknadDTO =
+            SøknadDTO(
+                underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
+                søkerMedOpplysninger =
+                    SøkerMedOpplysninger(
+                        ident = søkerIdent,
+                    ),
+                barnaMedOpplysninger =
+                    listOf(
+                        BarnMedOpplysninger(
+                            ident = folkeregistrertBarn,
+                        ),
+                        BarnMedOpplysninger(
+                            ident = uregistrertBarn,
+                            erFolkeregistrert = false,
+                        ),
+                    ),
+                endringAvOpplysningerBegrunnelse = "",
+            )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
-        val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling(søkerIdent, fagsak.id),
-        )
+        val behandling =
+            stegService.håndterNyBehandling(
+                lagNyBehandling(søkerIdent, fagsak.id),
+            )
 
         stegService.håndterSøknad(
             behandling = behandling,
-            restRegistrerSøknad = RestRegistrerSøknad(
-                søknad = søknadDTO,
-                bekreftEndringerViaFrontend = false,
-            ),
+            restRegistrerSøknad =
+                RestRegistrerSøknad(
+                    søknad = søknadDTO,
+                    bekreftEndringerViaFrontend = false,
+                ),
         )
 
         val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
@@ -187,32 +182,37 @@ class SøknadGrunnlagTest(
         assertTrue(persongrunnlag.barna.none { it.aktør.aktivFødselsnummer() == uregistrertBarn })
     }
 
-    private fun lagNyBehandling(søkerIdent: String, fagsakId: Long) = NyBehandling(
-        kategori = BehandlingKategori.NASJONAL,
-        underkategori = BehandlingUnderkategori.ORDINÆR,
-        søkersIdent = søkerIdent,
-        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        søknadMottattDato = LocalDate.now(),
-        fagsakId = fagsakId,
-    )
+    private fun lagNyBehandling(
+        søkerIdent: String,
+        fagsakId: Long,
+    ) =
+        NyBehandling(
+            kategori = BehandlingKategori.NASJONAL,
+            underkategori = BehandlingUnderkategori.ORDINÆR,
+            søkersIdent = søkerIdent,
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            søknadMottattDato = LocalDate.now(),
+            fagsakId = fagsakId,
+        )
 
     @Test
     fun `Skal tilbakestille behandling ved endring på søknadsregistrering`() {
         val søkerFnr = randomFnr()
         val barn1Fnr = ClientMocks.barnFnr[0]
         val barn2Fnr = ClientMocks.barnFnr[1]
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-            tilSteg = StegType.VILKÅRSVURDERING,
-            søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barn1Fnr),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandlingEtterVilkårsvurderingSteg =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = søkerFnr,
+                barnasIdenter = listOf(barn1Fnr),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         val tilkjentYtelse =
             beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
@@ -229,29 +229,34 @@ class SøknadGrunnlagTest(
         assertNotNull(tilkjentYtelse)
         assertTrue(tilkjentYtelse.andelerTilkjentYtelse.size > 0)
 
-        val behandlingEtterNyRegistrering = stegService.håndterSøknad(
-            behandling = behandlingEtterVilkårsvurderingSteg,
-            restRegistrerSøknad = RestRegistrerSøknad(
-                søknad = SøknadDTO(
-                    underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
-                    søkerMedOpplysninger = SøkerMedOpplysninger(
-                        ident = søkerFnr,
+        val behandlingEtterNyRegistrering =
+            stegService.håndterSøknad(
+                behandling = behandlingEtterVilkårsvurderingSteg,
+                restRegistrerSøknad =
+                    RestRegistrerSøknad(
+                        søknad =
+                            SøknadDTO(
+                                underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
+                                søkerMedOpplysninger =
+                                    SøkerMedOpplysninger(
+                                        ident = søkerFnr,
+                                    ),
+                                barnaMedOpplysninger =
+                                    listOf(
+                                        BarnMedOpplysninger(
+                                            ident = barn1Fnr,
+                                            inkludertISøknaden = false,
+                                        ),
+                                        BarnMedOpplysninger(
+                                            ident = barn2Fnr,
+                                            inkludertISøknaden = true,
+                                        ),
+                                    ),
+                                endringAvOpplysningerBegrunnelse = "",
+                            ),
+                        bekreftEndringerViaFrontend = true,
                     ),
-                    barnaMedOpplysninger = listOf(
-                        BarnMedOpplysninger(
-                            ident = barn1Fnr,
-                            inkludertISøknaden = false,
-                        ),
-                        BarnMedOpplysninger(
-                            ident = barn2Fnr,
-                            inkludertISøknaden = true,
-                        ),
-                    ),
-                    endringAvOpplysningerBegrunnelse = "",
-                ),
-                bekreftEndringerViaFrontend = true,
-            ),
-        )
+            )
 
         assertThrows<EmptyResultDataAccessException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
         val stegEtterNyRegistrering =
@@ -267,42 +272,48 @@ class SøknadGrunnlagTest(
         val søkerFnr = randomFnr()
         val barn1Fnr = ClientMocks.barnFnr[0]
         val barn2Fnr = ClientMocks.barnFnr[1]
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-            tilSteg = StegType.VILKÅRSVURDERING,
-            søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barn1Fnr),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandlingEtterVilkårsvurderingSteg =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = søkerFnr,
+                barnasIdenter = listOf(barn1Fnr),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
-        val behandlingEtterNyRegistrering = stegService.håndterSøknad(
-            behandling = behandlingEtterVilkårsvurderingSteg,
-            restRegistrerSøknad = RestRegistrerSøknad(
-                søknad = SøknadDTO(
-                    underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
-                    søkerMedOpplysninger = SøkerMedOpplysninger(
-                        ident = søkerFnr,
+        val behandlingEtterNyRegistrering =
+            stegService.håndterSøknad(
+                behandling = behandlingEtterVilkårsvurderingSteg,
+                restRegistrerSøknad =
+                    RestRegistrerSøknad(
+                        søknad =
+                            SøknadDTO(
+                                underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
+                                søkerMedOpplysninger =
+                                    SøkerMedOpplysninger(
+                                        ident = søkerFnr,
+                                    ),
+                                barnaMedOpplysninger =
+                                    listOf(
+                                        BarnMedOpplysninger(
+                                            ident = barn1Fnr,
+                                            inkludertISøknaden = false,
+                                        ),
+                                        BarnMedOpplysninger(
+                                            ident = barn2Fnr,
+                                            inkludertISøknaden = true,
+                                        ),
+                                    ),
+                                endringAvOpplysningerBegrunnelse = "",
+                            ),
+                        bekreftEndringerViaFrontend = true,
                     ),
-                    barnaMedOpplysninger = listOf(
-                        BarnMedOpplysninger(
-                            ident = barn1Fnr,
-                            inkludertISøknaden = false,
-                        ),
-                        BarnMedOpplysninger(
-                            ident = barn2Fnr,
-                            inkludertISøknaden = true,
-                        ),
-                    ),
-                    endringAvOpplysningerBegrunnelse = "",
-                ),
-                bekreftEndringerViaFrontend = true,
-            ),
-        )
+            )
 
         assertDoesNotThrow { utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
     }

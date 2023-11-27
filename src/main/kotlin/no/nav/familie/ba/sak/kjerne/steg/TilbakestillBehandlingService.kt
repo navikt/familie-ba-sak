@@ -24,7 +24,6 @@ class TilbakestillBehandlingService(
     private val tilbakekrevingService: TilbakekrevingService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 ) {
-
     @Transactional
     fun initierOgSettBehandlingTilVilkårsvurdering(
         behandling: Behandling,
@@ -33,9 +32,10 @@ class TilbakestillBehandlingService(
         vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = bekreftEndringerViaFrontend,
-            forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
-                behandling,
-            ),
+            forrigeBehandlingSomErVedtatt =
+                behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
+                    behandling,
+                ),
         )
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
@@ -72,9 +72,10 @@ class TilbakestillBehandlingService(
     @Transactional
     fun tilbakestillDataTilVilkårsvurderingssteg(behandling: Behandling) {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
-            vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId = behandling.id,
-            ),
+            vedtak =
+                vedtakRepository.findByBehandlingAndAktiv(
+                    behandlingId = behandling.id,
+                ),
         )
     }
 
@@ -86,9 +87,10 @@ class TilbakestillBehandlingService(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
-            vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandling.id,
-            ),
+            vedtak =
+                vedtakRepository.findByBehandlingAndAktiv(
+                    behandling.id,
+                ),
         )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
         behandlingHentOgPersisterService.lagreEllerOppdater(behandling.apply { resultat = Behandlingsresultat.IKKE_VURDERT })

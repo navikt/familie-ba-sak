@@ -5,8 +5,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_GENERERING_AV_BREVOBJEKTER
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -14,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtFørsteBarn
@@ -50,6 +47,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -64,7 +62,6 @@ class BrevService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val simuleringService: SimuleringService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val brevPeriodeService: BrevPeriodeService,
     private val sanityService: SanityService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
@@ -73,16 +70,15 @@ class BrevService(
     private val saksbehandlerContext: SaksbehandlerContext,
     private val brevmalService: BrevmalService,
     private val refusjonEøsRepository: RefusjonEøsRepository,
-    private val unleashNext: UnleashNextMedContextService,
     private val integrasjonClient: IntegrasjonClient,
 ) {
-
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
 
-        val brevmal = brevmalService.hentBrevmal(
-            behandling,
-        )
+        val brevmal =
+            brevmalService.hentBrevmal(
+                behandling,
+            )
 
         val vedtakFellesfelter = lagVedtaksbrevFellesfelter(vedtak)
         validerBrevdata(brevmal, vedtakFellesfelter)
@@ -92,107 +88,122 @@ class BrevService(
         }
 
         return when (brevmal) {
-            Brevmal.VEDTAK_FØRSTEGANGSVEDTAK -> Førstegangsvedtak(
-                vedtakFellesfelter = vedtakFellesfelter,
-                etterbetaling = hentEtterbetaling(vedtak),
-                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
-                refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
-                refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
-                duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
-                duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
-            )
+            Brevmal.VEDTAK_FØRSTEGANGSVEDTAK ->
+                Førstegangsvedtak(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetaling = hentEtterbetaling(vedtak),
+                    informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
+                    refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
+                    refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
+                    duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
+                    duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
+                )
 
-            Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON -> Førstegangsvedtak(
-                mal = Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
-                vedtakFellesfelter = vedtakFellesfelter,
-                etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
-            )
+            Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON ->
+                Førstegangsvedtak(
+                    mal = Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
+                )
 
-            Brevmal.VEDTAK_ENDRING -> VedtakEndring(
-                vedtakFellesfelter = vedtakFellesfelter,
-                etterbetaling = hentEtterbetaling(vedtak),
-                erKlage = behandling.erKlage(),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
-                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
-                feilutbetaltValuta = vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)?.let {
-                    FeilutbetaltValuta(perioderMedForMyeUtbetalt = it)
-                },
-                refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
-                refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
-                duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
-                duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
-            )
+            Brevmal.VEDTAK_ENDRING ->
+                VedtakEndring(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetaling = hentEtterbetaling(vedtak),
+                    erKlage = behandling.erKlage(),
+                    erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
+                    informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
+                    feilutbetaltValuta =
+                        vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)?.let {
+                            FeilutbetaltValuta(perioderMedForMyeUtbetalt = it)
+                        },
+                    refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
+                    refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
+                    duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
+                    duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
+                )
 
-            Brevmal.VEDTAK_ENDRING_INSTITUSJON -> VedtakEndring(
-                mal = Brevmal.VEDTAK_ENDRING_INSTITUSJON,
-                vedtakFellesfelter = vedtakFellesfelter,
-                etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
-                erKlage = behandling.erKlage(),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
-                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
-            )
+            Brevmal.VEDTAK_ENDRING_INSTITUSJON ->
+                VedtakEndring(
+                    mal = Brevmal.VEDTAK_ENDRING_INSTITUSJON,
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
+                    erKlage = behandling.erKlage(),
+                    erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
+                    informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
+                )
 
-            Brevmal.VEDTAK_OPPHØRT -> Opphørt(
-                vedtakFellesfelter = vedtakFellesfelter,
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
-            )
+            Brevmal.VEDTAK_OPPHØRT ->
+                Opphørt(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
+                )
 
-            Brevmal.VEDTAK_OPPHØRT_INSTITUSJON -> Opphørt(
-                mal = Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
-                vedtakFellesfelter = vedtakFellesfelter,
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
-            )
+            Brevmal.VEDTAK_OPPHØRT_INSTITUSJON ->
+                Opphørt(
+                    mal = Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
+                )
 
-            Brevmal.VEDTAK_OPPHØR_MED_ENDRING -> OpphørMedEndring(
-                vedtakFellesfelter = vedtakFellesfelter,
-                etterbetaling = hentEtterbetaling(vedtak),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
-                refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
-                refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
-            )
+            Brevmal.VEDTAK_OPPHØR_MED_ENDRING ->
+                OpphørMedEndring(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetaling = hentEtterbetaling(vedtak),
+                    erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
+                    refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
+                    refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
+                )
 
-            Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON -> OpphørMedEndring(
-                mal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
-                vedtakFellesfelter = vedtakFellesfelter,
-                etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
-            )
+            Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON ->
+                OpphørMedEndring(
+                    mal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
+                    erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
+                )
 
             Brevmal.VEDTAK_AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
-            Brevmal.VEDTAK_AVSLAG_INSTITUSJON -> Avslag(
-                mal = Brevmal.VEDTAK_AVSLAG_INSTITUSJON,
-                vedtakFellesfelter = vedtakFellesfelter,
-            )
+            Brevmal.VEDTAK_AVSLAG_INSTITUSJON ->
+                Avslag(
+                    mal = Brevmal.VEDTAK_AVSLAG_INSTITUSJON,
+                    vedtakFellesfelter = vedtakFellesfelter,
+                )
 
-            Brevmal.VEDTAK_FORTSATT_INNVILGET -> ForsattInnvilget(
-                vedtakFellesfelter = vedtakFellesfelter,
-                etterbetaling = hentEtterbetaling(vedtak),
-                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
-                refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
-                refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
-                duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
-                duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
-            )
+            Brevmal.VEDTAK_FORTSATT_INNVILGET ->
+                ForsattInnvilget(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetaling = hentEtterbetaling(vedtak),
+                    informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
+                    refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
+                    refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
+                    duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
+                    duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
+                )
 
-            Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> ForsattInnvilget(
-                mal = Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
-                vedtakFellesfelter = vedtakFellesfelter,
-                etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
-            )
+            Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON ->
+                ForsattInnvilget(
+                    mal = Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
+                )
 
-            Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG -> Autovedtak6og18årOgSmåbarnstillegg(
-                vedtakFellesfelter = vedtakFellesfelter,
-            )
+            Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG ->
+                Autovedtak6og18årOgSmåbarnstillegg(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                )
 
-            Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> AutovedtakNyfødtFørsteBarn(
-                vedtakFellesfelter = vedtakFellesfelter,
-                etterbetaling = hentEtterbetaling(vedtak),
-            )
+            Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN ->
+                AutovedtakNyfødtFørsteBarn(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetaling = hentEtterbetaling(vedtak),
+                )
 
-            Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> AutovedtakNyfødtBarnFraFør(
-                vedtakFellesfelter = vedtakFellesfelter,
-                etterbetaling = hentEtterbetaling(vedtak),
-            )
+            Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR ->
+                AutovedtakNyfødtBarnFraFør(
+                    vedtakFellesfelter = vedtakFellesfelter,
+                    etterbetaling = hentEtterbetaling(vedtak),
+                )
 
             else -> throw Feil("Forsøker å hente vedtaksbrevdata for brevmal ${brevmal.visningsTekst}")
         }
@@ -210,7 +221,8 @@ class BrevService(
         brevmal: Brevmal,
         vedtakFellesfelter: VedtakFellesfelter,
     ) {
-        if (brevmal in listOf(
+        if (brevmal in
+            listOf(
                 Brevmal.VEDTAK_OPPHØRT,
                 Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
             ) && vedtakFellesfelter.perioder.size > 1
@@ -224,53 +236,63 @@ class BrevService(
     fun hentDødsfallbrevData(vedtak: Vedtak): Brev =
         hentGrunnlagOgSignaturData(vedtak).let { data ->
             Dødsfall(
-                data = DødsfallData(
-                    delmalData = DødsfallData.DelmalData(
-                        signaturVedtak = SignaturVedtak(
-                            enhet = data.enhet,
-                            saksbehandler = data.saksbehandler,
-                            beslutter = data.beslutter,
-                        ),
+                data =
+                    DødsfallData(
+                        delmalData =
+                            DødsfallData.DelmalData(
+                                signaturVedtak =
+                                    SignaturVedtak(
+                                        enhet = data.enhet,
+                                        saksbehandler = data.saksbehandler,
+                                        beslutter = data.beslutter,
+                                    ),
+                            ),
+                        flettefelter =
+                            DødsfallData.Flettefelter(
+                                navn = data.grunnlag.søker.navn,
+                                fodselsnummer = data.grunnlag.søker.aktør.aktivFødselsnummer(),
+                                // Selv om det er feil å anta at alle navn er på dette formatet er det ønskelig å skrive
+                                // det slik, da uppercase kan oppleves som skrikende i et brev som skal være skånsomt
+                                navnAvdode = data.grunnlag.søker.navn.storForbokstavIAlleNavn(),
+                                virkningstidspunkt =
+                                    hentVirkningstidspunkt(
+                                        opphørsperioder = vedtaksperiodeService.hentOpphørsperioder(vedtak.behandling),
+                                        behandlingId = vedtak.behandling.id,
+                                    ),
+                            ),
                     ),
-                    flettefelter = DødsfallData.Flettefelter(
-                        navn = data.grunnlag.søker.navn,
-                        fodselsnummer = data.grunnlag.søker.aktør.aktivFødselsnummer(),
-                        // Selv om det er feil å anta at alle navn er på dette formatet er det ønskelig å skrive
-                        // det slik, da uppercase kan oppleves som skrikende i et brev som skal være skånsomt
-                        navnAvdode = data.grunnlag.søker.navn.storForbokstavIAlleNavn(),
-                        virkningstidspunkt = hentVirkningstidspunkt(
-                            opphørsperioder = vedtaksperiodeService.hentOpphørsperioder(vedtak.behandling),
-                            behandlingId = vedtak.behandling.id,
-                        ),
-                    ),
-                ),
             )
         }
 
     fun hentKorreksjonbrevData(vedtak: Vedtak): Brev =
         hentGrunnlagOgSignaturData(vedtak).let { data ->
             KorreksjonVedtaksbrev(
-                data = KorreksjonVedtaksbrevData(
-                    delmalData = KorreksjonVedtaksbrevData.DelmalData(
-                        signaturVedtak = SignaturVedtak(
-                            enhet = data.enhet,
-                            saksbehandler = data.saksbehandler,
-                            beslutter = data.beslutter,
-                        ),
+                data =
+                    KorreksjonVedtaksbrevData(
+                        delmalData =
+                            KorreksjonVedtaksbrevData.DelmalData(
+                                signaturVedtak =
+                                    SignaturVedtak(
+                                        enhet = data.enhet,
+                                        saksbehandler = data.saksbehandler,
+                                        beslutter = data.beslutter,
+                                    ),
+                            ),
+                        flettefelter =
+                            KorreksjonVedtaksbrevData.Flettefelter(
+                                navn = data.grunnlag.søker.navn,
+                                fodselsnummer = data.grunnlag.søker.aktør.aktivFødselsnummer(),
+                            ),
                     ),
-                    flettefelter = KorreksjonVedtaksbrevData.Flettefelter(
-                        navn = data.grunnlag.søker.navn,
-                        fodselsnummer = data.grunnlag.søker.aktør.aktivFødselsnummer(),
-                    ),
-                ),
             )
         }
 
     fun lagVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
-        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-            .filter {
-                !(it.begrunnelser.isEmpty() && it.fritekster.isEmpty() && it.eøsBegrunnelser.isEmpty())
-            }.sortedBy { it.fom }
+        val vedtaksperioder =
+            vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+                .filter {
+                    !(it.begrunnelser.isEmpty() && it.fritekster.isEmpty() && it.eøsBegrunnelser.isEmpty())
+                }.sortedBy { it.fom }
 
         if (vedtaksperioder.isEmpty()) {
             throw FunksjonellFeil(
@@ -279,35 +301,30 @@ class BrevService(
         }
 
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
-        val brevPerioderData = brevPeriodeService.hentBrevperioderData(
-            vedtaksperioder = vedtaksperioder,
-            behandling = vedtak.behandling,
-        )
 
-        val brevperioder = if (unleashNext.isEnabled(NY_GENERERING_AV_BREVOBJEKTER, vedtak.behandling.id)) {
-            val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
+
+        val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
+        val brevperioder =
             vedtaksperioder.mapNotNull {
                 it.lagBrevPeriode(
                     grunnlagForBegrunnelse = grunnlagForBegrunnelser,
                     landkoder = integrasjonClient.hentLandkoderISO2(),
                 )
             }
-        } else {
-            brevPerioderData.sorted().mapNotNull {
-                it.tilBrevPeriodeGenerator().genererBrevPeriode()
-            }
-        }
 
         val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(vedtak.behandling.id)
         val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(vedtak.behandling.id)
 
-        val hjemler = hentHjemler(
-            behandlingId = vedtak.behandling.id,
-            minimerteVedtaksperioder = brevPerioderData.map { it.minimertVedtaksperiode },
-            målform = brevPerioderData.first().brevMålform,
-            vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null,
-            refusjonEøsHjemmelSkalMedIBrev = refusjonEøs.isNotEmpty(),
-        )
+        val hjemler =
+            hentHjemler(
+                behandlingId = vedtak.behandling.id,
+                erFritekstIBrev = vedtaksperioder.any { it.fritekster.isNotEmpty() },
+                vedtaksperioder = vedtaksperioder,
+                målform = personopplysningGrunnlag.søker.målform,
+                vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null,
+                refusjonEøsHjemmelSkalMedIBrev = refusjonEøs.isNotEmpty(),
+            )
 
         val organisasjonsnummer = vedtak.behandling.fagsak.institusjon?.orgNummer
         val organisasjonsnavn = organisasjonsnummer?.let { organisasjonService.hentOrganisasjon(it).navn }
@@ -328,24 +345,28 @@ class BrevService(
 
     private fun hentHjemler(
         behandlingId: Long,
-        minimerteVedtaksperioder: List<MinimertVedtaksperiode>,
+        vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
         målform: Målform,
         vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false,
         refusjonEøsHjemmelSkalMedIBrev: Boolean,
+        erFritekstIBrev: Boolean,
     ): String {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
-            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+        val vilkårsvurdering =
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
+                ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
         val opplysningspliktHjemlerSkalMedIBrev =
             vilkårsvurdering.finnOpplysningspliktVilkår()?.resultat == Resultat.IKKE_OPPFYLT
 
         return hentHjemmeltekst(
-            minimerteVedtaksperioder = minimerteVedtaksperioder,
-            sanityBegrunnelser = sanityService.hentSanityBegrunnelser(),
+            vedtaksperioder = vedtaksperioder,
+            standardbegrunnelseTilSanityBegrunnelse = sanityService.hentSanityBegrunnelser(),
+            eøsStandardbegrunnelseTilSanityBegrunnelse = sanityService.hentSanityEØSBegrunnelser(),
             opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev,
             målform = målform,
             vedtakKorrigertHjemmelSkalMedIBrev = vedtakKorrigertHjemmelSkalMedIBrev,
             refusjonEøsHjemmelSkalMedIBrev = refusjonEøsHjemmelSkalMedIBrev,
+            erFritekstIBrev = erFritekstIBrev,
         )
     }
 
@@ -371,10 +392,11 @@ class BrevService(
 
     private fun hentGrunnlagOgSignaturData(vedtak: Vedtak): GrunnlagOgSignaturData {
         val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(vedtak.behandling.id)
-        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
-            behandling = vedtak.behandling,
-            totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id),
-        )
+        val (saksbehandler, beslutter) =
+            hentSaksbehandlerOgBeslutter(
+                behandling = vedtak.behandling,
+                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id),
+            )
         val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
         return GrunnlagOgSignaturData(
             grunnlag = personopplysningGrunnlag,

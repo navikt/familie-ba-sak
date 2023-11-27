@@ -26,11 +26,12 @@ class StønadsstatistikkController(
     private val statistikkClient: StatistikkClient,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
-
     private val logger = LoggerFactory.getLogger(StønadsstatistikkController::class.java)
 
     @PostMapping(path = ["/vedtakV2"])
-    fun hentVedtakDvhV2(@RequestBody(required = true) behandlinger: List<Long>): List<VedtakDVHV2> {
+    fun hentVedtakDvhV2(
+        @RequestBody(required = true) behandlinger: List<Long>,
+    ): List<VedtakDVHV2> {
         try {
             return behandlinger.map { stønadsstatistikkService.hentVedtakV2(it) }
         } catch (e: Exception) {
@@ -40,7 +41,9 @@ class StønadsstatistikkController(
     }
 
     @PostMapping(path = ["/send-til-dvh"])
-    fun sendTilStønadsstatistikk(@RequestBody(required = true) behandlinger: List<Long>) {
+    fun sendTilStønadsstatistikk(
+        @RequestBody(required = true) behandlinger: List<Long>,
+    ) {
         behandlinger.forEach {
             if (!statistikkClient.harSendtVedtaksmeldingForBehandling(it)) {
                 val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(it)
@@ -51,7 +54,9 @@ class StønadsstatistikkController(
     }
 
     @PostMapping(path = ["/send-til-dvh-manuell"])
-    fun sendTilStønadsstatistikkManuell(@RequestBody(required = true) behandlinger: List<Long>) {
+    fun sendTilStønadsstatistikkManuell(
+        @RequestBody(required = true) behandlinger: List<Long>,
+    ) {
         behandlinger.forEach {
             val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(it)
             val vedtakV2Task = PubliserVedtakV2Task.opprettTask(vedtakV2DVH.personV2.personIdent, it)
@@ -60,13 +65,16 @@ class StønadsstatistikkController(
     }
 
     @PostMapping(path = ["/ettersend-manuell-migrering/{dryRun}"])
-    fun ettersendManuellMigrereringer(@PathVariable dryRun: Boolean = true) {
-        val manuelleMigreringer = behandlingRepository.finnBehandlingIdMedOpprettetÅrsak(
-            listOf(
-                BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                BehandlingÅrsak.HELMANUELL_MIGRERING,
-            ),
-        )
+    fun ettersendManuellMigrereringer(
+        @PathVariable dryRun: Boolean = true,
+    ) {
+        val manuelleMigreringer =
+            behandlingRepository.finnBehandlingIdMedOpprettetÅrsak(
+                listOf(
+                    BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                    BehandlingÅrsak.HELMANUELL_MIGRERING,
+                ),
+            )
 
         manuelleMigreringer.forEach {
             if (!statistikkClient.harSendtVedtaksmeldingForBehandling(it) && erIverksattBehandling(it)) {

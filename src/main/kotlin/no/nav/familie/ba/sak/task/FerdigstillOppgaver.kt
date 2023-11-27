@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service
 class FerdigstillOppgaver(
     private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val ferdigstillOppgave = objectMapper.readValue(task.payload, FerdigstillOppgaveDTO::class.java)
         oppgaveService.ferdigstillOppgaver(
@@ -30,15 +29,19 @@ class FerdigstillOppgaver(
     companion object {
         const val TASK_STEP_TYPE = "ferdigstillOppgaveTask"
 
-        fun opprettTask(behandlingId: Long, oppgavetype: Oppgavetype): Task {
+        fun opprettTask(
+            behandlingId: Long,
+            oppgavetype: Oppgavetype,
+        ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(
-                    FerdigstillOppgaveDTO(
-                        behandlingId = behandlingId,
-                        oppgavetype = oppgavetype,
+                payload =
+                    objectMapper.writeValueAsString(
+                        FerdigstillOppgaveDTO(
+                            behandlingId = behandlingId,
+                            oppgavetype = oppgavetype,
+                        ),
                     ),
-                ),
             )
         }
     }

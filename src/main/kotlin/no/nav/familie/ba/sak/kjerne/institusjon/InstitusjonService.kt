@@ -11,8 +11,10 @@ class InstitusjonService(
     val samhandlerKlient: SamhandlerKlient,
     val institusjonRepository: InstitusjonRepository,
 ) {
-
-    fun hentEllerOpprettInstitusjon(orgNummer: String, tssEksternId: String?): Institusjon {
+    fun hentEllerOpprettInstitusjon(
+        orgNummer: String,
+        tssEksternId: String?,
+    ): Institusjon {
         return institusjonRepository.findByOrgNummer(orgNummer) ?: institusjonRepository.saveAndFlush(
             Institusjon(
                 orgNummer = orgNummer,
@@ -25,7 +27,11 @@ class InstitusjonService(
         return samhandlerKlient.hentSamhandler(orgNummer)
     }
 
-    fun søkSamhandlere(navn: String?, postnummer: String?, område: String?): List<SamhandlerInfo> {
+    fun søkSamhandlere(
+        navn: String?,
+        postnummer: String?,
+        område: String?,
+    ): List<SamhandlerInfo> {
         val komplettSamhandlerListe = mutableListOf<SamhandlerInfo>()
         var side = 0
         do {

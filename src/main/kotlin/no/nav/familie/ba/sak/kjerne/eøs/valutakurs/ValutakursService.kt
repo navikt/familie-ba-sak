@@ -12,23 +12,33 @@ class ValutakursService(
     valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs>>,
 ) {
-    val skjemaService = PeriodeOgBarnSkjemaService(
-        valutakursRepository,
-        endringsabonnenter,
-    )
+    val skjemaService =
+        PeriodeOgBarnSkjemaService(
+            valutakursRepository,
+            endringsabonnenter,
+        )
 
     fun hentValutakurs(valutakursId: Long): Valutakurs = skjemaService.hentMedId(valutakursId)
 
     fun hentValutakurser(behandlingId: BehandlingId) =
         skjemaService.hentMedBehandlingId(behandlingId)
 
-    fun oppdaterValutakurs(behandlingId: BehandlingId, valutakurs: Valutakurs) =
+    fun oppdaterValutakurs(
+        behandlingId: BehandlingId,
+        valutakurs: Valutakurs,
+    ) =
         skjemaService.endreSkjemaer(behandlingId, valutakurs)
 
-    fun slettValutakurs(behandlingId: BehandlingId, valutakursId: Long) =
+    fun slettValutakurs(
+        behandlingId: BehandlingId,
+        valutakursId: Long,
+    ) =
         skjemaService.slettSkjema(behandlingId, valutakursId)
 
     @Transactional
-    fun kopierOgErstattValutakurser(fraBehandlingId: BehandlingId, tilBehandlingId: BehandlingId) =
+    fun kopierOgErstattValutakurser(
+        fraBehandlingId: BehandlingId,
+        tilBehandlingId: BehandlingId,
+    ) =
         skjemaService.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
 }

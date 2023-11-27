@@ -43,7 +43,6 @@ class AutovedtakSatsendringService(
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
-
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
     private val satsendringIverksatt = Metrics.counter("satsendring.iverksatt")
     private val satsendringIgnorertÅpenBehandling = Metrics.counter("satsendring.ignorert.aapenbehandling")
@@ -114,28 +113,29 @@ class AutovedtakSatsendringService(
                 behandlingEtterBehandlingsresultat,
             )
 
-        val task = when (behandlingEtterBehandlingsresultat.steg) {
-            StegType.IVERKSETT_MOT_OPPDRAG -> {
-                IverksettMotOppdragTask.opprettTask(
-                    behandlingEtterBehandlingsresultat,
-                    opprettetVedtak,
-                    SikkerhetContext.hentSaksbehandler(),
-                )
-            }
+        val task =
+            when (behandlingEtterBehandlingsresultat.steg) {
+                StegType.IVERKSETT_MOT_OPPDRAG -> {
+                    IverksettMotOppdragTask.opprettTask(
+                        behandlingEtterBehandlingsresultat,
+                        opprettetVedtak,
+                        SikkerhetContext.hentSaksbehandler(),
+                    )
+                }
 
-            StegType.FERDIGSTILLE_BEHANDLING -> {
-                behandlingService.oppdaterStatusPåBehandling(
-                    behandlingEtterBehandlingsresultat.id,
-                    BehandlingStatus.IVERKSETTER_VEDTAK,
-                )
-                FerdigstillBehandlingTask.opprettTask(
-                    søkerAktør.aktivFødselsnummer(),
-                    behandlingEtterBehandlingsresultat.id,
-                )
-            }
+                StegType.FERDIGSTILLE_BEHANDLING -> {
+                    behandlingService.oppdaterStatusPåBehandling(
+                        behandlingEtterBehandlingsresultat.id,
+                        BehandlingStatus.IVERKSETTER_VEDTAK,
+                    )
+                    FerdigstillBehandlingTask.opprettTask(
+                        søkerAktør.aktivFødselsnummer(),
+                        behandlingEtterBehandlingsresultat.id,
+                    )
+                }
 
-            else -> throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} ved satsendring for fagsak=$fagsakId")
-        }
+                else -> throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} ved satsendring for fagsak=$fagsakId")
+            }
 
         satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
         satskjøringRepository.save(satskjøringForFagsak)

@@ -48,11 +48,12 @@ class ValutakursController(
 
         val barnAktører = restValutakurs.barnIdenter.map { personidentService.hentAktør(it) }
 
-        val valutaKurs = if (skalManueltSetteValutakurs(restValutakurs)) {
-            restValutakurs.tilValutakurs(barnAktører)
-        } else {
-            oppdaterValutakursMedKursFraECB(restValutakurs, restValutakurs.tilValutakurs(barnAktører = barnAktører))
-        }
+        val valutaKurs =
+            if (skalManueltSetteValutakurs(restValutakurs)) {
+                restValutakurs.tilValutakurs(barnAktører)
+            } else {
+                oppdaterValutakursMedKursFraECB(restValutakurs, restValutakurs.tilValutakurs(barnAktører = barnAktører))
+            }
 
         valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), valutaKurs)
 
@@ -76,13 +77,17 @@ class ValutakursController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    private fun oppdaterValutakursMedKursFraECB(restValutakurs: RestValutakurs, valutakurs: Valutakurs) =
+    private fun oppdaterValutakursMedKursFraECB(
+        restValutakurs: RestValutakurs,
+        valutakurs: Valutakurs,
+    ) =
         if (valutakursErEndret(restValutakurs, valutakursService.hentValutakurs(restValutakurs.id))) {
             valutakurs.copy(
-                kurs = ecbService.hentValutakurs(
-                    restValutakurs.valutakode!!,
-                    restValutakurs.valutakursdato!!,
-                ),
+                kurs =
+                    ecbService.hentValutakurs(
+                        restValutakurs.valutakode!!,
+                        restValutakurs.valutakursdato!!,
+                    ),
             )
         } else {
             valutakurs
@@ -92,15 +97,19 @@ class ValutakursController(
      * Sjekker om valuta er Islandske Kroner og kursdato er før 01.02.2018
      */
     private fun skalManueltSetteValutakurs(restValutakurs: RestValutakurs): Boolean {
-        return restValutakurs.valutakursdato != null && restValutakurs.valutakode == "ISK" && restValutakurs.valutakursdato.isBefore(
-            LocalDate.of(2018, 2, 1),
-        )
+        return restValutakurs.valutakursdato != null && restValutakurs.valutakode == "ISK" &&
+            restValutakurs.valutakursdato.isBefore(
+                LocalDate.of(2018, 2, 1),
+            )
     }
 
     /**
      * Sjekker om *restValutakurs* inneholder nødvendige verdier og sammenligner disse med *eksisterendeValutakurs*
      */
-    private fun valutakursErEndret(restValutakurs: RestValutakurs, eksisterendeValutakurs: Valutakurs): Boolean {
+    private fun valutakursErEndret(
+        restValutakurs: RestValutakurs,
+        eksisterendeValutakurs: Valutakurs,
+    ): Boolean {
         return restValutakurs.valutakode != null && restValutakurs.valutakursdato != null && (eksisterendeValutakurs.valutakursdato != restValutakurs.valutakursdato || eksisterendeValutakurs.valutakode != restValutakurs.valutakode)
     }
 }

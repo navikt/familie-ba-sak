@@ -31,7 +31,6 @@ class UtenlandskPeriodebeløpTestController(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
 ) {
-
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun endreUtenlandskePeriodebeløp(
         @PathVariable behandlingId: Long,

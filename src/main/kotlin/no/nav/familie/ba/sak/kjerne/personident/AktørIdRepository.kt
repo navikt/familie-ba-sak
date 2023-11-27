@@ -16,5 +16,8 @@ interface AktørIdRepository : JpaRepository<Aktør, String> {
      */
     @Modifying
     @Query("update aktoer set aktoer_id = :nyAktørId where aktoer_id = :gammelAktørId", nativeQuery = true)
-    fun patchAktørMedNyAktørId(gammelAktørId: String, nyAktørId: String)
+    fun patchAktørMedNyAktørId(
+        gammelAktørId: String,
+        nyAktørId: String,
+    )
 }

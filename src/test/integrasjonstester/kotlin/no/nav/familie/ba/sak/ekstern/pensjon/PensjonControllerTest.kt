@@ -14,7 +14,6 @@ import java.util.UUID
 
 @ActiveProfiles("postgres", "integrasjonstest", "mock-pdl", "mock-ident-client", "mock-oauth", "mock-brev-klient")
 class PensjonControllerTest : WebSpringAuthTestRunner() {
-
     @Test
     fun `Verifiser at pensjon-endepunkt - bestillPersonerMedBarnetrygdForGittÅrPåKafka - for henting av identer med barnetrygd - returnerer en gyldig UUID som string`() {
         val headers = HttpHeaders()
@@ -23,21 +22,23 @@ class PensjonControllerTest : WebSpringAuthTestRunner() {
             hentTokenForPsys(),
         )
         val entity: HttpEntity<String> = HttpEntity<String>(headers)
-        val responseEntity: ResponseEntity<String> = restTemplate.exchange(
-            hentUrl("/api/ekstern/pensjon/bestill-personer-med-barnetrygd/2023"),
-            HttpMethod.GET,
-            entity,
-            String::class.java,
-        )
+        val responseEntity: ResponseEntity<String> =
+            restTemplate.exchange(
+                hentUrl("/api/ekstern/pensjon/bestill-personer-med-barnetrygd/2023"),
+                HttpMethod.GET,
+                entity,
+                String::class.java,
+            )
         assertEquals(UUID.fromString(responseEntity.body.toString()).toString(), responseEntity.body.toString())
     }
 
-    private fun hentTokenForPsys() = token(
-        mapOf(
-            "groups" to listOf("SAKSBEHANDLER"),
-            "name" to "Mock McMockface",
-            "NAVident" to "Z0000",
-        ),
-        clientId = "omsorgsopptjening",
-    )
+    private fun hentTokenForPsys() =
+        token(
+            mapOf(
+                "groups" to listOf("SAKSBEHANDLER"),
+                "name" to "Mock McMockface",
+                "NAVident" to "Z0000",
+            ),
+            clientId = "omsorgsopptjening",
+        )
 }

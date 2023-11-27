@@ -35,20 +35,16 @@ data class GrSivilstand(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Column(name = "fom")
     val fom: LocalDate? = null,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     val type: SIVILSTAND,
-
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
     val person: Person,
 ) : BaseEntitet() {
-
     fun tilKopiForNyPerson(nyPerson: Person) =
         copy(id = 0, person = nyPerson)
 
@@ -62,23 +58,24 @@ data class GrSivilstand(
             fom != other.fom ||
                 type != other.type ||
                 person != other.person
-            )
+        )
     }
 
     override fun hashCode() = Objects.hash(fom, type, person)
 
-    fun tilRestRegisteropplysning() = RestRegisteropplysning(
-        fom = this.fom,
-        tom = null,
-        verdi = this.type.toString()
-            .replace("_", " ")
-            .storForbokstav(),
-    )
+    fun tilRestRegisteropplysning() =
+        RestRegisteropplysning(
+            fom = this.fom,
+            tom = null,
+            verdi =
+                this.type.toString()
+                    .replace("_", " ")
+                    .storForbokstav(),
+        )
 
     fun harGyldigFom() = this.fom != null
 
     companion object {
-
         fun List<GrSivilstand>.sisteSivilstand(): GrSivilstand? {
             if (this.size == 1) return this.single()
 
@@ -86,7 +83,10 @@ data class GrSivilstand(
             return sivilstandMedFom.maxByOrNull { it.fom!! }
         }
 
-        fun fraSivilstand(sivilstand: Sivilstand, person: Person) =
+        fun fraSivilstand(
+            sivilstand: Sivilstand,
+            person: Person,
+        ) =
             GrSivilstand(
                 fom = sivilstand.gyldigFraOgMed,
                 type = sivilstand.type,

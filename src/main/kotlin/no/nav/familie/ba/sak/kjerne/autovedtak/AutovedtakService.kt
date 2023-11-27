@@ -33,15 +33,16 @@ class AutovedtakService(
         behandlingÅrsak: BehandlingÅrsak,
         fagsakId: Long,
     ): Behandling {
-        val nyBehandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                behandlingType = behandlingType,
-                behandlingÅrsak = behandlingÅrsak,
-                søkersIdent = aktør.aktivFødselsnummer(),
-                skalBehandlesAutomatisk = true,
-                fagsakId = fagsakId,
-            ),
-        )
+        val nyBehandling =
+            stegService.håndterNyBehandling(
+                NyBehandling(
+                    behandlingType = behandlingType,
+                    behandlingÅrsak = behandlingÅrsak,
+                    søkersIdent = aktør.aktivFødselsnummer(),
+                    skalBehandlesAutomatisk = true,
+                    fagsakId = fagsakId,
+                ),
+            )
 
         val behandlingEtterBehandlingsresultat = stegService.håndterVilkårsvurdering(nyBehandling)
         return behandlingEtterBehandlingsresultat
@@ -56,12 +57,16 @@ class AutovedtakService(
             behandlingErAutomatiskBesluttet = true,
         )
 
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-            ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+        val vedtak =
+            vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+                ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
         return vedtakService.oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
     }
 
-    fun omgjørBehandlingTilManuellOgKjørSteg(behandling: Behandling, steg: StegType): Behandling {
+    fun omgjørBehandlingTilManuellOgKjørSteg(
+        behandling: Behandling,
+        steg: StegType,
+    ): Behandling {
         val omgjortBehandling = behandlingService.omgjørTilManuellBehandling(behandling)
 
         return when (steg) {

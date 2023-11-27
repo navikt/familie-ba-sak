@@ -9,14 +9,14 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
 class UtenlandskePeriodebeløpUtfyltTest {
-
     @Test
     fun `Skal sette UtfyltStatus til OK når alle felter er utfylt`() {
-        val utenlandskPeriodebeløp = lagUtenlandskPeriodebeløp(
-            beløp = BigDecimal.valueOf(500),
-            valutakode = "NOK",
-            intervall = Intervall.MÅNEDLIG,
-        )
+        val utenlandskPeriodebeløp =
+            lagUtenlandskPeriodebeløp(
+                beløp = BigDecimal.valueOf(500),
+                valutakode = "NOK",
+                intervall = Intervall.MÅNEDLIG,
+            )
 
         val restUtenlandskPeriodebeløp = utenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp()
 
@@ -25,18 +25,20 @@ class UtenlandskePeriodebeløpUtfyltTest {
 
     @Test
     fun `Skal sette UtfyltStatus til UFULLSTENDIG når ett eller to felter er utfylt`() {
-        var utenlandskPeriodebeløp = lagUtenlandskPeriodebeløp(
-            beløp = BigDecimal.valueOf(500),
-        )
+        var utenlandskPeriodebeløp =
+            lagUtenlandskPeriodebeløp(
+                beløp = BigDecimal.valueOf(500),
+            )
 
         var restUtenlandskPeriodebeløp = utenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp()
 
         assertEquals(UtfyltStatus.UFULLSTENDIG, restUtenlandskPeriodebeløp.status)
 
-        utenlandskPeriodebeløp = lagUtenlandskPeriodebeløp(
-            beløp = BigDecimal.valueOf(500),
-            valutakode = "NOK",
-        )
+        utenlandskPeriodebeløp =
+            lagUtenlandskPeriodebeløp(
+                beløp = BigDecimal.valueOf(500),
+                valutakode = "NOK",
+            )
 
         restUtenlandskPeriodebeløp = utenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp()
 
