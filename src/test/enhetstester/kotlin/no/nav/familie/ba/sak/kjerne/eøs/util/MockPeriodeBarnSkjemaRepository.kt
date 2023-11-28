@@ -38,8 +38,8 @@ fun <S : PeriodeOgBarnSkjemaEntitet<S>> mockPeriodeBarnSkjemaRepository(): Perio
 }
 
 private class MinnebasertSkjemaRepository<S> where S : PeriodeOgBarnSkjemaEntitet<S> {
-
     private val løpenummer = AtomicLong()
+
     private fun AtomicLong.neste() = this.addAndGet(1)
 
     private val skjemaer = mutableMapOf<Long, S>()

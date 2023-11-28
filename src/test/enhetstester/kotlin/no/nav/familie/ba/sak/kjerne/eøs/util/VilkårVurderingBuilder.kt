@@ -33,7 +33,10 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
     val personresultater: MutableSet<PersonResultat> = mutableSetOf()
     val personer: MutableSet<Person> = mutableSetOf()
 
-    fun forPerson(person: Person, startTidspunkt: Tidspunkt<T>): PersonResultatBuilder<T> {
+    fun forPerson(
+        person: Person,
+        startTidspunkt: Tidspunkt<T>,
+    ): PersonResultatBuilder<T> {
         return PersonResultatBuilder(this, startTidspunkt, person)
     }
 
@@ -52,7 +55,10 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
         private val person: Person = tilfeldigPerson(),
         private val vilkårsresultatTidslinjer: MutableList<Tidslinje<UtdypendeVilkårRegelverkResultat, T>> = mutableListOf(),
     ) {
-        fun medVilkår(v: String, vararg vilkår: Vilkår): PersonResultatBuilder<T> {
+        fun medVilkår(
+            v: String,
+            vararg vilkår: Vilkår,
+        ): PersonResultatBuilder<T> {
             vilkårsresultatTidslinjer.addAll(
                 vilkår.map { v.tilUtdypendeVilkårRegelverkResultatTidslinje(it, startTidspunkt) },
             )
@@ -71,24 +77,30 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
             return this
         }
 
-        fun forPerson(person: Person, startTidspunkt: Tidspunkt<T>): PersonResultatBuilder<T> {
+        fun forPerson(
+            person: Person,
+            startTidspunkt: Tidspunkt<T>,
+        ): PersonResultatBuilder<T> {
             return byggPerson().forPerson(person, startTidspunkt)
         }
 
         fun byggVilkårsvurdering(): Vilkårsvurdering = byggPerson().byggVilkårsvurdering()
+
         fun byggPersonopplysningGrunnlag(): PersonopplysningGrunnlag = byggPerson().byggPersonopplysningGrunnlag()
 
         fun byggPerson(): VilkårsvurderingBuilder<T> {
-            val personResultat = PersonResultat(
-                vilkårsvurdering = vilkårsvurderingBuilder.vilkårsvurdering,
-                aktør = person.aktør,
-            )
+            val personResultat =
+                PersonResultat(
+                    vilkårsvurdering = vilkårsvurderingBuilder.vilkårsvurdering,
+                    aktør = person.aktør,
+                )
 
-            val vilkårresultater = vilkårsresultatTidslinjer.flatMap {
-                it.perioder()
-                    .filter { it.innhold != null }
-                    .flatMap { periode -> periode.tilVilkårResultater(personResultat) }
-            }
+            val vilkårresultater =
+                vilkårsresultatTidslinjer.flatMap {
+                    it.perioder()
+                        .filter { it.innhold != null }
+                        .flatMap { periode -> periode.tilVilkårResultater(personResultat) }
+                }
 
             personResultat.vilkårResultater.addAll(vilkårresultater)
             vilkårsvurderingBuilder.personresultater.add(personResultat)
@@ -126,7 +138,6 @@ fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse() =
         vilkårsvurdering = this.byggVilkårsvurdering(),
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
         fagsakType = FagsakType.NORMAL,
-
     )
 
 data class UtdypendeVilkårRegelverkResultat(

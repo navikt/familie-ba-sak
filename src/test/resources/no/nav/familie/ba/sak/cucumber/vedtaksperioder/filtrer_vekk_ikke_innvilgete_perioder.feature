@@ -29,7 +29,7 @@ Egenskap: Vedtaksperioder skal filtrere vekk irrelevante perioder
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456    | 01.05.2020 | 31.03.2038 | 1054  | 1            |
+      | 3456    | 01.05.2020 | 30.06.2021 | 1054  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 

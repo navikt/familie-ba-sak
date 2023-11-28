@@ -13,8 +13,11 @@ import org.springframework.web.servlet.HandlerInterceptor
 @Component
 @Import(RolleConfig::class)
 class RolletilgangInterceptor(private val rolleConfig: RolleConfig) : HandlerInterceptor {
-
-    override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean =
+    override fun preHandle(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        handler: Any,
+    ): Boolean =
         SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.VEILEDER)
             .takeIf { it != BehandlerRolle.UKJENT }
             ?.let { super.preHandle(request, response, handler) }
@@ -25,7 +28,6 @@ class RolletilgangInterceptor(private val rolleConfig: RolleConfig) : HandlerInt
             }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(RolletilgangInterceptor::class.java)
     }
 }

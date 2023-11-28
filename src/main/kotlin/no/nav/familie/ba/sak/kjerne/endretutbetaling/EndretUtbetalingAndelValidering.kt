@@ -36,7 +36,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 object EndretUtbetalingAndelValidering {
-
     fun validerIngenOverlappendeEndring(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         eksisterendeEndringerPåBehandling: List<EndretUtbetalingAndel>,
@@ -61,19 +60,21 @@ object EndretUtbetalingAndelValidering {
         andelTilkjentYtelser: Collection<AndelTilkjentYtelse>,
     ) {
         endretUtbetalingAndel.validerUtfyltEndring()
-        val minsteDatoForTilkjentYtelse = andelTilkjentYtelser.filter {
-            it.aktør == endretUtbetalingAndel.person!!.aktør
-        }.minByOrNull { it.stønadFom }?.stønadFom
+        val minsteDatoForTilkjentYtelse =
+            andelTilkjentYtelser.filter {
+                it.aktør == endretUtbetalingAndel.person!!.aktør
+            }.minByOrNull { it.stønadFom }?.stønadFom
 
-        val størsteDatoForTilkjentYtelse = andelTilkjentYtelser.filter {
-            it.aktør == endretUtbetalingAndel.person!!.aktør
-        }.maxByOrNull { it.stønadTom }?.stønadTom
+        val størsteDatoForTilkjentYtelse =
+            andelTilkjentYtelser.filter {
+                it.aktør == endretUtbetalingAndel.person!!.aktør
+            }.maxByOrNull { it.stønadTom }?.stønadTom
 
         if ((minsteDatoForTilkjentYtelse == null || størsteDatoForTilkjentYtelse == null) ||
             (
                 endretUtbetalingAndel.fom!!.isBefore(minsteDatoForTilkjentYtelse) ||
                     endretUtbetalingAndel.tom!!.isAfter(størsteDatoForTilkjentYtelse)
-                )
+            )
         ) {
             throw FunksjonellFeil(
                 melding = "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
@@ -101,10 +102,11 @@ object EndretUtbetalingAndelValidering {
 
         return when (årsak) {
             Årsak.DELT_BOSTED -> {
-                val deltBostedPerioder = finnDeltBostedPerioder(
-                    person = endretUtbetalingAndel.person,
-                    vilkårsvurdering = vilkårsvurdering,
-                ).map { it.tilMånedPeriode() }
+                val deltBostedPerioder =
+                    finnDeltBostedPerioder(
+                        person = endretUtbetalingAndel.person,
+                        vilkårsvurdering = vilkårsvurdering,
+                    ).map { it.tilMånedPeriode() }
 
                 validerDeltBosted(
                     endretUtbetalingAndel = endretUtbetalingAndel,
@@ -112,10 +114,11 @@ object EndretUtbetalingAndelValidering {
                 )
             }
 
-            Årsak.ETTERBETALING_3ÅR -> validerEtterbetaling3År(
-                endretUtbetalingAndel = endretUtbetalingAndel,
-                behandlingOpprettetTidspunkt = vilkårsvurdering?.behandling?.opprettetTidspunkt?.toLocalDate(),
-            )
+            Årsak.ETTERBETALING_3ÅR ->
+                validerEtterbetaling3År(
+                    endretUtbetalingAndel = endretUtbetalingAndel,
+                    behandlingOpprettetTidspunkt = vilkårsvurdering?.behandling?.opprettetTidspunkt?.toLocalDate(),
+                )
 
             Årsak.ALLEREDE_UTBETALT -> validerAlleredeUtbetalt(endretUtbetalingAndel = endretUtbetalingAndel)
 
@@ -198,18 +201,20 @@ object EndretUtbetalingAndelValidering {
 fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
     endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
 ) {
-    val endredeUtvidetUtbetalingerAndeler = endretUtbetalingAndelerMedÅrsakDeltBosted
-        .filter { endretUtbetaling ->
-            endretUtbetaling.andelerTilkjentYtelse.any { it.erUtvidet() }
-        }
+    val endredeUtvidetUtbetalingerAndeler =
+        endretUtbetalingAndelerMedÅrsakDeltBosted
+            .filter { endretUtbetaling ->
+                endretUtbetaling.andelerTilkjentYtelse.any { it.erUtvidet() }
+            }
 
     endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->
-        val deltBostedEndringerISammePeriode = endretUtbetalingAndelerMedÅrsakDeltBosted.filter {
-            it.årsak == Årsak.DELT_BOSTED &&
-                it.fom!!.isSameOrBefore(endretPåUtvidetUtbetalinger.fom!!) &&
-                it.tom!!.isSameOrAfter(endretPåUtvidetUtbetalinger.tom!!) &&
-                it.id != endretPåUtvidetUtbetalinger.id
-        }
+        val deltBostedEndringerISammePeriode =
+            endretUtbetalingAndelerMedÅrsakDeltBosted.filter {
+                it.årsak == Årsak.DELT_BOSTED &&
+                    it.fom!!.isSameOrBefore(endretPåUtvidetUtbetalinger.fom!!) &&
+                    it.tom!!.isSameOrAfter(endretPåUtvidetUtbetalinger.tom!!) &&
+                    it.id != endretPåUtvidetUtbetalinger.id
+            }
 
         if (deltBostedEndringerISammePeriode.isEmpty()) {
             val feilmelding =
@@ -221,14 +226,21 @@ fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
     }
 }
 
-fun validerUtbetalingMotÅrsak(årsak: Årsak?, skalUtbetales: Boolean) {
+fun validerUtbetalingMotÅrsak(
+    årsak: Årsak?,
+    skalUtbetales: Boolean,
+) {
     if (skalUtbetales && (årsak == Årsak.ENDRE_MOTTAKER || årsak == Årsak.ALLEREDE_UTBETALT)) {
         val feilmelding = "Du kan ikke velge denne årsaken og si at barnetrygden skal utbetales."
         throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
     }
 }
 
-fun validerTomDato(tomDato: YearMonth?, gyldigTomEtterDagensDato: YearMonth?, årsak: Årsak?) {
+fun validerTomDato(
+    tomDato: YearMonth?,
+    gyldigTomEtterDagensDato: YearMonth?,
+    årsak: Årsak?,
+) {
     val dagensDato = YearMonth.now()
     if (årsak == Årsak.ALLEREDE_UTBETALT && tomDato?.isAfter(dagensDato) == true) {
         val feilmelding =
@@ -260,21 +272,22 @@ private fun slåSammenDeltBostedPerioderSomHengerSammen(
         val periode = sortertePerioder[index]
         val nestePeriode = if (index == sortertePerioder.size - 1) null else sortertePerioder[index + 1]
 
-        periodenViSerPå = if (nestePeriode != null) {
-            val andelerSkalSlåsSammen =
-                periode.tom.sisteDagIMåned().erDagenFør(nestePeriode.fom.førsteDagIInneværendeMåned())
+        periodenViSerPå =
+            if (nestePeriode != null) {
+                val andelerSkalSlåsSammen =
+                    periode.tom.sisteDagIMåned().erDagenFør(nestePeriode.fom.førsteDagIInneværendeMåned())
 
-            if (andelerSkalSlåsSammen) {
-                val nyPeriode = periodenViSerPå.copy(tom = nestePeriode.tom)
-                nyPeriode
+                if (andelerSkalSlåsSammen) {
+                    val nyPeriode = periodenViSerPå.copy(tom = nestePeriode.tom)
+                    nyPeriode
+                } else {
+                    oppdatertListeMedPerioder.add(periodenViSerPå)
+                    sortertePerioder[index + 1]
+                }
             } else {
                 oppdatertListeMedPerioder.add(periodenViSerPå)
-                sortertePerioder[index + 1]
+                break
             }
-        } else {
-            oppdatertListeMedPerioder.add(periodenViSerPå)
-            break
-        }
     }
     return oppdatertListeMedPerioder
 }
@@ -297,44 +310,51 @@ fun finnDeltBostedPerioder(
     vilkårsvurdering: Vilkårsvurdering?,
 ): List<Periode> {
     if (vilkårsvurdering == null || person == null) return emptyList()
-    val deltBostedPerioder = if (person.type == PersonType.SØKER) {
-        val deltBostedVilkårResultater = vilkårsvurdering.personResultater.flatMap { personResultat ->
-            personResultat.vilkårResultater.filter {
-                it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && it.resultat == Resultat.OPPFYLT
-            }
-        }
+    val deltBostedPerioder =
+        if (person.type == PersonType.SØKER) {
+            val deltBostedVilkårResultater =
+                vilkårsvurdering.personResultater.flatMap { personResultat ->
+                    personResultat.vilkårResultater.filter {
+                        it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && it.resultat == Resultat.OPPFYLT
+                    }
+                }
 
-        val deltBostedPerioder = deltBostedVilkårResultater.groupBy { it.personResultat?.aktør }
-            .flatMap { (_, vilkårResultater) -> vilkårResultater.mapNotNull { it.tilPeriode(vilkår = vilkårResultater) } }
+            val deltBostedPerioder =
+                deltBostedVilkårResultater.groupBy { it.personResultat?.aktør }
+                    .flatMap { (_, vilkårResultater) -> vilkårResultater.mapNotNull { it.tilPeriode(vilkår = vilkårResultater) } }
 
-        slåSammenOverlappendePerioder(
-            deltBostedPerioder.map {
-                DatoIntervallEntitet(
-                    fom = it.fom,
-                    tom = it.tom,
+            slåSammenOverlappendePerioder(
+                deltBostedPerioder.map {
+                    DatoIntervallEntitet(
+                        fom = it.fom,
+                        tom = it.tom,
+                    )
+                },
+            ).filter { it.fom != null && it.tom != null }.map {
+                Periode(
+                    fom = it.fom!!,
+                    tom = it.tom!!,
                 )
-            },
-        ).filter { it.fom != null && it.tom != null }.map {
-            Periode(
-                fom = it.fom!!,
-                tom = it.tom!!,
-            )
-        }
-    } else {
-        val personensVilkår = vilkårsvurdering.personResultater.singleOrNull { it.aktør == person.aktør } ?: return emptyList()
+            }
+        } else {
+            val personensVilkår = vilkårsvurdering.personResultater.singleOrNull { it.aktør == person.aktør } ?: return emptyList()
 
-        val deltBostedVilkårResultater = personensVilkår.vilkårResultater.filter {
-            it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && it.resultat == Resultat.OPPFYLT
-        }
+            val deltBostedVilkårResultater =
+                personensVilkår.vilkårResultater.filter {
+                    it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && it.resultat == Resultat.OPPFYLT
+                }
 
-        deltBostedVilkårResultater.mapNotNull { it.tilPeriode(vilkår = deltBostedVilkårResultater) }
-    }
+            deltBostedVilkårResultater.mapNotNull { it.tilPeriode(vilkår = deltBostedVilkårResultater) }
+        }
     return slåSammenDeltBostedPerioderSomHengerSammen(
         perioder = deltBostedPerioder.toMutableList(),
     )
 }
 
-fun validerBarnasVilkår(barna: List<PersonEnkel>, vilkårsvurdering: Vilkårsvurdering) {
+fun validerBarnasVilkår(
+    barna: List<PersonEnkel>,
+    vilkårsvurdering: Vilkårsvurdering,
+) {
     val listeAvFeil = mutableListOf<String>()
 
     barna.map { barn ->
@@ -370,12 +390,13 @@ fun finnTilOgMedDato(
     // LocalDateTimeline krasjer i isTimelineOutsideInterval funksjonen dersom vi sender med TIDENES_ENDE,
     // så bruker tidenes ende minus én dag.
     if (tilOgMed == null) return TIDENES_ENDE.minusDays(1)
-    val skalVidereføresEnMndEkstra = vilkårResultater.any { vilkårResultat ->
-        erBack2BackIMånedsskifte(
-            tilOgMed = tilOgMed,
-            fraOgMed = vilkårResultat.periodeFom,
-        )
-    }
+    val skalVidereføresEnMndEkstra =
+        vilkårResultater.any { vilkårResultat ->
+            erBack2BackIMånedsskifte(
+                tilOgMed = tilOgMed,
+                fraOgMed = vilkårResultat.periodeFom,
+            )
+        }
 
     return if (skalVidereføresEnMndEkstra) {
         tilOgMed.plusMonths(1).sisteDagIMåned()

@@ -9,36 +9,39 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class BrevTypeTest {
+    private val førerTilAvventerDokumentasjon =
+        listOf(
+            Brevmal.INNHENTE_OPPLYSNINGER,
+            Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
+            Brevmal.VARSEL_OM_REVURDERING,
+            Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON,
+            Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
+            Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
+            Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
+            Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
+            Brevmal.SVARTIDSBREV,
+            Brevmal.FORLENGET_SVARTIDSBREV,
+            Brevmal.SVARTIDSBREV_INSTITUSJON,
+            Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
+        )
 
-    private val førerTilAvventerDokumentasjon = listOf(
-        Brevmal.INNHENTE_OPPLYSNINGER,
-        Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
-        Brevmal.VARSEL_OM_REVURDERING,
-        Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON,
-        Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
-        Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
-        Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
-        Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
-        Brevmal.SVARTIDSBREV,
-        Brevmal.FORLENGET_SVARTIDSBREV,
-        Brevmal.SVARTIDSBREV_INSTITUSJON,
-        Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
-    )
+    private val eøsDokumentMedAvventerDokumentasjon =
+        listOf(
+            Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
+            Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
+        )
 
-    private val eøsDokumentMedAvventerDokumentasjon = listOf(
-        Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
-        Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
-    )
-
-    private val førerIkkeTilAvventingAvDokumentasjon = Brevmal.values()
-        .filter {
-            it !in førerTilAvventerDokumentasjon && it !in eøsDokumentMedAvventerDokumentasjon
-        }
+    private val førerIkkeTilAvventingAvDokumentasjon =
+        Brevmal.values()
+            .filter {
+                it !in førerTilAvventerDokumentasjon && it !in eøsDokumentMedAvventerDokumentasjon
+            }
 
     @Test
     fun `Skal si om behandling settes på vent`() {
-        val setterIkkeBehandlingPåVent = Brevmal.values()
-            .filter { !førerTilAvventerDokumentasjon.contains(it) && it !in eøsDokumentMedAvventerDokumentasjon }
+        val setterIkkeBehandlingPåVent =
+            Brevmal.values()
+                .filter { !førerTilAvventerDokumentasjon.contains(it) && it !in eøsDokumentMedAvventerDokumentasjon }
 
         setterIkkeBehandlingPåVent.forEach {
             Assertions.assertFalse(it.setterBehandlingPåVent())

@@ -14,7 +14,6 @@ class UnleashServiceMockConfig(
     private val unleashService: UnleashService,
     private val environment: Environment,
 ) {
-
     @Bean
     @Primary
     fun mockUnleashService(): UnleashService {

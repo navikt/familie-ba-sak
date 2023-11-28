@@ -33,44 +33,35 @@ data class Kompetanse(
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
     override val fom: YearMonth?,
-
     @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
     override val tom: YearMonth?,
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "AKTOER_TIL_KOMPETANSE",
         joinColumns = [JoinColumn(name = "fk_kompetanse_id")],
         inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")],
     )
-    override val barnAktører: Set<Aktør> = emptySet(), // kan ikke være tom
-
+    // kan ikke være tom
+    override val barnAktører: Set<Aktør> = emptySet(),
     @Enumerated(EnumType.STRING)
     @Column(name = "soekers_aktivitet")
     val søkersAktivitet: KompetanseAktivitet? = null,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "annen_forelderes_aktivitet")
     val annenForeldersAktivitet: KompetanseAktivitet? = null,
-
     @Column(name = "annen_forelderes_aktivitetsland")
     val annenForeldersAktivitetsland: String? = null,
-
     @Column(name = "sokers_aktivitetsland")
     val søkersAktivitetsland: String? = null,
-
     @Column(name = "barnets_bostedsland")
     val barnetsBostedsland: String? = null,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat")
     val resultat: KompetanseResultat? = null,
-
     @Column(name = "er_annen_forelder_omfattet_av_norsk_lovgivning")
     val erAnnenForelderOmfattetAvNorskLovgivning: Boolean? = false,
 ) : PeriodeOgBarnSkjemaEntitet<Kompetanse>() {
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "kompetanse_seq_generator")
     @SequenceGenerator(
@@ -83,16 +74,21 @@ data class Kompetanse(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     override var behandlingId: Long = 0
 
-    override fun utenInnhold() = this.copy(
-        søkersAktivitet = null,
-        søkersAktivitetsland = null,
-        annenForeldersAktivitet = null,
-        annenForeldersAktivitetsland = null,
-        barnetsBostedsland = null,
-        resultat = null,
-    )
+    override fun utenInnhold() =
+        this.copy(
+            søkersAktivitet = null,
+            søkersAktivitetsland = null,
+            annenForeldersAktivitet = null,
+            annenForeldersAktivitetsland = null,
+            barnetsBostedsland = null,
+            resultat = null,
+        )
 
-    override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) =
+    override fun kopier(
+        fom: YearMonth?,
+        tom: YearMonth?,
+        barnAktører: Set<Aktør>,
+    ) =
         copy(
             fom = fom,
             tom = tom,
@@ -106,8 +102,9 @@ data class Kompetanse(
         }
     }
 
-    fun erObligatoriskeFelterSatt() = fom != null &&
-        erObligatoriskeFelterUtenomTidsperioderSatt()
+    fun erObligatoriskeFelterSatt() =
+        fom != null &&
+            erObligatoriskeFelterUtenomTidsperioderSatt()
 
     fun erObligatoriskeFelterUtenomTidsperioderSatt() =
         this.søkersAktivitet != null &&

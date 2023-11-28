@@ -19,15 +19,16 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
     høyreTidslinje: Tidslinje<H, T>,
     kombinator: (V?, H?) -> R?,
-): Tidslinje<R, T> = tidsrom(this, høyreTidslinje).tidslinjeFraTidspunkt { tidspunkt ->
-    val venstre = this.innholdForTidspunkt(tidspunkt)
-    val høyre = høyreTidslinje.innholdForTidspunkt(tidspunkt)
+): Tidslinje<R, T> =
+    tidsrom(this, høyreTidslinje).tidslinjeFraTidspunkt { tidspunkt ->
+        val venstre = this.innholdForTidspunkt(tidspunkt)
+        val høyre = høyreTidslinje.innholdForTidspunkt(tidspunkt)
 
-    when {
-        !(venstre.harInnhold || høyre.harInnhold) -> Innhold.utenInnhold()
-        else -> kombinator(venstre.innhold, høyre.innhold).tilInnhold()
+        when {
+            !(venstre.harInnhold || høyre.harInnhold) -> Innhold.utenInnhold()
+            else -> kombinator(venstre.innhold, høyre.innhold).tilInnhold()
+        }
     }
-}
 
 /**
  * Extension-metode for å kombinere to tidslinjer der begge har verdi
@@ -43,15 +44,16 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
 fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerUtenNullMed(
     høyreTidslinje: Tidslinje<H, T>,
     kombinator: (V, H) -> R?,
-): Tidslinje<R, T> = tidsrom(this, høyreTidslinje).tidslinjeFraTidspunkt { tidspunkt ->
-    val venstre = this.innholdForTidspunkt(tidspunkt)
-    val høyre = høyreTidslinje.innholdForTidspunkt(tidspunkt)
+): Tidslinje<R, T> =
+    tidsrom(this, høyreTidslinje).tidslinjeFraTidspunkt { tidspunkt ->
+        val venstre = this.innholdForTidspunkt(tidspunkt)
+        val høyre = høyreTidslinje.innholdForTidspunkt(tidspunkt)
 
-    when {
-        venstre.harVerdi && høyre.harVerdi -> kombinator(venstre.verdi, høyre.verdi).tilVerdi()
-        else -> Innhold.utenInnhold()
+        when {
+            venstre.harVerdi && høyre.harVerdi -> kombinator(venstre.verdi, høyre.verdi).tilVerdi()
+            else -> Innhold.utenInnhold()
+        }
     }
-}
 
 /**
  * Extension-metode for å kombinere liste av tidslinjer
@@ -65,12 +67,13 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerUtenNullMed(
  */
 fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombinerUtenNull(
     listeKombinator: (Iterable<I>) -> R?,
-): Tidslinje<R, T> = tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-    this.map { it.innholdForTidspunkt(tidspunkt) }
-        .filter { it.harVerdi }
-        .map { it.verdi }
-        .let(listeKombinator).tilVerdi()
-}
+): Tidslinje<R, T> =
+    tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
+        this.map { it.innholdForTidspunkt(tidspunkt) }
+            .filter { it.harVerdi }
+            .map { it.verdi }
+            .let(listeKombinator).tilVerdi()
+    }
 
 /**
  * Extension-metode for å kombinere liste av tidslinjer
@@ -84,13 +87,14 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombinerUtenNull(
  */
 fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombinerUtenNullOgIkkeTom(
     listeKombinator: (Iterable<I>) -> R?,
-): Tidslinje<R, T> = tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-    this.map { it.innholdForTidspunkt(tidspunkt) }
-        .filter { it.harVerdi }
-        .map { it.verdi }
-        .takeIf { it.isNotEmpty() }
-        ?.let(listeKombinator).tilVerdi()
-}
+): Tidslinje<R, T> =
+    tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
+        this.map { it.innholdForTidspunkt(tidspunkt) }
+            .filter { it.harVerdi }
+            .map { it.verdi }
+            .takeIf { it.isNotEmpty() }
+            ?.let(listeKombinator).tilVerdi()
+    }
 
 /**
  * Extension-metode for å kombinere liste av tidslinjer
@@ -102,13 +106,14 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombinerUtenNullOgIkkeTom(
  */
 fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
     listeKombinator: (Iterable<I>) -> R?,
-): Tidslinje<R, T> = tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-    this.map { it.innholdForTidspunkt(tidspunkt) }
-        .filter { it.harVerdi }
-        .map { it.verdi }
-        .let { listeKombinator(it) }
-        .tilVerdi()
-}
+): Tidslinje<R, T> =
+    tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
+        this.map { it.innholdForTidspunkt(tidspunkt) }
+            .filter { it.harVerdi }
+            .map { it.verdi }
+            .let { listeKombinator(it) }
+            .tilVerdi()
+    }
 
 /**
  * Extension-metode for å kombinere to tidslinjer
@@ -122,13 +127,14 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
 fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.tidspunktKombinerMed(
     høyreTidslinje: Tidslinje<H, T>,
     kombinator: (Tidspunkt<T>, V?, H?) -> R?,
-): Tidslinje<R, T> = tidsrom(this, høyreTidslinje).tidslinjeFraTidspunkt { tidspunkt ->
-    kombinator(
-        tidspunkt,
-        this.innholdForTidspunkt(tidspunkt).innhold,
-        høyreTidslinje.innholdForTidspunkt(tidspunkt).innhold,
-    ).tilInnhold()
-}
+): Tidslinje<R, T> =
+    tidsrom(this, høyreTidslinje).tidslinjeFraTidspunkt { tidspunkt ->
+        kombinator(
+            tidspunkt,
+            this.innholdForTidspunkt(tidspunkt).innhold,
+            høyreTidslinje.innholdForTidspunkt(tidspunkt).innhold,
+        ).tilInnhold()
+    }
 
 /**
  * Extension-metode for å kombinere tre tidslinjer
@@ -143,51 +149,31 @@ fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMed(
     tidslinjeB: Tidslinje<B, T>,
     tidslinjeC: Tidslinje<C, T>,
     kombinator: (A?, B?, C?) -> R?,
-): Tidslinje<R, T> = tidsrom(this, tidslinjeB, tidslinjeC).tidslinjeFraTidspunkt { tidspunkt ->
-    kombinator(
-        this.innholdForTidspunkt(tidspunkt).innhold,
-        tidslinjeB.innholdForTidspunkt(tidspunkt).innhold,
-        tidslinjeC.innholdForTidspunkt(tidspunkt).innhold,
-    ).tilInnhold()
-}
-
-/**
- * Extension-metode for å kombinere tre tidslinjer
- * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
- * fra minste <fraOgMed()> til største <tilOgMed()> fra alle tidslinjene
- * Tidsenhet (T) må være av samme type
- * Hver av tidslinjene kan ha ulik innholdstype, hhv A, B og C
- * Kombintor-funksjonen tar inn (nullable) av A, B og C og returner (nullable) R
- * Resultatet er en tidslinje med tidsenhet T og innhold R
- */
-fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMedDatert(
-    tidslinjeB: Tidslinje<B, T>,
-    tidslinjeC: Tidslinje<C, T>,
-    kombinator: (A?, B?, C?, Tidspunkt<T>) -> R?,
-): Tidslinje<R, T> = tidsrom(this, tidslinjeB, tidslinjeC).tidslinjeFraTidspunkt { tidspunkt ->
-    kombinator(
-        this.innholdForTidspunkt(tidspunkt).innhold,
-        tidslinjeB.innholdForTidspunkt(tidspunkt).innhold,
-        tidslinjeC.innholdForTidspunkt(tidspunkt).innhold,
-        tidspunkt,
-    ).tilInnhold()
-}
+): Tidslinje<R, T> =
+    tidsrom(this, tidslinjeB, tidslinjeC).tidslinjeFraTidspunkt { tidspunkt ->
+        kombinator(
+            this.innholdForTidspunkt(tidspunkt).innhold,
+            tidslinjeB.innholdForTidspunkt(tidspunkt).innhold,
+            tidslinjeC.innholdForTidspunkt(tidspunkt).innhold,
+        ).tilInnhold()
+    }
 
 fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMedKunVerdi(
     tidslinjeB: Tidslinje<B, T>,
     tidslinjeC: Tidslinje<C, T>,
     kombinator: (A, B, C) -> R?,
-): Tidslinje<R, T> = tidsrom(this, tidslinjeB, tidslinjeC).tidslinjeFraTidspunkt { tidspunkt ->
-    val innholdA = this.innholdForTidspunkt(tidspunkt)
-    val innholdB = tidslinjeB.innholdForTidspunkt(tidspunkt)
-    val innholdC = tidslinjeC.innholdForTidspunkt(tidspunkt)
+): Tidslinje<R, T> =
+    tidsrom(this, tidslinjeB, tidslinjeC).tidslinjeFraTidspunkt { tidspunkt ->
+        val innholdA = this.innholdForTidspunkt(tidspunkt)
+        val innholdB = tidslinjeB.innholdForTidspunkt(tidspunkt)
+        val innholdC = tidslinjeC.innholdForTidspunkt(tidspunkt)
 
-    when {
-        innholdA.harVerdi && innholdB.harVerdi && innholdC.harVerdi ->
-            kombinator(innholdA.verdi, innholdB.verdi, innholdC.verdi).tilVerdi()
-        else -> Innhold.utenInnhold()
+        when {
+            innholdA.harVerdi && innholdB.harVerdi && innholdC.harVerdi ->
+                kombinator(innholdA.verdi, innholdB.verdi, innholdC.verdi).tilVerdi()
+            else -> Innhold.utenInnhold()
+        }
     }
-}
 
 fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harOverlappMed(tidslinje: Tidslinje<H, T>) =
     this.kombinerUtenNullMed(tidslinje) { v, h -> true }.erIkkeTom()
@@ -198,4 +184,9 @@ fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harIkkeOverlappMed(tidslinje: Tidslinj
 fun <V, H, T : Tidsenhet> Tidslinje<V, T>.kombinerMedNullable(
     høyreTidslinje: Tidslinje<H, T>?,
     kombinator: (V?, H?) -> V?,
-): Tidslinje<V, T> = if (høyreTidslinje != null) { kombinerMed(høyreTidslinje, kombinator) } else this
+): Tidslinje<V, T> =
+    if (høyreTidslinje != null) {
+        kombinerMed(høyreTidslinje, kombinator)
+    } else {
+        this
+    }

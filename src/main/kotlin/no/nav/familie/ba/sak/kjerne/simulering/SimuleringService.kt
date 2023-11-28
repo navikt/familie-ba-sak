@@ -5,7 +5,6 @@ import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
@@ -41,7 +40,6 @@ class SimuleringService(
     private val beregningService: BeregningService,
     private val økonomiSimuleringMottakerRepository: ØkonomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
-    private val featureToggleService: FeatureToggleService,
     private val unleashService: UnleashService,
     private val vedtakRepository: VedtakRepository,
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
@@ -56,10 +54,11 @@ class SimuleringService(
             return null
         }
 
-        val brukNyUtbetalingsoppdragGenerator = unleashService.isEnabled(
-            FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-            mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
-        )
+        val brukNyUtbetalingsoppdragGenerator =
+            unleashService.isEnabled(
+                FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
+                mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
+            )
 
         /**
          * SOAP integrasjonen støtter ikke full epost som MQ,
@@ -126,10 +125,10 @@ class SimuleringService(
                 behandling.status == BehandlingStatus.AVSLUTTET
 
         val simulering = hentSimuleringPåBehandling(behandlingId)
-        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
-            økonomiSimuleringMottakere = simulering,
-            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
-        )
+        val restSimulering =
+            vedtakSimuleringMottakereTilRestSimulering(
+                økonomiSimuleringMottakere = simulering,
+            )
 
         return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
             oppdaterSimuleringPåBehandling(behandling)
@@ -144,12 +143,13 @@ class SimuleringService(
                 simulering.forfallsdatoNestePeriode != null &&
                     simulering.tidSimuleringHentet < simulering.forfallsdatoNestePeriode &&
                     LocalDate.now() > simulering.forfallsdatoNestePeriode
-                )
+            )
 
     @Transactional
     fun oppdaterSimuleringPåBehandling(behandling: Behandling): List<ØkonomiSimuleringMottaker> {
-        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
-            ?: throw Feil("Fant ikke aktivt vedtak på behandling${behandling.id}")
+        val aktivtVedtak =
+            vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
+                ?: throw Feil("Fant ikke aktivt vedtak på behandling${behandling.id}")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "opprette simulering",
@@ -175,14 +175,12 @@ class SimuleringService(
     fun hentEtterbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
         return vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = økonomiSimuleringMottakere,
-            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
         ).etterbetaling
     }
 
     fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
         return vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere,
-            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
         ).feilutbetaling
     }
 
@@ -246,7 +244,6 @@ class SimuleringService(
 
         return vedtakSimuleringMottakereTilSimuleringPerioder(
             økonomiSimuleringMottakere = hentSimuleringPåBehandling(behandlingId),
-            erManuelPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
         ).filter {
             it.fom.isSameOrBefore(februar2023)
         }
@@ -259,9 +256,10 @@ class SimuleringService(
 
     private fun List<SimuleringsPeriode>.harKunNegativeResultater() = all { it.resultat <= BigDecimal.ZERO }
 
-    private fun List<SimuleringsPeriode>.harMaks1KroneIResultatPerBarn(antallBarn: Int) = all {
-        it.resultat.abs() <= BigDecimal(antallBarn)
-    }
+    private fun List<SimuleringsPeriode>.harMaks1KroneIResultatPerBarn(antallBarn: Int) =
+        all {
+            it.resultat.abs() <= BigDecimal(antallBarn)
+        }
 
     private fun List<SimuleringsPeriode>.harTotaltAvvikUnderBeløpsgrense() =
         sumOf { it.resultat }.abs() < BigDecimal(MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK)

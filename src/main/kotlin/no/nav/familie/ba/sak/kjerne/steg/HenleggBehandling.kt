@@ -33,29 +33,35 @@ class HenleggBehandling(
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
     private val logger = LoggerFactory.getLogger(HenleggBehandling::class.java)
 
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: RestHenleggBehandlingInfo): StegType {
+    override fun utførStegOgAngiNeste(
+        behandling: Behandling,
+        data: RestHenleggBehandlingInfo,
+    ): StegType {
         if (data.årsak == HenleggÅrsak.SØKNAD_TRUKKET) {
             dokumentService.sendManueltBrev(
                 behandling = behandling,
                 fagsakId = behandling.fagsak.id,
-                manueltBrevRequest = ManueltBrevRequest(
-                    mottakerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-                    brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
-                ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService),
+                manueltBrevRequest =
+                    ManueltBrevRequest(
+                        mottakerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                        brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
+                    ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService),
             )
         }
 
-        val (oppgaverTekniskVedlikeholdPgaSatsendring, oppgaverSomSkalFerdigstilles) = oppgaveService.hentOppgaverSomIkkeErFerdigstilt(
-            behandling,
-        )
-            .partition {
-                data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type in listOf(
-                    BehandleSak,
-                    GodkjenneVedtak,
-                    BehandleUnderkjentVedtak,
-                    VurderLivshendelse,
-                )
-            }
+        val (oppgaverTekniskVedlikeholdPgaSatsendring, oppgaverSomSkalFerdigstilles) =
+            oppgaveService.hentOppgaverSomIkkeErFerdigstilt(
+                behandling,
+            )
+                .partition {
+                    data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type in
+                        listOf(
+                            BehandleSak,
+                            GodkjenneVedtak,
+                            BehandleUnderkjentVedtak,
+                            VurderLivshendelse,
+                        )
+                }
 
         oppgaverSomSkalFerdigstilles.forEach {
             oppgaveService.ferdigstillOppgaver(behandling.id, it.type)

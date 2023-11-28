@@ -10,37 +10,38 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class VedtaksperiodeUtilTest {
-
     private val sanityEØSBegrunnelser = testSanityKlient.hentEØSBegrunnelserMap()
 
     @Test
     fun `Skal ikke endre på utbetalingsperioder hvis det ikke finnes reduksjonsperioder`() {
         val vedtak = lagVedtak()
-        val utbetalingsperioder = listOf(
-            VedtaksperiodeMedBegrunnelser(
-                vedtak = vedtak,
-                fom = LocalDate.now().minusYears(2).førsteDagIInneværendeMåned(),
-                tom = LocalDate.now().minusYears(1).minusMonths(1).sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING,
-            ),
-            VedtaksperiodeMedBegrunnelser(
-                vedtak = vedtak,
-                fom = LocalDate.now().minusYears(1).førsteDagIInneværendeMåned(),
-                tom = LocalDate.now().sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING,
-            ),
-            VedtaksperiodeMedBegrunnelser(
-                vedtak = vedtak,
-                fom = LocalDate.now().plusMonths(1).førsteDagIInneværendeMåned(),
-                tom = LocalDate.now().plusYears(3).sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING,
-            ),
-        )
+        val utbetalingsperioder =
+            listOf(
+                VedtaksperiodeMedBegrunnelser(
+                    vedtak = vedtak,
+                    fom = LocalDate.now().minusYears(2).førsteDagIInneværendeMåned(),
+                    tom = LocalDate.now().minusYears(1).minusMonths(1).sisteDagIMåned(),
+                    type = Vedtaksperiodetype.UTBETALING,
+                ),
+                VedtaksperiodeMedBegrunnelser(
+                    vedtak = vedtak,
+                    fom = LocalDate.now().minusYears(1).førsteDagIInneværendeMåned(),
+                    tom = LocalDate.now().sisteDagIMåned(),
+                    type = Vedtaksperiodetype.UTBETALING,
+                ),
+                VedtaksperiodeMedBegrunnelser(
+                    vedtak = vedtak,
+                    fom = LocalDate.now().plusMonths(1).førsteDagIInneværendeMåned(),
+                    tom = LocalDate.now().plusYears(3).sisteDagIMåned(),
+                    type = Vedtaksperiodetype.UTBETALING,
+                ),
+            )
 
-        val oppdaterteUtbetalingsperioder = oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
-            utbetalingsperioder = utbetalingsperioder,
-            reduksjonsperioder = emptyList(),
-        )
+        val oppdaterteUtbetalingsperioder =
+            oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
+                utbetalingsperioder = utbetalingsperioder,
+                reduksjonsperioder = emptyList(),
+            )
 
         Assertions.assertEquals(3, oppdaterteUtbetalingsperioder.size)
         Assertions.assertEquals(utbetalingsperioder, oppdaterteUtbetalingsperioder)
@@ -50,23 +51,26 @@ class VedtaksperiodeUtilTest {
     fun `Skal oppdatere utbetalingsperiodene med reduksjonsperioder`() {
         val vedtak = lagVedtak()
 
-        val utbetalingsperiode = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = LocalDate.now().minusYears(1).førsteDagIInneværendeMåned(),
-            tom = LocalDate.now().plusYears(1).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING,
-        )
-        val reduksjonsperiode = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = LocalDate.now().minusYears(1).plusMonths(1).førsteDagIInneværendeMåned(),
-            tom = LocalDate.now().minusYears(1).plusMonths(6).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-        )
+        val utbetalingsperiode =
+            VedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = LocalDate.now().minusYears(1).førsteDagIInneværendeMåned(),
+                tom = LocalDate.now().plusYears(1).sisteDagIMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+            )
+        val reduksjonsperiode =
+            VedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = LocalDate.now().minusYears(1).plusMonths(1).førsteDagIInneværendeMåned(),
+                tom = LocalDate.now().minusYears(1).plusMonths(6).sisteDagIMåned(),
+                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+            )
 
-        val oppdaterteUtbetalingsperioder = oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
-            utbetalingsperioder = listOf(utbetalingsperiode),
-            reduksjonsperioder = listOf(reduksjonsperiode),
-        )
+        val oppdaterteUtbetalingsperioder =
+            oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
+                utbetalingsperioder = listOf(utbetalingsperiode),
+                reduksjonsperioder = listOf(reduksjonsperiode),
+            )
 
         Assertions.assertEquals(3, oppdaterteUtbetalingsperioder.size)
 
@@ -95,45 +99,51 @@ class VedtaksperiodeUtilTest {
         val vedtak = lagVedtak()
 
         val b2bFomUtbetalingsperiode = LocalDate.now().minusYears(2).førsteDagIInneværendeMåned()
-        val utbetalingsperiode1 = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = LocalDate.now().minusYears(3).førsteDagIInneværendeMåned(),
-            tom = b2bFomUtbetalingsperiode.minusMonths(1).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING,
-        )
-        val utbetalingsperiode2 = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = b2bFomUtbetalingsperiode,
-            tom = LocalDate.now().plusYears(1).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING,
-        )
+        val utbetalingsperiode1 =
+            VedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = LocalDate.now().minusYears(3).førsteDagIInneværendeMåned(),
+                tom = b2bFomUtbetalingsperiode.minusMonths(1).sisteDagIMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+            )
+        val utbetalingsperiode2 =
+            VedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = b2bFomUtbetalingsperiode,
+                tom = LocalDate.now().plusYears(1).sisteDagIMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+            )
 
         val b2bFom1 = LocalDate.now().minusMonths(6).førsteDagIInneværendeMåned()
         val b2bFom2 = LocalDate.now().førsteDagIInneværendeMåned()
 
-        val reduksjonsperiode1 = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = LocalDate.now().minusYears(1).plusMonths(1).førsteDagIInneværendeMåned(),
-            tom = b2bFom1.minusMonths(1).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-        )
-        val reduksjonsperiode2 = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = b2bFom1,
-            tom = b2bFom2.minusMonths(1).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-        )
-        val reduksjonsperiode3 = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = b2bFom2,
-            tom = LocalDate.now().plusMonths(6).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-        )
+        val reduksjonsperiode1 =
+            VedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = LocalDate.now().minusYears(1).plusMonths(1).førsteDagIInneværendeMåned(),
+                tom = b2bFom1.minusMonths(1).sisteDagIMåned(),
+                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+            )
+        val reduksjonsperiode2 =
+            VedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = b2bFom1,
+                tom = b2bFom2.minusMonths(1).sisteDagIMåned(),
+                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+            )
+        val reduksjonsperiode3 =
+            VedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = b2bFom2,
+                tom = LocalDate.now().plusMonths(6).sisteDagIMåned(),
+                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+            )
 
-        val oppdaterteUtbetalingsperioder = oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
-            utbetalingsperioder = listOf(utbetalingsperiode1, utbetalingsperiode2),
-            reduksjonsperioder = listOf(reduksjonsperiode1, reduksjonsperiode2, reduksjonsperiode3),
-        )
+        val oppdaterteUtbetalingsperioder =
+            oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
+                utbetalingsperioder = listOf(utbetalingsperiode1, utbetalingsperiode2),
+                reduksjonsperioder = listOf(reduksjonsperiode1, reduksjonsperiode2, reduksjonsperiode3),
+            )
 
         Assertions.assertEquals(4, oppdaterteUtbetalingsperioder.size)
 
@@ -172,51 +182,54 @@ class VedtaksperiodeUtilTest {
         val fom3 = fom2.plusMonths(3).førsteDagIInneværendeMåned()
         val sisteTom = fom3.plusMonths(5).sisteDagIMåned()
 
-        val utbetalingsperioder = listOf(
-            VedtaksperiodeMedBegrunnelser(
-                vedtak = vedtak,
-                fom = fom1,
-                tom = fom2.minusMonths(1).sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING,
-            ),
-            VedtaksperiodeMedBegrunnelser(
-                vedtak = vedtak,
-                fom = fom2,
-                tom = fom3.minusMonths(1).sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING,
-            ),
-            VedtaksperiodeMedBegrunnelser(
-                vedtak = vedtak,
-                fom = fom3,
-                tom = sisteTom,
-                type = Vedtaksperiodetype.UTBETALING,
-            ),
-        )
-        val reduksjonsperioder = listOf(
-            VedtaksperiodeMedBegrunnelser(
-                vedtak = vedtak,
-                fom = fomReduksjon,
-                tom = fom2.minusMonths(1).sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-            ),
-            VedtaksperiodeMedBegrunnelser(
-                vedtak = vedtak,
-                fom = fom2,
-                tom = fom3.minusMonths(1).sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-            ),
-            VedtaksperiodeMedBegrunnelser(
-                vedtak = vedtak,
-                fom = fom3,
-                tom = sisteTom,
-                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-            ),
-        )
+        val utbetalingsperioder =
+            listOf(
+                VedtaksperiodeMedBegrunnelser(
+                    vedtak = vedtak,
+                    fom = fom1,
+                    tom = fom2.minusMonths(1).sisteDagIMåned(),
+                    type = Vedtaksperiodetype.UTBETALING,
+                ),
+                VedtaksperiodeMedBegrunnelser(
+                    vedtak = vedtak,
+                    fom = fom2,
+                    tom = fom3.minusMonths(1).sisteDagIMåned(),
+                    type = Vedtaksperiodetype.UTBETALING,
+                ),
+                VedtaksperiodeMedBegrunnelser(
+                    vedtak = vedtak,
+                    fom = fom3,
+                    tom = sisteTom,
+                    type = Vedtaksperiodetype.UTBETALING,
+                ),
+            )
+        val reduksjonsperioder =
+            listOf(
+                VedtaksperiodeMedBegrunnelser(
+                    vedtak = vedtak,
+                    fom = fomReduksjon,
+                    tom = fom2.minusMonths(1).sisteDagIMåned(),
+                    type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+                ),
+                VedtaksperiodeMedBegrunnelser(
+                    vedtak = vedtak,
+                    fom = fom2,
+                    tom = fom3.minusMonths(1).sisteDagIMåned(),
+                    type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+                ),
+                VedtaksperiodeMedBegrunnelser(
+                    vedtak = vedtak,
+                    fom = fom3,
+                    tom = sisteTom,
+                    type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+                ),
+            )
 
-        val oppdaterteUtbetalingsperioder = oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
-            utbetalingsperioder = utbetalingsperioder,
-            reduksjonsperioder = reduksjonsperioder,
-        )
+        val oppdaterteUtbetalingsperioder =
+            oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
+                utbetalingsperioder = utbetalingsperioder,
+                reduksjonsperioder = reduksjonsperioder,
+            )
 
         Assertions.assertEquals(4, oppdaterteUtbetalingsperioder.size)
 

@@ -10,6 +10,9 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentPåJournalpostIdTask
 import no.nav.familie.http.client.RessursException
+import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.dokdistkanal.Distribusjonskanal
+import no.nav.familie.kontrakter.felles.dokdistkanal.DokdistkanalRequest
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -21,7 +24,6 @@ class DokumentDistribueringService(
     private val integrasjonClient: IntegrasjonClient,
     private val loggService: LoggService,
 ) {
-
     fun prøvDistribuerBrevOgLoggHendelse(
         distribuerDokumentDTO: DistribuerDokumentDTO,
         loggBehandlerRolle: BehandlerRolle,
@@ -71,6 +73,15 @@ class DokumentDistribueringService(
         }
     }
 
+    fun hentDistribusjonskanal(personIdent: PersonIdent): Distribusjonskanal {
+        return integrasjonClient.hentDistribusjonskanal(
+            DokdistkanalRequest(
+                bruker = personIdent,
+                mottaker = personIdent,
+            ),
+        )
+    }
+
     internal fun opprettLogginnslagPåBehandlingOgNyTaskSomDistribuererPåJournalpostId(distribuerDokumentDTO: DistribuerDokumentDTO) {
         val task = DistribuerDokumentPåJournalpostIdTask.opprettTask(distribuerDokumentDTO.copy(behandlingId = null))
         taskService.save(task)
@@ -117,13 +128,14 @@ class DokumentDistribueringService(
         antallBrevSendt[brevmal]?.increment()
     }
 
-    private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
-        Metrics.counter(
-            "brev.sendt",
-            "brevtype",
-            it.visningsTekst,
-        )
-    }
+    private val antallBrevSendt: Map<Brevmal, Counter> =
+        mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
+            Metrics.counter(
+                "brev.sendt",
+                "brevtype",
+                it.visningsTekst,
+            )
+        }
 
     private val antallBrevIkkeDistribuertUkjentAndresse: Map<Brevmal, Counter> =
         mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
@@ -134,7 +146,10 @@ class DokumentDistribueringService(
             )
         }
 
-    fun alleredeDistribuertMelding(journalpostId: String, behandlingId: Long?) =
+    fun alleredeDistribuertMelding(
+        journalpostId: String,
+        behandlingId: Long?,
+    ) =
         "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering." +
             if (behandlingId != null) " BehandlingId=$behandlingId." else ""
 

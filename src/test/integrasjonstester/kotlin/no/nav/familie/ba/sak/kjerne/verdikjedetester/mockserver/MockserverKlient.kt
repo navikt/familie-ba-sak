@@ -11,15 +11,15 @@ class MockserverKlient(
     private val restOperations: RestOperations,
 ) {
     fun lagScenario(restScenario: RestScenario): RestScenario {
-        val scenario = restOperations.postForEntity<RestScenario>("$mockServerUrl/rest/scenario", restScenario).body
-            ?: error("Klarte ikke lage scenario med data $restScenario")
+        val scenario =
+            restOperations.postForEntity<RestScenario>("$mockServerUrl/rest/scenario", restScenario).body
+                ?: error("Klarte ikke lage scenario med data $restScenario")
         logger.info("Laget scenario: ${scenario.convertDataClassToJson()}")
 
         return scenario
     }
 
     companion object {
-
         val logger = LoggerFactory.getLogger(MockserverKlient::class.java)
     }
 }

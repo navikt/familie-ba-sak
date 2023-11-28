@@ -24,17 +24,18 @@ import java.time.LocalDate
 class HenleggelseTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AbstractVerdikjedetest() {
-
-    val restScenario = RestScenario(
-        søker = RestScenarioPerson(fødselsdato = "1990-04-20", fornavn = "Mor", etternavn = "Søker"),
-        barna = listOf(
-            RestScenarioPerson(
-                fødselsdato = LocalDate.now().minusMonths(2).toString(),
-                fornavn = "Barn",
-                etternavn = "Barnesen",
-            ),
-        ),
-    )
+    val restScenario =
+        RestScenario(
+            søker = RestScenarioPerson(fødselsdato = "1990-04-20", fornavn = "Mor", etternavn = "Søker"),
+            barna =
+                listOf(
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.now().minusMonths(2).toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen",
+                    ),
+                ),
+        )
 
     @Test
     fun `Opprett behandling, henlegg behandling feilaktig opprettet og opprett behandling på nytt`() {
@@ -42,13 +43,14 @@ class HenleggelseTest(
 
         val førsteBehandling = opprettBehandlingOgRegistrerSøknad(scenario)
 
-        val responseHenlagtSøknad = familieBaSakKlient().henleggSøknad(
-            førsteBehandling.behandlingId,
-            RestHenleggBehandlingInfo(
-                årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
-                begrunnelse = "feilaktig opprettet",
-            ),
-        )
+        val responseHenlagtSøknad =
+            familieBaSakKlient().henleggSøknad(
+                førsteBehandling.behandlingId,
+                RestHenleggBehandlingInfo(
+                    årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
+                    begrunnelse = "feilaktig opprettet",
+                ),
+            )
 
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = responseHenlagtSøknad,
@@ -80,22 +82,25 @@ class HenleggelseTest(
          * Denne forhåndsvisningen går ikke til sanity for øyeblikket, men det er en mulighet å legge til
          * familie-brev som docker-container og mocke ut pdf-generering for å teste mapping mot sanity.
          */
-        val responseForhandsvis = familieBaSakKlient().forhaandsvisHenleggelseBrev(
-            behandlingId = førsteBehandling.behandlingId,
-            manueltBrevRequest = ManueltBrevRequest(
-                mottakerIdent = scenario.søker.ident!!,
-                brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
-            ),
-        )
+        val responseForhandsvis =
+            familieBaSakKlient().forhaandsvisHenleggelseBrev(
+                behandlingId = førsteBehandling.behandlingId,
+                manueltBrevRequest =
+                    ManueltBrevRequest(
+                        mottakerIdent = scenario.søker.ident!!,
+                        brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
+                    ),
+            )
         assertThat(responseForhandsvis.status == Ressurs.Status.SUKSESS)
 
-        val responseHenlagtSøknad = familieBaSakKlient().henleggSøknad(
-            førsteBehandling.behandlingId,
-            RestHenleggBehandlingInfo(
-                årsak = HenleggÅrsak.SØKNAD_TRUKKET,
-                begrunnelse = "Søknad trukket",
-            ),
-        )
+        val responseHenlagtSøknad =
+            familieBaSakKlient().henleggSøknad(
+                førsteBehandling.behandlingId,
+                RestHenleggBehandlingInfo(
+                    årsak = HenleggÅrsak.SØKNAD_TRUKKET,
+                    begrunnelse = "Søknad trukket",
+                ),
+            )
 
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = responseHenlagtSøknad,
@@ -119,19 +124,22 @@ class HenleggelseTest(
         val søkersIdent = scenario.søker.ident!!
         val barn1 = scenario.barna[0].ident!!
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
-        val restFagsakMedBehandling = familieBaSakKlient().opprettBehandling(
-            søkersIdent = søkersIdent,
-            fagsakId = fagsak.data!!.id,
-        )
+        val restFagsakMedBehandling =
+            familieBaSakKlient().opprettBehandling(
+                søkersIdent = søkersIdent,
+                fagsakId = fagsak.data!!.id,
+            )
 
         val behandling = behandlingHentOgPersisterService.hent(restFagsakMedBehandling.data!!.behandlingId)
-        val restRegistrerSøknad = RestRegistrerSøknad(
-            søknad = lagSøknadDTO(
-                søkerIdent = søkersIdent,
-                barnasIdenter = listOf(barn1),
-            ),
-            bekreftEndringerViaFrontend = false,
-        )
+        val restRegistrerSøknad =
+            RestRegistrerSøknad(
+                søknad =
+                    lagSøknadDTO(
+                        søkerIdent = søkersIdent,
+                        barnasIdenter = listOf(barn1),
+                    ),
+                bekreftEndringerViaFrontend = false,
+            )
         return familieBaSakKlient().registrererSøknad(
             behandlingId = behandling.id,
             restRegistrerSøknad = restRegistrerSøknad,

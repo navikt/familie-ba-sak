@@ -38,7 +38,6 @@ class AutovedtakBrevService(
     private val infotrygdService: InfotrygdService,
     private val behandlingRepository: BehandlingRepository,
 ) : AutovedtakBehandlingService<OmregningBrevData> {
-
     override fun kjørBehandling(
         behandlingsdata: OmregningBrevData,
     ): String {
@@ -88,17 +87,19 @@ class AutovedtakBrevService(
             return false
         }
 
-        val tidligereVedtatteBehandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId)
-            .filter { behandling -> behandling.erVedtatt() }
+        val tidligereVedtatteBehandlinger =
+            behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId)
+                .filter { behandling -> behandling.erVedtatt() }
 
-        val standardbegrunnelserIPeriodeFraTidligereBehandlinger = tidligereVedtatteBehandlinger
-            .flatMap {
-                behandlingRepository.hentBegrunnelserPåBehandlingIPeriode(
-                    it.id,
-                    YearMonth.now().førsteDagIInneværendeMåned(),
-                )
-            }.toSet()
-            .mapNotNull { begrunnelse -> enumValues<Standardbegrunnelse>().find { it.name == begrunnelse } }
+        val standardbegrunnelserIPeriodeFraTidligereBehandlinger =
+            tidligereVedtatteBehandlinger
+                .flatMap {
+                    behandlingRepository.hentBegrunnelserPåBehandlingIPeriode(
+                        it.id,
+                        YearMonth.now().førsteDagIInneværendeMåned(),
+                    )
+                }.toSet()
+                .mapNotNull { begrunnelse -> enumValues<Standardbegrunnelse>().find { it.name == begrunnelse } }
 
         val erBarnAlleredeBegrunnet =
             standardbegrunnelserIPeriodeFraTidligereBehandlinger.any { it in standardbegrunnelser }
@@ -111,7 +112,10 @@ class AutovedtakBrevService(
         return true
     }
 
-    fun harSendtBrevFraInfotrygd(fagsakId: Long, behandlingsårsak: BehandlingÅrsak): Boolean {
+    fun harSendtBrevFraInfotrygd(
+        fagsakId: Long,
+        behandlingsårsak: BehandlingÅrsak,
+    ): Boolean {
         val personidenter = fagsakService.hentAktør(fagsakId).personidenter
         val harSendtBrev =
             infotrygdService.harSendtbrev(personidenter.map { it.fødselsnummer }, behandlingsårsak.tilBrevkoder())
@@ -135,10 +139,11 @@ class AutovedtakBrevService(
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {
-        val task = Task(
-            JournalførVedtaksbrevTask.TASK_STEP_TYPE,
-            "$vedtakId",
-        )
+        val task =
+            Task(
+                JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+                "$vedtakId",
+            )
         taskRepository.save(task)
     }
 
@@ -151,20 +156,23 @@ class AutovedtakBrevService(
 
 private fun BehandlingÅrsak.tilBrevkoder(): List<InfotrygdBrevkode> {
     return when (this) {
-        BehandlingÅrsak.OMREGNING_6ÅR -> listOf(
-            InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_6_ÅR,
-            InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_6_ÅR,
-        )
+        BehandlingÅrsak.OMREGNING_6ÅR ->
+            listOf(
+                InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_6_ÅR,
+                InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_6_ÅR,
+            )
 
-        BehandlingÅrsak.OMREGNING_18ÅR -> listOf(
-            InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_18_ÅR,
-            InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_18_ÅR,
-        )
+        BehandlingÅrsak.OMREGNING_18ÅR ->
+            listOf(
+                InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_18_ÅR,
+                InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_18_ÅR,
+            )
 
-        BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG -> listOf(
-            InfotrygdBrevkode.BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG,
-            InfotrygdBrevkode.BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG,
-        )
+        BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG ->
+            listOf(
+                InfotrygdBrevkode.BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG,
+                InfotrygdBrevkode.BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG,
+            )
 
         else -> emptyList()
     }

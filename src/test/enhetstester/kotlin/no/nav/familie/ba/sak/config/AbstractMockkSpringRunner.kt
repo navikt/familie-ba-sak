@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import io.mockk.every
 import io.mockk.isMockKMock
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
@@ -45,9 +46,6 @@ abstract class AbstractMockkSpringRunner {
     private lateinit var mockØkonomiKlient: ØkonomiKlient
 
     @Autowired
-    private lateinit var mockFeatureToggleService: FeatureToggleService
-
-    @Autowired
     private lateinit var mockUnleashService: UnleashService
 
     @Autowired
@@ -88,6 +86,15 @@ abstract class AbstractMockkSpringRunner {
         clearMocks()
     }
 
+    fun settToggleMock(
+        toggle: String,
+        value: Boolean,
+    ) {
+        every { mockUnleashService.isEnabled(toggle) } returns value
+        every { mockUnleashService.isEnabled(toggle, defaultValue = any()) } returns value
+        every { mockUnleashService.isEnabled(toggle, properties = any()) } returns value
+    }
+
     private fun clearMocks() {
         unmockkAll()
         if (isMockKMock(mockPersonopplysningerService)) {
@@ -102,10 +109,6 @@ abstract class AbstractMockkSpringRunner {
         IntegrasjonClientMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(
             mockFamilieIntegrasjonerTilgangskontrollClient,
         )
-
-        if (isMockKMock(mockFeatureToggleService)) {
-            ClientMocks.clearFeatureToggleMocks(mockFeatureToggleService)
-        }
 
         if (isMockKMock(mockUnleashService)) {
             ClientMocks.clearUnleashServiceMocks(mockUnleashService)

@@ -28,7 +28,6 @@ class GrunnlagController(
     private val tilbakestillService: TilbakestillBehandlingService,
     private val tilgangService: TilgangService,
 ) {
-
     @PostMapping(path = ["/{behandlingId}/legg-til-barn"])
     fun leggTilBarnIPersonopplysningsgrunnlag(
         @PathVariable behandlingId: Long,

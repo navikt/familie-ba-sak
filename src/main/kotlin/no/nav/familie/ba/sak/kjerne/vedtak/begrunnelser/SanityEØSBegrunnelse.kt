@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
+import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdiNullable
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
@@ -16,10 +17,11 @@ enum class BarnetsBostedsland {
     IKKE_NORGE,
 }
 
-fun landkodeTilBarnetsBostedsland(landkode: String): BarnetsBostedsland = when (landkode) {
-    "NO" -> BarnetsBostedsland.NORGE
-    else -> BarnetsBostedsland.IKKE_NORGE
-}
+fun landkodeTilBarnetsBostedsland(landkode: String): BarnetsBostedsland =
+    when (landkode) {
+        "NO" -> BarnetsBostedsland.NORGE
+        else -> BarnetsBostedsland.IKKE_NORGE
+    }
 
 data class RestSanityEØSBegrunnelse(
     val apiNavn: String?,
@@ -44,34 +46,40 @@ data class RestSanityEØSBegrunnelse(
     val periodeType: String?,
     val brevPeriodeType: String?,
     val begrunnelseTypeForPerson: String?,
+    val valgbarhet: String?,
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
         return SanityEØSBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
-            annenForeldersAktivitet = annenForeldersAktivitet?.mapNotNull {
-                konverterTilEnumverdi<KompetanseAktivitet>(it)
-            } ?: emptyList(),
-            barnetsBostedsland = barnetsBostedsland?.mapNotNull {
-                konverterTilEnumverdi<BarnetsBostedsland>(it)
-            } ?: emptyList(),
-            kompetanseResultat = kompetanseResultat?.mapNotNull {
-                konverterTilEnumverdi<KompetanseResultat>(it)
-            } ?: emptyList(),
+            annenForeldersAktivitet =
+                annenForeldersAktivitet?.mapNotNull {
+                    konverterTilEnumverdi<KompetanseAktivitet>(it)
+                } ?: emptyList(),
+            barnetsBostedsland =
+                barnetsBostedsland?.mapNotNull {
+                    konverterTilEnumverdi<BarnetsBostedsland>(it)
+                } ?: emptyList(),
+            kompetanseResultat =
+                kompetanseResultat?.mapNotNull {
+                    konverterTilEnumverdi<KompetanseResultat>(it)
+                } ?: emptyList(),
             hjemler = hjemler ?: emptyList(),
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
             hjemlerEØSForordningen883 = hjemlerEOSForordningen883 ?: emptyList(),
             hjemlerEØSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
             hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
             vilkår = eosVilkaar?.mapNotNull { konverterTilEnumverdi<Vilkår>(it) }?.toSet() ?: emptySet(),
-            periodeResultat = (
-                periodeResultatForPerson
-                    ?: vedtakResultat
+            periodeResultat =
+                (
+                    periodeResultatForPerson
+                        ?: vedtakResultat
                 ).finnEnumverdi<SanityPeriodeResultat>(apiNavn),
             fagsakType = fagsakType.finnEnumverdiNullable<FagsakType>(),
             tema = (regelverk ?: tema).finnEnumverdi<Tema>(apiNavn),
             periodeType = (brevPeriodeType ?: periodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
+            valgbarhet = valgbarhet?.finnEnumverdi<Valgbarhet>(apiNavn),
         )
     }
 

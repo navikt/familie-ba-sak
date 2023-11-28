@@ -24,7 +24,10 @@ fun <T : Tidsenhet> String.tilRegelverkResultatTidslinje(start: Tidspunkt<T>) =
         }
     }
 
-fun <T : Tidsenhet> String.tilUtdypendeVilkårRegelverkResultatTidslinje(vilkår: Vilkår, start: Tidspunkt<T>) =
+fun <T : Tidsenhet> String.tilUtdypendeVilkårRegelverkResultatTidslinje(
+    vilkår: Vilkår,
+    start: Tidspunkt<T>,
+) =
     this.tilCharTidslinje(start).map {
         when (it?.lowercaseChar()) {
             '+' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, null)

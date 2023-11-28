@@ -54,9 +54,10 @@ import java.time.YearMonth
 fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
     grunnlagForBegrunnelser: GrunnlagForBegrunnelse,
 ): Set<IVedtakBegrunnelse> {
-    val gyldigeBegrunnelserPerPerson = hentGyldigeBegrunnelserPerPerson(
-        grunnlagForBegrunnelser,
-    )
+    val gyldigeBegrunnelserPerPerson =
+        hentGyldigeBegrunnelserPerPerson(
+            grunnlagForBegrunnelser,
+        )
 
     return gyldigeBegrunnelserPerPerson.values.flatten().toSet()
 }
@@ -70,23 +71,24 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
         return avslagsbegrunnelserPerPerson
     }
 
-    val begrunnelseGrunnlagPerPerson = this.finnBegrunnelseGrunnlagPerPerson(
-        grunnlag,
-    )
+    val begrunnelseGrunnlagPerPerson =
+        this.finnBegrunnelseGrunnlagPerPerson(
+            grunnlag,
+        )
 
     if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
         return hentFortsattInnvilgetBegrunnelserPerPerson(
             begrunnelseGrunnlagPerPerson = begrunnelseGrunnlagPerPerson,
             grunnlag = grunnlag,
             vedtaksperiode = this,
-
         )
     }
 
     val erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson)
 
-    val begrunnelseGrunnlagForSøkerIPeriode = begrunnelseGrunnlagPerPerson
-        .filterKeys { it.type == PersonType.SØKER }.values.firstOrNull()
+    val begrunnelseGrunnlagForSøkerIPeriode =
+        begrunnelseGrunnlagPerPerson
+            .filterKeys { it.type == PersonType.SØKER }.values.firstOrNull()
 
     val utvidetVilkårPåSøkerIPeriode =
         begrunnelseGrunnlagForSøkerIPeriode
@@ -100,27 +102,29 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
         val relevantePeriodeResultater =
             hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
 
-        val standardBegrunnelser = hentStandardBegrunnelser(
-            begrunnelseGrunnlag = begrunnelseGrunnlag,
-            sanityBegrunnelser = grunnlag.sanityBegrunnelser,
-            person = person,
-            vedtaksperiode = this,
-            behandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.behandling,
-            relevantePeriodeResultater = relevantePeriodeResultater,
-            erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode,
-            utvidetVilkårPåSøkerIPeriode = utvidetVilkårPåSøkerIPeriode,
-            utvidetVilkårPåSøkerIForrigePeriode = utvidetVilkårPåSøkerIForrigePeriode,
-        )
+        val standardBegrunnelser =
+            hentStandardBegrunnelser(
+                begrunnelseGrunnlag = begrunnelseGrunnlag,
+                sanityBegrunnelser = grunnlag.sanityBegrunnelser,
+                person = person,
+                vedtaksperiode = this,
+                behandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.behandling,
+                relevantePeriodeResultater = relevantePeriodeResultater,
+                erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode,
+                utvidetVilkårPåSøkerIPeriode = utvidetVilkårPåSøkerIPeriode,
+                utvidetVilkårPåSøkerIForrigePeriode = utvidetVilkårPåSøkerIForrigePeriode,
+            )
 
-        val eøsBegrunnelser = hentEØSStandardBegrunnelser(
-            sanityEØSBegrunnelser = grunnlag.sanityEØSBegrunnelser,
-            begrunnelseGrunnlag = begrunnelseGrunnlag,
-            relevantePeriodeResultater = relevantePeriodeResultater,
-            erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode,
-            vedtaksperiode = this,
-            utvidetVilkårPåSøkerIPeriode = utvidetVilkårPåSøkerIPeriode,
-            utvidetVilkårPåSøkerIForrigePeriode = utvidetVilkårPåSøkerIForrigePeriode,
-        )
+        val eøsBegrunnelser =
+            hentEØSStandardBegrunnelser(
+                sanityEØSBegrunnelser = grunnlag.sanityEØSBegrunnelser,
+                begrunnelseGrunnlag = begrunnelseGrunnlag,
+                relevantePeriodeResultater = relevantePeriodeResultater,
+                erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode,
+                vedtaksperiode = this,
+                utvidetVilkårPåSøkerIPeriode = utvidetVilkårPåSøkerIPeriode,
+                utvidetVilkårPåSøkerIForrigePeriode = utvidetVilkårPåSøkerIForrigePeriode,
+            )
 
         val avslagsbegrunnelser = avslagsbegrunnelserPerPerson[person] ?: emptySet()
 
@@ -174,13 +178,15 @@ private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
     val tidslinjeMedVedtaksperioden = this.tilTidslinjeForAktuellPeriode()
 
     return behandlingsGrunnlagForVedtaksperioder.persongrunnlag.personer.associateWith { person ->
-        val vilkårResultaterForPerson = behandlingsGrunnlagForVedtaksperioder
-            .personResultater.firstOrNull { it.aktør == person.aktør }?.vilkårResultater ?: emptyList()
+        val vilkårResultaterForPerson =
+            behandlingsGrunnlagForVedtaksperioder
+                .personResultater.firstOrNull { it.aktør == person.aktør }?.vilkårResultater ?: emptyList()
 
-        val avslagsbegrunnelserTisdlinje = vilkårResultaterForPerson
-            .filter { it.erEksplisittAvslagPåSøknad == true }
-            .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
-            .kombiner { vilkårResultaterIPeriode -> vilkårResultaterIPeriode.flatMap { it.standardbegrunnelser } }
+        val avslagsbegrunnelserTisdlinje =
+            vilkårResultaterForPerson
+                .filter { it.erEksplisittAvslagPåSøknad == true }
+                .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
+                .kombiner { vilkårResultaterIPeriode -> vilkårResultaterIPeriode.flatMap { it.standardbegrunnelser } }
 
         tidslinjeMedVedtaksperioden.kombinerMed(avslagsbegrunnelserTisdlinje) { vedtaksperiode, avslagsbegrunnelser ->
             avslagsbegrunnelser.takeIf { vedtaksperiode != null }
@@ -203,79 +209,92 @@ private fun hentStandardBegrunnelser(
 
     val relevantePeriodeResultaterForrigePeriode = hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode)
 
-    val filtrertPåRolle = sanityBegrunnelser.filterValues { begrunnelse ->
-        begrunnelse.erGjeldendeForRolle(person, behandling.fagsak.type)
-    }
-    val filtrertPåRolleOgFagsaktype = filtrertPåRolle.filterValues {
-        it.erGjeldendeForFagsakType(behandling.fagsak.type)
-    }
-    val filtrertPåRolleFagsaktypeOgPeriodetype = filtrertPåRolleOgFagsaktype.filterValues {
-        it.periodeResultat in relevantePeriodeResultater
-    }
-
-    val filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser = filtrertPåRolleFagsaktypeOgPeriodetype
-        .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
-
-    val relevanteBegrunnelser = filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser
-        .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
-        .filterValues { !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && !it.begrunnelseGjelderOpphørFraForrigeBehandling() }
-
-    val filtrertPåVilkårOgEndretUtbetaling = relevanteBegrunnelser.filterValues {
-        val begrunnelseErGjeldendeForUtgjørendeVilkår = it.vilkår.isNotEmpty()
-        val begrunnelseErGjeldendeForEndretUtbetaling = it.endringsaarsaker.isNotEmpty()
-
-        when {
-            begrunnelseErGjeldendeForUtgjørendeVilkår && begrunnelseErGjeldendeForEndretUtbetaling -> filtrerPåVilkår(
-                it,
-                begrunnelseGrunnlag,
-                utvidetVilkårPåSøkerIPeriode,
-                utvidetVilkårPåSøkerIForrigePeriode,
-            ) && filtrerPåEndretUtbetaling(it, endretUtbetalingDennePerioden)
-
-            begrunnelseErGjeldendeForUtgjørendeVilkår -> filtrerPåVilkår(
-                it,
-                begrunnelseGrunnlag,
-                utvidetVilkårPåSøkerIPeriode,
-                utvidetVilkårPåSøkerIForrigePeriode,
-            )
-
-            else -> it.erEndretUtbetaling(endretUtbetalingDennePerioden)
+    val filtrertPåRolle =
+        sanityBegrunnelser.filterValues { begrunnelse ->
+            begrunnelse.erGjeldendeForRolle(person, behandling.fagsak.type)
         }
-    }
+    val filtrertPåRolleOgFagsaktype =
+        filtrertPåRolle.filterValues {
+            it.erGjeldendeForFagsakType(behandling.fagsak.type)
+        }
+    val filtrertPåRolleFagsaktypeOgPeriodetype =
+        filtrertPåRolleOgFagsaktype.filterValues {
+            it.periodeResultat in relevantePeriodeResultater
+        }
 
-    val filtrertPåReduksjonFraForrigeBehandling = filtrertPåRolleOgFagsaktype.filterValues {
-        it.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag)
-    }
+    val filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser =
+        filtrertPåRolleFagsaktypeOgPeriodetype
+            .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
 
-    val filtrertPåOpphørFraForrigeBehandling = filtrertPåRolleOgFagsaktype.filterValues {
-        it.erGjeldendeForOpphørFraForrigeBehandling(begrunnelseGrunnlag)
-    }
+    val relevanteBegrunnelser =
+        filtrertPåRolleFagsaktypePeriodeTypeOgManuelleBegrunnelser
+            .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
+            .filterValues { !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && !it.begrunnelseGjelderOpphørFraForrigeBehandling() }
+
+    val filtrertPåVilkårOgEndretUtbetaling =
+        relevanteBegrunnelser.filterValues {
+            val begrunnelseErGjeldendeForUtgjørendeVilkår = it.vilkår.isNotEmpty()
+            val begrunnelseErGjeldendeForEndretUtbetaling = it.endringsaarsaker.isNotEmpty()
+
+            when {
+                begrunnelseErGjeldendeForUtgjørendeVilkår && begrunnelseErGjeldendeForEndretUtbetaling ->
+                    filtrerPåVilkår(
+                        it,
+                        begrunnelseGrunnlag,
+                        utvidetVilkårPåSøkerIPeriode,
+                        utvidetVilkårPåSøkerIForrigePeriode,
+                    ) && filtrerPåEndretUtbetaling(it, endretUtbetalingDennePerioden)
+
+                begrunnelseErGjeldendeForUtgjørendeVilkår ->
+                    filtrerPåVilkår(
+                        it,
+                        begrunnelseGrunnlag,
+                        utvidetVilkårPåSøkerIPeriode,
+                        utvidetVilkårPåSøkerIForrigePeriode,
+                    )
+
+                else -> it.erEndretUtbetaling(endretUtbetalingDennePerioden)
+            }
+        }
+
+    val filtrertPåReduksjonFraForrigeBehandling =
+        filtrertPåRolleOgFagsaktype.filterValues {
+            it.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGrunnlag)
+        }
+
+    val filtrertPåOpphørFraForrigeBehandling =
+        filtrertPåRolleOgFagsaktype.filterValues {
+            it.erGjeldendeForOpphørFraForrigeBehandling(begrunnelseGrunnlag)
+        }
 
     val filtrertPåSmåbarnstillegg =
         relevanteBegrunnelser.filterValues { begrunnelse ->
             begrunnelse.erGjeldendeForSmåbarnstillegg(begrunnelseGrunnlag)
         }
 
-    val begrunnelserFiltrertPåPeriodetypeForrigePeriode = sanityBegrunnelser.filterValues {
-        it.periodeResultat in relevantePeriodeResultaterForrigePeriode
-    }
+    val begrunnelserFiltrertPåPeriodetypeForrigePeriode =
+        sanityBegrunnelser.filterValues {
+            it.periodeResultat in relevantePeriodeResultaterForrigePeriode
+        }
 
     val filtrertPåRolleOgPeriodetypeForrigePeriode =
         begrunnelserFiltrertPåPeriodetypeForrigePeriode.filterValues { begrunnelse ->
             begrunnelse.erGjeldendeForRolle(person, behandling.fagsak.type)
         }
 
-    val filtrertPåEtterEndretUtbetaling = filtrertPåRolleOgPeriodetypeForrigePeriode.filterValues {
-        it.erEtterEndretUtbetaling(
-            endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
-            endretUtbetalingForrigePeriode = hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag),
-        )
-    }
+    val filtrertPåEtterEndretUtbetaling =
+        filtrertPåRolleOgPeriodetypeForrigePeriode.filterValues {
+            it.erEtterEndretUtbetaling(
+                endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
+                endretUtbetalingForrigePeriode = hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag),
+            )
+        }
 
-    val filtrertPåHendelser = relevanteBegrunnelser.filtrerPåHendelser(
-        begrunnelseGrunnlag,
-        vedtaksperiode.fom,
-    )
+    val filtrertPåHendelser =
+        relevanteBegrunnelser.filtrerPåHendelser(
+            begrunnelseGrunnlag,
+            vedtaksperiode.fom,
+        )
 
     val filtrertPåSkalVisesSelvOmIkkeEndring =
         relevanteBegrunnelser.filtrerPåSkalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
@@ -292,15 +311,17 @@ private fun hentStandardBegrunnelser(
 private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSkalVisesSelvOmIkkeEndring(
     begrunnelseGrunnlagForPersonIPeriode: BegrunnelseGrunnlagForPersonIPeriode,
 ) = filterValues { begrunnelse ->
-    val begrunnelseMatcherVilkår = begrunnelse.periodeResultat != null &&
-        when (begrunnelse.periodeResultat) {
-            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING, SanityPeriodeResultat.REDUKSJON ->
-                begrunnelse.vilkår.all { vilkår ->
-                    begrunnelseGrunnlagForPersonIPeriode.vilkårResultater.any { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT }
-                }
+    val begrunnelseMatcherVilkår =
+        begrunnelse.periodeResultat != null &&
+            when (begrunnelse.periodeResultat) {
+                SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING, SanityPeriodeResultat.REDUKSJON ->
+                    begrunnelse.vilkår.isNotEmpty() &&
+                        begrunnelse.vilkår.all { vilkår ->
+                            begrunnelseGrunnlagForPersonIPeriode.vilkårResultater.any { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT }
+                        }
 
-            SanityPeriodeResultat.IKKE_INNVILGET -> false
-        }
+                SanityPeriodeResultat.IKKE_INNVILGET -> false
+            }
 
     val begrunnelseSkalVisesSelvOmIkkeEndring =
         ØvrigTrigger.SKAL_VISES_SELV_OM_IKKE_ENDRING in begrunnelse.ovrigeTriggere
@@ -308,11 +329,12 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSkalVisesSelvO
     begrunnelseSkalVisesSelvOmIkkeEndring && begrunnelseMatcherVilkår
 }
 
-private fun SanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean): Boolean = when {
-    this.valgbarhet != Valgbarhet.AUTOMATISK -> !erAutomatiskBehandling
-    ØvrigTrigger.ALLTID_AUTOMATISK in this.ovrigeTriggere -> erAutomatiskBehandling
-    else -> true
-}
+private fun SanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean): Boolean =
+    when {
+        this.valgbarhet != Valgbarhet.AUTOMATISK -> !erAutomatiskBehandling
+        ØvrigTrigger.ALLTID_AUTOMATISK in this.ovrigeTriggere -> erAutomatiskBehandling
+        else -> true
+    }
 
 fun ISanityBegrunnelse.erGjeldendeForFagsakType(
     fagsakType: FagsakType,
@@ -333,13 +355,15 @@ private fun filtrerPåVilkår(
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
 ) =
-    !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && it.erGjeldendeForUtgjørendeVilkår(
-        begrunnelseGrunnlag,
-        utvidetVilkårPåSøkerIPeriode,
-        utvidetVilkårPåSøkerIForrigePeriode,
-    ) && it.erGjeldendeForRegelverk(
-        begrunnelseGrunnlag,
-    )
+    !it.begrunnelseGjelderReduksjonFraForrigeBehandling() &&
+        it.erGjeldendeForUtgjørendeVilkår(
+            begrunnelseGrunnlag,
+            utvidetVilkårPåSøkerIPeriode,
+            utvidetVilkårPåSøkerIForrigePeriode,
+        ) &&
+        it.erGjeldendeForRegelverk(
+            begrunnelseGrunnlag,
+        )
 
 private fun SanityBegrunnelse.erGjeldendeForRegelverk(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean =
     begrunnelseGrunnlag.dennePerioden.vilkårResultater.none { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } || this.tema == Tema.FELLES
@@ -389,15 +413,20 @@ private fun SanityBegrunnelse.erGjeldendeForOpphørFraForrigeBehandling(begrunne
 
     val vilkårMistetSidenForrigeBehandling = oppfylteVilkårForrigeBehandling - oppfylteVilkårDenneBehandlingen
 
-    val begrunnelseGjelderMistedeVilkår = this.erLikVilkårOgUtdypendeVilkårIPeriode(
-        oppfylteVilkårsresultaterForrigeBehandling?.filter { it.vilkårType in vilkårMistetSidenForrigeBehandling }
-            ?: emptyList(),
-    )
+    val begrunnelseGjelderMistedeVilkår =
+        this.erLikVilkårOgUtdypendeVilkårIPeriode(
+            oppfylteVilkårsresultaterForrigeBehandling?.filter { it.vilkårType in vilkårMistetSidenForrigeBehandling }
+                ?: emptyList(),
+        )
+
+    val ikkeOppfylteVilkårDenneBehandlingen = begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.IKKE_OPPFYLT }
+
+    val begrunnelsenGjelderVilkårIkkeLengerOppfylt = this.erLikVilkårOgUtdypendeVilkårIPeriode(ikkeOppfylteVilkårDenneBehandlingen.filter { it.vilkårType in vilkårMistetSidenForrigeBehandling })
 
     val dennePeriodenErFørsteVedtaksperiodePåFagsak =
         begrunnelseGrunnlag.forrigePeriode == null || begrunnelseGrunnlag.forrigePeriode!!.andeler.firstOrNull() == null
 
-    return begrunnelseGjelderMistedeVilkår && dennePeriodenErFørsteVedtaksperiodePåFagsak
+    return (begrunnelseGjelderMistedeVilkår || begrunnelsenGjelderVilkårIkkeLengerOppfylt) && dennePeriodenErFørsteVedtaksperiodePåFagsak
 }
 
 private fun SanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling() =
@@ -412,38 +441,52 @@ private fun hentEØSStandardBegrunnelser(
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
 ): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
-    val begrunnelserFiltrertPåPeriodetype = sanityEØSBegrunnelser.filterValues {
-        it.periodeResultat in relevantePeriodeResultater
-    }
+    val begrunnelserFiltrertPåPeriodetype =
+        sanityEØSBegrunnelser.filterValues {
+            it.periodeResultat in relevantePeriodeResultater
+        }
 
-    val begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType = begrunnelserFiltrertPåPeriodetype
-        .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
+    val begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType =
+        begrunnelserFiltrertPåPeriodetype
+            .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
 
-    val filtrertPåEndretVilkår = begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
-        it.erGjeldendeForUtgjørendeVilkår(
-            begrunnelseGrunnlag,
-            utvidetVilkårPåSøkerIPeriode,
-            utvidetVilkårPåSøkerIForrigePeriode,
-        )
-    }
-
-    val filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp = begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues { begrunnelse ->
-        val endringIKompetanseValutakursEllerUtenlandskPeriodebeløp =
-            erEndringIKompetanse(begrunnelseGrunnlag) || erEndringIValutakurs(begrunnelseGrunnlag) || erEndringIUtenlandskPeriodebeløp(
-                begrunnelseGrunnlag,
-            )
-
-        endringIKompetanseValutakursEllerUtenlandskPeriodebeløp && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
-    }
-
-    val filtrertPåIngenEndringMedLikKompetanse =
+    val filtrertPåEndretVilkår =
         begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
-            SanityPeriodeResultat.INGEN_ENDRING in relevantePeriodeResultater && it.erLikKompetanseIPeriode(
+            it.erGjeldendeForUtgjørendeVilkår(
                 begrunnelseGrunnlag,
+                utvidetVilkårPåSøkerIPeriode,
+                utvidetVilkårPåSøkerIForrigePeriode,
             )
         }
 
-    return filtrertPåEndretVilkår + filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp + filtrertPåIngenEndringMedLikKompetanse
+    val filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp =
+        begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues { begrunnelse ->
+            val endringIKompetanseValutakursEllerUtenlandskPeriodebeløp =
+                erEndringIKompetanse(begrunnelseGrunnlag) || erEndringIValutakurs(begrunnelseGrunnlag) ||
+                    erEndringIUtenlandskPeriodebeløp(
+                        begrunnelseGrunnlag,
+                    )
+
+            endringIKompetanseValutakursEllerUtenlandskPeriodebeløp && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
+        }
+
+    val filtrertPåIngenEndringMedLikKompetanse =
+        begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
+            SanityPeriodeResultat.INGEN_ENDRING in relevantePeriodeResultater &&
+                it.erLikKompetanseIPeriode(
+                    begrunnelseGrunnlag,
+                )
+        }
+
+    val filtrertPåTilleggstekstMedLikKompetanse =
+        begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
+            it.valgbarhet == Valgbarhet.TILLEGGSTEKST &&
+                it.erLikKompetanseIPeriode(
+                    begrunnelseGrunnlag,
+                )
+        }
+
+    return filtrertPåEndretVilkår + filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp + filtrertPåIngenEndringMedLikKompetanse + filtrertPåTilleggstekstMedLikKompetanse
 }
 
 fun SanityBegrunnelse.erGjeldendeForRolle(
@@ -461,40 +504,44 @@ fun SanityBegrunnelse.erGjeldendeForRolle(
 fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
 ): Boolean {
-    val kompetanse = when (this.periodeResultat) {
-        SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING ->
-            begrunnelseGrunnlag.dennePerioden.kompetanse
-                ?: return false
+    val kompetanse =
+        when (this.periodeResultat) {
+            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING ->
+                begrunnelseGrunnlag.dennePerioden.kompetanse
+                    ?: return false
 
-        SanityPeriodeResultat.IKKE_INNVILGET,
-        SanityPeriodeResultat.REDUKSJON,
-        -> begrunnelseGrunnlag.forrigePeriode?.kompetanse ?: return false
+            SanityPeriodeResultat.IKKE_INNVILGET,
+            SanityPeriodeResultat.REDUKSJON,
+            -> begrunnelseGrunnlag.forrigePeriode?.kompetanse ?: return false
 
-        null,
-        -> return false
-    }
+            null,
+            -> return false
+        }
 
-    return this.annenForeldersAktivitet.contains(kompetanse.annenForeldersAktivitet) && this.barnetsBostedsland.contains(
-        landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland),
-    ) && this.kompetanseResultat.contains(kompetanse.resultat)
+    return this.annenForeldersAktivitet.contains(kompetanse.annenForeldersAktivitet) &&
+        this.barnetsBostedsland.contains(
+            landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland),
+        ) && this.kompetanseResultat.contains(kompetanse.resultat)
 }
 
 fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåHendelser(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
     fomVedtaksperiode: LocalDate?,
-): Map<Standardbegrunnelse, SanityBegrunnelse> = if (!begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget()) {
-    val person = begrunnelseGrunnlag.dennePerioden.person
+): Map<Standardbegrunnelse, SanityBegrunnelse> =
+    if (!begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget()) {
+        val person = begrunnelseGrunnlag.dennePerioden.person
 
-    this.filtrerPåBarnDød(person, fomVedtaksperiode)
-} else {
-    val person = begrunnelseGrunnlag.dennePerioden.person
+        this.filtrerPåBarnDød(person, fomVedtaksperiode)
+    } else {
+        val person = begrunnelseGrunnlag.dennePerioden.person
 
-    this.filtrerPåBarn6år(person, fomVedtaksperiode) + this.filtrerPåSatsendring(
-        person,
-        begrunnelseGrunnlag.dennePerioden.andeler,
-        fomVedtaksperiode,
-    )
-}
+        this.filtrerPåBarn6år(person, fomVedtaksperiode) +
+            this.filtrerPåSatsendring(
+                person,
+                begrunnelseGrunnlag.dennePerioden.andeler,
+                fomVedtaksperiode,
+            )
+    }
 
 fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåBarn6år(
     person: Person,
@@ -531,9 +578,10 @@ fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåSatsendring(
 ): Map<Standardbegrunnelse, SanityBegrunnelse> {
     val satstyperPåAndelene = andeler.map { it.type.tilSatsType(person, fomVedtaksperiode ?: TIDENES_MORGEN) }.toSet()
 
-    val erSatsendringIPeriodenForPerson = satstyperPåAndelene.any { satstype ->
-        SatsService.finnAlleSatserFor(satstype).any { it.gyldigFom == fomVedtaksperiode }
-    }
+    val erSatsendringIPeriodenForPerson =
+        satstyperPåAndelene.any { satstype ->
+            SatsService.finnAlleSatserFor(satstype).any { it.gyldigFom == fomVedtaksperiode }
+        }
 
     return if (erSatsendringIPeriodenForPerson) {
         this.filterValues { it.ovrigeTriggere.contains(ØvrigTrigger.SATSENDRING) }
@@ -562,26 +610,30 @@ private fun hentResultaterForPeriode(
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
 ): List<SanityPeriodeResultat> {
     val erAndelerPåPersonHvisBarn =
-        begrunnelseGrunnlagForPeriode.person.type != PersonType.BARN || begrunnelseGrunnlagForPeriode.andeler.toList()
-            .isNotEmpty()
+        begrunnelseGrunnlagForPeriode.person.type != PersonType.BARN ||
+            begrunnelseGrunnlagForPeriode.andeler.toList()
+                .isNotEmpty()
 
     val erInnvilgetEtterVilkårOgEndretUtbetaling =
         begrunnelseGrunnlagForPeriode.erOrdinæreVilkårInnvilget() && begrunnelseGrunnlagForPeriode.erInnvilgetEtterEndretUtbetaling()
 
-    val erReduksjonIAndel = erReduksjonIAndelMellomPerioder(
-        begrunnelseGrunnlagForPeriode,
-        begrunnelseGrunnlagForrigePeriode,
-    )
+    val erReduksjonIAndel =
+        erReduksjonIAndelMellomPerioder(
+            begrunnelseGrunnlagForPeriode,
+            begrunnelseGrunnlagForrigePeriode,
+        )
 
     return if (erInnvilgetEtterVilkårOgEndretUtbetaling && erAndelerPåPersonHvisBarn) {
-        val erØkingIAndel = erØkningIAndelMellomPerioder(
-            begrunnelseGrunnlagForPeriode,
-            begrunnelseGrunnlagForrigePeriode,
-        )
-        val erSatsøkning = erSatsøkningMellomPerioder(
-            begrunnelseGrunnlagForPeriode,
-            begrunnelseGrunnlagForrigePeriode,
-        )
+        val erØkingIAndel =
+            erØkningIAndelMellomPerioder(
+                begrunnelseGrunnlagForPeriode,
+                begrunnelseGrunnlagForrigePeriode,
+            )
+        val erSatsøkning =
+            erSatsøkningMellomPerioder(
+                begrunnelseGrunnlagForPeriode,
+                begrunnelseGrunnlagForrigePeriode,
+            )
 
         val erSøker = begrunnelseGrunnlagForPeriode.person.type == PersonType.SØKER
         val erOrdinæreVilkårOppfyltIForrigePeriode =
@@ -676,9 +728,10 @@ private fun SanityBegrunnelse.matcherEtterEndretUtbetaling(
 
     if (!begrunnelseMatcherEndretUtbetalingIForrigePeriode || begrunnelseMatcherEndretUtbetalingIDennePerioden) return false
 
-    return endretUtbetalingForrigePeriode?.årsak != Årsak.DELT_BOSTED || this.erDeltBostedUtbetalingstype(
-        endretUtbetalingForrigePeriode,
-    )
+    return endretUtbetalingForrigePeriode?.årsak != Årsak.DELT_BOSTED ||
+        this.erDeltBostedUtbetalingstype(
+            endretUtbetalingForrigePeriode,
+        )
 }
 
 private fun SanityBegrunnelse.erEndringsårsakOgGjelderEtterEndretUtbetaling() =
@@ -751,12 +804,13 @@ fun VedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
 
         when (this.type) {
             Vedtaksperiodetype.OPPHØR -> begrunnelseperioderIVedtaksperiode.first()
-            Vedtaksperiodetype.FORTSATT_INNVILGET -> if (this.fom == null && this.tom == null) {
-                val perioder = grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder()
-                perioder.single { grunnlag.nåDato.toYearMonth() in it.fraOgMed.tilYearMonthEllerUendeligFortid()..it.tilOgMed.tilYearMonthEllerUendeligFramtid() }.innhold!!
-            } else {
-                begrunnelseperioderIVedtaksperiode.first()
-            }
+            Vedtaksperiodetype.FORTSATT_INNVILGET ->
+                if (this.fom == null && this.tom == null) {
+                    val perioder = grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder()
+                    perioder.single { grunnlag.nåDato.toYearMonth() in it.fraOgMed.tilYearMonthEllerUendeligFortid()..it.tilOgMed.tilYearMonthEllerUendeligFramtid() }.innhold!!
+                } else {
+                    begrunnelseperioderIVedtaksperiode.first()
+                }
 
             else -> begrunnelseperioderIVedtaksperiode.first()
         }
@@ -809,15 +863,16 @@ data class ForrigeOgDennePerioden(
 private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOgNåværendePeriodeTidslinje(
     vedtaksperiodeTidslinje: Tidslinje<VedtaksperiodeMedBegrunnelser, Måned>,
 ): Tidslinje<ForrigeOgDennePerioden, Måned> {
-    val grunnlagPerioderSplittetPåVedtaksperiode = kombinerMed(vedtaksperiodeTidslinje) { grunnlag, periode ->
-        Pair(grunnlag, periode)
-    }.perioder().mapInnhold { it?.first }
+    val grunnlagPerioderSplittetPåVedtaksperiode =
+        kombinerMed(vedtaksperiodeTidslinje) { grunnlag, periode ->
+            Pair(grunnlag, periode)
+        }.perioder().mapInnhold { it?.first }
 
     return (
         listOf(
             månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + grunnlagPerioderSplittetPåVedtaksperiode
-        ).zipWithNext { forrige, denne ->
+    ).zipWithNext { forrige, denne ->
         periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
     }.tilTidslinje()
 }
@@ -837,11 +892,12 @@ private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
     val erEndringISmåbarnstilleggFraForrigeBehandling =
         erSmåbarnstilleggIForrigeBehandlingPeriode != erSmåbarnstilleggDennePerioden
 
-    val begrunnelseMatcherPeriodeResultat = this.matcherPerioderesultat(
-        erSmåbarnstilleggForrigePeriode,
-        erSmåbarnstilleggDennePerioden,
-        erSmåbarnstilleggIForrigeBehandlingPeriode,
-    )
+    val begrunnelseMatcherPeriodeResultat =
+        this.matcherPerioderesultat(
+            erSmåbarnstilleggForrigePeriode,
+            erSmåbarnstilleggDennePerioden,
+            erSmåbarnstilleggIForrigeBehandlingPeriode,
+        )
 
     val erEndringISmåbarnstillegg = erSmåbarnstilleggForrigePeriode != erSmåbarnstilleggDennePerioden
 
@@ -879,11 +935,12 @@ fun ISanityBegrunnelse.erGjeldendeForBrevPeriodeType(
     vedtaksperiode: VedtaksperiodeMedBegrunnelser,
     erUtbetalingEllerDeltBostedIPeriode: Boolean,
 ): Boolean {
-    val brevPeriodeType = hentBrevPeriodeType(
-        vedtaksperiode.type,
-        vedtaksperiode.fom,
-        erUtbetalingEllerDeltBostedIPeriode,
-    )
+    val brevPeriodeType =
+        hentBrevPeriodeType(
+            vedtaksperiode.type,
+            vedtaksperiode.fom,
+            erUtbetalingEllerDeltBostedIPeriode,
+        )
     return this.periodeType == brevPeriodeType ||
         (this.periodeType == BrevPeriodeType.FORTSATT_INNVILGET && brevPeriodeType == BrevPeriodeType.FORTSATT_INNVILGET_NY)
 }

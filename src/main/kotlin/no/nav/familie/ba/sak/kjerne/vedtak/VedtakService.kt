@@ -12,7 +12,6 @@ class VedtakService(
     private val vedtakRepository: VedtakRepository,
     private val dokumentGenereringService: DokumentGenereringService,
 ) {
-
     fun hent(vedtakId: Long): Vedtak {
         return vedtakRepository.getReferenceById(vedtakId)
     }
@@ -59,7 +58,6 @@ class VedtakService(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(VedtakService::class.java)
     }
 }

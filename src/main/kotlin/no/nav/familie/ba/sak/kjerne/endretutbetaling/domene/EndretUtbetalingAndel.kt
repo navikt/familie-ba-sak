@@ -17,12 +17,9 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
-import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
@@ -44,39 +41,29 @@ data class EndretUtbetalingAndel(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
-
     @ManyToOne
     @JoinColumn(name = "fk_po_person_id")
     var person: Person? = null,
-
     @Column(name = "prosent")
     var prosent: BigDecimal? = null,
-
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
     var fom: YearMonth? = null,
-
     @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
     var tom: YearMonth? = null,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "aarsak")
     var årsak: Årsak? = null,
-
     @Column(name = "avtaletidspunkt_delt_bosted")
     var avtaletidspunktDeltBosted: LocalDate? = null,
-
     @Column(name = "soknadstidspunkt")
     var søknadstidspunkt: LocalDate? = null,
-
     @Column(name = "begrunnelse")
     var begrunnelse: String? = null,
 ) : BaseEntitet() {
-
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode)
 
     val periode
@@ -107,13 +94,14 @@ data class EndretUtbetalingAndel(
         return true
     }
 
-    fun manglerObligatoriskFelt() = person == null ||
-        prosent == null ||
-        fom == null ||
-        tom == null ||
-        årsak == null ||
-        søknadstidspunkt == null ||
-        (begrunnelse == null || begrunnelse!!.isEmpty())
+    fun manglerObligatoriskFelt() =
+        person == null ||
+            prosent == null ||
+            fom == null ||
+            tom == null ||
+            årsak == null ||
+            søknadstidspunkt == null ||
+            (begrunnelse == null || begrunnelse!!.isEmpty())
 
     fun årsakErDeltBosted() = this.årsak == Årsak.DELT_BOSTED
 }
@@ -153,16 +141,6 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     this.person = person
     return this
 }
-
-fun hentPersonerForEtterEndretUtbetalingsperiode(
-    minimerteEndredeUtbetalingAndeler: List<MinimertRestEndretAndel>,
-    fom: LocalDate?,
-    endringsaarsaker: Set<Årsak>,
-) = minimerteEndredeUtbetalingAndeler.filter { endretUtbetalingAndel ->
-    endretUtbetalingAndel.periode.tom.sisteDagIInneværendeMåned()
-        .erDagenFør(fom) &&
-        endringsaarsaker.contains(endretUtbetalingAndel.årsak)
-}.map { it.personIdent }
 
 sealed interface IEndretUtbetalingAndel
 
@@ -205,7 +183,6 @@ data class UtfyltEndretUtbetalingAndelDeltBosted(
     override val årsak: Årsak,
     override val søknadstidspunkt: LocalDate,
     override val begrunnelse: String,
-
     val avtaletidspunktDeltBosted: LocalDate,
 ) : IUtfyltEndretUtbetalingAndel
 

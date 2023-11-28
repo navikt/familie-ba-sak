@@ -19,7 +19,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMåneds
  * Ikke oppfylt | Oppfylt EØS   -> <Tomt>
  * Ikke oppfylt | Oppfylt Nasj  -> <Tomt>
  */
-fun Tidslinje<VilkårRegelverkResultat, Dag>.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() = this
-    .tilMånedFraMånedsskifteIkkeNull { sisteDagForrigeMåned, førsteDagDenneMåned ->
-        if (sisteDagForrigeMåned.erOppfylt() && førsteDagDenneMåned.erOppfylt()) førsteDagDenneMåned else null
-    }
+fun Tidslinje<VilkårRegelverkResultat, Dag>.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() =
+    this
+        .tilMånedFraMånedsskifteIkkeNull { sisteDagForrigeMåned, førsteDagDenneMåned ->
+            if (sisteDagForrigeMåned.erOppfylt() && førsteDagDenneMåned.erOppfylt()) førsteDagDenneMåned else null
+        }

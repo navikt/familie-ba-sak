@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_ENDRING
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_VEDLIKEHOLD_HENLEGGELSE
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
@@ -42,9 +42,8 @@ class BehandlingStegController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val stegService: StegService,
     private val tilgangService: TilgangService,
-    private val featureToggleService: FeatureToggleService,
+    private val unleashService: UnleashNextMedContextService,
 ) {
-
     @PostMapping(
         path = ["registrer-søknad"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
@@ -65,7 +64,9 @@ class BehandlingStegController(
     }
 
     @PostMapping(path = ["vilkårsvurdering"])
-    fun validerVilkårsvurdering(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    fun validerVilkårsvurdering(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "vurdere vilkårsvurdering",
@@ -78,7 +79,9 @@ class BehandlingStegController(
     }
 
     @GetMapping(path = ["behandlingsresultat/valider"])
-    fun validerBehandlingsresultat(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<Boolean>> {
+    fun validerBehandlingsresultat(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<Boolean>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "validere behandlingsresultat",
@@ -101,7 +104,9 @@ class BehandlingStegController(
     }
 
     @PostMapping(path = ["behandlingsresultat"])
-    fun utledBehandlingsresultat(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    fun utledBehandlingsresultat(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "vurdere behandlingsresultat",
@@ -175,13 +180,13 @@ class BehandlingStegController(
 
         validerhenleggelsestype(
             henleggÅrsak = henleggInfo.årsak,
-            tekniskVedlikeholdToggel = featureToggleService.isEnabled(TEKNISK_VEDLIKEHOLD_HENLEGGELSE),
+            tekniskVedlikeholdToggel = unleashService.isEnabled(TEKNISK_VEDLIKEHOLD_HENLEGGELSE, behandling.id),
             behandlingId = behandling.id,
         )
 
         validerTilgangTilHenleggelseAvBehandling(
             behandling = behandling,
-            tekniskEndringToggle = featureToggleService.isEnabled(TEKNISK_ENDRING),
+            tekniskEndringToggle = unleashService.isEnabled(TEKNISK_ENDRING, behandling.id),
         )
 
         validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)
@@ -226,10 +231,11 @@ enum class HenleggÅrsak(val beskrivelse: String) {
     TEKNISK_VEDLIKEHOLD("Teknisk vedlikehold"),
     ;
 
-    fun tilBehandlingsresultat() = when (this) {
-        FEILAKTIG_OPPRETTET -> Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
-        SØKNAD_TRUKKET -> Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
-        FØDSELSHENDELSE_UGYLDIG_UTFALL -> Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
-        TEKNISK_VEDLIKEHOLD -> Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
-    }
+    fun tilBehandlingsresultat() =
+        when (this) {
+            FEILAKTIG_OPPRETTET -> Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
+            SØKNAD_TRUKKET -> Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
+            FØDSELSHENDELSE_UGYLDIG_UTFALL -> Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+            TEKNISK_VEDLIKEHOLD -> Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
+        }
 }

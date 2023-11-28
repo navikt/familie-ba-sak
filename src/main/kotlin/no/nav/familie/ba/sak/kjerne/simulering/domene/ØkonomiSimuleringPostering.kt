@@ -36,41 +36,31 @@ data class ØkonomiSimuleringPostering(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_okonomi_simulering_mottaker_id", nullable = false, updatable = false)
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator::class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
     val økonomiSimuleringMottaker: ØkonomiSimuleringMottaker,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "fag_omraade_kode", nullable = false)
     val fagOmrådeKode: FagOmrådeKode,
-
     @Column(name = "fom", updatable = false, nullable = false)
     val fom: LocalDate,
-
     @Column(name = "tom", updatable = false, nullable = false)
     val tom: LocalDate,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "betaling_type", nullable = false)
     val betalingType: BetalingType,
-
     @Column(name = "belop", nullable = false)
     val beløp: BigDecimal,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "postering_type", nullable = false)
     val posteringType: PosteringType,
-
     @Column(name = "forfallsdato", updatable = false, nullable = false)
     val forfallsdato: LocalDate,
-
     @Column(name = "uten_inntrekk", nullable = false)
     val utenInntrekk: Boolean,
 ) : BaseEntitet() {
-
     override fun hashCode() = id.hashCode()
 
     override fun equals(other: Any?): Boolean {

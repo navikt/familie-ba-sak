@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service
 class BrevmalService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
-
     fun hentBrevmal(behandling: Behandling): Brevmal =
         when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.DØDSFALL_BRUKER -> Brevmal.VEDTAK_OPPHØR_DØDSFALL
@@ -27,11 +26,12 @@ class BrevmalService(
             throw Feil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
         }
 
-        val brevmal = if (behandling.skalBehandlesAutomatisk) {
-            hentAutomatiskVedtaksbrevtype(behandling)
-        } else {
-            hentManuellVedtaksbrevtype(behandling)
-        }
+        val brevmal =
+            if (behandling.skalBehandlesAutomatisk) {
+                hentAutomatiskVedtaksbrevtype(behandling)
+            } else {
+                hentManuellVedtaksbrevtype(behandling)
+            }
 
         return if (brevmal.erVedtaksbrev) brevmal else throw Feil("Brevmal ${brevmal.visningsTekst} er ikke vedtaksbrev")
     }

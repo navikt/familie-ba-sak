@@ -22,7 +22,6 @@ data class UtbetalingsperiodeMal(
     val vedtak: Vedtak,
     val erEndringPåEksisterendePeriode: Boolean = false,
 ) {
-
     /**
      * Lager utbetalingsperioder som legges på utbetalingsoppdrag. En utbetalingsperiode tilsvarer linjer hos økonomi
      *
@@ -43,14 +42,15 @@ data class UtbetalingsperiodeMal(
     ): Utbetalingsperiode =
         Utbetalingsperiode(
             erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
-            opphør = if (erEndringPåEksisterendePeriode) {
-                Opphør(
-                    opphørKjedeFom?.førsteDagIInneværendeMåned()
-                        ?: error("Mangler opphørsdato for kjede"),
-                )
-            } else {
-                null
-            },
+            opphør =
+                if (erEndringPåEksisterendePeriode) {
+                    Opphør(
+                        opphørKjedeFom?.førsteDagIInneværendeMåned()
+                            ?: error("Mangler opphørsdato for kjede"),
+                    )
+                } else {
+                    null
+                },
             forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() },
             periodeId = periodeIdOffset.toLong(),
             datoForVedtak = vedtak.vedtaksdato?.toLocalDate() ?: now(),

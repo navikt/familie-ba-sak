@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.cucumber.domeneparser
 
 object BrevPeriodeParser {
-
     enum class DomenebegrepBrevBegrunnelse(override val nøkkel: String) : Domenenøkkel {
         BEGRUNNELSE("Begrunnelse"),
         GJELDER_SØKER("Gjelder søker"),

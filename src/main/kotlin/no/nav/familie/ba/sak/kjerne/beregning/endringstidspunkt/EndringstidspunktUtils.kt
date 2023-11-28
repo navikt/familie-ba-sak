@@ -43,11 +43,12 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentPerioderMedEndringerFra(
         val tidslinjeForPerson = andelerTidslinje[aktørId] ?: LocalDateTimeline(emptyList())
         val forrigeTidslinjeForPerson = forrigeAndelerTidslinje[aktørId] ?: LocalDateTimeline(emptyList())
 
-        val kombinertTidslinje = tidslinjeForPerson.combine(
-            forrigeTidslinjeForPerson,
-            StandardCombinators::bothValues,
-            LocalDateTimeline.JoinStyle.CROSS_JOIN,
-        ) as LocalDateTimeline<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>
+        val kombinertTidslinje =
+            tidslinjeForPerson.combine(
+                forrigeTidslinjeForPerson,
+                StandardCombinators::bothValues,
+                LocalDateTimeline.JoinStyle.CROSS_JOIN,
+            ) as LocalDateTimeline<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>
 
         LocalDateTimeline(
             kombinertTidslinje.toSegments().mapNotNull { it.tilSegmentMedEndringer() },
@@ -95,11 +96,12 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentTidslinjerForPer
     return this.groupBy { it.aktør.aktørId }
         .map { (aktørId, andeler) ->
             if (andeler.any { it.erSøkersAndel() }) {
-                aktørId to kombinerOverlappendeAndelerForSøker(
-                    andeler = andeler,
-                    behandlingAlder = behandlingAlder,
-                    aktørId = aktørId,
-                )
+                aktørId to
+                    kombinerOverlappendeAndelerForSøker(
+                        andeler = andeler,
+                        behandlingAlder = behandlingAlder,
+                        aktørId = aktørId,
+                    )
             } else {
                 aktørId to andeler.hentTidslinje(behandlingAlder)
             }
@@ -108,20 +110,21 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentTidslinjerForPer
 
 private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentTidslinje(
     behandlingAlder: BehandlingAlder,
-): LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring> = LocalDateTimeline(
-    map {
-        LocalDateSegment(
-            it.stønadFom.førsteDagIInneværendeMåned(),
-            it.stønadTom.sisteDagIInneværendeMåned(),
-            AndelTilkjentYtelseDataForÅKalkulereEndring(
-                aktørId = it.aktør.aktørId,
-                kalkulertBeløp = it.kalkulertUtbetalingsbeløp,
-                endretUtbetalingÅrsaker = it.endreteUtbetalinger.mapNotNull { endretUtbetalingAndel -> endretUtbetalingAndel.årsak },
-                behandlingAlder = behandlingAlder,
-            ),
-        )
-    },
-)
+): LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring> =
+    LocalDateTimeline(
+        map {
+            LocalDateSegment(
+                it.stønadFom.førsteDagIInneværendeMåned(),
+                it.stønadTom.sisteDagIInneværendeMåned(),
+                AndelTilkjentYtelseDataForÅKalkulereEndring(
+                    aktørId = it.aktør.aktørId,
+                    kalkulertBeløp = it.kalkulertUtbetalingsbeløp,
+                    endretUtbetalingÅrsaker = it.endreteUtbetalinger.mapNotNull { endretUtbetalingAndel -> endretUtbetalingAndel.årsak },
+                    behandlingAlder = behandlingAlder,
+                ),
+            )
+        },
+    )
 
 private fun kombinerOverlappendeAndelerForSøker(
     andeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
@@ -137,7 +140,8 @@ private fun kombinerOverlappendeAndelerForSøker(
                 AndelTilkjentYtelseDataForÅKalkulereEndring(
                     aktørId = aktørId,
                     behandlingAlder = behandlingAlder,
-                    endretUtbetalingÅrsaker = emptyList(), // TODO() her bør man nok prøve å hente overstyringer på søker også, men haster mest å fikse endringstidspunkt pga overstyringer på barn.
+                    // TODO() her bør man nok prøve å hente overstyringer på søker også, men haster mest å fikse endringstidspunkt pga overstyringer på barn.
+                    endretUtbetalingÅrsaker = emptyList(),
                     kalkulertBeløp = it.value,
                 ),
             )

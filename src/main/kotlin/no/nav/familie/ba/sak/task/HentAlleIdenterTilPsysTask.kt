@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.ekstern.pensjon.HentAlleIdenterTilPsysResponseDTO
 import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype
 import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype.DATA
@@ -13,6 +14,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Properties
@@ -29,8 +31,8 @@ class HentAlleIdenterTilPsysTask(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val envService: EnvService,
+    private val unleashNext: UnleashService,
 ) : AsyncTaskStep {
-
     private val logger = LoggerFactory.getLogger(HentAlleIdenterTilPsysTask::class.java)
 
     override fun doTask(task: Task) {
@@ -40,10 +42,11 @@ class HentAlleIdenterTilPsysTask(
             logger.info("Ferdig med å hente alle identer fra DB for request $requestId")
 
             logger.info("Starter med å hente alle identer fra Infotrygd for request $requestId")
-            val identerFraInfotrygd = when {
-                envService.erPreprod() -> emptyList() // Tar ikke med personer fra infotrygd i preprod siden de ikke finnes i PDL
-                else -> infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
-            }
+            val identerFraInfotrygd =
+                when {
+                    envService.erPreprod() && !unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD) -> emptyList()
+                    else -> infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
+                }
             logger.info("Ferdig med å hente alle identer fra Infotrygd for request $requestId")
 
             logger.info("Starter på å sende alle identer til kafka for request $requestId")
@@ -64,17 +67,22 @@ class HentAlleIdenterTilPsysTask(
     }
 
     companion object {
-        fun lagTask(år: Int, uuid: UUID): Task {
+        fun lagTask(
+            år: Int,
+            uuid: UUID,
+        ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(HentAlleIdenterTilPsysRequestDTO(år = år, requestId = uuid)),
-                properties = Properties().apply {
-                    this["år"] = år.toString()
-                    this["requestId"] = uuid.toString()
-                    this["callId"] = uuid.toString()
-                },
+                properties =
+                    Properties().apply {
+                        this["år"] = år.toString()
+                        this["requestId"] = uuid.toString()
+                        this["callId"] = uuid.toString()
+                    },
             )
         }
+
         const val TASK_STEP_TYPE = "hentAlleIdenterTilPsys"
     }
 }

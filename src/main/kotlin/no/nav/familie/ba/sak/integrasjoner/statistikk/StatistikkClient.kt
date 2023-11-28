@@ -18,7 +18,6 @@ class StatistikkClient(
     @Value("\${FAMILIE_STATISTIKK_URL}") val baseUri: URI,
     @Qualifier("jwtBearer") val restTemplate: RestOperations,
 ) : AbstractRestClient(restTemplate, "statistikk") {
-
     fun harSendtVedtaksmeldingForBehandling(behandlingId: Long): Boolean {
         val uri = URI.create("$baseUri/vedtak/$behandlingId")
 

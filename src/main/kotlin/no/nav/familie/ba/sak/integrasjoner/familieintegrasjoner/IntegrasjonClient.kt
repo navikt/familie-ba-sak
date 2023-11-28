@@ -26,6 +26,8 @@ import no.nav.familie.kontrakter.felles.dokdist.AdresseType
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
+import no.nav.familie.kontrakter.felles.dokdistkanal.Distribusjonskanal
+import no.nav.familie.kontrakter.felles.dokdistkanal.DokdistkanalRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
@@ -56,7 +58,6 @@ class IntegrasjonClient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "integrasjon") {
-
     @Cacheable("alle-eøs-land", cacheManager = "dailyCache")
     fun hentAlleEØSLand(): KodeverkDto {
         val uri = URI.create("$integrasjonUri/kodeverk/landkoder/eea")
@@ -94,9 +95,10 @@ class IntegrasjonClient(
     )
     @Cacheable("behandlendeEnhet", cacheManager = "shortCache")
     fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {
-        val uri = UriComponentsBuilder.fromUri(integrasjonUri)
-            .pathSegment("arbeidsfordeling", "enhet", "BAR")
-            .build().toUri()
+        val uri =
+            UriComponentsBuilder.fromUri(integrasjonUri)
+                .pathSegment("arbeidsfordeling", "enhet", "BAR")
+                .build().toUri()
 
         return kallEksternTjenesteRessurs(
             tjeneste = "arbeidsfordeling",
@@ -109,10 +111,11 @@ class IntegrasjonClient(
 
     @Cacheable("behandlendeEnhetForPersonMedRelasjon", cacheManager = "shortCache")
     fun hentBehandlendeEnhetForPersonIdentMedRelasjoner(ident: String): Arbeidsfordelingsenhet {
-        val uri = UriComponentsBuilder
-            .fromUri(integrasjonUri)
-            .pathSegment("arbeidsfordeling", "enhet", Tema.KON.name, "med-relasjoner")
-            .build().toUri()
+        val uri =
+            UriComponentsBuilder
+                .fromUri(integrasjonUri)
+                .pathSegment("arbeidsfordeling", "enhet", Tema.KON.name, "med-relasjoner")
+                .build().toUri()
 
         return kallEksternTjenesteRessurs<List<Arbeidsfordelingsenhet>>(
             tjeneste = "arbeidsfordeling",
@@ -128,10 +131,14 @@ class IntegrasjonClient(
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
-    fun hentArbeidsforhold(ident: String, ansettelsesperiodeFom: LocalDate): List<Arbeidsforhold> {
-        val uri = UriComponentsBuilder.fromUri(integrasjonUri)
-            .pathSegment("aareg", "arbeidsforhold")
-            .build().toUri()
+    fun hentArbeidsforhold(
+        ident: String,
+        ansettelsesperiodeFom: LocalDate,
+    ): List<Arbeidsforhold> {
+        val uri =
+            UriComponentsBuilder.fromUri(integrasjonUri)
+                .pathSegment("aareg", "arbeidsforhold")
+                .build().toUri()
 
         return kallEksternTjenesteRessurs(
             tjeneste = "aareg",
@@ -145,21 +152,23 @@ class IntegrasjonClient(
     fun distribuerBrev(distribuerDokumentDTO: DistribuerDokumentDTO): String {
         val uri = URI.create("$integrasjonUri/dist/v1")
 
-        val resultat: String = kallEksternTjenesteRessurs(
-            tjeneste = "dokdist",
-            uri = uri,
-            formål = "Distribuer brev",
-        ) {
-            val journalpostRequest = DistribuerJournalpostRequest(
-                journalpostId = distribuerDokumentDTO.journalpostId,
-                bestillendeFagsystem = Fagsystem.BA,
-                dokumentProdApp = "FAMILIE_BA_SAK",
-                distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
-                distribusjonstype = distribuerDokumentDTO.brevmal.distribusjonstype,
-                adresse = distribuerDokumentDTO.manuellAdresseInfo?.let { lagManuellAdresse(it) },
-            )
-            postForEntity(uri, journalpostRequest, HttpHeaders().medContentTypeJsonUTF8())
-        }
+        val resultat: String =
+            kallEksternTjenesteRessurs(
+                tjeneste = "dokdist",
+                uri = uri,
+                formål = "Distribuer brev",
+            ) {
+                val journalpostRequest =
+                    DistribuerJournalpostRequest(
+                        journalpostId = distribuerDokumentDTO.journalpostId,
+                        bestillendeFagsystem = Fagsystem.BA,
+                        dokumentProdApp = "FAMILIE_BA_SAK",
+                        distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
+                        distribusjonstype = distribuerDokumentDTO.brevmal.distribusjonstype,
+                        adresse = distribuerDokumentDTO.manuellAdresseInfo?.let { lagManuellAdresse(it) },
+                    )
+                postForEntity(uri, journalpostRequest, HttpHeaders().medContentTypeJsonUTF8())
+            }
 
         if (resultat.isBlank()) error("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
         return resultat
@@ -167,10 +176,11 @@ class IntegrasjonClient(
 
     private fun lagManuellAdresse(manuellAdresseInfo: ManuellAdresseInfo) =
         ManuellAdresse(
-            adresseType = when (manuellAdresseInfo.landkode) {
-                "NO" -> AdresseType.norskPostadresse
-                else -> AdresseType.utenlandskPostadresse
-            },
+            adresseType =
+                when (manuellAdresseInfo.landkode) {
+                    "NO" -> AdresseType.norskPostadresse
+                    else -> AdresseType.utenlandskPostadresse
+                },
             adresselinje1 = manuellAdresseInfo.adresselinje1,
             adresselinje2 = manuellAdresseInfo.adresselinje2,
             postnummer = manuellAdresseInfo.postnummer,
@@ -190,7 +200,10 @@ class IntegrasjonClient(
         }
     }
 
-    fun oppdaterOppgave(oppgaveId: Long, oppdatertOppgave: Oppgave) {
+    fun oppdaterOppgave(
+        oppgaveId: Long,
+        oppdatertOppgave: Oppgave,
+    ) {
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId/oppdater")
 
         kallEksternTjenesteUtenRespons(
@@ -247,13 +260,17 @@ class IntegrasjonClient(
         }
     }
 
-    fun fordelOppgave(oppgaveId: Long, saksbehandler: String?): OppgaveResponse {
+    fun fordelOppgave(
+        oppgaveId: Long,
+        saksbehandler: String?,
+    ): OppgaveResponse {
         val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/fordel")
-        val uri = if (saksbehandler == null) {
-            baseUri
-        } else {
-            UriComponentsBuilder.fromUri(baseUri).queryParam("saksbehandler", saksbehandler).build().toUri()
-        }
+        val uri =
+            if (saksbehandler == null) {
+                baseUri
+            } else {
+                UriComponentsBuilder.fromUri(baseUri).queryParam("saksbehandler", saksbehandler).build().toUri()
+            }
 
         return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
@@ -267,10 +284,14 @@ class IntegrasjonClient(
         }
     }
 
-    fun tilordneEnhetForOppgave(oppgaveId: Long, nyEnhet: String): OppgaveResponse {
+    fun tilordneEnhetForOppgave(
+        oppgaveId: Long,
+        nyEnhet: String,
+    ): OppgaveResponse {
         val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/enhet/$nyEnhet")
-        val uri = UriComponentsBuilder.fromUri(baseUri).queryParam("fjernMappeFraOppgave", true).build()
-            .toUri() // fjerner alltid mappe fra Barnetrygd siden hver enhet sin mappestruktur
+        val uri =
+            UriComponentsBuilder.fromUri(baseUri).queryParam("fjernMappeFraOppgave", true).build()
+                .toUri() // fjerner alltid mappe fra Barnetrygd siden hver enhet sin mappestruktur
 
         return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
@@ -297,8 +318,9 @@ class IntegrasjonClient(
         }
 
         val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/fjern-behandles-av-applikasjon")
-        val uri = UriComponentsBuilder.fromUri(baseUri).queryParam("versjon", oppgave.versjon).build()
-            .toUri()
+        val uri =
+            UriComponentsBuilder.fromUri(baseUri).queryParam("versjon", oppgave.versjon).build()
+                .toUri()
 
         return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
@@ -374,7 +396,10 @@ class IntegrasjonClient(
         }
     }
 
-    fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String) {
+    fun ferdigstillJournalpost(
+        journalpostId: String,
+        journalførendeEnhet: String,
+    ) {
         val uri =
             URI.create("$integrasjonUri/arkiv/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet")
 
@@ -387,7 +412,10 @@ class IntegrasjonClient(
         }
     }
 
-    fun oppdaterJournalpost(request: OppdaterJournalpostRequest, journalpostId: String): OppdaterJournalpostResponse {
+    fun oppdaterJournalpost(
+        request: OppdaterJournalpostRequest,
+        journalpostId: String,
+    ): OppdaterJournalpostResponse {
         val uri = URI.create("$integrasjonUri/arkiv/v2/$journalpostId")
 
         return kallEksternTjenesteRessurs(
@@ -399,7 +427,10 @@ class IntegrasjonClient(
         }
     }
 
-    fun leggTilLogiskVedlegg(request: LogiskVedleggRequest, dokumentinfoId: String): LogiskVedleggResponse {
+    fun leggTilLogiskVedlegg(
+        request: LogiskVedleggRequest,
+        dokumentinfoId: String,
+    ): LogiskVedleggResponse {
         val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg")
 
         return kallEksternTjenesteRessurs(
@@ -411,7 +442,10 @@ class IntegrasjonClient(
         }
     }
 
-    fun slettLogiskVedlegg(logiskVedleggId: String, dokumentinfoId: String): LogiskVedleggResponse {
+    fun slettLogiskVedlegg(
+        logiskVedleggId: String,
+        dokumentinfoId: String,
+    ): LogiskVedleggResponse {
         val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg/$logiskVedleggId")
         return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
@@ -422,7 +456,10 @@ class IntegrasjonClient(
         }
     }
 
-    fun hentDokument(dokumentInfoId: String, journalpostId: String): ByteArray {
+    fun hentDokument(
+        dokumentInfoId: String,
+        journalpostId: String,
+    ): ByteArray {
         val uri = URI.create("$integrasjonUri/journalpost/hentdokument/$journalpostId/$dokumentInfoId")
 
         return kallEksternTjenesteRessurs(
@@ -448,7 +485,10 @@ class IntegrasjonClient(
         }
     }
 
-    fun opprettSkyggesak(aktør: Aktør, fagsakId: Long) {
+    fun opprettSkyggesak(
+        aktør: Aktør,
+        fagsakId: Long,
+    ) {
         val uri = URI.create("$integrasjonUri/skyggesak/v1")
 
         kallEksternTjenesteUtenRespons<Unit>(
@@ -484,8 +524,18 @@ class IntegrasjonClient(
         }
     }
 
-    companion object {
+    fun hentDistribusjonskanal(request: DokdistkanalRequest): Distribusjonskanal {
+        val uri = URI.create("$integrasjonUri/dokdistkanal/BAR")
+        return kallEksternTjenesteRessurs(
+            tjeneste = "dokdistkanal",
+            uri = uri,
+            formål = "Hent distribusjonskanal for bruker/mottaker",
+        ) {
+            postForEntity(uri, request)
+        }
+    }
 
+    companion object {
         private val logger = LoggerFactory.getLogger(IntegrasjonClient::class.java)
         const val VEDTAK_VEDLEGG_FILNAVN = "NAV_33-0005bm-10.2016.pdf"
         const val VEDTAK_VEDLEGG_TITTEL = "Stønadsmottakerens rettigheter og plikter (Barnetrygd)"

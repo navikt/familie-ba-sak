@@ -29,13 +29,15 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
 object VilkårsvurderingUtils {
-
     /**
      * Funksjon som forsøker å slette en periode på et vilkår.
      * Dersom det kun finnes en periode eller perioden som skal slettes
      * lager en glippe. Isåfall nullstiller vi bare perioden.
      */
-    fun muterPersonResultatDelete(personResultat: PersonResultat, vilkårResultatId: Long) {
+    fun muterPersonResultatDelete(
+        personResultat: PersonResultat,
+        vilkårResultatId: Long,
+    ) {
         personResultat.slettEllerNullstill(vilkårResultatId = vilkårResultatId)
     }
 
@@ -44,14 +46,18 @@ object VilkårsvurderingUtils {
      * Dersom det allerede finnes en uvurdet periode med samme vilkårstype
      * skal det kastes en feil.
      */
-    fun muterPersonResultatPost(personResultat: PersonResultat, vilkårType: Vilkår) {
-        val nyttVilkårResultat = VilkårResultat(
-            personResultat = personResultat,
-            vilkårType = vilkårType,
-            resultat = Resultat.IKKE_VURDERT,
-            begrunnelse = "",
-            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
-        )
+    fun muterPersonResultatPost(
+        personResultat: PersonResultat,
+        vilkårType: Vilkår,
+    ) {
+        val nyttVilkårResultat =
+            VilkårResultat(
+                personResultat = personResultat,
+                vilkårType = vilkårType,
+                resultat = Resultat.IKKE_VURDERT,
+                begrunnelse = "",
+                sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+            )
         if (harUvurdertePerioder(personResultat, vilkårType)) {
             throw FunksjonellFeil(
                 melding = "Det finnes allerede uvurderte vilkår av samme vilkårType",
@@ -90,7 +96,10 @@ object VilkårsvurderingUtils {
         return Pair(kopiAvVilkårResultater, personResultat.vilkårResultater.toList())
     }
 
-    fun validerAvslagUtenPeriodeMedLøpende(personSomEndres: PersonResultat, vilkårSomEndres: RestVilkårResultat) {
+    fun validerAvslagUtenPeriodeMedLøpende(
+        personSomEndres: PersonResultat,
+        vilkårSomEndres: RestVilkårResultat,
+    ) {
         val resultaterPåVilkår =
             personSomEndres.vilkårResultater.filter { it.vilkårType == vilkårSomEndres.vilkårType && it.id != vilkårSomEndres.id }
         when {
@@ -110,10 +119,14 @@ object VilkårsvurderingUtils {
         }
     }
 
-    private fun harUvurdertePerioder(personResultat: PersonResultat, vilkårType: Vilkår): Boolean {
-        val uvurdetePerioderMedSammeVilkårType = personResultat.vilkårResultater
-            .filter { it.vilkårType == vilkårType }
-            .find { it.resultat == Resultat.IKKE_VURDERT }
+    private fun harUvurdertePerioder(
+        personResultat: PersonResultat,
+        vilkårType: Vilkår,
+    ): Boolean {
+        val uvurdetePerioderMedSammeVilkårType =
+            personResultat.vilkårResultater
+                .filter { it.vilkårType == vilkårType }
+                .find { it.resultat == Resultat.IKKE_VURDERT }
         return uvurdetePerioderMedSammeVilkårType != null
     }
 
@@ -207,10 +220,11 @@ object VilkårsvurderingUtils {
         val personResultaterAktivt = aktivVilkårsvurderingKopi.personResultater.toMutableSet()
         val personResultaterOppdatert = mutableSetOf<PersonResultat>()
         initiellVilkårsvurderingKopi.personResultater.forEach { personFraInit ->
-            val personTilOppdatert = PersonResultat(
-                vilkårsvurdering = initiellVilkårsvurderingKopi,
-                aktør = personFraInit.aktør,
-            )
+            val personTilOppdatert =
+                PersonResultat(
+                    vilkårsvurdering = initiellVilkårsvurderingKopi,
+                    aktør = personFraInit.aktør,
+                )
             val personenSomFinnes = personResultaterAktivt.firstOrNull { it.aktør == personFraInit.aktør }
 
             if (personenSomFinnes == null) {
@@ -258,9 +272,10 @@ object VilkårsvurderingUtils {
             val vilkårSomFinnes =
                 personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
 
-            val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
-                kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
-            )
+            val vilkårSomSkalKopieresOver =
+                vilkårSomFinnes.filtrerVilkårÅKopiere(
+                    kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
+                )
             val vilkårSomSkalFjernesFraAktivt = vilkårSomFinnes - vilkårSomSkalKopieresOver
             personsVilkårAktivt.removeAll(vilkårSomSkalFjernesFraAktivt)
 
@@ -362,10 +377,9 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
     val sanityBegrunnelse = sanityBegrunnelser[vedtakBegrunnelse] ?: return emptyList()
 
-    val triggesAv = sanityBegrunnelse.triggesAv
     val visningsnavn = sanityBegrunnelse.navnISystem
 
-    return if (triggesAv.vilkår.isEmpty()) {
+    return if (sanityBegrunnelse.vilkår.isEmpty()) {
         listOf(
             RestVedtakBegrunnelseTilknyttetVilkår(
                 id = vedtakBegrunnelse.enumnavnTilString(),
@@ -374,7 +388,7 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
             ),
         )
     } else {
-        triggesAv.vilkår.map {
+        sanityBegrunnelse.vilkår.map {
             RestVedtakBegrunnelseTilknyttetVilkår(
                 id = vedtakBegrunnelse.enumnavnTilString(),
                 navn = visningsnavn,
@@ -421,41 +435,45 @@ fun genererPersonResultatForPerson(
     vilkårsvurdering: Vilkårsvurdering,
     person: Person,
 ): PersonResultat {
-    val personResultat = PersonResultat(
-        vilkårsvurdering = vilkårsvurdering,
-        aktør = person.aktør,
-    )
-
-    val vilkårForPerson = Vilkår.hentVilkårFor(
-        personType = person.type,
-        fagsakType = vilkårsvurdering.behandling.fagsak.type,
-        behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
-    )
-
-    val vilkårResultater = vilkårForPerson.map { vilkår ->
-        val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
-
-        val tom: LocalDate? =
-            when {
-                person.erDød() -> person.dødsfall!!.dødsfallDato
-                vilkår == Vilkår.UNDER_18_ÅR -> person.fødselsdato.til18ÅrsVilkårsdato()
-                else -> null
-            }
-
-        VilkårResultat(
-            personResultat = personResultat,
-            erAutomatiskVurdert = when (vilkår) {
-                Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP -> true
-                else -> false
-            },
-            resultat = utledResultat(vilkår, person),
-            vilkårType = vilkår,
-            periodeFom = fom,
-            periodeTom = tom,
-            begrunnelse = utledBegrunnelse(vilkår, person),
-            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+    val personResultat =
+        PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = person.aktør,
         )
-    }.toSortedSet(VilkårResultat.VilkårResultatComparator)
+
+    val vilkårForPerson =
+        Vilkår.hentVilkårFor(
+            personType = person.type,
+            fagsakType = vilkårsvurdering.behandling.fagsak.type,
+            behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
+        )
+
+    val vilkårResultater =
+        vilkårForPerson.map { vilkår ->
+            val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
+
+            val tom: LocalDate? =
+                when {
+                    person.erDød() -> person.dødsfall!!.dødsfallDato
+                    vilkår == Vilkår.UNDER_18_ÅR -> person.fødselsdato.til18ÅrsVilkårsdato()
+                    else -> null
+                }
+
+            VilkårResultat(
+                personResultat = personResultat,
+                erAutomatiskVurdert =
+                    when (vilkår) {
+                        Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP -> true
+                        else -> false
+                    },
+                resultat = utledResultat(vilkår, person),
+                vilkårType = vilkår,
+                periodeFom = fom,
+                periodeTom = tom,
+                begrunnelse = utledBegrunnelse(vilkår, person),
+                sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+            )
+        }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
     personResultat.setSortedVilkårResultater(vilkårResultater)
 
@@ -484,12 +502,13 @@ private fun utledBegrunnelse(
 ) = when {
     person.erDød() -> "Dødsfall"
     vilkår == Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
-    vilkår == Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false) {
-        "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
-            "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen"
-    } else {
-        ""
-    }
+    vilkår == Vilkår.GIFT_PARTNERSKAP ->
+        if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false) {
+            "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
+                "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen"
+        } else {
+            ""
+        }
 
     else -> ""
 }
@@ -505,12 +524,14 @@ fun validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(
         vilkårResultat.periodeFom?.isBefore(migreringsdato) == true
     ) {
         throw FunksjonellFeil(
-            melding = "${vilkårResultat.vilkårType} kan ikke endres før $migreringsdato " +
-                "for fagsak=${behandling.fagsak.id}",
-            frontendFeilmelding = "F.o.m. kan ikke settes tidligere " +
-                "enn migreringsdato ${migreringsdato.tilKortString()}. " +
-                "Ved behov for vurdering før dette, må behandlingen henlegges, " +
-                "og migreringstidspunktet endres ved å opprette en ny migreringsbehandling.",
+            melding =
+                "${vilkårResultat.vilkårType} kan ikke endres før $migreringsdato " +
+                    "for fagsak=${behandling.fagsak.id}",
+            frontendFeilmelding =
+                "F.o.m. kan ikke settes tidligere " +
+                    "enn migreringsdato ${migreringsdato.tilKortString()}. " +
+                    "Ved behov for vurdering før dette, må behandlingen henlegges, " +
+                    "og migreringstidspunktet endres ved å opprette en ny migreringsbehandling.",
         )
     }
 }

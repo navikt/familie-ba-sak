@@ -20,9 +20,10 @@ class UtvidetBehandlingController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val tilgangService: TilgangService,
 ) {
-
     @GetMapping(path = ["/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentUtvidetBehandling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    fun hentUtvidetBehandling(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,

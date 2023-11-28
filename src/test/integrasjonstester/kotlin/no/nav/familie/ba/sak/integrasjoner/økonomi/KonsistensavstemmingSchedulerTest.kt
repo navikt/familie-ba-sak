@@ -6,7 +6,6 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -30,7 +29,6 @@ import java.time.LocalDate
 @ActiveProfiles("postgres", "mock-brev-klient", "integrasjonstest")
 @Tag("integration")
 class KonsistensavstemmingSchedulerTest : AbstractMockkSpringRunner() {
-
     @Autowired
     lateinit var taskRepository: TaskRepositoryWrapper
 
@@ -49,9 +47,6 @@ class KonsistensavstemmingSchedulerTest : AbstractMockkSpringRunner() {
     @Autowired
     private lateinit var databaseCleanupService: DatabaseCleanupService
 
-    @Autowired
-    private lateinit var featureToggleService: FeatureToggleService
-
     @BeforeEach
     fun setUp() {
         databaseCleanupService.truncate()
@@ -61,7 +56,6 @@ class KonsistensavstemmingSchedulerTest : AbstractMockkSpringRunner() {
                 behandlingService,
                 fagsakService,
                 taskRepository,
-                featureToggleService,
             )
         taskRepository = spyk(taskRepository)
     }

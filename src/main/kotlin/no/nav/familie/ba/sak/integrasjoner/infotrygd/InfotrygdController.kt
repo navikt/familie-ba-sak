@@ -22,27 +22,34 @@ class InfotrygdController(
     private val personidentService: PersonidentService,
     private val infotrygdService: InfotrygdService,
 ) {
-
     @PostMapping(path = ["/hent-infotrygdsaker-for-soker"])
-    fun hentInfotrygdsakerForSøker(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<RestInfotrygdsaker>> {
+    fun hentInfotrygdsakerForSøker(
+        @RequestBody personIdent: Personident,
+    ): ResponseEntity<Ressurs<RestInfotrygdsaker>> {
         val aktør = personidentService.hentAktør(personIdent.ident)
-        val infotrygdsaker = infotrygdService.hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør)
-            ?: RestInfotrygdsaker(infotrygdService.hentInfotrygdsakerForSøker(aktør).bruker)
+        val infotrygdsaker =
+            infotrygdService.hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør)
+                ?: RestInfotrygdsaker(infotrygdService.hentInfotrygdsakerForSøker(aktør).bruker)
 
         return ResponseEntity.ok(Ressurs.success(infotrygdsaker))
     }
 
     @PostMapping(path = ["/hent-infotrygdstonader-for-soker"])
-    fun hentInfotrygdstønaderForSøker(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<RestInfotrygdstønader>> {
+    fun hentInfotrygdstønaderForSøker(
+        @RequestBody personIdent: Personident,
+    ): ResponseEntity<Ressurs<RestInfotrygdstønader>> {
         val aktør = personidentService.hentAktør(personIdent.ident)
-        val infotrygdstønader = infotrygdService.hentMaskertRestInfotrygdstønaderVedManglendeTilgang(aktør)
-            ?: RestInfotrygdstønader(infotrygdService.hentInfotrygdstønaderForSøker(personIdent.ident).bruker)
+        val infotrygdstønader =
+            infotrygdService.hentMaskertRestInfotrygdstønaderVedManglendeTilgang(aktør)
+                ?: RestInfotrygdstønader(infotrygdService.hentInfotrygdstønaderForSøker(personIdent.ident).bruker)
 
         return ResponseEntity.ok(Ressurs.success(infotrygdstønader))
     }
 
     @PostMapping(path = ["/har-lopende-sak"])
-    fun harLøpendeSak(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<RestLøpendeSak>> {
+    fun harLøpendeSak(
+        @RequestBody personIdent: Personident,
+    ): ResponseEntity<Ressurs<RestLøpendeSak>> {
         val harLøpendeSak = infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(listOf(personIdent.ident))
         return ResponseEntity.ok(Ressurs.success(RestLøpendeSak(harLøpendeSak)))
     }

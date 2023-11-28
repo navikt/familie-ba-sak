@@ -31,11 +31,12 @@ class TilkjentYtelseBuilder(
     private val startMåned: Tidspunkt<Måned>,
     private val behandling: Behandling = lagBehandling(),
 ) {
-    private val tilkjentYtelse = TilkjentYtelse(
-        behandling = behandling,
-        opprettetDato = LocalDate.now(),
-        endretDato = LocalDate.now(),
-    )
+    private val tilkjentYtelse =
+        TilkjentYtelse(
+            behandling = behandling,
+            opprettetDato = LocalDate.now(),
+            endretDato = LocalDate.now(),
+        )
 
     var gjeldendePersoner: List<Person> = emptyList()
 
@@ -91,8 +92,9 @@ class TilkjentYtelseBuilder(
         kalkulert,
     ) {
         val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
-        val tilleggOrbaTidslinje = satstypeTidslinje(SatsType.TILLEGG_ORBA)
-            .filtrerMed(erUnder6ÅrTidslinje(it))
+        val tilleggOrbaTidslinje =
+            satstypeTidslinje(SatsType.TILLEGG_ORBA)
+                .filtrerMed(erUnder6ÅrTidslinje(it))
         orbaTidslinje.kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
     }
 
@@ -105,42 +107,50 @@ class TilkjentYtelseBuilder(
         kalkulert: (Int) -> Int = { it },
         satsTidslinje: (Person) -> Tidslinje<Int, Måned>,
     ): TilkjentYtelseBuilder {
-        val andeler = gjeldendePersoner
-            .map { person ->
-                val andelTilkjentYtelseTidslinje = s.tilCharTidslinje(startMåned)
-                    .filtrer { char -> char?.let { !it.isWhitespace() } ?: false }
-                    .map {
-                        AndelTilkjentYtelse(
-                            behandlingId = behandling.id,
-                            tilkjentYtelse = tilkjentYtelse,
-                            aktør = person.aktør,
-                            stønadFom = MIN_MÅNED,
-                            stønadTom = MAX_MÅNED,
-                            kalkulertUtbetalingsbeløp = 0, // Overskrives under
-                            nasjonaltPeriodebeløp = 0, // Overskrives under
-                            differanseberegnetPeriodebeløp = null, // Overskrives under
-                            prosent = BigDecimal.valueOf(prosent),
-                            sats = 0, // Overskrives under
-                            type = type,
+        val andeler =
+            gjeldendePersoner
+                .map { person ->
+                    val andelTilkjentYtelseTidslinje =
+                        s.tilCharTidslinje(startMåned)
+                            .filtrer { char -> char?.let { !it.isWhitespace() } ?: false }
+                            .map {
+                                AndelTilkjentYtelse(
+                                    behandlingId = behandling.id,
+                                    tilkjentYtelse = tilkjentYtelse,
+                                    aktør = person.aktør,
+                                    stønadFom = MIN_MÅNED,
+                                    stønadTom = MAX_MÅNED,
+                                    // Overskrives under
+                                    kalkulertUtbetalingsbeløp = 0,
+                                    // Overskrives under
+                                    nasjonaltPeriodebeløp = 0,
+                                    // Overskrives under
+                                    differanseberegnetPeriodebeløp = null,
+                                    prosent = BigDecimal.valueOf(prosent),
+                                    // Overskrives under
+                                    sats = 0,
+                                    type = type,
+                                )
+                            }
+
+                    val begrensetAndelTilkjentYtelseTidslinje =
+                        when (type) {
+                            YtelseType.ORDINÆR_BARNETRYGD ->
+                                andelTilkjentYtelseTidslinje.beskjærEtter(
+                                    erUnder18ÅrVilkårTidslinje(person.fødselsdato),
+                                )
+                            else -> andelTilkjentYtelseTidslinje
+                        }
+
+                    begrensetAndelTilkjentYtelseTidslinje.kombinerUtenNullMed(satsTidslinje(person)) { aty, sats ->
+                        aty.copy(
+                            sats = nasjonalt(sats) ?: kalkulert(sats),
+                            kalkulertUtbetalingsbeløp = kalkulert(sats),
+                            nasjonaltPeriodebeløp = nasjonalt(sats) ?: kalkulert(sats),
+                            differanseberegnetPeriodebeløp = differanse(sats),
                         )
                     }
-
-                val begrensetAndelTilkjentYtelseTidslinje = when (type) {
-                    YtelseType.ORDINÆR_BARNETRYGD -> andelTilkjentYtelseTidslinje.beskjærEtter(
-                        erUnder18ÅrVilkårTidslinje(person.fødselsdato),
-                    )
-                    else -> andelTilkjentYtelseTidslinje
-                }
-
-                begrensetAndelTilkjentYtelseTidslinje.kombinerUtenNullMed(satsTidslinje(person)) { aty, sats ->
-                    aty.copy(
-                        sats = nasjonalt(sats) ?: kalkulert(sats),
-                        kalkulertUtbetalingsbeløp = kalkulert(sats),
-                        nasjonaltPeriodebeløp = nasjonalt(sats) ?: kalkulert(sats),
-                        differanseberegnetPeriodebeløp = differanse(sats),
-                    )
-                }
-            }.tilAndelerTilkjentYtelse()
+                }.tilAndelerTilkjentYtelse()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andeler)
         return this

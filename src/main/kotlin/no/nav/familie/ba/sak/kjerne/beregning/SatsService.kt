@@ -28,36 +28,35 @@ object SatsTidspunkt {
 }
 
 object SatsService {
-
-    private val satser = listOf(
-        Sats(SatsType.ORBA, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28)),
-        Sats(SatsType.ORBA, 1054, LocalDate.of(2019, 3, 1), LocalDate.of(2023, 2, 28)),
-        Sats(SatsType.ORBA, 1083, LocalDate.of(2023, 3, 1), LocalDate.of(2023, 6, 30)),
-        Sats(SatsType.ORBA, 1310, LocalDate.of(2023, 7, 1), LocalDate.MAX),
-
-        Sats(SatsType.SMA, 660, LocalDate.MIN, LocalDate.of(2023, 2, 28)),
-        Sats(SatsType.SMA, 678, LocalDate.of(2023, 3, 1), LocalDate.of(2023, 6, 30)),
-        Sats(SatsType.SMA, 696, LocalDate.of(2023, 7, 1), LocalDate.MAX),
-
-        Sats(SatsType.TILLEGG_ORBA, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28)),
-        Sats(SatsType.TILLEGG_ORBA, 1054, LocalDate.of(2019, 3, 1), LocalDate.of(2020, 8, 31)),
-        Sats(SatsType.TILLEGG_ORBA, 1354, LocalDate.of(2020, 9, 1), LocalDate.of(2021, 8, 31)),
-        Sats(SatsType.TILLEGG_ORBA, 1654, LocalDate.of(2021, 9, 1), LocalDate.of(2021, 12, 31)),
-        Sats(SatsType.TILLEGG_ORBA, 1676, LocalDate.of(2022, 1, 1), LocalDate.of(2023, 2, 28)),
-        Sats(SatsType.TILLEGG_ORBA, 1723, LocalDate.of(2023, 3, 1), LocalDate.of(2023, 6, 30)),
-        Sats(SatsType.TILLEGG_ORBA, 1766, LocalDate.of(2023, 7, 1), LocalDate.MAX),
-
-        Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31)),
-
-        Sats(SatsType.UTVIDET_BARNETRYGD, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28)),
-        Sats(SatsType.UTVIDET_BARNETRYGD, 1054, LocalDate.of(2019, 3, 1), LocalDate.of(2023, 2, 28)),
-        Sats(SatsType.UTVIDET_BARNETRYGD, 2489, LocalDate.of(2023, 3, 1), LocalDate.of(2023, 6, 30)),
-        Sats(SatsType.UTVIDET_BARNETRYGD, 2516, LocalDate.of(2023, 7, 1), LocalDate.MAX),
-    )
+    private val satser =
+        listOf(
+            Sats(SatsType.ORBA, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28)),
+            Sats(SatsType.ORBA, 1054, LocalDate.of(2019, 3, 1), LocalDate.of(2023, 2, 28)),
+            Sats(SatsType.ORBA, 1083, LocalDate.of(2023, 3, 1), LocalDate.of(2023, 6, 30)),
+            Sats(SatsType.ORBA, 1310, LocalDate.of(2023, 7, 1), LocalDate.MAX),
+            Sats(SatsType.SMA, 660, LocalDate.MIN, LocalDate.of(2023, 2, 28)),
+            Sats(SatsType.SMA, 678, LocalDate.of(2023, 3, 1), LocalDate.of(2023, 6, 30)),
+            Sats(SatsType.SMA, 696, LocalDate.of(2023, 7, 1), LocalDate.MAX),
+            Sats(SatsType.TILLEGG_ORBA, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28)),
+            Sats(SatsType.TILLEGG_ORBA, 1054, LocalDate.of(2019, 3, 1), LocalDate.of(2020, 8, 31)),
+            Sats(SatsType.TILLEGG_ORBA, 1354, LocalDate.of(2020, 9, 1), LocalDate.of(2021, 8, 31)),
+            Sats(SatsType.TILLEGG_ORBA, 1654, LocalDate.of(2021, 9, 1), LocalDate.of(2021, 12, 31)),
+            Sats(SatsType.TILLEGG_ORBA, 1676, LocalDate.of(2022, 1, 1), LocalDate.of(2023, 2, 28)),
+            Sats(SatsType.TILLEGG_ORBA, 1723, LocalDate.of(2023, 3, 1), LocalDate.of(2023, 6, 30)),
+            Sats(SatsType.TILLEGG_ORBA, 1766, LocalDate.of(2023, 7, 1), LocalDate.MAX),
+            Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31)),
+            Sats(SatsType.UTVIDET_BARNETRYGD, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28)),
+            Sats(SatsType.UTVIDET_BARNETRYGD, 1054, LocalDate.of(2019, 3, 1), LocalDate.of(2023, 2, 28)),
+            Sats(SatsType.UTVIDET_BARNETRYGD, 2489, LocalDate.of(2023, 3, 1), LocalDate.of(2023, 6, 30)),
+            Sats(SatsType.UTVIDET_BARNETRYGD, 2516, LocalDate.of(2023, 7, 1), LocalDate.MAX),
+        )
 
     fun finnSisteSatsFor(satstype: SatsType) = finnAlleSatserFor(satstype).maxBy { it.gyldigTom }
 
-    fun finnGjeldendeSatsForDato(satstype: SatsType, dato: LocalDate): Int {
+    fun finnGjeldendeSatsForDato(
+        satstype: SatsType,
+        dato: LocalDate,
+    ): Int {
         val gjeldendeSatsForPeriode =
             satser.find { it.type == satstype && dato.isBetween(Periode(it.gyldigFom, it.gyldigTom)) }
                 ?: throw Feil("Finnes ingen sats for SatsType: $satstype for dato: $dato")
@@ -66,21 +65,23 @@ object SatsService {
 
     fun finnSisteSatsendringsDato(): LocalDate = hentAllesatser().maxBy { it.gyldigFom }.gyldigFom
 
-    fun finnSatsendring(startDato: LocalDate): List<Sats> = hentAllesatser()
-        .filter { it.gyldigFom == startDato }
-        .filter { it.gyldigFom != LocalDate.MIN }
+    fun finnSatsendring(startDato: LocalDate): List<Sats> =
+        hentAllesatser()
+            .filter { it.gyldigFom == startDato }
+            .filter { it.gyldigFom != LocalDate.MIN }
 
     /**
      * SatsService.senesteSatsTidspunkt brukes for å mocke inn et tidspunkt som ligger tidligere enn gjeldende satser
      * alle satser som er gyldige fra etter dette tidspunktet vil filtreres bort
      * gyldigTom vil settes til LocalDate.MAX for det som nå blir siste gyldige sats, dvs varer uendelig
      */
-    internal fun hentAllesatser() = satser
-        .filter { it.gyldigFom <= SatsTidspunkt.senesteSatsTidspunkt }
-        .map {
-            val overstyrtTom = if (SatsTidspunkt.senesteSatsTidspunkt < it.gyldigTom) LocalDate.MAX else it.gyldigTom
-            it.copy(gyldigTom = overstyrtTom)
-        }
+    internal fun hentAllesatser() =
+        satser
+            .filter { it.gyldigFom <= SatsTidspunkt.senesteSatsTidspunkt }
+            .map {
+                val overstyrtTom = if (SatsTidspunkt.senesteSatsTidspunkt < it.gyldigTom) LocalDate.MAX else it.gyldigTom
+                it.copy(gyldigTom = overstyrtTom)
+            }
 
     fun finnAlleSatserFor(type: SatsType): List<Sats> = hentAllesatser().filter { it.type == type }
 
@@ -117,7 +118,8 @@ fun lagOrdinærTidslinje(barn: Person): Tidslinje<Int, Måned> {
         .klippBortPerioderFørBarnetBleFødt(fødselsdato = barn.fødselsdato)
 }
 
-private fun Tidslinje<Int, Måned>.klippBortPerioderFørBarnetBleFødt(fødselsdato: LocalDate) = this.beskjær(
-    fraOgMed = fødselsdato.tilMånedTidspunkt(),
-    tilOgMed = MånedTidspunkt.uendeligLengeTil(fødselsdato.toYearMonth()),
-)
+private fun Tidslinje<Int, Måned>.klippBortPerioderFørBarnetBleFødt(fødselsdato: LocalDate) =
+    this.beskjær(
+        fraOgMed = fødselsdato.tilMånedTidspunkt(),
+        tilOgMed = MånedTidspunkt.uendeligLengeTil(fødselsdato.toYearMonth()),
+    )

@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -24,9 +23,7 @@ class KonsistensavstemmingScheduler(
     val behandlingService: BehandlingService,
     val fagsakService: FagsakService,
     val taskRepository: TaskRepositoryWrapper,
-    val featureToggleService: FeatureToggleService,
 ) {
-
     @Scheduled(cron = "0 0 22 * * *")
     @Transactional
     fun utførKonsistensavstemming() {
@@ -39,16 +36,18 @@ class KonsistensavstemmingScheduler(
         taskRepository.save(
             Task(
                 type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(
-                    KonsistensavstemmingStartTaskDTO(
-                        batchId = plukketBatch.id,
-                        avstemmingdato = LocalDateTime.now(),
-                        transaksjonsId = transaksjonsId,
+                payload =
+                    objectMapper.writeValueAsString(
+                        KonsistensavstemmingStartTaskDTO(
+                            batchId = plukketBatch.id,
+                            avstemmingdato = LocalDateTime.now(),
+                            transaksjonsId = transaksjonsId,
+                        ),
                     ),
-                ),
-                properties = Properties().apply {
-                    this["transaksjonsId"] = transaksjonsId.toString()
-                },
+                properties =
+                    Properties().apply {
+                        this["transaksjonsId"] = transaksjonsId.toString()
+                    },
             ),
         )
 
@@ -56,7 +55,6 @@ class KonsistensavstemmingScheduler(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(KonsistensavstemmingScheduler::class.java)
     }
 }

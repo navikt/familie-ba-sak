@@ -10,7 +10,6 @@ class KorrigertEtterbetalingService(
     private val korrigertEtterbetalingRepository: KorrigertEtterbetalingRepository,
     private val loggService: LoggService,
 ) {
-
     fun finnAktivtKorrigeringPåBehandling(behandlingId: Long): KorrigertEtterbetaling? =
         korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandlingId)
 

@@ -26,20 +26,14 @@ data class BehandlingSøknadsinfo(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Column(name = "journalpost_id")
     val journalpostId: String? = null,
-
     @Column(name = "brevkode")
     val brevkode: String? = null,
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandling: Behandling,
-
     val mottattDato: LocalDateTime,
-
     @Column(name = "er_digital")
     val erDigital: Boolean? = null,
-
 ) : BaseEntitet()

@@ -84,7 +84,10 @@ data class PdlKontaktinformasjonForDødsboAdresse(
 data class VergeData(val harVerge: Boolean)
 
 class KjonnDeserializer : StdDeserializer<Kjønn>(Kjønn::class.java) {
-    override fun deserialize(jp: JsonParser?, p1: DeserializationContext?): Kjønn {
+    override fun deserialize(
+        jp: JsonParser?,
+        p1: DeserializationContext?,
+    ): Kjønn {
         val node: JsonNode = jp!!.codec.readTree(jp)
         return when (val kjønn = node.asText()) {
             "M" -> Kjønn.MANN

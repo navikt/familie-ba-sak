@@ -19,7 +19,10 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
 import java.math.BigDecimal
 import java.time.LocalDate
 
-fun validerVerdierPåRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, feilutbetaling: BigDecimal) {
+fun validerVerdierPåRestTilbakekreving(
+    restTilbakekreving: RestTilbakekreving?,
+    feilutbetaling: BigDecimal,
+) {
     if (feilutbetaling != BigDecimal.ZERO && restTilbakekreving == null) {
         throw FunksjonellFeil(
             "Simuleringen har en feilutbetaling, men restTilbakekreving var null",
@@ -55,26 +58,23 @@ fun slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder: List<Simule
 
 fun hentTilbakekrevingsperioderISimulering(
     simulering: List<ØkonomiSimuleringMottaker>,
-    erManuelPosteringTogglePå: Boolean,
 ): List<Periode> =
     slåsammenNærliggendeFeilutbtalingPerioder(
         vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = simulering,
-            erManuellPosteringTogglePå = erManuelPosteringTogglePå,
         ).perioder,
     )
 
 fun opprettVarsel(
     tilbakekreving: Tilbakekreving?,
     simulering: List<ØkonomiSimuleringMottaker>,
-    erManuelPosteringTogglePå: Boolean,
 ): Varsel? =
     if (tilbakekreving?.valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
         val varseltekst = tilbakekreving.varsel ?: throw Feil("Varseltekst er ikke satt")
-        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
-            økonomiSimuleringMottakere = simulering,
-            erManuellPosteringTogglePå = erManuelPosteringTogglePå,
-        )
+        val restSimulering =
+            vedtakSimuleringMottakereTilRestSimulering(
+                økonomiSimuleringMottakere = simulering,
+            )
 
         Varsel(
             varseltekst = varseltekst,
@@ -85,7 +85,10 @@ fun opprettVarsel(
         null
     }
 
-fun hentFaktainfoForTilbakekreving(behandling: Behandling, tilbakekreving: Tilbakekreving): Faktainfo =
+fun hentFaktainfoForTilbakekreving(
+    behandling: Behandling,
+    tilbakekreving: Tilbakekreving,
+): Faktainfo =
     Faktainfo(
         revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
         revurderingsresultat = behandling.resultat.displayName,

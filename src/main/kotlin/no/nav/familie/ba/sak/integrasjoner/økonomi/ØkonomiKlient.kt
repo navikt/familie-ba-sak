@@ -27,7 +27,6 @@ class ØkonomiKlient(
     private val familieOppdragUri: String,
     @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "økonomi_barnetrygd") {
-
     fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): String {
         val uri = URI.create("$familieOppdragUri/oppdrag")
         return kallEksternTjenesteRessurs(
@@ -39,7 +38,10 @@ class ØkonomiKlient(
         }
     }
 
-    fun iverksettOppdragPåNytt(utbetalingsoppdrag: Utbetalingsoppdrag, versjon: Int = 1): String {
+    fun iverksettOppdragPåNytt(
+        utbetalingsoppdrag: Utbetalingsoppdrag,
+        versjon: Int = 1,
+    ): String {
         val uri = URI.create("$familieOppdragUri/oppdragPaaNytt/$versjon")
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
@@ -78,7 +80,10 @@ class ØkonomiKlient(
         }
     }
 
-    fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): String {
+    fun grensesnittavstemOppdrag(
+        fraDato: LocalDateTime,
+        tilDato: LocalDateTime,
+    ): String {
         val uri = URI.create("$familieOppdragUri/grensesnittavstemming")
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
@@ -100,10 +105,11 @@ class ØkonomiKlient(
         avstemmingsdato: LocalDateTime,
         transaksjonsId: UUID,
     ): String {
-        val uri = URI.create(
-            "$familieOppdragUri/v2/konsistensavstemming" +
-                "?sendStartmelding=true&sendAvsluttmelding=false&transaksjonsId=$transaksjonsId",
-        )
+        val uri =
+            URI.create(
+                "$familieOppdragUri/v2/konsistensavstemming" +
+                    "?sendStartmelding=true&sendAvsluttmelding=false&transaksjonsId=$transaksjonsId",
+            )
 
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
@@ -126,10 +132,11 @@ class ØkonomiKlient(
         perioderTilAvstemming: List<PerioderForBehandling>,
         transaksjonsId: UUID,
     ): String {
-        val uri = URI.create(
-            "$familieOppdragUri/v2/konsistensavstemming" +
-                "?sendStartmelding=false&sendAvsluttmelding=false&transaksjonsId=$transaksjonsId",
-        )
+        val uri =
+            URI.create(
+                "$familieOppdragUri/v2/konsistensavstemming" +
+                    "?sendStartmelding=false&sendAvsluttmelding=false&transaksjonsId=$transaksjonsId",
+            )
 
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
@@ -151,10 +158,11 @@ class ØkonomiKlient(
         avstemmingsdato: LocalDateTime,
         transaksjonsId: UUID,
     ): String {
-        val uri = URI.create(
-            "$familieOppdragUri/v2/konsistensavstemming" +
-                "?sendStartmelding=false&sendAvsluttmelding=true&transaksjonsId=$transaksjonsId",
-        )
+        val uri =
+            URI.create(
+                "$familieOppdragUri/v2/konsistensavstemming" +
+                    "?sendStartmelding=false&sendAvsluttmelding=true&transaksjonsId=$transaksjonsId",
+            )
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
@@ -181,6 +189,17 @@ class ØkonomiKlient(
             uri = uri,
             formål = "Hent utbetalingsoppdrag for fagsaker",
         ) { postForEntity(uri = uri, payload = fagsakIder) }
+    }
+
+    fun opprettManuellKvitteringPåOppdrag(oppdragId: OppdragId): OppdragStatus {
+        val uri = URI.create("$familieOppdragUri/oppdrag/manuell-kvittering")
+        return kallEksternTjenesteRessurs(
+            tjeneste = "familie-oppdrag",
+            uri = uri,
+            formål = "Oppretter kvitteringsmelding på oppdrag og setter status til KVITTERT_OK",
+        ) {
+            postForEntity(uri = uri, oppdragId)
+        }
     }
 }
 

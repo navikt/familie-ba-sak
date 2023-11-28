@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -44,15 +43,15 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
     val personidentService = mockk<PersonidentService>()
     val beregningService = mockk<BeregningService>()
     val persongrunnlagService = mockk<PersongrunnlagService>()
-    val featureToggleService = mockk<FeatureToggleService>()
 
-    private val personopplysningGrunnlagForNyBehandlingService = spyk(
-        PersonopplysningGrunnlagForNyBehandlingService(
-            personidentService = personidentService,
-            beregningService = beregningService,
-            persongrunnlagService = persongrunnlagService,
-        ),
-    )
+    private val personopplysningGrunnlagForNyBehandlingService =
+        spyk(
+            PersonopplysningGrunnlagForNyBehandlingService(
+                personidentService = personidentService,
+                beregningService = beregningService,
+                persongrunnlagService = persongrunnlagService,
+            ),
+        )
 
     @Test
     fun `Skal sende med barna fra forrige behandling ved førstegangsbehandling nummer to`() {
@@ -119,13 +118,14 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         val grUkjentBosted = GrUkjentBosted("Oslo").medPeriodeOgPerson(periode, søkerPerson)
         val grMatrikkeladresse = GrMatrikkeladresse(1, "2", null, "0682", "23").medPeriodeOgPerson(periode, søkerPerson)
 
-        val statsborgerskap = GrStatsborgerskap(
-            id = 1,
-            gyldigPeriode = periode,
-            landkode = "N",
-            medlemskap = Medlemskap.EØS,
-            person = søkerPerson,
-        )
+        val statsborgerskap =
+            GrStatsborgerskap(
+                id = 1,
+                gyldigPeriode = periode,
+                landkode = "N",
+                medlemskap = Medlemskap.EØS,
+                person = søkerPerson,
+            )
         val opphold =
             GrOpphold(id = 1, gyldigPeriode = periode, type = OPPHOLDSTILLATELSE.PERMANENT, person = søkerPerson)
         val arbeidsforhold =
@@ -138,14 +138,15 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
             )
         val sivilstand =
             GrSivilstand(id = 1, fom = LocalDate.now(), type = SIVILSTAND.REGISTRERT_PARTNER, person = søkerPerson)
-        val dødsfall = Dødsfall(
-            id = 1,
-            person = søkerPerson,
-            dødsfallDato = LocalDate.now(),
-            dødsfallAdresse = "Adresse",
-            dødsfallPostnummer = "1234",
-            dødsfallPoststed = "Oslo",
-        )
+        val dødsfall =
+            Dødsfall(
+                id = 1,
+                person = søkerPerson,
+                dødsfallDato = LocalDate.now(),
+                dødsfallAdresse = "Adresse",
+                dødsfallPostnummer = "1234",
+                dødsfallPoststed = "Oslo",
+            )
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(forrigeBehandling.id, søkerPerson, barnPerson).also {
@@ -166,15 +167,15 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
                     }
                 }
             }
-        every { featureToggleService.isEnabled(any(), any()) } returns true
         every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
         every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
         every { personidentService.hentOgLagreAktør(any(), any()) } returns tilAktør(søker.ident)
-        every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns listOf(
-            tilAktør(
-                barn.ident,
-            ),
-        )
+        every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns
+            listOf(
+                tilAktør(
+                    barn.ident,
+                ),
+            )
         personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
             nyBehandling,
             forrigeBehandling,
@@ -208,13 +209,14 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         val grUkjentBosted = GrUkjentBosted("Oslo").medPeriodeOgPerson(periode, søkerPerson)
         val grMatrikkeladresse = GrMatrikkeladresse(1, "2", null, "0682", "23").medPeriodeOgPerson(periode, søkerPerson)
 
-        val statsborgerskap = GrStatsborgerskap(
-            id = 1,
-            gyldigPeriode = periode,
-            landkode = "N",
-            medlemskap = Medlemskap.EØS,
-            person = søkerPerson,
-        )
+        val statsborgerskap =
+            GrStatsborgerskap(
+                id = 1,
+                gyldigPeriode = periode,
+                landkode = "N",
+                medlemskap = Medlemskap.EØS,
+                person = søkerPerson,
+            )
         val opphold =
             GrOpphold(id = 1, gyldigPeriode = periode, type = OPPHOLDSTILLATELSE.PERMANENT, person = søkerPerson)
         val arbeidsforhold =
@@ -227,14 +229,15 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
             )
         val sivilstand =
             GrSivilstand(id = 1, fom = LocalDate.now(), type = SIVILSTAND.REGISTRERT_PARTNER, person = søkerPerson)
-        val dødsfall = Dødsfall(
-            id = 1,
-            person = søkerPerson,
-            dødsfallDato = LocalDate.now(),
-            dødsfallAdresse = "Adresse",
-            dødsfallPostnummer = "1234",
-            dødsfallPoststed = "Oslo",
-        )
+        val dødsfall =
+            Dødsfall(
+                id = 1,
+                person = søkerPerson,
+                dødsfallDato = LocalDate.now(),
+                dødsfallAdresse = "Adresse",
+                dødsfallPostnummer = "1234",
+                dødsfallPoststed = "Oslo",
+            )
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(forrigeBehandling.id, søkerPerson, barnPerson1, barnPerson2).also {
@@ -275,15 +278,15 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
                     }
                 }
             }
-        every { featureToggleService.isEnabled(any(), any()) } returns true
         every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
         every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
         every { personidentService.hentOgLagreAktør(any(), any()) } returns tilAktør(søker.ident)
-        every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns listOf(
-            tilAktør(
-                barn1.ident,
-            ),
-        )
+        every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns
+            listOf(
+                tilAktør(
+                    barn1.ident,
+                ),
+            )
         personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
             nyBehandling,
             forrigeBehandling,
@@ -306,7 +309,6 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         val nyBehandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING)
         val søker = PersonIdent(randomFnr())
         val barn = PersonIdent(randomFnr())
-        every { featureToggleService.isEnabled(any(), any()) } returns true
         assertThatThrownBy {
             personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
                 behandling = nyBehandling,
@@ -317,7 +319,10 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         }.isInstanceOf(Feil::class.java)
     }
 
-    private fun GrBostedsadresse.medPeriodeOgPerson(periode: DatoIntervallEntitet, person: Person): GrBostedsadresse =
+    private fun GrBostedsadresse.medPeriodeOgPerson(
+        periode: DatoIntervallEntitet,
+        person: Person,
+    ): GrBostedsadresse =
         this.also {
             it.periode = periode
             it.person = person

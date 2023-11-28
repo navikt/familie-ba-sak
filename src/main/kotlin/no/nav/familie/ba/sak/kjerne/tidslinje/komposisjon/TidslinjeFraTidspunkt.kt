@@ -12,18 +12,19 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somTilOgMed
 
 fun <T : Tidsenhet, I> Iterable<Tidspunkt<T>>.tidslinjeFraTidspunkt(
     tidspunktMapper: (Tidspunkt<T>) -> Innhold<I>,
-): Tidslinje<I, T> = tidslinje {
-    map { tidspunkt -> TidspunktMedInnhold(tidspunkt, tidspunktMapper(tidspunkt)) }
-        .filter { it.harInnhold }
-        .fold(emptyList()) { perioder, tidspunktMedInnhold ->
-            val sistePeriode = perioder.lastOrNull()
-            when {
-                sistePeriode != null && sistePeriode.kanUtvidesMed(tidspunktMedInnhold) ->
-                    perioder.replaceLast(sistePeriode.utvidMed(tidspunktMedInnhold))
-                else -> perioder + tidspunktMedInnhold.tilPeriode()
+): Tidslinje<I, T> =
+    tidslinje {
+        map { tidspunkt -> TidspunktMedInnhold(tidspunkt, tidspunktMapper(tidspunkt)) }
+            .filter { it.harInnhold }
+            .fold(emptyList()) { perioder, tidspunktMedInnhold ->
+                val sistePeriode = perioder.lastOrNull()
+                when {
+                    sistePeriode != null && sistePeriode.kanUtvidesMed(tidspunktMedInnhold) ->
+                        perioder.replaceLast(sistePeriode.utvidMed(tidspunktMedInnhold))
+                    else -> perioder + tidspunktMedInnhold.tilPeriode()
+                }
             }
-        }
-}
+    }
 
 /**
  * Innhold har tre tilstander
@@ -48,10 +49,12 @@ data class Innhold<I>(
         get() = innhold!!
 
     fun <R> mapInnhold(mapper: (I?) -> R?): R? = if (this.harInnhold) mapper(innhold) else null
+
     fun <R> mapVerdi(mapper: (I) -> R): R? = if (this.harVerdi) mapper(verdi) else null
 }
 
 fun <I> I?.tilInnhold() = Innhold(this)
+
 fun <I> I?.tilVerdi() = this?.let { Innhold<I>(it) } ?: Innhold.utenInnhold()
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.innholdForTidspunkt(tidspunkt: Tidspunkt<T>): Innhold<I> =

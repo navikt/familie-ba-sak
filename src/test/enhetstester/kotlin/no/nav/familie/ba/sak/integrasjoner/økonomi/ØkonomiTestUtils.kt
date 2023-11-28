@@ -15,20 +15,22 @@ fun sats(ytelseType: YtelseType) =
         YtelseType.SMÅBARNSTILLEGG -> 660
     }
 
-fun lagUtbetalingsoppdrag(utbetalingsperiode: List<Utbetalingsperiode>) = Utbetalingsoppdrag(
-    kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
-    fagSystem = "BA",
-    saksnummer = "",
-    aktoer = UUID.randomUUID().toString(),
-    saksbehandlerId = "",
-    avstemmingTidspunkt = LocalDateTime.now(),
-    utbetalingsperiode = utbetalingsperiode,
-)
+fun lagUtbetalingsoppdrag(utbetalingsperiode: List<Utbetalingsperiode>) =
+    Utbetalingsoppdrag(
+        kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
+        fagSystem = "BA",
+        saksnummer = "",
+        aktoer = UUID.randomUUID().toString(),
+        saksbehandlerId = "",
+        avstemmingTidspunkt = LocalDateTime.now(),
+        utbetalingsperiode = utbetalingsperiode,
+    )
 
 fun lagUtbetalingsoppdrag(
-    utbetalingsperiode: List<no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode> = listOf(
-        lagUtbetalingsperiode(),
-    ),
+    utbetalingsperiode: List<no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode> =
+        listOf(
+            lagUtbetalingsperiode(),
+        ),
 ) =
     no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag(
         kodeEndring = no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag.KodeEndring.NY,
@@ -40,18 +42,19 @@ fun lagUtbetalingsoppdrag(
         utbetalingsperiode = utbetalingsperiode,
     )
 
-fun lagUtbetalingsperiode() = no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode(
-    erEndringPåEksisterendePeriode = false,
-    opphør = null,
-    periodeId = 0,
-    forrigePeriodeId = null,
-    datoForVedtak = LocalDate.now(),
-    klassifisering = "",
-    vedtakdatoFom = LocalDate.now(),
-    vedtakdatoTom = LocalDate.now().plusMonths(1),
-    sats = BigDecimal(100),
-    satsType = no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode.SatsType.MND,
-    utbetalesTil = "",
-    behandlingId = 1,
-    utbetalingsgrad = 100,
-)
+fun lagUtbetalingsperiode() =
+    no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode(
+        erEndringPåEksisterendePeriode = false,
+        opphør = null,
+        periodeId = 0,
+        forrigePeriodeId = null,
+        datoForVedtak = LocalDate.now(),
+        klassifisering = "",
+        vedtakdatoFom = LocalDate.now(),
+        vedtakdatoTom = LocalDate.now().plusMonths(1),
+        sats = BigDecimal(100),
+        satsType = no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode.SatsType.MND,
+        utbetalesTil = "",
+        behandlingId = 1,
+        utbetalingsgrad = 100,
+    )

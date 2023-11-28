@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-java@v3
         with:
-          java-version: 17
+          java-version: 21
           distribution: 'temurin'
           cache: 'maven'
       - name: Bygg med maven
@@ -40,6 +40,7 @@ jobs:
           docker_context: .
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          byosbom: target/bom.json
       - name: Skriv ut docker-taggen
         run: echo 'Docker-tag er ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }} ' >> $GITHUB_STEP_SUMMARY
     outputs:

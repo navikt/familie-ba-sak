@@ -24,13 +24,13 @@ class VilkårsvurderingService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val sanityService: SanityService,
 ) {
-
     fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? {
         return vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun hentAktivForBehandlingThrows(behandlingId: Long): Vilkårsvurdering = hentAktivForBehandling(behandlingId)
-        ?: throw Feil("Fant ikke vilkårsvurdering knyttet til behandling=$behandlingId")
+    fun hentAktivForBehandlingThrows(behandlingId: Long): Vilkårsvurdering =
+        hentAktivForBehandling(behandlingId)
+            ?: throw Feil("Fant ikke vilkårsvurdering knyttet til behandling=$behandlingId")
 
     fun oppdater(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer vilkårsvurdering $vilkårsvurdering")
@@ -65,9 +65,10 @@ class VilkårsvurderingService(
             eøsStandardbegrunnelserTilNedtrekksmenytekster(sanityService.hentSanityEØSBegrunnelser())
 
     fun hentTidligsteVilkårsvurderingKnyttetTilMigrering(behandlingId: Long): YearMonth? {
-        val vilkårsvurdering = hentAktivForBehandling(
-            behandlingId = behandlingId,
-        )
+        val vilkårsvurdering =
+            hentAktivForBehandling(
+                behandlingId = behandlingId,
+            )
 
         return vilkårsvurdering?.personResultater
             ?.flatMap { it.vilkårResultater }
@@ -79,11 +80,16 @@ class VilkårsvurderingService(
     }
 
     @Transactional
-    fun oppdaterVilkårVedDødsfall(behandlingId: BehandlingId, dødsfallsDato: LocalDate, aktør: Aktør) {
+    fun oppdaterVilkårVedDødsfall(
+        behandlingId: BehandlingId,
+        dødsfallsDato: LocalDate,
+        aktør: Aktør,
+    ) {
         val vilkårsvurdering = hentAktivForBehandlingThrows(behandlingId.id)
 
-        val personResultat = vilkårsvurdering.personResultater.find { it.aktør == aktør }
-            ?: throw Feil(message = "Fant ikke vilkårsvurdering for person under manuell registrering av dødsfall dato")
+        val personResultat =
+            vilkårsvurdering.personResultater.find { it.aktør == aktør }
+                ?: throw Feil(message = "Fant ikke vilkårsvurdering for person under manuell registrering av dødsfall dato")
 
         personResultat.vilkårResultater.filter { it.periodeTom != null && it.periodeTom!! > dødsfallsDato }.forEach {
             it.periodeTom = dødsfallsDato
@@ -91,7 +97,6 @@ class VilkårsvurderingService(
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(VilkårsvurderingService::class.java)
 
         fun matchVilkårResultater(
@@ -111,17 +116,18 @@ class VilkårsvurderingService(
                 val erEksplisittAvslagPåSøknad: Boolean?,
             )
 
-            val gruppert = vilkårResultater.groupBy {
-                Match(
-                    aktør = it.personResultat?.aktør ?: error("VilkårResultat mangler aktør"),
-                    vilkårType = it.vilkårType,
-                    resultat = it.resultat,
-                    periodeFom = it.periodeFom,
-                    periodeTom = it.periodeTom,
-                    begrunnelse = it.begrunnelse,
-                    erEksplisittAvslagPåSøknad = it.erEksplisittAvslagPåSøknad,
-                )
-            }
+            val gruppert =
+                vilkårResultater.groupBy {
+                    Match(
+                        aktør = it.personResultat?.aktør ?: error("VilkårResultat mangler aktør"),
+                        vilkårType = it.vilkårType,
+                        resultat = it.resultat,
+                        periodeFom = it.periodeFom,
+                        periodeTom = it.periodeTom,
+                        begrunnelse = it.begrunnelse,
+                        erEksplisittAvslagPåSøknad = it.erEksplisittAvslagPåSøknad,
+                    )
+                }
             return gruppert.map { (_, gruppe) ->
                 if (gruppe.size > 2) throw Feil("Finnes flere like vilkår i én vilkårsvurdering")
                 val vilkår1 = gruppe.find { it.personResultat!!.vilkårsvurdering == vilkårsvurdering1 }

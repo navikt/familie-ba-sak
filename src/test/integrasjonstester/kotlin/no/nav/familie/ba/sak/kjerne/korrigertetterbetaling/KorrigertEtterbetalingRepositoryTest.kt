@@ -23,19 +23,19 @@ class KorrigertEtterbetalingRepositoryTest(
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val korrigertEtterbetalingRepository: KorrigertEtterbetalingRepository,
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun `finnAktivtKorrigeringPåBehandling skal returnere null dersom det ikke eksisterer en aktiv etterbetaling korrigering på behandling`() {
         val behandling = opprettBehandling()
 
-        val inaktivKorrigertEtterbetaling = KorrigertEtterbetaling(
-            id = 10000001,
-            årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
-            begrunnelse = "Test på inaktiv korrigering",
-            beløp = 1000,
-            behandling = behandling,
-            aktiv = false,
-        )
+        val inaktivKorrigertEtterbetaling =
+            KorrigertEtterbetaling(
+                id = 10000001,
+                årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+                begrunnelse = "Test på inaktiv korrigering",
+                beløp = 1000,
+                behandling = behandling,
+                aktiv = false,
+            )
 
         korrigertEtterbetalingRepository.saveAndFlush(inaktivKorrigertEtterbetaling)
 
@@ -49,14 +49,15 @@ class KorrigertEtterbetalingRepositoryTest(
     fun `finnAktivtKorrigeringPåBehandling skal returnere aktiv korrigering på behandling dersom det finnes`() {
         val behandling = opprettBehandling()
 
-        val aktivKorrigertEtterbetaling = KorrigertEtterbetaling(
-            id = 10000002,
-            årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
-            begrunnelse = "Test på aktiv korrigering",
-            beløp = 1000,
-            behandling = behandling,
-            aktiv = true,
-        )
+        val aktivKorrigertEtterbetaling =
+            KorrigertEtterbetaling(
+                id = 10000002,
+                årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+                begrunnelse = "Test på aktiv korrigering",
+                beløp = 1000,
+                behandling = behandling,
+                aktiv = true,
+            )
 
         korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)
 
@@ -71,23 +72,25 @@ class KorrigertEtterbetalingRepositoryTest(
     fun `Det skal kastes DataIntegrityViolationException dersom det forsøkes å lagre aktivt korrigering når det allerede finnes en`() {
         val behandling = opprettBehandling()
 
-        val aktivKorrigertEtterbetaling = KorrigertEtterbetaling(
-            id = 10000007,
-            årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
-            begrunnelse = "Test på aktiv korrigering",
-            beløp = 1000,
-            behandling = behandling,
-            aktiv = true,
-        )
+        val aktivKorrigertEtterbetaling =
+            KorrigertEtterbetaling(
+                id = 10000007,
+                årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+                begrunnelse = "Test på aktiv korrigering",
+                beløp = 1000,
+                behandling = behandling,
+                aktiv = true,
+            )
 
-        val aktivKorrigertEtterbetaling2 = KorrigertEtterbetaling(
-            id = 10000008,
-            årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
-            begrunnelse = "Test på aktiv korrigering",
-            beløp = 1000,
-            behandling = behandling,
-            aktiv = true,
-        )
+        val aktivKorrigertEtterbetaling2 =
+            KorrigertEtterbetaling(
+                id = 10000008,
+                årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+                begrunnelse = "Test på aktiv korrigering",
+                beløp = 1000,
+                behandling = behandling,
+                aktiv = true,
+            )
 
         korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)
 
@@ -100,23 +103,25 @@ class KorrigertEtterbetalingRepositoryTest(
     fun `hentAlleKorrigeringPåBehandling skal returnere alle KorrigertEtterbetaling på behandling`() {
         val behandling = opprettBehandling()
 
-        val aktivKorrigertEtterbetaling = KorrigertEtterbetaling(
-            id = 10000003,
-            årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
-            begrunnelse = "1",
-            beløp = 1000,
-            behandling = behandling,
-            aktiv = true,
-        )
+        val aktivKorrigertEtterbetaling =
+            KorrigertEtterbetaling(
+                id = 10000003,
+                årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+                begrunnelse = "1",
+                beløp = 1000,
+                behandling = behandling,
+                aktiv = true,
+            )
 
-        val inaktivKorrigertEtterbetaling = KorrigertEtterbetaling(
-            id = 10000004,
-            årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
-            begrunnelse = "2",
-            beløp = 1000,
-            behandling = behandling,
-            aktiv = false,
-        )
+        val inaktivKorrigertEtterbetaling =
+            KorrigertEtterbetaling(
+                id = 10000004,
+                årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+                begrunnelse = "2",
+                beløp = 1000,
+                behandling = behandling,
+                aktiv = false,
+            )
 
         korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)
         korrigertEtterbetalingRepository.saveAndFlush(inaktivKorrigertEtterbetaling)

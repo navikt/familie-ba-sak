@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 
 object BehandlingValidering {
-
     fun validerBehandlingKanRedigeres(behandling: Behandling) {
         validerBehandlingKanRedigeres(behandling.status)
     }

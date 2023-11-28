@@ -27,7 +27,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2021 | 500   | 1            |
-      | 3456    | 01.04.2021 | 31.05.2022 | 1354  | 1            |
+      | 3456    | 01.04.2021 | 30.04.2022 | 1354  | 1            |
 
     Når vedtaksperiodene genereres for behandling 1
 

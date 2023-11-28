@@ -9,13 +9,11 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -30,36 +28,21 @@ import java.time.LocalDate
 class RestFagsakTest(
     @Autowired
     private val stegService: StegService,
-
     @Autowired
     private val vedtakService: VedtakService,
-
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
-
     @Autowired
     private val fagsakService: FagsakService,
-
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
-
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-
-    @Autowired
-    private val tilbakekrevingService: TilbakekrevingService,
-
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
-
     @Autowired
     private val brevmalService: BrevmalService,
-
-    @Autowired
-    private val featureToggleService: FeatureToggleService,
-
 ) : AbstractSpringIntegrationTest() {
-
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
@@ -81,18 +64,19 @@ class RestFagsakTest(
         val søkerFnr = randomFnr()
         val barnFnr = ClientMocks.barnFnr[0]
 
-        val førstegangsbehandling = kjørStegprosessForFGB(
-            tilSteg = StegType.BEHANDLING_AVSLUTTET,
-            søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val førstegangsbehandling =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.BEHANDLING_AVSLUTTET,
+                søkerFnr = søkerFnr,
+                barnasIdenter = listOf(barnFnr),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         kjørStegprosessForRevurderingÅrligKontroll(
             tilSteg = StegType.BEHANDLINGSRESULTAT,

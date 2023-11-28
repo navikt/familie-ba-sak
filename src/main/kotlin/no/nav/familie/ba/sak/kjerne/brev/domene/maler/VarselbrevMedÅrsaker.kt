@@ -18,21 +18,25 @@ data class VarselbrevMedÅrsaker(
         saksbehandlerNavn: String,
     ) : this(
         mal = mal,
-        data = VarselOmRevurderingData(
-            delmalData = VarselOmRevurderingData.DelmalData(
-                signatur = SignaturDelmal(
-                    enhet = enhet,
-                    saksbehandlerNavn = saksbehandlerNavn,
-                ),
+        data =
+            VarselOmRevurderingData(
+                delmalData =
+                    VarselOmRevurderingData.DelmalData(
+                        signatur =
+                            SignaturDelmal(
+                                enhet = enhet,
+                                saksbehandlerNavn = saksbehandlerNavn,
+                            ),
+                    ),
+                flettefelter =
+                    VarselOmRevurderingData.Flettefelter(
+                        navn = navn,
+                        fodselsnummer = fødselsnummer,
+                        varselÅrsaker = varselÅrsaker,
+                        organisasjonsnummer = organisasjonsnummer,
+                        gjelder = gjelder,
+                    ),
             ),
-            flettefelter = VarselOmRevurderingData.Flettefelter(
-                navn = navn,
-                fodselsnummer = fødselsnummer,
-                varselÅrsaker = varselÅrsaker,
-                organisasjonsnummer = organisasjonsnummer,
-                gjelder = gjelder,
-            ),
-        ),
     )
 }
 
@@ -40,7 +44,6 @@ data class VarselOmRevurderingData(
     override val delmalData: DelmalData,
     override val flettefelter: Flettefelter,
 ) : BrevData {
-
     data class Flettefelter(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
@@ -49,7 +52,6 @@ data class VarselOmRevurderingData(
         override val organisasjonsnummer: Flettefelt,
         override val gjelder: Flettefelt,
     ) : FlettefelterForDokument {
-
         constructor(
             navn: String,
             fodselsnummer: String,

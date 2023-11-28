@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service
 class TilbakestillBehandlingFraKompetanseEndringService(
     private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse> {
-    override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<Kompetanse>) {
+    override fun skjemaerEndret(
+        behandlingId: BehandlingId,
+        endretTil: Collection<Kompetanse>,
+    ) {
         tilbakestillBehandlingTilBehandlingsresultatService
             .tilbakestillBehandlingTilBehandlingsresultat(behandlingId.id)
     }
@@ -22,7 +25,10 @@ class TilbakestillBehandlingFraKompetanseEndringService(
 class TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService(
     private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
-    override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<UtenlandskPeriodebeløp>) {
+    override fun skjemaerEndret(
+        behandlingId: BehandlingId,
+        endretTil: Collection<UtenlandskPeriodebeløp>,
+    ) {
         tilbakestillBehandlingTilBehandlingsresultatService
             .tilbakestillBehandlingTilBehandlingsresultat(behandlingId.id)
     }
@@ -32,7 +38,10 @@ class TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService(
 class TilbakestillBehandlingFraValutakursEndringService(
     private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs> {
-    override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<Valutakurs>) {
+    override fun skjemaerEndret(
+        behandlingId: BehandlingId,
+        endretTil: Collection<Valutakurs>,
+    ) {
         tilbakestillBehandlingTilBehandlingsresultatService
             .tilbakestillBehandlingTilBehandlingsresultat(behandlingId.id)
     }

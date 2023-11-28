@@ -32,11 +32,9 @@ data class Valutakurs(
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
     override val fom: YearMonth?,
-
     @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
     override val tom: YearMonth?,
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "AKTOER_TIL_VALUTAKURS",
@@ -44,13 +42,10 @@ data class Valutakurs(
         inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")],
     )
     override val barnAktører: Set<Aktør> = emptySet(),
-
     @Column(name = "valutakursdato", columnDefinition = "DATE")
     val valutakursdato: LocalDate? = null,
-
     @Column(name = "valutakode")
     val valutakode: String? = null,
-
     @Column(name = "kurs", nullable = false)
     val kurs: BigDecimal? = null,
 ) : PeriodeOgBarnSkjemaEntitet<Valutakurs>() {
@@ -67,20 +62,26 @@ data class Valutakurs(
     override var behandlingId: Long = 0
 
     // Valutakode skal alltid være satt (muligens til null), så den slettes ikke
-    override fun utenInnhold() = copy(
-        valutakursdato = null,
-        kurs = null,
-    )
+    override fun utenInnhold() =
+        copy(
+            valutakursdato = null,
+            kurs = null,
+        )
 
-    override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) =
+    override fun kopier(
+        fom: YearMonth?,
+        tom: YearMonth?,
+        barnAktører: Set<Aktør>,
+    ) =
         copy(
             fom = fom,
             tom = tom,
             barnAktører = barnAktører,
         )
 
-    fun erObligatoriskeFelterSatt() = fom != null &&
-        erObligatoriskeFelterUtenomTidsperioderSatt()
+    fun erObligatoriskeFelterSatt() =
+        fom != null &&
+            erObligatoriskeFelterUtenomTidsperioderSatt()
 
     fun erObligatoriskeFelterUtenomTidsperioderSatt() =
         this.valutakode != null &&

@@ -34,7 +34,6 @@ class KompetanseController(
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
-
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterKompetanse(
         @PathVariable behandlingId: Long,

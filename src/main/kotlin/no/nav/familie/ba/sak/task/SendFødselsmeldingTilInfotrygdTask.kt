@@ -22,7 +22,6 @@ import java.util.Properties
 class SendFødselsmeldingTilInfotrygdTask(
     private val infotrygdFeedClient: InfotrygdFeedClient,
 ) : AsyncTaskStep {
-
     override fun doTask(task: Task) {
         val infotrygdFeedTaskDto = objectMapper.readValue(task.payload, InfotrygdFødselhendelsesFeedTaskDto::class.java)
 
@@ -32,26 +31,27 @@ class SendFødselsmeldingTilInfotrygdTask(
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "sendFeedTilInfotrygd"
 
         fun opprettTask(fnrBarn: List<String>): Task {
             secureLogger.info("Oppretter task for å sende fødselsmelding for $fnrBarn til Infotrygd.")
 
-            val metadata = Properties().apply {
-                this["personIdenterBarn"] = fnrBarn.toString()
-                if (!MDC.get(MDCConstants.MDC_CALL_ID).isNullOrEmpty()) {
-                    this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
+            val metadata =
+                Properties().apply {
+                    this["personIdenterBarn"] = fnrBarn.toString()
+                    if (!MDC.get(MDCConstants.MDC_CALL_ID).isNullOrEmpty()) {
+                        this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
+                    }
                 }
-            }
 
             return Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(
-                    InfotrygdFødselhendelsesFeedTaskDto(
-                        fnrBarn = fnrBarn,
+                payload =
+                    objectMapper.writeValueAsString(
+                        InfotrygdFødselhendelsesFeedTaskDto(
+                            fnrBarn = fnrBarn,
+                        ),
                     ),
-                ),
                 properties = metadata,
             )
         }

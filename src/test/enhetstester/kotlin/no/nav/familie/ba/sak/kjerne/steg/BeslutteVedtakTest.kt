@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -42,7 +42,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class BeslutteVedtakTest {
-
     private lateinit var beslutteVedtak: BeslutteVedtak
     private lateinit var vedtakService: VedtakService
     private lateinit var behandlingService: BehandlingService
@@ -50,7 +49,7 @@ class BeslutteVedtakTest {
     private lateinit var taskRepository: TaskRepositoryWrapper
     private lateinit var dokumentService: DokumentService
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
-    private lateinit var featureToggleService: FeatureToggleService
+    private val unleashService = mockk<UnleashNextMedContextService>()
     private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
     private lateinit var simuleringService: SimuleringService
     private lateinit var automatiskBeslutningService: AutomatiskBeslutningService
@@ -68,7 +67,6 @@ class BeslutteVedtakTest {
         behandlingService = mockk()
         beregningService = mockk()
         vilkårsvurderingService = mockk()
-        featureToggleService = mockk()
         tilkjentYtelseValideringService = mockk()
         simuleringService = mockk()
         automatiskBeslutningService = mockk()
@@ -84,11 +82,12 @@ class BeslutteVedtakTest {
                 any(),
                 any(),
             )
-        } returns Totrinnskontroll(
-            behandling = lagBehandling(),
-            saksbehandler = "Mock Saksbehandler",
-            saksbehandlerId = "Mock.Saksbehandler",
-        )
+        } returns
+            Totrinnskontroll(
+                behandling = lagBehandling(),
+                saksbehandler = "Mock Saksbehandler",
+                saksbehandlerId = "Mock.Saksbehandler",
+            )
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
         every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any(), any()) } just runs
@@ -96,19 +95,20 @@ class BeslutteVedtakTest {
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
 
-        beslutteVedtak = BeslutteVedtak(
-            toTrinnKontrollService,
-            vedtakService,
-            behandlingService,
-            beregningService,
-            taskRepository,
-            loggService,
-            vilkårsvurderingService,
-            featureToggleService,
-            tilkjentYtelseValideringService,
-            saksbehandlerContext,
-            automatiskBeslutningService,
-        )
+        beslutteVedtak =
+            BeslutteVedtak(
+                totrinnskontrollService = toTrinnKontrollService,
+                vedtakService = vedtakService,
+                behandlingService = behandlingService,
+                beregningService = beregningService,
+                taskRepository = taskRepository,
+                loggService = loggService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                unleashService = unleashService,
+                tilkjentYtelseValideringService = tilkjentYtelseValideringService,
+                saksbehandlerContext = saksbehandlerContext,
+                automatiskBeslutningService = automatiskBeslutningService,
+            )
     }
 
     @Test
@@ -216,10 +216,11 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgaver.Companion)
         mockkObject(OpprettOppgaveTask.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
-        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task(
-            OpprettOppgaveTask.TASK_STEP_TYPE,
-            "",
-        )
+        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns
+            Task(
+                OpprettOppgaveTask.TASK_STEP_TYPE,
+                "",
+            )
 
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
@@ -229,7 +230,12 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV) } returns false
+        every {
+            unleashService.isEnabled(
+                FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV,
+                any(),
+            )
+        } returns false
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
@@ -238,17 +244,18 @@ class BeslutteVedtakTest {
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
         mockkObject(FerdigstillOppgaver.Companion)
-        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(
-            type = FerdigstillOppgaver.TASK_STEP_TYPE,
-            payload = "",
-        )
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns
+            Task(
+                type = FerdigstillOppgaver.TASK_STEP_TYPE,
+                payload = "",
+            )
 
         assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
     }
 
     @Test
     fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING) } returns false
+        every { unleashService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING, any()) } returns false
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
@@ -257,10 +264,11 @@ class BeslutteVedtakTest {
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
         mockkObject(FerdigstillOppgaver.Companion)
-        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(
-            type = FerdigstillOppgaver.TASK_STEP_TYPE,
-            payload = "",
-        )
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns
+            Task(
+                type = FerdigstillOppgaver.TASK_STEP_TYPE,
+                payload = "",
+            )
 
         assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
     }

@@ -10,7 +10,9 @@ interface PeriodeOgBarnSkjema<out T> where T : PeriodeOgBarnSkjema<T> {
     val fom: YearMonth?
     val tom: YearMonth?
     val barnAktører: Set<Aktør>
+
     fun utenInnhold(): T
+
     fun kopier(
         fom: YearMonth? = this.fom,
         tom: YearMonth? = this.tom,
@@ -22,11 +24,12 @@ fun <T : PeriodeOgBarnSkjema<T>> T.medBarnOgPeriodeSomOverlapperMed(skjema: T): 
     val fom = maxOf(this.fom ?: MIN_MÅNED, skjema.fom ?: MIN_MÅNED)
     val tom = minOf(this.tom ?: MAX_MÅNED, skjema.tom ?: MAX_MÅNED)
 
-    val snitt = this.kopier(
-        fom = if (fom == MIN_MÅNED) null else fom,
-        tom = if (tom == MAX_MÅNED) null else tom,
-        barnAktører = this.barnAktører.intersect(skjema.barnAktører),
-    )
+    val snitt =
+        this.kopier(
+            fom = if (fom == MIN_MÅNED) null else fom,
+            tom = if (tom == MAX_MÅNED) null else tom,
+            barnAktører = this.barnAktører.intersect(skjema.barnAktører),
+        )
 
     return if (snitt.harBarnOgPeriode()) snitt else null
 }

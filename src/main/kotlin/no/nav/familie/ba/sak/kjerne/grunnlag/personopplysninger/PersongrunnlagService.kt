@@ -50,7 +50,6 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
-
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
         val restPerson = person.tilRestPerson()
         restPerson.registerhistorikk?.statsborgerskap
@@ -82,14 +81,19 @@ class PersongrunnlagService(
         personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilFagsak(fagsakId)
             .takeIf { it.isNotEmpty() }
 
-    fun hentBarna(behandlingId: Long): List<Person> = personopplysningGrunnlagRepository
-        .findByBehandlingAndAktiv(behandlingId)!!.barna
+    fun hentBarna(behandlingId: Long): List<Person> =
+        personopplysningGrunnlagRepository
+            .findByBehandlingAndAktiv(behandlingId)!!.barna
 
-    fun hentPersonerPåBehandling(identer: List<String>, behandling: Behandling): List<Person> {
+    fun hentPersonerPåBehandling(
+        identer: List<String>,
+        behandling: Behandling,
+    ): List<Person> {
         val aktørIder = personidentService.hentAktørIder(identer)
 
-        val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-            ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling ${behandling.id}")
+        val grunnlag =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling ${behandling.id}")
         return grunnlag.søkerOgBarn.filter { person -> aktørIder.contains(person.aktør) }
     }
 
@@ -129,6 +133,10 @@ class PersongrunnlagService(
 
         val personopplysningGrunnlag = hentAktivThrows(behandlingId = behandling.id)
 
+        if (nyttbarnAktør == personopplysningGrunnlag.søker.aktør) {
+            throw FunksjonellFeil("Du kan ikke legge til søker som barn på behandlingen")
+        }
+
         val barnIGrunnlag = personopplysningGrunnlag.barna.map { it.aktør }
 
         if (barnIGrunnlag.contains(nyttbarnAktør)) {
@@ -138,12 +146,13 @@ class PersongrunnlagService(
             )
         }
 
-        val oppdatertGrunnlag = hentOgLagreSøkerOgBarnINyttGrunnlag(
-            aktør = personopplysningGrunnlag.søker.aktør,
-            barnFraInneværendeBehandling = barnIGrunnlag.plus(nyttbarnAktør).toList(),
-            behandling = behandling,
-            målform = personopplysningGrunnlag.søker.målform,
-        )
+        val oppdatertGrunnlag =
+            hentOgLagreSøkerOgBarnINyttGrunnlag(
+                aktør = personopplysningGrunnlag.søker.aktør,
+                barnFraInneværendeBehandling = barnIGrunnlag.plus(nyttbarnAktør).toList(),
+                behandling = behandling,
+                målform = personopplysningGrunnlag.søker.målform,
+            )
 
         oppdatertGrunnlag.barna.singleOrNull { nyttbarnAktør == it.aktør }
             ?.also { loggService.opprettBarnLagtTilLogg(behandling, it) } ?: run {
@@ -152,7 +161,10 @@ class PersongrunnlagService(
         }
     }
 
-    fun finnNyeBarn(behandling: Behandling, forrigeBehandling: Behandling?): List<Person> {
+    fun finnNyeBarn(
+        behandling: Behandling,
+        forrigeBehandling: Behandling?,
+    ): List<Person> {
         val barnIForrigeGrunnlag = forrigeBehandling?.let { hentAktiv(behandlingId = it.id)?.barna } ?: emptySet()
         val barnINyttGrunnlag = behandling.let { hentAktivThrows(behandlingId = it.id).barna }
 
@@ -208,17 +220,19 @@ class PersongrunnlagService(
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val enkelPersonInfo = behandling.erMigrering() || behandling.erSatsendring()
-        val søker = hentPerson(
-            aktør = aktør,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            målform = målform,
-            personType = when (behandling.fagsak.type) {
-                NORMAL -> PersonType.SØKER
-                BARN_ENSLIG_MINDREÅRIG, INSTITUSJON -> PersonType.BARN
-            },
-            enkelPersonInfo = enkelPersonInfo,
-            hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
-        )
+        val søker =
+            hentPerson(
+                aktør = aktør,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                målform = målform,
+                personType =
+                    when (behandling.fagsak.type) {
+                        NORMAL -> PersonType.SØKER
+                        BARN_ENSLIG_MINDREÅRIG, INSTITUSJON -> PersonType.BARN
+                    },
+                enkelPersonInfo = enkelPersonInfo,
+                hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
+            )
         personopplysningGrunnlag.personer.add(søker)
 
         barnFraInneværendeBehandling.union(barnFraForrigeBehandling).forEach { barnsAktør ->
@@ -296,15 +310,17 @@ class PersongrunnlagService(
                         person = person,
                     )
                 }?.sortedBy { it.gyldigPeriode?.fom }?.toMutableList() ?: mutableListOf()
-            person.dødsfall = lagDødsfallFraPdl(
-                person = person,
-                dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato,
-                dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse,
-            )
-            if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
-                person.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(
+            person.dødsfall =
+                lagDødsfallFraPdl(
                     person = person,
-                ).toMutableList()
+                    dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato,
+                    dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse,
+                )
+            if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
+                person.arbeidsforhold =
+                    arbeidsforholdService.hentArbeidsforhold(
+                        person = person,
+                    ).toMutableList()
             }
         }
     }
@@ -345,10 +361,11 @@ class PersongrunnlagService(
         val personopplysningGrunnlag = hentAktivThrows(behandlingId.id)
         val aktør = personidentService.hentAktør(personIdent.ident)
 
-        val person = personopplysningGrunnlag.personer.singleOrNull { it.aktør == aktør } ?: run {
-            secureLogger.info("Klarte ikke registrere manuell dødsfall dato siden $aktør ikke finnes i personopplysningsgrunnlaget til behandlingen")
-            throw Feil("Manuell registrering av dødsfall dato feilet i behandling ${behandlingId.id}. Se securelog for mer informasjon.")
-        }
+        val person =
+            personopplysningGrunnlag.personer.singleOrNull { it.aktør == aktør } ?: run {
+                secureLogger.info("Klarte ikke registrere manuell dødsfall dato siden $aktør ikke finnes i personopplysningsgrunnlaget til behandlingen")
+                throw Feil("Manuell registrering av dødsfall dato feilet i behandling ${behandlingId.id}. Se securelog for mer informasjon.")
+            }
 
         validerAtDødsfallKanManueltRegistreresPåPerson(person, dødsfallDato)
 
@@ -357,12 +374,16 @@ class PersongrunnlagService(
         loggService.loggManueltRegistrertDødsfallDato(behandlingId, person, begrunnelse)
     }
 
-    private fun validerAtDødsfallKanManueltRegistreresPåPerson(person: Person, dødsfallDato: LocalDate) {
+    private fun validerAtDødsfallKanManueltRegistreresPåPerson(
+        person: Person,
+        dødsfallDato: LocalDate,
+    ) {
         when {
             person.erDød() -> throw FunksjonellFeil("Dødsfall dato er allerede registrert på person med navn ${person.navn}")
             person.fødselsdato > dødsfallDato -> throw FunksjonellFeil("Du kan ikke sette dødsfall dato til en dato som er før ${person.navn} sin fødselsdato")
         }
     }
+
     companion object {
         private val logger = LoggerFactory.getLogger(PersongrunnlagService::class.java)
     }

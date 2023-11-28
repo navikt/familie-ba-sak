@@ -40,30 +40,32 @@ data class RestBostedsadresse(
     val postnummer: String,
 )
 
-private fun ForelderBarnRelasjonMaskert.tilRestForelderBarnRelasjonMaskert() = RestForelderBarnRelasjonnMaskert(
-    relasjonRolle = this.relasjonsrolle,
-    adressebeskyttelseGradering = this.adressebeskyttelseGradering,
-)
+private fun ForelderBarnRelasjonMaskert.tilRestForelderBarnRelasjonMaskert() =
+    RestForelderBarnRelasjonnMaskert(
+        relasjonRolle = this.relasjonsrolle,
+        adressebeskyttelseGradering = this.adressebeskyttelseGradering,
+    )
 
-private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() = RestForelderBarnRelasjon(
-    personIdent = this.aktør.aktivFødselsnummer(),
-    relasjonRolle = this.relasjonsrolle,
-    navn = this.navn ?: "",
-    fødselsdato = this.fødselsdato,
-    adressebeskyttelseGradering = this.adressebeskyttelseGradering,
-
-)
+private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() =
+    RestForelderBarnRelasjon(
+        personIdent = this.aktør.aktivFødselsnummer(),
+        relasjonRolle = this.relasjonsrolle,
+        navn = this.navn ?: "",
+        fødselsdato = this.fødselsdato,
+        adressebeskyttelseGradering = this.adressebeskyttelseGradering,
+    )
 
 fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
     val bostedsadresse =
         this.bostedsadresser.filter { it.angittFlyttedato != null }.maxByOrNull { it.angittFlyttedato!! }
-    val kommunenummer: String = when {
-        bostedsadresse == null -> null
-        bostedsadresse.vegadresse != null -> bostedsadresse.vegadresse?.kommunenummer
-        bostedsadresse.matrikkeladresse != null -> bostedsadresse.matrikkeladresse?.kommunenummer
-        bostedsadresse.ukjentBosted != null -> null
-        else -> null
-    } ?: "ukjent"
+    val kommunenummer: String =
+        when {
+            bostedsadresse == null -> null
+            bostedsadresse.vegadresse != null -> bostedsadresse.vegadresse?.kommunenummer
+            bostedsadresse.matrikkeladresse != null -> bostedsadresse.matrikkeladresse?.kommunenummer
+            bostedsadresse.ukjentBosted != null -> null
+            else -> null
+        } ?: "ukjent"
 
     val dødsfallDato = if (this.dødsfall != null && this.dødsfall.erDød) this.dødsfall.dødsdato else null
 
@@ -87,12 +89,14 @@ fun PersonInfo.tilRestPersonInfoMedNavnOgAdresse(personIdent: String): RestPerso
         personIdent = personIdent,
         fødselsdato = this.fødselsdato,
         navn = this.navn,
-        bostedsadresse = when (postnummer) {
-            null -> null
-            else -> RestBostedsadresse(
-                adresse = bostedsadresse?.vegadresse?.adressenavn?.plus(" ${bostedsadresse.vegadresse?.husnummer ?: ""}")?.trim(),
-                postnummer = postnummer,
-            )
-        },
+        bostedsadresse =
+            when (postnummer) {
+                null -> null
+                else ->
+                    RestBostedsadresse(
+                        adresse = bostedsadresse?.vegadresse?.adressenavn?.plus(" ${bostedsadresse.vegadresse?.husnummer ?: ""}")?.trim(),
+                        postnummer = postnummer,
+                    )
+            },
     )
 }

@@ -34,7 +34,7 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.05.2020 | 31.05.2020 | 1354  | 1            |
 
     Når vedtaksperiodene genereres for behandling 1
 

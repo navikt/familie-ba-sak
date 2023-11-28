@@ -7,8 +7,10 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -22,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDateEllerNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
@@ -46,11 +49,11 @@ fun genererVedtaksperioder(
         return lagPeriodeForOmregningsbehandling(
             vedtak = vedtak,
             nåDato = nåDato,
-            andelTilkjentYtelseer = grunnlagForVedtakPerioder.andelerTilkjentYtelse,
+            andelTilkjentYtelser = grunnlagForVedtakPerioder.andelerTilkjentYtelse,
         )
     }
 
-    if (vedtak.behandling.resultat.erFortsattInnvilget()) {
+    if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
         return lagFortsattInnvilgetPeriode(vedtak = vedtak)
     }
 
@@ -65,10 +68,11 @@ fun genererVedtaksperioder(
         finnPerioderSomSkalBegrunnes(
             grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson,
             grunnlagTidslinjePerPersonForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling,
-            endringstidspunkt = vedtak.behandling.overstyrtEndringstidspunkt ?: utledEndringstidspunkt(
-                behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtakPerioder,
-                behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtakPerioderForrigeBehandling,
-            ),
+            endringstidspunkt =
+                vedtak.behandling.overstyrtEndringstidspunkt ?: utledEndringstidspunkt(
+                    behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtakPerioder,
+                    behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtakPerioderForrigeBehandling,
+                ),
         )
 
     val vedtaksperioder =
@@ -111,12 +115,13 @@ private fun List<VedtaksperiodeMedBegrunnelser>.leggTilPeriodeForUregistrerteBar
         avslagsperiodeUtenDatoer.leggTilAvslagUregistrertBarnBegrunnelse()
         this
     } else {
-        val avslagsperiode: VedtaksperiodeMedBegrunnelser = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = null,
-            tom = null,
-            type = Vedtaksperiodetype.AVSLAG,
-        ).also { it.leggTilAvslagUregistrertBarnBegrunnelse() }
+        val avslagsperiode: VedtaksperiodeMedBegrunnelser =
+            VedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = null,
+                tom = null,
+                type = Vedtaksperiodetype.AVSLAG,
+            ).also { it.leggTilAvslagUregistrertBarnBegrunnelse() }
 
         this + avslagsperiode
     }
@@ -127,15 +132,17 @@ fun finnPerioderSomSkalBegrunnes(
     grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørOgRolleBegrunnelseGrunnlag, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag>,
     endringstidspunkt: LocalDate,
 ): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
-    val gjeldendeOgForrigeGrunnlagKombinert = kombinerGjeldendeOgForrigeGrunnlag(
-        grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson.mapValues { it.value.vedtaksperiodeGrunnlagForPerson },
-        grunnlagTidslinjePerPersonForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling.mapValues { it.value.vedtaksperiodeGrunnlagForPerson },
-    )
+    val gjeldendeOgForrigeGrunnlagKombinert =
+        kombinerGjeldendeOgForrigeGrunnlag(
+            grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson.mapValues { it.value.vedtaksperiodeGrunnlagForPerson },
+            grunnlagTidslinjePerPersonForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling.mapValues { it.value.vedtaksperiodeGrunnlagForPerson },
+        )
 
-    val sammenslåttePerioderUtenEksplisittAvslag = gjeldendeOgForrigeGrunnlagKombinert
-        .slåSammenUtenEksplisitteAvslag()
-        .filtrerPåEndringstidspunkt(endringstidspunkt)
-        .slåSammenSammenhengendeOpphørsperioder()
+    val sammenslåttePerioderUtenEksplisittAvslag =
+        gjeldendeOgForrigeGrunnlagKombinert
+            .slåSammenUtenEksplisitteAvslag()
+            .filtrerPåEndringstidspunkt(endringstidspunkt)
+            .slåSammenSammenhengendeOpphørsperioder()
 
     val eksplisitteAvslagsperioder = gjeldendeOgForrigeGrunnlagKombinert.utledEksplisitteAvslagsperioder()
 
@@ -147,8 +154,9 @@ fun finnPerioderSomSkalBegrunnes(
 }
 
 fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.slåSammenSammenhengendeOpphørsperioder(): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
-    val sortertePerioder = this
-        .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
+    val sortertePerioder =
+        this
+            .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
 
     return sortertePerioder.fold(emptyList()) { acc: List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>, dennePerioden ->
         val forrigePeriode = acc.lastOrNull()
@@ -165,8 +173,9 @@ fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.slåSam
 }
 
 fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.leggTilUendelighetPåSisteOpphørsPeriode(): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
-    val sortertePerioder = this
-        .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
+    val sortertePerioder =
+        this
+            .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
 
     val sistePeriode = sortertePerioder.lastOrNull()
     val sistePeriodeInneholderEksplisittAvslag =
@@ -203,16 +212,17 @@ private fun Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, M�
 }
 
 private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.slåSammenUtenEksplisitteAvslag(): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
-    val kombinerteAvslagOgReduksjonsperioder = this.map { grunnlagForDenneOgForrigeBehandlingTidslinje ->
-        grunnlagForDenneOgForrigeBehandlingTidslinje.filtrerIkkeNull {
-            val gjeldendeErIkkeInnvilgetIkkeAvslag =
-                it.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget && !it.gjeldende.erEksplisittAvslag
-            val gjeldendeErInnvilget = it.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårInnvilget
-            val erReduksjonSidenForrigeBehandling = it.erReduksjonSidenForrigeBehandling
+    val kombinerteAvslagOgReduksjonsperioder =
+        this.map { grunnlagForDenneOgForrigeBehandlingTidslinje ->
+            grunnlagForDenneOgForrigeBehandlingTidslinje.filtrerIkkeNull {
+                val gjeldendeErIkkeInnvilgetIkkeAvslag =
+                    it.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget && !it.gjeldende.erEksplisittAvslag
+                val gjeldendeErInnvilget = it.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårInnvilget
+                val erReduksjonSidenForrigeBehandling = it.erReduksjonSidenForrigeBehandling
 
-            gjeldendeErIkkeInnvilgetIkkeAvslag || gjeldendeErInnvilget || erReduksjonSidenForrigeBehandling
+                gjeldendeErIkkeInnvilgetIkkeAvslag || gjeldendeErInnvilget || erReduksjonSidenForrigeBehandling
+            }
         }
-    }
 
     return kombinerteAvslagOgReduksjonsperioder.kombiner { grunnlagTidslinje ->
         grunnlagTidslinje.toList().takeIf { it.isNotEmpty() }
@@ -220,14 +230,16 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.sl�
 }
 
 private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utledEksplisitteAvslagsperioder(): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
-    val avslagsperioderPerPerson = this.map { it.filtrerErAvslagsperiode() }
-        .map { tidslinje -> tidslinje.map { it?.medVilkårSomHarEksplisitteAvslag() } }
-        .flatMap { it.splittVilkårPerPerson() }
-        .map { it.slåSammenLike() }
+    val avslagsperioderPerPerson =
+        this.map { it.filtrerErAvslagsperiode() }
+            .map { tidslinje -> tidslinje.map { it?.medVilkårSomHarEksplisitteAvslag() } }
+            .flatMap { it.splittVilkårPerPerson() }
+            .map { it.slåSammenLike() }
 
-    val avslagsperioderMedSammeFomOgTom = avslagsperioderPerPerson
-        .flatMap { it.perioder() }
-        .groupBy { Pair(it.fraOgMed, it.tilOgMed) }
+    val avslagsperioderMedSammeFomOgTom =
+        avslagsperioderPerPerson
+            .flatMap { it.perioder() }
+            .groupBy { Pair(it.fraOgMed, it.tilOgMed) }
 
     return avslagsperioderMedSammeFomOgTom
         .map { (fomTomPar, avslagMedSammeFomOgTom) ->
@@ -254,13 +266,16 @@ private fun Periode<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.splittOppTi
         innhold.gjeldende.vilkårResultaterForVedtaksperiode.groupBy { it.aktørId }
 
     return vilkårPerPerson.map { (aktørId, vilkårresultaterForPersonIPeriode) ->
-        aktørId to this.copy(
-            innhold = this.innhold.copy(
-                gjeldende = innhold.gjeldende.kopier(
-                    vilkårResultaterForVedtaksperiode = vilkårresultaterForPersonIPeriode,
-                ),
-            ),
-        )
+        aktørId to
+            this.copy(
+                innhold =
+                    this.innhold.copy(
+                        gjeldende =
+                            innhold.gjeldende.kopier(
+                                vilkårResultaterForVedtaksperiode = vilkårresultaterForPersonIPeriode,
+                            ),
+                    ),
+            )
     }
 }
 
@@ -269,11 +284,13 @@ private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.filtrerEr
 
 private fun GrunnlagForGjeldendeOgForrigeBehandling.medVilkårSomHarEksplisitteAvslag(): GrunnlagForGjeldendeOgForrigeBehandling {
     return copy(
-        gjeldende = this.gjeldende?.kopier(
-            vilkårResultaterForVedtaksperiode = this.gjeldende
-                .vilkårResultaterForVedtaksperiode
-                .filter { it.erEksplisittAvslagPåSøknad },
-        ),
+        gjeldende =
+            this.gjeldende?.kopier(
+                vilkårResultaterForVedtaksperiode =
+                    this.gjeldende
+                        .vilkårResultaterForVedtaksperiode
+                        .filter { it.erEksplisittAvslagPåSøknad },
+            ),
     )
 }
 
@@ -315,7 +332,6 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
                 GrunnlagForGjeldendeOgForrigeBehandling(
                     gjeldende = gjeldende?.grunnlagForPerson,
                     erReduksjonSidenForrigeBehandling = erReduksjonFraForrigeBehandlingPåMinstEnYtelsestype,
-
                 )
             }.slåSammenSammenhengendeOpphørsPerioder()
     }
@@ -374,29 +390,31 @@ private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.slåSamme
 
 fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksperiodeMedBegrunnelser(
     vedtak: Vedtak,
-): VedtaksperiodeMedBegrunnelser = VedtaksperiodeMedBegrunnelser(
-    vedtak = vedtak,
-    fom = fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDateEllerNull(),
-    tom = tilOgMed.tilLocalDateEllerNull(),
-    type = this.tilVedtaksperiodeType(),
-).let { vedtaksperiode ->
-    val begrunnelser = this.innhold?.flatMap { grunnlagForGjeldendeOgForrigeBehandling ->
-        grunnlagForGjeldendeOgForrigeBehandling.gjeldende?.vilkårResultaterForVedtaksperiode
-            ?.flatMap { it.standardbegrunnelser } ?: emptyList()
-    } ?: emptyList()
+): VedtaksperiodeMedBegrunnelser =
+    VedtaksperiodeMedBegrunnelser(
+        vedtak = vedtak,
+        fom = fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDateEllerNull(),
+        tom = tilOgMed.tilLocalDateEllerNull(),
+        type = this.tilVedtaksperiodeType(),
+    ).let { vedtaksperiode ->
+        val begrunnelser =
+            this.innhold?.flatMap { grunnlagForGjeldendeOgForrigeBehandling ->
+                grunnlagForGjeldendeOgForrigeBehandling.gjeldende?.vilkårResultaterForVedtaksperiode
+                    ?.flatMap { it.standardbegrunnelser } ?: emptyList()
+            } ?: emptyList()
 
-    vedtaksperiode.begrunnelser.addAll(
-        begrunnelser.filterIsInstance<Standardbegrunnelse>()
-            .map { Vedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser = vedtaksperiode, standardbegrunnelse = it) },
-    )
+        vedtaksperiode.begrunnelser.addAll(
+            begrunnelser.filterIsInstance<Standardbegrunnelse>()
+                .map { Vedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser = vedtaksperiode, standardbegrunnelse = it) },
+        )
 
-    vedtaksperiode.eøsBegrunnelser.addAll(
-        begrunnelser.filterIsInstance<EØSStandardbegrunnelse>()
-            .map { EØSBegrunnelse(vedtaksperiodeMedBegrunnelser = vedtaksperiode, begrunnelse = it) },
-    )
+        vedtaksperiode.eøsBegrunnelser.addAll(
+            begrunnelser.filterIsInstance<EØSStandardbegrunnelse>()
+                .map { EØSBegrunnelse(vedtaksperiodeMedBegrunnelser = vedtaksperiode, begrunnelse = it) },
+        )
 
-    vedtaksperiode
-}
+        vedtaksperiode
+    }
 
 private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksperiodeType(): Vedtaksperiodetype {
     val erUtbetalingsperiode =
@@ -404,11 +422,12 @@ private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVe
     val erAvslagsperiode = this.innhold != null && this.innhold.all { it.gjeldende?.erEksplisittAvslag() == true }
 
     return when {
-        erUtbetalingsperiode -> if (this.innhold?.any { it.erReduksjonSidenForrigeBehandling } == true) {
-            Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
-        } else {
-            Vedtaksperiodetype.UTBETALING
-        }
+        erUtbetalingsperiode ->
+            if (this.innhold?.any { it.erReduksjonSidenForrigeBehandling } == true) {
+                Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
+            } else {
+                Vedtaksperiodetype.UTBETALING
+            }
 
         erAvslagsperiode -> Vedtaksperiodetype.AVSLAG
 
@@ -452,24 +471,29 @@ fun lagFortsattInnvilgetPeriode(
 
 fun lagPeriodeForOmregningsbehandling(
     vedtak: Vedtak,
-    andelTilkjentYtelseer: List<AndelTilkjentYtelse>,
+    andelTilkjentYtelser: List<AndelTilkjentYtelse>,
     nåDato: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
-    val nesteEndringITilkjentYtelse = andelTilkjentYtelseer
-        .filter { it.periodeInneholder(nåDato) }
-        .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
+    val andelerTidslinje: Tidslinje<List<AndelForVedtaksperiode>, Måned> =
+        andelTilkjentYtelser.tilTidslinjerPerAktørOgType().values.kombiner { it.toList() }
+
+    val nesteEndringITilkjentYtelse =
+        andelerTidslinje.perioder()
+            .singleOrNull { it.periodeInneholder(nåDato) }
+            ?.tilOgMed?.tilYearMonth()?.sisteDagIInneværendeMåned()
 
     return listOf(
         VedtaksperiodeMedBegrunnelser(
             fom = nåDato.førsteDagIInneværendeMåned(),
-            tom = nesteEndringITilkjentYtelse
-                ?: error("Fant ingen andeler for ${nåDato.tilMånedÅr()}. Autobrev skal ikke brukes for opphør."),
+            tom =
+                nesteEndringITilkjentYtelse
+                    ?: error("Fant ingen andeler for ${nåDato.tilMånedÅr()}. Autobrev skal ikke brukes for opphør."),
             vedtak = vedtak,
             type = Vedtaksperiodetype.UTBETALING,
         ),
     )
 }
 
-private fun AndelTilkjentYtelse.periodeInneholder(
+private fun <T> Periode<T, Måned>.periodeInneholder(
     nåDato: LocalDate,
-) = stønadFom <= nåDato.toYearMonth() && stønadTom >= nåDato.toYearMonth()
+) = this.fraOgMed.tilYearMonth() <= nåDato.toYearMonth() && this.tilOgMed.tilYearMonth() >= nåDato.toYearMonth()

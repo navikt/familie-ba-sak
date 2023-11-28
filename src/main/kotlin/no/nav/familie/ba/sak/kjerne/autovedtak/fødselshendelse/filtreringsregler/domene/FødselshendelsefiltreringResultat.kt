@@ -29,29 +29,22 @@ class FødselshendelsefiltreringResultat(
         allocationSize = 50,
     )
     val id: Long = 0,
-
     @Column(name = "fk_behandling_id", nullable = false, updatable = false, unique = true)
     val behandlingId: Long,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "filtreringsregel")
     val filtreringsregel: Filtreringsregel,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat")
     val resultat: Resultat,
-
     @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
     val begrunnelse: String,
-
     @Column(name = "evalueringsaarsaker")
     @Convert(converter = StringListConverter::class)
     val evalueringsårsaker: List<String> = emptyList(),
-
     @Column(name = "regel_input", columnDefinition = "TEXT")
     val regelInput: String? = null,
 ) : BaseEntitet() {
-
     override fun toString(): String {
         return "FødselshendelsefiltreringResultat(" +
             "id=$id, " +

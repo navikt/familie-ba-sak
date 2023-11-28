@@ -118,16 +118,17 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))) {
             val behandling = this
             with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
-                val andel = lagAndelTilkjentYtelse(
-                    årMnd("2019-04"),
-                    årMnd("2023-03"),
-                    YtelseType.ORDINÆR_BARNETRYGD,
-                    660,
-                    behandling,
-                    person = barn1,
-                    aktør = barnAktør,
-                    tilkjentYtelse = this,
-                )
+                val andel =
+                    lagAndelTilkjentYtelse(
+                        årMnd("2019-04"),
+                        årMnd("2023-03"),
+                        YtelseType.ORDINÆR_BARNETRYGD,
+                        660,
+                        behandling,
+                        person = barn1,
+                        aktør = barnAktør,
+                        tilkjentYtelse = this,
+                    )
                 andelerTilkjentYtelse.add(andel)
                 tilkjentYtelseRepository.save(this)
             }
@@ -143,24 +144,26 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     private fun mockInfotrygdBarnetrygdResponse(søkerAktør: Aktør) {
         every { envService.erPreprod() } returns false
-        every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(any(), any()) } returns BarnetrygdTilPensjonResponse(
-            fagsaker = listOf(
-                BarnetrygdTilPensjon(
-                    "",
+        every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(any(), any()) } returns
+            BarnetrygdTilPensjonResponse(
+                fagsaker =
                     listOf(
-                        BarnetrygdPeriode(
-                            personIdent = søkerAktør.aktivFødselsnummer(),
-                            delingsprosentYtelse = YtelseProsent.FULL,
-                            ytelseTypeEkstern = YtelseTypeEkstern.ORDINÆR_BARNETRYGD,
-                            utbetaltPerMnd = 1054,
-                            stønadFom = YearMonth.now(),
-                            stønadTom = YearMonth.now(),
-                            kildesystem = "Infotrygd",
-                            sakstypeEkstern = SakstypeEkstern.NASJONAL,
+                        BarnetrygdTilPensjon(
+                            "",
+                            listOf(
+                                BarnetrygdPeriode(
+                                    personIdent = søkerAktør.aktivFødselsnummer(),
+                                    delingsprosentYtelse = YtelseProsent.FULL,
+                                    ytelseTypeEkstern = YtelseTypeEkstern.ORDINÆR_BARNETRYGD,
+                                    utbetaltPerMnd = 1054,
+                                    stønadFom = YearMonth.now(),
+                                    stønadTom = YearMonth.now(),
+                                    kildesystem = "Infotrygd",
+                                    sakstypeEkstern = SakstypeEkstern.NASJONAL,
+                                ),
+                            ),
                         ),
                     ),
-                ),
-            ),
-        )
+            )
     }
 }

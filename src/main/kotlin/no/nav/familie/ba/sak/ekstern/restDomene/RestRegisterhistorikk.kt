@@ -13,14 +13,15 @@ data class RestRegisterhistorikk(
     val dødsboadresse: List<RestRegisteropplysning>? = emptyList(),
 )
 
-fun Person.tilRestRegisterhistorikk() = RestRegisterhistorikk(
-    hentetTidspunkt = this.personopplysningGrunnlag.opprettetTidspunkt,
-    oppholdstillatelse = opphold.map { it.tilRestRegisteropplysning() },
-    statsborgerskap = statsborgerskap.map { it.tilRestRegisteropplysning() },
-    bostedsadresse = this.bostedsadresser.map { it.tilRestRegisteropplysning() }.fyllInnTomDatoer(),
-    sivilstand = this.sivilstander.map { it.tilRestRegisteropplysning() },
-    dødsboadresse = if (this.dødsfall == null) emptyList() else listOf(this.dødsfall!!.tilRestRegisteropplysning()),
-)
+fun Person.tilRestRegisterhistorikk() =
+    RestRegisterhistorikk(
+        hentetTidspunkt = this.personopplysningGrunnlag.opprettetTidspunkt,
+        oppholdstillatelse = opphold.map { it.tilRestRegisteropplysning() },
+        statsborgerskap = statsborgerskap.map { it.tilRestRegisteropplysning() },
+        bostedsadresse = this.bostedsadresser.map { it.tilRestRegisteropplysning() }.fyllInnTomDatoer(),
+        sivilstand = this.sivilstander.map { it.tilRestRegisteropplysning() },
+        dødsboadresse = if (this.dødsfall == null) emptyList() else listOf(this.dødsfall!!.tilRestRegisteropplysning()),
+    )
 
 data class RestRegisteropplysning(
     val fom: LocalDate?,

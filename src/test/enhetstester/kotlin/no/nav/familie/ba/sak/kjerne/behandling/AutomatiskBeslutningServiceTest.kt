@@ -24,10 +24,11 @@ class AutomatiskBeslutningServiceTest {
 
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere true dersom behandling er helmanuell migrering med avvik innenfor beløpsgrenser og det ikke finnes manuelle posteringer`() {
-        val behandling = lagBehandling(
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-        )
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+            )
         every { simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling) } returns true
         every { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) } returns false
 
@@ -36,20 +37,22 @@ class AutomatiskBeslutningServiceTest {
 
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere true dersom behandling er endre migreringsdato behandling`() {
-        val behandling = lagBehandling(
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-        )
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+            )
 
         assertThat(automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)).isTrue
     }
 
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere false dersom behandling er helmanuell migrering med avvik innenfor beløpsgrenser men det finnes manuelle posteringer`() {
-        val behandling = lagBehandling(
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-        )
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+            )
         every { simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling) } returns true
         every { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) } returns true
 
@@ -58,10 +61,11 @@ class AutomatiskBeslutningServiceTest {
 
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere false dersom behandling er helmanuell migrering med avvik utenfor beløpsgrenser og det ikke finnes manuelle posteringer`() {
-        val behandling = lagBehandling(
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-        )
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+            )
         every { simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling) } returns false
         every { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) } returns false
 
@@ -70,10 +74,11 @@ class AutomatiskBeslutningServiceTest {
 
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere false dersom behandling er helmanuell migrering med avvik utenfor beløpsgrenser og det finnes manuelle posteringer`() {
-        val behandling = lagBehandling(
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-        )
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+            )
         every { simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling) } returns false
         every { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) } returns true
 
@@ -91,10 +96,11 @@ class AutomatiskBeslutningServiceTest {
                 BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
             ).contains(it)
         }.forEach { behandlingType ->
-            val behandling = lagBehandling(
-                behandlingType = behandlingType,
-                årsak = behandlingÅrsak,
-            )
+            val behandling =
+                lagBehandling(
+                    behandlingType = behandlingType,
+                    årsak = behandlingÅrsak,
+                )
             assertThat(automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)).isFalse
         }
     }

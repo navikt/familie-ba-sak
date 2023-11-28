@@ -29,27 +29,32 @@ class BehandlingsresultatService(
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val kompetanseService: KompetanseService,
 ) {
+    internal fun finnPersonerFremstiltKravFor(
+        behandling: Behandling,
+        søknadDTO: SøknadDTO?,
+        forrigeBehandling: Behandling?,
+    ): List<Aktør> {
+        val personerFremstiltKravFor =
+            when {
+                behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD -> {
+                    // alle barna som er krysset av på søknad
+                    val barnFraSøknad =
+                        søknadDTO?.barnaMedOpplysninger
+                            ?.filter { it.erFolkeregistrert && it.inkludertISøknaden }
+                            ?.map { personidentService.hentAktør(it.ident) }
+                            ?: emptyList()
 
-    internal fun finnPersonerFremstiltKravFor(behandling: Behandling, søknadDTO: SøknadDTO?, forrigeBehandling: Behandling?): List<Aktør> {
-        val personerFremstiltKravFor = when {
-            behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD -> {
-                // alle barna som er krysset av på søknad
-                val barnFraSøknad = søknadDTO?.barnaMedOpplysninger
-                    ?.filter { it.erFolkeregistrert && it.inkludertISøknaden }
-                    ?.map { personidentService.hentAktør(it.ident) }
-                    ?: emptyList()
+                    // hvis det søkes om utvidet skal søker med
+                    val utvidetBarnetrygdSøker =
+                        if (søknadDTO?.underkategori == BehandlingUnderkategoriDTO.UTVIDET) listOf(behandling.fagsak.aktør) else emptyList()
 
-                // hvis det søkes om utvidet skal søker med
-                val utvidetBarnetrygdSøker =
-                    if (søknadDTO?.underkategori == BehandlingUnderkategoriDTO.UTVIDET) listOf(behandling.fagsak.aktør) else emptyList()
+                    barnFraSøknad + utvidetBarnetrygdSøker
+                }
 
-                barnFraSøknad + utvidetBarnetrygdSøker
+                behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling).map { it.aktør }
+                behandling.erManuellMigrering() || behandling.opprettetÅrsak == BehandlingÅrsak.KLAGE -> persongrunnlagService.hentAktivThrows(behandling.id).personer.map { it.aktør }
+                else -> emptyList()
             }
-
-            behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling).map { it.aktør }
-            behandling.erManuellMigrering() || behandling.opprettetÅrsak == BehandlingÅrsak.KLAGE -> persongrunnlagService.hentAktivThrows(behandling.id).personer.map { it.aktør }
-            else -> emptyList()
-        }
 
         return personerFremstiltKravFor.distinct()
     }
@@ -72,59 +77,63 @@ class BehandlingsresultatService(
         val personerIBehandling = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id).personer.toSet()
         val personerIForrigeBehandling = forrigeBehandling?.let { persongrunnlagService.hentAktivThrows(behandlingId = forrigeBehandling.id).personer.toSet() } ?: emptySet()
 
-        val personerFremstiltKravFor = finnPersonerFremstiltKravFor(
-            behandling = behandling,
-            søknadDTO = søknadDTO,
-            forrigeBehandling = forrigeBehandling,
-        )
+        val personerFremstiltKravFor =
+            finnPersonerFremstiltKravFor(
+                behandling = behandling,
+                søknadDTO = søknadDTO,
+                forrigeBehandling = forrigeBehandling,
+            )
 
         BehandlingsresultatValideringUtils.validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(personerFremstiltKravFor = personerFremstiltKravFor, personResultater = vilkårsvurdering.personResultater)
 
         // 1 SØKNAD
-        val søknadsresultat = if (skalUtledeSøknadsresultatForBehandling(behandling)) {
-            BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
-                nåværendeAndeler = andelerTilkjentYtelse,
-                forrigeAndeler = forrigeAndelerTilkjentYtelse,
-                endretUtbetalingAndeler = endretUtbetalingAndeler,
-                personerFremstiltKravFor = personerFremstiltKravFor,
-                nåværendePersonResultater = vilkårsvurdering.personResultater,
-                behandlingÅrsak = behandling.opprettetÅrsak,
-                finnesUregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.isNotEmpty() ?: false,
-            )
-        } else {
-            null
-        }
+        val søknadsresultat =
+            if (skalUtledeSøknadsresultatForBehandling(behandling)) {
+                BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
+                    nåværendeAndeler = andelerTilkjentYtelse,
+                    forrigeAndeler = forrigeAndelerTilkjentYtelse,
+                    endretUtbetalingAndeler = endretUtbetalingAndeler,
+                    personerFremstiltKravFor = personerFremstiltKravFor,
+                    nåværendePersonResultater = vilkårsvurdering.personResultater,
+                    behandlingÅrsak = behandling.opprettetÅrsak,
+                    finnesUregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.isNotEmpty() ?: false,
+                )
+            } else {
+                null
+            }
 
         // 2 ENDRINGER
-        val endringsresultat = if (forrigeBehandling != null) {
-            val forrigeVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = forrigeBehandling.id)
-            val kompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(behandlingId))
-            val forrigeKompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(forrigeBehandling.id))
+        val endringsresultat =
+            if (forrigeBehandling != null) {
+                val forrigeVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = forrigeBehandling.id)
+                val kompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(behandlingId))
+                val forrigeKompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(forrigeBehandling.id))
 
-            BehandlingsresultatEndringUtils.utledEndringsresultat(
+                BehandlingsresultatEndringUtils.utledEndringsresultat(
+                    nåværendeAndeler = andelerTilkjentYtelse,
+                    forrigeAndeler = forrigeAndelerTilkjentYtelse,
+                    nåværendeEndretAndeler = endretUtbetalingAndeler,
+                    forrigeEndretAndeler = forrigeEndretUtbetalingAndeler,
+                    nåværendePersonResultat = vilkårsvurdering.personResultater,
+                    forrigePersonResultat = forrigeVilkårsvurdering.personResultater,
+                    nåværendeKompetanser = kompetanser.toList(),
+                    forrigeKompetanser = forrigeKompetanser.toList(),
+                    personerFremstiltKravFor = personerFremstiltKravFor,
+                    personerIBehandling = personerIBehandling,
+                    personerIForrigeBehandling = personerIForrigeBehandling,
+                )
+            } else {
+                Endringsresultat.INGEN_ENDRING
+            }
+
+        // 3 OPPHØR
+        val opphørsresultat =
+            BehandlingsresultatOpphørUtils.hentOpphørsresultatPåBehandling(
                 nåværendeAndeler = andelerTilkjentYtelse,
                 forrigeAndeler = forrigeAndelerTilkjentYtelse,
                 nåværendeEndretAndeler = endretUtbetalingAndeler,
                 forrigeEndretAndeler = forrigeEndretUtbetalingAndeler,
-                nåværendePersonResultat = vilkårsvurdering.personResultater,
-                forrigePersonResultat = forrigeVilkårsvurdering.personResultater,
-                nåværendeKompetanser = kompetanser.toList(),
-                forrigeKompetanser = forrigeKompetanser.toList(),
-                personerFremstiltKravFor = personerFremstiltKravFor,
-                personerIBehandling = personerIBehandling,
-                personerIForrigeBehandling = personerIForrigeBehandling,
             )
-        } else {
-            Endringsresultat.INGEN_ENDRING
-        }
-
-        // 3 OPPHØR
-        val opphørsresultat = BehandlingsresultatOpphørUtils.hentOpphørsresultatPåBehandling(
-            nåværendeAndeler = andelerTilkjentYtelse,
-            forrigeAndeler = forrigeAndelerTilkjentYtelse,
-            nåværendeEndretAndeler = endretUtbetalingAndeler,
-            forrigeEndretAndeler = forrigeEndretUtbetalingAndeler,
-        )
 
         // KOMBINER
         val behandlingsresultat = BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(søknadsresultat, endringsresultat, opphørsresultat)

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
@@ -23,20 +22,23 @@ class IverksettMotOppdrag(
     private val økonomiService: ØkonomiService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vedtakService: VedtakService,
-    private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
 ) : BehandlingSteg<IverksettingTaskDTO> {
     private val iverksattOppdrag = Metrics.counter("familie.ba.sak.oppdrag.iverksatt")
 
-    override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
+    override fun preValiderSteg(
+        behandling: Behandling,
+        stegService: StegService?,
+    ) {
         tilkjentYtelseValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling)
 
-        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
-            ?: throw Feil(
-                message = "Mangler totrinnskontroll ved iverksetting",
-                frontendFeilmelding = "Mangler totrinnskontroll ved iverksetting",
-            )
+        val totrinnskontroll =
+            totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
+                ?: throw Feil(
+                    message = "Mangler totrinnskontroll ved iverksetting",
+                    frontendFeilmelding = "Mangler totrinnskontroll ved iverksetting",
+                )
 
         if (totrinnskontroll.erUgyldig()) {
             throw Feil(

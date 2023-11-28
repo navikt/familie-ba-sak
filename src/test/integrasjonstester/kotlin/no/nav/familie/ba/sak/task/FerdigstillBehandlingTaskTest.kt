@@ -40,7 +40,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
-
     @Autowired
     private lateinit var vedtakService: VedtakService
 
@@ -94,18 +93,19 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
         val aktørId = personidentService.hentAktør(fnr)
         val fnrBarn = ClientMocks.barnFnr[0]
 
-        val behandling = kjørStegprosessForFGB(
-            tilSteg = if (resultat == Resultat.OPPFYLT) StegType.DISTRIBUER_VEDTAKSBREV else StegType.REGISTRERE_SØKNAD,
-            søkerFnr = fnr,
-            barnasIdenter = listOf(fnrBarn),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService,
-        )
+        val behandling =
+            kjørStegprosessForFGB(
+                tilSteg = if (resultat == Resultat.OPPFYLT) StegType.DISTRIBUER_VEDTAKSBREV else StegType.REGISTRERE_SØKNAD,
+                søkerFnr = fnr,
+                barnasIdenter = listOf(fnrBarn),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                brevmalService = brevmalService,
+            )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {
             val vilkårsvurdering = lagVilkårsvurdering(aktørId, behandling, resultat)
@@ -176,7 +176,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Nested
     inner class BehandlingPåMaskinellVent {
-
         @Test
         fun `skal reaktivere en behandling som er på maskinell vent`() {
             val behandling1 = opprettBehandling(status = BehandlingStatus.UTREDES)
@@ -211,10 +210,11 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             val behandling2 = opprettBehandling(status = BehandlingStatus.UTREDES)
             settPåMaskinellVent(behandling2)
 
-            val behandling3 = opprettBehandling(
-                status = BehandlingStatus.FATTER_VEDTAK,
-                resultat = Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
-            )
+            val behandling3 =
+                opprettBehandling(
+                    status = BehandlingStatus.FATTER_VEDTAK,
+                    resultat = Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+                )
             stegService.håndterFerdigstillBehandling(behandling3)
 
             assertThat(behandlingRepository.finnBehandling(behandling2.id).aktiv).isTrue()
@@ -224,19 +224,21 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             status: BehandlingStatus = BehandlingStatus.IVERKSETTER_VEDTAK,
             resultat: Behandlingsresultat = Behandlingsresultat.INNVILGET,
         ): Behandling {
-            val behandling = Behandling(
-                fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr),
-                opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-                type = BehandlingType.REVURDERING,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                status = status,
-                resultat = resultat,
-            ).initBehandlingStegTilstand()
-            val ferdigstillSteg = BehandlingStegTilstand(
-                behandling = behandling,
-                behandlingSteg = StegType.FERDIGSTILLE_BEHANDLING,
-            )
+            val behandling =
+                Behandling(
+                    fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr),
+                    opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                    type = BehandlingType.REVURDERING,
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    status = status,
+                    resultat = resultat,
+                ).initBehandlingStegTilstand()
+            val ferdigstillSteg =
+                BehandlingStegTilstand(
+                    behandling = behandling,
+                    behandlingSteg = StegType.FERDIGSTILLE_BEHANDLING,
+                )
             behandling.behandlingStegTilstand.add(ferdigstillSteg)
             return behandlingService.lagreNyOgDeaktiverGammelBehandling(behandling)
         }

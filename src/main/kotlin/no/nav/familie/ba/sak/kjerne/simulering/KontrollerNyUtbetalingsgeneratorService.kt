@@ -35,7 +35,6 @@ class KontrollerNyUtbetalingsgeneratorService(
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
-
     fun kontrollerNyUtbetalingsgenerator(
         vedtak: Vedtak,
         saksbehandlerId: String,
@@ -190,11 +189,12 @@ class KontrollerNyUtbetalingsgeneratorService(
         gammeltSimuleringResultat: DetaljertSimuleringResultat,
         behandling: Behandling,
     ): Boolean {
-        val andelerEtterDagensDato = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
-            .andelerTilkjentYtelse
-            .filter { andelTilkjentYtelse ->
-                andelTilkjentYtelse.stønadTom.isAfter(YearMonth.now())
-            }
+        val andelerEtterDagensDato =
+            tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
+                .andelerTilkjentYtelse
+                .filter { andelTilkjentYtelse ->
+                    andelTilkjentYtelse.stønadTom.isAfter(YearMonth.now())
+                }
         if (!(nyttSimuleringResultat.simuleringMottaker.isNotEmpty() && gammeltSimuleringResultat.simuleringMottaker.isNotEmpty())) {
             secureLogger.warn("Behandling ${behandling.id} får tomt simuleringsresultat med ny eller gammel generator. Ny er tom: ${nyttSimuleringResultat.simuleringMottaker.isEmpty()}, Gammel er tom: ${gammeltSimuleringResultat.simuleringMottaker.isEmpty()}. antallAndeler=${andelerEtterDagensDato.size}, resultat=${behandling.resultat}")
             return false
@@ -245,16 +245,17 @@ class KontrollerNyUtbetalingsgeneratorService(
         simuleringsPerioderNyTidslinje: Tidslinje<SimuleringsPeriode, Måned>,
         behandling: Behandling,
     ): DiffFeilType? {
-        val perioderFraGammelFørNyMedResultatUlik0 = simuleringsPerioderGammelTidslinje
-            .beskjær(
-                simuleringsPerioderGammelTidslinje.fraOgMed()!!,
-                simuleringsPerioderNyTidslinje.fraOgMed()!!.tilForrigeMåned(),
-            ).perioder()
-            // Bruker compareTo for å ignorere scale. 0 == 0.00 gir false, mens 0.compareTo(0.00) gir 0 som betyr at de er like.
-            .filter { it.innhold!!.resultat.compareTo(BigDecimal.ZERO) != 0 }
+        val perioderFraGammelFørNyMedResultatUlik0 =
+            simuleringsPerioderGammelTidslinje
+                .beskjær(
+                    simuleringsPerioderGammelTidslinje.fraOgMed()!!,
+                    simuleringsPerioderNyTidslinje.fraOgMed()!!.tilForrigeMåned(),
+                ).perioder()
+                // Bruker compareTo for å ignorere scale. 0 == 0.00 gir false, mens 0.compareTo(0.00) gir 0 som betyr at de er like.
+                .filter { it.innhold!!.resultat.compareTo(BigDecimal.ZERO) != 0 }
 
         if (perioderFraGammelFørNyMedResultatUlik0.isNotEmpty()) {
-            secureLogger.warn("Behandling ${behandling.id}  har diff i simuleringsresultat ved bruk av ny utbetalingsgenerator - simuleringsperioder før simuleringsperioder fra gammel generator gir resultat ulik 0. [${perioderFraGammelFørNyMedResultatUlik0.joinToString() { it.toString() }}]")
+            secureLogger.warn("Behandling ${behandling.id}  har diff i simuleringsresultat ved bruk av ny utbetalingsgenerator - simuleringsperioder før simuleringsperioder fra gammel generator gir resultat ulik 0. [${perioderFraGammelFørNyMedResultatUlik0.joinToString { it.toString() }}]")
             return DiffFeilType.TidligerePerioderIGammelUlik0
         }
         return null
@@ -264,7 +265,7 @@ class KontrollerNyUtbetalingsgeneratorService(
         simuleringsPerioderGammel: List<SimuleringsPeriode>,
         simuleringsPerioderNy: List<SimuleringsPeriode>,
     ) {
-        secureLogger.warn("Simuleringsperioder med diff - Gammel: [${simuleringsPerioderGammel.joinToString() { "${it.fom} - ${it.tom}: ${it.resultat}" }}] Ny: [${simuleringsPerioderNy.joinToString() { "${it.fom} - ${it.tom}: ${it.resultat}" }}]")
+        secureLogger.warn("Simuleringsperioder med diff - Gammel: [${simuleringsPerioderGammel.joinToString { "${it.fom} - ${it.tom}: ${it.resultat}" }}] Ny: [${simuleringsPerioderNy.joinToString { "${it.fom} - ${it.tom}: ${it.resultat}" }}]")
     }
 
     private fun DetaljertSimuleringResultat.tilSorterteSimuleringsPerioder(behandling: Behandling): List<SimuleringsPeriode> =
@@ -272,7 +273,6 @@ class KontrollerNyUtbetalingsgeneratorService(
             this.simuleringMottaker.map {
                 it.tilBehandlingSimuleringMottaker(behandling)
             },
-            true,
         ).sortedBy { it.fom }
 
     data class KombinertSimuleringsResultat(

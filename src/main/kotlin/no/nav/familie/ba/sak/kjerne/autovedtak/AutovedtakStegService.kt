@@ -68,30 +68,40 @@ class AutovedtakStegService(
     private val autovedtakBrevService: AutovedtakBrevService,
     private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
 ) {
-
-    private val antallAutovedtak: Map<Autovedtaktype, Counter> = Autovedtaktype.values().associateWith {
-        Metrics.counter("behandling.saksbehandling.autovedtak", "type", it.name)
-    }
-    private val antallAutovedtakÅpenBehandling: Map<Autovedtaktype, Counter> = Autovedtaktype.values().associateWith {
-        Metrics.counter("behandling.saksbehandling.autovedtak.aapen_behandling", "type", it.name)
-    }
+    private val antallAutovedtak: Map<Autovedtaktype, Counter> =
+        Autovedtaktype.values().associateWith {
+            Metrics.counter("behandling.saksbehandling.autovedtak", "type", it.name)
+        }
+    private val antallAutovedtakÅpenBehandling: Map<Autovedtaktype, Counter> =
+        Autovedtaktype.values().associateWith {
+            Metrics.counter("behandling.saksbehandling.autovedtak.aapen_behandling", "type", it.name)
+        }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun kjørBehandlingFødselshendelse(mottakersAktør: Aktør, nyBehandlingHendelse: NyBehandlingHendelse): String {
+    fun kjørBehandlingFødselshendelse(
+        mottakersAktør: Aktør,
+        nyBehandlingHendelse: NyBehandlingHendelse,
+    ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = FødselshendelseData(nyBehandlingHendelse),
         )
     }
 
-    fun kjørBehandlingOmregning(mottakersAktør: Aktør, behandlingsdata: OmregningBrevData): String {
+    fun kjørBehandlingOmregning(
+        mottakersAktør: Aktør,
+        behandlingsdata: OmregningBrevData,
+    ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = behandlingsdata,
         )
     }
 
-    fun kjørBehandlingSmåbarnstillegg(mottakersAktør: Aktør, aktør: Aktør): String {
+    fun kjørBehandlingSmåbarnstillegg(
+        mottakersAktør: Aktør,
+        aktør: Aktør,
+    ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = SmåbarnstilleggData(aktør),
@@ -105,11 +115,12 @@ class AutovedtakStegService(
         secureLoggAutovedtakBehandling(automatiskBehandlingData.type, mottakersAktør, BEHANDLING_STARTER)
         antallAutovedtak[automatiskBehandlingData.type]?.increment()
 
-        val skalAutovedtakBehandles = when (automatiskBehandlingData) {
-            is FødselshendelseData -> autovedtakFødselshendelseService.skalAutovedtakBehandles(automatiskBehandlingData)
-            is OmregningBrevData -> autovedtakBrevService.skalAutovedtakBehandles(automatiskBehandlingData)
-            is SmåbarnstilleggData -> autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(automatiskBehandlingData)
-        }
+        val skalAutovedtakBehandles =
+            when (automatiskBehandlingData) {
+                is FødselshendelseData -> autovedtakFødselshendelseService.skalAutovedtakBehandles(automatiskBehandlingData)
+                is OmregningBrevData -> autovedtakBrevService.skalAutovedtakBehandles(automatiskBehandlingData)
+                is SmåbarnstilleggData -> autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(automatiskBehandlingData)
+            }
 
         if (!skalAutovedtakBehandles) {
             secureLoggAutovedtakBehandling(
@@ -134,11 +145,12 @@ class AutovedtakStegService(
             return "${automatiskBehandlingData.type.displayName}: Bruker har åpen behandling"
         }
 
-        val resultatAvKjøring = when (automatiskBehandlingData) {
-            is FødselshendelseData -> autovedtakFødselshendelseService.kjørBehandling(automatiskBehandlingData)
-            is OmregningBrevData -> autovedtakBrevService.kjørBehandling(automatiskBehandlingData)
-            is SmåbarnstilleggData -> autovedtakSmåbarnstilleggService.kjørBehandling(automatiskBehandlingData)
-        }
+        val resultatAvKjøring =
+            when (automatiskBehandlingData) {
+                is FødselshendelseData -> autovedtakFødselshendelseService.kjørBehandling(automatiskBehandlingData)
+                is OmregningBrevData -> autovedtakBrevService.kjørBehandling(automatiskBehandlingData)
+                is SmåbarnstilleggData -> autovedtakSmåbarnstilleggService.kjørBehandling(automatiskBehandlingData)
+            }
 
         secureLoggAutovedtakBehandling(
             automatiskBehandlingData.type,
@@ -151,26 +163,29 @@ class AutovedtakStegService(
 
     private fun hentFagsakIdFraBehandlingsdata(
         behandlingsdata: AutomatiskBehandlingData,
-    ): Long? = when (behandlingsdata) {
-        is OmregningBrevData -> behandlingsdata.fagsakId
-        is FødselshendelseData,
-        is SmåbarnstilleggData,
-        -> null
-    }
+    ): Long? =
+        when (behandlingsdata) {
+            is OmregningBrevData -> behandlingsdata.fagsakId
+            is FødselshendelseData,
+            is SmåbarnstilleggData,
+            -> null
+        }
 
     private fun håndterÅpenBehandlingOgAvbrytAutovedtak(
         aktør: Aktør,
         autovedtaktype: Autovedtaktype,
         fagsakId: Long?,
     ): Boolean {
-        val fagsak = if (fagsakId != null) {
-            fagsakService.hentPåFagsakId(fagsakId)
-        } else {
-            fagsakService.hentNormalFagsak(aktør = aktør)
-        }
-        val åpenBehandling = fagsak?.let {
-            behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(it.id)
-        }
+        val fagsak =
+            if (fagsakId != null) {
+                fagsakService.hentPåFagsakId(fagsakId)
+            } else {
+                fagsakService.hentNormalFagsak(aktør = aktør)
+            }
+        val åpenBehandling =
+            fagsak?.let {
+                behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(it.id)
+            }
 
         return if (åpenBehandling == null) {
             false

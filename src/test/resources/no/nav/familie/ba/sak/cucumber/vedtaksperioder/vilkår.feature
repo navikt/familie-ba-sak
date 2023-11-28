@@ -53,8 +53,8 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og et barn
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 1234    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
-      | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
+      | 1234    | 01.05.2020 | 31.05.2022 | 1354  | 1            |
+      | 3456    | 01.05.2020 | 31.05.2022 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
@@ -77,8 +77,8 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og et barn
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 1234    | 01.01.2020 | 31.03.2038 | 1354  | 1            |
-      | 3456    | 01.01.2020 | 31.03.2038 | 1354  | 1            |
+      | 1234    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
@@ -100,7 +100,7 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og et barn
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.09.2021 | 31.03.2038 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
@@ -127,7 +127,9 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og et barn
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
     Så forvent følgende vedtaksperioder med begrunnelser
-      | Fra dato | Til dato | Vedtaksperiodetype | Kommentar |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar |
+      | 01.05.2020 | 31.03.2038 | Utbetaling         |           |
+      | 01.04.2038 |            | Opphør             |           |
 
   Scenario: Skal lage vedtaksperioder med begrunnelser for mor med vilkår når barnet flytter ut
 
@@ -141,7 +143,7 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og et barn
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.05.2020 | 31.07.2029 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
@@ -165,7 +167,8 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og et barn
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.05.2020 | 31.07.2029 | 1354  | 1            |
+      | 3456    | 01.06.2030 | 31.03.2038 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
@@ -194,7 +197,8 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og et barn
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.05.2020 | 31.07.2021 | 1354  | 1            |
+      | 3456    | 01.06.2030 | 31.03.2038 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
@@ -224,10 +228,10 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og et barn
       | 1234    | UTVIDET_BARNETRYGD               | 17.02.2021 | 16.05.2030 | Ikke_oppfylt |
 
     Og med andeler tilkjent ytelse
-      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 1234    | 01.05.2020 | 01.03.2021 | 678   | 1            |
-      | 3456    | 01.05.2020 | 31.07.2021 | 1245  | 1            |
-      | 3456    | 01.06.2030 | 31.03.2038 | 1245  | 1            |
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId | Ytelse type        |
+      | 1234    | 01.05.2020 | 28.02.2021 | 678   | 1            | UTVIDET_BARNETRYGD |
+      | 3456    | 01.05.2020 | 31.07.2021 | 1245  | 1            | ORDINÆR_BARNETRYGD |
+      | 3456    | 01.06.2030 | 31.03.2038 | 1245  | 1            | ORDINÆR_BARNETRYGD |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
@@ -282,17 +286,17 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og et barn
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 1234    | 01.05.2020 | 30.04.2021 | 678   | 1            |
-      | 1234    | 01.01.2030 | 30.04.2038 | 678   | 1            |
+      | 1234    | 01.02.2030 | 31.03.2038 | 678   | 1            |
       | 3456    | 01.05.2020 | 30.04.2021 | 1245  | 1            |
-      | 3456    | 01.01.2030 | 30.04.2038 | 1245  | 1            |
+      | 3456    | 01.02.2030 | 31.03.2038 | 1245  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                        |
       | 01.05.2020 | 30.04.2021 | Utbetaling         | Barn og søker                    |
-      | 01.02.2030 | 31.03.2038 | Utbetaling         | Barn og søker                    |
       | 01.05.2021 | 31.01.2030 | Opphør             | Søker har ikke oppfylt vilkårene |
+      | 01.02.2030 | 31.03.2038 | Utbetaling         | Barn og søker                    |
       | 01.04.2038 |            | Opphør             |                                  |
 
   Scenario: Skal ikke dra med splitter fra forrige behandling inn i behandlingen
@@ -329,13 +333,13 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og et barn
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.02.2021 | 31.08.2021 | 1354  | 1            |
       | 3456    | 01.09.2021 | 31.12.2021 | 1654  | 1            |
-      | 3456    | 01.01.2022 | 28.02.2023 | 1676  | 1            |
-      | 3456    | 01.03.2023 | 30.02.2039 | 1723  | 1            |
+      | 3456    | 01.01.2022 | 31.01.2023 | 1676  | 1            |
+      | 3456    | 01.02.2030 | 31.12.2038 | 1723  | 1            |
 
       | 3456    | 01.02.2021 | 31.08.2021 | 1354  | 2            |
       | 3456    | 01.09.2021 | 31.12.2021 | 1654  | 2            |
-      | 3456    | 01.01.2022 | 31.03.2023 | 1676  | 2            |
-      | 3456    | 01.01.2030 | 30.02.2039 | 1676  | 2            |
+      | 3456    | 01.01.2022 | 31.01.2023 | 1676  | 2            |
+      | 3456    | 01.02.2030 | 31.12.2038 | 1676  | 2            |
 
     Og med overstyrt endringstidspunkt
       | Endringstidspunkt | BehandlingId |
@@ -345,12 +349,12 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og et barn
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype |
-      | 2021-02-01 | 2021-08-31 | UTBETALING         |
-      | 2021-09-01 | 2021-12-31 | UTBETALING         |
-      | 2022-01-01 | 2023-01-31 | UTBETALING         |
-      | 2030-02-01 | 2038-12-31 | UTBETALING         |
-      | 2023-02-01 | 2030-01-31 | OPPHØR             |
-      | 2039-01-01 |            | OPPHØR             |
+      | 01.02.2021 | 31.08.2021 | UTBETALING         |
+      | 01.09.2021 | 31.12.2021 | UTBETALING         |
+      | 01.01.2022 | 31.01.2023 | UTBETALING         |
+      | 01.02.2030 | 31.12.2038 | UTBETALING         |
+      | 01.02.2023 | 31.01.2030 | OPPHØR             |
+      | 01.01.2039 |            | OPPHØR             |
 
 
   Scenario: Skal lage periode selv om det ikke finnes barn når det er eksplisitt avslag på søker

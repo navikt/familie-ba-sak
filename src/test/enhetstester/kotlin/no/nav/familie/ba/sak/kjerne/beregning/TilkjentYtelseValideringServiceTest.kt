@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class TilkjentYtelseValideringServiceTest {
-
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val beregningServiceMock = mockk<BeregningService>()
     private val totrinnskontrollServiceMock = mockk<TotrinnskontrollService>()
@@ -28,12 +27,13 @@ class TilkjentYtelseValideringServiceTest {
 
     @BeforeEach
     fun setUp() {
-        tilkjentYtelseValideringService = TilkjentYtelseValideringService(
-            beregningService = beregningServiceMock,
-            totrinnskontrollService = totrinnskontrollServiceMock,
-            persongrunnlagService = persongrunnlagServiceMock,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-        )
+        tilkjentYtelseValideringService =
+            TilkjentYtelseValideringService(
+                beregningService = beregningServiceMock,
+                totrinnskontrollService = totrinnskontrollServiceMock,
+                persongrunnlagService = persongrunnlagServiceMock,
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            )
 
         every {
             beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(
@@ -89,49 +89,53 @@ class TilkjentYtelseValideringServiceTest {
         val person1 = tilfeldigPerson()
         val person2 = tilfeldigPerson()
 
-        val tilkjentYtelse = TilkjentYtelse(
-            behandling = behandling,
-            opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now(),
-            andelerTilkjentYtelse = mutableSetOf(
-                lagAndelTilkjentYtelse(
-                    fom = inneværendeMåned().minusYears(4),
-                    tom = inneværendeMåned(),
-                    beløp = 2108,
-                    person = person1,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = inneværendeMåned().minusYears(4),
-                    tom = inneværendeMåned(),
-                    beløp = 2108,
-                    person = person2,
-                ),
-            ),
-        )
+        val tilkjentYtelse =
+            TilkjentYtelse(
+                behandling = behandling,
+                opprettetDato = LocalDate.now(),
+                endretDato = LocalDate.now(),
+                andelerTilkjentYtelse =
+                    mutableSetOf(
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusYears(4),
+                            tom = inneværendeMåned(),
+                            beløp = 2108,
+                            person = person1,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusYears(4),
+                            tom = inneværendeMåned(),
+                            beløp = 2108,
+                            person = person2,
+                        ),
+                    ),
+            )
 
         val forrigeBehandling = lagBehandling()
 
-        val forrigeTilkjentYtelse = TilkjentYtelse(
-            behandling = forrigeBehandling,
-            opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now(),
-            andelerTilkjentYtelse = mutableSetOf(
-                lagAndelTilkjentYtelse(
-                    fom = inneværendeMåned().minusYears(4),
-                    tom = inneværendeMåned(),
-                    beløp = 2108,
-                    person = person1,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = inneværendeMåned().minusYears(4),
-                    tom = inneværendeMåned(),
-                    beløp = 1054,
-                    person = person2,
-                ),
-            ),
-        )
+        val forrigeTilkjentYtelse =
+            TilkjentYtelse(
+                behandling = forrigeBehandling,
+                opprettetDato = LocalDate.now(),
+                endretDato = LocalDate.now(),
+                andelerTilkjentYtelse =
+                    mutableSetOf(
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusYears(4),
+                            tom = inneværendeMåned(),
+                            beløp = 2108,
+                            person = person1,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusYears(4),
+                            tom = inneværendeMåned(),
+                            beløp = 1054,
+                            person = person2,
+                        ),
+                    ),
+            )
 
-        every { beregningServiceMock.hentTilkjentYtelseForBehandling(behandlingId = behandling.id) } answers { tilkjentYtelse }
+        every { beregningServiceMock.hentOptionalTilkjentYtelseForBehandling(behandlingId = behandling.id) } answers { tilkjentYtelse }
         every { behandlingHentOgPersisterService.hent(behandlingId = behandling.id) } answers { behandling }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling) } answers { forrigeBehandling }
         every { beregningServiceMock.hentOptionalTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } answers { forrigeTilkjentYtelse }

@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 
 object VedtaksperiodeMedBegrunnelserParser {
-
     fun mapForventetVedtaksperioderMedBegrunnelser(
         dataTable: DataTable,
         vedtak: Vedtak,

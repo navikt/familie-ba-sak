@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -60,10 +59,8 @@ class RestartAvSmåbarnstilleggTest(
     @Autowired private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val autovedtakSatsendringService: AutovedtakSatsendringService,
-    @Autowired private val featureToggleService: FeatureToggleService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
 ) : AbstractVerdikjedetest() {
-
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
 
     @AfterEach
@@ -88,20 +85,21 @@ class RestartAvSmåbarnstilleggTest(
             fagsak = fagsak1,
             personScenario = personScenario1,
             barnFødselsdato = barnFødselsdato,
-            mockPerioderMedOvergangsstønad = listOf(
-                EksternPeriode(
-                    personIdent = personScenario1.søker.ident!!,
-                    fomDato = barnFødselsdato.plusYears(1),
-                    tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF,
+            mockPerioderMedOvergangsstønad =
+                listOf(
+                    EksternPeriode(
+                        personIdent = personScenario1.søker.ident!!,
+                        fomDato = barnFødselsdato.plusYears(1),
+                        tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
+                        datakilde = Datakilde.EF,
+                    ),
+                    EksternPeriode(
+                        personIdent = personScenario1.søker.ident,
+                        fomDato = restartSmåbarnstilleggMåned.førsteDagIInneværendeMåned(),
+                        tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
+                        datakilde = Datakilde.EF,
+                    ),
                 ),
-                EksternPeriode(
-                    personIdent = personScenario1.søker.ident,
-                    fomDato = restartSmåbarnstilleggMåned.førsteDagIInneværendeMåned(),
-                    tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF,
-                ),
-            ),
         )
         startEnRevurderingNyeOpplysningerMenIkkeFullfør(
             fagsak = fagsak1,
@@ -121,20 +119,21 @@ class RestartAvSmåbarnstilleggTest(
             fagsak = fagsak2,
             personScenario = personScenario2,
             barnFødselsdato = barnFødselsdato,
-            mockPerioderMedOvergangsstønad = listOf(
-                EksternPeriode(
-                    personIdent = personScenario2.søker.ident!!,
-                    fomDato = barnFødselsdato.plusYears(1),
-                    tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF,
+            mockPerioderMedOvergangsstønad =
+                listOf(
+                    EksternPeriode(
+                        personIdent = personScenario2.søker.ident!!,
+                        fomDato = barnFødselsdato.plusYears(1),
+                        tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
+                        datakilde = Datakilde.EF,
+                    ),
+                    EksternPeriode(
+                        personIdent = personScenario2.søker.ident,
+                        fomDato = restartSmåbarnstilleggMåned.førsteDagIInneværendeMåned(),
+                        tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
+                        datakilde = Datakilde.EF,
+                    ),
                 ),
-                EksternPeriode(
-                    personIdent = personScenario2.søker.ident,
-                    fomDato = restartSmåbarnstilleggMåned.førsteDagIInneværendeMåned(),
-                    tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF,
-                ),
-            ),
         )
 
         // Fagsak 3 - har restart av småbarnstillegg som allerede er begrunnet, skal ikke være med i listen
@@ -150,20 +149,21 @@ class RestartAvSmåbarnstilleggTest(
             personScenario = personScenario3,
             barnFødselsdato = barnFødselsdato,
             skalBegrunneSmåbarnstillegg = true,
-            mockPerioderMedOvergangsstønad = listOf(
-                EksternPeriode(
-                    personIdent = personScenario3.søker.ident!!,
-                    fomDato = barnFødselsdato.plusYears(1),
-                    tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF,
+            mockPerioderMedOvergangsstønad =
+                listOf(
+                    EksternPeriode(
+                        personIdent = personScenario3.søker.ident!!,
+                        fomDato = barnFødselsdato.plusYears(1),
+                        tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
+                        datakilde = Datakilde.EF,
+                    ),
+                    EksternPeriode(
+                        personIdent = personScenario3.søker.ident,
+                        fomDato = restartSmåbarnstilleggMåned.førsteDagIInneværendeMåned(),
+                        tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
+                        datakilde = Datakilde.EF,
+                    ),
                 ),
-                EksternPeriode(
-                    personIdent = personScenario3.søker.ident,
-                    fomDato = restartSmåbarnstilleggMåned.førsteDagIInneværendeMåned(),
-                    tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF,
-                ),
-            ),
         )
 
         val fagsaker: List<Long> =
@@ -179,11 +179,12 @@ class RestartAvSmåbarnstilleggTest(
         val satsendringDato = SatsService.finnSisteSatsFor(SatsType.SMA).gyldigFom.toYearMonth()
 
         mockkObject(SatsTidspunkt)
-        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(
-            2022,
-            12,
-            1,
-        ) // Mocker slik at behandling får gammel sats
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns
+            LocalDate.of(
+                2022,
+                12,
+                1,
+            ) // Mocker slik at behandling får gammel sats
 
         // Fagsak - har restart dato på samme dato som satsendringen
         val personScenario: RestScenario = lagScenario(barnFødselsdato)
@@ -198,20 +199,21 @@ class RestartAvSmåbarnstilleggTest(
             fagsak = fagsakMedSatsendringOgSmåbarnstilleggSomSkalRestartes,
             personScenario = personScenario,
             barnFødselsdato = barnFødselsdato,
-            mockPerioderMedOvergangsstønad = listOf(
-                EksternPeriode(
-                    personIdent = personScenario.søker.ident!!,
-                    fomDato = barnFødselsdato.plusYears(1),
-                    tomDato = satsendringDato.minusMonths(2).sisteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF,
+            mockPerioderMedOvergangsstønad =
+                listOf(
+                    EksternPeriode(
+                        personIdent = personScenario.søker.ident!!,
+                        fomDato = barnFødselsdato.plusYears(1),
+                        tomDato = satsendringDato.minusMonths(2).sisteDagIInneværendeMåned(),
+                        datakilde = Datakilde.EF,
+                    ),
+                    EksternPeriode(
+                        personIdent = personScenario.søker.ident,
+                        fomDato = satsendringDato.førsteDagIInneværendeMåned(),
+                        tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
+                        datakilde = Datakilde.EF,
+                    ),
                 ),
-                EksternPeriode(
-                    personIdent = personScenario.søker.ident,
-                    fomDato = satsendringDato.førsteDagIInneværendeMåned(),
-                    tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF,
-                ),
-            ),
         )
 
         unmockkObject(SatsTidspunkt)
@@ -230,11 +232,12 @@ class RestartAvSmåbarnstilleggTest(
         val satsendringDato = SatsService.finnSisteSatsFor(SatsType.SMA).gyldigFom.toYearMonth()
 
         mockkObject(SatsTidspunkt)
-        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(
-            2022,
-            12,
-            1,
-        ) // Mocker slik at behandling får gammel sats
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns
+            LocalDate.of(
+                2022,
+                12,
+                1,
+            ) // Mocker slik at behandling får gammel sats
 
         // Fagsak  - har løpende fagsak med småbarnstillegg og skal ikke restartes
         val personScenario2: RestScenario = lagScenario(barnFødselsdato)
@@ -249,14 +252,15 @@ class RestartAvSmåbarnstilleggTest(
             fagsak = fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes,
             personScenario = personScenario2,
             barnFødselsdato = barnFødselsdato,
-            mockPerioderMedOvergangsstønad = listOf(
-                EksternPeriode(
-                    personIdent = personScenario2.søker.ident!!,
-                    fomDato = barnFødselsdato.plusYears(1),
-                    tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF,
+            mockPerioderMedOvergangsstønad =
+                listOf(
+                    EksternPeriode(
+                        personIdent = personScenario2.søker.ident!!,
+                        fomDato = barnFødselsdato.plusYears(1),
+                        tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
+                        datakilde = Datakilde.EF,
+                    ),
                 ),
-            ),
         )
 
         // satsendring gjør at den får en ny andel på småbarnstillegg med gyldig fom satsendringsdatoen
@@ -268,19 +272,21 @@ class RestartAvSmåbarnstilleggTest(
         Assertions.assertFalse(fagsaker.contains(fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes.id))
     }
 
-    fun lagScenario(barnFødselsdato: LocalDate): RestScenario = mockServerKlient().lagScenario(
-        RestScenario(
-            søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-            barna = listOf(
-                RestScenarioPerson(
-                    fødselsdato = barnFødselsdato.toString(),
-                    fornavn = "Barn",
-                    etternavn = "Barnesen",
-                    bostedsadresser = emptyList(),
-                ),
+    fun lagScenario(barnFødselsdato: LocalDate): RestScenario =
+        mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = barnFødselsdato.toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
+                            bostedsadresser = emptyList(),
+                        ),
+                    ),
             ),
-        ),
-    )
+        )
 
     fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak {
         return familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
@@ -292,9 +298,10 @@ class RestartAvSmåbarnstilleggTest(
         barnFødselsdato: LocalDate,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = emptyList(),
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder = emptyList(),
+            )
 
         val restBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
@@ -306,11 +313,12 @@ class RestartAvSmåbarnstilleggTest(
         val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
             RestRegistrerSøknad(
-                søknad = lagSøknadDTO(
-                    søkerIdent = fagsak.søkerFødselsnummer,
-                    barnasIdenter = personScenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.UTVIDET,
-                ),
+                søknad =
+                    lagSøknadDTO(
+                        søkerIdent = fagsak.søkerFødselsnummer,
+                        barnasIdenter = personScenario.barna.map { it.ident!! },
+                        underkategori = BehandlingUnderkategori.UTVIDET,
+                    ),
                 bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
@@ -330,22 +338,24 @@ class RestartAvSmåbarnstilleggTest(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
         barnFødselsdato: LocalDate,
-        mockPerioderMedOvergangsstønad: List<EksternPeriode> = listOf(
-            EksternPeriode(
-                personIdent = personScenario.søker.ident!!,
-                fomDato = barnFødselsdato.plusYears(1),
-                tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                datakilde = Datakilde.EF,
+        mockPerioderMedOvergangsstønad: List<EksternPeriode> =
+            listOf(
+                EksternPeriode(
+                    personIdent = personScenario.søker.ident!!,
+                    fomDato = barnFødselsdato.plusYears(1),
+                    tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
+                    datakilde = Datakilde.EF,
+                ),
             ),
-        ),
         skalBegrunneSmåbarnstillegg: Boolean = false,
     ): Behandling {
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = mockPerioderMedOvergangsstønad,
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder = mockPerioderMedOvergangsstønad,
+            )
 
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
@@ -364,39 +374,47 @@ class RestartAvSmåbarnstilleggTest(
         )
     }
 
-    private fun fullførSatsendring(fagsakId: Long, satsendringsTidspunkt: YearMonth) {
+    private fun fullførSatsendring(
+        fagsakId: Long,
+        satsendringsTidspunkt: YearMonth,
+    ) {
         unmockkObject(SatsTidspunkt)
         autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(fagsakId, satsendringsTidspunkt))
         val satsendring = behandlingHentOgPersisterService.hentBehandlinger(fagsakId).first { it.erSatsendring() }
 
-        val iverksattBehandling = håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = satsendring,
-            søkerFnr = satsendring.fagsak.aktør.aktivFødselsnummer(),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            stegService = stegService,
-            brevmalService = brevmalService,
-        )
+        val iverksattBehandling =
+            håndterIverksettingAvBehandling(
+                behandlingEtterVurdering = satsendring,
+                søkerFnr = satsendring.fagsak.aktør.aktivFødselsnummer(),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                stegService = stegService,
+                brevmalService = brevmalService,
+            )
 
         if (!iverksattBehandling.erVedtatt() && iverksattBehandling.aktiv) error("Satsendringen er ikke utført $iverksattBehandling")
     }
 
-    fun settAlleVilkårTilOppfylt(restUtvidetBehandling: RestUtvidetBehandling, barnFødselsdato: LocalDate) {
+    fun settAlleVilkårTilOppfylt(
+        restUtvidetBehandling: RestUtvidetBehandling,
+        barnFødselsdato: LocalDate,
+    ) {
         restUtvidetBehandling.personResultater.forEach { restPersonResultat ->
             restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
                 familieBaSakKlient().putVilkår(
                     behandlingId = restUtvidetBehandling.behandlingId,
                     vilkårId = it.id,
                     restPersonResultat =
-                    RestPersonResultat(
-                        personIdent = restPersonResultat.personIdent,
-                        vilkårResultater = listOf(
-                            it.copy(
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = barnFødselsdato,
-                            ),
+                        RestPersonResultat(
+                            personIdent = restPersonResultat.personIdent,
+                            vilkårResultater =
+                                listOf(
+                                    it.copy(
+                                        resultat = Resultat.OPPFYLT,
+                                        periodeFom = barnFødselsdato,
+                                    ),
+                                ),
                         ),
-                    ),
                 )
             }
         }
@@ -410,16 +428,18 @@ class RestartAvSmåbarnstilleggTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = listOf(
-                EksternPeriode(
-                    personIdent = personScenario.søker.ident!!,
-                    fomDato = barnFødselsdato.plusYears(1),
-                    tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF,
-                ),
-            ),
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder =
+                    listOf(
+                        EksternPeriode(
+                            personIdent = personScenario.søker.ident!!,
+                            fomDato = barnFødselsdato.plusYears(1),
+                            tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
+                            datakilde = Datakilde.EF,
+                        ),
+                    ),
+            )
 
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
@@ -458,17 +478,19 @@ class RestartAvSmåbarnstilleggTest(
                 RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
 
-        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
-        )
+        val vedtaksperioderMedBegrunnelser =
+            vedtaksperiodeService.hentRestUtvidetVedtaksperiodeMedBegrunnelser(
+                restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId,
+            )
 
         val utvidetVedtaksperiodeMedBegrunnelser = vedtaksperioderMedBegrunnelser.sortedBy { it.fom }.first()
 
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,
-            restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.filter(String::isNotEmpty),
-            ),
+            restPutVedtaksperiodeMedStandardbegrunnelser =
+                RestPutVedtaksperiodeMedStandardbegrunnelser(
+                    standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.filter(String::isNotEmpty),
+                ),
         )
         if (skalBegrunneSmåbarnstillegg) {
             val småbarnstilleggVedtaksperioder =
@@ -480,11 +502,13 @@ class RestartAvSmåbarnstilleggTest(
             småbarnstilleggVedtaksperioder.forEach { periode ->
                 familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
                     vedtaksperiodeId = periode.id,
-                    restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                        standardbegrunnelser = listOf(
-                            Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG.enumnavnTilString(),
+                    restPutVedtaksperiodeMedStandardbegrunnelser =
+                        RestPutVedtaksperiodeMedStandardbegrunnelser(
+                            standardbegrunnelser =
+                                listOf(
+                                    Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG.enumnavnTilString(),
+                                ),
                         ),
-                    ),
                 )
             }
         }
@@ -494,21 +518,23 @@ class RestartAvSmåbarnstilleggTest(
 
         familieBaSakKlient().iverksettVedtak(
             behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
-            restBeslutningPåVedtak = RestBeslutningPåVedtak(
-                Beslutning.GODKJENT,
-            ),
-            beslutterHeaders = HttpHeaders().apply {
-                setBearerAuth(
-                    token(
-                        mapOf(
-                            "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
-                            "azp" to "azp-test",
-                            "name" to "Mock McMockface Beslutter",
-                            "NAVident" to "Z0000",
+            restBeslutningPåVedtak =
+                RestBeslutningPåVedtak(
+                    Beslutning.GODKJENT,
+                ),
+            beslutterHeaders =
+                HttpHeaders().apply {
+                    setBearerAuth(
+                        token(
+                            mapOf(
+                                "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
+                                "azp" to "azp-test",
+                                "name" to "Mock McMockface Beslutter",
+                                "NAVident" to "Z0000",
+                            ),
                         ),
-                    ),
-                )
-            },
+                    )
+                },
         )
         return håndterIverksettingAvBehandling(
             behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)!!,
@@ -517,7 +543,6 @@ class RestartAvSmåbarnstilleggTest(
             vedtakService = vedtakService,
             stegService = stegService,
             brevmalService = brevmalService,
-
         )
     }
 }

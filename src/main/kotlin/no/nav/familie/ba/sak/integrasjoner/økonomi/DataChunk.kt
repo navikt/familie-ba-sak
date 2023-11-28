@@ -17,22 +17,17 @@ import java.util.UUID
 @Entity(name = "DataChunk")
 @Table(name = "DATA_CHUNK")
 data class DataChunk(
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "data_chunk_seq")
     @SequenceGenerator(name = "data_chunk_seq")
     val id: Long = 0,
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_batch_id", nullable = false, updatable = false)
     val batch: Batch,
-
     @Column(name = "transaksjons_id", nullable = false)
     val transaksjonsId: UUID,
-
     @Column(name = "chunk_nr", nullable = false)
     val chunkNr: Int,
-
     @Column(name = "er_sendt", nullable = false)
     var erSendt: Boolean = false,
 )

@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -51,27 +49,33 @@ class TilbakekrevingService(
     private val tilbakekrevingKlient: TilbakekrevingKlient,
     private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService,
-    private val featureToggleService: FeatureToggleService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
-
-    fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, behandlingId: Long) {
+    fun validerRestTilbakekreving(
+        restTilbakekreving: RestTilbakekreving?,
+        behandlingId: Long,
+    ) {
         val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingId)
         validerVerdierPåRestTilbakekreving(restTilbakekreving, feilutbetaling)
     }
 
     @Transactional
-    fun lagreTilbakekreving(restTilbakekreving: RestTilbakekreving, behandlingId: Long): Tilbakekreving? {
+    fun lagreTilbakekreving(
+        restTilbakekreving: RestTilbakekreving,
+        behandlingId: Long,
+    ): Tilbakekreving? {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
-        val tilbakekreving = Tilbakekreving(
-            begrunnelse = restTilbakekreving.begrunnelse,
-            behandling = behandling,
-            valg = restTilbakekreving.valg,
-            varsel = restTilbakekreving.varsel,
-            tilbakekrevingsbehandlingId = tilbakekrevingRepository
-                .findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId,
-        )
+        val tilbakekreving =
+            Tilbakekreving(
+                begrunnelse = restTilbakekreving.begrunnelse,
+                behandling = behandling,
+                valg = restTilbakekreving.valg,
+                varsel = restTilbakekreving.varsel,
+                tilbakekrevingsbehandlingId =
+                    tilbakekrevingRepository
+                        .findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId,
+            )
 
         tilbakekrevingRepository.deleteByBehandlingId(behandlingId)
         return tilbakekrevingRepository.save(tilbakekreving)
@@ -88,11 +92,12 @@ class TilbakekrevingService(
         behandlingId: Long,
         forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest,
     ): ByteArray {
-        val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId)
-            ?: throw Feil(
-                "Fant ikke vedtak for behandling $behandlingId ved forhåndsvisning av varselbrev" +
-                    " for tilbakekreving.",
-            )
+        val vedtak =
+            vedtakRepository.findByBehandlingAndAktivOptional(behandlingId)
+                ?: throw Feil(
+                    "Fant ikke vedtak for behandling $behandlingId ved forhåndsvisning av varselbrev" +
+                        " for tilbakekreving.",
+                )
 
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
         val arbeidsfordeling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId)
@@ -100,26 +105,28 @@ class TilbakekrevingService(
         val verge = hentVerge(vedtak.behandling.verge?.ident)
 
         return tilbakekrevingKlient.hentForhåndsvisningVarselbrev(
-            forhåndsvisVarselbrevRequest = ForhåndsvisVarselbrevRequest(
-                varseltekst = forhåndsvisTilbakekrevingsvarselbrevRequest.fritekst,
-                ytelsestype = Ytelsestype.BARNETRYGD,
-                behandlendeEnhetId = arbeidsfordeling.behandlendeEnhetId,
-                behandlendeEnhetsNavn = arbeidsfordeling.behandlendeEnhetNavn,
-                språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
-                feilutbetaltePerioderDto = FeilutbetaltePerioderDto(
-                    sumFeilutbetaling = simuleringService.hentFeilutbetaling(behandlingId).toLong(),
-                    perioder = hentTilbakekrevingsperioderISimulering(
-                        simuleringService.hentSimuleringPåBehandling(behandlingId),
-                        featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
-                    ),
+            forhåndsvisVarselbrevRequest =
+                ForhåndsvisVarselbrevRequest(
+                    varseltekst = forhåndsvisTilbakekrevingsvarselbrevRequest.fritekst,
+                    ytelsestype = Ytelsestype.BARNETRYGD,
+                    behandlendeEnhetId = arbeidsfordeling.behandlendeEnhetId,
+                    behandlendeEnhetsNavn = arbeidsfordeling.behandlendeEnhetNavn,
+                    språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
+                    feilutbetaltePerioderDto =
+                        FeilutbetaltePerioderDto(
+                            sumFeilutbetaling = simuleringService.hentFeilutbetaling(behandlingId).toLong(),
+                            perioder =
+                                hentTilbakekrevingsperioderISimulering(
+                                    simuleringService.hentSimuleringPåBehandling(behandlingId),
+                                ),
+                        ),
+                    fagsystem = Fagsystem.BA,
+                    eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
+                    ident = persongrunnlag.søker.aktør.aktivFødselsnummer(),
+                    saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerNavn(),
+                    verge = verge,
+                    institusjon = institusjon,
                 ),
-                fagsystem = Fagsystem.BA,
-                eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
-                ident = persongrunnlag.søker.aktør.aktivFødselsnummer(),
-                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerNavn(),
-                verge = verge,
-                institusjon = institusjon,
-            ),
         )
     }
 
@@ -134,18 +141,22 @@ class TilbakekrevingService(
 
         val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id)
 
-        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
-            ?: throw Feil("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+        val aktivtVedtak =
+            vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
+                ?: throw Feil("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
         val totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandling.id)
 
-        val revurderingsvedtaksdato = aktivtVedtak.vedtaksdato?.toLocalDate() ?: throw Feil(
-            message = "Finner ikke revurderingsvedtaksdato på vedtak ${aktivtVedtak.id} " +
-                "ved iverksetting av tilbakekreving mot familie-tilbake",
-        )
+        val revurderingsvedtaksdato =
+            aktivtVedtak.vedtaksdato?.toLocalDate() ?: throw Feil(
+                message =
+                    "Finner ikke revurderingsvedtaksdato på vedtak ${aktivtVedtak.id} " +
+                        "ved iverksetting av tilbakekreving mot familie-tilbake",
+            )
 
-        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
-            ?: throw Feil("Fant ikke tilbakekreving på behandling ${behandling.id}")
+        val tilbakekreving =
+            tilbakekrevingRepository.findByBehandlingId(behandling.id)
+                ?: throw Feil("Fant ikke tilbakekreving på behandling ${behandling.id}")
 
         val institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak)
         val verge = hentVerge(behandling.verge?.ident)
@@ -153,24 +164,26 @@ class TilbakekrevingService(
         val manuelleBrevMottakere =
             brevmottakerRepository.finnBrevMottakereForBehandling(behandling.id).map { baSakBrevMottaker ->
                 val mottakerType = MottakerType.valueOf(baSakBrevMottaker.type.name)
-                val vergetype = when {
-                    mottakerType == FULLMEKTIG -> Vergetype.ANNEN_FULLMEKTIG
-                    mottakerType == VERGE && behandling.fagsak.type == FagsakType.NORMAL -> Vergetype.VERGE_FOR_VOKSEN
-                    mottakerType == VERGE && behandling.fagsak.type != FagsakType.NORMAL -> Vergetype.VERGE_FOR_BARN
-                    else -> null
-                }
+                val vergetype =
+                    when {
+                        mottakerType == FULLMEKTIG -> Vergetype.ANNEN_FULLMEKTIG
+                        mottakerType == VERGE && behandling.fagsak.type == FagsakType.NORMAL -> Vergetype.VERGE_FOR_VOKSEN
+                        mottakerType == VERGE && behandling.fagsak.type != FagsakType.NORMAL -> Vergetype.VERGE_FOR_BARN
+                        else -> null
+                    }
 
                 Brevmottaker(
                     type = mottakerType,
                     vergetype = vergetype,
                     navn = baSakBrevMottaker.navn,
-                    manuellAdresseInfo = ManuellAdresseInfo(
-                        adresselinje1 = baSakBrevMottaker.adresselinje1,
-                        adresselinje2 = baSakBrevMottaker.adresselinje2,
-                        postnummer = baSakBrevMottaker.postnummer,
-                        poststed = baSakBrevMottaker.poststed,
-                        landkode = baSakBrevMottaker.landkode,
-                    ),
+                    manuellAdresseInfo =
+                        ManuellAdresseInfo(
+                            adresselinje1 = baSakBrevMottaker.adresselinje1,
+                            adresselinje2 = baSakBrevMottaker.adresselinje2,
+                            postnummer = baSakBrevMottaker.postnummer,
+                            poststed = baSakBrevMottaker.poststed,
+                            landkode = baSakBrevMottaker.landkode,
+                        ),
                 )
             }.toSet()
 
@@ -188,11 +201,11 @@ class TilbakekrevingService(
             enhetId = enhet.behandlendeEnhetId,
             enhetsnavn = enhet.behandlendeEnhetNavn,
             saksbehandlerIdent = totrinnskontroll?.saksbehandlerId ?: SikkerhetContext.hentSaksbehandler(),
-            varsel = opprettVarsel(
-                tilbakekreving,
-                simuleringService.hentSimuleringPåBehandling(behandling.id),
-                featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
-            ),
+            varsel =
+                opprettVarsel(
+                    tilbakekreving,
+                    simuleringService.hentSimuleringPåBehandling(behandling.id),
+                ),
             revurderingsvedtaksdato = revurderingsvedtaksdato,
             // Verge er per nå ikke støttet i familie-ba-sak.
             verge = verge,
@@ -211,9 +224,10 @@ class TilbakekrevingService(
             )
         }
 
-        val behandling = kanOpprettesRespons.kravgrunnlagsreferanse?.toLong()
-            ?.let { behandlingHentOgPersisterService.hent(it) }
-            ?.takeIf { it.status == BehandlingStatus.AVSLUTTET }
+        val behandling =
+            kanOpprettesRespons.kravgrunnlagsreferanse?.toLong()
+                ?.let { behandlingHentOgPersisterService.hent(it) }
+                ?.takeIf { it.status == BehandlingStatus.AVSLUTTET }
         return if (behandling != null) {
             tilbakekrevingKlient.opprettTilbakekrevingsbehandlingManuelt(
                 OpprettManueltTilbakekrevingRequest(
@@ -234,23 +248,23 @@ class TilbakekrevingService(
     }
 
     private fun hentVerge(vergeIdent: String?): Verge? {
-        val verge: Verge? = if (vergeIdent != null) {
-            val aktør = personidentService.hentAktør(vergeIdent)
-            personopplysningerService.hentPersoninfoNavnOgAdresse(aktør).let {
-                Verge(
-                    vergetype = Vergetype.VERGE_FOR_BARN,
-                    navn = it.navn!!,
-                    personIdent = aktør.aktivFødselsnummer(),
-                )
+        val verge: Verge? =
+            if (vergeIdent != null) {
+                val aktør = personidentService.hentAktør(vergeIdent)
+                personopplysningerService.hentPersoninfoNavnOgAdresse(aktør).let {
+                    Verge(
+                        vergetype = Vergetype.VERGE_FOR_BARN,
+                        navn = it.navn!!,
+                        personIdent = aktør.aktivFødselsnummer(),
+                    )
+                }
+            } else {
+                null
             }
-        } else {
-            null
-        }
         return verge
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(TilbakekrevingService::class.java)
     }
 }

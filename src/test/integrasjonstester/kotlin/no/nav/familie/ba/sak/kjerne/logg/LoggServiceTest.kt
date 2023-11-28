@@ -33,53 +33,50 @@ import java.time.LocalDateTime
 class LoggServiceTest(
     @Autowired
     private val loggService: LoggService,
-
     @Autowired
     private val stegService: StegService,
-
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService,
-
     @Autowired
     private val behandlingRepository: BehandlingRepository,
-
     @Autowired
     private val aktørIdRepository: AktørIdRepository,
-
     @Autowired
     private val fagsakRepository: FagsakRepository,
 ) : AbstractSpringIntegrationTest() {
-
     @Test
     fun `Skal lage noen logginnslag på forskjellige behandlinger og hente dem fra databasen`() {
         val behandling: Behandling = lagBehandling()
         val behandling1: Behandling = lagBehandling()
 
-        val logg1 = Logg(
-            behandlingId = behandling.id,
-            type = LoggType.BEHANDLING_OPPRETTET,
-            tittel = "Førstegangsbehandling opprettet",
-            rolle = BehandlerRolle.SYSTEM,
-            tekst = "",
-        )
+        val logg1 =
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.BEHANDLING_OPPRETTET,
+                tittel = "Førstegangsbehandling opprettet",
+                rolle = BehandlerRolle.SYSTEM,
+                tekst = "",
+            )
         loggService.lagre(logg1)
 
-        val logg2 = Logg(
-            behandlingId = behandling.id,
-            type = LoggType.BEHANDLING_OPPRETTET,
-            tittel = "Revurdering opprettet",
-            rolle = BehandlerRolle.SYSTEM,
-            tekst = "",
-        )
+        val logg2 =
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.BEHANDLING_OPPRETTET,
+                tittel = "Revurdering opprettet",
+                rolle = BehandlerRolle.SYSTEM,
+                tekst = "",
+            )
         loggService.lagre(logg2)
 
-        val logg3 = Logg(
-            behandlingId = behandling1.id,
-            type = LoggType.BEHANDLING_OPPRETTET,
-            tittel = "Førstegangsbehandling opprettet",
-            rolle = BehandlerRolle.SYSTEM,
-            tekst = "",
-        )
+        val logg3 =
+            Logg(
+                behandlingId = behandling1.id,
+                type = LoggType.BEHANDLING_OPPRETTET,
+                tittel = "Førstegangsbehandling opprettet",
+                rolle = BehandlerRolle.SYSTEM,
+                tekst = "",
+            )
         loggService.lagre(logg3)
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandling.id)
@@ -96,12 +93,13 @@ class LoggServiceTest(
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, morsIdent, barnetsIdent)
 
-        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(
-            NyBehandlingHendelse(
-                morsIdent = morsIdent,
-                barnasIdenter = listOf(barnetsIdent),
-            ),
-        )
+        val behandling =
+            stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(
+                NyBehandlingHendelse(
+                    morsIdent = morsIdent,
+                    barnasIdenter = listOf(barnetsIdent),
+                ),
+            )
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
         assertEquals(2, loggForBehandling.size)
@@ -113,11 +111,12 @@ class LoggServiceTest(
     @Test
     fun `Skal lage nye vilkårslogger og endringer`() {
         val behandling = lagBehandling()
-        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(
-            behandling = behandling,
-            forrigeBehandlingsresultat = behandling.resultat,
-            nyttBehandlingsresultat = Behandlingsresultat.INNVILGET,
-        )
+        val vilkårsvurderingLogg =
+            loggService.opprettVilkårsvurderingLogg(
+                behandling = behandling,
+                forrigeBehandlingsresultat = behandling.resultat,
+                nyttBehandlingsresultat = Behandlingsresultat.INNVILGET,
+            )
 
         assertNotNull(vilkårsvurderingLogg)
         assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg!!.tittel)
@@ -139,21 +138,23 @@ class LoggServiceTest(
 
     @Test
     fun `Skal ikke logge ved uforandret behandlingsresultat`() {
-        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(
-            behandling = lagBehandling(),
-            forrigeBehandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET,
-            nyttBehandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET,
-        )
+        val vilkårsvurderingLogg =
+            loggService.opprettVilkårsvurderingLogg(
+                behandling = lagBehandling(),
+                forrigeBehandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET,
+                nyttBehandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET,
+            )
 
         assertNull(vilkårsvurderingLogg)
     }
 
     @Test
     fun `Skal lage noen logginnslag på helmanuell migrering ved avvik innenfor beløpsgrenser`() {
-        val behandling = lagBehandling(
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-        )
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+            )
         loggService.opprettBehandlingLogg(BehandlingLoggRequest(behandling))
         loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
         loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = true)
@@ -201,10 +202,11 @@ class LoggServiceTest(
 
     @Test
     fun `Skal lage noen logginnslag på helmanuell migrering ved avvik utenfor beløpsgrenser`() {
-        val behandling = lagBehandling(
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-        )
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+            )
         loggService.opprettBehandlingLogg(BehandlingLoggRequest(behandling))
         loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
         loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = false)
@@ -252,31 +254,34 @@ class LoggServiceTest(
 
     @Test
     fun `Om to logginnslag blir oppretta i samme sekund skal vi sortere med den første først`() {
-        val behandlingId = lagBehandling(
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            årsak = BehandlingÅrsak.SØKNAD,
-        ).id
+        val behandlingId =
+            lagBehandling(
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                årsak = BehandlingÅrsak.SØKNAD,
+            ).id
         val tidspunkt = LocalDateTime.now()
-        val logg1 = loggService.lagre(
-            Logg(
-                behandlingId = behandlingId,
-                type = LoggType.LIVSHENDELSE,
-                tittel = "Mottok fødselshendelse",
-                rolle = BehandlerRolle.SAKSBEHANDLER,
-                tekst = "",
-                opprettetTidspunkt = tidspunkt,
-            ),
-        )
-        val logg2 = loggService.lagre(
-            Logg(
-                behandlingId = behandlingId,
-                type = LoggType.BEHANDLING_OPPRETTET,
-                tittel = "Førstegangbehandling opprettet",
-                rolle = BehandlerRolle.SAKSBEHANDLER,
-                tekst = "",
-                opprettetTidspunkt = tidspunkt,
-            ),
-        )
+        val logg1 =
+            loggService.lagre(
+                Logg(
+                    behandlingId = behandlingId,
+                    type = LoggType.LIVSHENDELSE,
+                    tittel = "Mottok fødselshendelse",
+                    rolle = BehandlerRolle.SAKSBEHANDLER,
+                    tekst = "",
+                    opprettetTidspunkt = tidspunkt,
+                ),
+            )
+        val logg2 =
+            loggService.lagre(
+                Logg(
+                    behandlingId = behandlingId,
+                    type = LoggType.BEHANDLING_OPPRETTET,
+                    tittel = "Førstegangbehandling opprettet",
+                    rolle = BehandlerRolle.SAKSBEHANDLER,
+                    tekst = "",
+                    opprettetTidspunkt = tidspunkt,
+                ),
+            )
 
         val logginnslag = loggService.hentLoggForBehandling(behandlingId)
         assertEquals(listOf(logg2.id, logg1.id), logginnslag.map { it.id })
@@ -284,37 +289,41 @@ class LoggServiceTest(
 
     @Test
     fun `eldste logginnslag skal komme sist og nyaste først`() {
-        val behandlingId = lagBehandling(
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            årsak = BehandlingÅrsak.SØKNAD,
-        ).id
-        val eldst = loggService.lagre(
-            Logg(
-                behandlingId = behandlingId,
-                type = LoggType.BEHANDLING_OPPRETTET,
-                tittel = "Førstegangbehandling opprettet",
-                rolle = BehandlerRolle.SAKSBEHANDLER,
-                tekst = "",
-            ),
-        )
-        val mellomst = loggService.lagre(
-            Logg(
-                behandlingId = behandlingId,
-                type = LoggType.LIVSHENDELSE,
-                tittel = "Søknaden ble registrert",
-                rolle = BehandlerRolle.SAKSBEHANDLER,
-                tekst = "",
-            ),
-        )
-        val nyast = loggService.lagre(
-            Logg(
-                behandlingId = behandlingId,
-                type = LoggType.LIVSHENDELSE,
-                tittel = "Vilkårsvurdering gjennomført",
-                rolle = BehandlerRolle.SAKSBEHANDLER,
-                tekst = "",
-            ),
-        )
+        val behandlingId =
+            lagBehandling(
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                årsak = BehandlingÅrsak.SØKNAD,
+            ).id
+        val eldst =
+            loggService.lagre(
+                Logg(
+                    behandlingId = behandlingId,
+                    type = LoggType.BEHANDLING_OPPRETTET,
+                    tittel = "Førstegangbehandling opprettet",
+                    rolle = BehandlerRolle.SAKSBEHANDLER,
+                    tekst = "",
+                ),
+            )
+        val mellomst =
+            loggService.lagre(
+                Logg(
+                    behandlingId = behandlingId,
+                    type = LoggType.LIVSHENDELSE,
+                    tittel = "Søknaden ble registrert",
+                    rolle = BehandlerRolle.SAKSBEHANDLER,
+                    tekst = "",
+                ),
+            )
+        val nyast =
+            loggService.lagre(
+                Logg(
+                    behandlingId = behandlingId,
+                    type = LoggType.LIVSHENDELSE,
+                    tittel = "Vilkårsvurdering gjennomført",
+                    rolle = BehandlerRolle.SAKSBEHANDLER,
+                    tekst = "",
+                ),
+            )
 
         val logginnslag = loggService.hentLoggForBehandling(behandlingId)
         assertEquals(listOf(nyast.id, mellomst.id, eldst.id), logginnslag.map { it.id })

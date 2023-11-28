@@ -29,7 +29,6 @@ class OpprettTaskService(
     val taskRepository: TaskRepositoryWrapper,
     val satskjøringRepository: SatskjøringRepository,
 ) {
-
     fun opprettOppgaveTask(
         behandlingId: Long,
         oppgavetype: Oppgavetype,
@@ -55,16 +54,17 @@ class OpprettTaskService(
         taskRepository.save(
             Task(
                 type = OpprettOppgaveTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(
-                    OpprettOppgaveTaskDTO(
-                        behandlingId,
-                        Oppgavetype.VurderLivshendelse,
-                        fristForFerdigstillelse,
-                        null,
-                        beskrivelse,
-                        manuellOppgaveType,
+                payload =
+                    objectMapper.writeValueAsString(
+                        OpprettOppgaveTaskDTO(
+                            behandlingId,
+                            Oppgavetype.VurderLivshendelse,
+                            fristForFerdigstillelse,
+                            null,
+                            beskrivelse,
+                            manuellOppgaveType,
+                        ),
                     ),
-                ),
             ),
         )
     }
@@ -77,25 +77,30 @@ class OpprettTaskService(
         taskRepository.save(SendStartBehandlingTilInfotrygdTask.opprettTask(aktørStoenadsmottaker))
     }
 
-    fun opprettAutovedtakFor6Og18ÅrBarn(fagsakId: Long, alder: Int) {
+    fun opprettAutovedtakFor6Og18ÅrBarn(
+        fagsakId: Long,
+        alder: Int,
+    ) {
         val inneværendeMåned = inneværendeMåned()
 
         overstyrTaskMedNyCallId(IdUtils.generateId()) {
             taskRepository.save(
                 Task(
                     type = SendAutobrev6og18ÅrTask.TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(
-                        Autobrev6og18ÅrDTO(
-                            fagsakId = fagsakId,
-                            alder = alder,
-                            årMåned = inneværendeMåned,
+                    payload =
+                        objectMapper.writeValueAsString(
+                            Autobrev6og18ÅrDTO(
+                                fagsakId = fagsakId,
+                                alder = alder,
+                                årMåned = inneværendeMåned,
+                            ),
                         ),
-                    ),
-                    properties = Properties().apply {
-                        this["fagsak"] = fagsakId.toString()
-                        this["alder"] = alder
-                        this["månedÅr"] = inneværendeMåned.tilMånedÅr()
-                    },
+                    properties =
+                        Properties().apply {
+                            this["fagsak"] = fagsakId.toString()
+                            this["alder"] = alder.toString()
+                            this["månedÅr"] = inneværendeMåned.tilMånedÅr()
+                        },
                 ),
             )
         }
@@ -106,30 +111,36 @@ class OpprettTaskService(
             taskRepository.save(
                 Task(
                     type = SendAutobrevOpphørSmåbarnstilleggTask.TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(
-                        AutobrevOpphørSmåbarnstilleggDTO(
-                            fagsakId = fagsakId,
+                    payload =
+                        objectMapper.writeValueAsString(
+                            AutobrevOpphørSmåbarnstilleggDTO(
+                                fagsakId = fagsakId,
+                            ),
                         ),
-                    ),
-                    properties = Properties().apply {
-                        this["fagsakId"] = fagsakId.toString()
-                    },
+                    properties =
+                        Properties().apply {
+                            this["fagsakId"] = fagsakId.toString()
+                        },
                 ),
             )
         }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun opprettSatsendringTask(fagsakId: Long, satstidspunkt: YearMonth) {
+    fun opprettSatsendringTask(
+        fagsakId: Long,
+        satstidspunkt: YearMonth,
+    ) {
         satskjøringRepository.save(Satskjøring(fagsakId = fagsakId, satsTidspunkt = satstidspunkt))
         overstyrTaskMedNyCallId(IdUtils.generateId()) {
             taskRepository.save(
                 Task(
                     type = SatsendringTask.TASK_STEP_TYPE,
                     payload = objectMapper.writeValueAsString(SatsendringTaskDto(fagsakId, satstidspunkt)),
-                    properties = Properties().apply {
-                        this["fagsakId"] = fagsakId.toString()
-                    },
+                    properties =
+                        Properties().apply {
+                            this["fagsakId"] = fagsakId.toString()
+                        },
                 ),
             )
         }
@@ -145,24 +156,30 @@ class OpprettTaskService(
         taskRepository.save(
             Task(
                 type = HenleggBehandlingTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(
-                    HenleggBehandlingTaskDTO(
-                        behandlingId = behandlingId,
-                        årsak = årsak,
-                        begrunnelse = begrunnelse,
-                        validerOppgavefristErEtterDato = validerOppgavefristErEtterDato,
+                payload =
+                    objectMapper.writeValueAsString(
+                        HenleggBehandlingTaskDTO(
+                            behandlingId = behandlingId,
+                            årsak = årsak,
+                            begrunnelse = begrunnelse,
+                            validerOppgavefristErEtterDato = validerOppgavefristErEtterDato,
+                        ),
                     ),
-                ),
-                properties = Properties().apply {
-                    this["behandlingId"] = behandlingId.toString()
-                },
+                properties =
+                    Properties().apply {
+                        this["behandlingId"] = behandlingId.toString()
+                    },
             ),
         )
     }
 
     companion object {
         const val RETRY_BACKOFF_5000MS = "\${retry.backoff.delay:5000}"
-        fun <T> overstyrTaskMedNyCallId(callId: String, body: () -> T): T {
+
+        fun <T> overstyrTaskMedNyCallId(
+            callId: String,
+            body: () -> T,
+        ): T {
             val originalCallId = MDC.get(MDCConstants.MDC_CALL_ID) ?: null
 
             return try {

@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -47,6 +48,9 @@ internal class ØkonomiServiceTest {
 
     @MockK
     private lateinit var unleashService: UnleashService
+
+    @MockK
+    private lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 
     @InjectMockKs
     private lateinit var økonomiService: ØkonomiService
@@ -106,24 +110,25 @@ internal class ØkonomiServiceTest {
     }
 
     private fun setupMocks(toggelPå: Boolean) {
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(
-            listOf(
-                Utbetalingsperiode(
-                    erEndringPåEksisterendePeriode = false,
-                    opphør = null,
-                    periodeId = 1,
-                    forrigePeriodeId = null,
-                    datoForVedtak = LocalDate.now(),
-                    klassifisering = "BATR",
-                    vedtakdatoFom = inneværendeMåned().førsteDagIInneværendeMåned(),
-                    vedtakdatoTom = inneværendeMåned().sisteDagIInneværendeMåned(),
-                    sats = BigDecimal(1054),
-                    satsType = Utbetalingsperiode.SatsType.MND,
-                    utbetalesTil = "13455678910",
-                    behandlingId = 1,
+        val utbetalingsoppdrag =
+            lagUtbetalingsoppdrag(
+                listOf(
+                    Utbetalingsperiode(
+                        erEndringPåEksisterendePeriode = false,
+                        opphør = null,
+                        periodeId = 1,
+                        forrigePeriodeId = null,
+                        datoForVedtak = LocalDate.now(),
+                        klassifisering = "BATR",
+                        vedtakdatoFom = inneværendeMåned().førsteDagIInneværendeMåned(),
+                        vedtakdatoTom = inneværendeMåned().sisteDagIInneværendeMåned(),
+                        sats = BigDecimal(1054),
+                        satsType = Utbetalingsperiode.SatsType.MND,
+                        utbetalesTil = "13455678910",
+                        behandlingId = 1,
+                    ),
                 ),
-            ),
-        )
+            )
         every {
             kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
                 any(),

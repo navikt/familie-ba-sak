@@ -10,7 +10,6 @@ import java.util.Optional
 
 @Repository
 interface BatchRepository : JpaRepository<Batch, Long> {
-
     @Lock(LockModeType.PESSIMISTIC_FORCE_INCREMENT)
     fun save(batch: Batch): Batch
 

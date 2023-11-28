@@ -29,8 +29,8 @@ Egenskap: Vedtaksperioder for enslig mindreårig
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId | Ytelse type        |
-      | 3456    | 01.12.2016 | 30.11.2034 | 1234  | 1            | Ordinær_barnetrygd |
-      | 3456    | 01.12.2016 | 30.11.2034 | 2000  | 1            | Utvidet_barnetrygd |
+      | 3456    | 01.01.2017 | 30.11.2034 | 1234  | 1            | Ordinær_barnetrygd |
+      | 3456    | 01.01.2017 | 30.11.2034 | 2000  | 1            | Utvidet_barnetrygd |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
@@ -51,7 +51,7 @@ Egenskap: Vedtaksperioder for enslig mindreårig
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId | Ytelse type        |
-      | 3456    | 01.12.2016 | 30.11.2034 | 1234  | 1            | Ordinær_barnetrygd |
+      | 3456    | 01.01.2017 | 30.11.2034 | 1234  | 1            | Ordinær_barnetrygd |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 

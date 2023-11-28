@@ -8,9 +8,11 @@ import org.springframework.transaction.annotation.Transactional
 class VergeService(
     val vergeRepository: VergeRepository,
 ) {
-
     @Transactional
-    fun oppdaterVergeForBehandling(behandling: Behandling, verge: Verge) {
+    fun oppdaterVergeForBehandling(
+        behandling: Behandling,
+        verge: Verge,
+    ) {
         val vergeRegistrertFraFør = vergeRepository.findByBehandling(behandling)
         if (vergeRegistrertFraFør != null) {
             vergeRepository.delete(vergeRegistrertFraFør)

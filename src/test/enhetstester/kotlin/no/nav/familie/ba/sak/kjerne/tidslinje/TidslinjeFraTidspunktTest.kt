@@ -20,25 +20,27 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class TidslinjeFraTidspunktTest {
-    val tidslinje = tidslinje {
-        listOf(
-            Periode(mar(2018), mar(2018), null),
-            Periode(mai(2018), mai(2018), "A"),
-            Periode(jun(2018), sep(2018), "B"),
-            Periode(des(2018), feb(2019), "C"),
-            Periode(apr(2019), jul(2019), null),
-            Periode(sep(2019), jan(2020), "D"),
-            Periode(feb(2020), okt(2020), null),
-            Periode(nov(2020), feb(2021), "e"),
-            Periode(apr(2021), apr(2021), null),
-        )
-    }
+    val tidslinje =
+        tidslinje {
+            listOf(
+                Periode(mar(2018), mar(2018), null),
+                Periode(mai(2018), mai(2018), "A"),
+                Periode(jun(2018), sep(2018), "B"),
+                Periode(des(2018), feb(2019), "C"),
+                Periode(apr(2019), jul(2019), null),
+                Periode(sep(2019), jan(2020), "D"),
+                Periode(feb(2020), okt(2020), null),
+                Periode(nov(2020), feb(2021), "e"),
+                Periode(apr(2021), apr(2021), null),
+            )
+        }
 
     @Test
     fun `skal gjenskape underliggende tidslinje dersom innholdet returneres uendret `() {
-        val resultat = tidslinje.tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-            tidslinje.innholdForTidspunkt(tidspunkt)
-        }
+        val resultat =
+            tidslinje.tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
+                tidslinje.innholdForTidspunkt(tidspunkt)
+            }
 
         assertEquals(tidslinje, resultat)
     }

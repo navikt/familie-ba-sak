@@ -24,9 +24,10 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 interface KafkaProducer {
-
     fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long
+
     fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long
+
     fun sendMessageForTopicSak(melding: SaksstatistikkMellomlagring): Long
 
     fun sendFagsystemsbehandlingResponsForTopicTilbakekreving(
@@ -55,7 +56,6 @@ interface KafkaProducer {
 @Profile("!preprod-gcp & !prod-gcp")
 class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) :
     KafkaProducer {
-
     private val vedtakV2Counter = Metrics.counter(COUNTER_NAME, "type", "vedtakV2")
     private val saksstatistikkSakDvhCounter = Metrics.counter(COUNTER_NAME, "type", "sak")
     private val saksstatistikkBehandlingDvhCounter = Metrics.counter(COUNTER_NAME, "type", "behandling")
@@ -170,7 +170,6 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(DefaultKafkaProducer::class.java)
         private const val VEDTAKV2_TOPIC = "teamfamilie.aapen-barnetrygd-vedtak-v2"
         private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "teamfamilie.aapen-barnetrygd-saksstatistikk-behandling-v1"
@@ -186,7 +185,6 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
 @Service
 class MockKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) :
     KafkaProducer {
-
     override fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long {
         logger.info("Skipper sending av vedtakV2 for ${vedtakV2.behandlingsId} fordi kafka Aiven for DVH V2 ikke er enablet")
 
@@ -221,6 +219,7 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
     ) {
         logger.info("Skipper sending av fagsystemsbehandling respons for $behandlingId fordi kafka ikke er enablet")
     }
+
     override fun sendIdentTilPSys(
         hentAlleIdenterTilPsysResponseDTO: HentAlleIdenterTilPsysResponseDTO,
     ) {
@@ -235,7 +234,6 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(MockKafkaProducer::class.java)
 
         var sendteMeldinger = mutableMapOf<String, Any>()

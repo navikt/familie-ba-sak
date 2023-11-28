@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import io.mockk.every
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -38,47 +36,49 @@ class TekniskEndringAvFødselshendelseTest(
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val featureToggleService: FeatureToggleService,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
-
     @Test
     fun `Skal teknisk opphøre fødselshendelse`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING) } returns true
+        this.settToggleMock(FeatureToggleConfig.TEKNISK_ENDRING, true)
 
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1998-01-12", fornavn = "Mor", etternavn = "Søker"),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.now().minusDays(2).toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                    ),
+        val scenario =
+            mockServerKlient().lagScenario(
+                RestScenario(
+                    søker = RestScenarioPerson(fødselsdato = "1998-01-12", fornavn = "Mor", etternavn = "Søker"),
+                    barna =
+                        listOf(
+                            RestScenarioPerson(
+                                fødselsdato = LocalDate.now().minusDays(2).toString(),
+                                fornavn = "Barn",
+                                etternavn = "Barnesen",
+                            ),
+                        ),
                 ),
-            ),
-        )
-        val behandling = behandleFødselshendelse(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!),
-            ),
-            behandleFødselshendelseTask = behandleFødselshendelseTask,
-            fagsakService = fagsakService,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            personidentService = personidentService,
-            vedtakService = vedtakService,
-            stegService = stegService,
-            brevmalService = brevmalService,
+            )
+        val behandling =
+            behandleFødselshendelse(
+                nyBehandlingHendelse =
+                    NyBehandlingHendelse(
+                        morsIdent = scenario.søker.ident!!,
+                        barnasIdenter = listOf(scenario.barna.first().ident!!),
+                    ),
+                behandleFødselshendelseTask = behandleFødselshendelseTask,
+                fagsakService = fagsakService,
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                personidentService = personidentService,
+                vedtakService = vedtakService,
+                stegService = stegService,
+                brevmalService = brevmalService,
+            )!!
 
-        )!!
-
-        val restUtvidetBehandling = familieBaSakKlient().opprettBehandling(
-            søkersIdent = scenario.søker.ident,
-            behandlingType = BehandlingType.TEKNISK_ENDRING,
-            behandlingÅrsak = BehandlingÅrsak.TEKNISK_ENDRING,
-            fagsakId = behandling.fagsak.id,
-        )
+        val restUtvidetBehandling =
+            familieBaSakKlient().opprettBehandling(
+                søkersIdent = scenario.søker.ident,
+                behandlingType = BehandlingType.TEKNISK_ENDRING,
+                behandlingÅrsak = BehandlingÅrsak.TEKNISK_ENDRING,
+                fagsakId = behandling.fagsak.id,
+            )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandling,
             behandlingStatus = BehandlingStatus.UTREDES,
@@ -95,14 +95,15 @@ class TekniskEndringAvFødselshendelseTest(
                     behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,
                     restPersonResultat =
-                    RestPersonResultat(
-                        personIdent = restPersonResultat.personIdent,
-                        vilkårResultater = listOf(
-                            it.copy(
-                                resultat = Resultat.IKKE_OPPFYLT,
-                            ),
+                        RestPersonResultat(
+                            personIdent = restPersonResultat.personIdent,
+                            vilkårResultater =
+                                listOf(
+                                    it.copy(
+                                        resultat = Resultat.IKKE_OPPFYLT,
+                                    ),
+                                ),
                         ),
-                    ),
                 )
             }
         }
@@ -146,21 +147,23 @@ class TekniskEndringAvFødselshendelseTest(
         val restUtvidetBehandlingEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
                 behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
-                restBeslutningPåVedtak = RestBeslutningPåVedtak(
-                    Beslutning.GODKJENT,
-                ),
-                beslutterHeaders = HttpHeaders().apply {
-                    setBearerAuth(
-                        token(
-                            mapOf(
-                                "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
-                                "azp" to "azp-test",
-                                "name" to "Mock McMockface Beslutter",
-                                "NAVident" to "Z0000",
+                restBeslutningPåVedtak =
+                    RestBeslutningPåVedtak(
+                        Beslutning.GODKJENT,
+                    ),
+                beslutterHeaders =
+                    HttpHeaders().apply {
+                        setBearerAuth(
+                            token(
+                                mapOf(
+                                    "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
+                                    "azp" to "azp-test",
+                                    "name" to "Mock McMockface Beslutter",
+                                    "NAVident" to "Z0000",
+                                ),
                             ),
-                        ),
-                    )
-                },
+                        )
+                    },
             )
 
         generellAssertRestUtvidetBehandling(
@@ -177,7 +180,6 @@ class TekniskEndringAvFødselshendelseTest(
             vedtakService = vedtakService,
             stegService = stegService,
             brevmalService = brevmalService,
-
         )
     }
 }

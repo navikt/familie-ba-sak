@@ -17,18 +17,14 @@ import java.time.LocalDate
 @Entity(name = "EcbValutakursCache")
 @Table(name = "ECBVALUTAKURSCACHE")
 data class ECBValutakursCache(
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ecbvalutakurscache_seq_generator")
     @SequenceGenerator(name = "ecbvalutakurscache_seq_generator", sequenceName = "ecbvalutakurscache_seq", allocationSize = 50)
     val id: Long = 0,
-
     @Column(name = "valutakursdato", columnDefinition = "DATE")
     val valutakursdato: LocalDate? = null,
-
     @Column(name = "valutakode")
     val valutakode: String? = null,
-
     @Column(name = "kurs", nullable = false)
     val kurs: BigDecimal,
 ) : BaseEntitet()

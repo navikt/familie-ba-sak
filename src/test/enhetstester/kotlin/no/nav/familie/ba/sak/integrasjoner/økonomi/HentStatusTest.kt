@@ -33,7 +33,6 @@ import java.time.LocalDate
 import java.time.Month
 
 class HentStatusTest {
-
     private val økonomiKlient = mockk<ØkonomiKlient>()
 
     private val beregningService: BeregningService = mockk()
@@ -50,20 +49,22 @@ class HentStatusTest {
 
     @BeforeEach
     fun setUp() {
-        val økonomiService = ØkonomiService(
-
-            økonomiKlient = økonomiKlient,
-            beregningService = beregningService,
-            tilkjentYtelseValideringService = mockk(),
-            tilkjentYtelseRepository = tilkjentYtelseRepository,
-            kontrollerNyUtbetalingsgeneratorService = kontrollerNyUtbetalingsgeneratorService,
-            utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
-            unleashService = unleashService,
-        )
-        statusFraOppdrag = StatusFraOppdrag(
-            økonomiService = økonomiService,
-            taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() },
-        )
+        val økonomiService =
+            ØkonomiService(
+                økonomiKlient = økonomiKlient,
+                beregningService = beregningService,
+                tilkjentYtelseValideringService = mockk(),
+                tilkjentYtelseRepository = tilkjentYtelseRepository,
+                kontrollerNyUtbetalingsgeneratorService = kontrollerNyUtbetalingsgeneratorService,
+                utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
+                unleashService = unleashService,
+                behandlingHentOgPersisterService = mockk(),
+            )
+        statusFraOppdrag =
+            StatusFraOppdrag(
+                økonomiService = økonomiService,
+                taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() },
+            )
 
         every { unleashService.isEnabled(toggleId = any(), properties = any()) } returns false
     }
@@ -79,19 +80,20 @@ class HentStatusTest {
                 match { it.behandlingsId == nyBehandling.id.toString() },
             )
         } returns OppdragStatus.KVITTERT_OK
-        val andelerTilkjentYtelse = listOf(
-            lagAndelTilkjentYtelse(
-                årMnd("2019-04"),
-                årMnd("2020-03"),
-                YtelseType.ORDINÆR_BARNETRYGD,
-                10,
-                behandling = nyBehandling,
-                person = tilfeldigPerson,
-                aktør = mockk(),
-                tilkjentYtelse = mockk(),
-                kildeBehandlingId = null,
-            ),
-        )
+        val andelerTilkjentYtelse =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    årMnd("2019-04"),
+                    årMnd("2020-03"),
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    10,
+                    behandling = nyBehandling,
+                    person = tilfeldigPerson,
+                    aktør = mockk(),
+                    tilkjentYtelse = mockk(),
+                    kildeBehandlingId = null,
+                ),
+            )
 
         every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(any()) } returns andelerTilkjentYtelse
 
@@ -112,19 +114,20 @@ class HentStatusTest {
                 match { it.behandlingsId == nyBehandling.id.toString() },
             )
         } returns OppdragStatus.KVITTERT_OK
-        val andelerTilkjentYtelse = listOf(
-            lagAndelTilkjentYtelse(
-                årMnd("2019-04"),
-                årMnd("2020-03"),
-                YtelseType.ORDINÆR_BARNETRYGD,
-                0,
-                behandling = nyBehandling,
-                person = tilfeldigPerson,
-                aktør = mockk(),
-                tilkjentYtelse = mockk(),
-                kildeBehandlingId = null,
-            ),
-        )
+        val andelerTilkjentYtelse =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    årMnd("2019-04"),
+                    årMnd("2020-03"),
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    0,
+                    behandling = nyBehandling,
+                    person = tilfeldigPerson,
+                    aktør = mockk(),
+                    tilkjentYtelse = mockk(),
+                    kildeBehandlingId = null,
+                ),
+            )
 
         every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(any()) } returns andelerTilkjentYtelse
 
@@ -134,11 +137,15 @@ class HentStatusTest {
         verify(exactly = 0) { økonomiKlient.hentStatus(any()) }
     }
 
-    private fun lagTilkjentYtelse(behandling: Behandling, utbetalingsperiode: List<Utbetalingsperiode>) {
-        val nyTilkjentYtelse = lagInitiellTilkjentYtelse(
-            behandling = behandling,
-            utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdrag(utbetalingsperiode = utbetalingsperiode)),
-        )
+    private fun lagTilkjentYtelse(
+        behandling: Behandling,
+        utbetalingsperiode: List<Utbetalingsperiode>,
+    ) {
+        val nyTilkjentYtelse =
+            lagInitiellTilkjentYtelse(
+                behandling = behandling,
+                utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdrag(utbetalingsperiode = utbetalingsperiode)),
+            )
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns nyTilkjentYtelse
     }
 
@@ -146,26 +153,29 @@ class HentStatusTest {
         tilfeldigPerson: Person,
         nyBehandling: Behandling,
     ) = StatusFraOppdragMedTask(
-        statusFraOppdragDTO = StatusFraOppdragDTO(
-            fagsystem = "BA",
-            personIdent = tilfeldigPerson.aktør.aktivFødselsnummer(),
-            aktørId = "Søker1",
-            behandlingsId = nyBehandling.id,
-            vedtaksId = 0L,
-        ),
-        task = Task(
-            type = StatusFraOppdragTask.TASK_STEP_TYPE,
-            payload = "",
-        ),
+        statusFraOppdragDTO =
+            StatusFraOppdragDTO(
+                fagsystem = "BA",
+                personIdent = tilfeldigPerson.aktør.aktivFødselsnummer(),
+                aktørId = "Søker1",
+                behandlingsId = nyBehandling.id,
+                vedtaksId = 0L,
+            ),
+        task =
+            Task(
+                type = StatusFraOppdragTask.TASK_STEP_TYPE,
+                payload = "",
+            ),
     )
 
     private fun lagUtbetalingsperiode(nyBehandling: Behandling) =
         Utbetalingsperiode(
-            vedtakdatoFom = LocalDate.of(
-                2019,
-                Month.APRIL,
-                1,
-            ),
+            vedtakdatoFom =
+                LocalDate.of(
+                    2019,
+                    Month.APRIL,
+                    1,
+                ),
             vedtakdatoTom = LocalDate.of(2020, Month.MARCH, 31),
             erEndringPåEksisterendePeriode = false,
             periodeId = 1L,

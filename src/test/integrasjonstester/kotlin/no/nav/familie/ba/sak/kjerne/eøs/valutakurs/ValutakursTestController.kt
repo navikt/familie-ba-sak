@@ -31,7 +31,6 @@ class ValutakursTestController(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val valutakursService: ValutakursService,
 ) {
-
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun endreValutakurser(
         @PathVariable behandlingId: Long,

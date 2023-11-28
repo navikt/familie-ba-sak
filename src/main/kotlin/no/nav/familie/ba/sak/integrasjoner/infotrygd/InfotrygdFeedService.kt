@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service
 class InfotrygdFeedService(
     val opprettTaskService: OpprettTaskService,
 ) {
-
     @Transactional
     fun sendTilInfotrygdFeed(barnsIdenter: List<String>) {
         opprettTaskService.opprettSendFeedTilInfotrygdTask(barnsIdenter)

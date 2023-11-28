@@ -19,7 +19,6 @@ import java.time.LocalDate
 @Service
 @Import(ValutakursRestClient::class)
 class ECBService(private val ecbClient: ValutakursRestClient, private val ecbValutakursCacheRepository: ECBValutakursCacheRepository) {
-
     private val logger: Logger = LoggerFactory.getLogger(ECBService::class.java)
 
     /**
@@ -28,7 +27,10 @@ class ECBService(private val ecbClient: ValutakursRestClient, private val ecbVal
      * @return Henter valutakurs for *utenlandskValuta* -> EUR og NOK -> EUR på *kursDato*, og returnerer en beregnet kurs for *utenlandskValuta* -> NOK.
      */
     @Throws(ECBServiceException::class)
-    fun hentValutakurs(utenlandskValuta: String, kursDato: LocalDate): BigDecimal {
+    fun hentValutakurs(
+        utenlandskValuta: String,
+        kursDato: LocalDate,
+    ): BigDecimal {
         val valutakurs = ecbValutakursCacheRepository.findByValutakodeAndValutakursdato(utenlandskValuta, kursDato)
         if (valutakurs == null) {
             logger.info("Henter valutakurs for $utenlandskValuta på $kursDato")
@@ -44,10 +46,11 @@ class ECBService(private val ecbClient: ValutakursRestClient, private val ecbVal
                 val valutakursUtenlandskValuta = exchangeRates.exchangeRateForCurrency(utenlandskValuta)!!
                 ecbValutakursCacheRepository.save(
                     ECBValutakursCache(
-                        kurs = beregnValutakurs(
-                            valutakursUtenlandskValuta.exchangeRate,
-                            valutakursNOK.exchangeRate,
-                        ),
+                        kurs =
+                            beregnValutakurs(
+                                valutakursUtenlandskValuta.exchangeRate,
+                                valutakursNOK.exchangeRate,
+                            ),
                         valutakode = utenlandskValuta,
                         valutakursdato = kursDato,
                     ),
@@ -61,7 +64,10 @@ class ECBService(private val ecbClient: ValutakursRestClient, private val ecbVal
         return valutakurs.kurs
     }
 
-    private fun beregnValutakurs(valutakursUtenlandskValuta: BigDecimal, valutakursNOK: BigDecimal) =
+    private fun beregnValutakurs(
+        valutakursUtenlandskValuta: BigDecimal,
+        valutakursNOK: BigDecimal,
+    ) =
         valutakursNOK.del(valutakursUtenlandskValuta, 10)
 
     private fun validateExchangeRates(
@@ -88,7 +94,10 @@ class ECBService(private val ecbClient: ValutakursRestClient, private val ecbVal
             exchangeRates.all { it.date == exchangeRateDate } &&
             exchangeRates.map { it.currency }.containsAll(currencies)
 
-    private fun throwValidationException(currency: String, exchangeRateDate: LocalDate) {
+    private fun throwValidationException(
+        currency: String,
+        exchangeRateDate: LocalDate,
+    ) {
         throw ECBServiceException("Fant ikke nødvendige valutakurser for valutakursdato ${exchangeRateDate.tilKortString()} for å bestemme valutakursen $currency - NOK")
     }
 }

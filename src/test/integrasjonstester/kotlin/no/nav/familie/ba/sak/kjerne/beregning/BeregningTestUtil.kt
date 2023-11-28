@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 
 object BeregningTestUtil {
-
     /**
      * Denne erstatter det som [no.nav.familie.ba.sak.kjerne.beregning.BeregningService.hentSisteAndelPerIdent] gjør
      * Pga at det ikke er den samme implementasjonen burde bruket av denne minimeres

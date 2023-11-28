@@ -14,7 +14,6 @@ class StringTidslinje(
     val start: Tidspunkt<Måned>,
     val s: List<String>,
 ) : Tidslinje<String, Måned>() {
-
     val fraOgMed = if (s.firstOrNull() == "<") start.somUendeligLengeSiden() else start
 
     val tilOgMed: Tidspunkt<Måned>
@@ -26,11 +25,12 @@ class StringTidslinje(
     override fun lagPerioder(): Collection<Periode<String, Måned>> {
         val tidspunkter = fraOgMed..tilOgMed
         return tidspunkter.mapIndexed { index, tidspunkt ->
-            val c = when (index) {
-                0 -> if (s[index] == "<") s[index + 1] else s[index]
-                s.size - 1 -> if (s[index] == ">") s[index - 1] else s[index]
-                else -> s[index]
-            }
+            val c =
+                when (index) {
+                    0 -> if (s[index] == "<") s[index + 1] else s[index]
+                    s.size - 1 -> if (s[index] == ">") s[index - 1] else s[index]
+                    else -> s[index]
+                }
             Periode(tidspunkt.somFraOgMed(), tidspunkt.somTilOgMed(), c)
         }
     }

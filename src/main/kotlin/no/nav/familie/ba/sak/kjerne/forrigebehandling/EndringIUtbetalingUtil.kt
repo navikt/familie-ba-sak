@@ -10,15 +10,15 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import java.time.YearMonth
 
 object EndringIUtbetalingUtil {
-
     fun utledEndringstidspunktForUtbetalingsbeløp(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
     ): YearMonth? {
-        val endringIUtbetalingTidslinje = lagEndringIUtbetalingTidslinje(
-            nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler,
-        )
+        val endringIUtbetalingTidslinje =
+            lagEndringIUtbetalingTidslinje(
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+            )
 
         return endringIUtbetalingTidslinje.tilFørsteEndringstidspunkt()
     }
@@ -29,16 +29,17 @@ object EndringIUtbetalingUtil {
     ): Tidslinje<Boolean, Måned> {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
 
-        val endringstidslinjePerPersonOgType = allePersonerMedAndeler.flatMap { aktør ->
-            val ytelseTyperForPerson = (nåværendeAndeler.map { it.type } + forrigeAndeler.map { it.type }).distinct()
+        val endringstidslinjePerPersonOgType =
+            allePersonerMedAndeler.flatMap { aktør ->
+                val ytelseTyperForPerson = (nåværendeAndeler.map { it.type } + forrigeAndeler.map { it.type }).distinct()
 
-            ytelseTyperForPerson.map { ytelseType ->
-                lagEndringIUtbetalingForPersonOgTypeTidslinje(
-                    nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
-                    forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
-                )
+                ytelseTyperForPerson.map { ytelseType ->
+                    lagEndringIUtbetalingForPersonOgTypeTidslinje(
+                        nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
+                        forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
+                    )
+                }
             }
-        }
 
         return endringstidslinjePerPersonOgType.kombiner { finnesMinstEnEndringIPeriode(it) }
     }
@@ -58,15 +59,17 @@ object EndringIUtbetalingUtil {
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
 
-        val endringIBeløpTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
-            val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
-            val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
+        val endringIBeløpTidslinje =
+            nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+                val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
+                val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
 
-            nåværendeBeløp != forrigeBeløp
-        }
+                nåværendeBeløp != forrigeBeløp
+            }
 
         return endringIBeløpTidslinje
     }
+
     internal fun lagEtterbetalingstidslinjeForPersonOgType(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
@@ -74,12 +77,13 @@ object EndringIUtbetalingUtil {
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
 
-        val etterbetaling = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
-            val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
-            val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
+        val etterbetaling =
+            nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+                val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
+                val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
 
-            nåværendeBeløp > forrigeBeløp
-        }
+                nåværendeBeløp > forrigeBeløp
+            }
 
         return etterbetaling
     }

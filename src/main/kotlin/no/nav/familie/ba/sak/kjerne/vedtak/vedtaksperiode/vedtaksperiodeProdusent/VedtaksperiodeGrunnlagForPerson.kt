@@ -46,10 +46,11 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
         vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode> = this.vilkårResultaterForVedtaksperiode,
     ): VedtaksperiodeGrunnlagForPerson {
         return when (this) {
-            is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> this.copy(
-                person,
-                vilkårResultaterForVedtaksperiode,
-            )
+            is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
+                this.copy(
+                    person,
+                    vilkårResultaterForVedtaksperiode,
+                )
 
             is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
         }
@@ -100,8 +101,9 @@ data class VilkårResultatForVedtaksperiode(
         standardbegrunnelser = vilkårResultat.standardbegrunnelser,
         fom = vilkårResultat.periodeFom,
         tom = vilkårResultat.periodeTom,
-        aktørId = vilkårResultat.personResultat?.aktør?.aktørId
-            ?: throw Feil("$vilkårResultat er ikke knyttet til personResultat"),
+        aktørId =
+            vilkårResultat.personResultat?.aktør?.aktørId
+                ?: throw Feil("$vilkårResultat er ikke knyttet til personResultat"),
     )
 }
 

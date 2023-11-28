@@ -23,24 +23,24 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class StegServiceTest {
-
     private val behandlingService: BehandlingService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val satsendringService: SatsendringService = mockk()
 
-    private val stegService = StegService(
-        steg = listOf(mockRegistrerPersongrunnlag()),
-        fagsakService = mockk(),
-        behandlingService = behandlingService,
-        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-        beregningService = mockk(),
-        søknadGrunnlagService = mockk(),
-        tilgangService = mockk(relaxed = true),
-        infotrygdFeedService = mockk(),
-        satsendringService = satsendringService,
-        personopplysningerService = mockk(),
-        automatiskBeslutningService = mockk(),
-    )
+    private val stegService =
+        StegService(
+            steg = listOf(mockRegistrerPersongrunnlag()),
+            fagsakService = mockk(),
+            behandlingService = behandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            beregningService = mockk(),
+            søknadGrunnlagService = mockk(),
+            tilgangService = mockk(relaxed = true),
+            infotrygdFeedService = mockk(),
+            satsendringService = satsendringService,
+            personopplysningerService = mockk(),
+            automatiskBeslutningService = mockk(),
+        )
 
     @BeforeEach
     fun setup() {
@@ -100,16 +100,17 @@ internal class StegServiceTest {
     fun `Skal feile dersom vi har en gammel sats på forrige iverksatte behandling på endre migreringsdato behandling`() {
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns false
 
-        val nyBehandling = NyBehandling(
-            kategori = BehandlingKategori.NASJONAL,
-            underkategori = BehandlingUnderkategori.ORDINÆR,
-            behandlingType = BehandlingType.REVURDERING,
-            behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-            søkersIdent = randomFnr(),
-            barnasIdenter = listOf(randomFnr()),
-            nyMigreringsdato = LocalDate.now().minusMonths(6),
-            fagsakId = 1L,
-        )
+        val nyBehandling =
+            NyBehandling(
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                behandlingType = BehandlingType.REVURDERING,
+                behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                søkersIdent = randomFnr(),
+                barnasIdenter = listOf(randomFnr()),
+                nyMigreringsdato = LocalDate.now().minusMonths(6),
+                fagsakId = 1L,
+            )
 
         assertThrows<FunksjonellFeil> { stegService.håndterNyBehandling(nyBehandling) }
     }
@@ -122,13 +123,17 @@ internal class StegServiceTest {
             .hasMessageContaining("er på vent")
     }
 
-    private fun mockRegistrerPersongrunnlag() = object : RegistrerPersongrunnlag(mockk(), mockk(), mockk(), mockk()) {
-        override fun utførStegOgAngiNeste(behandling: Behandling, data: RegistrerPersongrunnlagDTO): StegType {
-            return StegType.VILKÅRSVURDERING
-        }
+    private fun mockRegistrerPersongrunnlag() =
+        object : RegistrerPersongrunnlag(mockk(), mockk(), mockk(), mockk()) {
+            override fun utførStegOgAngiNeste(
+                behandling: Behandling,
+                data: RegistrerPersongrunnlagDTO,
+            ): StegType {
+                return StegType.VILKÅRSVURDERING
+            }
 
-        override fun stegType(): StegType {
-            return StegType.REGISTRERE_PERSONGRUNNLAG
+            override fun stegType(): StegType {
+                return StegType.REGISTRERE_PERSONGRUNNLAG
+            }
         }
-    }
 }

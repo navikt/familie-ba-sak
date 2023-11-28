@@ -39,14 +39,15 @@ class SmåbarnstilleggServiceTest {
 
     @BeforeEach
     fun setUp() {
-        småbarnstilleggService = SmåbarnstilleggService(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            efSakRestClient = efSakRestClient,
-            periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
-            tilkjentYtelseRepository = tilkjentYtelseRepository,
-            persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-        )
+        småbarnstilleggService =
+            SmåbarnstilleggService(
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                efSakRestClient = efSakRestClient,
+                periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
+                tilkjentYtelseRepository = tilkjentYtelseRepository,
+                persongrunnlagService = persongrunnlagService,
+                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            )
 
         every { periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(any()) } just Runs
     }
@@ -58,32 +59,34 @@ class SmåbarnstilleggServiceTest {
         val forrigeBehandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD, fagsak = fagsak)
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING, fagsak = fagsak)
 
-        val perioderForrigeBehandling = listOf(
-            PeriodeOvergangsstønadGrunnlag(
-                fom = LocalDate.now().minusYears(1),
-                tom = LocalDate.now().minusMonths(8),
-                aktør = søker.aktør,
-                datakilde = Datakilde.EF,
-                behandlingId = forrigeBehandling.id,
-            ),
-            PeriodeOvergangsstønadGrunnlag(
-                fom = LocalDate.now().minusMonths(7),
-                tom = LocalDate.now().minusMonths(1),
-                aktør = søker.aktør,
-                datakilde = Datakilde.EF,
-                behandlingId = forrigeBehandling.id,
-            ),
-        )
-
-        val forventetNyePerioder = perioderForrigeBehandling.map {
-            PeriodeOvergangsstønadGrunnlag(
-                fom = it.fom,
-                tom = it.tom,
-                aktør = it.aktør,
-                datakilde = it.datakilde,
-                behandlingId = behandling.id,
+        val perioderForrigeBehandling =
+            listOf(
+                PeriodeOvergangsstønadGrunnlag(
+                    fom = LocalDate.now().minusYears(1),
+                    tom = LocalDate.now().minusMonths(8),
+                    aktør = søker.aktør,
+                    datakilde = Datakilde.EF,
+                    behandlingId = forrigeBehandling.id,
+                ),
+                PeriodeOvergangsstønadGrunnlag(
+                    fom = LocalDate.now().minusMonths(7),
+                    tom = LocalDate.now().minusMonths(1),
+                    aktør = søker.aktør,
+                    datakilde = Datakilde.EF,
+                    behandlingId = forrigeBehandling.id,
+                ),
             )
-        }
+
+        val forventetNyePerioder =
+            perioderForrigeBehandling.map {
+                PeriodeOvergangsstønadGrunnlag(
+                    fom = it.fom,
+                    tom = it.tom,
+                    aktør = it.aktør,
+                    datakilde = it.datakilde,
+                    behandlingId = behandling.id,
+                )
+            }
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeBehandling
         every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(forrigeBehandling.id) } returns perioderForrigeBehandling
@@ -106,23 +109,26 @@ class SmåbarnstilleggServiceTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.NYE_OPPLYSNINGER)
         val søker = lagPerson(type = PersonType.SØKER)
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = listOf(
-                EksternPeriode(
-                    personIdent = søker.aktør.aktivFødselsnummer(),
-                    fomDato = LocalDate.now().minusMonths(5),
-                    tomDato = LocalDate.now().minusMonths(1),
-                    datakilde = Datakilde.EF,
-                ),
-            ),
-        )
-        val forventetPeriode = PeriodeOvergangsstønadGrunnlag(
-            behandlingId = behandling.id,
-            fom = LocalDate.now().minusMonths(5),
-            tom = LocalDate.now().minusMonths(1),
-            datakilde = Datakilde.EF,
-            aktør = søker.aktør,
-        )
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
+            EksternePerioderResponse(
+                perioder =
+                    listOf(
+                        EksternPeriode(
+                            personIdent = søker.aktør.aktivFødselsnummer(),
+                            fomDato = LocalDate.now().minusMonths(5),
+                            tomDato = LocalDate.now().minusMonths(1),
+                            datakilde = Datakilde.EF,
+                        ),
+                    ),
+            )
+        val forventetPeriode =
+            PeriodeOvergangsstønadGrunnlag(
+                behandlingId = behandling.id,
+                fom = LocalDate.now().minusMonths(5),
+                tom = LocalDate.now().minusMonths(1),
+                datakilde = Datakilde.EF,
+                aktør = søker.aktør,
+            )
 
         val slot = slot<List<PeriodeOvergangsstønadGrunnlag>>()
         every { periodeOvergangsstønadGrunnlagRepository.saveAll(capture(slot)) } returnsArgument 0

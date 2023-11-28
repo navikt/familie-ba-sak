@@ -22,7 +22,6 @@ internal enum class Søknadsresultat {
 }
 
 object BehandlingsresultatSøknadUtils {
-
     internal fun utledResultatPåSøknad(
         forrigeAndeler: List<AndelTilkjentYtelse>,
         nåværendeAndeler: List<AndelTilkjentYtelse>,
@@ -32,33 +31,37 @@ object BehandlingsresultatSøknadUtils {
         behandlingÅrsak: BehandlingÅrsak,
         finnesUregistrerteBarn: Boolean,
     ): Søknadsresultat {
-        val resultaterFraAndeler = utledSøknadResultatFraAndelerTilkjentYtelse(
-            forrigeAndeler = forrigeAndeler,
-            nåværendeAndeler = nåværendeAndeler,
-            personerFremstiltKravFor = personerFremstiltKravFor,
-            endretUtbetalingAndeler = endretUtbetalingAndeler,
-        )
+        val resultaterFraAndeler =
+            utledSøknadResultatFraAndelerTilkjentYtelse(
+                forrigeAndeler = forrigeAndeler,
+                nåværendeAndeler = nåværendeAndeler,
+                personerFremstiltKravFor = personerFremstiltKravFor,
+                endretUtbetalingAndeler = endretUtbetalingAndeler,
+            )
 
-        val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor = erEksplisittAvslagPåMinstEnPersonFremstiltKravForEllerSøker(
-            nåværendePersonResultater = nåværendePersonResultater,
-            personerFremstiltKravFor = personerFremstiltKravFor,
-        )
+        val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor =
+            erEksplisittAvslagPåMinstEnPersonFremstiltKravForEllerSøker(
+                nåværendePersonResultater = nåværendePersonResultater,
+                personerFremstiltKravFor = personerFremstiltKravFor,
+            )
 
-        val erFødselshendelseMedAvslag = if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-            nåværendePersonResultater.any { personResultat ->
-                personResultat.vilkårResultater
-                    .any { it.resultat == Resultat.IKKE_OPPFYLT || it.resultat == Resultat.IKKE_VURDERT }
-            }
-        } else {
-            false
-        }
-
-        val alleResultater = (
-            if (erEksplisittAvslagPåMinstEnPersonFremstiltKravFor || erFødselshendelseMedAvslag || finnesUregistrerteBarn) {
-                resultaterFraAndeler.plus(Søknadsresultat.AVSLÅTT)
+        val erFødselshendelseMedAvslag =
+            if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+                nåværendePersonResultater.any { personResultat ->
+                    personResultat.vilkårResultater
+                        .any { it.resultat == Resultat.IKKE_OPPFYLT || it.resultat == Resultat.IKKE_VURDERT }
+                }
             } else {
-                resultaterFraAndeler
+                false
             }
+
+        val alleResultater =
+            (
+                if (erEksplisittAvslagPåMinstEnPersonFremstiltKravFor || erFødselshendelseMedAvslag || finnesUregistrerteBarn) {
+                    resultaterFraAndeler.plus(Søknadsresultat.AVSLÅTT)
+                } else {
+                    resultaterFraAndeler
+                }
             ).distinct()
 
         return alleResultater.kombinerSøknadsresultater(behandlingÅrsak = behandlingÅrsak)
@@ -70,17 +73,18 @@ object BehandlingsresultatSøknadUtils {
         personerFremstiltKravFor: List<Aktør>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     ): List<Søknadsresultat> {
-        val alleSøknadsresultater = personerFremstiltKravFor.flatMap { aktør ->
-            val ytelseTyper = (forrigeAndeler.map { it.type } + nåværendeAndeler.map { it.type }).distinct()
+        val alleSøknadsresultater =
+            personerFremstiltKravFor.flatMap { aktør ->
+                val ytelseTyper = (forrigeAndeler.map { it.type } + nåværendeAndeler.map { it.type }).distinct()
 
-            ytelseTyper.flatMap { ytelseType ->
-                utledSøknadResultatFraAndelerTilkjentYtelsePerPersonOgType(
-                    forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
-                    nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
-                    endretUtbetalingAndelerForPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør },
-                )
+                ytelseTyper.flatMap { ytelseType ->
+                    utledSøknadResultatFraAndelerTilkjentYtelsePerPersonOgType(
+                        forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
+                        nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
+                        endretUtbetalingAndelerForPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør },
+                    )
+                }
             }
-        }
 
         return alleSøknadsresultater.distinct()
     }
@@ -94,35 +98,37 @@ object BehandlingsresultatSøknadUtils {
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndelerForPerson)
         val endretUtbetalingTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndelerForPerson)
 
-        val resultatTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje, endretUtbetalingTidslinje) { nåværende, forrige, endretUtbetalingAndel ->
-            val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp
-            val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp
+        val resultatTidslinje =
+            nåværendeTidslinje.kombinerMed(forrigeTidslinje, endretUtbetalingTidslinje) { nåværende, forrige, endretUtbetalingAndel ->
+                val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp
+                val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp
 
-            when {
-                nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Finnes ikke andel i denne behandlingen
-                forrigeBeløp == null && nåværendeBeløp == 0 -> { // Lagt til ny andel, men den er overstyrt til 0 kr. Må se på årsak for å finne resultat
-                    when (endretUtbetalingAndel?.årsak) {
-                        null -> if (nåværende.differanseberegnetPeriodebeløp != null) {
-                            Søknadsresultat.INNVILGET
-                        } else {
-                            secureLogger.info(
-                                "Andel $nåværende er satt til 0kr, men det skyldes verken differanseberegning eller endret utbetaling andel." +
-                                    "\nNåværende andeler: $nåværendeAndelerForPerson" +
-                                    "\nEndret utbetaling andeler: $endretUtbetalingAndelerForPerson",
-                            )
-                            throw Feil("Andel er satt til 0 kr, men det skyldes verken differanseberegning eller endret utbetaling andel")
+                when {
+                    nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Finnes ikke andel i denne behandlingen
+                    forrigeBeløp == null && nåværendeBeløp == 0 -> { // Lagt til ny andel, men den er overstyrt til 0 kr. Må se på årsak for å finne resultat
+                        when (endretUtbetalingAndel?.årsak) {
+                            null ->
+                                if (nåværende.differanseberegnetPeriodebeløp != null) {
+                                    Søknadsresultat.INNVILGET
+                                } else {
+                                    secureLogger.info(
+                                        "Andel $nåværende er satt til 0kr, men det skyldes verken differanseberegning eller endret utbetaling andel." +
+                                            "\nNåværende andeler: $nåværendeAndelerForPerson" +
+                                            "\nEndret utbetaling andeler: $endretUtbetalingAndelerForPerson",
+                                    )
+                                    throw Feil("Andel er satt til 0 kr, men det skyldes verken differanseberegning eller endret utbetaling andel")
+                                }
+                            Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
+                            Årsak.ALLEREDE_UTBETALT,
+                            Årsak.ENDRE_MOTTAKER,
+                            Årsak.ETTERBETALING_3ÅR,
+                            -> Søknadsresultat.AVSLÅTT
                         }
-                        Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
-                        Årsak.ALLEREDE_UTBETALT,
-                        Årsak.ENDRE_MOTTAKER,
-                        Årsak.ETTERBETALING_3ÅR,
-                        -> Søknadsresultat.AVSLÅTT
                     }
+                    forrigeBeløp != nåværendeBeløp && nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige
+                    else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
                 }
-                forrigeBeløp != nåværendeBeløp && nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige
-                else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
             }
-        }
 
         return resultatTidslinje.perioder().mapNotNull { it.innhold }.distinct()
     }
@@ -140,28 +146,31 @@ object BehandlingsresultatSøknadUtils {
     internal fun List<Søknadsresultat>.kombinerSøknadsresultater(behandlingÅrsak: BehandlingÅrsak): Søknadsresultat {
         val resultaterUtenIngenEndringer = this.filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
 
-        val ingenSøknadsresultatFeil = if (behandlingÅrsak == BehandlingÅrsak.KLAGE) {
-            FunksjonellFeil(
-                frontendFeilmelding = "Du har opprettet en revurdering med årsak klage, men ikke innvilget noen perioder. Denne behandlingen kan kun brukes til full omgjøring.",
-                melding = "Klarer ikke utlede søknadsresultat for behandling med årsak klage. Det er ikke innvilget noen perioder.",
-            )
-        } else {
-            FunksjonellFeil(
-                frontendFeilmelding = "Du har opprettet en behandling som følge av søknad, men har enten ikke krysset av for noen barn det er søkt for eller avslått/innvilget noen perioder.",
-                melding = "Klarer ikke utlede søknadsresultat. Finner ingen resultater.",
-            )
-        }
+        val ingenSøknadsresultatFeil =
+            if (behandlingÅrsak == BehandlingÅrsak.KLAGE) {
+                FunksjonellFeil(
+                    frontendFeilmelding = "Du har opprettet en revurdering med årsak klage, men ikke innvilget noen perioder. Denne behandlingen kan kun brukes til full omgjøring.",
+                    melding = "Klarer ikke utlede søknadsresultat for behandling med årsak klage. Det er ikke innvilget noen perioder.",
+                )
+            } else {
+                FunksjonellFeil(
+                    frontendFeilmelding = "Du har opprettet en behandling som følge av søknad, men har enten ikke krysset av for noen barn det er søkt for eller avslått/innvilget noen perioder.",
+                    melding = "Klarer ikke utlede søknadsresultat. Finner ingen resultater.",
+                )
+            }
 
         return when {
             this.isEmpty() -> throw ingenSøknadsresultatFeil
             this.size == 1 -> this.single()
             resultaterUtenIngenEndringer.size == 1 -> resultaterUtenIngenEndringer.single()
-            resultaterUtenIngenEndringer.size == 2 && resultaterUtenIngenEndringer.containsAll(
-                listOf(
-                    Søknadsresultat.INNVILGET,
-                    Søknadsresultat.AVSLÅTT,
-                ),
-            ) -> Søknadsresultat.DELVIS_INNVILGET
+            resultaterUtenIngenEndringer.size == 2 &&
+                resultaterUtenIngenEndringer.containsAll(
+                    listOf(
+                        Søknadsresultat.INNVILGET,
+                        Søknadsresultat.AVSLÅTT,
+                    ),
+                )
+            -> Søknadsresultat.DELVIS_INNVILGET
             else -> throw Feil("Klarer ikke kombinere søknadsresultater: $this")
         }
     }

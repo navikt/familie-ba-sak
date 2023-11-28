@@ -16,12 +16,12 @@ import java.util.concurrent.atomic.AtomicLong
 
 @Component
 class KafkaAivenErrorHandler : CommonContainerStoppingErrorHandler() {
-
     val logger: Logger = LoggerFactory.getLogger(KafkaAivenErrorHandler::class.java)
 
     private val executor: Executor
     private val teller = AtomicInteger(0)
     private val sisteFeil = AtomicLong(0)
+
     override fun handleRemaining(
         e: Exception,
         records: List<ConsumerRecord<*, *>>,
@@ -88,7 +88,6 @@ class KafkaAivenErrorHandler : CommonContainerStoppingErrorHandler() {
     }
 
     companion object {
-
         private val MAKS_STOP_TID = Duration.ofHours(3).toMillis()
         private val MIN_STOP_TID = Duration.ofSeconds(20).toMillis()
         private const val MAKS_ANTALL_FEIL = 10

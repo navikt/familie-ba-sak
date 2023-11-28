@@ -47,43 +47,51 @@ data class RestSanityBegrunnelse(
         return SanityBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
-            vilkaar = vilkaar?.mapNotNull {
-                it.finnEnumverdi<SanityVilkår>(apiNavn)
-            } ?: emptyList(),
-            vilkår = vilkaar?.mapNotNull {
-                it.finnEnumverdi<SanityVilkår>(apiNavn)
-            }?.map { it.tilVilkår() }?.toSet()
-                ?: emptySet(),
-            rolle = rolle?.mapNotNull { it.finnEnumverdi<VilkårRolle>(apiNavn) }
-                ?: emptyList(),
-            lovligOppholdTriggere = lovligOppholdTriggere?.mapNotNull {
-                it.finnEnumverdi<VilkårTrigger>(apiNavn)
-            } ?: emptyList(),
-            bosattIRiketTriggere = bosattIRiketTriggere?.mapNotNull {
-                it.finnEnumverdi<VilkårTrigger>(apiNavn)
-            } ?: emptyList(),
-            giftPartnerskapTriggere = giftPartnerskapTriggere?.mapNotNull {
-                it.finnEnumverdi<VilkårTrigger>(apiNavn)
-            } ?: emptyList(),
-            borMedSokerTriggere = borMedSokerTriggere?.mapNotNull {
-                it.finnEnumverdi<VilkårTrigger>(apiNavn)
-            } ?: emptyList(),
-            ovrigeTriggere = ovrigeTriggere?.mapNotNull {
-                it.finnEnumverdi<ØvrigTrigger>(apiNavn)
-            } ?: emptyList(),
-            endringsaarsaker = endringsaarsaker?.mapNotNull {
-                it.finnEnumverdi<Årsak>(apiNavn)
-            } ?: emptyList(),
+            vilkår =
+                vilkaar?.mapNotNull {
+                    it.finnEnumverdi<SanityVilkår>(apiNavn)
+                }?.map { it.tilVilkår() }?.toSet()
+                    ?: emptySet(),
+            rolle =
+                rolle?.mapNotNull { it.finnEnumverdi<VilkårRolle>(apiNavn) }
+                    ?: emptyList(),
+            lovligOppholdTriggere =
+                lovligOppholdTriggere?.mapNotNull {
+                    it.finnEnumverdi<VilkårTrigger>(apiNavn)
+                } ?: emptyList(),
+            bosattIRiketTriggere =
+                bosattIRiketTriggere?.mapNotNull {
+                    it.finnEnumverdi<VilkårTrigger>(apiNavn)
+                } ?: emptyList(),
+            giftPartnerskapTriggere =
+                giftPartnerskapTriggere?.mapNotNull {
+                    it.finnEnumverdi<VilkårTrigger>(apiNavn)
+                } ?: emptyList(),
+            borMedSokerTriggere =
+                borMedSokerTriggere?.mapNotNull {
+                    it.finnEnumverdi<VilkårTrigger>(apiNavn)
+                } ?: emptyList(),
+            ovrigeTriggere =
+                ovrigeTriggere?.mapNotNull {
+                    it.finnEnumverdi<ØvrigTrigger>(apiNavn)
+                } ?: emptyList(),
+            endringsaarsaker =
+                endringsaarsaker?.mapNotNull {
+                    it.finnEnumverdi<Årsak>(apiNavn)
+                } ?: emptyList(),
             hjemler = hjemler ?: emptyList(),
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
-            endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedUtbetalingTrigger
-                .finnEnumverdiNullable<EndretUtbetalingsperiodeDeltBostedTriggere>(),
-            endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere?.mapNotNull {
-                it.finnEnumverdi<EndretUtbetalingsperiodeTrigger>(apiNavn)
-            } ?: emptyList(),
-            utvidetBarnetrygdTriggere = utvidetBarnetrygdTriggere?.mapNotNull {
-                it.finnEnumverdi<UtvidetBarnetrygdTrigger>(apiNavn)
-            } ?: emptyList(),
+            endretUtbetalingsperiodeDeltBostedUtbetalingTrigger =
+                endretUtbetalingsperiodeDeltBostedUtbetalingTrigger
+                    .finnEnumverdiNullable<EndretUtbetalingsperiodeDeltBostedTriggere>(),
+            endretUtbetalingsperiodeTriggere =
+                endretUtbetalingsperiodeTriggere?.mapNotNull {
+                    it.finnEnumverdi<EndretUtbetalingsperiodeTrigger>(apiNavn)
+                } ?: emptyList(),
+            utvidetBarnetrygdTriggere =
+                utvidetBarnetrygdTriggere?.mapNotNull {
+                    it.finnEnumverdi<UtvidetBarnetrygdTrigger>(apiNavn)
+                } ?: emptyList(),
             valgbarhet = valgbarhet.finnEnumverdi<Valgbarhet>(apiNavn),
             periodeResultat = (periodeResultatForPerson).finnEnumverdi<SanityPeriodeResultat>(apiNavn),
             fagsakType = fagsakType.finnEnumverdiNullable<FagsakType>(),
@@ -118,14 +126,15 @@ enum class SanityVilkår {
     UTVIDET_BARNETRYGD,
 }
 
-fun SanityVilkår.tilVilkår() = when (this) {
-    UNDER_18_ÅR -> Vilkår.UNDER_18_ÅR
-    BOR_MED_SOKER -> Vilkår.BOR_MED_SØKER
-    GIFT_PARTNERSKAP -> Vilkår.GIFT_PARTNERSKAP
-    BOSATT_I_RIKET -> Vilkår.BOSATT_I_RIKET
-    LOVLIG_OPPHOLD -> Vilkår.LOVLIG_OPPHOLD
-    UTVIDET_BARNETRYGD -> Vilkår.UTVIDET_BARNETRYGD
-}
+fun SanityVilkår.tilVilkår() =
+    when (this) {
+        UNDER_18_ÅR -> Vilkår.UNDER_18_ÅR
+        BOR_MED_SOKER -> Vilkår.BOR_MED_SØKER
+        GIFT_PARTNERSKAP -> Vilkår.GIFT_PARTNERSKAP
+        BOSATT_I_RIKET -> Vilkår.BOSATT_I_RIKET
+        LOVLIG_OPPHOLD -> Vilkår.LOVLIG_OPPHOLD
+        UTVIDET_BARNETRYGD -> Vilkår.UTVIDET_BARNETRYGD
+    }
 
 fun VilkårRolle.tilPersonType() =
     when (this) {
@@ -145,14 +154,15 @@ enum class VilkårTrigger {
     DELT_BOSTED_SKAL_IKKE_DELES,
 }
 
-fun List<VilkårTrigger>.tilUtdypendeVilkårsvurderinger() = this.map {
-    when (it) {
-        VilkårTrigger.VURDERING_ANNET_GRUNNLAG -> UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
-        VilkårTrigger.MEDLEMSKAP -> UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
-        VilkårTrigger.DELT_BOSTED -> UtdypendeVilkårsvurdering.DELT_BOSTED
-        VilkårTrigger.DELT_BOSTED_SKAL_IKKE_DELES -> UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
+fun List<VilkårTrigger>.tilUtdypendeVilkårsvurderinger() =
+    this.map {
+        when (it) {
+            VilkårTrigger.VURDERING_ANNET_GRUNNLAG -> UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
+            VilkårTrigger.MEDLEMSKAP -> UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+            VilkårTrigger.DELT_BOSTED -> UtdypendeVilkårsvurdering.DELT_BOSTED
+            VilkårTrigger.DELT_BOSTED_SKAL_IKKE_DELES -> UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
+        }
     }
-}
 
 enum class SanityPeriodeResultat {
     INNVILGET_ELLER_ØKNING,
@@ -206,24 +216,3 @@ enum class Tema {
     EØS,
     FELLES,
 }
-
-fun SanityBegrunnelse.inneholderVilkår(vilkår: SanityVilkår) =
-    this.vilkaar.contains(vilkår)
-
-fun SanityBegrunnelse.inneholderØvrigTrigger(øvrigTrigger: ØvrigTrigger) =
-    this.ovrigeTriggere.contains(øvrigTrigger)
-
-fun SanityBegrunnelse.inneholderLovligOppholdTrigger(vilkårTrigger: VilkårTrigger) =
-    this.lovligOppholdTriggere.contains(vilkårTrigger)
-
-fun SanityBegrunnelse.inneholderBosattIRiketTrigger(vilkårTrigger: VilkårTrigger) =
-    this.bosattIRiketTriggere.contains(vilkårTrigger)
-
-fun SanityBegrunnelse.inneholderGiftPartnerskapTrigger(vilkårTrigger: VilkårTrigger) =
-    this.giftPartnerskapTriggere.contains(vilkårTrigger)
-
-fun SanityBegrunnelse.inneholderBorMedSøkerTrigger(vilkårTrigger: VilkårTrigger) =
-    this.borMedSokerTriggere.contains(vilkårTrigger)
-
-fun SanityBegrunnelse.inneholderUtvidetBarnetrygdTrigger(utvidetBarnetrygdTrigger: UtvidetBarnetrygdTrigger) =
-    this.utvidetBarnetrygdTriggere.contains(utvidetBarnetrygdTrigger)

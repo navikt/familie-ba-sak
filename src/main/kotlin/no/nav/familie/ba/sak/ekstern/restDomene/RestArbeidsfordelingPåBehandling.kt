@@ -8,8 +8,9 @@ data class RestArbeidsfordelingPåBehandling(
     val manueltOverstyrt: Boolean = false,
 )
 
-fun ArbeidsfordelingPåBehandling.tilRestArbeidsfordelingPåBehandling() = RestArbeidsfordelingPåBehandling(
-    behandlendeEnhetId = this.behandlendeEnhetId,
-    behandlendeEnhetNavn = this.behandlendeEnhetNavn,
-    manueltOverstyrt = this.manueltOverstyrt,
-)
+fun ArbeidsfordelingPåBehandling.tilRestArbeidsfordelingPåBehandling() =
+    RestArbeidsfordelingPåBehandling(
+        behandlendeEnhetId = this.behandlendeEnhetId,
+        behandlendeEnhetNavn = this.behandlendeEnhetNavn,
+        manueltOverstyrt = this.manueltOverstyrt,
+    )

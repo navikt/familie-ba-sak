@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class BehandleFødselshendelseTaskTest {
-
     @Test
     fun `håndterer syntetisk fødselsnummer`() {
         val autovedtakStegService =
@@ -30,10 +29,11 @@ internal class BehandleFødselshendelseTaskTest {
         settOppBehandleFødselshendelseTask(autovedtakStegService).doTask(
             BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(
-                    nyBehandling = NyBehandlingHendelse(
-                        morsIdent = randomFnr(),
-                        barnasIdenter = listOf("61031999277"),
-                    ),
+                    nyBehandling =
+                        NyBehandlingHendelse(
+                            morsIdent = randomFnr(),
+                            barnasIdenter = listOf("61031999277"),
+                        ),
                 ),
             ),
         )
@@ -47,10 +47,11 @@ internal class BehandleFødselshendelseTaskTest {
         settOppBehandleFødselshendelseTask(autovedtakStegService).doTask(
             BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(
-                    nyBehandling = NyBehandlingHendelse(
-                        morsIdent = randomFnr(),
-                        barnasIdenter = listOf("31018721832"),
-                    ),
+                    nyBehandling =
+                        NyBehandlingHendelse(
+                            morsIdent = randomFnr(),
+                            barnasIdenter = listOf("31018721832"),
+                        ),
                 ),
             ),
         )
@@ -62,36 +63,41 @@ internal class BehandleFødselshendelseTaskTest {
         assertThrows<RekjørSenereException> {
             BehandleFødselshendelseTask(
                 taskRepositoryWrapper = mockk(),
-                autovedtakStegService = mockk<AutovedtakStegService>().apply {
-                    every {
-                        kjørBehandlingFødselshendelse(
-                            any(),
-                            any(),
-                        )
-                    } returns ""
-                },
-                velgFagsystemService = mockk<VelgFagSystemService>().apply {
-                    every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
-                        FagsystemRegelVurdering.SEND_TIL_BA,
-                        FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
-                    )
-                },
+                autovedtakStegService =
+                    mockk<AutovedtakStegService>().apply {
+                        every {
+                            kjørBehandlingFødselshendelse(
+                                any(),
+                                any(),
+                            )
+                        } returns ""
+                    },
+                velgFagsystemService =
+                    mockk<VelgFagSystemService>().apply {
+                        every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns
+                            Pair(
+                                FagsystemRegelVurdering.SEND_TIL_BA,
+                                FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
+                            )
+                    },
                 infotrygdFeedService = mockk(),
                 personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns mockk() },
-                startSatsendring = mockk<StartSatsendring>().apply {
-                    every {
-                        sjekkOgOpprettSatsendringVedGammelSats(
-                            any<String>(),
-                        )
-                    } returns true
-                },
+                startSatsendring =
+                    mockk<StartSatsendring>().apply {
+                        every {
+                            sjekkOgOpprettSatsendringVedGammelSats(
+                                any<String>(),
+                            )
+                        } returns true
+                    },
             ).doTask(
                 BehandleFødselshendelseTask.opprettTask(
                     BehandleFødselshendelseTaskDTO(
-                        nyBehandling = NyBehandlingHendelse(
-                            morsIdent = randomFnr(),
-                            barnasIdenter = listOf("31018721832"),
-                        ),
+                        nyBehandling =
+                            NyBehandlingHendelse(
+                                morsIdent = randomFnr(),
+                                barnasIdenter = listOf("31018721832"),
+                            ),
                     ),
                 ),
             )
@@ -108,27 +114,31 @@ internal class BehandleFødselshendelseTaskTest {
             taskRepositoryWrapper = taskRepositoryWrapper,
             personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns randomAktør },
             autovedtakStegService = mockk(),
-            velgFagsystemService = mockk<VelgFagSystemService>().apply {
-                every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
-                    FagsystemRegelVurdering.SEND_TIL_BA,
-                    FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
-                )
-            },
+            velgFagsystemService =
+                mockk<VelgFagSystemService>().apply {
+                    every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns
+                        Pair(
+                            FagsystemRegelVurdering.SEND_TIL_BA,
+                            FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
+                        )
+                },
             infotrygdFeedService = mockk(),
-            startSatsendring = mockk<StartSatsendring>().apply {
-                every {
-                    sjekkOgOpprettSatsendringVedGammelSats(
-                        any<String>(),
-                    )
-                }.throws(FunksjonellFeil("funksjonell feil"))
-            },
+            startSatsendring =
+                mockk<StartSatsendring>().apply {
+                    every {
+                        sjekkOgOpprettSatsendringVedGammelSats(
+                            any<String>(),
+                        )
+                    }.throws(FunksjonellFeil("funksjonell feil"))
+                },
         ).doTask(
             BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(
-                    nyBehandling = NyBehandlingHendelse(
-                        morsIdent = randomFnr(),
-                        barnasIdenter = listOf("31018721832"),
-                    ),
+                    nyBehandling =
+                        NyBehandlingHendelse(
+                            morsIdent = randomFnr(),
+                            barnasIdenter = listOf("31018721832"),
+                        ),
                 ),
             ),
         )
@@ -147,20 +157,23 @@ internal class BehandleFødselshendelseTaskTest {
         BehandleFødselshendelseTask(
             taskRepositoryWrapper = mockk(),
             autovedtakStegService = autovedtakStegService,
-            velgFagsystemService = mockk<VelgFagSystemService>().apply {
-                every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
-                    FagsystemRegelVurdering.SEND_TIL_BA,
-                    FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
-                )
-            },
+            velgFagsystemService =
+                mockk<VelgFagSystemService>().apply {
+                    every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns
+                        Pair(
+                            FagsystemRegelVurdering.SEND_TIL_BA,
+                            FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
+                        )
+                },
             infotrygdFeedService = mockk(),
             personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns mockk() },
-            startSatsendring = mockk<StartSatsendring>().apply {
-                every {
-                    sjekkOgOpprettSatsendringVedGammelSats(
-                        any<String>(),
-                    )
-                } returns false
-            },
+            startSatsendring =
+                mockk<StartSatsendring>().apply {
+                    every {
+                        sjekkOgOpprettSatsendringVedGammelSats(
+                            any<String>(),
+                        )
+                    } returns false
+                },
         )
 }
