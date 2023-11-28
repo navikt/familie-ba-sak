@@ -486,7 +486,7 @@ private fun hentEØSStandardBegrunnelser(
             it.valgbarhet == Valgbarhet.TILLEGGSTEKST && (
                 it.erLikKompetanseIPeriode(begrunnelseGrunnlag) ||
                     it.erLikVilkårOgUtdypendeVilkårIPeriode(oppfylteVilkårDennePerioden)
-                )
+            )
         }
 
     return filtrertPåEndretVilkår + filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp + filtrertPåIngenEndringMedLikKompetanse + filtrertPåTilleggstekstMedLikKompetanseEllerVilkår
@@ -875,7 +875,7 @@ private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOg
         listOf(
             månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + grunnlagPerioderSplittetPåVedtaksperiode
-        ).zipWithNext { forrige, denne ->
+    ).zipWithNext { forrige, denne ->
         periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
     }.tilTidslinje()
 }
