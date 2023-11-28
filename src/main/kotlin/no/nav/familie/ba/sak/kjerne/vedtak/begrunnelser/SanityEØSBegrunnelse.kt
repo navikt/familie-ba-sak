@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
+import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdiNullable
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
@@ -29,6 +30,7 @@ data class RestSanityEØSBegrunnelse(
     val annenForeldersAktivitet: List<String>?,
     val barnetsBostedsland: List<String>?,
     val kompetanseResultat: List<String>?,
+    val borMedSokerTriggere: List<String>? = emptyList(),
     val hjemler: List<String>?,
     val hjemlerFolketrygdloven: List<String>?,
     val hjemlerEOSForordningen883: List<String>?,
@@ -64,6 +66,10 @@ data class RestSanityEØSBegrunnelse(
             kompetanseResultat =
                 kompetanseResultat?.mapNotNull {
                     konverterTilEnumverdi<KompetanseResultat>(it)
+                } ?: emptyList(),
+            borMedSokerTriggere =
+                borMedSokerTriggere?.mapNotNull {
+                    it.finnEnumverdi<VilkårTrigger>(apiNavn)
                 } ?: emptyList(),
             hjemler = hjemler ?: emptyList(),
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
