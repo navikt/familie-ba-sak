@@ -462,10 +462,9 @@ private fun hentEØSStandardBegrunnelser(
     val filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp =
         begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues { begrunnelse ->
             val endringIKompetanseValutakursEllerUtenlandskPeriodebeløp =
-                erEndringIKompetanse(begrunnelseGrunnlag) || erEndringIValutakurs(begrunnelseGrunnlag) ||
-                    erEndringIUtenlandskPeriodebeløp(
-                        begrunnelseGrunnlag,
-                    )
+                erEndringIKompetanse(begrunnelseGrunnlag) ||
+                    erEndringIValutakurs(begrunnelseGrunnlag) ||
+                    erEndringIUtenlandskPeriodebeløp(begrunnelseGrunnlag)
 
             endringIKompetanseValutakursEllerUtenlandskPeriodebeløp && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
         }
@@ -627,6 +626,7 @@ private fun hentResultaterForPeriode(
         )
 
     return if (erInnvilgetEtterVilkårOgEndretUtbetaling && erAndelerPåPersonHvisBarn) {
+        val erEøs = begrunnelseGrunnlagForPeriode.kompetanse != null
         val erØkingIAndel =
             erØkningIAndelMellomPerioder(
                 begrunnelseGrunnlagForPeriode,
@@ -644,7 +644,7 @@ private fun hentResultaterForPeriode(
 
         val erIngenEndring = !erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode
         listOfNotNull(
-            if (erØkingIAndel || erSatsøkning || erSøker || erIngenEndring) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
+            if (erØkingIAndel || erSatsøkning || erSøker || erIngenEndring || erEøs) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
             if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
             if (erIngenEndring) SanityPeriodeResultat.INGEN_ENDRING else null,
         )
