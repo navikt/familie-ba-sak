@@ -150,8 +150,9 @@ fun hentTemaSomPeriodeErVurdertEtter(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
 ): Tema {
     val erVurdertEtterEøsDennePerioden = begrunnelseGrunnlag.dennePerioden.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
-    val harGåttFraÅVæreVurdertAvEØSDennePerioden =
-        !erVurdertEtterEøsDennePerioden && begrunnelseGrunnlag.forrigePeriode?.vilkårResultater?.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } == true
+    val erVurdertEtterEøsForrigePeriode = begrunnelseGrunnlag.forrigePeriode?.vilkårResultater?.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } == true
+    val harGåttFraÅVæreVurdertAvEØSDennePerioden = !erVurdertEtterEøsDennePerioden && erVurdertEtterEøsForrigePeriode
+
     val fårUtbetaltNasjonalt = begrunnelseGrunnlag.dennePerioden.andeler.any { it.nasjonaltPeriodebeløp != 0 }
     val harGåttFraEøsTilNasjonal = harGåttFraÅVæreVurdertAvEØSDennePerioden && fårUtbetaltNasjonalt
 
