@@ -44,6 +44,6 @@ Egenskap: Gyldige begrunnelser ved EØS
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                                           | Ugyldige begrunnelser |
-      | 01.01.2023 | 31.01.2023 | UTBETALING         | NASJONALE_REGLER               | REDUKSJON_UNDER_6_ÅR                                           |                       |
-      | 01.01.2023 | 31.01.2023 | UTBETALING         | EØS_FORORDNINGEN               | INNVILGET_SEKUNDÆRLAND_STANDARD, INNVILGET_PRIMÆRLAND_STANDARD |                       |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser          | Ugyldige begrunnelser |
+      | 01.01.2023 | 31.01.2023 | UTBETALING         | NASJONALE_REGLER               | REDUKSJON_UNDER_6_ÅR          |                       |
+      | 01.01.2023 | 31.01.2023 | UTBETALING         | EØS_FORORDNINGEN               | INNVILGET_PRIMÆRLAND_STANDARD |                       |
