@@ -39,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -148,19 +149,19 @@ fun ISanityBegrunnelse.erSammeTemaSomPeriode(
 fun hentTemaSomPeriodeErVurdertEtter(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
 ): Tema {
-    val harKompetanseDennePerioden = begrunnelseGrunnlag.dennePerioden.kompetanse != null
-    val harMistetKompetanseDennePerioden =
-        !harKompetanseDennePerioden && begrunnelseGrunnlag.forrigePeriode?.kompetanse != null
+    val erVurdertEtterEøsDennePerioden = begrunnelseGrunnlag.dennePerioden.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
+    val harGåttFraÅVæreVurdertAvEØSDennePerioden =
+        !erVurdertEtterEøsDennePerioden && begrunnelseGrunnlag.forrigePeriode?.vilkårResultater?.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } == true
     val fårUtbetaltNasjonalt = begrunnelseGrunnlag.dennePerioden.andeler.any { it.nasjonaltPeriodebeløp != 0 }
-    val harGåttFraEøsTilNasjonal = harMistetKompetanseDennePerioden && fårUtbetaltNasjonalt
+    val harGåttFraEøsTilNasjonal = harGåttFraÅVæreVurdertAvEØSDennePerioden && fårUtbetaltNasjonalt
 
-    val harMistetKompetanseIPeriodeSidenForrigeBehandling =
-        !harKompetanseDennePerioden && begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.kompetanse != null
+    val harGåttFraÅVæreVurdertAvEØSSidenForrigeBehandling =
+        !erVurdertEtterEøsDennePerioden && begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.vilkårResultater?.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } == true
 
     return when {
         harGåttFraEøsTilNasjonal -> Tema.NASJONAL
-        harKompetanseDennePerioden || harMistetKompetanseDennePerioden -> Tema.EØS
-        harMistetKompetanseIPeriodeSidenForrigeBehandling -> Tema.EØS
+        erVurdertEtterEøsDennePerioden || harGåttFraÅVæreVurdertAvEØSDennePerioden -> Tema.EØS
+        harGåttFraÅVæreVurdertAvEØSSidenForrigeBehandling -> Tema.EØS
         else -> Tema.NASJONAL
     }
 }
@@ -351,6 +352,7 @@ private fun hentResultaterForPeriode(
         )
 
     return if (erInnvilgetEtterVilkårOgEndretUtbetaling && erAndelerPåPersonHvisBarn) {
+        val erEøs = begrunnelseGrunnlagForPeriode.kompetanse != null
         val erØkingIAndel =
             erØkningIAndelMellomPerioder(
                 begrunnelseGrunnlagForPeriode,
@@ -368,7 +370,7 @@ private fun hentResultaterForPeriode(
 
         val erIngenEndring = !erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode
         listOfNotNull(
-            if (erØkingIAndel || erSatsøkning || erSøker || erIngenEndring) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
+            if (erØkingIAndel || erSatsøkning || erSøker || erIngenEndring || erEøs) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
             if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
             if (erIngenEndring) SanityPeriodeResultat.INGEN_ENDRING else null,
         )

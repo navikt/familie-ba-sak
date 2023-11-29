@@ -93,6 +93,7 @@ data class SanityEØSBegrunnelse(
     override val navnISystem: String,
     override val periodeResultat: SanityPeriodeResultat? = null,
     override val vilkår: Set<Vilkår>,
+    override val borMedSokerTriggere: List<VilkårTrigger> = emptyList(),
     override val fagsakType: FagsakType?,
     override val tema: Tema?,
     override val periodeType: BrevPeriodeType?,
@@ -112,5 +113,4 @@ data class SanityEØSBegrunnelse(
     override val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger> = emptyList()
     override val bosattIRiketTriggere: List<VilkårTrigger> = emptyList()
     override val giftPartnerskapTriggere: List<VilkårTrigger> = emptyList()
-    override val borMedSokerTriggere: List<VilkårTrigger> = emptyList()
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentBegrunnelser
 
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
@@ -12,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForBrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erLikKompetanseIPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erLikVilkårOgUtdypendeVilkårIPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erSammeTemaSomPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.matcherErAutomatisk
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.skalFiltreresPåHendelser
@@ -64,12 +66,15 @@ internal fun hentEØSStandardBegrunnelser(
                 )
         }
 
-    val filtrertPåTilleggstekstMedLikKompetanse =
+    val oppfylteVilkårDennePerioden =
+        begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
+
+    val filtrertPåTilleggstekstMedLikKompetanseEllerVilkår =
         filtrertPåManuelleBegrunnelser.filterValues {
-            it.valgbarhet == Valgbarhet.TILLEGGSTEKST &&
-                it.erLikKompetanseIPeriode(
-                    begrunnelseGrunnlag,
-                )
+            it.valgbarhet == Valgbarhet.TILLEGGSTEKST && (
+                it.erLikKompetanseIPeriode(begrunnelseGrunnlag) ||
+                    it.erLikVilkårOgUtdypendeVilkårIPeriode(oppfylteVilkårDennePerioden)
+            )
         }
 
     val filtrertPåReduksjonFraForrigeBehandling =
@@ -95,7 +100,7 @@ internal fun hentEØSStandardBegrunnelser(
     return filtrertPåEndretVilkår.keys +
         filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp.keys +
         filtrertPåIngenEndringMedLikKompetanse.keys +
-        filtrertPåTilleggstekstMedLikKompetanse.keys +
+        filtrertPåTilleggstekstMedLikKompetanseEllerVilkår.keys +
         filtrertPåSkalVisesSelvOmIkkeEndring.keys +
         filtrertPåHendelser.keys +
         filtrertPåOpphørFraForrigeBehandling.keys +

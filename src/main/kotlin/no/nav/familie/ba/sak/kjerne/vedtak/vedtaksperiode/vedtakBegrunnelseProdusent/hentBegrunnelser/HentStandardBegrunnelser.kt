@@ -321,10 +321,14 @@ fun ISanityBegrunnelse.erGjeldendeForOpphørFraForrigeBehandling(begrunnelseGrun
     val vilkårMistetSidenForrigeBehandling = oppfylteVilkårForrigeBehandling - oppfylteVilkårDenneBehandlingen
 
     val begrunnelseGjelderMistedeVilkår =
-        this.erLikVilkårOgUtdypendeVilkårIPeriode(
-            oppfylteVilkårsresultaterForrigeBehandling?.filter { it.vilkårType in vilkårMistetSidenForrigeBehandling }
-                ?: emptyList(),
-        )
+        if (this.vilkår.isNotEmpty()) {
+            this.erLikVilkårOgUtdypendeVilkårIPeriode(
+                oppfylteVilkårsresultaterForrigeBehandling?.filter { it.vilkårType in vilkårMistetSidenForrigeBehandling }
+                    ?: emptyList(),
+            )
+        } else {
+            vilkårMistetSidenForrigeBehandling.isNotEmpty()
+        }
 
     val ikkeOppfylteVilkårDenneBehandlingen = begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.IKKE_OPPFYLT }
 

@@ -23,23 +23,23 @@ Egenskap: Brevperioder: Selvstendig rett
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
-      | AktørId | Vilkår           | Utdypende vilkår                            | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
-      | 1       | LOVLIG_OPPHOLD   |                                             | 11.09.2018 |            | OPPFYLT  | Nei                  |
-      | 1       | BOSATT_I_RIKET   | ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING | 11.08.2022 |            | OPPFYLT  | Nei                  |
+      | AktørId | Vilkår           | Utdypende vilkår                            | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
+      | 1       | LOVLIG_OPPHOLD   |                                             | 11.09.2018 |            | OPPFYLT  | Nei                  |                  |
+      | 1       | BOSATT_I_RIKET   | ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING | 11.08.2022 |            | OPPFYLT  | Nei                  |                  |
 
-      | 2       | UNDER_18_ÅR      |                                             | 26.01.2010 | 25.01.2028 | OPPFYLT  | Nei                  |
-      | 2       | GIFT_PARTNERSKAP |                                             | 26.01.2010 |            | OPPFYLT  | Nei                  |
-      | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER                    | 11.09.2018 | 04.04.2023 | OPPFYLT  | Nei                  |
-      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS                              | 11.09.2018 | 04.04.2023 | OPPFYLT  | Nei                  |
-      | 2       | LOVLIG_OPPHOLD   |                                             | 11.09.2018 |            | OPPFYLT  | Nei                  |
-      | 2       | BOR_MED_SØKER    | BARN_BOR_I_NORGE_MED_SØKER                  | 05.04.2023 |            | OPPFYLT  | Nei                  |
-      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_NORGE                            | 05.04.2023 |            | OPPFYLT  | Nei                  |
+      | 2       | UNDER_18_ÅR      |                                             | 26.01.2010 | 25.01.2028 | OPPFYLT  | Nei                  |                  |
+      | 2       | GIFT_PARTNERSKAP |                                             | 26.01.2010 |            | OPPFYLT  | Nei                  |                  |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER                    | 11.09.2018 | 04.04.2023 | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS                              | 11.09.2018 | 04.04.2023 | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2       | LOVLIG_OPPHOLD   |                                             | 11.09.2018 |            | OPPFYLT  | Nei                  |                  |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_NORGE_MED_SØKER                  | 05.04.2023 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_NORGE                            | 05.04.2023 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
 
-      | 3       | BOR_MED_SØKER    | BARN_BOR_I_NORGE_MED_SØKER                  | 21.04.2023 |            | OPPFYLT  | Nei                  |
-      | 3       | UNDER_18_ÅR      |                                             | 21.04.2023 | 20.04.2041 | OPPFYLT  | Nei                  |
-      | 3       | GIFT_PARTNERSKAP |                                             | 21.04.2023 |            | OPPFYLT  | Nei                  |
-      | 3       | BOSATT_I_RIKET   | BARN_BOR_I_NORGE                            | 21.04.2023 |            | OPPFYLT  | Nei                  |
-      | 3       | LOVLIG_OPPHOLD   |                                             | 21.04.2023 |            | OPPFYLT  | Nei                  |
+      | 3       | BOR_MED_SØKER    | BARN_BOR_I_NORGE_MED_SØKER                  | 21.04.2023 |            | OPPFYLT  | Nei                  |                  |
+      | 3       | UNDER_18_ÅR      |                                             | 21.04.2023 | 20.04.2041 | OPPFYLT  | Nei                  |                  |
+      | 3       | GIFT_PARTNERSKAP |                                             | 21.04.2023 |            | OPPFYLT  | Nei                  |                  |
+      | 3       | BOSATT_I_RIKET   | BARN_BOR_I_NORGE                            | 21.04.2023 |            | OPPFYLT  | Nei                  |                  |
+      | 3       | LOVLIG_OPPHOLD   |                                             | 21.04.2023 |            | OPPFYLT  | Nei                  |                  |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
