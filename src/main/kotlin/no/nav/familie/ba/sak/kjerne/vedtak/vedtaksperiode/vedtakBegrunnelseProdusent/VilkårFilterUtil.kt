@@ -30,6 +30,7 @@ fun ISanityBegrunnelse.erGjeldendeForUtgjørendeVilkår(
 fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
     vilkårResultaterForPerson: Collection<VilkårResultatForVedtaksperiode>,
 ): Boolean {
+    if (this.vilkår.isEmpty()) return false
     return this.vilkår.all { vilkårISanityBegrunnelse ->
         val vilkårResultat = vilkårResultaterForPerson.find { it.vilkårType == vilkårISanityBegrunnelse }
 

@@ -477,15 +477,18 @@ private fun hentEØSStandardBegrunnelser(
                 )
         }
 
-    val filtrertPåTilleggstekstMedLikKompetanse =
+    val oppfylteVilkårDennePerioden =
+        begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
+
+    val filtrertPåTilleggstekstMedLikKompetanseEllerVilkår =
         begrunnelserFiltrertPåPerioderesultatOgBrevPeriodeType.filterValues {
-            it.valgbarhet == Valgbarhet.TILLEGGSTEKST &&
-                it.erLikKompetanseIPeriode(
-                    begrunnelseGrunnlag,
-                )
+            it.valgbarhet == Valgbarhet.TILLEGGSTEKST && (
+                it.erLikKompetanseIPeriode(begrunnelseGrunnlag) ||
+                    it.erLikVilkårOgUtdypendeVilkårIPeriode(oppfylteVilkårDennePerioden)
+            )
         }
 
-    return filtrertPåEndretVilkår + filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp + filtrertPåIngenEndringMedLikKompetanse + filtrertPåTilleggstekstMedLikKompetanse
+    return filtrertPåEndretVilkår + filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp + filtrertPåIngenEndringMedLikKompetanse + filtrertPåTilleggstekstMedLikKompetanseEllerVilkår
 }
 
 fun SanityBegrunnelse.erGjeldendeForRolle(
