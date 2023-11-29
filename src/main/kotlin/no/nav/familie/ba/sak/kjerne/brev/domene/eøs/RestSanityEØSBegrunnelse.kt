@@ -71,7 +71,7 @@ data class RestSanityEØSBegrunnelse(
             tema = (regelverk ?: tema).finnEnumverdi<Tema>(apiNavn),
             periodeType = (brevPeriodeType ?: periodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
             valgbarhet = valgbarhet?.finnEnumverdi<Valgbarhet>(apiNavn),
-            ovrigeTriggere =
+            øvrigeTriggere =
                 ovrigeTriggere?.mapNotNull {
                     it.finnEnumverdi<ØvrigTrigger>(apiNavn)
                 } ?: emptyList(),

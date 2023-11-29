@@ -24,11 +24,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erLikVilkårOgUtdypendeVilkårIPeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.filtrerPåHendelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.filtrerPåSkalVisesSelvOmIkkeEndring
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erSammeTemaSomPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentEndretUtbetalingDennePerioden
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentResultaterForForrigePeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.matcherErAutomatisk
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.skalFiltreresPåHendelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.skalVisesSelvOmIkkeEndring
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.IEndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -44,11 +45,13 @@ internal fun hentStandardBegrunnelser(
     erUtbetalingEllerDeltBostedIPeriode: Boolean,
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
-): Map<IVedtakBegrunnelse, ISanityBegrunnelse> {
+    temaSomPeriodeErVurdertEtter: Tema,
+): Set<IVedtakBegrunnelse> {
     val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
+    val filtrertPåTema = sanityBegrunnelser.filterValues { it.erSammeTemaSomPeriode(temaSomPeriodeErVurdertEtter) }
 
     val filtrertPåRolleOgFagsaktype =
-        sanityBegrunnelser
+        filtrertPåTema
             .filterValues { begrunnelse -> begrunnelse.erGjeldendeForRolle(person, behandling.fagsak.type) }
             .filterValues { it.erGjeldendeForFagsakType(behandling.fagsak.type) }
 
@@ -101,7 +104,7 @@ internal fun hentStandardBegrunnelser(
         }
 
     val filtrertPåEtterEndretUtbetaling =
-        sanityBegrunnelser
+        filtrertPåTema
             .filterValues { it.periodeResultat in hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode) }
             .filterValues { begrunnelse -> begrunnelse.erGjeldendeForRolle(person, behandling.fagsak.type) }
             .filterValues {
@@ -111,24 +114,26 @@ internal fun hentStandardBegrunnelser(
                 )
             }
 
-    @Suppress("UNCHECKED_CAST")
     val filtrertPåHendelser =
-        (relevanteBegrunnelser as Map<IVedtakBegrunnelse, ISanityBegrunnelse>).filtrerPåHendelser(
-            begrunnelseGrunnlag,
-            vedtaksperiode.fom,
-        )
+        relevanteBegrunnelser.filterValues {
+            it.skalFiltreresPåHendelser(
+                begrunnelseGrunnlag,
+                vedtaksperiode.fom,
+            )
+        }
 
-    @Suppress("UNCHECKED_CAST")
     val filtrertPåSkalVisesSelvOmIkkeEndring =
-        (relevanteBegrunnelser as Map<IVedtakBegrunnelse, ISanityBegrunnelse>).filtrerPåSkalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
+        relevanteBegrunnelser.filterValues {
+            it.skalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
+        }
 
-    return filtrertPåVilkårOgEndretUtbetaling +
-        filtrertPåReduksjonFraForrigeBehandling +
-        filtrertPåOpphørFraForrigeBehandling +
-        filtrertPåSmåbarnstillegg +
-        filtrertPåEtterEndretUtbetaling +
-        filtrertPåHendelser +
-        filtrertPåSkalVisesSelvOmIkkeEndring
+    return filtrertPåVilkårOgEndretUtbetaling.keys +
+        filtrertPåReduksjonFraForrigeBehandling.keys +
+        filtrertPåOpphørFraForrigeBehandling.keys +
+        filtrertPåSmåbarnstillegg.keys +
+        filtrertPåEtterEndretUtbetaling.keys +
+        filtrertPåHendelser.keys +
+        filtrertPåSkalVisesSelvOmIkkeEndring.keys
 }
 
 private fun filtrerPåVilkår(

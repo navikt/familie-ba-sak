@@ -95,6 +95,8 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
         val relevantePeriodeResultater =
             hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
 
+        val temaSomPeriodeErVurdertEtter = hentTemaSomPeriodeErVurdertEtter(begrunnelseGrunnlag)
+
         val standardBegrunnelser =
             hentStandardBegrunnelser(
                 begrunnelseGrunnlag = begrunnelseGrunnlag,
@@ -106,6 +108,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
                 erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode,
                 utvidetVilkårPåSøkerIPeriode = utvidetVilkårPåSøkerIPeriode,
                 utvidetVilkårPåSøkerIForrigePeriode = utvidetVilkårPåSøkerIForrigePeriode,
+                temaSomPeriodeErVurdertEtter = temaSomPeriodeErVurdertEtter,
             )
 
         val eøsBegrunnelser =
@@ -118,20 +121,16 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
                 vedtaksperiode = this,
                 utvidetVilkårPåSøkerIPeriode = utvidetVilkårPåSøkerIPeriode,
                 utvidetVilkårPåSøkerIForrigePeriode = utvidetVilkårPåSøkerIForrigePeriode,
+                temaSomPeriodeErVurdertEtter = temaSomPeriodeErVurdertEtter,
             )
 
         val avslagsbegrunnelser = avslagsbegrunnelserPerPerson[person] ?: emptySet()
 
-        val temaSomPeriodeErVurdertEtter = hentTemaSomPeriodeErVurdertEtter(begrunnelseGrunnlag)
-
-        val standardOgEøsBegrunnelser: Map<IVedtakBegrunnelse, ISanityBegrunnelse> =
+        val standardOgEøsBegrunnelser =
             (standardBegrunnelser + eøsBegrunnelser)
-                .filterKeys { !it.vedtakBegrunnelseType.erAvslag() }
+                .filter { !it.vedtakBegrunnelseType.erAvslag() }
 
-        val standardOgEøsBegrunnelserFiltrertPåTema =
-            standardOgEøsBegrunnelser.filtrerPåTema(temaSomPeriodeErVurdertEtter)
-
-        standardOgEøsBegrunnelserFiltrertPåTema + avslagsbegrunnelser
+        (standardOgEøsBegrunnelser + avslagsbegrunnelser).toSet()
     }
 }
 
@@ -142,13 +141,9 @@ fun erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson: Map<Person
             dennePerioden.andeler.any { it.prosent != BigDecimal.ZERO }
     }
 
-private fun Map<IVedtakBegrunnelse, ISanityBegrunnelse>.filtrerPåTema(
+fun ISanityBegrunnelse.erSammeTemaSomPeriode(
     temaSomPeriodeErVurdertEtter: Tema,
-) = filter {
-    val temaPåBegrunnelse = it.value.tema
-
-    temaSomPeriodeErVurdertEtter == temaPåBegrunnelse || temaPåBegrunnelse == Tema.FELLES
-}.keys.toSet()
+): Boolean = temaSomPeriodeErVurdertEtter == tema || tema == Tema.FELLES
 
 fun hentTemaSomPeriodeErVurdertEtter(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
@@ -192,14 +187,14 @@ private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
     }
 }
 
-internal fun Map<IVedtakBegrunnelse, ISanityBegrunnelse>.filtrerPåSkalVisesSelvOmIkkeEndring(
+internal fun ISanityBegrunnelse.skalVisesSelvOmIkkeEndring(
     begrunnelseGrunnlagForPersonIPeriode: BegrunnelseGrunnlagForPersonIPeriode,
-) = filterValues { begrunnelse ->
+): Boolean {
     val begrunnelseMatcherVilkår =
-        when (begrunnelse.periodeResultat) {
+        when (this.periodeResultat) {
             SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING, SanityPeriodeResultat.REDUKSJON ->
-                begrunnelse.vilkår.isNotEmpty() &&
-                    begrunnelse.vilkår.all { vilkår ->
+                this.vilkår.isNotEmpty() &&
+                    this.vilkår.all { vilkår ->
                         begrunnelseGrunnlagForPersonIPeriode.vilkårResultater.any { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT }
                     }
 
@@ -207,14 +202,14 @@ internal fun Map<IVedtakBegrunnelse, ISanityBegrunnelse>.filtrerPåSkalVisesSelv
             null -> false
         }
     val begrunnelseSkalVisesSelvOmIkkeEndring =
-        ØvrigTrigger.SKAL_VISES_SELV_OM_IKKE_ENDRING in begrunnelse.ovrigeTriggere
-    begrunnelseSkalVisesSelvOmIkkeEndring && begrunnelseMatcherVilkår
+        ØvrigTrigger.SKAL_VISES_SELV_OM_IKKE_ENDRING in this.øvrigeTriggere
+    return begrunnelseSkalVisesSelvOmIkkeEndring && begrunnelseMatcherVilkår
 }
 
 internal fun ISanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean): Boolean =
     when {
         this.valgbarhet != Valgbarhet.AUTOMATISK -> !erAutomatiskBehandling
-        ØvrigTrigger.ALLTID_AUTOMATISK in this.ovrigeTriggere -> erAutomatiskBehandling
+        ØvrigTrigger.ALLTID_AUTOMATISK in this.øvrigeTriggere -> erAutomatiskBehandling
         else -> true
     }
 
@@ -227,10 +222,10 @@ fun ISanityBegrunnelse.erGjeldendeForFagsakType(
 }
 
 internal fun ISanityBegrunnelse.begrunnelseGjelderReduksjonFraForrigeBehandling() =
-    ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT in this.ovrigeTriggere || ØvrigTrigger.REDUKSJON_FRA_FORRIGE_BEHANDLING in this.ovrigeTriggere
+    ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT in this.øvrigeTriggere || ØvrigTrigger.REDUKSJON_FRA_FORRIGE_BEHANDLING in this.øvrigeTriggere
 
 internal fun ISanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling() =
-    ØvrigTrigger.GJELDER_FØRSTE_PERIODE in this.ovrigeTriggere || ØvrigTrigger.OPPHØR_FRA_FORRIGE_BEHANDLING in this.ovrigeTriggere
+    ØvrigTrigger.GJELDER_FØRSTE_PERIODE in this.øvrigeTriggere || ØvrigTrigger.OPPHØR_FRA_FORRIGE_BEHANDLING in this.øvrigeTriggere
 
 fun SanityBegrunnelse.erGjeldendeForRolle(
     person: Person,
@@ -267,58 +262,51 @@ fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
         ) && this.kompetanseResultat.contains(kompetanse.resultat)
 }
 
-fun Map<IVedtakBegrunnelse, ISanityBegrunnelse>.filtrerPåHendelser(
+fun ISanityBegrunnelse.skalFiltreresPåHendelser(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
     fomVedtaksperiode: LocalDate?,
-): Map<IVedtakBegrunnelse, ISanityBegrunnelse> =
+): Boolean =
     if (!begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget()) {
         val person = begrunnelseGrunnlag.dennePerioden.person
 
-        this.filtrerPåBarnDød(person, fomVedtaksperiode)
+        this.erBarnDød(person, fomVedtaksperiode)
     } else {
         val person = begrunnelseGrunnlag.dennePerioden.person
 
-        this.filtrerPåBarn6år(person, fomVedtaksperiode) +
-            this.filtrerPåSatsendring(
+        this.erBarn6År(person, fomVedtaksperiode) ||
+            this.erSatsendring(
                 person,
                 begrunnelseGrunnlag.dennePerioden.andeler,
                 fomVedtaksperiode,
             )
     }
 
-fun Map<IVedtakBegrunnelse, ISanityBegrunnelse>.filtrerPåBarn6år(
+fun ISanityBegrunnelse.erBarn6År(
     person: Person,
     fomVedtaksperiode: LocalDate?,
-): Map<IVedtakBegrunnelse, ISanityBegrunnelse> {
+): Boolean {
     val blirPerson6DennePerioden = person.hentSeksårsdag().toYearMonth() == fomVedtaksperiode?.toYearMonth()
 
-    return if (blirPerson6DennePerioden) {
-        this.filterValues { it.ovrigeTriggere.contains(ØvrigTrigger.BARN_MED_6_ÅRS_DAG) }
-    } else {
-        emptyMap()
-    }
+    return blirPerson6DennePerioden && this.øvrigeTriggere.contains(ØvrigTrigger.BARN_MED_6_ÅRS_DAG)
 }
 
-fun Map<IVedtakBegrunnelse, ISanityBegrunnelse>.filtrerPåBarnDød(
+fun ISanityBegrunnelse.erBarnDød(
     person: Person,
     fomVedtaksperiode: LocalDate?,
-): Map<IVedtakBegrunnelse, ISanityBegrunnelse> {
+): Boolean {
     val dødsfall = person.dødsfall
     val personDødeForrigeMåned =
         dødsfall != null && dødsfall.dødsfallDato.toYearMonth().plusMonths(1) == fomVedtaksperiode?.toYearMonth()
 
-    return if (personDødeForrigeMåned && person.type == PersonType.BARN) {
-        this.filterValues { it.ovrigeTriggere.contains(ØvrigTrigger.BARN_DØD) }
-    } else {
-        emptyMap()
-    }
+    return personDødeForrigeMåned && person.type == PersonType.BARN &&
+        this.øvrigeTriggere.contains(ØvrigTrigger.BARN_DØD)
 }
 
-fun Map<IVedtakBegrunnelse, ISanityBegrunnelse>.filtrerPåSatsendring(
+fun ISanityBegrunnelse.erSatsendring(
     person: Person,
     andeler: Iterable<AndelForVedtaksperiode>,
     fomVedtaksperiode: LocalDate?,
-): Map<IVedtakBegrunnelse, ISanityBegrunnelse> {
+): Boolean {
     val satstyperPåAndelene = andeler.map { it.type.tilSatsType(person, fomVedtaksperiode ?: TIDENES_MORGEN) }.toSet()
 
     val erSatsendringIPeriodenForPerson =
@@ -326,11 +314,7 @@ fun Map<IVedtakBegrunnelse, ISanityBegrunnelse>.filtrerPåSatsendring(
             SatsService.finnAlleSatserFor(satstype).any { it.gyldigFom == fomVedtaksperiode }
         }
 
-    return if (erSatsendringIPeriodenForPerson) {
-        this.filterValues { it.ovrigeTriggere.contains(ØvrigTrigger.SATSENDRING) }
-    } else {
-        emptyMap()
-    }
+    return erSatsendringIPeriodenForPerson && this.øvrigeTriggere.contains(ØvrigTrigger.SATSENDRING)
 }
 
 internal fun hentResultaterForForrigePeriode(

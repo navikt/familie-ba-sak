@@ -71,7 +71,7 @@ data class RestSanityBegrunnelse(
                 borMedSokerTriggere?.mapNotNull {
                     it.finnEnumverdi<VilkårTrigger>(apiNavn)
                 } ?: emptyList(),
-            ovrigeTriggere =
+            øvrigeTriggere =
                 ovrigeTriggere?.mapNotNull {
                     it.finnEnumverdi<ØvrigTrigger>(apiNavn)
                 } ?: emptyList(),

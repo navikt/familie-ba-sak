@@ -1312,7 +1312,7 @@ fun lagSanityBegrunnelse(
         bosattIRiketTriggere = bosattIRiketTriggere,
         giftPartnerskapTriggere = giftPartnerskapTriggere,
         borMedSokerTriggere = borMedSokerTriggere,
-        ovrigeTriggere = ovrigeTriggere,
+        øvrigeTriggere = ovrigeTriggere,
         endringsaarsaker = endringsaarsaker,
         hjemler = hjemler,
         hjemlerFolketrygdloven = hjemlerFolketrygdloven,
@@ -1358,7 +1358,7 @@ fun lagSanityEøsBegrunnelse(
         tema = tema,
         periodeType = periodeType,
         valgbarhet = valgbarhet,
-        ovrigeTriggere = ovrigeTriggere,
+        øvrigeTriggere = ovrigeTriggere,
     )
 
 fun oppfyltVilkår(

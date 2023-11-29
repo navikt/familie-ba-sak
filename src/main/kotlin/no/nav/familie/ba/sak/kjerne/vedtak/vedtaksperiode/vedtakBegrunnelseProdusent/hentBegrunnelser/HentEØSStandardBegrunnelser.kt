@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentBegrunnelser
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -12,9 +12,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForBrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erLikKompetanseIPeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.filtrerPåHendelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.filtrerPåSkalVisesSelvOmIkkeEndring
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erSammeTemaSomPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.matcherErAutomatisk
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.skalFiltreresPåHendelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.skalVisesSelvOmIkkeEndring
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VilkårResultatForVedtaksperiode
 
 internal fun hentEØSStandardBegrunnelser(
@@ -26,14 +27,15 @@ internal fun hentEØSStandardBegrunnelser(
     erUtbetalingEllerDeltBostedIPeriode: Boolean,
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
-): Map<IVedtakBegrunnelse, ISanityBegrunnelse> {
+    temaSomPeriodeErVurdertEtter: Tema,
+): Set<IVedtakBegrunnelse> {
     val filtrertPåManuelleBegrunnelser =
         sanityEØSBegrunnelser
             .filterValues { it.periodeResultat in relevantePeriodeResultater }
             .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
             .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
+            .filterValues { it.erSammeTemaSomPeriode(temaSomPeriodeErVurdertEtter) }
 
-    @Suppress("UNCHECKED_CAST")
     val filtrertPåEndretVilkår =
         filtrertPåManuelleBegrunnelser.filterValues {
             it.erGjeldendeForUtgjørendeVilkår(
@@ -41,7 +43,7 @@ internal fun hentEØSStandardBegrunnelser(
                 utvidetVilkårPåSøkerIPeriode,
                 utvidetVilkårPåSøkerIForrigePeriode,
             )
-        } as Map<IVedtakBegrunnelse, ISanityBegrunnelse>
+        }
 
     val filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp =
         filtrertPåManuelleBegrunnelser.filterValues { begrunnelse ->
@@ -81,19 +83,23 @@ internal fun hentEØSStandardBegrunnelser(
         }
 
     val filtrertPåHendelser =
-        filtrertPåEndretVilkår.filtrerPåHendelser(begrunnelseGrunnlag, vedtaksperiode.fom)
+        filtrertPåEndretVilkår.filterValues {
+            it.skalFiltreresPåHendelser(begrunnelseGrunnlag, vedtaksperiode.fom)
+        }
 
     val filtrertPåSkalVisesSelvOmIkkeEndring =
-        filtrertPåEndretVilkår.filtrerPåSkalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
+        filtrertPåEndretVilkår.filterValues {
+            it.skalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
+        }
 
-    return filtrertPåEndretVilkår +
-        filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp +
-        filtrertPåIngenEndringMedLikKompetanse +
-        filtrertPåTilleggstekstMedLikKompetanse +
-        filtrertPåSkalVisesSelvOmIkkeEndring +
-        filtrertPåHendelser +
-        filtrertPåOpphørFraForrigeBehandling +
-        filtrertPåReduksjonFraForrigeBehandling
+    return filtrertPåEndretVilkår.keys +
+        filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp.keys +
+        filtrertPåIngenEndringMedLikKompetanse.keys +
+        filtrertPåTilleggstekstMedLikKompetanse.keys +
+        filtrertPåSkalVisesSelvOmIkkeEndring.keys +
+        filtrertPåHendelser.keys +
+        filtrertPåOpphørFraForrigeBehandling.keys +
+        filtrertPåReduksjonFraForrigeBehandling.keys
 }
 
 private fun erEndringIKompetanse(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) =

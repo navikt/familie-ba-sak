@@ -24,7 +24,7 @@ sealed interface ISanityBegrunnelse {
     val valgbarhet: Valgbarhet?
     val periodeType: BrevPeriodeType?
     val begrunnelseTypeForPerson: VedtakBegrunnelseType? // TODO: Fjern når migrering av ny felter er ferdig
-    val ovrigeTriggere: List<ØvrigTrigger>
+    val øvrigeTriggere: List<ØvrigTrigger>
 
     val gjelderEtterEndretUtbetaling
         get() =
@@ -39,7 +39,7 @@ sealed interface ISanityBegrunnelse {
     val gjelderSatsendring
         get() =
             this is SanityBegrunnelse &&
-                ØvrigTrigger.SATSENDRING in this.ovrigeTriggere
+                ØvrigTrigger.SATSENDRING in this.øvrigeTriggere
 }
 
 data class SanityBegrunnelse(
@@ -57,9 +57,7 @@ data class SanityBegrunnelse(
     override val valgbarhet: Valgbarhet? = null,
     override val periodeType: BrevPeriodeType? = null,
     override val begrunnelseTypeForPerson: VedtakBegrunnelseType? = null,
-    override val ovrigeTriggere: List<ØvrigTrigger> = emptyList(),
-    @Deprecated("Bruk vilkår")
-    val vilkaar: List<SanityVilkår> = emptyList(),
+    override val øvrigeTriggere: List<ØvrigTrigger> = emptyList(),
     val rolle: List<VilkårRolle> = emptyList(),
     val hjemler: List<String> = emptyList(),
     val hjemlerFolketrygdloven: List<String> = emptyList(),
@@ -100,7 +98,7 @@ data class SanityEØSBegrunnelse(
     override val periodeType: BrevPeriodeType?,
     override val begrunnelseTypeForPerson: VedtakBegrunnelseType? = null,
     override val valgbarhet: Valgbarhet?,
-    override val ovrigeTriggere: List<ØvrigTrigger> = emptyList(),
+    override val øvrigeTriggere: List<ØvrigTrigger> = emptyList(),
     val annenForeldersAktivitet: List<KompetanseAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,

@@ -152,7 +152,7 @@ class VedtaksperiodeService(
                     sanityBegrunnelser[it]
                         ?: return@mapNotNull null
 
-                if (sanityBegrunnelse.ovrigeTriggere.contains(ØvrigTrigger.SATSENDRING)) {
+                if (sanityBegrunnelse.øvrigeTriggere.contains(ØvrigTrigger.SATSENDRING)) {
                     validerSatsendring(
                         fom = vedtaksperiodeMedBegrunnelser.fom,
                         harBarnMedSeksårsdagPåFom =
