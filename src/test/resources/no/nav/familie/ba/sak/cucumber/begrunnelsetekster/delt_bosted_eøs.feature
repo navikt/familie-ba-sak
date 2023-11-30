@@ -17,14 +17,14 @@ Egenskap: Gyldige begrunnelser for delt bosted i EØS-saker
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
-      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat | Utdypende vilkår | Vurderes etter |
-      | 1       | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |                  |                |
-      | 2       | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |                  |                |
-      | 2       | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |                  |                |
-      | 2       | BOR_MED_SØKER                                    | 13.04.2020 | 10.03.2021 | Oppfylt  | DELT_BOSTED      |                |
-      | 3       | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |                  |                |
-      | 3       | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |                  |                |
-      | 3       | BOR_MED_SØKER                                    | 13.04.2020 | 10.04.2021 | Oppfylt  | DELT_BOSTED      |                |
+      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat | Utdypende vilkår | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |                  |                  |
+      | 2       | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |                  |                  |
+      | 2       | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |                  |                  |
+      | 2       | BOR_MED_SØKER                                    | 13.04.2020 | 10.03.2021 | Oppfylt  | DELT_BOSTED      | EØS_FORORDNINGEN |
+      | 3       | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |                  |                  |
+      | 3       | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |                  |                  |
+      | 3       | BOR_MED_SØKER                                    | 13.04.2020 | 10.04.2021 | Oppfylt  | DELT_BOSTED      | EØS_FORORDNINGEN |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
@@ -53,11 +53,11 @@ Egenskap: Gyldige begrunnelser for delt bosted i EØS-saker
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
-      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat | Utdypende vilkår            | Vurderes etter |
-      | 1       | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |                             |                |
-      | 2       | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |                             |                |
-      | 2       | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |                             |                |
-      | 2       | BOR_MED_SØKER                                    | 13.04.2020 | 10.03.2021 | Oppfylt  | DELT_BOSTED_SKAL_IKKE_DELES |                |
+      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat | Utdypende vilkår            | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |                             |                  |
+      | 2       | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |                             |                  |
+      | 2       | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |                             |                  |
+      | 2       | BOR_MED_SØKER                                    | 13.04.2020 | 10.03.2021 | Oppfylt  | DELT_BOSTED_SKAL_IKKE_DELES | EØS_FORORDNINGEN |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |

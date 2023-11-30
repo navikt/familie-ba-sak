@@ -21,15 +21,15 @@ Egenskap: Gyldige begrunnelser ved EØS
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
-      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
-      | 1       | LOVLIG_OPPHOLD   |                              | 01.08.2019 |            | OPPFYLT  | Nei                  |                      |
-      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 15.11.2022 | 15.01.2023 | OPPFYLT  | Nei                  |                      |
+      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | LOVLIG_OPPHOLD   |                              | 01.08.2019 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 15.11.2022 | 15.01.2023 | OPPFYLT  | Nei                  |                      |                  |
 
-      | 2       | GIFT_PARTNERSKAP |                              | 01.01.2017 |            | OPPFYLT  | Nei                  |                      |
-      | 2       | UNDER_18_ÅR      |                              | 01.01.2017 | 31.12.2034 | OPPFYLT  | Nei                  |                      |
-      | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 01.08.2019 |            | OPPFYLT  | Nei                  |                      |
-      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 01.08.2019 |            | OPPFYLT  | Nei                  |                      |
-      | 2       | LOVLIG_OPPHOLD   |                              | 01.08.2019 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | GIFT_PARTNERSKAP |                              | 01.01.2017 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | UNDER_18_ÅR      |                              | 01.01.2017 | 31.12.2034 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 01.08.2019 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 01.08.2019 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | LOVLIG_OPPHOLD   |                              | 01.08.2019 |            | OPPFYLT  | Nei                  |                      |                  |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |

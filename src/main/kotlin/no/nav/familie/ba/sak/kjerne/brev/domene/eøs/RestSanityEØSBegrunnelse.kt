@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
+package no.nav.familie.ba.sak.kjerne.brev.domene.eøs
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
@@ -8,21 +8,11 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdiNullable
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
+import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-
-enum class BarnetsBostedsland {
-    NORGE,
-    IKKE_NORGE,
-}
-
-fun landkodeTilBarnetsBostedsland(landkode: String): BarnetsBostedsland =
-    when (landkode) {
-        "NO" -> BarnetsBostedsland.NORGE
-        else -> BarnetsBostedsland.IKKE_NORGE
-    }
 
 data class RestSanityEØSBegrunnelse(
     val apiNavn: String?,
@@ -37,6 +27,7 @@ data class RestSanityEØSBegrunnelse(
     val hjemlerEOSForordningen987: List<String>?,
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>?,
     val eosVilkaar: List<String>? = null,
+    val ovrigeTriggere: List<String>? = emptyList(),
     @Deprecated("Skal bruke periodeResultatForPerson i stedet")
     val vedtakResultat: String?,
     val periodeResultatForPerson: String?,
@@ -86,9 +77,24 @@ data class RestSanityEØSBegrunnelse(
             tema = (regelverk ?: tema).finnEnumverdi<Tema>(apiNavn),
             periodeType = (brevPeriodeType ?: periodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
             valgbarhet = valgbarhet?.finnEnumverdi<Valgbarhet>(apiNavn),
+            øvrigeTriggere =
+                ovrigeTriggere?.mapNotNull {
+                    it.finnEnumverdi<ØvrigTrigger>(apiNavn)
+                } ?: emptyList(),
         )
     }
 
     private inline fun <reified T> konverterTilEnumverdi(it: String): T? where T : Enum<T> =
         enumValues<T>().find { enum -> enum.name == it }
 }
+
+enum class BarnetsBostedsland {
+    NORGE,
+    IKKE_NORGE,
+}
+
+fun landkodeTilBarnetsBostedsland(landkode: String): BarnetsBostedsland =
+    when (landkode) {
+        "NO" -> BarnetsBostedsland.NORGE
+        else -> BarnetsBostedsland.IKKE_NORGE
+    }

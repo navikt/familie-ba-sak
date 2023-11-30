@@ -43,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -78,7 +79,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -1312,7 +1312,7 @@ fun lagSanityBegrunnelse(
         bosattIRiketTriggere = bosattIRiketTriggere,
         giftPartnerskapTriggere = giftPartnerskapTriggere,
         borMedSokerTriggere = borMedSokerTriggere,
-        ovrigeTriggere = ovrigeTriggere,
+        øvrigeTriggere = ovrigeTriggere,
         endringsaarsaker = endringsaarsaker,
         hjemler = hjemler,
         hjemlerFolketrygdloven = hjemlerFolketrygdloven,
@@ -1340,6 +1340,7 @@ fun lagSanityEøsBegrunnelse(
     tema: Tema? = null,
     periodeType: BrevPeriodeType? = null,
     valgbarhet: Valgbarhet? = null,
+    ovrigeTriggere: List<ØvrigTrigger> = emptyList(),
 ): SanityEØSBegrunnelse =
     SanityEØSBegrunnelse(
         apiNavn = apiNavn,
@@ -1357,6 +1358,7 @@ fun lagSanityEøsBegrunnelse(
         tema = tema,
         periodeType = periodeType,
         valgbarhet = valgbarhet,
+        øvrigeTriggere = ovrigeTriggere,
     )
 
 fun oppfyltVilkår(

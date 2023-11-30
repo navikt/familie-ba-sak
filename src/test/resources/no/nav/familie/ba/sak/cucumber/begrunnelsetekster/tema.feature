@@ -22,14 +22,14 @@ Egenskap: Gyldige begrunnelser for behandlingstema
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
-      | AktørId | Vilkår                          | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
-      | 1234    | LOVLIG_OPPHOLD                  |                              | 02.01.1985 |            | OPPFYLT  | Nei                  |
-      | 1234    | BOSATT_I_RIKET                  | OMFATTET_AV_NORSK_LOVGIVNING | 02.01.1985 |            | OPPFYLT  | Nei                  |
+      | AktørId | Vilkår                          | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
+      | 1234    | LOVLIG_OPPHOLD                  |                              | 02.01.1985 |            | OPPFYLT  | Nei                  |                  |
+      | 1234    | BOSATT_I_RIKET                  | OMFATTET_AV_NORSK_LOVGIVNING | 02.01.1985 |            | OPPFYLT  | Nei                  |                  |
 
-      | 4567    | UNDER_18_ÅR                     |                              | 07.09.2019 | 06.09.2037 | OPPFYLT  | Nei                  |
-      | 4567    | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP |                              | 07.09.2019 |            | OPPFYLT  | Nei                  |
-      | 4567    | BOSATT_I_RIKET                  | BARN_BOR_I_NORGE             | 07.09.2019 |            | OPPFYLT  | Nei                  |
-      | 4567    | BOR_MED_SØKER                   | BARN_BOR_I_EØS_MED_SØKER     | 07.09.2019 |            | OPPFYLT  | Nei                  |
+      | 4567    | UNDER_18_ÅR                     |                              | 07.09.2019 | 06.09.2037 | OPPFYLT  | Nei                  |                  |
+      | 4567    | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP |                              | 07.09.2019 |            | OPPFYLT  | Nei                  |                  |
+      | 4567    | BOSATT_I_RIKET                  | BARN_BOR_I_NORGE             | 07.09.2019 |            | OPPFYLT  | Nei                  |                  |
+      | 4567    | BOR_MED_SØKER                   | BARN_BOR_I_EØS_MED_SØKER     | 07.09.2019 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent |
@@ -119,14 +119,14 @@ Egenskap: Gyldige begrunnelser for behandlingstema
       | 4567    | GIFT_PARTNERSKAP |                              | 18.06.2019 |            | OPPFYLT  | Nei                  |                  |
       | 4567    | LOVLIG_OPPHOLD   |                              | 18.05.2022 |            | OPPFYLT  | Nei                  |                  |
       | 4567    | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 18.05.2022 |            | OPPFYLT  | Nei                  |                  |
-      | 4567    | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 18.05.2022 |            | OPPFYLT  | Nei                  |                  |
+      | 4567    | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 18.05.2022 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
 
       | 1234    | LOVLIG_OPPHOLD   |                              | 18.05.2022 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
       | 1234    | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 18.05.2022 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
 
       | 5678    | GIFT_PARTNERSKAP |                              | 20.12.2014 |            | OPPFYLT  | Nei                  |                  |
       | 5678    | UNDER_18_ÅR      |                              | 20.12.2014 | 19.12.2032 | OPPFYLT  | Nei                  |                  |
-      | 5678    | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 18.05.2022 |            | OPPFYLT  | Nei                  |                  |
+      | 5678    | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 18.05.2022 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
       | 5678    | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 18.05.2022 |            | OPPFYLT  | Nei                  |                  |
       | 5678    | LOVLIG_OPPHOLD   |                              | 18.05.2022 |            | OPPFYLT  | Nei                  |                  |
 
