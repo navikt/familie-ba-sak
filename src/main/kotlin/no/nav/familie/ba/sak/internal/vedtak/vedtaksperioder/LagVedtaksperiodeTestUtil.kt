@@ -142,17 +142,25 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
                     it.vurderesEtter,
                 )
             }.toList().joinToString("") { (vilkårResultatRad, vilkårResultater) ->
-                """
-      | ${vilkårResultatRad.aktørId}  
-      | ${vilkårResultater.map { it.vilkårType }.joinToString(",")} 
-      | ${vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")} 
-      | ${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""} 
-      | ${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""} 
-      | ${vilkårResultatRad.resultat}  
-      | ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"}  
-      | ${vilkårResultatRad.standardbegrunnelser.joinToString(",")}
-      | ${vilkårResultatRad.vurderesEtter}  
-      |"""
+                """| ${
+                    vilkårResultatRad.aktørId
+                }  | ${
+                    vilkårResultater.map { it.vilkårType }.joinToString(",")
+                } | ${
+                    vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")
+                } | ${
+                    vilkårResultatRad.fom?.tilddMMyyyy() ?: ""
+                } | ${
+                    vilkårResultatRad.tom?.tilddMMyyyy() ?: ""
+                } | ${
+                    vilkårResultatRad.resultat
+                }  | ${
+                    if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"
+                }  | ${
+                    vilkårResultatRad.standardbegrunnelser.joinToString(",")
+                }| ${
+                    vilkårResultatRad.vurderesEtter
+                }|"""
             }
     } ?: ""
 
