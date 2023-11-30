@@ -151,7 +151,7 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
                     "| ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"}" +
                     "| ${vilkårResultatRad.standardbegrunnelser.joinToString(",")}" +
                     "| ${vilkårResultatRad.vurderesEtter}" +
-                    "|"
+                    "| \n"
             }
     } ?: ""
 

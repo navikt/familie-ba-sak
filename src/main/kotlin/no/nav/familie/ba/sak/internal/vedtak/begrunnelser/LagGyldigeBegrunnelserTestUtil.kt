@@ -182,7 +182,7 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
                     it.vurderesEtter,
                 )
             }.toList().joinToString("") { (vilkårResultatRad, vilkårResultater) ->
-                "| ${vilkårResultatRad.aktørId} " +
+                "\n | ${vilkårResultatRad.aktørId} " +
                     "| ${vilkårResultater.map { it.vilkårType }.joinToString(",")} " +
                     "| ${vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")} " +
                     "| ${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""} " +
@@ -190,8 +190,8 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
                     "| ${vilkårResultatRad.resultat} " +
                     "| ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} " +
                     "| ${vilkårResultatRad.standardbegrunnelser.joinToString(",")}" +
-                    "| ${vilkårResultatRad.vurderesEtter} " +
-                    "|"
+                    "| ${vilkårResultatRad.vurderesEtter ?: ""} " +
+                    "| "
             }
     } ?: ""
 
