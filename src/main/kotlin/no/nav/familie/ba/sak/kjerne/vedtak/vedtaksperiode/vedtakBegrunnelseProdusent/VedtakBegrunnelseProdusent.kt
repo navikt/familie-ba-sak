@@ -151,18 +151,18 @@ fun hentTemaSomPeriodeErVurdertEtter(
 ): Tema {
     val erVurdertEtterEøsDennePerioden = begrunnelseGrunnlag.dennePerioden.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
     val erVurdertEtterEøsForrigePeriode = begrunnelseGrunnlag.forrigePeriode?.vilkårResultater?.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } == true
-    val harGåttFraÅVæreVurdertAvEØSDennePerioden = !erVurdertEtterEøsDennePerioden && erVurdertEtterEøsForrigePeriode
+    val erForrigePeriodeEøsOgDenneNasjonal = !erVurdertEtterEøsDennePerioden && erVurdertEtterEøsForrigePeriode
 
     val fårUtbetaltNasjonalt = begrunnelseGrunnlag.dennePerioden.andeler.any { it.nasjonaltPeriodebeløp != 0 }
-    val harGåttFraEøsTilNasjonal = harGåttFraÅVæreVurdertAvEØSDennePerioden && fårUtbetaltNasjonalt
+    val harGåttFraEøsTilNasjonal = erForrigePeriodeEøsOgDenneNasjonal && fårUtbetaltNasjonalt
 
-    val harGåttFraÅVæreVurdertAvEØSSidenForrigeBehandling =
+    val erPeriodeEndretFraEøsTilNasjonalSidenForrigeBehandling =
         !erVurdertEtterEøsDennePerioden && begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.vilkårResultater?.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } == true
 
     return when {
         harGåttFraEøsTilNasjonal -> Tema.NASJONAL
-        erVurdertEtterEøsDennePerioden || harGåttFraÅVæreVurdertAvEØSDennePerioden -> Tema.EØS
-        harGåttFraÅVæreVurdertAvEØSSidenForrigeBehandling -> Tema.EØS
+        erVurdertEtterEøsDennePerioden || erForrigePeriodeEøsOgDenneNasjonal -> Tema.EØS
+        erPeriodeEndretFraEøsTilNasjonalSidenForrigeBehandling -> Tema.EØS
         else -> Tema.NASJONAL
     }
 }
