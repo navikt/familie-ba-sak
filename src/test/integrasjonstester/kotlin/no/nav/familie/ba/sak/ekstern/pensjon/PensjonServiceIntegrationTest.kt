@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
 import io.mockk.every
+import io.mockk.slot
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -144,12 +145,13 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     private fun mockInfotrygdBarnetrygdResponse(søkerAktør: Aktør) {
         every { envService.erPreprod() } returns false
-        every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(any(), any()) } returns
+        val identFraRequest = slot<String>()
+        every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(capture(identFraRequest), any()) } answers {
             BarnetrygdTilPensjonResponse(
                 fagsaker =
                     listOf(
                         BarnetrygdTilPensjon(
-                            "",
+                            identFraRequest.captured,
                             listOf(
                                 BarnetrygdPeriode(
                                     personIdent = søkerAktør.aktivFødselsnummer(),
@@ -165,5 +167,6 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         ),
                     ),
             )
+        }
     }
 }
