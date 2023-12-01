@@ -17,7 +17,7 @@ Egenskap: Vedtaksperioder for institusjonssaker
       | 1            | 1       | BARN       | 10.01.2018  |
 
   Scenario: Skal kunne endre utbetalingen til 0 prosent
-    Og følgende dagens dato 26.09.2023
+    Og dagens dato er 26.09.2023
     Og lag personresultater for behandling 1
 
     Og legg til nye vilkårresultater for behandling 1
