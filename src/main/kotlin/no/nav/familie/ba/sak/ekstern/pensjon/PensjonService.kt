@@ -95,16 +95,16 @@ class PensjonService(
         aktør: Aktør,
         fraDato: LocalDate,
     ): Pair<BarnetrygdTilPensjon, List<BarnetrygdTilPensjon>> {
-        val personidenter = if (envService.erPreprod()) testident(aktør, fraDato) else aktør.personidenter
+        val personidenter = (if (envService.erPreprod()) testident(aktør, fraDato) else aktør.personidenter).map { it.fødselsnummer }
 
-        val barnetrygdFraRelaterteSaker = mutableListOf<BarnetrygdTilPensjon>()
         val allePerioderTilhørendeAktør = mutableListOf<BarnetrygdPeriode>()
+        val barnetrygdFraRelaterteSaker = mutableListOf<BarnetrygdTilPensjon>()
 
         personidenter.forEach { ident ->
-            infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident.fødselsnummer, fraDato).fagsaker.forEach {
-                if (it.fagsakEiersIdent == ident.fødselsnummer) {
+            infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident, fraDato).fagsaker.forEach {
+                if (personidenter.contains(it.fagsakEiersIdent)) {
                     allePerioderTilhørendeAktør.addAll(it.barnetrygdPerioder.maskerPersonidenteneIPreprod(aktør))
-                } else if (!envService.erPreprod()) { // Trenger ikke ha med relaterte saker i test fra Q2. I så fall måtte disse også blitt maskert
+                } else if (!envService.erPreprod()) { // tar ikke med relaterte saker i test fra Q2 i denne omgang. Må i så fall maskeres
                     barnetrygdFraRelaterteSaker.add(it)
                 }
             }
