@@ -95,18 +95,7 @@ class PensjonService(
         aktør: Aktør,
         fraDato: LocalDate,
     ): Pair<BarnetrygdTilPensjon, List<BarnetrygdTilPensjon>> {
-        val personidenter =
-            when {
-                envService.erPreprod() -> // ulik strategi avhengig av hvilket Q-miljø det er som brukes for testsesjonen av pensjon..
-                    if (unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
-                        emptyList()
-                    } else {
-                        listOfNotNull(
-                            tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer(), fraDato.year)?.let { Personident(it, aktør) },
-                        )
-                    }
-                else -> aktør.personidenter
-            }
+        val personidenter = if (envService.erPreprod()) testident(aktør, fraDato) else aktør.personidenter
 
         val barnetrygdFraRelaterteSaker = mutableListOf<BarnetrygdTilPensjon>()
         val allePerioderTilhørendeAktør = mutableListOf<BarnetrygdPeriode>()
@@ -115,10 +104,9 @@ class PensjonService(
             infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident.fødselsnummer, fraDato).fagsaker.forEach {
                 if (it.fagsakEiersIdent == ident.fødselsnummer) {
                     allePerioderTilhørendeAktør.addAll(it.barnetrygdPerioder.maskerPersonidenteneIPreprod(aktør))
-                } else if (!envService.erPreprod())
-                    { // Dropper relaterte saker i preprod. Hvis ikke måtte disse også blitt maskert
-                        barnetrygdFraRelaterteSaker.add(it)
-                    }
+                } else if (!envService.erPreprod()) { // Trenger ikke ha med relaterte saker i test fra Q2. I så fall måtte disse også blitt maskert
+                    barnetrygdFraRelaterteSaker.add(it)
+                }
             }
         }
 
@@ -178,6 +166,17 @@ class PensjonService(
                     sakstypeEkstern = behandling.kategori.tilPensjonSakstype(),
                 )
             }
+    }
+
+    private fun testident(
+        aktør: Aktør,
+        fraDato: LocalDate,
+    ) = if (unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
+        emptyList()
+    } else {
+        listOfNotNull(
+            tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer(), fraDato.year)?.let { Personident(it, aktør) },
+        )
     }
 
     @Cacheable("pensjon_testident", cacheManager = "dailyCache")
