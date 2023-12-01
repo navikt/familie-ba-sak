@@ -48,7 +48,7 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
             """
       
   Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
-    Og følgende dagens dato ${LocalDate.now().tilddMMyyyy()}""" +
+    Og dagens dato er ${LocalDate.now().tilddMMyyyy()}""" +
             lagPersonresultaterTekst(forrigeBehandling) +
             lagPersonresultaterTekst(behandling) +
             hentTekstForVilkårresultater(
