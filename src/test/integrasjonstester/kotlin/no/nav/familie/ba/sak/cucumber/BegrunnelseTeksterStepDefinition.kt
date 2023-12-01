@@ -423,7 +423,7 @@ private object SanityBegrunnelseMock {
     // for å få alle begrunnelsene i clipboardet
     fun hentSanityBegrunnelserMock(): Map<Standardbegrunnelse, SanityBegrunnelse> {
         val restSanityBegrunnelserJson =
-            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityBegrunnelser")!!
+            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/gyldigeBegrunnelser/restSanityBegrunnelser")!!
 
         val restSanityBegrunnelser =
             objectMapper.readValue(restSanityBegrunnelserJson, Array<RestSanityBegrunnelse>::class.java)
@@ -445,7 +445,7 @@ private object SanityBegrunnelseMock {
 
     fun hentSanityEØSBegrunnelserMock(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
         val restSanityEØSBegrunnelserJson =
-            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityEØSBegrunnelser")!!
+            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/gyldigeBegrunnelser/restSanityEØSBegrunnelser")!!
 
         val restSanityEØSBegrunnelser =
             objectMapper.readValue(

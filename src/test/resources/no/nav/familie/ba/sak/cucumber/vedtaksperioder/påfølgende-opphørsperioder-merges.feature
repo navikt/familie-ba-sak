@@ -19,7 +19,7 @@ Egenskap: Vedtaksperioder med reduksjon fra forrige periode eller behandling
       | 2            | 5678    | BARN       | 06.10.2007  |
 
   Scenario: Skal ikke splitte når det er reduksjon fra forrige periode selv om det er reduksjon fra forrige behandling
-    Og følgende dagens dato 18.09.2023
+    Og dagens dato er 18.09.2023
     Og lag personresultater for behandling 1
     Og lag personresultater for behandling 2
 
