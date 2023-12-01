@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.ekstern.restDomene.UtfyltStatus
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKompetanse
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

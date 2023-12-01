@@ -17,10 +17,10 @@ Egenskap: Brevbegrunnelser ved endring av kompetanse
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
-      | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
-      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
-      | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
-      | 3456    | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
+      | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat | Vurderes etter   |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |                  |
+      | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  | EØS_FORORDNINGEN |
+      | 3456    | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  | EØS_FORORDNINGEN |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
@@ -35,10 +35,10 @@ Egenskap: Brevbegrunnelser ved endring av kompetanse
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                            | Ugyldige begrunnelser                              |
-      | 01.05.2020 | 30.04.2021 | Utbetaling         | EØS_FORORDNINGEN                  | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_JOBBER_I_NORGE    |
-      | 01.05.2021 | 31.03.2038 | Utbetaling         | EØS_FORORDNINGEN                  | INNVILGET_SEKUNDÆRLAND_STANDARD                    | INNVILGET_SEKUNDÆRLAND_TO_ARBEIDSLAND_NORGE_UTBETALER |
-      | 01.04.2038 |            | Opphør             |                                   |                                                    |                                                       |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                               | Ugyldige begrunnelser                                 |
+      | 01.05.2020 | 30.04.2021 | Utbetaling         | EØS_FORORDNINGEN               | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_JOBBER_I_NORGE    |
+      | 01.05.2021 | 31.03.2038 | Utbetaling         | EØS_FORORDNINGEN               | INNVILGET_SEKUNDÆRLAND_STANDARD                    | INNVILGET_SEKUNDÆRLAND_TO_ARBEIDSLAND_NORGE_UTBETALER |
+      | 01.04.2038 |            | Opphør             |                                |                                                    |                                                       |
 
     Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser | Eøsbegrunnelser                                    | Fritekster |
