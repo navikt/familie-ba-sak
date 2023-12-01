@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
 import no.nav.familie.unleash.UnleashService
@@ -95,7 +94,7 @@ class PensjonService(
         aktør: Aktør,
         fraDato: LocalDate,
     ): Pair<BarnetrygdTilPensjon, List<BarnetrygdTilPensjon>> {
-        val personidenter = (if (envService.erPreprod()) testident(aktør, fraDato) else aktør.personidenter).map { it.fødselsnummer }
+        val personidenter = if (envService.erPreprod()) testident(aktør, fraDato) else aktør.personidenter.map { it.fødselsnummer }
 
         val allePerioderTilhørendeAktør = mutableListOf<BarnetrygdPeriode>()
         val barnetrygdFraRelaterteSaker = mutableListOf<BarnetrygdTilPensjon>()
@@ -175,7 +174,7 @@ class PensjonService(
         emptyList()
     } else {
         listOfNotNull(
-            tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer(), fraDato.year)?.let { Personident(it, aktør) },
+            tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer(), fraDato.year),
         )
     }
 
