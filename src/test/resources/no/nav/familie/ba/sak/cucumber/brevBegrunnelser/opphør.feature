@@ -230,3 +230,71 @@ Egenskap: Brevbegrunnelser ved opphør
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.05.2022 til 31.08.2022
       | Begrunnelse                | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | OPPHØR_IKKE_BOSATT_I_NORGE | STANDARD | Ja            | 04.05.06             | 1           | april 2022                           | NB      | 0     |
+
+  Scenario: Skal flette inn riktige barn i opphørstest
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | OPPHØRT             | NYE_OPPLYSNINGER | Nei                       | NASJONAL            |
+      | 2            | 1        | 1                   | AVSLÅTT             | SØKNAD           | Nei                       | NASJONAL            |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 30.12.2001  |
+      | 1            | 2       | BARN       | 25.12.2018  |
+      | 2            | 1       | SØKER      | 30.12.2001  |
+      | 2            | 2       | BARN       | 25.12.2018  |
+
+    Og følgende dagens dato 01.12.2023
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                      | Utdypende vilkår         | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET                              | VURDERING_ANNET_GRUNNLAG | 01.11.2021 | 31.01.2022 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 1       | UTVIDET_BARNETRYGD                          |                          | 01.11.2021 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 1       | LOVLIG_OPPHOLD                              |                          | 01.11.2021 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+      | 2       | GIFT_PARTNERSKAP                            |                          | 25.12.2018 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | UNDER_18_ÅR                                 |                          | 25.12.2018 | 24.12.2036 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOSATT_I_RIKET,BOR_MED_SØKER,LOVLIG_OPPHOLD |                          | 01.11.2021 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår                                      | Utdypende vilkår         | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser                   | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET                              |                          |            |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_DOKUMENTERT_BOSATT_I_NORGE | NASJONALE_REGLER |
+      | 1       | BOSATT_I_RIKET                              | VURDERING_ANNET_GRUNNLAG | 01.11.2021 | 31.01.2022 | OPPFYLT      | Nei                  |                                        | NASJONALE_REGLER |
+      | 1       | LOVLIG_OPPHOLD                              |                          | 01.11.2021 |            | OPPFYLT      | Nei                  |                                        | NASJONALE_REGLER |
+      | 1       | UTVIDET_BARNETRYGD                          |                          | 01.11.2021 |            | OPPFYLT      | Nei                  |                                        |                  |
+
+      | 2       | UNDER_18_ÅR                                 |                          | 25.12.2018 | 24.12.2036 | OPPFYLT      | Nei                  |                                        |                  |
+      | 2       | GIFT_PARTNERSKAP                            |                          | 25.12.2018 |            | OPPFYLT      | Nei                  |                                        |                  |
+      | 2       | BOR_MED_SØKER,LOVLIG_OPPHOLD,BOSATT_I_RIKET |                          | 01.11.2021 |            | OPPFYLT      | Nei                  |                                        | NASJONALE_REGLER |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 1       | 1            | 01.12.2021 | 31.01.2022 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
+      | 2       | 1            | 01.12.2021 | 31.12.2021 | 1654  | ORDINÆR_BARNETRYGD | 100     | 1654 |
+      | 2       | 1            | 01.01.2022 | 31.01.2022 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+
+      | 1       | 2            | 01.12.2021 | 31.01.2022 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
+      | 2       | 2            | 01.12.2021 | 31.12.2021 | 1654  | ORDINÆR_BARNETRYGD | 100     | 1654 |
+      | 2       | 2            | 01.01.2022 | 31.01.2022 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+
+    Når vedtaksperiodene genereres for behandling 2
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                   | Ugyldige begrunnelser |
+      |            |          | AVSLAG             |                                | AVSLAG_IKKE_DOKUMENTERT_BOSATT_I_NORGE |                       |
+      | 01.02.2022 |          | OPPHØR             |                                |                                        |                       |
+
+    Og når disse begrunnelsene er valgt for behandling 2
+      | Fra dato   | Til dato | Standardbegrunnelser                   | Eøsbegrunnelser | Fritekster |
+      |            |          | AVSLAG_IKKE_DOKUMENTERT_BOSATT_I_NORGE |                 |            |
+      | 01.02.2022 |          | OPPHØR_VURDERING_IKKE_BOSATT_I_NORGE   |                 |            |
+
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.02.2022 til -
+      | Begrunnelse                          | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
+      | OPPHØR_VURDERING_IKKE_BOSATT_I_NORGE | STANDARD | Ja            | 25.12.18             | 0           | januar 2022                          | NB      | 0     |
