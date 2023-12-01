@@ -21,7 +21,7 @@ Egenskap: Vedtaksperioder for endret og fortsatt innvilget
       | 2            | 2       | BARN       | 19.08.2021  |
 
   Scenario: Skal gi riktige perioder når behandlingsresultatet er endret og fortsatt innvilget
-    Og følgende dagens dato 16.11.2023
+    Og dagens dato er 16.11.2023
     Og lag personresultater for behandling 1
     Og lag personresultater for behandling 2
 

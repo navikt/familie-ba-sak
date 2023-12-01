@@ -76,7 +76,7 @@ Egenskap: Vedtaksperioder med endret utbetaling der endringstidspunkt påvirker 
       | 1            | 1       | BARN       | 02.02.2015  |
       | 1            | 2       | SØKER      | 17.04.1985  |
 
-    Og følgende dagens dato 27.09.2023
+    Og dagens dato er 27.09.2023
     Og lag personresultater for behandling 1
 
     Og legg til nye vilkårresultater for behandling 1

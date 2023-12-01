@@ -24,7 +24,7 @@ Egenskap: Vedtaksperioder ved automatisk behandling
       | 2            | 2       | BARN       | 30.11.2017  |
       | 2            | 3       | BARN       | 12.10.2021  |
 
-    Og følgende dagens dato 08.11.2023
+    Og dagens dato er 08.11.2023
     Og lag personresultater for behandling 1
     Og lag personresultater for behandling 2
 
