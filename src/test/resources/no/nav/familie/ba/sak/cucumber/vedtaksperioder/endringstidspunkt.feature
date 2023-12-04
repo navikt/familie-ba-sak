@@ -115,7 +115,7 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | 2            | 2       | BARN       | 23.04.2017  |
       | 2            | 3       | BARN       | 22.03.2015  |
 
-    Og følgende dagens dato 19.09.2023
+    Og dagens dato er 19.09.2023
     Og lag personresultater for behandling 1
     Og lag personresultater for behandling 2
 
@@ -196,7 +196,7 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | 2            | 1       | SØKER      | 25.11.1987  |
       | 2            | 2       | BARN       | 19.06.2017  |
 
-    Og følgende dagens dato 20.09.2023
+    Og dagens dato er 20.09.2023
     Og lag personresultater for behandling 1
     Og lag personresultater for behandling 2
 
