@@ -18,7 +18,7 @@ Egenskap: Vedtaksperioder for Satsendring
       | 100175851    | 2435441739050 | BARN       | 10.07.2012  |
 
   Scenario: Skal ikke lage splitt på satsendring
-    Og følgende dagens dato 2023-09-13
+    Og dagens dato er 2023-09-13
     Og lag personresultater for behandling 100175851
 
     Og legg til nye vilkårresultater for behandling 100175851

@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
@@ -24,6 +24,7 @@ sealed interface ISanityBegrunnelse {
     val valgbarhet: Valgbarhet?
     val periodeType: BrevPeriodeType?
     val begrunnelseTypeForPerson: VedtakBegrunnelseType? // TODO: Fjern når migrering av ny felter er ferdig
+    val øvrigeTriggere: List<ØvrigTrigger>
 
     val gjelderEtterEndretUtbetaling
         get() =
@@ -38,7 +39,7 @@ sealed interface ISanityBegrunnelse {
     val gjelderSatsendring
         get() =
             this is SanityBegrunnelse &&
-                ØvrigTrigger.SATSENDRING in this.ovrigeTriggere
+                ØvrigTrigger.SATSENDRING in this.øvrigeTriggere
 }
 
 data class SanityBegrunnelse(
@@ -56,8 +57,8 @@ data class SanityBegrunnelse(
     override val valgbarhet: Valgbarhet? = null,
     override val periodeType: BrevPeriodeType? = null,
     override val begrunnelseTypeForPerson: VedtakBegrunnelseType? = null,
+    override val øvrigeTriggere: List<ØvrigTrigger> = emptyList(),
     val rolle: List<VilkårRolle> = emptyList(),
-    val ovrigeTriggere: List<ØvrigTrigger> = emptyList(),
     val hjemler: List<String> = emptyList(),
     val hjemlerFolketrygdloven: List<String> = emptyList(),
     val endringsaarsaker: List<Årsak> = emptyList(),
@@ -66,6 +67,25 @@ data class SanityBegrunnelse(
 ) : ISanityBegrunnelse {
     fun gjelderEtterEndretUtbetaling() =
         this.endretUtbetalingsperiodeTriggere.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE)
+}
+
+enum class ØvrigTrigger {
+    MANGLER_OPPLYSNINGER,
+    SATSENDRING,
+    BARN_MED_6_ÅRS_DAG,
+    ALLTID_AUTOMATISK,
+    ETTER_ENDRET_UTBETALING,
+    ENDRET_UTBETALING,
+    OPPHØR_FRA_FORRIGE_BEHANDLING,
+    REDUKSJON_FRA_FORRIGE_BEHANDLING,
+    BARN_DØD,
+    SKAL_VISES_SELV_OM_IKKE_ENDRING,
+
+    @Deprecated("Skal erstattes med OPPHØR_FRA_FORRIGE_BEHANDLING, må endres i sanity")
+    GJELDER_FØRSTE_PERIODE,
+
+    @Deprecated("Skal erstattes med REDUKSJON_FRA_FORRIGE_BEHANDLING, må endres i sanity")
+    GJELDER_FRA_INNVILGELSESTIDSPUNKT,
 }
 
 data class SanityEØSBegrunnelse(
@@ -79,6 +99,7 @@ data class SanityEØSBegrunnelse(
     override val periodeType: BrevPeriodeType?,
     override val begrunnelseTypeForPerson: VedtakBegrunnelseType? = null,
     override val valgbarhet: Valgbarhet?,
+    override val øvrigeTriggere: List<ØvrigTrigger> = emptyList(),
     val annenForeldersAktivitet: List<KompetanseAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,

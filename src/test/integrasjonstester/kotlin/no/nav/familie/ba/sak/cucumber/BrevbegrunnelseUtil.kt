@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.norskDatoFormatter
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnum
-import no.nav.familie.ba.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriInt
@@ -15,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
@@ -46,14 +44,17 @@ fun parseBegrunnelser(dataTable: DataTable): List<BegrunnelseMedData> {
     }
 }
 
-fun parseStandardBegrunnelse(rad: Tabellrad) =
-    BegrunnelseData(
-        vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
+fun parseStandardBegrunnelse(rad: Tabellrad): BegrunnelseData {
+    val begrunnelse =
+        parseEnum<Standardbegrunnelse>(
+            BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BEGRUNNELSE,
+            rad,
+        )
+
+    return BegrunnelseData(
+        vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
         apiNavn =
-            parseEnum<Standardbegrunnelse>(
-                BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BEGRUNNELSE,
-                rad,
-            ).sanityApiNavn,
+            begrunnelse.sanityApiNavn,
         gjelderSoker = parseValgfriBoolean(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.GJELDER_SØKER, rad) ?: false,
         barnasFodselsdatoer =
             parseValgfriString(
@@ -86,6 +87,7 @@ fun parseStandardBegrunnelse(rad: Tabellrad) =
                 rad,
             )?.tilSanityFormat() ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat(),
     )
+}
 
 fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
     val gjelderSoker = parseValgfriBoolean(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.GJELDER_SØKER, rad)
@@ -116,13 +118,11 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
             rad,
         )
 
-    val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
-
-    val apiNavn =
+    val begrunnelse =
         parseEnum<EØSStandardbegrunnelse>(
             BrevPeriodeParser.DomenebegrepBrevBegrunnelse.BEGRUNNELSE,
             rad,
-        ).sanityApiNavn
+        )
 
     val barnasFodselsdatoer =
         parseValgfriString(
@@ -130,9 +130,9 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
             rad,
         ) ?: ""
 
-    val antallBarn = parseInt(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.ANTALL_BARN, rad)
+    val antallBarn = parseValgfriInt(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.ANTALL_BARN, rad) ?: -1
 
-    val målform = parseEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad).tilSanityFormat()
+    val målform = (parseValgfriEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad) ?: Målform.NB).tilSanityFormat()
 
     return if (gjelderSoker == null) {
         if (annenForeldersAktivitet == null ||
@@ -145,8 +145,8 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
         }
 
         EØSBegrunnelseDataMedKompetanse(
-            vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET,
-            apiNavn = apiNavn,
+            vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
+            apiNavn = begrunnelse.sanityApiNavn,
             barnasFodselsdatoer = barnasFodselsdatoer,
             antallBarn = antallBarn,
             maalform = målform,
@@ -158,8 +158,8 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
         )
     } else {
         EØSBegrunnelseDataUtenKompetanse(
-            vedtakBegrunnelseType = vedtakBegrunnelseType,
-            apiNavn = apiNavn,
+            vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
+            apiNavn = begrunnelse.sanityApiNavn,
             barnasFodselsdatoer = barnasFodselsdatoer,
             antallBarn = antallBarn,
             maalform = målform,

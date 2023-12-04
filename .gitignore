@@ -40,3 +40,4 @@ target/
 !.idea/inspectionProfiles/Project_Default.xml
 .DS_Store
 /.run/
+/.java-version
