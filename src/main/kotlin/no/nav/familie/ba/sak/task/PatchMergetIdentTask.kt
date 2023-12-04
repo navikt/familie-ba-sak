@@ -23,7 +23,7 @@ import java.time.LocalDateTime
     taskStepType = PatchMergetIdentTask.TASK_STEP_TYPE,
     beskrivelse = "Patcher ident for identer som er merget",
     maxAntallFeil = 1,
-    triggerTidVedFeilISekunder = (60 * 60 * 24).toLong(),
+    settTilManuellOppfølgning = true,
 )
 class PatchMergetIdentTask(
     private val personidentService: PersonidentService,
