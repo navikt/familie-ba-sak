@@ -65,9 +65,11 @@ class PensjonService(
                 ?.flatten()
                 ?: emptyList()
 
-        return barnetrygdMedRelaterteSaker.plus(barnetrygdFraRelaterteInfotrygdsaker).plus(
-            barnetrygdTilPensjonFraInfotrygd.plus(barnetrygdTilPensjon),
-        ).distinct()
+        return barnetrygdMedRelaterteSaker
+            .plus(barnetrygdFraRelaterteInfotrygdsaker)
+            .plus(
+                barnetrygdTilPensjonFraInfotrygd.plus(barnetrygdTilPensjon),
+            ).distinct()
     }
 
     fun lagTaskForHentingAvIdenterTilPensjon(år: Int): String {
@@ -94,7 +96,7 @@ class PensjonService(
         aktør: Aktør,
         fraDato: LocalDate,
     ): Pair<BarnetrygdTilPensjon, List<BarnetrygdTilPensjon>> {
-        val personidenter = if (envService.erPreprod()) testident(aktør, fraDato) else aktør.personidenter.map { it.fødselsnummer }
+        val personidenter = if (envService.erPreprod()) testidenter(aktør, fraDato) else aktør.personidenter.map { it.fødselsnummer }
 
         val allePerioderTilhørendeAktør = mutableListOf<BarnetrygdPeriode>()
         val barnetrygdFraRelaterteSaker = mutableListOf<BarnetrygdTilPensjon>()
@@ -167,7 +169,7 @@ class PensjonService(
             }
     }
 
-    private fun testident(
+    private fun testidenter(
         aktør: Aktør,
         fraDato: LocalDate,
     ) = if (unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
@@ -221,11 +223,15 @@ class PensjonService(
 }
 
 private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): List<BarnetrygdTilPensjon> {
-    return if (barnetrygdPerioder.isEmpty()) {
-        listOfNotNull(other)
-    } else if (fagsakEiersIdent == other?.fagsakEiersIdent) {
-        listOf(copy(barnetrygdPerioder = barnetrygdPerioder + other.barnetrygdPerioder))
-    } else {
-        listOfNotNull(this, other)
+    return when {
+        barnetrygdPerioder.isEmpty() -> {
+            listOfNotNull(other)
+        }
+        fagsakEiersIdent == other?.fagsakEiersIdent -> {
+            listOf(copy(barnetrygdPerioder = barnetrygdPerioder + other.barnetrygdPerioder))
+        }
+        else -> {
+            listOfNotNull(this, other)
+        }
     }
 }
