@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
 import no.nav.familie.unleash.UnleashService
@@ -52,7 +51,8 @@ class PensjonService(
         val aktør = personidentService.hentAktør(personIdent)
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         val barnetrygdTilPensjon = fagsak?.let { hentBarnetrygdTilPensjon(fagsak, fraDato) }
-        val barnetrygdTilPensjonFraInfotrygd = hentBarnetrygdTilPensjonFraInfotrygd(aktør, fraDato)
+        val (barnetrygdTilPensjonFraInfotrygd, barnetrygdFraRelaterteInfotrygdsaker) =
+            hentBarnetrygdTilPensjonFraInfotrygd(aktør, fraDato)
 
         if (barnetrygdTilPensjon == null && barnetrygdTilPensjonFraInfotrygd.barnetrygdPerioder.isEmpty()) return emptyList()
 
@@ -65,7 +65,11 @@ class PensjonService(
                 ?.flatten()
                 ?: emptyList()
 
-        return barnetrygdMedRelaterteSaker.plus(barnetrygdTilPensjonFraInfotrygd.plus(barnetrygdTilPensjon)).distinct()
+        return barnetrygdMedRelaterteSaker
+            .plus(barnetrygdFraRelaterteInfotrygdsaker)
+            .plus(
+                barnetrygdTilPensjonFraInfotrygd.plus(barnetrygdTilPensjon),
+            ).distinct()
     }
 
     fun lagTaskForHentingAvIdenterTilPensjon(år: Int): String {
@@ -91,19 +95,26 @@ class PensjonService(
     private fun hentBarnetrygdTilPensjonFraInfotrygd(
         aktør: Aktør,
         fraDato: LocalDate,
-    ): BarnetrygdTilPensjon {
-        val personidenter = personidenter(aktør, fraDato)
-        val allePerioderTilhørendeAktør =
-            personidenter.flatMap { ident ->
-                infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident.fødselsnummer, fraDato).fagsaker.flatMap {
-                    it.barnetrygdPerioder.maskerPersonidenteneIPreprod(aktør)
+    ): Pair<BarnetrygdTilPensjon, List<BarnetrygdTilPensjon>> {
+        val personidenter = if (envService.erPreprod()) testidenter(aktør, fraDato) else aktør.personidenter.map { it.fødselsnummer }
+
+        val allePerioderTilhørendeAktør = mutableListOf<BarnetrygdPeriode>()
+        val barnetrygdFraRelaterteSaker = mutableListOf<BarnetrygdTilPensjon>()
+
+        personidenter.forEach { ident ->
+            infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident, fraDato).fagsaker.forEach {
+                if (personidenter.contains(it.fagsakEiersIdent)) {
+                    allePerioderTilhørendeAktør.addAll(it.barnetrygdPerioder.maskerPersonidenteneIPreprod(aktør))
+                } else if (!envService.erPreprod()) { // tar ikke med relaterte saker i test fra Q2 i denne omgang. Må i så fall maskeres
+                    barnetrygdFraRelaterteSaker.add(it)
                 }
             }
+        }
 
         return BarnetrygdTilPensjon(
             fagsakEiersIdent = aktør.aktivFødselsnummer(),
             barnetrygdPerioder = allePerioderTilhørendeAktør,
-        )
+        ) to barnetrygdFraRelaterteSaker
     }
 
     private fun hentBarnetrygdTilPensjonFraInfotrygdQ(
@@ -158,16 +169,15 @@ class PensjonService(
             }
     }
 
-    private fun personidenter(
+    private fun testidenter(
         aktør: Aktør,
         fraDato: LocalDate,
-    ) = when {
-        envService.erPreprod() ->
-            listOfNotNull(
-                tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer(), fraDato.year)?.let { Personident(it, aktør) },
-            )
-
-        else -> aktør.personidenter
+    ) = if (unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
+        emptyList()
+    } else {
+        listOfNotNull(
+            tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer(), fraDato.year),
+        )
     }
 
     @Cacheable("pensjon_testident", cacheManager = "dailyCache")
@@ -213,9 +223,15 @@ class PensjonService(
 }
 
 private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): List<BarnetrygdTilPensjon> {
-    return if (fagsakEiersIdent == other?.fagsakEiersIdent) {
-        listOf(copy(barnetrygdPerioder = barnetrygdPerioder + other.barnetrygdPerioder))
-    } else {
-        listOfNotNull(this, other)
+    return when {
+        barnetrygdPerioder.isEmpty() -> {
+            listOfNotNull(other)
+        }
+        fagsakEiersIdent == other?.fagsakEiersIdent -> {
+            listOf(copy(barnetrygdPerioder = barnetrygdPerioder + other.barnetrygdPerioder))
+        }
+        else -> {
+            listOfNotNull(this, other)
+        }
     }
 }
