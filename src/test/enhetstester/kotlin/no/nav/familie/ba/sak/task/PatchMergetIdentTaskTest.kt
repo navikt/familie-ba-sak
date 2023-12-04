@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.internal
+package no.nav.familie.ba.sak.task
 
 import io.mockk.every
 import io.mockk.mockk
@@ -8,21 +8,9 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLogg
@@ -30,10 +18,9 @@ import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLoggRepository
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -41,51 +28,22 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-class ForvalterServiceTest {
-    private val økonomiService = mockk<ØkonomiService>()
-    private val vedtakService = mockk<VedtakService>()
-    private val beregningService = mockk<BeregningService>()
-    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val stegService = mockk<StegService>()
-    private val fagsakService = mockk<FagsakService>()
-    private val behandlingService = mockk<BehandlingService>()
-    private val taskRepository = mockk<TaskRepositoryWrapper>()
-    private val autovedtakService = mockk<AutovedtakService>()
-    private val fagsakRepository = mockk<FagsakRepository>()
-    private val behandlingRepository = mockk<BehandlingRepository>()
-    private val tilkjentYtelseValideringService = mockk<TilkjentYtelseValideringService>()
-    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
-    private val infotrygdService = mockk<InfotrygdService>()
+class PatchMergetIdentTaskTest {
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val pdlIdentRestClient = mockk<PdlIdentRestClient>()
     private val personidentService = mockk<PersonidentService>(relaxed = true)
     private val aktørIdRepository = mockk<AktørIdRepository>(relaxed = true)
-    private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val aktørMergeLoggRepository = mockk<AktørMergeLoggRepository>(relaxed = true)
     private val personidentRepository = mockk<PersonidentRepository>()
 
-    private val service =
-        ForvalterService(
-            økonomiService,
-            vedtakService,
-            beregningService,
-            behandlingHentOgPersisterService,
-            stegService,
-            fagsakService,
-            behandlingService,
-            taskRepository,
-            autovedtakService,
-            fagsakRepository,
-            behandlingRepository,
-            tilkjentYtelseValideringService,
-            arbeidsfordelingService,
-            infotrygdService,
-            persongrunnlagService,
-            pdlIdentRestClient,
-            personidentService,
-            aktørIdRepository,
-            aktørMergeLoggRepository,
-            personidentRepository,
+    private val task =
+        PatchMergetIdentTask(
+            persongrunnlagService = persongrunnlagService,
+            pdlIdentRestClient = pdlIdentRestClient,
+            personidentService = personidentService,
+            aktørIdRepository = aktørIdRepository,
+            aktørMergeLoggRepository = aktørMergeLoggRepository,
+            personidentRepository = personidentRepository,
         )
 
     private val barnetsGamleAktør = tilAktør(randomFnr())
@@ -123,7 +81,7 @@ class ForvalterServiceTest {
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
 
-        service.patchIdentForBarnPåFagsak(dto)
+        task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
 
         val aktørMergeLogg = aktørMergeLoggSlot.captured
         assertThat(aktørMergeLogg.nyAktørId).isEqualTo(barnetsNyeAktør.aktørId)
@@ -146,7 +104,7 @@ class ForvalterServiceTest {
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns emptySet()
 
-        assertThrows<IllegalStateException> { service.patchIdentForBarnPåFagsak(dto) }.also {
+        assertThrows<IllegalStateException> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Fant ikke ident som skal patches som barn på fagsak=${fagsak.id}")
         }
     }
@@ -163,7 +121,7 @@ class ForvalterServiceTest {
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
         every { pdlIdentRestClient.hentIdenter(barnetsNyeAktør.aktivFødselsnummer(), true) } returns emptyList()
 
-        assertThrows<IllegalStateException> { service.patchIdentForBarnPåFagsak(dto) }.also {
+        assertThrows<IllegalStateException> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Ident som skal patches finnes ikke som historisk ident av ny ident")
         }
     }
@@ -187,7 +145,7 @@ class ForvalterServiceTest {
 
         every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns Personident(barnetsNyeAktør.aktivFødselsnummer(), barnetsNyeAktør)
 
-        assertThrows<IllegalStateException> { service.patchIdentForBarnPåFagsak(dto) }.also {
+        assertThrows<IllegalStateException> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Fant allerede en personident for nytt fødselsnummer")
         }
     }
@@ -214,7 +172,7 @@ class ForvalterServiceTest {
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
 
-        service.patchIdentForBarnPåFagsak(dto)
+        task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
 
         val aktørMergeLogg = aktørMergeLoggSlot.captured
         assertThat(aktørMergeLogg.nyAktørId).isEqualTo(barnetsNyeAktør.aktørId)

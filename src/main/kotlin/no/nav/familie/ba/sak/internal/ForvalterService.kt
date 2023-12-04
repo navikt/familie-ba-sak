@@ -14,8 +14,6 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -31,18 +29,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
-import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLogg
-import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLoggRepository
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -50,7 +40,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Service
@@ -69,12 +58,6 @@ class ForvalterService(
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val infotrygdService: InfotrygdService,
-    private val persongrunnlagService: PersongrunnlagService,
-    private val pdlIdentRestClient: PdlIdentRestClient,
-    private val personidentService: PersonidentService,
-    private val aktørIdRepository: AktørIdRepository,
-    private val aktørMergeLoggRepository: AktørMergeLoggRepository,
-    private val personidentRepository: PersonidentRepository,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -217,62 +200,7 @@ class ForvalterService(
             fraÅrMåned.førsteDagIInneværendeMåned().atStartOfDay(),
         ).map { Pair(it.fagsakId, it.fødselsnummer) }
     }
-
-    @Transactional
-    fun patchIdentForBarnPåFagsak(dto: PatchIdentForBarnPåFagsak) {
-        secureLogger.info("Patcher barnets ident på fagsak $dto")
-
-        if (dto.gammelIdent == dto.nyIdent) {
-            throw IllegalArgumentException("ident som skal patches er lik ident som det skal patches til")
-        }
-
-        val aktørForBarnSomSkalPatches =
-            persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId = dto.fagsakId)
-                ?.singleOrNull { it.type == PersonType.BARN && it.aktør.aktivFødselsnummer() == dto.gammelIdent.ident }?.aktør ?: error("Fant ikke ident som skal patches som barn på fagsak=${dto.fagsakId}")
-
-        val identer = pdlIdentRestClient.hentIdenter(personIdent = dto.nyIdent.ident, historikk = true)
-        if (dto.skalSjekkeAtGammelIdentErHistoriskAvNyIdent) {
-            if (identer.none { it.ident == dto.gammelIdent.ident && it.historisk }) {
-                error("Ident som skal patches finnes ikke som historisk ident av ny ident")
-            }
-        }
-
-        val personidentNyttFødselsnummer = personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident)
-        if (personidentNyttFødselsnummer != null) error("Fant allerede en personident for nytt fødselsnummer")
-
-        // Denne patcher med å bruke on cascade update på aktørid
-        aktørIdRepository.patchAktørMedNyAktørId(
-            gammelAktørId = aktørForBarnSomSkalPatches.aktørId,
-            nyAktørId = identer.hentAktivAktørId(),
-        )
-
-        // Etter at alle fk_aktoer_id har blitt oppgradert alle steder, så vil personident ha det gamle fødselsnummeret.
-        // Ved å kalle hentOgLagre, så vil den gamle personidenten-raden bli deaktivert og ny med riktig fødselsnummer
-        // vil bli oppdatert
-        val nyAktør = personidentService.hentOgLagreAktør(ident = dto.nyIdent.ident, lagre = true)
-
-        aktørMergeLoggRepository.save(
-            AktørMergeLogg(
-                fagsakId = dto.fagsakId,
-                historiskAktørId = aktørForBarnSomSkalPatches.aktørId,
-                nyAktørId = nyAktør.aktørId,
-                mergeTidspunkt = LocalDateTime.now(),
-            ),
-        )
-    }
 }
-
-data class PatchIdentForBarnPåFagsak(
-    val fagsakId: Long,
-    val gammelIdent: PersonIdent,
-    val nyIdent: PersonIdent,
-    /*
-    Sjekker at gammel ident er historisk av ny. Hvis man ønsker å patche med en ident hvor den gamle ikke er
-    historisk av ny, så settes denne til false. OBS: Du må da være sikker på at identen man ønsker å patche til er
-    samme person. Dette kan skje hvis identen ikke er merget av folketrygden.
-     */
-    val skalSjekkeAtGammelIdentErHistoriskAvNyIdent: Boolean = true,
-)
 
 interface FagsakMedFlereMigreringer {
     val fagsakId: Long
