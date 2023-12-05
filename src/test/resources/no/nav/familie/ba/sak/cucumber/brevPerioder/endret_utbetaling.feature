@@ -111,3 +111,56 @@ Egenskap: Brevperioder: Endret utbetaling
     Så forvent følgende brevperioder for behandling 1
       | Brevperiodetype | Fra dato     | Til dato         | Beløp | Antall barn med utbetaling | Barnas fødselsdager  | Du eller institusjonen |
       | UTBETALING      | oktober 2011 | til oktober 2011 | 970   | 2                          | 24.05.10 og 06.09.11 | du                     |
+
+  Scenario: Skal ta med barna det allerede er for utbetalt i tidligere behandling i periodeteksten
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | DELVIS_INNVILGET    | SØKNAD           | Nei                       | EØS                 |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 28.05.1956  |
+      | 1            | 2       | BARN       | 26.06.2011  |
+
+    Og følgende dagens dato 04.12.2023
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår             | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET     | OMFATTET_AV_NORSK_LOVGIVNING | 01.08.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 1       | LOVLIG_OPPHOLD     |                              | 01.08.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 1       | UTVIDET_BARNETRYGD |                              | 01.08.2023 |            | OPPFYLT  | Nei                  |                      |                  |
+
+      | 2       | UNDER_18_ÅR        |                              | 26.06.2011 | 25.06.2029 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | GIFT_PARTNERSKAP   |                              | 26.06.2011 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOSATT_I_RIKET     | BARN_BOR_I_NORGE             | 01.08.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | LOVLIG_OPPHOLD     |                              | 01.08.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | BOR_MED_SØKER      | BARN_BOR_I_NORGE_MED_SØKER   | 01.08.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 1       | 1            | 01.09.2023 | 31.05.2029 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 2       | 1            | 01.09.2023 | 30.11.2023 | 0     | ORDINÆR_BARNETRYGD | 0       | 1310 |
+      | 2       | 1            | 01.12.2023 | 31.05.2029 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+
+    Og med endrede utbetalinger for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
+      | 2       | 1            | 01.09.2023 | 30.11.2023 | ALLEREDE_UTBETALT | 0       | 08.08.2023       |                             |
+
+    Og med kompetanser for begrunnelse
+      | AktørId | Fra dato   | Til dato | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
+      | 2       | 01.12.2023 |          | NORGE_ER_PRIMÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | EE                             | NO                  |
+
+    Når vedtaksperiodene genereres for behandling 1
+
+    Og når disse begrunnelsene er valgt for behandling 1
+      | Fra dato   | Til dato   | Standardbegrunnelser                                         | Eøsbegrunnelser | Fritekster |
+      | 01.09.2023 | 30.11.2023 | ENDRET_UTBETALING_SELVSTENDIG_RETT_ETTERBETALING_UTVIDET_DEL |                 |            |
+
+    Så forvent følgende brevperioder for behandling 1
+      | Brevperiodetype | Fra dato       | Til dato          | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
+      | UTBETALING      | september 2023 | til november 2023 | 2516  | 1                          | 26.06.11            | du                     |
