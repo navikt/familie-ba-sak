@@ -205,7 +205,7 @@ private fun hentStandardBegrunnelser(rad: MutableMap<String, String>): List<IVed
             )
         } catch (_: Exception) {
             parseEnumListe<EØSStandardbegrunnelse>(
-                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.EØSBEGRUNNELSER,
+                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.STANDARDBEGRUNNELSER,
                 rad,
             )
         }
