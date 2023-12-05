@@ -112,7 +112,7 @@ Egenskap: Brevperioder: Endret utbetaling
       | Brevperiodetype | Fra dato     | Til dato         | Beløp | Antall barn med utbetaling | Barnas fødselsdager  | Du eller institusjonen |
       | UTBETALING      | oktober 2011 | til oktober 2011 | 970   | 2                          | 24.05.10 og 06.09.11 | du                     |
 
-  Scenario: Skal ta med barna det allerede er for utbetalt i tidligere behandling i periodeteksten
+  Scenario: Skal ta med barna det allerede er utbetalt for i tidligere behandling i periodeteksten
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
