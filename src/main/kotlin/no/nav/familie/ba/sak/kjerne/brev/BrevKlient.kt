@@ -48,7 +48,7 @@ class BrevKlient(
                 postForEntity(uri, begrunnelseData)
             }
         } catch (e: Exception) {
-            logger.info("Kall for å hente begrunnelsetest feilet. Autogenerert test:\"" + testVerktøyService.hentBegrunnelsetest(vedtaksperiode.vedtak.behandling.id))
+            secureLogger.info("Kall for å hente begrunnelsetest feilet. Autogenerert test:\"" + testVerktøyService.hentBegrunnelsetest(vedtaksperiode.vedtak.behandling.id))
             throw e
         }
     }

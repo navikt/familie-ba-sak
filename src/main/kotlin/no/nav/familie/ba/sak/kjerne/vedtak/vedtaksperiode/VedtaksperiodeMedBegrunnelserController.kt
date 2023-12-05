@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
@@ -153,12 +154,13 @@ class VedtaksperiodeMedBegrunnelserController(
                     landkoder = integrasjonClient.hentLandkoderISO2(),
                 )
             } catch (e: BrevBegrunnelseFeil) {
-                throw IllegalStateException(
-                    "${e.message}. På behandling $behandlingId, " +
+                secureLogger.info(
+                    "Brevbegrunnelsefeil for behandling $behandlingId, " +
                         "fagsak ${vedtaksperiode.vedtak.behandling.fagsak.id} " +
                         "på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom}. " +
                         "\nAutogenerert test:\n" + testVerktøyService.hentBegrunnelsetest(behandlingId),
                 )
+                throw IllegalStateException(e.message, cause = e)
             }
 
         val begrunnelser =

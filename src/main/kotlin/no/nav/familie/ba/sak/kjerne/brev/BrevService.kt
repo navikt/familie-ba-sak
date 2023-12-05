@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
@@ -317,12 +318,13 @@ class BrevService(
                         landkoder = integrasjonClient.hentLandkoderISO2(),
                     )
                 } catch (e: BrevBegrunnelseFeil) {
-                    throw IllegalStateException(
-                        "${e.message} For behandling $behandlingId, " +
+                    secureLogger.info(
+                        "Brevbegrunnelsefeil for behandling $behandlingId, " +
                             "fagsak ${vedtak.behandling.fagsak.id} " +
                             "på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom}. " +
                             "\nAutogenerert test:\n" + testVerktøyService.hentBegrunnelsetest(behandlingId),
                     )
+                    throw IllegalStateException(e.message, cause = e)
                 }
             }
 
