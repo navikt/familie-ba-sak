@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.PatchIdentForBarnPåFagsak
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -44,6 +46,7 @@ class ForvalterController(
     private val testVerktøyService: TestVerktøyService,
     private val tilgangService: TilgangService,
     private val økonomiService: ØkonomiService,
+    private val opprettTaskService: OpprettTaskService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -204,8 +207,7 @@ class ForvalterController(
         @RequestBody
         patchIdentForBarnPåFagsak: PatchIdentForBarnPåFagsak,
     ): ResponseEntity<String> {
-        forvalterService.patchIdentForBarnPåFagsak(patchIdentForBarnPåFagsak)
-
+        opprettTaskService.opprettTaskForÅPatcheMergetIdent(patchIdentForBarnPåFagsak)
         return ResponseEntity.ok("ok")
     }
 
