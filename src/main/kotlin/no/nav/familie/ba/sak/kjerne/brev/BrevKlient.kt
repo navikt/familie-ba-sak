@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
+import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -19,6 +20,7 @@ class BrevKlient(
     @Value("\${FAMILIE_BREV_API_URL}") private val familieBrevUri: String,
     @Value("\${SANITY_DATASET}") private val sanityDataset: String,
     restTemplate: RestTemplate,
+    private val testVerktøyService: TestVerktøyService,
 ) : AbstractRestClient(restTemplate, "familie-brev") {
     fun genererBrev(
         målform: String,
@@ -41,8 +43,13 @@ class BrevKlient(
         secureLogger.info("Kaller familie brev($uri) med data $begrunnelseData")
         logger.info("Henter begrunnelse ${begrunnelseData.apiNavn} på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom} i behandling ${vedtaksperiode.vedtak.behandling}")
 
-        return kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Henter begrunnelsestekst") {
-            postForEntity(uri, begrunnelseData)
+        return try {
+            kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Henter begrunnelsestekst") {
+                postForEntity(uri, begrunnelseData)
+            }
+        } catch (e: Exception) {
+            logger.info("Kall for å hente begrunnelsetest feilet. Autogenerert test:\"" + testVerktøyService.hentBegrunnelsetest(vedtaksperiode.vedtak.behandling.id))
+            throw e
         }
     }
 }

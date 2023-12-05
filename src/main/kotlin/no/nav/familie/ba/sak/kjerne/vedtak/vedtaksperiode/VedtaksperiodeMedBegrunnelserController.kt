@@ -6,8 +6,10 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekst
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
+import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -40,6 +42,7 @@ class VedtaksperiodeMedBegrunnelserController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val integrasjonClient: IntegrasjonClient,
+    private val testVerktøyService: TestVerktøyService,
 ) {
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
     fun oppdaterVedtaksperiodeStandardbegrunnelser(
@@ -143,11 +146,20 @@ class VedtaksperiodeMedBegrunnelserController(
         val begrunnelsesGrunnlagPerPerson = vedtaksperiode.finnBegrunnelseGrunnlagPerPerson(grunnlagForBegrunnelser)
 
         val brevBegrunnelser =
-            vedtaksperiode.hentBegrunnelser(
-                grunnlagForBegrunnelse = grunnlagForBegrunnelser,
-                begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
-                landkoder = integrasjonClient.hentLandkoderISO2(),
-            )
+            try {
+                vedtaksperiode.hentBegrunnelser(
+                    grunnlagForBegrunnelse = grunnlagForBegrunnelser,
+                    begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+                    landkoder = integrasjonClient.hentLandkoderISO2(),
+                )
+            } catch (e: BrevBegrunnelseFeil) {
+                throw IllegalStateException(
+                    "${e.message}. På behandling $behandlingId, " +
+                        "fagsak ${vedtaksperiode.vedtak.behandling.fagsak.id} " +
+                        "på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom}. " +
+                        "\nAutogenerert test:\n" + testVerktøyService.hentBegrunnelsetest(behandlingId),
+                )
+            }
 
         val begrunnelser =
             brevBegrunnelser.map {
