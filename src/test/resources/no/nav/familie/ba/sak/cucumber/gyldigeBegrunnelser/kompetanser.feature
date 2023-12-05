@@ -437,3 +437,64 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | 01.05.2023 | 30.06.2023 | UTBETALING         |                                | REDUKSJON_UNDER_6_ÅR                   |                       |
       | 01.05.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN               | REDUKSJON_TILLEGGSTEKST_NULLUTBETALING |                       |
 
+  Scenario: Skal finne riktige kompetansebegrunnelser i overgang fra sekundærland til primærland
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | INNVILGET           | SØKNAD           | Nei                       | EØS                 |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 21.10.1988  |
+      | 1            | 2       | BARN       | 22.12.2015  |
+
+    Og følgende dagens dato 05.12.2023
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | LOVLIG_OPPHOLD   |                              | 16.07.2022 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 16.07.2022 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+      | 2       | GIFT_PARTNERSKAP |                              | 22.12.2015 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | UNDER_18_ÅR      |                              | 22.12.2015 | 21.12.2033 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_NORGE_MED_SØKER   | 16.07.2022 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | LOVLIG_OPPHOLD   |                              | 16.07.2022 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 16.07.2022 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.08.2022 | 31.12.2022 | 0     | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 1            | 01.01.2023 | 28.02.2023 | 0     | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 1            | 01.03.2023 | 31.03.2023 | 0     | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 1            | 01.04.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 1            | 01.07.2023 | 30.11.2033 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+
+    Og med kompetanser for begrunnelse
+      | AktørId | Fra dato   | Til dato   | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
+      | 2       | 01.08.2022 | 31.03.2023 | NORGE_ER_SEKUNDÆRLAND | 1            | INAKTIV          | UTSENDT_ARBEIDSTAKER      | NO                    | DE                             | NO                  |
+      | 2       | 01.04.2023 |            | NORGE_ER_PRIMÆRLAND   | 1            | ARBEIDER         | UTSENDT_ARBEIDSTAKER      | NO                    | DE                             | NO                  |
+
+    Og med utenlandsk periodebeløp for begrunnelse
+      | AktørId | Fra dato   | Til dato   | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
+      | 2       | 01.08.2022 | 31.12.2022 | 1            | 219   | EUR         | MÅNEDLIG  | NO              |
+      | 2       | 01.01.2023 | 31.03.2023 | 1            | 250   | EUR         | MÅNEDLIG  | NO              |
+
+    Og med valutakurs for begrunnelse
+      | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs    |
+      | 2       | 01.08.2022 | 31.12.2022 | 1            | 30.12.2022     | EUR         | 10.5138 |
+      | 2       | 01.01.2023 | 31.03.2023 | 1            | 01.12.2023     | EUR         | 11.698  |
+
+    Når vedtaksperiodene genereres for behandling 1
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                   | Ugyldige begrunnelser           |
+      | 01.08.2022 | 31.12.2022 | UTBETALING         | EØS_FORORDNINGEN               | INNVILGET_TILLEGGSTEKST_NULLUTBETALING |                                 |
+      | 01.01.2023 | 31.03.2023 | UTBETALING         |                                |                                        |                                 |
+      | 01.04.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN               | INNVILGET_PRIMÆRLAND_STANDARD          | INNVILGET_SEKUNDÆRLAND_STANDARD |
+      | 01.07.2023 | 30.11.2033 | UTBETALING         |                                |                                        |                                 |
+      | 01.12.2033 |            | OPPHØR             |                                |                                        |                                 |
+
