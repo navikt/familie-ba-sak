@@ -361,6 +361,10 @@ Egenskap: Gyldige begrunnelser for kompetanser
 
     Når vedtaksperiodene genereres for behandling 2
 
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser          | Ugyldige begrunnelser |
+      | 01.01.2022 | 31.03.2022 | UTBETALING         | EØS_FORORDNINGEN               | INNVILGET_PRIMÆRLAND_STANDARD |                       |
+
     Og når disse begrunnelsene er valgt for behandling 2
       | Fra dato   | Til dato   | Standardbegrunnelser | Eøsbegrunnelser               | Fritekster |
       | 01.01.2022 | 31.03.2022 |                      | INNVILGET_PRIMÆRLAND_STANDARD |            |
