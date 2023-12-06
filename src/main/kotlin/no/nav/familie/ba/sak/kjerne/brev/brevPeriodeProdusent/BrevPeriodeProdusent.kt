@@ -121,12 +121,16 @@ private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentTotaltUtbetaltIPerio
 private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling() =
     filterKeys { it.type == PersonType.BARN }
         .filterValues { grunnlag ->
-            val endretUtbetalingAndelIPeriodeErDeltBosted =
+            val endretUtbetalingGjelderAlleredeDeltBosted =
                 grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
+
+            val endretUtbetalingGjelderAlleredeUtbetalt =
+                grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.ALLEREDE_UTBETALT
+
             val harAndelerSomIkkeErPåNullProsent =
                 grunnlag.dennePerioden.andeler.filter { it.prosent != BigDecimal.ZERO }.toList().isNotEmpty()
 
-            harAndelerSomIkkeErPåNullProsent || endretUtbetalingAndelIPeriodeErDeltBosted
+            harAndelerSomIkkeErPåNullProsent || endretUtbetalingGjelderAlleredeDeltBosted || endretUtbetalingGjelderAlleredeUtbetalt
         }
 
 fun Set<Person>.tilBarnasFødselsdatoer(): String {

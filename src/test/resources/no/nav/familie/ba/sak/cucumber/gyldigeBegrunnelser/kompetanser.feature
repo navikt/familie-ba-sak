@@ -403,15 +403,15 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | 2       | LOVLIG_OPPHOLD   |                                     | 01.04.2022 |            | OPPFYLT  | Nei                  |                  |
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 2
-      | AktørId | Vilkår           | Utdypende vilkår                    | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
-      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING_UTLAND | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
-      | 1       | LOVLIG_OPPHOLD   |                                     | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
+      | AktørId | Vilkår           | Utdypende vilkår                    | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING_UTLAND | 01.04.2022 |            | OPPFYLT  | Nei                  |                  |
+      | 1       | LOVLIG_OPPHOLD   |                                     | 01.04.2022 |            | OPPFYLT  | Nei                  |                  |
 
-      | 2       | UNDER_18_ÅR      |                                     | 20.05.2017 | 19.05.2035 | OPPFYLT  | Nei                  |                      |
-      | 2       | GIFT_PARTNERSKAP |                                     | 20.05.2017 |            | OPPFYLT  | Nei                  |                      |
-      | 2       | LOVLIG_OPPHOLD   |                                     | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
-      | 2       | BOR_MED_SØKER    | BARN_BOR_I_STORBRITANNIA_MED_SØKER  | 01.04.2022 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN     |
-      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_STORBRITANNIA            | 01.04.2022 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN     |
+      | 2       | UNDER_18_ÅR      |                                     | 20.05.2017 | 19.05.2035 | OPPFYLT  | Nei                  |                  |
+      | 2       | GIFT_PARTNERSKAP |                                     | 20.05.2017 |            | OPPFYLT  | Nei                  |                  |
+      | 2       | LOVLIG_OPPHOLD   |                                     | 01.04.2022 |            | OPPFYLT  | Nei                  |                  |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_STORBRITANNIA_MED_SØKER  | 01.04.2022 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_STORBRITANNIA            | 01.04.2022 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
