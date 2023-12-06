@@ -160,7 +160,7 @@ class VedtaksperiodeMedBegrunnelserController(
                         "på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom}. " +
                         "\nAutogenerert test:\n" + testVerktøyService.hentBegrunnelsetest(behandlingId),
                 )
-                throw IllegalStateException(e.message, cause = e)
+                throw IllegalStateException(e.message, e)
             }
 
         val begrunnelser =
