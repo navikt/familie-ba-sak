@@ -46,16 +46,14 @@ internal fun hentEØSStandardBegrunnelser(
                 utvidetVilkårPåSøkerIForrigePeriode,
             )
         }
+    val erEndringIKompetanseValutakursEllerUtenlandskPeriodebeløp =
+        erEndringIKompetanse(begrunnelseGrunnlag) ||
+            erEndringIValutakurs(begrunnelseGrunnlag) ||
+            erEndringIUtenlandskPeriodebeløp(begrunnelseGrunnlag)
 
     val filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp =
         filtrertPåManuelleBegrunnelser.filterValues { begrunnelse ->
-            val endringIKompetanseValutakursEllerUtenlandskPeriodebeløp =
-                erEndringIKompetanse(begrunnelseGrunnlag) || erEndringIValutakurs(begrunnelseGrunnlag) ||
-                    erEndringIUtenlandskPeriodebeløp(
-                        begrunnelseGrunnlag,
-                    )
-
-            endringIKompetanseValutakursEllerUtenlandskPeriodebeløp && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
+            erEndringIKompetanseValutakursEllerUtenlandskPeriodebeløp && begrunnelse.erLikKompetanseIPeriode(begrunnelseGrunnlag)
         }
 
     val filtrertPåIngenEndringMedLikKompetanse =
