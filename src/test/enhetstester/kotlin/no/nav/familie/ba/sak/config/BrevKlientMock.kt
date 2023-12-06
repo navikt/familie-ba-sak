@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
@@ -17,6 +18,7 @@ class BrevKlientMock : BrevKlient(
     familieBrevUri = "brev_uri_mock",
     restTemplate = RestTemplate(),
     sanityDataset = "",
+    testVerktøyService = mockk(),
 ) {
     override fun genererBrev(
         målform: String,

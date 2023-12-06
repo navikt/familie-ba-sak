@@ -29,6 +29,7 @@ class BrevServiceTest {
             brevmalService = brevmalService,
             refusjonEøsRepository = mockk(),
             integrasjonClient = mockk(),
+            testVerktøyService = mockk(),
         )
 
     @BeforeEach
