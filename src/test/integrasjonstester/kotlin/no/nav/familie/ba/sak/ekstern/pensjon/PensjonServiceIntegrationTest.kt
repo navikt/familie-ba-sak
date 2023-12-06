@@ -100,6 +100,27 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
     }
 
     @Test
+    fun `skal fjerne overlapp ved å kutte perioden fra Infotrygd til før perioden for den samme personen starter i BA-sak`() {
+        val søker = tilfeldigPerson()
+        val barn1 = tilfeldigPerson()
+        val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
+        val barnAktør = personidentService.hentOgLagreAktør(barn1.aktør.aktivFødselsnummer(), true)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
+        leggTilAvsluttetBehandling(fagsak, barn1, barnAktør)
+
+        mockInfotrygdBarnetrygdResponse(
+            barnAktør,
+            stønadFom = YearMonth.of(2019, 1),
+            stønadTom = YearMonth.from(LocalDate.MAX)
+        )
+
+        val barnetrygdTilPensjon = pensjonService.hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
+        assertThat(barnetrygdTilPensjon).hasSize(1)
+        assertThat(barnetrygdTilPensjon.first().barnetrygdPerioder.filter { it.kildesystem == "Infotrygd" }).hasSize(1)
+    }
+
+    @Test
     fun `skal finne og returnere perioder fra Infotrygd`() {
         val søker = tilfeldigPerson()
         val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
@@ -143,7 +164,11 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false)
     }
 
-    private fun mockInfotrygdBarnetrygdResponse(søkerAktør: Aktør) {
+    private fun mockInfotrygdBarnetrygdResponse(
+        person: Aktør,
+        stønadFom: YearMonth = YearMonth.now(),
+        stønadTom: YearMonth = YearMonth.now()
+    ) {
         every { envService.erPreprod() } returns false
         val identFraRequest = slot<String>()
         every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(capture(identFraRequest), any()) } answers {
@@ -154,12 +179,12 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
                             identFraRequest.captured,
                             listOf(
                                 BarnetrygdPeriode(
-                                    personIdent = søkerAktør.aktivFødselsnummer(),
+                                    personIdent = person.aktivFødselsnummer(),
                                     delingsprosentYtelse = YtelseProsent.FULL,
                                     ytelseTypeEkstern = YtelseTypeEkstern.ORDINÆR_BARNETRYGD,
                                     utbetaltPerMnd = 1054,
-                                    stønadFom = YearMonth.now(),
-                                    stønadTom = YearMonth.now(),
+                                    stønadFom = stønadFom,
+                                    stønadTom = stønadTom,
                                     kildesystem = "Infotrygd",
                                     sakstypeEkstern = SakstypeEkstern.NASJONAL,
                                 ),

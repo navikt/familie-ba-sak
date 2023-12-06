@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -19,11 +21,14 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
 import no.nav.familie.unleash.UnleashService
+import no.nav.fpsak.tidsserie.LocalDateSegment
+import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 import kotlin.random.Random
 
@@ -69,7 +74,7 @@ class PensjonService(
             .plus(barnetrygdFraRelaterteInfotrygdsaker)
             .plus(
                 barnetrygdTilPensjonFraInfotrygd.plus(barnetrygdTilPensjon),
-            ).distinct()
+            ).minusEventuelleInfotrygdperioderSomOverlapperBA()
     }
 
     fun lagTaskForHentingAvIdenterTilPensjon(år: Int): String {
@@ -221,6 +226,52 @@ class PensjonService(
         private val logger = LoggerFactory.getLogger(BisysService::class.java)
     }
 }
+
+private fun List<BarnetrygdTilPensjon>.minusEventuelleInfotrygdperioderSomOverlapperBA(): List<BarnetrygdTilPensjon> {
+    return distinct().groupBy { it.fagsakEiersIdent }.map { (fagsakEiersIdent, barnetrygdTilPensjon) ->
+        val perioderUtenOverlappMellomFagsystemene = mutableListOf<BarnetrygdPeriode>()
+
+        barnetrygdTilPensjon.flatMap { it.barnetrygdPerioder }.groupBy { it.personIdent }
+            .forEach { (_, perioderTilhørendePerson) ->
+                val (baSakPerioder, infotrygdPerioder) = perioderTilhørendePerson.partition { it.kildesystem == "BA" }
+
+                val baSakTidslinje = LocalDateTimeline(
+                    baSakPerioder.map {
+                        LocalDateSegment(
+                            it.stønadFom.førsteDagIInneværendeMåned(),
+                            it.stønadTom.sisteDagIInneværendeMåned(),
+                            it
+                        )
+                    }
+                )
+                val infotrygdTidslinje = LocalDateTimeline(
+                    infotrygdPerioder.map {
+                        LocalDateSegment(
+                            it.stønadFom.førsteDagIInneværendeMåned(),
+                            it.stønadTom.sisteDagIInneværendeMåned(),
+                            it
+                        )
+                    }
+                )
+                val infotrygdperioderEliminertForOverlapp = baSakTidslinje.crossJoin(infotrygdTidslinje).toSegments().map {
+                    it.value.copy(
+                        stønadFom = it.fom.toYearMonth(),
+                        stønadTom = it.tom.toYearMonth()
+                    )
+                }.filter {
+                    it.kildesystem == "Infotrygd" && infotrygdPerioder.fomDatoer().contains(it.stønadFom)
+                }
+                perioderUtenOverlappMellomFagsystemene.addAll(baSakPerioder + infotrygdperioderEliminertForOverlapp)
+            }
+
+        BarnetrygdTilPensjon(
+            fagsakEiersIdent = fagsakEiersIdent,
+            barnetrygdPerioder = perioderUtenOverlappMellomFagsystemene
+        )
+    }
+}
+
+private fun List<BarnetrygdPeriode>.fomDatoer(): List<YearMonth> = map { it.stønadFom }
 
 private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): List<BarnetrygdTilPensjon> {
     return when {
