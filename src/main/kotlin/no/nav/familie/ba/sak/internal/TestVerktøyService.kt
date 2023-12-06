@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import org.springframework.stereotype.Service
@@ -23,7 +23,7 @@ class TestVerktøyService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingRepository: EndretUtbetalingAndelRepository,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
-    private val vedtakService: VedtakService,
+    private val vedtakRepository: VedtakRepository,
     private val kompetanseRepository: KompetanseRepository,
 ) {
     @Transactional
@@ -71,7 +71,7 @@ class TestVerktøyService(
 
         val vedtaksperioder =
             vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
-                vedtakService.hentAktivForBehandlingThrows(behandlingId).id,
+                vedtakRepository.findByBehandlingAndAktiv(behandlingId).id,
             )
 
         return lagGyldigeBegrunnelserTest(
@@ -112,7 +112,7 @@ class TestVerktøyService(
             forrigeBehandling?.let { kompetanseRepository.finnFraBehandlingId(it.id) }
         val vedtaksperioder =
             vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
-                vedtakService.hentAktivForBehandlingThrows(behandlingId).id,
+                vedtakRepository.findByBehandlingAndAktiv(behandlingId).id,
             )
 
         return lagVedtaksperioderTest(
