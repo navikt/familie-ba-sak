@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -124,6 +125,10 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
                 utvidetVilkårPåSøkerIForrigePeriode = utvidetVilkårPåSøkerIForrigePeriode,
                 temaSomPeriodeErVurdertEtter = temaSomPeriodeErVurdertEtter,
             )
+
+        if (grunnlag.behandlingsGrunnlagForVedtaksperioder.behandling.fagsak.id == "2178816".toLong()) {
+            secureLogger.info("Henter EØS standardbegrunnelser for behandling=${grunnlag.behandlingsGrunnlagForVedtaksperioder.behandling.id} periode fom ${this.fom} med begrunnelsegrunnlag=$begrunnelseGrunnlag, relevantePeriodeResultater=$relevantePeriodeResultater, erUtbetalingEllerDeltBostedIPeriode=$erUtbetalingEllerDeltBostedIPeriode, utvidetVilkårPåSøkerIPeriode=$utvidetVilkårPåSøkerIPeriode, utvidetVilkårPåSøkerIForrigePeriode=$utvidetVilkårPåSøkerIForrigePeriode")
+        }
 
         val avslagsbegrunnelser = avslagsbegrunnelserPerPerson[person] ?: emptySet()
 
