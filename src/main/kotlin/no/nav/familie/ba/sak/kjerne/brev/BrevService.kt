@@ -4,13 +4,16 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
+import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
@@ -71,6 +74,7 @@ class BrevService(
     private val brevmalService: BrevmalService,
     private val refusjonEøsRepository: RefusjonEøsRepository,
     private val integrasjonClient: IntegrasjonClient,
+    private val testVerktøyService: TestVerktøyService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -302,23 +306,34 @@ class BrevService(
 
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
+        val behandlingId = vedtak.behandling.id
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
 
         val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
         val brevperioder =
-            vedtaksperioder.mapNotNull {
-                it.lagBrevPeriode(
-                    grunnlagForBegrunnelse = grunnlagForBegrunnelser,
-                    landkoder = integrasjonClient.hentLandkoderISO2(),
-                )
+            vedtaksperioder.mapNotNull { vedtaksperiode ->
+                try {
+                    vedtaksperiode.lagBrevPeriode(
+                        grunnlagForBegrunnelse = grunnlagForBegrunnelser,
+                        landkoder = integrasjonClient.hentLandkoderISO2(),
+                    )
+                } catch (e: BrevBegrunnelseFeil) {
+                    secureLogger.info(
+                        "Brevbegrunnelsefeil for behandling $behandlingId, " +
+                            "fagsak ${vedtak.behandling.fagsak.id} " +
+                            "på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom}. " +
+                            "\nAutogenerert test:\n" + testVerktøyService.hentBegrunnelsetest(behandlingId),
+                    )
+                    throw IllegalStateException(e.message, e)
+                }
             }
 
-        val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(vedtak.behandling.id)
-        val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(vedtak.behandling.id)
+        val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
+        val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId)
 
         val hjemler =
             hentHjemler(
-                behandlingId = vedtak.behandling.id,
+                behandlingId = behandlingId,
                 erFritekstIBrev = vedtaksperioder.any { it.fritekster.isNotEmpty() },
                 vedtaksperioder = vedtaksperioder,
                 målform = personopplysningGrunnlag.søker.målform,
