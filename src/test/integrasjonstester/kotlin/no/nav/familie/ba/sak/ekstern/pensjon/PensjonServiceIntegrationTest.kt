@@ -107,14 +107,20 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val barnAktør = personidentService.hentOgLagreAktør(barn1.aktør.aktivFødselsnummer(), true)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
-        leggTilAvsluttetBehandling(fagsak, barn1, barnAktør)
-
-        val infotrygdStønadFom = YearMonth.of(2019, 1)
+        leggTilAvsluttetBehandling(
+            fagsak,
+            barn1,
+            barnAktør,
+            fom = årMnd("2021-04"),
+            tom = årMnd("2023-11"),
+        )
+        val infotrygdStønadFom = årMnd("2019-03")
+        val infotrygdStønadTom = årMnd("2022-09")
 
         mockInfotrygdBarnetrygdResponse(
             barnAktør,
             stønadFom = infotrygdStønadFom,
-            stønadTom = YearMonth.from(LocalDate.MAX),
+            stønadTom = infotrygdStønadTom,
         )
 
         val (basakPeriode, infotrygdperiode) =
@@ -143,14 +149,16 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         fagsak: Fagsak,
         barn1: Person,
         barnAktør: Aktør,
+        fom: YearMonth = årMnd("2019-04"),
+        tom: YearMonth = årMnd("2023-03"),
     ) {
         with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))) {
             val behandling = this
             with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
                 val andel =
                     lagAndelTilkjentYtelse(
-                        årMnd("2019-04"),
-                        årMnd("2023-03"),
+                        fom,
+                        tom,
                         YtelseType.ORDINÆR_BARNETRYGD,
                         660,
                         behandling,
