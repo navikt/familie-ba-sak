@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.ekstern.bisys.BisysService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -222,54 +221,64 @@ class PensjonService(
         }
     }
 
-    companion object {
-        private val logger = LoggerFactory.getLogger(BisysService::class.java)
-    }
-}
+    private fun List<BarnetrygdTilPensjon>.minusEventuelleInfotrygdperioderSomOverlapperBA(): List<BarnetrygdTilPensjon> {
+        return distinct().groupBy { it.fagsakEiersIdent }.map { (fagsakEiersIdent, barnetrygdTilPensjon) ->
+            val perioderUtenOverlappMellomFagsystemene = mutableListOf<BarnetrygdPeriode>()
 
-private fun List<BarnetrygdTilPensjon>.minusEventuelleInfotrygdperioderSomOverlapperBA(): List<BarnetrygdTilPensjon> {
-    return distinct().groupBy { it.fagsakEiersIdent }.map { (fagsakEiersIdent, barnetrygdTilPensjon) ->
-        val perioderUtenOverlappMellomFagsystemene = mutableListOf<BarnetrygdPeriode>()
+            barnetrygdTilPensjon.flatMap { it.barnetrygdPerioder }.groupBy { it.personIdent }
+                .forEach { (_, perioderTilhørendePerson) ->
+                    val (baSakPerioder, opprinneligeInfotrygdPerioder) =
+                        perioderTilhørendePerson.partition { it.kildesystem == "BA" }
 
-        barnetrygdTilPensjon.flatMap { it.barnetrygdPerioder }.groupBy { it.personIdent }
-            .forEach { (_, perioderTilhørendePerson) ->
-                val (baSakPerioder, infotrygdPerioder) = perioderTilhørendePerson.partition { it.kildesystem == "BA" }
-
-                val baSakTidslinje = LocalDateTimeline(
-                    baSakPerioder.map {
-                        LocalDateSegment(
-                            it.stønadFom.førsteDagIInneværendeMåned(),
-                            it.stønadTom.sisteDagIInneværendeMåned(),
-                            it
-                        )
-                    }
-                )
-                val infotrygdTidslinje = LocalDateTimeline(
-                    infotrygdPerioder.map {
-                        LocalDateSegment(
-                            it.stønadFom.førsteDagIInneværendeMåned(),
-                            it.stønadTom.sisteDagIInneværendeMåned(),
-                            it
-                        )
-                    }
-                )
-                val infotrygdperioderEliminertForOverlapp = baSakTidslinje.crossJoin(infotrygdTidslinje).toSegments().map {
-                    it.value.copy(
-                        stønadFom = it.fom.toYearMonth(),
-                        stønadTom = it.tom.toYearMonth()
-                    )
-                }.filter {
-                    it.kildesystem == "Infotrygd" && infotrygdPerioder.fomDatoer().contains(it.stønadFom)
+                    val infotrygdperioderMinusOverlappMedBA =
+                        baSakPerioder.tidslinje().crossJoin(opprinneligeInfotrygdPerioder.tidslinje()).toSegments().map {
+                            it.value.copy(
+                                stønadFom = it.fom.toYearMonth(),
+                                stønadTom = it.tom.toYearMonth(),
+                            )
+                        }.filter {
+                            it.kildesystem == "Infotrygd" && opprinneligeInfotrygdPerioder.fomDatoer().contains(it.stønadFom)
+                        }
+                    sjekkOgLoggOmDetFinnesOverlapp(baSakPerioder, opprinneligeInfotrygdPerioder, infotrygdperioderMinusOverlappMedBA)
+                    perioderUtenOverlappMellomFagsystemene.addAll(baSakPerioder + infotrygdperioderMinusOverlappMedBA)
                 }
-                perioderUtenOverlappMellomFagsystemene.addAll(baSakPerioder + infotrygdperioderEliminertForOverlapp)
-            }
 
-        BarnetrygdTilPensjon(
-            fagsakEiersIdent = fagsakEiersIdent,
-            barnetrygdPerioder = perioderUtenOverlappMellomFagsystemene
-        )
+            BarnetrygdTilPensjon(
+                fagsakEiersIdent = fagsakEiersIdent,
+                barnetrygdPerioder = perioderUtenOverlappMellomFagsystemene,
+            )
+        }
+    }
+
+    fun sjekkOgLoggOmDetFinnesOverlapp(
+        baSak: List<BarnetrygdPeriode>,
+        infotrygdperioder: List<BarnetrygdPeriode>,
+        infotrygdperioderMinusOverlappeneMedBA: List<BarnetrygdPeriode>,
+    ) {
+        if (infotrygdperioder != infotrygdperioderMinusOverlappeneMedBA) {
+            secureLogger.warn(
+                "Fant overlapp mellom $baSak og $infotrygdperioder. " +
+                    "Infotrygdperioder korrigert for overlapp:\n$infotrygdperioderMinusOverlappeneMedBA",
+            )
+        }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(PensjonService::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
+
+private fun List<BarnetrygdPeriode>.tidslinje() =
+    LocalDateTimeline(
+        map {
+            LocalDateSegment(
+                it.stønadFom.førsteDagIInneværendeMåned(),
+                it.stønadTom.sisteDagIInneværendeMåned(),
+                it,
+            )
+        },
+    )
 
 private fun List<BarnetrygdPeriode>.fomDatoer(): List<YearMonth> = map { it.stønadFom }
 

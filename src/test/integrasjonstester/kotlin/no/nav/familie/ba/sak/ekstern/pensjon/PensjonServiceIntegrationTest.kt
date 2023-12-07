@@ -109,15 +109,22 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
         leggTilAvsluttetBehandling(fagsak, barn1, barnAktør)
 
+        val infotrygdStønadFom = YearMonth.of(2019, 1)
+
         mockInfotrygdBarnetrygdResponse(
             barnAktør,
-            stønadFom = YearMonth.of(2019, 1),
-            stønadTom = YearMonth.from(LocalDate.MAX)
+            stønadFom = infotrygdStønadFom,
+            stønadTom = YearMonth.from(LocalDate.MAX),
         )
 
-        val barnetrygdTilPensjon = pensjonService.hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
-        assertThat(barnetrygdTilPensjon).hasSize(1)
-        assertThat(barnetrygdTilPensjon.first().barnetrygdPerioder.filter { it.kildesystem == "Infotrygd" }).hasSize(1)
+        val (basakPeriode, infotrygdperiode) =
+            pensjonService.hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
+                .single().barnetrygdPerioder
+                .partition { it.kildesystem == "BA" }
+                .run { first.single() to second.single() }
+
+        assertThat(infotrygdperiode.stønadFom).isEqualTo(infotrygdStønadFom)
+        assertThat(infotrygdperiode.stønadTom).isEqualTo(basakPeriode.stønadFom.minusMonths(1))
     }
 
     @Test
@@ -167,7 +174,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
     private fun mockInfotrygdBarnetrygdResponse(
         person: Aktør,
         stønadFom: YearMonth = YearMonth.now(),
-        stønadTom: YearMonth = YearMonth.now()
+        stønadTom: YearMonth = YearMonth.now(),
     ) {
         every { envService.erPreprod() } returns false
         val identFraRequest = slot<String>()
