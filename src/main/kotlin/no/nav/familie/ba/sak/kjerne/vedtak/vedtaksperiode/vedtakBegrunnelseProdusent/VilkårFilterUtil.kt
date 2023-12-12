@@ -41,7 +41,9 @@ fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
 fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResultatForVedtaksperiode): Boolean {
     return when (vilkårResultat.vilkårType) {
         Vilkår.UNDER_18_ÅR -> true
-        Vilkår.BOR_MED_SØKER -> vilkårResultat.utdypendeVilkårsvurderinger.any { this.borMedSokerTriggere.tilUtdypendeVilkårsvurderinger().toSet().contains(it) }
+        Vilkår.BOR_MED_SØKER ->
+            vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.borMedSokerTriggere) ||
+                vilkårResultat.utdypendeVilkårsvurderinger.any { this.borMedSokerTriggere.tilUtdypendeVilkårsvurderinger().toSet().contains(it) }
         Vilkår.GIFT_PARTNERSKAP -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.giftPartnerskapTriggere)
         Vilkår.BOSATT_I_RIKET -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.bosattIRiketTriggere)
         Vilkår.LOVLIG_OPPHOLD -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.lovligOppholdTriggere)
