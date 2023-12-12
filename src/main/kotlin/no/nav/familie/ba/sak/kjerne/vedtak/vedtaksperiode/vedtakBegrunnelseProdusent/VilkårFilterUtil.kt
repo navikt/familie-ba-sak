@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProd
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
@@ -42,12 +41,7 @@ fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
 fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResultatForVedtaksperiode): Boolean {
     return when (vilkårResultat.vilkårType) {
         Vilkår.UNDER_18_ÅR -> true
-        Vilkår.BOR_MED_SØKER -> if (this is SanityEØSBegrunnelse) {
-            val triggere = this.borMedSokerTriggere.tilUtdypendeVilkårsvurderinger().toSet() ?: emptySet()
-            vilkårResultat.utdypendeVilkårsvurderinger.any { triggere.contains(it) }
-        } else {
-            vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.borMedSokerTriggere)
-        }
+        Vilkår.BOR_MED_SØKER -> vilkårResultat.utdypendeVilkårsvurderinger.any { this.borMedSokerTriggere.tilUtdypendeVilkårsvurderinger().toSet().contains(it) }
         Vilkår.GIFT_PARTNERSKAP -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.giftPartnerskapTriggere)
         Vilkår.BOSATT_I_RIKET -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.bosattIRiketTriggere)
         Vilkår.LOVLIG_OPPHOLD -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.lovligOppholdTriggere)
