@@ -41,7 +41,9 @@ fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
 fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResultatForVedtaksperiode): Boolean {
     return when (vilkårResultat.vilkårType) {
         Vilkår.UNDER_18_ÅR -> true
-        Vilkår.BOR_MED_SØKER -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.borMedSokerTriggere)
+        Vilkår.BOR_MED_SØKER ->
+            vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.borMedSokerTriggere) ||
+                vilkårResultat.utdypendeVilkårsvurderinger.harMinstEttTriggerFra(this.borMedSokerTriggere)
         Vilkår.GIFT_PARTNERSKAP -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.giftPartnerskapTriggere)
         Vilkår.BOSATT_I_RIKET -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.bosattIRiketTriggere)
         Vilkår.LOVLIG_OPPHOLD -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.lovligOppholdTriggere)
@@ -58,6 +60,14 @@ private fun Collection<UtdypendeVilkårsvurdering>.erLik(
         utdypendeVilkårsvurderingFraSanityBegrunnelse?.tilUtdypendeVilkårsvurderinger()?.toSet() ?: emptySet()
 
     return utdypendeVilkårPåVilkårResultat == utdypendeVilkårPåSanityBegrunnelse
+}
+
+private fun Collection<UtdypendeVilkårsvurdering>.harMinstEttTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean {
+    val utdypendeVilkårPåVilkårResultat = this.toSet()
+    val utdypendeVilkårTriggerePåSanityBegrunnelse: Set<UtdypendeVilkårsvurdering> =
+        utdypendeVilkårsvurderingFraSanityBegrunnelse.tilUtdypendeVilkårsvurderinger().toSet()
+
+    return utdypendeVilkårPåVilkårResultat.any { utdypendeVilkårTriggerePåSanityBegrunnelse.contains(it) }
 }
 
 private fun finnUtgjørendeVilkår(
