@@ -33,7 +33,7 @@
         <cucumber.version>7.14.1</cucumber.version>
         <mockk.version>1.13.5</mockk.version>
         <wiremock.version>3.3.1</wiremock.version>
-        <token-validation-spring.version>3.1.8</token-validation-spring.version>
+        <token-validation-spring.version>3.2.0</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.3.0</springdoc.version>
         <sentry.version>7.0.0</sentry.version>
@@ -212,6 +212,11 @@
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>token-client-spring</artifactId>
+            <version>${token-validation-spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.security</groupId>
+            <artifactId>token-client-core</artifactId>
             <version>${token-validation-spring.version}</version>
         </dependency>
         <dependency>
