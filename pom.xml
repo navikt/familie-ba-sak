@@ -22,21 +22,21 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>4.0.0</spring.cloud.version>
-        <prosessering.version>2.20231026103714_2f17845</prosessering.version>
-        <felles.version>2.20231023162434_fa320ce</felles.version>
+        <prosessering.version>2.20231212093500_bfa0e7c</prosessering.version>
+        <felles.version>2.20231201131108_ea25dd3</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20231122081318_2e4ddec</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20231206111937_3c866af</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230912090318_2267c05</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20230927085000_900743f</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
-        <cucumber.version>7.14.0</cucumber.version>
+        <cucumber.version>7.15.0</cucumber.version>
         <mockk.version>1.13.5</mockk.version>
         <wiremock.version>3.3.1</wiremock.version>
         <token-validation-spring.version>3.1.8</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>2.2.0</springdoc.version>
-        <sentry.version>6.34.0</sentry.version>
+        <springdoc.version>2.3.0</springdoc.version>
+        <sentry.version>7.0.0</sentry.version>
         <kotlinx.version>1.7.3</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -46,9 +46,9 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.19.2</testcontainers.postgresql.version>
-        <unleash.version>8.4.0</unleash.version>
-        <maven.model.version>3.9.5</maven.model.version>
+        <testcontainers.postgresql.version>1.19.3</testcontainers.postgresql.version>
+        <unleash.version>9.2.0</unleash.version>
+        <maven.model.version>3.9.6</maven.model.version>
         <jackson.module.kotlin.version>2.16.0</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <fpsak-tidslinje.version>2.7.1</fpsak-tidslinje.version>
@@ -497,7 +497,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <phase>generate-test-sources</phase>

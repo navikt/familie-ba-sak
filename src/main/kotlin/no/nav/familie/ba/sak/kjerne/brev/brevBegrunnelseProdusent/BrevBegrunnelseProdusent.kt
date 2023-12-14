@@ -386,7 +386,7 @@ private fun ISanityBegrunnelse.validerBrevbegrunnelse(
     barnasFødselsdatoer: List<LocalDate>,
 ) {
     if (!gjelderSøker && barnasFødselsdatoer.isEmpty() && !this.gjelderSatsendring && !this.erAvslagUregistrerteBarnBegrunnelse()) {
-        throw IllegalStateException("Ingen personer på brevbegrunnelse ${this.apiNavn}")
+        throw BrevBegrunnelseFeil("Ingen personer på brevbegrunnelse ${this.apiNavn}")
     }
 }
 
@@ -418,3 +418,7 @@ fun ISanityBegrunnelse.erAvslagUregistrerteBarnBegrunnelse() =
             Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN.sanityApiNavn,
             EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN.sanityApiNavn,
         )
+
+class BrevBegrunnelseFeil(
+    melding: String,
+) : IllegalStateException(melding)

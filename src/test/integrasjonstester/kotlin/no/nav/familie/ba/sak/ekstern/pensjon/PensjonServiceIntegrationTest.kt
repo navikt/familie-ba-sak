@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
 import io.mockk.every
+import io.mockk.slot
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -99,6 +100,40 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
     }
 
     @Test
+    fun `skal fjerne overlapp ved å kutte perioden fra Infotrygd til før perioden for den samme personen starter i BA-sak`() {
+        val søker = tilfeldigPerson()
+        val barn1 = tilfeldigPerson()
+        val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
+        val barnAktør = personidentService.hentOgLagreAktør(barn1.aktør.aktivFødselsnummer(), true)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
+        leggTilAvsluttetBehandling(
+            fagsak,
+            barn1,
+            barnAktør,
+            fom = årMnd("2021-04"),
+            tom = årMnd("2023-11"),
+        )
+        val infotrygdStønadFom = årMnd("2019-03")
+        val infotrygdStønadTom = årMnd("2022-09")
+
+        mockInfotrygdBarnetrygdResponse(
+            barnAktør,
+            stønadFom = infotrygdStønadFom,
+            stønadTom = infotrygdStønadTom,
+        )
+
+        val (basakPeriode, infotrygdperiode) =
+            pensjonService.hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
+                .single().barnetrygdPerioder
+                .partition { it.kildesystem == "BA" }
+                .run { first.single() to second.single() }
+
+        assertThat(infotrygdperiode.stønadFom).isEqualTo(infotrygdStønadFom)
+        assertThat(infotrygdperiode.stønadTom).isEqualTo(basakPeriode.stønadFom.minusMonths(1))
+    }
+
+    @Test
     fun `skal finne og returnere perioder fra Infotrygd`() {
         val søker = tilfeldigPerson()
         val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
@@ -114,14 +149,16 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         fagsak: Fagsak,
         barn1: Person,
         barnAktør: Aktør,
+        fom: YearMonth = årMnd("2019-04"),
+        tom: YearMonth = årMnd("2023-03"),
     ) {
         with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))) {
             val behandling = this
             with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
                 val andel =
                     lagAndelTilkjentYtelse(
-                        årMnd("2019-04"),
-                        årMnd("2023-03"),
+                        fom,
+                        tom,
                         YtelseType.ORDINÆR_BARNETRYGD,
                         660,
                         behandling,
@@ -142,22 +179,27 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false)
     }
 
-    private fun mockInfotrygdBarnetrygdResponse(søkerAktør: Aktør) {
+    private fun mockInfotrygdBarnetrygdResponse(
+        person: Aktør,
+        stønadFom: YearMonth = YearMonth.now(),
+        stønadTom: YearMonth = YearMonth.now(),
+    ) {
         every { envService.erPreprod() } returns false
-        every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(any(), any()) } returns
+        val identFraRequest = slot<String>()
+        every { infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(capture(identFraRequest), any()) } answers {
             BarnetrygdTilPensjonResponse(
                 fagsaker =
                     listOf(
                         BarnetrygdTilPensjon(
-                            "",
+                            identFraRequest.captured,
                             listOf(
                                 BarnetrygdPeriode(
-                                    personIdent = søkerAktør.aktivFødselsnummer(),
+                                    personIdent = person.aktivFødselsnummer(),
                                     delingsprosentYtelse = YtelseProsent.FULL,
                                     ytelseTypeEkstern = YtelseTypeEkstern.ORDINÆR_BARNETRYGD,
                                     utbetaltPerMnd = 1054,
-                                    stønadFom = YearMonth.now(),
-                                    stønadTom = YearMonth.now(),
+                                    stønadFom = stønadFom,
+                                    stønadTom = stønadTom,
                                     kildesystem = "Infotrygd",
                                     sakstypeEkstern = SakstypeEkstern.NASJONAL,
                                 ),
@@ -165,5 +207,6 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         ),
                     ),
             )
+        }
     }
 }

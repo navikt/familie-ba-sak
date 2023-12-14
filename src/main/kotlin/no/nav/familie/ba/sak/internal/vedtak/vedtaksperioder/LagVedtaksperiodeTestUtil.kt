@@ -48,7 +48,7 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
             """
       
   Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
-    Og følgende dagens dato ${LocalDate.now().tilddMMyyyy()}""" +
+    Og dagens dato er ${LocalDate.now().tilddMMyyyy()}""" +
             lagPersonresultaterTekst(forrigeBehandling) +
             lagPersonresultaterTekst(behandling) +
             hentTekstForVilkårresultater(
@@ -122,7 +122,7 @@ private fun hentTekstForVilkårresultater(
     return """
         
     Og legg til nye vilkårresultater for behandling $behandlingId
-      | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Standardbegrunnelser |""" +
+      | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter |""" +
         tilVilkårResultatRader(personResultater)
 }
 
@@ -139,14 +139,19 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
                     it.resultat,
                     it.erEksplisittAvslagPåSøknad,
                     it.standardbegrunnelser,
+                    it.vurderesEtter,
                 )
             }.toList().joinToString("") { (vilkårResultatRad, vilkårResultater) ->
-                """
-      | ${vilkårResultatRad.aktørId} |${vilkårResultater.map { it.vilkårType }.joinToString(",")}|${
-                    vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")
-                }|${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""}|${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""}| ${vilkårResultatRad.resultat} | ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} | ${
-                    vilkårResultatRad.standardbegrunnelser.joinToString(",")
-                } |"""
+                "| ${vilkårResultatRad.aktørId} " +
+                    "| ${vilkårResultater.map { it.vilkårType }.joinToString(",")} " +
+                    "| ${vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")} " +
+                    "| ${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""} " +
+                    "| ${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""} " +
+                    "| ${vilkårResultatRad.resultat} " +
+                    "| ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"}" +
+                    "| ${vilkårResultatRad.standardbegrunnelser.joinToString(",")}" +
+                    "| ${vilkårResultatRad.vurderesEtter}" +
+                    "| \n"
             }
     } ?: ""
 

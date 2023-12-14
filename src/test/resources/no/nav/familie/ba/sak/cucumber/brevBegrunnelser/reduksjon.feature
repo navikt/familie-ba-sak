@@ -24,27 +24,27 @@ Egenskap: Brevbegrunnelser ved reduksjon
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
-      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat |
-      | 7890    | UNDER_18_ÅR      |                              | 24.06.2010 | 23.06.2028 | OPPFYLT  |
-      | 7890    | GIFT_PARTNERSKAP |                              | 24.06.2010 |            | OPPFYLT  |
-      | 7890    | LOVLIG_OPPHOLD   |                              | 11.11.2022 |            | OPPFYLT  |
-      | 7890    | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 11.11.2022 |            | OPPFYLT  |
-      | 7890    | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 11.11.2022 |            | OPPFYLT  |
+      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Vurderes etter   |
+      | 7890    | UNDER_18_ÅR      |                              | 24.06.2010 | 23.06.2028 | OPPFYLT  |                  |
+      | 7890    | GIFT_PARTNERSKAP |                              | 24.06.2010 |            | OPPFYLT  |                  |
+      | 7890    | LOVLIG_OPPHOLD   |                              | 11.11.2022 |            | OPPFYLT  |                  |
+      | 7890    | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 11.11.2022 |            | OPPFYLT  | EØS_FORORDNINGEN |
+      | 7890    | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 11.11.2022 |            | OPPFYLT  |                  |
 
-      | 1234    | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 11.11.2022 |            | OPPFYLT  |
-      | 1234    | LOVLIG_OPPHOLD   |                              | 11.11.2022 |            | OPPFYLT  |
+      | 1234    | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 11.11.2022 |            | OPPFYLT  |                  |
+      | 1234    | LOVLIG_OPPHOLD   |                              | 11.11.2022 |            | OPPFYLT  |                  |
 
-      | 3456    | UNDER_18_ÅR      |                              | 09.04.2005 | 08.04.2023 | OPPFYLT  |
-      | 3456    | GIFT_PARTNERSKAP |                              | 09.04.2005 |            | OPPFYLT  |
-      | 3456    | LOVLIG_OPPHOLD   |                              | 11.11.2022 |            | OPPFYLT  |
-      | 3456    | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 11.11.2022 |            | OPPFYLT  |
-      | 3456    | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 11.11.2022 |            | OPPFYLT  |
+      | 3456    | UNDER_18_ÅR      |                              | 09.04.2005 | 08.04.2023 | OPPFYLT  |                  |
+      | 3456    | GIFT_PARTNERSKAP |                              | 09.04.2005 |            | OPPFYLT  |                  |
+      | 3456    | LOVLIG_OPPHOLD   |                              | 11.11.2022 |            | OPPFYLT  |                  |
+      | 3456    | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 11.11.2022 |            | OPPFYLT  | EØS_FORORDNINGEN |
+      | 3456    | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 11.11.2022 |            | OPPFYLT  |                  |
 
-      | 5678    | UNDER_18_ÅR      |                              | 06.04.2006 | 05.04.2024 | OPPFYLT  |
-      | 5678    | GIFT_PARTNERSKAP |                              | 06.04.2006 |            | OPPFYLT  |
-      | 5678    | LOVLIG_OPPHOLD   |                              | 11.11.2022 |            | OPPFYLT  |
-      | 5678    | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 11.11.2022 |            | OPPFYLT  |
-      | 5678    | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 11.11.2022 |            | OPPFYLT  |
+      | 5678    | UNDER_18_ÅR      |                              | 06.04.2006 | 05.04.2024 | OPPFYLT  |                  |
+      | 5678    | GIFT_PARTNERSKAP |                              | 06.04.2006 |            | OPPFYLT  |                  |
+      | 5678    | LOVLIG_OPPHOLD   |                              | 11.11.2022 |            | OPPFYLT  |                  |
+      | 5678    | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 11.11.2022 |            | OPPFYLT  | EØS_FORORDNINGEN |
+      | 5678    | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 11.11.2022 |            | OPPFYLT  |                  |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
@@ -68,7 +68,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser           | Ugyldige begrunnelser |
-      | 01.04.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN                  | REDUKSJON_IKKE_ANSVAR_FOR_BARN |                          |
+      | 01.04.2023 | 30.06.2023 | UTBETALING         | EØS_FORORDNINGEN               | REDUKSJON_IKKE_ANSVAR_FOR_BARN |                       |
 
     Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser | Eøsbegrunnelser                | Fritekster |

@@ -248,3 +248,4 @@ Egenskap: Gyldige begrunnelser for opphør fra forrige behandling
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                       | Ugyldige begrunnelser |
       | 01.08.2023 |          | OPPHØR             | NASJONALE_REGLER               | OPPHØR_UGYLDIG_KONTONUMMER_FRA_INNVILGELSE |                       |
+
