@@ -146,14 +146,14 @@ fun ISanityBegrunnelse.erSammeTemaSomPeriode(
     temaerForBegrunnelser: TemaerForBegrunnelser,
 ): Boolean {
     return if (this.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {
-        temaerForBegrunnelser.temaForOpphør.contains(tema) || tema == Tema.FELLES
+        temaerForBegrunnelser.temaerForOpphør.contains(tema) || tema == Tema.FELLES
     } else {
         temaerForBegrunnelser.temaForUtbetaling == tema || tema == Tema.FELLES
     }
 }
 
 data class TemaerForBegrunnelser(
-    val temaForOpphør: Set<Tema>,
+    val temaerForOpphør: Set<Tema>,
     val temaForUtbetaling: Tema
 )
 
@@ -175,7 +175,7 @@ fun hentTemaSomPeriodeErVurdertEtter(
         listOfNotNull(regelverkSomBlirBorteFraForrigePeriode, regelverkSomBlirBorteFraForrigeBehandling).toSet()
 
     return TemaerForBegrunnelser(
-        temaForOpphør = regelverkSomBlirBorte.ifEmpty { setOf(Tema.NASJONAL) },
+        temaerForOpphør = regelverkSomBlirBorte.ifEmpty { setOf(Tema.NASJONAL) },
         temaForUtbetaling = if (vurdertEtterEøsDennePerioden) Tema.EØS else Tema.NASJONAL
     )
 }
