@@ -161,12 +161,12 @@ fun hentTemaSomPeriodeErVurdertEtter(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
 ): TemaerForBegrunnelser {
     val regelverkSomBlirBorteFraForrigePeriode =
-        finnRegelverkForPerioderSomBlirBorte(
+        finnRegelverkSomBlirBorte(
             dennePerioden = begrunnelseGrunnlag.dennePerioden,
             forrigePeriode = begrunnelseGrunnlag.forrigePeriode,
         )
     val regelverkSomBlirBorteFraForrigeBehandling =
-        finnRegelverkForPerioderSomBlirBorte(
+        finnRegelverkSomBlirBorte(
             dennePerioden = begrunnelseGrunnlag.dennePerioden,
             forrigePeriode = begrunnelseGrunnlag.sammePeriodeForrigeBehandling,
         )
@@ -182,7 +182,7 @@ fun hentTemaSomPeriodeErVurdertEtter(
     )
 }
 
-fun finnRegelverkForPerioderSomBlirBorte(
+fun finnRegelverkSomBlirBorte(
     dennePerioden: BegrunnelseGrunnlagForPersonIPeriode,
     forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
 ): Tema? {
