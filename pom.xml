@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
+        <version>3.2.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -21,7 +21,6 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <spring.cloud.version>4.0.0</spring.cloud.version>
         <prosessering.version>2.20231212093500_bfa0e7c</prosessering.version>
         <felles.version>2.20231201131108_ea25dd3</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
@@ -33,7 +32,7 @@
         <cucumber.version>7.15.0</cucumber.version>
         <mockk.version>1.13.5</mockk.version>
         <wiremock.version>3.3.1</wiremock.version>
-        <token-validation-spring.version>3.1.8</token-validation-spring.version>
+        <token-validation-spring.version>3.2.0</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.3.0</springdoc.version>
         <sentry.version>7.0.0</sentry.version>
@@ -57,6 +56,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>3.2.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>no.nav.familie.felles</groupId>
                 <artifactId>felles</artifactId>
@@ -216,6 +222,11 @@
         </dependency>
         <dependency>
             <groupId>no.nav.security</groupId>
+            <artifactId>token-client-core</artifactId>
+            <version>${token-validation-spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.security</groupId>
             <artifactId>token-validation-test-support</artifactId>
             <version>${token-validation-test-support.version}</version>
             <scope>test</scope>
@@ -346,7 +357,7 @@
         </dependency>
         <dependency>
             <groupId>org.wiremock</groupId>
-            <artifactId>wiremock</artifactId>
+            <artifactId>wiremock-standalone</artifactId>
             <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
