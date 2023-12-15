@@ -92,14 +92,15 @@ Egenskap: Gyldige begrunnelser for kompetanser
     Og lag personresultater for begrunnelse for behandling 100173207
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 100173207
-      | AktørId       | Vilkår                          | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
-      | 2005858678161 | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP |                              | 02.02.2015 |            | OPPFYLT  | Nei                  |                  |
-      | 2005858678161 | BOSATT_I_RIKET                  | BARN_BOR_I_NORGE             | 02.02.2015 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
-      | 2005858678161 | BOR_MED_SØKER                   | BARN_BOR_I_EØS_MED_SØKER     | 02.02.2015 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
-      | 2005858678161 | UNDER_18_ÅR                     |                              | 02.02.2015 | 01.02.2033 | OPPFYLT  | Nei                  |                  |
+      | AktørId       | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
+      | 2005858678161 | GIFT_PARTNERSKAP |                              | 02.02.2015 |            | OPPFYLT  | Nei                  |                  |
+      | 2005858678161 | LOVLIG_OPPHOLD   |                              | 02.02.2015 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2005858678161 | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 02.02.2015 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2005858678161 | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 02.02.2015 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2005858678161 | UNDER_18_ÅR      |                              | 02.02.2015 | 01.02.2033 | OPPFYLT  | Nei                  |                  |
 
-      | 2305793738737 | LOVLIG_OPPHOLD                  |                              | 12.11.1984 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
-      | 2305793738737 | BOSATT_I_RIKET                  | OMFATTET_AV_NORSK_LOVGIVNING | 15.03.2023 | 15.08.2023 | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2305793738737 | LOVLIG_OPPHOLD   |                              | 12.11.1984 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2305793738737 | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 15.03.2023 | 15.08.2023 | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId       | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent |
@@ -140,24 +141,26 @@ Egenskap: Gyldige begrunnelser for kompetanser
     Og lag personresultater for begrunnelse for behandling 2
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
-      | AktørId | Vilkår                          | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
-      | 5678    | LOVLIG_OPPHOLD                  |                              | 10.05.1985 |            | OPPFYLT  | Nei                  |                  |
-      | 5678    | BOSATT_I_RIKET                  | OMFATTET_AV_NORSK_LOVGIVNING | 15.02.2021 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
+      | 5678    | LOVLIG_OPPHOLD   |                              | 10.05.1985 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 5678    | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 15.02.2021 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
 
-      | 1234    | BOR_MED_SØKER                   | BARN_BOR_I_EØS_MED_SØKER     | 02.02.2015 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
-      | 1234    | BOSATT_I_RIKET                  | BARN_BOR_I_NORGE             | 02.02.2015 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
-      | 1234    | UNDER_18_ÅR                     |                              | 02.02.2015 | 01.02.2033 | OPPFYLT  | Nei                  |                  |
-      | 1234    | GIFT_PARTNERSKAP,LOVLIG_OPPHOLD |                              | 02.02.2015 |            | OPPFYLT  | Nei                  |                  |
+      | 1234    | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 02.02.2015 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 1234    | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 02.02.2015 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 1234    | UNDER_18_ÅR      |                              | 02.02.2015 | 01.02.2033 | OPPFYLT  | Nei                  |                  |
+      | 1234    | LOVLIG_OPPHOLD   |                              | 02.02.2015 |            | OPPFYLT  | Nei                  |                  |
+      | 1234    | GIFT_PARTNERSKAP |                              | 02.02.2015 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 2
-      | AktørId | Vilkår                          | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
-      | 1234    | GIFT_PARTNERSKAP,LOVLIG_OPPHOLD |                              | 02.02.2015 |            | OPPFYLT  | Nei                  |
-      | 1234    | BOSATT_I_RIKET                  | BARN_BOR_I_NORGE             | 02.02.2015 |            | OPPFYLT  | Nei                  |
-      | 1234    | UNDER_18_ÅR                     |                              | 02.02.2015 | 01.02.2033 | OPPFYLT  | Nei                  |
-      | 1234    | BOR_MED_SØKER                   | BARN_BOR_I_EØS_MED_SØKER     | 02.02.2015 |            | OPPFYLT  | Nei                  |
+      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
+      | 1234    | GIFT_PARTNERSKAP |                              | 02.02.2015 |            | OPPFYLT  | Nei                  |                  |
+      | 1234    | LOVLIG_OPPHOLD   |                              | 02.02.2015 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 1234    | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 02.02.2015 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 1234    | UNDER_18_ÅR      |                              | 02.02.2015 | 01.02.2033 | OPPFYLT  | Nei                  |                  |
+      | 1234    | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 02.02.2015 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
 
-      | 5678    | LOVLIG_OPPHOLD                  |                              | 10.05.1985 |            | OPPFYLT  | Nei                  |
-      | 5678    | BOSATT_I_RIKET                  | OMFATTET_AV_NORSK_LOVGIVNING | 15.02.2021 |            | OPPFYLT  | Nei                  |
+      | 5678    | LOVLIG_OPPHOLD   |                              | 10.05.1985 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 5678    | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 15.02.2021 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent |

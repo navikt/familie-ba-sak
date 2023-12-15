@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.BegrunnelseGrunnlagForPeriodeMedOpphør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.BegrunnelseGrunnlagForPeriodeMedReduksjonPåTversAvBehandlinger
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.TemaerForBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.begrunnelseGjelderOpphørFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.begrunnelseGjelderReduksjonFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForBrevPeriodeType
@@ -45,7 +46,7 @@ internal fun hentStandardBegrunnelser(
     erUtbetalingEllerDeltBostedIPeriode: Boolean,
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
-    temaSomPeriodeErVurdertEtter: Tema,
+    temaSomPeriodeErVurdertEtter: TemaerForBegrunnelser,
 ): Set<IVedtakBegrunnelse> {
     val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
     val filtrertPåTema = sanityBegrunnelser.filterValues { it.erSammeTemaSomPeriode(temaSomPeriodeErVurdertEtter) }
