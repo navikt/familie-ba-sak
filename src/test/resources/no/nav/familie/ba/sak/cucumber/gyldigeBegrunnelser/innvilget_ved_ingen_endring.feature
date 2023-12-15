@@ -22,16 +22,18 @@ Egenskap: Gyldige begrunnelser ved ingen endring
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
-      | AktørId | Vilkår                                      | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
-      | 2       | UNDER_18_ÅR                                 |                              | 07.09.2019 | 06.09.2037 | OPPFYLT  | Nei                  |
-      | 2       | GIFT_PARTNERSKAP                            |                              | 07.09.2019 |            | OPPFYLT  | Nei                  |
-      | 2       | LOVLIG_OPPHOLD                              |                              | 07.09.2019 | 14.07.2023 | OPPFYLT  | Nei                  |
-      | 2       | BOSATT_I_RIKET                              | BARN_BOR_I_NORGE             | 07.09.2019 | 14.07.2023 | OPPFYLT  | Nei                  |
-      | 2       | BOR_MED_SØKER                               | BARN_BOR_I_EØS_MED_SØKER     | 07.06.2023 | 14.07.2023 | OPPFYLT  | Nei                  |
-      | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD,BOR_MED_SØKER |                              | 15.07.2023 | 15.08.2023 | OPPFYLT  | Nei                  |
+      | AktørId | Vilkår                                      | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
+      | 2       | UNDER_18_ÅR                                 |                              | 07.09.2019 | 06.09.2037 | OPPFYLT  | Nei                  |                  |
+      | 2       | GIFT_PARTNERSKAP                            |                              | 07.09.2019 |            | OPPFYLT  | Nei                  |                  |
+      | 2       | LOVLIG_OPPHOLD                              |                              | 07.09.2019 | 14.07.2023 | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2       | BOSATT_I_RIKET                              | BARN_BOR_I_NORGE             | 07.09.2019 | 14.07.2023 | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2       | BOR_MED_SØKER                               | BARN_BOR_I_EØS_MED_SØKER     | 07.06.2023 | 14.07.2023 | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD,BOR_MED_SØKER |                              | 15.07.2023 | 15.08.2023 | OPPFYLT  | Nei                  |                  |
 
-      | 1       | LOVLIG_OPPHOLD                              |                              | 06.11.1984 |            | OPPFYLT  | Nei                  |
-      | 1       | BOSATT_I_RIKET                              | OMFATTET_AV_NORSK_LOVGIVNING | 11.11.2021 |            | OPPFYLT  | Nei                  |
+      | 1       | LOVLIG_OPPHOLD                              |                              | 07.09.2019 | 14.07.2023 | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 1       | BOSATT_I_RIKET                              | OMFATTET_AV_NORSK_LOVGIVNING | 07.09.2019 | 14.07.2023 | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 1       | LOVLIG_OPPHOLD                              |                              | 15.07.2023 |            | OPPFYLT  | Nei                  |                  |
+      | 1       | BOSATT_I_RIKET                              |                              | 15.07.2023 |            | OPPFYLT  | Nei                  |                  |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
