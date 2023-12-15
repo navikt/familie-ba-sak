@@ -645,9 +645,10 @@ class ClientMocks {
     @Bean
     @Profile("mock-leader-client")
     @Primary
-    fun mockLeaderClient() {
+    fun mockLeaderClient(): LeaderClient {
         mockkStatic(LeaderClient::class)
         every { LeaderClient.isLeader() } returns true
+        return LeaderClient
     }
 }
 
