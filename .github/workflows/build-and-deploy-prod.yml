@@ -63,7 +63,7 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/app-preprod.yaml
-          IMAGE: ${{ needs.bygg.outputs.image }}
+          VAR: image=${{ needs.bygg.outputs.image }}
 
   deploy-to-prod:
     name: Deploy til prod-gcp
