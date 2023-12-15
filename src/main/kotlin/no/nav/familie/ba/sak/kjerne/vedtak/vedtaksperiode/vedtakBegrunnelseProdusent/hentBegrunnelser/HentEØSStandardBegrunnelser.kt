@@ -4,12 +4,12 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
-import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.TemaerForBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForBrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erLikKompetanseIPeriode
@@ -29,7 +29,7 @@ internal fun hentEØSStandardBegrunnelser(
     erUtbetalingEllerDeltBostedIPeriode: Boolean,
     utvidetVilkårPåSøkerIPeriode: VilkårResultatForVedtaksperiode?,
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
-    temaSomPeriodeErVurdertEtter: Tema,
+    temaSomPeriodeErVurdertEtter: TemaerForBegrunnelser,
 ): Set<IVedtakBegrunnelse> {
     val filtrertPåManuelleBegrunnelser =
         sanityEØSBegrunnelser

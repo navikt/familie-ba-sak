@@ -143,28 +143,59 @@ fun erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson: Map<Person
     }
 
 fun ISanityBegrunnelse.erSammeTemaSomPeriode(
-    temaSomPeriodeErVurdertEtter: Tema,
-): Boolean = temaSomPeriodeErVurdertEtter == tema || tema == Tema.FELLES
+    temaerForBegrunnelser: TemaerForBegrunnelser,
+): Boolean {
+    return if (this.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {
+        temaerForBegrunnelser.temaForOpphør.contains(tema) || tema == Tema.FELLES
+    } else {
+        temaerForBegrunnelser.temaForUtbetaling == tema || tema == Tema.FELLES
+    }
+}
+
+data class TemaerForBegrunnelser(
+    val temaForOpphør: Set<Tema>,
+    val temaForUtbetaling: Tema
+)
 
 fun hentTemaSomPeriodeErVurdertEtter(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
-): Tema {
-    val erVurdertEtterEøsDennePerioden = begrunnelseGrunnlag.dennePerioden.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
-    val erVurdertEtterEøsForrigePeriode = begrunnelseGrunnlag.forrigePeriode?.vilkårResultater?.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } == true
-    val erForrigePeriodeEøsOgDenneNasjonal = !erVurdertEtterEøsDennePerioden && erVurdertEtterEøsForrigePeriode
+): TemaerForBegrunnelser {
+    val regelverkSomBlirBorteFraForrigePeriode = finnRegelverkForPerioderSomBlirBorte(
+        dennePerioden = begrunnelseGrunnlag.dennePerioden,
+        forrigePeriode = begrunnelseGrunnlag.forrigePeriode
+    )
+    val regelverkSomBlirBorteFraForrigeBehandling = finnRegelverkForPerioderSomBlirBorte(
+        dennePerioden = begrunnelseGrunnlag.dennePerioden,
+        forrigePeriode = begrunnelseGrunnlag.sammePeriodeForrigeBehandling
+    )
+    val vurdertEtterEøsDennePerioden =
+        begrunnelseGrunnlag.dennePerioden.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
 
-    val fårUtbetaltNasjonalt = begrunnelseGrunnlag.dennePerioden.andeler.any { it.nasjonaltPeriodebeløp != 0 }
-    val harGåttFraEøsTilNasjonal = erForrigePeriodeEøsOgDenneNasjonal && fårUtbetaltNasjonalt
+    val regelverkSomBlirBorte =
+        listOfNotNull(regelverkSomBlirBorteFraForrigePeriode, regelverkSomBlirBorteFraForrigeBehandling).toSet()
 
-    val erPeriodeEndretFraEøsTilNasjonalSidenForrigeBehandling =
-        !erVurdertEtterEøsDennePerioden && begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.vilkårResultater?.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } == true
+    return TemaerForBegrunnelser(
+        temaForOpphør = regelverkSomBlirBorte.ifEmpty { setOf(Tema.NASJONAL) },
+        temaForUtbetaling = if (vurdertEtterEøsDennePerioden) Tema.EØS else Tema.NASJONAL
+    )
+}
 
-    return when {
-        harGåttFraEøsTilNasjonal -> Tema.NASJONAL
-        erVurdertEtterEøsDennePerioden || erForrigePeriodeEøsOgDenneNasjonal -> Tema.EØS
-        erPeriodeEndretFraEøsTilNasjonalSidenForrigeBehandling -> Tema.EØS
-        else -> Tema.NASJONAL
-    }
+fun finnRegelverkForPerioderSomBlirBorte(
+    dennePerioden: BegrunnelseGrunnlagForPersonIPeriode,
+    forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?
+): Tema? {
+    if (forrigePeriode == null) return null
+    val vilkårRelevantForRegelverk = listOf(Vilkår.BOR_MED_SØKER, Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)
+    val finnesVilkårSomStopperOpp =
+        forrigePeriode.vilkårResultater.any { vilkårForrigePeriode -> vilkårForrigePeriode.resultat == Resultat.OPPFYLT && (dennePerioden.vilkårResultater.none { it.vilkårType == vilkårForrigePeriode.vilkårType } || dennePerioden.vilkårResultater.any { it.vilkårType == vilkårForrigePeriode.vilkårType && it.resultat == Resultat.IKKE_OPPFYLT }) }
+
+    val kompetanseStopperOpp = forrigePeriode.kompetanse != null && dennePerioden.kompetanse == null
+
+    return if (kompetanseStopperOpp) Tema.EØS
+    else if (finnesVilkårSomStopperOpp) {
+        if (forrigePeriode.vilkårResultater.filter { it.vilkårType in vilkårRelevantForRegelverk }
+                .any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }) Tema.EØS else Tema.NASJONAL
+    } else null
 }
 
 private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
@@ -529,9 +560,9 @@ private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOg
         listOf(
             månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + grunnlagPerioderSplittetPåVedtaksperiode
-    ).zipWithNext { forrige, denne ->
-        periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
-    }.tilTidslinje()
+        ).zipWithNext { forrige, denne ->
+            periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
+        }.tilTidslinje()
 }
 
 fun ISanityBegrunnelse.erGjeldendeForBrevPeriodeType(
