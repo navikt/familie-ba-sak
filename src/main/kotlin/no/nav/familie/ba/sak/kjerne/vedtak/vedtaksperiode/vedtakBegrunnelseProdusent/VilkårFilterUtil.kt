@@ -59,7 +59,7 @@ private fun Collection<UtdypendeVilkårsvurdering>.erLik(
     val utdypendeVilkårPåSanityBegrunnelse: Set<UtdypendeVilkårsvurdering> =
         utdypendeVilkårsvurderingFraSanityBegrunnelse?.tilUtdypendeVilkårsvurderinger()?.toSet() ?: emptySet()
 
-    return utdypendeVilkårPåVilkårResultat == utdypendeVilkårPåSanityBegrunnelse
+    return utdypendeVilkårPåSanityBegrunnelse.isEmpty() || utdypendeVilkårPåVilkårResultat == utdypendeVilkårPåSanityBegrunnelse
 }
 
 private fun Collection<UtdypendeVilkårsvurdering>.harMinstEttTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean {
