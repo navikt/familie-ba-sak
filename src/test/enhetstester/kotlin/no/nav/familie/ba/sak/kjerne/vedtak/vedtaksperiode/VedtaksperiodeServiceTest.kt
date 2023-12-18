@@ -128,12 +128,13 @@ class VedtaksperiodeServiceTest {
     fun `EØS med periode med utløpt tom skal ikke ha årlig kontroll`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
 
-        every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns listOf(
-            lagKompetanse(
-                fom = YearMonth.now().minusMonths(2),
-                tom = YearMonth.now()
+        every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns
+            listOf(
+                lagKompetanse(
+                    fom = YearMonth.now().minusMonths(2),
+                    tom = YearMonth.now(),
+                ),
             )
-        )
 
         assertFalse { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
@@ -142,12 +143,13 @@ class VedtaksperiodeServiceTest {
     fun `EØS med periode med løpende tom skal ha årlig kontroll`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
 
-        every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns listOf(
-            lagKompetanse(
-                fom = YearMonth.now().minusMonths(1),
-                tom = YearMonth.now().plusMonths(5)
+        every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns
+            listOf(
+                lagKompetanse(
+                    fom = YearMonth.now().minusMonths(1),
+                    tom = YearMonth.now().plusMonths(5),
+                ),
             )
-        )
 
         assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
@@ -156,12 +158,13 @@ class VedtaksperiodeServiceTest {
     fun `EØS med periode uten tom skal ha årlig kontroll`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
 
-        every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns listOf(
-            lagKompetanse(
-                fom = YearMonth.now().minusMonths(1),
-                tom = null
+        every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns
+            listOf(
+                lagKompetanse(
+                    fom = YearMonth.now().minusMonths(1),
+                    tom = null,
+                ),
             )
-        )
 
         assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
