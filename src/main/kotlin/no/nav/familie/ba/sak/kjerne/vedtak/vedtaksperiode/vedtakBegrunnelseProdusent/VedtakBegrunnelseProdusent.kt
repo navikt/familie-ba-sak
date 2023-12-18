@@ -411,13 +411,13 @@ private fun hentResultaterForPeriode(
             begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true
 
         val erIngenEndring = !erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode
-        val erKunReduksjonISats =
-            erKunReduksjonISats(begrunnelseGrunnlagForPeriode, begrunnelseGrunnlagForrigePeriode)
+        val erKunReduksjonAvSats =
+            erKunReduksjonAvSats(begrunnelseGrunnlagForPeriode, begrunnelseGrunnlagForrigePeriode)
 
         listOfNotNull(
             if (erØkingIAndel || erSatsøkning || erSøker || erIngenEndring || erEøs) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
             if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
-            if (erIngenEndring || erKunReduksjonISats) SanityPeriodeResultat.INGEN_ENDRING else null,
+            if (erIngenEndring || erKunReduksjonAvSats) SanityPeriodeResultat.INGEN_ENDRING else null,
         )
     } else {
         listOfNotNull(
@@ -427,7 +427,7 @@ private fun hentResultaterForPeriode(
     }
 }
 
-private fun erKunReduksjonISats(
+private fun erKunReduksjonAvSats(
     begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode,
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
 ): Boolean {
