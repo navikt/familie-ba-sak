@@ -411,13 +411,13 @@ private fun hentResultaterForPeriode(
             begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true
 
         val erIngenEndring = !erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode
-        val erReduksjonPga6År =
-            erReduksjonPgaBarn6År(begrunnelseGrunnlagForPeriode, begrunnelseGrunnlagForrigePeriode)
+        val erKunReduksjonISats =
+            erKunReduksjonISats(begrunnelseGrunnlagForPeriode, begrunnelseGrunnlagForrigePeriode)
 
         listOfNotNull(
             if (erØkingIAndel || erSatsøkning || erSøker || erIngenEndring || erEøs) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
             if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
-            if (erIngenEndring || erReduksjonPga6År) SanityPeriodeResultat.INGEN_ENDRING else null,
+            if (erIngenEndring || erKunReduksjonISats) SanityPeriodeResultat.INGEN_ENDRING else null,
         )
     } else {
         listOfNotNull(
@@ -427,26 +427,22 @@ private fun hentResultaterForPeriode(
     }
 }
 
-private fun erReduksjonPgaBarn6År(
+private fun erKunReduksjonISats(
     begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode,
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?
 ): Boolean {
     val andelerForrigePeriode = begrunnelseGrunnlagForrigePeriode?.andeler ?: emptyList()
     val andelerDennePerioden = begrunnelseGrunnlagForPeriode.andeler
 
-    val barnBlir6ÅrDenneMåneden = begrunnelseGrunnlagForPeriode.person.fyllerAntallÅrInneværendeMåned(6)
+    return andelerForrigePeriode.any { andelIForrigePeriode ->
+        val sammeAndelDennePerioden = andelerDennePerioden.singleOrNull { andelIForrigePeriode.type == it.type }
 
-    return if (barnBlir6ÅrDenneMåneden) {
-        andelerForrigePeriode.any { andelIForrigePeriode ->
-            val sammeAndelDennePerioden = andelerDennePerioden.singleOrNull { andelIForrigePeriode.type == it.type }
+        val harAndelSammeProsent =
+            sammeAndelDennePerioden != null && andelIForrigePeriode.prosent == sammeAndelDennePerioden.prosent
+        val satsErRedusert = andelIForrigePeriode.sats > (sammeAndelDennePerioden?.sats ?: 0)
 
-            val harAndelSammeProsent =
-                sammeAndelDennePerioden != null && andelIForrigePeriode.prosent == sammeAndelDennePerioden.prosent
-            val satsErRedusert = andelIForrigePeriode.sats > (sammeAndelDennePerioden?.sats ?: 0)
-
-            harAndelSammeProsent && satsErRedusert
-        }
-    } else false
+        harAndelSammeProsent && satsErRedusert
+    }
 }
 
 private fun erReduksjonIAndelMellomPerioder(
