@@ -8,13 +8,14 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -40,6 +41,7 @@ class VedtaksperiodeServiceTest {
     private val småbarnstilleggService: SmåbarnstilleggService = mockk()
     private val refusjonEøsRepository = mockk<RefusjonEøsRepository>()
     private val integrasjonClient = mockk<IntegrasjonClient>()
+    private val kompetanseRepository = mockk<KompetanseRepository>()
 
     private val vedtaksperiodeService =
         spyk(
@@ -53,7 +55,7 @@ class VedtaksperiodeServiceTest {
                 sanityService = mockk(),
                 søknadGrunnlagService = mockk(relaxed = true),
                 endretUtbetalingAndelRepository = mockk(),
-                kompetanseRepository = mockk(),
+                kompetanseRepository = kompetanseRepository,
                 andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
                 feilutbetaltValutaRepository = feilutbetaltValutaRepository,
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -114,39 +116,53 @@ class VedtaksperiodeServiceTest {
     }
 
     @Test
-    fun `nasjonal skal ikke ha årlig kontroll`() {
+    fun `nasjonal sak skal ikke ha årlig kontroll`() {
         val behandling = lagBehandling(behandlingKategori = BehandlingKategori.NASJONAL)
         val vedtak = Vedtak(behandling = behandling)
+
+        every { kompetanseRepository.finnFraBehandlingId(behandlingId = behandling.id) } returns emptyList()
         assertFalse { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
     @Test
     fun `EØS med periode med utløpt tom skal ikke ha årlig kontroll`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
-        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns
-            listOf(
-                lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = LocalDate.now()),
+
+        every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns listOf(
+            lagKompetanse(
+                fom = YearMonth.now().minusMonths(2),
+                tom = YearMonth.now()
             )
+        )
+
         assertFalse { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
     @Test
     fun `EØS med periode med løpende tom skal ha årlig kontroll`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
-        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns
-            listOf(
-                lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = LocalDate.now().plusMonths(1)),
+
+        every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns listOf(
+            lagKompetanse(
+                fom = YearMonth.now().minusMonths(1),
+                tom = YearMonth.now().plusMonths(5)
             )
+        )
+
         assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
     @Test
     fun `EØS med periode uten tom skal ha årlig kontroll`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
-        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns
-            listOf(
-                lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null),
+
+        every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns listOf(
+            lagKompetanse(
+                fom = YearMonth.now().minusMonths(1),
+                tom = null
             )
+        )
+
         assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
