@@ -429,7 +429,7 @@ private fun hentResultaterForPeriode(
 
 private fun erKunReduksjonISats(
     begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode,
-    begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?
+    begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
 ): Boolean {
     val andelerForrigePeriode = begrunnelseGrunnlagForrigePeriode?.andeler ?: emptyList()
     val andelerDennePerioden = begrunnelseGrunnlagForPeriode.andeler
