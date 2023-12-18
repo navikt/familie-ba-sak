@@ -411,10 +411,13 @@ private fun hentResultaterForPeriode(
             begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true
 
         val erIngenEndring = !erØkingIAndel && !erReduksjonIAndel && erOrdinæreVilkårOppfyltIForrigePeriode
+        val erReduksjonPga6År =
+            erReduksjonPgaBarn6År(begrunnelseGrunnlagForPeriode, begrunnelseGrunnlagForrigePeriode)
+
         listOfNotNull(
             if (erØkingIAndel || erSatsøkning || erSøker || erIngenEndring || erEøs) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
             if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
-            if (erIngenEndring) SanityPeriodeResultat.INGEN_ENDRING else null,
+            if (erIngenEndring || erReduksjonPga6År) SanityPeriodeResultat.INGEN_ENDRING else null,
         )
     } else {
         listOfNotNull(
@@ -422,6 +425,28 @@ private fun hentResultaterForPeriode(
             SanityPeriodeResultat.IKKE_INNVILGET,
         )
     }
+}
+
+private fun erReduksjonPgaBarn6År(
+    begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode,
+    begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?
+): Boolean {
+    val andelerForrigePeriode = begrunnelseGrunnlagForrigePeriode?.andeler ?: emptyList()
+    val andelerDennePerioden = begrunnelseGrunnlagForPeriode.andeler
+
+    val barnBlir6ÅrDenneMåneden = begrunnelseGrunnlagForPeriode.person.fyllerAntallÅrInneværendeMåned(6)
+
+    return if (barnBlir6ÅrDenneMåneden) {
+        andelerForrigePeriode.any { andelIForrigePeriode ->
+            val sammeAndelDennePerioden = andelerDennePerioden.singleOrNull { andelIForrigePeriode.type == it.type }
+
+            val harAndelSammeProsent =
+                sammeAndelDennePerioden != null && andelIForrigePeriode.prosent == sammeAndelDennePerioden.prosent
+            val satsErRedusert = andelIForrigePeriode.sats > (sammeAndelDennePerioden?.sats ?: 0)
+
+            harAndelSammeProsent && satsErRedusert
+        }
+    } else false
 }
 
 private fun erReduksjonIAndelMellomPerioder(
