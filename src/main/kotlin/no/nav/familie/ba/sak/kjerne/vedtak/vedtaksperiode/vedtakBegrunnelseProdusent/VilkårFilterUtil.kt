@@ -31,7 +31,7 @@ fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
     vilkårResultaterForPerson: Collection<VilkårResultatForVedtaksperiode>,
 ): Boolean {
     if (this.vilkår.isEmpty()) return false
-    return this.vilkår.all { vilkårISanityBegrunnelse ->
+    return this.vilkår.any { vilkårISanityBegrunnelse ->
         val vilkårResultat = vilkårResultaterForPerson.find { it.vilkårType == vilkårISanityBegrunnelse }
 
         vilkårResultat != null && this.matcherMedUtdypendeVilkår(vilkårResultat)
@@ -59,7 +59,7 @@ private fun Collection<UtdypendeVilkårsvurdering>.erLik(
     val utdypendeVilkårPåSanityBegrunnelse: Set<UtdypendeVilkårsvurdering> =
         utdypendeVilkårsvurderingFraSanityBegrunnelse?.tilUtdypendeVilkårsvurderinger()?.toSet() ?: emptySet()
 
-    return utdypendeVilkårPåVilkårResultat == utdypendeVilkårPåSanityBegrunnelse
+    return utdypendeVilkårPåSanityBegrunnelse.isEmpty() || utdypendeVilkårPåVilkårResultat == utdypendeVilkårPåSanityBegrunnelse
 }
 
 private fun Collection<UtdypendeVilkårsvurdering>.harMinstEttTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean {
