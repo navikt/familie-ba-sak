@@ -35,7 +35,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     val personerIBegrunnelse = personerGjeldendeForBegrunnelse
 
     val gjelderSøker = personerIBegrunnelse.any { it.type == PersonType.SØKER }
-    val begrunnelseGjelderOpphørFraForrigeBehandlingOgGjelderSøker = (sanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling()) && gjelderSøker
+    val begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = (sanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling()) && gjelderSøker
     val kompetanser =
         when (sanityBegrunnelse.periodeResultat) {
             SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
@@ -46,7 +46,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
             SanityPeriodeResultat.REDUKSJON,
             -> {
                 val kompetanserForrigePeriode = periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.forrigePeriode?.kompetanse }
-                if (begrunnelseGjelderOpphørFraForrigeBehandlingOgGjelderSøker) {
+                if (begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling) {
                     begrunnelsesGrunnlagPerPerson.values.mapNotNull { it.sammePeriodeForrigeBehandling?.kompetanse } + kompetanserForrigePeriode
                 } else {
                     kompetanserForrigePeriode
@@ -82,7 +82,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
         kompetanser.mapNotNull { kompetanse ->
             val barnIBegrunnelseOgIKompetanse =
                 kompetanse.barnAktører.mapNotNull { barnAktør ->
-                    if (begrunnelseGjelderOpphørFraForrigeBehandlingOgGjelderSøker) {
+                    if (begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling) {
                         begrunnelsesGrunnlagPerPerson.keys.find { it.aktør == barnAktør }
                     } else {
                         personerGjeldendeForBegrunnelse.find { it.aktør == barnAktør }
