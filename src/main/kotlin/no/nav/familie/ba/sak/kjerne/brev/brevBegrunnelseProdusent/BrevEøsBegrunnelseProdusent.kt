@@ -45,11 +45,10 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
             SanityPeriodeResultat.IKKE_INNVILGET,
             SanityPeriodeResultat.REDUKSJON,
             -> {
-                val kompetanserForrigePeriode = periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.forrigePeriode?.kompetanse }
                 if (begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling) {
-                    begrunnelsesGrunnlagPerPerson.values.mapNotNull { it.sammePeriodeForrigeBehandling?.kompetanse } + kompetanserForrigePeriode
+                    begrunnelsesGrunnlagPerPerson.values.mapNotNull { it.sammePeriodeForrigeBehandling?.kompetanse }
                 } else {
-                    kompetanserForrigePeriode
+                    periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.forrigePeriode?.kompetanse }
                 }
             }
 
