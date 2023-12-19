@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetan
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataUtenKompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.begrunnelseGjelderOpphørFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserPerPerson
 import java.time.LocalDate
 
@@ -24,13 +25,17 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     landkoder: Map<String, String>,
 ): List<EØSBegrunnelseData> {
     val sanityBegrunnelse = hentSanityBegrunnelse(grunnlag)
-    val personerGjeldeneForBegrunnelse =
+    val personerGjeldendeForBegrunnelse =
         vedtaksperiode.hentGyldigeBegrunnelserPerPerson(
             grunnlag,
         ).mapNotNull { (person, begrunnelserPåPerson) -> person.takeIf { this in begrunnelserPåPerson } }
     val periodegrunnlagForPersonerIBegrunnelse =
-        begrunnelsesGrunnlagPerPerson.filter { (person, _) -> person in personerGjeldeneForBegrunnelse }
+        begrunnelsesGrunnlagPerPerson.filter { (person, _) -> person in personerGjeldendeForBegrunnelse }
 
+    val personerIBegrunnelse = personerGjeldendeForBegrunnelse
+
+    val gjelderSøker = personerIBegrunnelse.any { it.type == PersonType.SØKER }
+    val begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = (sanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling()) && gjelderSøker
     val kompetanser =
         when (sanityBegrunnelse.periodeResultat) {
             SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
@@ -39,18 +44,21 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
 
             SanityPeriodeResultat.IKKE_INNVILGET,
             SanityPeriodeResultat.REDUKSJON,
-            -> periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.forrigePeriode?.kompetanse }
+            -> {
+                if (begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling) {
+                    begrunnelsesGrunnlagPerPerson.values.mapNotNull { it.sammePeriodeForrigeBehandling?.kompetanse }
+                } else {
+                    periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.forrigePeriode?.kompetanse }
+                }
+            }
 
             null -> error("Feltet 'periodeResultat' er ikke satt for begrunnelse fra sanity '${sanityBegrunnelse.apiNavn}'.")
         }
 
-    val personerIBegrunnelse = personerGjeldeneForBegrunnelse
     val barnPåBehandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
-    val barnIBegrunnelse = personerGjeldeneForBegrunnelse.filter { it.type == PersonType.BARN }
+    val barnIBegrunnelse = personerGjeldendeForBegrunnelse.filter { it.type == PersonType.BARN }
 
     return if (kompetanser.isEmpty() && sanityBegrunnelse.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {
-        val gjelderSøker = personerIBegrunnelse.any { it.type == PersonType.SØKER }
-
         val barnasFødselsdatoer =
             hentBarnasFødselsdatoerForAvslagsbegrunnelse(
                 barnIBegrunnelse = barnIBegrunnelse,
@@ -72,7 +80,13 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     } else {
         kompetanser.mapNotNull { kompetanse ->
             val barnIBegrunnelseOgIKompetanse =
-                kompetanse.barnAktører.mapNotNull { barnAktør -> personerGjeldeneForBegrunnelse.find { it.aktør == barnAktør } }
+                kompetanse.barnAktører.mapNotNull { barnAktør ->
+                    if (begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling) {
+                        begrunnelsesGrunnlagPerPerson.keys.find { it.aktør == barnAktør }
+                    } else {
+                        personerGjeldendeForBegrunnelse.find { it.aktør == barnAktør }
+                    }
+                }
 
             if (barnIBegrunnelseOgIKompetanse.isNotEmpty()) {
                 EØSBegrunnelseDataMedKompetanse(
