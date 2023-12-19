@@ -231,14 +231,20 @@ class PensjonService(
                         perioderTilhørendePerson.partition { it.kildesystem == "BA" }
 
                     val infotrygdperioderMinusOverlappMedBA =
-                        baSakPerioder.tidslinje().crossJoin(opprinneligeInfotrygdPerioder.tidslinje()).toSegments().map {
-                            it.value.copy(
-                                stønadFom = it.fom.toYearMonth(),
-                                stønadTom = it.tom.toYearMonth(),
-                            )
-                        }.filter {
-                            it.kildesystem == "Infotrygd" && opprinneligeInfotrygdPerioder.fomDatoer().contains(it.stønadFom)
+                        try {
+                            baSakPerioder.tidslinje().crossJoin(opprinneligeInfotrygdPerioder.tidslinje()).toSegments().map {
+                                it.value.copy(
+                                    stønadFom = it.fom.toYearMonth(),
+                                    stønadTom = it.tom.toYearMonth(),
+                                )
+                            }.filter {
+                                it.kildesystem == "Infotrygd" && opprinneligeInfotrygdPerioder.fomDatoer().contains(it.stønadFom)
+                            }
+                        } catch (e: Exception) {
+                            secureLogger.warn("Klarte ikke kombinere $baSakPerioder\nog\n$opprinneligeInfotrygdPerioder")
+                            opprinneligeInfotrygdPerioder
                         }
+
                     sjekkOgLoggOmDetFinnesOverlapp(baSakPerioder, opprinneligeInfotrygdPerioder, infotrygdperioderMinusOverlappMedBA)
                     perioderUtenOverlappMellomFagsystemene.addAll(baSakPerioder + infotrygdperioderMinusOverlappMedBA)
                 }
