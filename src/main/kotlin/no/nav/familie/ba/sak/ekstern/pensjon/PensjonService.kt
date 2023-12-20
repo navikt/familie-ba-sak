@@ -157,6 +157,7 @@ class PensjonService(
                 ?: error("Finner ikke tilkjent ytelse for behandling=${behandling.id}")
         return tilkjentYtelse.andelerTilkjentYtelse
             .filter { it.stønadTom.isSameOrAfter(fraDato.toYearMonth()) }
+            .filter { it.type == YtelseType.ORDINÆR_BARNETRYGD } // Pensjon trenger kun forholde seg til periodene med Ordinær BA
             .map { andel ->
                 BarnetrygdPeriode(
                     ytelseTypeEkstern = andel.type.tilPensjonYtelsesType(),
