@@ -255,7 +255,7 @@ class PensjonService(
                                 it.kildesystem == "Infotrygd" && opprinneligeInfotrygdPerioder.fomDatoer().contains(it.stønadFom)
                             }
                         } catch (e: Exception) {
-                            logger.error("PensjonService: Klarte ikke kombinere BA og IT-perioder for fjerning av evt. overlapp")
+                            logger.error("Klarte ikke kombinere BA og IT-perioder for fjerning av eventuelle overlapp")
                             secureLogger.warn("Klarte ikke kombinere $baSakPerioder\n og \n$opprinneligeInfotrygdPerioder", e)
 
                             throw EksternTjenesteFeilException(
