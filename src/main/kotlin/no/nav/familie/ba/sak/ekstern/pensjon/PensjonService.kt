@@ -56,7 +56,7 @@ class PensjonService(
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         val barnetrygdTilPensjon = fagsak?.let { hentBarnetrygdTilPensjon(fagsak, fraDato) }
         val (barnetrygdTilPensjonFraInfotrygd, barnetrygdFraRelaterteInfotrygdsaker) =
-            hentBarnetrygdTilPensjonFraInfotrygd(aktør, fraDato)
+            hentBarnetrygdTilPensjonFraInfotrygd(aktør, fraDato, barnetrygdTilPensjon?.barna)
 
         if (barnetrygdTilPensjon == null && barnetrygdTilPensjonFraInfotrygd.barnetrygdPerioder.isEmpty()) return emptyList()
 
@@ -99,6 +99,7 @@ class PensjonService(
     private fun hentBarnetrygdTilPensjonFraInfotrygd(
         aktør: Aktør,
         fraDato: LocalDate,
+        barna: List<String>?,
     ): Pair<BarnetrygdTilPensjon, List<BarnetrygdTilPensjon>> {
         val personidenter = if (envService.erPreprod()) testidenter(aktør, fraDato) else aktør.personidenter.map { it.fødselsnummer }
 
@@ -108,7 +109,7 @@ class PensjonService(
         personidenter.forEach { ident ->
             infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident, fraDato).fagsaker.forEach {
                 if (personidenter.contains(it.fagsakEiersIdent)) {
-                    allePerioderTilhørendeAktør.addAll(it.barnetrygdPerioder.maskerPersonidenteneIPreprod(aktør))
+                    allePerioderTilhørendeAktør.addAll(it.barnetrygdPerioder.maskerPersonidenteneIPreprod(barna))
                 } else if (!envService.erPreprod()) { // tar ikke med relaterte saker i test fra Q2 i denne omgang. Må i så fall maskeres
                     barnetrygdFraRelaterteSaker.add(it)
                 }
@@ -198,10 +199,14 @@ class PensjonService(
         }
     }
 
-    private fun List<BarnetrygdPeriode>.maskerPersonidenteneIPreprod(aktør: Aktør) =
+    private fun List<BarnetrygdPeriode>.maskerPersonidenteneIPreprod(barna: List<String>?) =
         when {
             envService.erPreprod() -> {
-                map { it.copy(personIdent = aktør.aktivFødselsnummer()) }
+                groupBy { it.personIdent }.values.flatMapIndexed { i, iendePeriode ->
+                    barna?.elementAtOrNull(i)?.let { ident ->
+                        iendePeriode.map { it.copy(personIdent = ident) }
+                    } ?: emptyList()
+                }
             }
             else -> this
         }
@@ -241,8 +246,8 @@ class PensjonService(
                                 it.kildesystem == "Infotrygd" && opprinneligeInfotrygdPerioder.fomDatoer().contains(it.stønadFom)
                             }
                         } catch (e: Exception) {
-                            secureLogger.warn("Klarte ikke kombinere $baSakPerioder\nog\n$opprinneligeInfotrygdPerioder")
-                            opprinneligeInfotrygdPerioder
+                            secureLogger.warn("Klarte ikke kombinere $baSakPerioder\n og \n$opprinneligeInfotrygdPerioder")
+                            throw e
                         }
 
                     sjekkOgLoggOmDetFinnesOverlapp(baSakPerioder, opprinneligeInfotrygdPerioder, infotrygdperioderMinusOverlappMedBA)
@@ -301,3 +306,6 @@ private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): Li
         }
     }
 }
+
+private val BarnetrygdTilPensjon.barna: List<String>
+    get() = barnetrygdPerioder.map { it.personIdent }.filter { it != fagsakEiersIdent }
