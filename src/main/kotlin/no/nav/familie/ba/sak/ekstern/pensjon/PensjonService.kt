@@ -204,12 +204,16 @@ class PensjonService(
     private fun List<BarnetrygdPeriode>.maskerPersonidenteneIPreprod(barnFnr: List<String>?) =
         when {
             envService.erPreprod() -> {
-                groupBy { it.personIdent }.values.flatMapIndexed { i, iendePeriode ->
-                    barnFnr?.elementAtOrNull(i)?.let { ident ->
-                        iendePeriode.map { it.copy(personIdent = ident) }
-                    } ?: emptyList()
+                val barnetrygdperioerPerPerson = this.groupBy { it.personIdent }.values
+                if (barnFnr != null) {
+                    barnetrygdperioerPerPerson.zip(barnFnr) { barnetrydperioder, barn ->
+                        barnetrydperioder.map { it.copy(personIdent = barn) }
+                    }.flatten()
+                } else {
+                    emptyList()
                 }
             }
+
             else -> this
         }
 
