@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
+import no.nav.familie.ba.sak.common.EksternTjenesteFeil
+import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
@@ -56,7 +58,7 @@ class PensjonService(
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         val barnetrygdTilPensjon = fagsak?.let { hentBarnetrygdTilPensjon(fagsak, fraDato) }
         val (barnetrygdTilPensjonFraInfotrygd, barnetrygdFraRelaterteInfotrygdsaker) =
-            hentBarnetrygdTilPensjonFraInfotrygd(aktør, fraDato)
+            hentBarnetrygdTilPensjonFraInfotrygd(aktør, fraDato, barnetrygdTilPensjon?.barna)
 
         if (barnetrygdTilPensjon == null && barnetrygdTilPensjonFraInfotrygd.barnetrygdPerioder.isEmpty()) return emptyList()
 
@@ -73,7 +75,7 @@ class PensjonService(
             .plus(barnetrygdFraRelaterteInfotrygdsaker)
             .plus(
                 barnetrygdTilPensjonFraInfotrygd.plus(barnetrygdTilPensjon),
-            ).minusEventuelleInfotrygdperioderSomOverlapperBA()
+            ).minusEventuelleInfotrygdperioderSomOverlapperBA(personIdent, fraDato)
     }
 
     fun lagTaskForHentingAvIdenterTilPensjon(år: Int): String {
@@ -99,6 +101,7 @@ class PensjonService(
     private fun hentBarnetrygdTilPensjonFraInfotrygd(
         aktør: Aktør,
         fraDato: LocalDate,
+        barnFnr: List<String>?,
     ): Pair<BarnetrygdTilPensjon, List<BarnetrygdTilPensjon>> {
         val personidenter = if (envService.erPreprod()) testidenter(aktør, fraDato) else aktør.personidenter.map { it.fødselsnummer }
 
@@ -108,7 +111,7 @@ class PensjonService(
         personidenter.forEach { ident ->
             infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident, fraDato).fagsaker.forEach {
                 if (personidenter.contains(it.fagsakEiersIdent)) {
-                    allePerioderTilhørendeAktør.addAll(it.barnetrygdPerioder.maskerPersonidenteneIPreprod(aktør))
+                    allePerioderTilhørendeAktør.addAll(it.barnetrygdPerioder.maskerPersonidenteneIPreprod(barnFnr))
                 } else if (!envService.erPreprod()) { // tar ikke med relaterte saker i test fra Q2 i denne omgang. Må i så fall maskeres
                     barnetrygdFraRelaterteSaker.add(it)
                 }
@@ -154,6 +157,7 @@ class PensjonService(
                 ?: error("Finner ikke tilkjent ytelse for behandling=${behandling.id}")
         return tilkjentYtelse.andelerTilkjentYtelse
             .filter { it.stønadTom.isSameOrAfter(fraDato.toYearMonth()) }
+            .filter { it.type == YtelseType.ORDINÆR_BARNETRYGD } // Pensjon trenger kun forholde seg til periodene med Ordinær BA
             .map { andel ->
                 BarnetrygdPeriode(
                     ytelseTypeEkstern = andel.type.tilPensjonYtelsesType(),
@@ -198,11 +202,19 @@ class PensjonService(
         }
     }
 
-    private fun List<BarnetrygdPeriode>.maskerPersonidenteneIPreprod(aktør: Aktør) =
+    private fun List<BarnetrygdPeriode>.maskerPersonidenteneIPreprod(barnFnr: List<String>?) =
         when {
             envService.erPreprod() -> {
-                map { it.copy(personIdent = aktør.aktivFødselsnummer()) }
+                val barnetrygdperioerPerPerson = this.groupBy { it.personIdent }.values
+                if (barnFnr != null) {
+                    barnetrygdperioerPerPerson.zip(barnFnr) { barnetrydperioder, barn ->
+                        barnetrydperioder.map { it.copy(personIdent = barn) }
+                    }.flatten()
+                } else {
+                    emptyList()
+                }
             }
+
             else -> this
         }
 
@@ -221,7 +233,10 @@ class PensjonService(
         }
     }
 
-    private fun List<BarnetrygdTilPensjon>.minusEventuelleInfotrygdperioderSomOverlapperBA(): List<BarnetrygdTilPensjon> {
+    private fun List<BarnetrygdTilPensjon>.minusEventuelleInfotrygdperioderSomOverlapperBA(
+        personIdent: String,
+        fraDato: LocalDate,
+    ): List<BarnetrygdTilPensjon> {
         return distinct().groupBy { it.fagsakEiersIdent }.map { (fagsakEiersIdent, barnetrygdTilPensjon) ->
             val perioderUtenOverlappMellomFagsystemene = mutableListOf<BarnetrygdPeriode>()
 
@@ -231,14 +246,27 @@ class PensjonService(
                         perioderTilhørendePerson.partition { it.kildesystem == "BA" }
 
                     val infotrygdperioderMinusOverlappMedBA =
-                        baSakPerioder.tidslinje().crossJoin(opprinneligeInfotrygdPerioder.tidslinje()).toSegments().map {
-                            it.value.copy(
-                                stønadFom = it.fom.toYearMonth(),
-                                stønadTom = it.tom.toYearMonth(),
+                        try {
+                            baSakPerioder.tidslinje().crossJoin(opprinneligeInfotrygdPerioder.tidslinje()).toSegments().map {
+                                it.value.copy(
+                                    stønadFom = it.fom.toYearMonth(),
+                                    stønadTom = it.tom.toYearMonth(),
+                                )
+                            }.filter {
+                                it.kildesystem == "Infotrygd" && opprinneligeInfotrygdPerioder.fomDatoer().contains(it.stønadFom)
+                            }
+                        } catch (e: Exception) {
+                            logger.error("Klarte ikke kombinere BA og IT-perioder for fjerning av eventuelle overlapp")
+                            secureLogger.warn("Klarte ikke kombinere $baSakPerioder\n og \n$opprinneligeInfotrygdPerioder", e)
+
+                            throw EksternTjenesteFeilException(
+                                eksternTjenesteFeil = EksternTjenesteFeil("/api/ekstern/pensjon/hent-barnetrygd"),
+                                melding = "Det oppstod feil ved kombinering av BA og IT-perioder for fjerning av evt. overlapp",
+                                request = BarnetrygdTilPensjonRequest(personIdent, fraDato),
+                                throwable = e,
                             )
-                        }.filter {
-                            it.kildesystem == "Infotrygd" && opprinneligeInfotrygdPerioder.fomDatoer().contains(it.stønadFom)
                         }
+
                     sjekkOgLoggOmDetFinnesOverlapp(baSakPerioder, opprinneligeInfotrygdPerioder, infotrygdperioderMinusOverlappMedBA)
                     perioderUtenOverlappMellomFagsystemene.addAll(baSakPerioder + infotrygdperioderMinusOverlappMedBA)
                 }
@@ -295,3 +323,6 @@ private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): Li
         }
     }
 }
+
+private val BarnetrygdTilPensjon.barna: List<String>
+    get() = barnetrygdPerioder.map { it.personIdent }.filter { it != fagsakEiersIdent }
