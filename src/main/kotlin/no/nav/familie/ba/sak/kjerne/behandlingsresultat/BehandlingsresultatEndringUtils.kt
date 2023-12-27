@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.filtrerBortIrrelevanteAndeler
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -126,15 +127,15 @@ object BehandlingsresultatEndringUtils {
         return erEndringIBeløpForMinstEnPerson
     }
 
-    // Kun interessert i endringer i beløp FØR opphørstidspunkt
+    // Kun interessert i endringer i beløp FØR opphørstidspunkt og perioder som ikke er lengre enn 2 måneder fram i tid
     private fun erEndringIBeløpForPersonOgType(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
         opphørstidspunkt: YearMonth,
         erFremstiltKravForPerson: Boolean,
     ): Boolean {
-        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
-        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
+        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler.filtrerBortAndelerMedFomLengreEnn2MånederFramITid())
+        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler.filtrerBortAndelerMedFomLengreEnn2MånederFramITid())
 
         val endringIBeløpTidslinje =
             nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
@@ -154,7 +155,8 @@ object BehandlingsresultatEndringUtils {
                         else -> false
                     }
                 }
-            }.fjernPerioderEtterOpphørsdato(opphørstidspunkt)
+            }
+                .fjernPerioderEtterOpphørsdato(opphørstidspunkt)
 
         return endringIBeløpTidslinje.perioder().any { it.innhold == true }
     }
@@ -202,5 +204,14 @@ object BehandlingsresultatEndringUtils {
             )
 
         return endringIEndretUtbetalingAndelTidslinje.perioder().any { it.innhold == true }
+    }
+
+    /**
+     * Når vi beregner om det er endring i beløp så tar vi ikke hensyn til andeler som har fom lengre enn 2 måneder fram i tid
+     */
+    private fun List<AndelTilkjentYtelse>.filtrerBortAndelerMedFomLengreEnn2MånederFramITid(): List<AndelTilkjentYtelse> {
+        val toMånederFramITid = YearMonth.now().plusMonths(2)
+
+        return this.filterNot { it.stønadFom > toMånederFramITid }
     }
 }

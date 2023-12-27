@@ -597,6 +597,56 @@ class BehandlingsresultatEndringUtilsTest {
     }
 
     @Test
+    fun `Endring i beløp - Skal ikke bry seg om endringer lengre enn 2 måneder fram i tid`() {
+        val søker = lagPerson(type = PersonType.SØKER).aktør
+        val barnAktør = lagPerson(type = PersonType.BARN).aktør
+        val denneMåned = YearMonth.now()
+        val toMånederFramITid = denneMåned.plusMonths(2)
+        val treMånederFramITid = toMånederFramITid.plusMonths(1)
+
+        val forrigeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = denneMåned,
+                    tom = toMånederFramITid,
+                    beløp = 1054,
+                    aktør = søker,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = treMånederFramITid,
+                    tom = treMånederFramITid,
+                    beløp = 1054,
+                    aktør = barnAktør,
+                ),
+            )
+        val nåværendeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = denneMåned,
+                    tom = toMånederFramITid,
+                    beløp = 1054,
+                    aktør = søker,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = treMånederFramITid,
+                    tom = treMånederFramITid,
+                    beløp = 1070,
+                    aktør = barnAktør,
+                ),
+            )
+
+        val erEndringIBeløp =
+            erEndringIBeløp(
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+                nåværendeEndretAndeler = emptyList(),
+                personerFremstiltKravFor = listOf(),
+            )
+
+        assertEquals(false, erEndringIBeløp)
+    }
+
+    @Test
     fun `Endring i endret utbetaling andel - skal returnere true hvis årsak er endret`() {
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
