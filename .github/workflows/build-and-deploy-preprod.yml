@@ -43,4 +43,4 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/app-preprod.yaml
-          IMAGE: ${{ steps.docker-push.outputs.image }}
+          VAR: image=${{ steps.docker-push.outputs.image }}
