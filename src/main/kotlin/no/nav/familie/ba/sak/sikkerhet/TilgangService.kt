@@ -78,14 +78,16 @@ class TilgangService(
                 ?.map { it.aktør.aktivFødselsnummer() }
                 ?: listOf(behandlingHentOgPersisterService.hent(behandlingId).fagsak.aktør.aktivFødselsnummer())
 
-        personIdenter.forEach {
-            auditLogger.log(
-                Sporingsdata(
-                    event = event,
-                    personIdent = it,
-                    custom1 = CustomKeyValue("behandling", behandlingId.toString()),
-                ),
-            )
+        if (!SikkerhetContext.erSystemKontekst()) {
+            personIdenter.forEach {
+                auditLogger.log(
+                    Sporingsdata(
+                        event = event,
+                        personIdent = it,
+                        custom1 = CustomKeyValue("behandling", behandlingId.toString()),
+                    ),
+                )
+            }
         }
 
         if (!harTilgangTilPersoner(personIdenter)) {
