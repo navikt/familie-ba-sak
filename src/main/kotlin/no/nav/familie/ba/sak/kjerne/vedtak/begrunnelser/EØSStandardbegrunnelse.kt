@@ -563,6 +563,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettSekundaerlandUkOgUtlandStandard"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
     },
+    FORTSATT_INNVILGET_SELVSTENDIG_RETT_TILLEGGSTEKST_NULLUTBETALING {
+        override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettTilleggstekstNullutbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
     REDUKSJON_BARN_DØD_EØS {
         override val sanityApiNavn = "reduksjonBarnDoedEos"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
@@ -598,6 +602,18 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_SELVSTENDIG_RETT_BARN_FLYTTET_FRA_SØKER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
         override val sanityApiNavn = "reduksjonSelvstendigRettBarnFlyttetFraSoker"
+    },
+    REDUKSJON_SELVSTENDIG_RETT_TILLEGGSTEKST_NULLUTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+        override val sanityApiNavn = "reduksjonSelvstendigRettTilleggstekstNullutbetaling"
+    },
+    REDUKSJON_SELVSTENDIG_RETT_NORSKE_REGLER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+        override val sanityApiNavn = "reduksjonSelvstendigRettNorskeRegler"
+    },
+    REDUKSJON_SENTRUM_FOR_LIVSINTERESSE_SÆRKULLSBARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+        override val sanityApiNavn = "reduksjonSentrumForLivsinteresseSaerkullsbarn"
     }, ;
 
     override val kanDelesOpp: Boolean = false
