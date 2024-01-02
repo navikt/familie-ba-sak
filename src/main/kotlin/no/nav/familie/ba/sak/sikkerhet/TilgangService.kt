@@ -104,10 +104,12 @@ class TilgangService(
     ) {
         val aktør = fagsakService.hentAktør(fagsakId)
         aktør.personidenter.forEach {
-            Sporingsdata(
-                event = event,
-                personIdent = it.fødselsnummer,
-                custom1 = CustomKeyValue("fagsak", fagsakId.toString()),
+            auditLogger.log(
+                Sporingsdata(
+                    event = event,
+                    personIdent = it.fødselsnummer,
+                    custom1 = CustomKeyValue("fagsak", fagsakId.toString()),
+                ),
             )
         }
         val personIdenterIFagsak =
