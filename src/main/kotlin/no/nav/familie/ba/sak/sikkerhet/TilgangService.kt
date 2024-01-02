@@ -73,24 +73,22 @@ class TilgangService(
         behandlingId: Long,
         event: AuditLoggerEvent,
     ) {
-        val harTilgang =
-            harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
-                val personIdenter =
-                    persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
-                        ?.map { it.aktør.aktivFødselsnummer() }
-                        ?: listOf(behandlingHentOgPersisterService.hent(behandlingId).fagsak.aktør.aktivFødselsnummer())
-                personIdenter.forEach {
-                    auditLogger.log(
-                        Sporingsdata(
-                            event = event,
-                            personIdent = it,
-                            custom1 = CustomKeyValue("behandling", behandlingId.toString()),
-                        ),
-                    )
-                }
-                harTilgangTilPersoner(personIdenter)
-            }
-        if (!harTilgang) {
+        val personIdenter =
+            persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
+                ?.map { it.aktør.aktivFødselsnummer() }
+                ?: listOf(behandlingHentOgPersisterService.hent(behandlingId).fagsak.aktør.aktivFødselsnummer())
+
+        personIdenter.forEach {
+            auditLogger.log(
+                Sporingsdata(
+                    event = event,
+                    personIdent = it,
+                    custom1 = CustomKeyValue("behandling", behandlingId.toString()),
+                ),
+            )
+        }
+
+        if (!harTilgangTilPersoner(personIdenter)) {
             throw RolleTilgangskontrollFeil(
                 "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                     "har ikke tilgang til behandling=$behandlingId",
