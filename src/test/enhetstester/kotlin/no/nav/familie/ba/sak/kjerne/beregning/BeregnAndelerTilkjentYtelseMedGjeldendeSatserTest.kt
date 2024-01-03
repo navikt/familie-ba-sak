@@ -74,7 +74,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 barn får alt av 1766 i jul(2023)..okt(2023),
                 barn får alt av 1310 i nov(2023)..des(2023),
                 barn får alt av 1510 i jan(2024)..okt(2035),
-                )
+            )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
@@ -114,7 +114,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 barn2 får alt av 1083 i mar(2023)..jun(2023),
                 barn2 får alt av 1310 i jul(2023)..des(2023),
                 barn2 får alt av 1510 i jan(2024)..apr(2031),
-                )
+            )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
@@ -214,7 +214,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 barn får halvparten av 1766 i jul(2023)..feb(2024),
                 barn får alt av 1766 i mar(2024)..nov(2025),
                 barn får alt av 1510 i des(2025)..nov(2037),
-                )
+            )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
