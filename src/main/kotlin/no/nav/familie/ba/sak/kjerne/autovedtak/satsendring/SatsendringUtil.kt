@@ -9,18 +9,18 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import java.math.BigDecimal
 
-fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertMedSisteSatser(personnOpplysningGrunnlag: PersonopplysningGrunnlag): Boolean =
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertMedSisteSatser(personOpplysningGrunnlag: PersonopplysningGrunnlag): Boolean =
     SatsType.entries
         .filter { it != SatsType.FINN_SVAL }
         .all {
             this.erOppdatertFor(
-                personnOpplysningGrunnlag = personnOpplysningGrunnlag,
+                personOpplysningGrunnlag = personOpplysningGrunnlag,
                 satstype = it,
             )
         }
 
 private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertFor(
-    personnOpplysningGrunnlag: PersonopplysningGrunnlag,
+    personOpplysningGrunnlag: PersonopplysningGrunnlag,
     satstype: SatsType,
 ): Boolean {
     val sisteSatsForSatstype = SatsService.finnSisteSatsFor(satstype)
@@ -33,7 +33,7 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertFor(
 
     return this.filter { it.stønadTom.isSameOrAfter(fomSisteSatsForSatstype) }
         .filter { andel ->
-            val person = personnOpplysningGrunnlag.personer.single { it.aktør == andel.aktør }
+            val person = personOpplysningGrunnlag.personer.single { it.aktør == andel.aktør }
             val andelSatsType = andel.type.tilSatsType(person, andel.stønadFom.førsteDagIInneværendeMåned())
 
             andelSatsType == satstype
