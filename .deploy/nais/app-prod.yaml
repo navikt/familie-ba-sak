@@ -113,8 +113,8 @@ spec:
         - host: data-api.ecb.europa.eu
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
   replicas:
-    min: 2
-    max: 4
+    min: 3
+    max: 5
   resources:
     limits:
       memory: 4096Mi
