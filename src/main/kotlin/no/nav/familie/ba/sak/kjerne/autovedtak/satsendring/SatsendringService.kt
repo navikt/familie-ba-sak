@@ -25,12 +25,15 @@ class SatsendringService(
         val sisteVedtatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)
 
-        return sisteVedtatteBehandling == null ||
-            personOpplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id)?.let { personOpplysningGrunnlag ->
-                andelerTilkjentYtelseOgEndreteUtbetalingerService
-                    .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteVedtatteBehandling.id)
-                    .erOppdatertMedSisteSatser(personOpplysningGrunnlag)
-            } == true
+        return if (sisteVedtatteBehandling == null) {
+            true
+        } else {
+            val personOpplysningGrunnlagSisteVedtatteBehandling = personOpplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) ?: error("Fant ikke persongrunnlag på behandling ${sisteVedtatteBehandling.id}")
+
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteVedtatteBehandling.id)
+                .erOppdatertMedSisteSatser(personOpplysningGrunnlagSisteVedtatteBehandling)
+        }
     }
 
     fun finnLøpendeFagsakerUtenSisteSats(callId: String) {

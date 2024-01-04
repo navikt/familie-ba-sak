@@ -13,23 +13,18 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertMedSisteSatser(pe
     SatsType.entries
         .filter { it != SatsType.FINN_SVAL }
         .all {
-            this.erOppdatertFor(
+            this.erOppdatertForSats(
                 personOpplysningGrunnlag = personOpplysningGrunnlag,
                 satstype = it,
             )
         }
 
-private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertFor(
+private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertForSats(
     personOpplysningGrunnlag: PersonopplysningGrunnlag,
     satstype: SatsType,
 ): Boolean {
     val sisteSatsForSatstype = SatsService.finnSisteSatsFor(satstype)
     val fomSisteSatsForSatstype = sisteSatsForSatstype.gyldigFom.toYearMonth()
-
-    val satsTyperMedTilsvarendeYtelsestype =
-        satstype
-            .tilYtelseType()
-            .hentSatsTyper()
 
     return this.filter { it.stønadTom.isSameOrAfter(fomSisteSatsForSatstype) }
         .filter { andel ->
@@ -39,8 +34,5 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertFor(
             andelSatsType == satstype
         }
         .filter { it.prosent != BigDecimal.ZERO }
-        .all { andelTilkjentYtelse ->
-            satsTyperMedTilsvarendeYtelsestype
-                .any { andelTilkjentYtelse.sats == SatsService.finnSisteSatsFor(it).beløp }
-        }
+        .all { andelTilkjentYtelse -> andelTilkjentYtelse.sats == SatsService.finnSisteSatsFor(satstype).beløp }
 }
