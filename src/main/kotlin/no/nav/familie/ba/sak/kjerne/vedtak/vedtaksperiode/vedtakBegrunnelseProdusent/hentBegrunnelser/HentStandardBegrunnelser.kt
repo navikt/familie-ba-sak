@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -48,6 +49,7 @@ internal fun hentStandardBegrunnelser(
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
     temaSomPeriodeErVurdertEtter: TemaerForBegrunnelser,
 ): Set<IVedtakBegrunnelse> {
+    val erUtbetalingForPersonIPeriode = begrunnelseGrunnlag.dennePerioden.andeler.any { it.prosent != BigDecimal.ZERO }
     val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
     val filtrertPåTema = sanityBegrunnelser.filterValues { it.erSammeTemaSomPeriode(temaSomPeriodeErVurdertEtter) }
 
@@ -60,7 +62,10 @@ internal fun hentStandardBegrunnelser(
         filtrertPåRolleOgFagsaktype
             .filterValues { it.periodeResultat in relevantePeriodeResultater }
             .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
-            .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
+            .filterValues {
+                it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) ||
+                        it.periodeType == BrevPeriodeType.INGEN_UTBETALING && !erUtbetalingForPersonIPeriode
+            }
             .filterValues { !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && !it.begrunnelseGjelderOpphørFraForrigeBehandling() }
 
     val filtrertPåVilkårOgEndretUtbetaling =

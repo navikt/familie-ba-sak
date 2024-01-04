@@ -78,6 +78,8 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
         )
     }
 
+    val erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson)
+
     val begrunnelseGrunnlagForSøkerIPeriode =
         begrunnelseGrunnlagPerPerson
             .filterKeys { it.type == PersonType.SØKER }.values.firstOrNull()
@@ -90,7 +92,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
         begrunnelseGrunnlagForSøkerIPeriode
             ?.forrigePeriode?.vilkårResultater?.singleOrNull { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
-    return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) ->
+    return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
         val relevantePeriodeResultater =
             hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
 
@@ -104,7 +106,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
                 vedtaksperiode = this,
                 behandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.behandling,
                 relevantePeriodeResultater = relevantePeriodeResultater,
-                erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode(mapOf(person to begrunnelseGrunnlag)),
+                erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode,
                 utvidetVilkårPåSøkerIPeriode = utvidetVilkårPåSøkerIPeriode,
                 utvidetVilkårPåSøkerIForrigePeriode = utvidetVilkårPåSøkerIForrigePeriode,
                 temaSomPeriodeErVurdertEtter = temaSomPeriodeErVurdertEtter,
@@ -116,7 +118,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
                 begrunnelseGrunnlag = begrunnelseGrunnlag,
                 relevantePeriodeResultater = relevantePeriodeResultater,
                 behandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.behandling,
-                erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode(mapOf(person to begrunnelseGrunnlag)),
+                erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode,
                 vedtaksperiode = this,
                 utvidetVilkårPåSøkerIPeriode = utvidetVilkårPåSøkerIPeriode,
                 utvidetVilkårPåSøkerIForrigePeriode = utvidetVilkårPåSøkerIForrigePeriode,
