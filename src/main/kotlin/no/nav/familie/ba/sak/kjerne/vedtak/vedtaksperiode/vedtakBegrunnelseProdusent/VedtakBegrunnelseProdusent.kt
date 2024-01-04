@@ -415,7 +415,7 @@ private fun hentResultaterForPeriode(
             erKunReduksjonAvSats(begrunnelseGrunnlagForPeriode, begrunnelseGrunnlagForrigePeriode)
 
         listOfNotNull(
-            if (erØkingIAndel || erSatsøkning || erSøker || erIngenEndring || erEøs) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
+            if (erØkingIAndel || erSatsøkning || erSøker || erIngenEndring || erEøs || erKunReduksjonAvSats) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
             if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
             if (erIngenEndring || erKunReduksjonAvSats) SanityPeriodeResultat.INGEN_ENDRING else null,
         )
