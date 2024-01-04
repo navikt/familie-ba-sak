@@ -27,7 +27,7 @@ class SatsendringUtilTest {
     @Test
     fun `Skal returnere true dersom vi har siste sats`() {
         val andelerMedSisteSats =
-            SatsType.values()
+            SatsType.entries
                 .filter { it != SatsType.FINN_SVAL }
                 .map {
                     val sisteSats = SatsService.finnSisteSatsFor(it)
@@ -46,8 +46,8 @@ class SatsendringUtilTest {
     @Test
     fun `Skal returnere true dersom vi har siste sats selv om alle perioder er fram i tid`() {
         val andelerMedSisteSats =
-            SatsType.values()
-                .filter { it != SatsType.FINN_SVAL && it != SatsType.TILLEGG_ORBA }
+            SatsType.entries
+                .filter { it != SatsType.FINN_SVAL }
                 .map {
                     val sisteSats = SatsService.finnSisteSatsFor(it)
                     lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -64,7 +64,7 @@ class SatsendringUtilTest {
 
     @Test
     fun `Skal returnere false dersom vi ikke har siste sats`() {
-        SatsType.values()
+        SatsType.entries
             .filter { it != SatsType.FINN_SVAL }
             .forEach {
                 val sisteSats = SatsService.finnSisteSatsFor(it)
@@ -85,7 +85,7 @@ class SatsendringUtilTest {
 
     @Test
     fun `Skal ignorere andeler som kommer før siste sats`() {
-        SatsType.values()
+        SatsType.entries
             .filter { it != SatsType.FINN_SVAL }
             .forEach {
                 val sisteSats = SatsService.finnSisteSatsFor(it)
@@ -106,7 +106,7 @@ class SatsendringUtilTest {
 
     @Test
     fun `Skal ikke returnere false dersom vi ikke har siste sats, men de er redusert til 0 prosent`() {
-        SatsType.values()
+        SatsType.entries
             .filter { it != SatsType.FINN_SVAL }
             .forEach {
                 val sisteSats = SatsService.finnSisteSatsFor(it)
