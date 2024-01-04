@@ -4,7 +4,6 @@ class FeatureToggleConfig {
     companion object {
         // Release
         const val ENDRET_EØS_REGELVERKFILTER_FOR_BARN = "familie-ba-sak.endret-eos-regelverkfilter-for-barn"
-        const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
 
         // Ny utbetalingsgenerator
         const val BRUK_NY_UTBETALINGSGENERATOR = "familie.ba.sak.bruk-ny-utbetalingsgenerator"
@@ -15,5 +14,18 @@ class FeatureToggleConfig {
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
         const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
         const val HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD = "familie-ba-sak.hent-identer-til-psys-fra-infotrygd"
+
+        // satsendring
+        // Oppretter satsendring-tasker for de som ikke har fått ny task
+        const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
+
+        // kjører satsendring i arbeidstid med lavt eller høyt volum
+        const val SATSENDRING_HØYT_VOLUM: String = "familie-ba-sak.satsendring-hoyt-volum"
+
+        // Kjører satsendring i utenfor arbeidstid
+        const val SATSENDRING_KVELD: String = "familie-ba-sak.satsendring-kveld"
+
+        // Kjører satsendring lørdag
+        const val SATSENDRING_LØRDAG: String = "familie-ba-sak.satsendring-lordag"
     }
 }
