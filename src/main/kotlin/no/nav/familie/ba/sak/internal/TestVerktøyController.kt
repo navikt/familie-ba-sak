@@ -63,7 +63,7 @@ class TestVerktøyController(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
-            opprettTaskService.opprettSatsendringTask(fagsakId, startSatsendring.hentAktivSatsendringstidspunkt())
+            opprettTaskService.opprettSatsendringTask(fagsakId, StartSatsendring.hentAktivSatsendringstidspunkt())
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsak $fagsakId"))
         } else {
             ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))

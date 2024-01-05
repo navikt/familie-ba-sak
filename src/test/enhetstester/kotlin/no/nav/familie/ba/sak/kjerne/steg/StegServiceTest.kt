@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -26,6 +27,7 @@ internal class StegServiceTest {
     private val behandlingService: BehandlingService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val satsendringService: SatsendringService = mockk()
+    private val opprettTaskService: OpprettTaskService = mockk()
 
     private val stegService =
         StegService(
@@ -40,6 +42,7 @@ internal class StegServiceTest {
             satsendringService = satsendringService,
             personopplysningerService = mockk(),
             automatiskBeslutningService = mockk(),
+            opprettTaskService = mockk(),
         )
 
     @BeforeEach
