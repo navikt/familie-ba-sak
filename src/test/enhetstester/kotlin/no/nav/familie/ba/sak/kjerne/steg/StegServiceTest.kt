@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
@@ -27,7 +28,7 @@ internal class StegServiceTest {
     private val behandlingService: BehandlingService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val satsendringService: SatsendringService = mockk()
-    private val opprettTaskService: OpprettTaskService = mockk()
+    private val opprettTaskService: OpprettTaskService = mockk(relaxed = true)
 
     private val stegService =
         StegService(
@@ -42,7 +43,7 @@ internal class StegServiceTest {
             satsendringService = satsendringService,
             personopplysningerService = mockk(),
             automatiskBeslutningService = mockk(),
-            opprettTaskService = mockk(),
+            opprettTaskService = opprettTaskService,
         )
 
     @BeforeEach
@@ -116,6 +117,7 @@ internal class StegServiceTest {
             )
 
         assertThrows<FunksjonellFeil> { stegService.håndterNyBehandling(nyBehandling) }
+        verify(exactly = 1) { opprettTaskService.opprettSatsendringTask(any(), any()) }
     }
 
     @Test
