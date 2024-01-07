@@ -130,14 +130,14 @@ fun hentTekstForPersongrunnlag(
     """
     
     Og følgende persongrunnlag for begrunnelse
-      | BehandlingId | AktørId | Persontype | Fødselsdato |""" +
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |""" +
         hentPersongrunnlagRader(persongrunnlagForrigeBehandling) +
         hentPersongrunnlagRader(persongrunnlag)
 
 private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): String =
     persongrunnlag?.personer?.sortedBy { it.fødselsdato }?.joinToString("") {
         """
-      | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|"""
+      | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|${it.dødsfall?.dødsfallDato}|"""
     } ?: ""
 
 fun hentTekstForVilkårresultater(
