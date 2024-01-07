@@ -137,7 +137,7 @@ fun hentTekstForPersongrunnlag(
 private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): String =
     persongrunnlag?.personer?.sortedBy { it.fødselsdato }?.joinToString("") {
         """
-      | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|${it.dødsfall?.dødsfallDato}|"""
+      | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|${it.dødsfall?.dødsfallDato?.tilddMMyyyy()}|"""
     } ?: ""
 
 fun hentTekstForVilkårresultater(
