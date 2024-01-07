@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 14.5 (Debian 14.5-1.pgdg110+1)
--- Dumped by pg_dump version 14.6 (Homebrew)
+-- Dumped by pg_dump version 14.10 (Homebrew)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -32,6 +32,50 @@ CREATE TABLE public.aktoer (
     endret_av character varying,
     endret_tid timestamp(3) without time zone
 );
+
+
+--
+-- Name: aktoer_merge_logg; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.aktoer_merge_logg (
+    id bigint NOT NULL,
+    fk_fagsak_id bigint NOT NULL,
+    historisk_aktoer_id character varying(50),
+    ny_aktoer_id character varying(50),
+    merge_tid timestamp without time zone
+);
+
+
+--
+-- Name: aktoer_merge_logg_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.aktoer_merge_logg_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: aktoer_merge_logg_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.aktoer_merge_logg_id_seq OWNED BY public.aktoer_merge_logg.id;
+
+
+--
+-- Name: aktoer_merge_logg_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.aktoer_merge_logg_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
 --
@@ -372,6 +416,35 @@ CREATE SEQUENCE public.data_chunk_seq
 
 
 --
+-- Name: ecbvalutakurscache; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ecbvalutakurscache (
+    id bigint NOT NULL,
+    valutakursdato timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
+    valutakode character varying,
+    kurs numeric,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
+);
+
+
+--
+-- Name: ecbvalutakurscache_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.ecbvalutakurscache_seq
+    START WITH 1
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
 -- Name: endret_utbetaling_andel; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -389,7 +462,6 @@ CREATE TABLE public.endret_utbetaling_andel (
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
     endret_av character varying,
     endret_tid timestamp(3) without time zone,
-    vedtak_begrunnelse_spesifikasjoner text DEFAULT ''::text,
     avtaletidspunkt_delt_bosted timestamp(3) without time zone,
     soknadstidspunkt timestamp(3) without time zone
 );
@@ -497,38 +569,6 @@ CREATE TABLE public.feilutbetalt_valuta (
 --
 
 CREATE SEQUENCE public.feilutbetalt_valuta_seq
-    START WITH 1000000
-    INCREMENT BY 50
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: foedselshendelse_pre_lansering; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.foedselshendelse_pre_lansering (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    ny_behandling_hendelse text NOT NULL,
-    filtreringsregler_input text,
-    filtreringsregler_output text,
-    vilkaarsvurderinger_for_foedselshendelse text,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    versjon bigint DEFAULT 0 NOT NULL,
-    fk_aktoer_id character varying
-);
-
-
---
--- Name: foedselshendelse_pre_lansering_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.foedselshendelse_pre_lansering_seq
     START WITH 1000000
     INCREMENT BY 50
     NO MINVALUE
@@ -726,7 +766,8 @@ CREATE TABLE public.kompetanse (
     annen_forelderes_aktivitetsland character varying,
     barnets_bostedsland character varying,
     resultat character varying,
-    sokers_aktivitetsland text
+    sokers_aktivitetsland text,
+    er_annen_forelder_omfattet_av_norsk_lovgivning boolean DEFAULT false
 );
 
 
@@ -1081,7 +1122,8 @@ CREATE TABLE public.po_doedsfall (
     opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
     endret_av character varying,
-    endret_tid timestamp(3) without time zone
+    endret_tid timestamp(3) without time zone,
+    manuell_registrert boolean DEFAULT false NOT NULL
 );
 
 
@@ -1800,7 +1842,7 @@ CREATE TABLE public.vilkar_resultat (
     begrunnelse text,
     periode_fom timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
     periode_tom timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
-    fk_behandling_id bigint NOT NULL,
+    sist_endret_i_behandling_id bigint NOT NULL,
     evaluering_aarsak text DEFAULT ''::text,
     er_automatisk_vurdert boolean DEFAULT false NOT NULL,
     er_eksplisitt_avslag_paa_soknad boolean,
@@ -1824,6 +1866,13 @@ CREATE SEQUENCE public.vilkar_resultat_seq
 
 
 --
+-- Name: aktoer_merge_logg id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.aktoer_merge_logg ALTER COLUMN id SET DEFAULT nextval('public.aktoer_merge_logg_id_seq'::regclass);
+
+
+--
 -- Name: task id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1842,6 +1891,14 @@ ALTER TABLE ONLY public.task_logg ALTER COLUMN id SET DEFAULT nextval('public.ta
 --
 
 COPY public.aktoer (aktoer_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
+\.
+
+
+--
+-- Data for Name: aktoer_merge_logg; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.aktoer_merge_logg (id, fk_fagsak_id, historisk_aktoer_id, ny_aktoer_id, merge_tid) FROM stdin;
 \.
 
 
@@ -1986,10 +2043,18 @@ COPY public.data_chunk (id, fk_batch_id, transaksjons_id, chunk_nr, er_sendt, ve
 
 
 --
+-- Data for Name: ecbvalutakurscache; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.ecbvalutakurscache (id, valutakursdato, valutakode, kurs, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
+\.
+
+
+--
 -- Data for Name: endret_utbetaling_andel; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.endret_utbetaling_andel (id, fk_behandling_id, fk_po_person_id, fom, tom, prosent, aarsak, begrunnelse, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, vedtak_begrunnelse_spesifikasjoner, avtaletidspunkt_delt_bosted, soknadstidspunkt) FROM stdin;
+COPY public.endret_utbetaling_andel (id, fk_behandling_id, fk_po_person_id, fom, tom, prosent, aarsak, begrunnelse, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, avtaletidspunkt_delt_bosted, soknadstidspunkt) FROM stdin;
 \.
 
 
@@ -2014,14 +2079,6 @@ COPY public.fagsak (id, versjon, opprettet_av, opprettet_tid, endret_av, endret_
 --
 
 COPY public.feilutbetalt_valuta (id, fk_behandling_id, fom, tom, feilutbetalt_beloep, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, er_per_maaned) FROM stdin;
-\.
-
-
---
--- Data for Name: foedselshendelse_pre_lansering; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.foedselshendelse_pre_lansering (id, fk_behandling_id, ny_behandling_hendelse, filtreringsregler_input, filtreringsregler_output, vilkaarsvurderinger_for_foedselshendelse, opprettet_av, opprettet_tid, endret_av, endret_tid, versjon, fk_aktoer_id) FROM stdin;
 \.
 
 
@@ -2077,7 +2134,7 @@ COPY public.journalpost (id, fk_behandling_id, journalpost_id, opprettet_tid, op
 -- Data for Name: kompetanse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.kompetanse (id, fk_behandling_id, fom, tom, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, soekers_aktivitet, annen_forelderes_aktivitet, annen_forelderes_aktivitetsland, barnets_bostedsland, resultat, sokers_aktivitetsland) FROM stdin;
+COPY public.kompetanse (id, fk_behandling_id, fom, tom, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, soekers_aktivitet, annen_forelderes_aktivitet, annen_forelderes_aktivitetsland, barnets_bostedsland, resultat, sokers_aktivitetsland, er_annen_forelder_omfattet_av_norsk_lovgivning) FROM stdin;
 \.
 
 
@@ -2173,7 +2230,7 @@ COPY public.po_bostedsadresseperiode (id, fk_po_person_id, fom, tom, opprettet_a
 -- Data for Name: po_doedsfall; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.po_doedsfall (id, fk_po_person_id, versjon, doedsfall_dato, doedsfall_adresse, doedsfall_postnummer, doedsfall_poststed, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
+COPY public.po_doedsfall (id, fk_po_person_id, versjon, doedsfall_dato, doedsfall_adresse, doedsfall_postnummer, doedsfall_poststed, opprettet_av, opprettet_tid, endret_av, endret_tid, manuell_registrert) FROM stdin;
 \.
 
 
@@ -2357,8 +2414,22 @@ COPY public.vilkaarsvurdering (id, fk_behandling_id, aktiv, versjon, opprettet_a
 -- Data for Name: vilkar_resultat; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.vilkar_resultat (id, vilkar, resultat, regel_input, regel_output, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, fk_person_resultat_id, begrunnelse, periode_fom, periode_tom, fk_behandling_id, evaluering_aarsak, er_automatisk_vurdert, er_eksplisitt_avslag_paa_soknad, vedtak_begrunnelse_spesifikasjoner, vurderes_etter, utdypende_vilkarsvurderinger, resultat_begrunnelse) FROM stdin;
+COPY public.vilkar_resultat (id, vilkar, resultat, regel_input, regel_output, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, fk_person_resultat_id, begrunnelse, periode_fom, periode_tom, sist_endret_i_behandling_id, evaluering_aarsak, er_automatisk_vurdert, er_eksplisitt_avslag_paa_soknad, vedtak_begrunnelse_spesifikasjoner, vurderes_etter, utdypende_vilkarsvurderinger, resultat_begrunnelse) FROM stdin;
 \.
+
+
+--
+-- Name: aktoer_merge_logg_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.aktoer_merge_logg_id_seq', 1, false);
+
+
+--
+-- Name: aktoer_merge_logg_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.aktoer_merge_logg_seq', 1000000, false);
 
 
 --
@@ -2386,7 +2457,7 @@ SELECT pg_catalog.setval('public.arbeidsfordeling_pa_behandling_seq', 1000000, f
 -- Name: batch_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.batch_seq', 1001750, true);
+SELECT pg_catalog.setval('public.batch_seq', 1002350, true);
 
 
 --
@@ -2432,6 +2503,13 @@ SELECT pg_catalog.setval('public.data_chunk_seq', 1000000, false);
 
 
 --
+-- Name: ecbvalutakurscache_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.ecbvalutakurscache_seq', 1, false);
+
+
+--
 -- Name: endret_utbetaling_andel_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2464,13 +2542,6 @@ SELECT pg_catalog.setval('public.fagsak_seq', 1000000, false);
 --
 
 SELECT pg_catalog.setval('public.feilutbetalt_valuta_seq', 1000000, false);
-
-
---
--- Name: foedselshendelse_pre_lansering_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.foedselshendelse_pre_lansering_seq', 1000000, false);
 
 
 --
@@ -2775,6 +2846,14 @@ SELECT pg_catalog.setval('public.vilkar_resultat_seq', 1000000, false);
 
 
 --
+-- Name: aktoer_merge_logg aktoer_merge_logg_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.aktoer_merge_logg
+    ADD CONSTRAINT aktoer_merge_logg_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: aktoer aktoer_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2919,6 +2998,14 @@ ALTER TABLE ONLY public.data_chunk
 
 
 --
+-- Name: ecbvalutakurscache ecbvalutakurscache_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ecbvalutakurscache
+    ADD CONSTRAINT ecbvalutakurscache_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: endret_utbetaling_andel endret_utbetaling_andel_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2940,14 +3027,6 @@ ALTER TABLE ONLY public.eos_begrunnelse
 
 ALTER TABLE ONLY public.fagsak
     ADD CONSTRAINT fagsak_pkey PRIMARY KEY (id);
-
-
---
--- Name: foedselshendelse_pre_lansering foedselshendelse_pre_lansering_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.foedselshendelse_pre_lansering
-    ADD CONSTRAINT foedselshendelse_pre_lansering_pkey PRIMARY KEY (id);
 
 
 --
@@ -3441,13 +3520,6 @@ CREATE INDEX feilutbetalt_valuta_fk_behandling_id_idx ON public.feilutbetalt_val
 
 
 --
--- Name: foedselshendelse_pre_lansering_fk_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX foedselshendelse_pre_lansering_fk_idx ON public.foedselshendelse_pre_lansering USING btree (fk_aktoer_id);
-
-
---
 -- Name: foedselshendelsefiltrering_resultat_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3866,6 +3938,13 @@ CREATE INDEX utenlandsk_periodebeloep_fk_behandling_id_idx ON public.utenlandsk_
 
 
 --
+-- Name: valutakode_valutadato_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX valutakode_valutadato_idx ON public.ecbvalutakurscache USING btree (valutakursdato, valutakode);
+
+
+--
 -- Name: valutakurs_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3908,17 +3987,17 @@ CREATE INDEX vilkaarsvurdering_fk_idx ON public.vilkaarsvurdering USING btree (f
 
 
 --
--- Name: vilkar_resultat_fk_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX vilkar_resultat_fk_idx ON public.vilkar_resultat USING btree (fk_behandling_id);
-
-
---
 -- Name: vilkar_resultat_fk_personr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX vilkar_resultat_fk_personr_idx ON public.vilkar_resultat USING btree (fk_person_resultat_id);
+
+
+--
+-- Name: vilkar_resultat_sist_endret_i_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX vilkar_resultat_sist_endret_i_behandling_id_idx ON public.vilkar_resultat USING btree (sist_endret_i_behandling_id);
 
 
 --
@@ -4119,22 +4198,6 @@ ALTER TABLE ONLY public.fagsak
 
 ALTER TABLE ONLY public.andel_tilkjent_ytelse
     ADD CONSTRAINT fk_andel_tilkjent_ytelse FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
-
-
---
--- Name: vilkar_resultat fk_behandling_id_vilkar_resultat; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.vilkar_resultat
-    ADD CONSTRAINT fk_behandling_id_vilkar_resultat FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
-
-
---
--- Name: foedselshendelse_pre_lansering fk_foedselshendelse_pre_lansering; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.foedselshendelse_pre_lansering
-    ADD CONSTRAINT fk_foedselshendelse_pre_lansering FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
 
 
 --
@@ -4359,6 +4422,14 @@ ALTER TABLE ONLY public.satskjoering
 
 ALTER TABLE ONLY public.sett_paa_vent
     ADD CONSTRAINT sett_paa_vent_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+
+
+--
+-- Name: vilkar_resultat sist_endret_i_behandling_id_vilkar_resultat; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.vilkar_resultat
+    ADD CONSTRAINT sist_endret_i_behandling_id_vilkar_resultat FOREIGN KEY (sist_endret_i_behandling_id) REFERENCES public.behandling(id);
 
 
 --
