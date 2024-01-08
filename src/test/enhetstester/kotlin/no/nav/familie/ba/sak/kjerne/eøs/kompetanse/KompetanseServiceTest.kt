@@ -289,11 +289,12 @@ internal class KompetanseServiceTest {
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
-            vilkårsvurdering= vilkårsvurdering,
-            personopplysningGrunnlag= PersonopplysningGrunnlag(behandlingId= behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
-            fagsakType = FagsakType.NORMAL
-        )
+        val tilkjentYtelse =
+            TilkjentYtelseUtils.beregnTilkjentYtelse(
+                vilkårsvurdering = vilkårsvurdering,
+                personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
+                fagsakType = FagsakType.NORMAL,
+            )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
@@ -349,11 +350,12 @@ internal class KompetanseServiceTest {
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
-            vilkårsvurdering= vilkårsvurdering,
-            personopplysningGrunnlag= PersonopplysningGrunnlag(behandlingId= behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
-            fagsakType = FagsakType.NORMAL
-        )
+        val tilkjentYtelse =
+            TilkjentYtelseUtils.beregnTilkjentYtelse(
+                vilkårsvurdering = vilkårsvurdering,
+                personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
+                fagsakType = FagsakType.NORMAL,
+            )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { endretUtbetalingAndelTidslinjeService.hentBarnasSkalIkkeUtbetalesTidslinjer(behandlingId) } returns emptyMap()
@@ -404,11 +406,12 @@ internal class KompetanseServiceTest {
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
-            vilkårsvurdering= vilkårsvurdering,
-            personopplysningGrunnlag= PersonopplysningGrunnlag(behandlingId= behandlingId.id, personer = mutableSetOf(søker, barn1, barn2, barn3)),
-            fagsakType = FagsakType.NORMAL
-        )
+        val tilkjentYtelse =
+            TilkjentYtelseUtils.beregnTilkjentYtelse(
+                vilkårsvurdering = vilkårsvurdering,
+                personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2, barn3)),
+                fagsakType = FagsakType.NORMAL,
+            )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()

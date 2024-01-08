@@ -58,7 +58,7 @@ class TilpassKompetanserTilRegelverkTest {
                 barnaRegelverkTidslinjer = eøsPerioder,
                 barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
                 annenForelderOmfattetAvNorskLovgivningTidslinje = annenForelderOmfattetTidslinje,
-                barnHarAndelTidslinjer = eøsPerioder.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } }
+                barnHarAndelTidslinjer = eøsPerioder.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } },
             )
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -75,12 +75,13 @@ class TilpassKompetanserTilRegelverkTest {
 
         val forventedeKompetanser = emptyList<Kompetanse>()
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
-            gjeldendeKompetanser = kompetanser,
-            barnaRegelverkTidslinjer = eøsPerioder,
-            barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
-            barnHarAndelTidslinjer = eøsPerioder.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } }
-        )
+        val faktiskeKompetanser =
+            tilpassKompetanserTilRegelverk(
+                gjeldendeKompetanser = kompetanser,
+                barnaRegelverkTidslinjer = eøsPerioder,
+                barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
+                barnHarAndelTidslinjer = eøsPerioder.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } },
+            )
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
@@ -107,7 +108,7 @@ class TilpassKompetanserTilRegelverkTest {
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
-                barnHarAndelTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } }
+                barnHarAndelTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } },
             )
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -138,7 +139,7 @@ class TilpassKompetanserTilRegelverkTest {
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasEgneRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
                 barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
-                barnHarAndelTidslinjer = barnasEgneRegelverkResultatTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } }
+                barnHarAndelTidslinjer = barnasEgneRegelverkResultatTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } },
             ).sortedBy { it.fom }
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -183,7 +184,7 @@ class TilpassKompetanserTilRegelverkTest {
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasEgneRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
                 barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
-                barnHarAndelTidslinjer = barnasEgneRegelverkResultatTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } }
+                barnHarAndelTidslinjer = barnasEgneRegelverkResultatTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } },
             ).sortedBy { it.fom }
 
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
@@ -210,7 +211,7 @@ class TilpassKompetanserTilRegelverkTest {
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
                 barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
-                barnHarAndelTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } }
+                barnHarAndelTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } },
             ).sortedBy { it.fom }
 
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
@@ -252,7 +253,7 @@ class TilpassKompetanserTilRegelverkTest {
                 kompetanser,
                 barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
                 emptyMap(),
-                barnHarAndelTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } }
+                barnHarAndelTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } },
             ).sortedBy { it.fom }
 
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
@@ -288,7 +289,7 @@ class TilpassKompetanserTilRegelverkTest {
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
                 barnasSkalIkkeUtbetalesTidslinjer = barnasHarEtterbetaling3År,
-                barnHarAndelTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } }
+                barnHarAndelTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } },
             ).sortedBy { it.fom }
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -313,17 +314,18 @@ class TilpassKompetanserTilRegelverkTest {
                 .medKompetanse("   ---", barn1)
                 .byggKompetanser().sortedBy { it.fom }
 
-        val barnHarAndelTidslinjer = mapOf(
-            Pair(barn1.aktør, "tttttt".somBoolskTidslinje(jan2020)),
-            Pair(barn2.aktør, "ttt".somBoolskTidslinje(jan2020))
-        )
+        val barnHarAndelTidslinjer =
+            mapOf(
+                Pair(barn1.aktør, "tttttt".somBoolskTidslinje(jan2020)),
+                Pair(barn2.aktør, "ttt".somBoolskTidslinje(jan2020)),
+            )
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
                 barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
-                barnHarAndelTidslinjer = barnHarAndelTidslinjer
+                barnHarAndelTidslinjer = barnHarAndelTidslinjer,
             ).sortedBy { it.fom }
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)

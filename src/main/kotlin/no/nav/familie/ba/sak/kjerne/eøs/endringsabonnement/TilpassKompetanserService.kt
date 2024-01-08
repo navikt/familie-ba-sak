@@ -128,14 +128,12 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
                 barnasSkalIkkeUtbetalesTidslinjer,
                 annenForelderOmfattetAvNorskLovgivningTidslinje,
                 brukBarnetsRegelverkVedBlandetResultat = unleashNext.isEnabled(ENDRET_EØS_REGELVERKFILTER_FOR_BARN),
-                barnHarAndelTidslinjer = barnHarAndelTidslinjer
+                barnHarAndelTidslinjer = barnHarAndelTidslinjer,
             ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
     }
 }
-
-
 
 fun tilpassKompetanserTilRegelverk(
     gjeldendeKompetanser: Collection<Kompetanse>,
@@ -143,7 +141,7 @@ fun tilpassKompetanserTilRegelverk(
     barnasSkalIkkeUtbetalesTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
     annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean, Måned> = TomTidslinje<Boolean, Måned>(),
     brukBarnetsRegelverkVedBlandetResultat: Boolean = true,
-    barnHarAndelTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>
+    barnHarAndelTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
 ): Collection<Kompetanse> {
     val barnasEøsRegelverkTidslinjer =
         barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer(
@@ -222,9 +220,10 @@ private fun <I, T : Tidsenhet> Tidslinje<I, T>.flyttTilOgMed(tilTidspunkt: Tidsp
 }
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilBarnHarAndelTidslinjer(): Map<Aktør, Tidslinje<Boolean, Måned>> {
-    val andelerPerBarnTidslinje = filter { !it.erSøkersAndel() }.groupBy { it.aktør }
-        .mapValues { (_, andelerPåBarnet) ->
-            andelerPåBarnet.tilTidslinje().map { andelIPeriode -> if(andelIPeriode != null) true else null }
-        }
+    val andelerPerBarnTidslinje =
+        filter { !it.erSøkersAndel() }.groupBy { it.aktør }
+            .mapValues { (_, andelerPåBarnet) ->
+                andelerPåBarnet.tilTidslinje().map { andelIPeriode -> if (andelIPeriode != null) true else null }
+            }
     return andelerPerBarnTidslinje
 }
