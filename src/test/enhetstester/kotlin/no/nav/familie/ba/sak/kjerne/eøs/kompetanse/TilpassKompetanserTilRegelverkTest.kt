@@ -293,6 +293,41 @@ class TilpassKompetanserTilRegelverkTest {
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
+
+    @Test
+    fun `skal klippe kompetansen etter andelene slik at vi kun har kompetanse der vi har andeler på personen`() {
+        val kompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("->", barn1, barn2)
+                .byggKompetanser()
+
+        val barnasRegelverkResultatTidslinjer =
+            mapOf(
+                barn1.aktør to "EEEEEEEEE".tilRegelverkResultatTidslinje(jan2020),
+                barn2.aktør to "EEEEEEEEE".tilRegelverkResultatTidslinje(jan2020),
+            )
+
+        val forventedeKompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("---", barn1, barn2)
+                .medKompetanse("   ---", barn1)
+                .byggKompetanser().sortedBy { it.fom }
+
+        val barnHarAndelTidslinjer = mapOf(
+            Pair(barn1.aktør, "tttttt".somBoolskTidslinje(jan2020)),
+            Pair(barn2.aktør, "ttt".somBoolskTidslinje(jan2020))
+        )
+
+        val faktiskeKompetanser =
+            tilpassKompetanserTilRegelverk(
+                gjeldendeKompetanser = kompetanser,
+                barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
+                barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
+                barnHarAndelTidslinjer = barnHarAndelTidslinjer
+            ).sortedBy { it.fom }
+
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
 }
 
 private fun Tidslinje<RegelverkResultat, Måned>.kombinertSøkersResultatTidslinje(
