@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -65,6 +66,7 @@ class StegService(
     private val personopplysningerService: PersonopplysningerService,
     private val automatiskBeslutningService: AutomatiskBeslutningService,
     private val opprettTaskService: OpprettTaskService,
+    private val satskjøringRepository: SatskjøringRepository,
 ) {
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
@@ -137,8 +139,13 @@ class StegService(
         check(nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO)
 
         if (!satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId = nyBehandling.fagsakId)) {
-            opprettTaskService.opprettSatsendringTask(fagsakId = nyBehandling.fagsakId, satstidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt())
-            throw FunksjonellFeil("Fagsaken har ikke siste sats. Det har automatisk blitt opprettet en behandling for satsendring. Vent til den er ferdig behandlet før du endrer migreringsdato.")
+            val satskjøring = satskjøringRepository.findByFagsakIdAndSatsTidspunkt(nyBehandling.fagsakId, StartSatsendring.hentAktivSatsendringstidspunkt())
+            if (satskjøring == null) {
+                opprettTaskService.opprettSatsendringTask(fagsakId = nyBehandling.fagsakId, satstidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt())
+                throw FunksjonellFeil("Fagsaken har ikke siste sats. Det har automatisk blitt opprettet en behandling for satsendring. Vent til den er ferdig behandlet før du endrer migreringsdato.")
+            } else if (satskjøring.ferdigTidspunkt == null) {
+                throw FunksjonellFeil("Det kjøres satsendring på fagsaken. Vennligst prøv igjen senere")
+            }
         }
     }
 
