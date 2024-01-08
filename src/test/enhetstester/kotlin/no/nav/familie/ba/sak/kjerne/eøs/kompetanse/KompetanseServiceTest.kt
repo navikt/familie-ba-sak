@@ -5,6 +5,9 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -14,8 +17,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.EndretUtbetalingAndelTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
@@ -36,6 +41,7 @@ internal class KompetanseServiceTest {
     val mockKompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse> = mockPeriodeBarnSkjemaRepository()
     val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService = mockk()
     val endretUtbetalingAndelTidslinjeService: EndretUtbetalingAndelTidslinjeService = mockk()
+    val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
     val unleashService: UnleashService = mockk()
 
     val kompetanseService =
@@ -46,11 +52,12 @@ internal class KompetanseServiceTest {
 
     val tilpassKompetanserTilRegelverkService =
         TilpassKompetanserTilRegelverkService(
-            vilkårsvurderingTidslinjeService,
-            endretUtbetalingAndelTidslinjeService,
-            unleashService,
-            mockKompetanseRepository,
-            emptyList(),
+            vilkårsvurderingTidslinjeService = vilkårsvurderingTidslinjeService,
+            endretUtbetalingAndelTidslinjeService = endretUtbetalingAndelTidslinjeService,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            unleashNext = unleashService,
+            kompetanseRepository = mockKompetanseRepository,
+            endringsabonnenter = emptyList(),
         )
 
     @BeforeEach
@@ -269,20 +276,30 @@ internal class KompetanseServiceTest {
 
         val forventedeKompetanser =
             KompetanseBuilder(treMånederSiden.neste(), behandlingId)
-                .medKompetanse("->", barn1, barn2)
+                .medKompetanse("------", barn1, barn2)
+                .medKompetanse("      ----", barn1)
                 .byggKompetanser()
 
+        val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
         val vilkårsvurderingTidslinjer =
             VilkårsvurderingTidslinjer(
-                vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
+                vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn =
                     lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2)
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
+        val tilkjentYtelse =
+            TilkjentYtelseUtils.beregnTilkjentYtelse(
+                vilkårsvurdering = vilkårsvurdering,
+                personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
+                fagsakType = FagsakType.NORMAL,
+            )
+
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
         every { endretUtbetalingAndelTidslinjeService.hentBarnasSkalIkkeUtbetalesTidslinjer(behandlingId) } returns emptyMap()
+        every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 
@@ -321,20 +338,29 @@ internal class KompetanseServiceTest {
         val forventedeKompetanser =
             KompetanseBuilder(seksMånederSiden.neste(), behandlingId)
                 .medKompetanse("--", barn1, barn2) // Begge barna har 3 mnd EØS-regelverk før nå-tidspunktet
-                .medKompetanse("  ->", barn1) // Bare barn 1 har EØS-regelverk etter nå-tidspunktet
+                .medKompetanse("  --------", barn1) // Bare barn 1 har EØS-regelverk etter nå-tidspunktet
                 .byggKompetanser()
 
+        val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
         val vilkårsvurderingTidslinjer =
             VilkårsvurderingTidslinjer(
-                vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
+                vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn =
                     lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2)
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
+        val tilkjentYtelse =
+            TilkjentYtelseUtils.beregnTilkjentYtelse(
+                vilkårsvurdering = vilkårsvurdering,
+                personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
+                fagsakType = FagsakType.NORMAL,
+            )
+
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { endretUtbetalingAndelTidslinjeService.hentBarnasSkalIkkeUtbetalesTidslinjer(behandlingId) } returns emptyMap()
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
+        every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 
@@ -380,9 +406,17 @@ internal class KompetanseServiceTest {
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
+        val tilkjentYtelse =
+            TilkjentYtelseUtils.beregnTilkjentYtelse(
+                vilkårsvurdering = vilkårsvurdering,
+                personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2, barn3)),
+                fagsakType = FagsakType.NORMAL,
+            )
+
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
         every { endretUtbetalingAndelTidslinjeService.hentBarnasSkalIkkeUtbetalesTidslinjer(behandlingId) } returns emptyMap()
+        every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 

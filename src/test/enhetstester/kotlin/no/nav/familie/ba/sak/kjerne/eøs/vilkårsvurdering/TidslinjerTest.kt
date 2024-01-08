@@ -267,6 +267,7 @@ internal class TidslinjerTest {
                 emptyList(),
                 barnaRegelverkTidslinjer,
                 emptyMap(),
+                barnHarAndelTidslinjer = barnaRegelverkTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } },
             )
 
         assertEquals(1, kompetanser.size)
@@ -318,6 +319,7 @@ internal class TidslinjerTest {
                 emptyList(),
                 barnaRegelverkTidslinjer,
                 emptyMap(),
+                barnHarAndelTidslinjer = barnaRegelverkTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } },
             )
 
         val forventetRegelverkResultat =
@@ -373,6 +375,7 @@ internal class TidslinjerTest {
                 emptyList(),
                 barnaRegelverkTidslinjer,
                 emptyMap(),
+                barnHarAndelTidslinjer = barnaRegelverkTidslinjer.mapValues { (_, regelverkTilBarnet) -> regelverkTilBarnet.map { it != null } },
             )
 
         assertEquals(1, kompetanser.size)
