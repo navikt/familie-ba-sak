@@ -130,7 +130,7 @@ internal class StegServiceTest {
     }
 
     @Test
-    fun `Skal ikke trugge ny satsendring dersom vi har en gammel sats på forrige iverksatte behandling på endre migreringsdato behandling, og satsendring allerede er trigget`() {
+    fun `Skal ikke trigge ny satsendring dersom vi har en gammel sats på forrige iverksatte behandling på endre migreringsdato behandling, og satsendring allerede er trigget`() {
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns false
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(any(), any()) } returns Satskjøring(fagsakId = 1, startTidspunkt = LocalDateTime.now(), satsTidspunkt = YearMonth.now())
 
