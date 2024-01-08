@@ -22,11 +22,16 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.ekstern.restDomene.RestYtelsePeriode
 import no.nav.familie.ba.sak.integrasjoner.økonomi.YtelsetypeBA
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForVedtaksperioderTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
+import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -194,31 +199,45 @@ data class AndelTilkjentYtelse(
             }
 }
 
-fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp(): List<AndelTilkjentYtelse> {
-    if (this.size <= 1) return this
-    val sorterteAndeler = this.sortedBy { it.stønadFom }
-    val sammenslåtteAndeler = mutableListOf<AndelTilkjentYtelse>()
-    var andel = sorterteAndeler.firstOrNull()
-    sorterteAndeler.forEach { andelTilkjentYtelse ->
-        andel = andel ?: andelTilkjentYtelse
-        val back2BackAndelsperiodeMedSammeBeløp =
-            this.singleOrNull {
-                andel!!.stønadTom.plusMonths(1).equals(it.stønadFom) &&
-                    andel!!.aktør == it.aktør &&
-                    andel!!.kalkulertUtbetalingsbeløp == it.kalkulertUtbetalingsbeløp &&
-                    andel!!.type == it.type
+data class RestYtelsePeriodeUtenDatoer(
+    val kalkulertUtbetalingsbeløp: Int,
+    val ytelseType: YtelseType,
+    val skalUtbetales: Boolean,
+)
+
+fun List<AndelTilkjentYtelse>.tilRestYtelsePerioder(): List<RestYtelsePeriode> {
+    val restYtelsePeriodeTidslinjePerAktørOgTypeSlåttSammen =
+        this.groupBy { Pair(it.aktør, it.type) }
+            .mapValues { (_, andelerTilkjentYtelse) ->
+                andelerTilkjentYtelse
+                    .tilRestYtelsePeriodeUtenDatoerTidslinje()
+                    .slåSammenLike()
             }
-        andel =
-            if (back2BackAndelsperiodeMedSammeBeløp != null) {
-                andel!!.copy(stønadTom = back2BackAndelsperiodeMedSammeBeløp.stønadTom)
-            } else {
-                sammenslåtteAndeler.add(andel!!)
-                null
+
+    return restYtelsePeriodeTidslinjePerAktørOgTypeSlåttSammen
+        .flatMap { (_, andelerTidslinje) -> andelerTidslinje.perioder() }
+        .mapNotNull { periode ->
+            periode.innhold?.let { innhold ->
+                RestYtelsePeriode(
+                    beløp = innhold.kalkulertUtbetalingsbeløp,
+                    stønadFom = periode.fraOgMed.tilYearMonth(),
+                    stønadTom = periode.tilOgMed.tilYearMonth(),
+                    ytelseType = innhold.ytelseType,
+                    skalUtbetales = innhold.skalUtbetales,
+                )
             }
-    }
-    if (andel != null) sammenslåtteAndeler.add(andel!!)
-    return sammenslåtteAndeler
+        }
 }
+
+private fun List<AndelTilkjentYtelse>.tilRestYtelsePeriodeUtenDatoerTidslinje() =
+    this.map {
+        månedPeriodeAv(
+            fraOgMed = it.stønadFom,
+            tilOgMed = it.stønadTom,
+            innhold = RestYtelsePeriodeUtenDatoer(kalkulertUtbetalingsbeløp = it.kalkulertUtbetalingsbeløp, it.type, it.prosent > BigDecimal.ZERO),
+        )
+    }
+        .tilTidslinje()
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>, List<AndelTilkjentYtelseMedEndreteUtbetalinger>> {
     return this.utledSegmenter()
@@ -302,7 +321,7 @@ fun List<AndelTilkjentYtelse>.tilTidslinjerPerPersonOgType(): Map<Pair<Aktør, Y
         )
     }
 
-fun List<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgType() =
+fun List<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForVedtaksperioderTidslinje> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         AndelTilkjentYtelseForVedtaksperioderTidslinje(
             andelerTilkjentYtelsePåPerson,
