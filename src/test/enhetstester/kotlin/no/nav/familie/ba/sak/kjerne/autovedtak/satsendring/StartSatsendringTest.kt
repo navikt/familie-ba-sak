@@ -42,6 +42,7 @@ internal class StartSatsendringTest {
     fun setUp() {
         val satsSlot = slot<Satskjøring>()
         every { satskjøringRepository.save(capture(satsSlot)) } answers { satsSlot.captured }
+        every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(any(), any()) } returns null
         val taskSlot = slot<Task>()
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
         val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
