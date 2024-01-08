@@ -31,7 +31,7 @@ class SatsendringStatistikk(
         try {
             MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
             logger.info("Kjører statistikk satsendring")
-            val satsTidspunkt = startSatsendring.hentAktivSatsendringstidspunkt()
+            val satsTidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt()
             val antallKjørt = satskjøringRepository.countByFerdigTidspunktIsNotNullAndSatsTidspunkt(satsTidspunkt)
             val antallTriggetTotalt = satskjøringRepository.countBySatsTidspunkt(satsTidspunkt)
             val antallLøpendeFagsakerTotalt = fagsakRepository.finnAntallFagsakerLøpende()

@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -40,6 +41,7 @@ import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.hibernate.exception.ConstraintViolationException
@@ -62,6 +64,7 @@ class StegService(
     private val satsendringService: SatsendringService,
     private val personopplysningerService: PersonopplysningerService,
     private val automatiskBeslutningService: AutomatiskBeslutningService,
+    private val opprettTaskService: OpprettTaskService,
 ) {
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
@@ -134,7 +137,8 @@ class StegService(
         check(nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO)
 
         if (!satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId = nyBehandling.fagsakId)) {
-            throw FunksjonellFeil("Fagsaken har ikke siste sats. Gjennomfør satsendring før du endrer migreringsdato.")
+            opprettTaskService.opprettSatsendringTask(fagsakId = nyBehandling.fagsakId, satstidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt())
+            throw FunksjonellFeil("Fagsaken har ikke siste sats. Det har automatisk blitt opprettet en behandling for satsendring. Vent til den er ferdig behandlet før du endrer migreringsdato.")
         }
     }
 
