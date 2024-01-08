@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -17,18 +19,22 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
 
 internal class StegServiceTest {
     private val behandlingService: BehandlingService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val satsendringService: SatsendringService = mockk()
     private val opprettTaskService: OpprettTaskService = mockk(relaxed = true)
+    private val satskjøringRepository: SatskjøringRepository = mockk(relaxed = true)
 
     private val stegService =
         StegService(
@@ -44,7 +50,7 @@ internal class StegServiceTest {
             personopplysningerService = mockk(),
             automatiskBeslutningService = mockk(),
             opprettTaskService = opprettTaskService,
-            satskjøringRepository = mockk(relaxed = true),
+            satskjøringRepository = satskjøringRepository,
         )
 
     @BeforeEach
@@ -102,8 +108,9 @@ internal class StegServiceTest {
     }
 
     @Test
-    fun `Skal feile dersom vi har en gammel sats på forrige iverksatte behandling på endre migreringsdato behandling`() {
+    fun `Skal feile og trigge satsendring dersom vi har en gammel sats på forrige iverksatte behandling på endre migreringsdato behandling`() {
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns false
+        every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(any(), any()) } returns null
 
         val nyBehandling =
             NyBehandling(
@@ -117,8 +124,31 @@ internal class StegServiceTest {
                 fagsakId = 1L,
             )
 
-        assertThrows<FunksjonellFeil> { stegService.håndterNyBehandling(nyBehandling) }
+        val feil = assertThrows<FunksjonellFeil> { stegService.håndterNyBehandling(nyBehandling) }
         verify(exactly = 1) { opprettTaskService.opprettSatsendringTask(any(), any()) }
+        assertThat(feil.melding).isEqualTo("Fagsaken har ikke siste sats. Det har automatisk blitt opprettet en behandling for satsendring. Vent til den er ferdig behandlet før du endrer migreringsdato.")
+    }
+
+    @Test
+    fun `Skal ikke trugge ny satsendring dersom vi har en gammel sats på forrige iverksatte behandling på endre migreringsdato behandling, og satsendring allerede er trigget`() {
+        every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns false
+        every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(any(), any()) } returns Satskjøring(fagsakId = 1, startTidspunkt = LocalDateTime.now(), satsTidspunkt = YearMonth.now())
+
+        val nyBehandling =
+            NyBehandling(
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                behandlingType = BehandlingType.REVURDERING,
+                behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                søkersIdent = randomFnr(),
+                barnasIdenter = listOf(randomFnr()),
+                nyMigreringsdato = LocalDate.now().minusMonths(6),
+                fagsakId = 1L,
+            )
+
+        val feil = assertThrows<FunksjonellFeil> { stegService.håndterNyBehandling(nyBehandling) }
+        verify(exactly = 0) { opprettTaskService.opprettSatsendringTask(any(), any()) }
+        assertThat(feil.melding).isEqualTo("Det kjøres satsendring på fagsaken. Vennligst prøv igjen senere")
     }
 
     @Test

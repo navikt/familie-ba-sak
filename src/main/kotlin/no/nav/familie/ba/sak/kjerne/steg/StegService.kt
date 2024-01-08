@@ -139,11 +139,13 @@ class StegService(
         check(nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO)
 
         if (!satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId = nyBehandling.fagsakId)) {
-            if (satskjøringRepository.findByFagsakIdAndSatsTidspunkt(nyBehandling.fagsakId, StartSatsendring.hentAktivSatsendringstidspunkt()) == null) {
+            val satskjøring = satskjøringRepository.findByFagsakIdAndSatsTidspunkt(nyBehandling.fagsakId, StartSatsendring.hentAktivSatsendringstidspunkt())
+            if (satskjøring == null) {
+                opprettTaskService.opprettSatsendringTask(fagsakId = nyBehandling.fagsakId, satstidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt())
+                throw FunksjonellFeil("Fagsaken har ikke siste sats. Det har automatisk blitt opprettet en behandling for satsendring. Vent til den er ferdig behandlet før du endrer migreringsdato.")
+            } else if (satskjøring.ferdigTidspunkt == null) {
                 throw FunksjonellFeil("Det kjøres satsendring på fagsaken. Vennligst prøv igjen senere")
             }
-            opprettTaskService.opprettSatsendringTask(fagsakId = nyBehandling.fagsakId, satstidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt())
-            throw FunksjonellFeil("Fagsaken har ikke siste sats. Det har automatisk blitt opprettet en behandling for satsendring. Vent til den er ferdig behandlet før du endrer migreringsdato.")
         }
     }
 
