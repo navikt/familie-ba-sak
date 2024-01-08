@@ -44,6 +44,7 @@ internal class StegServiceTest {
             personopplysningerService = mockk(),
             automatiskBeslutningService = mockk(),
             opprettTaskService = opprettTaskService,
+            satskjøringRepository = mockk(relaxed = true),
         )
 
     @BeforeEach
