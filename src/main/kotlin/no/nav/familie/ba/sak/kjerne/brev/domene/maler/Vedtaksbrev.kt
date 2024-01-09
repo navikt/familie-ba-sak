@@ -16,6 +16,7 @@ enum class BrevPeriodeType(val apiNavn: String) {
     INGEN_UTBETALING("ingenUtbetaling"),
     INGEN_UTBETALING_UTEN_PERIODE("ingenUtbetalingUtenPeriode"),
     FORTSATT_INNVILGET("fortsattInnvilget"),
+    IKKE_RELEVANT("ikkeRelevant"),
 
     @Deprecated("Skal renames til FORTSATT_INNVILGET når det gamle implementasjonen er fjernet")
     FORTSATT_INNVILGET_NY("fortsattInnvilgetNy"),

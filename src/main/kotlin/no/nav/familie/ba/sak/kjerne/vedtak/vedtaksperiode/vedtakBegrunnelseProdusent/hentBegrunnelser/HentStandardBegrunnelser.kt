@@ -60,10 +60,7 @@ internal fun hentStandardBegrunnelser(
         filtrertPåRolleOgFagsaktype
             .filterValues { it.periodeResultat in relevantePeriodeResultater }
             .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
-            .filterValues {
-                it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) ||
-                    it.gjelderEndretutbetaling && endretUtbetalingDennePerioden?.årsak in it.endringsaarsaker
-            }
+            .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
             .filterValues { !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && !it.begrunnelseGjelderOpphørFraForrigeBehandling() }
 
     val filtrertPåVilkårOgEndretUtbetaling =
