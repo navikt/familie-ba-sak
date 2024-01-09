@@ -287,8 +287,7 @@ class TilpassKompetanserTilRegelverkTest {
     }
 
     @Test
-    @Disabled
-    fun `skal klippe kompetansen etter andelene slik at vi kun har kompetanse der vi har andeler på personen`() {
+    fun `skal klippe kompetansene basert på endret utbetaling som fører til stans av utbetaling`() {
         val kompetanser =
             KompetanseBuilder(jan2020)
                 .medKompetanse("->", barn1, barn2)
@@ -300,25 +299,23 @@ class TilpassKompetanserTilRegelverkTest {
                 barn2.aktør to "EEEEEEEEE".tilRegelverkResultatTidslinje(jan2020),
             )
 
-        val forventedeKompetanser =
-            KompetanseBuilder(jan2020)
-                .medKompetanse("---", barn1, barn2)
-                .medKompetanse("   ---", barn1)
-                .byggKompetanser().sortedBy { it.fom }
-
-        val barnHarAndelTidslinjer =
+        val barnasSkalIkkeUtbetalesTidslinjer =
             mapOf(
-                Pair(barn1.aktør, "tttttt".somBoolskTidslinje(jan2020)),
-                Pair(barn2.aktør, "ttt".somBoolskTidslinje(jan2020)),
+                Pair(barn1.aktør, "     tttt".somBoolskTidslinje(jan2020)),
             )
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
-                barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
-                barnHarAndelTidslinjer = barnHarAndelTidslinjer,
+                barnasSkalIkkeUtbetalesTidslinjer = barnasSkalIkkeUtbetalesTidslinjer,
             ).sortedBy { it.fom }
+
+        val forventedeKompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("-----", barn1, barn2)
+                .medKompetanse("     ----", barn2)
+                .byggKompetanser().sortedBy { it.fom }
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
