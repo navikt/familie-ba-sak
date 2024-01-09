@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBoolskTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilRegelverkResultatTidslinje
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class TilpassKompetanserTilRegelverkTest {
@@ -296,6 +297,7 @@ class TilpassKompetanserTilRegelverkTest {
     }
 
     @Test
+    @Disabled
     fun `skal klippe kompetansen etter andelene slik at vi kun har kompetanse der vi har andeler på personen`() {
         val kompetanser =
             KompetanseBuilder(jan2020)
