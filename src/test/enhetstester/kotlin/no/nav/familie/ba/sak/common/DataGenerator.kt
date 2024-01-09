@@ -570,6 +570,7 @@ fun lagPersonResultat(
     erDeltBosted: Boolean = false,
     erDeltBostedSkalIkkeDeles: Boolean = false,
     erEksplisittAvslagPåSøknad: Boolean? = null,
+    vurderesEtter: Regelverk = Regelverk.NASJONALE_REGLER
 ): PersonResultat {
     val personResultat =
         PersonResultat(
@@ -601,6 +602,7 @@ fun lagPersonResultat(
                             },
                         ),
                     erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
+                    vurderesEtter = vurderesEtter
                 )
             }.toSet(),
         )
