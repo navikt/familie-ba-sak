@@ -130,18 +130,8 @@ class VilkårsvurderingTidslinjer(
 }
 
 fun VilkårsvurderingTidslinjer.harBlandetRegelverk(): Boolean {
-    return søkerHarNasjonalOgFinnesBarnMedEøs() ||
-        søkersTidslinjer().regelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) ||
+    return søkersTidslinjer().regelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) ||
         barnasTidslinjer().values.any { it.egetRegelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) }
-}
-
-private fun VilkårsvurderingTidslinjer.søkerHarNasjonalOgFinnesBarnMedEøs(): Boolean {
-    return søkersTidslinjer().regelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_NASJONALE_REGLER) &&
-        barnasTidslinjer().values.any {
-            it.egetRegelverkResultatTidslinje.inneholder(
-                RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN,
-            )
-        }
 }
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.inneholder(innhold: I): Boolean =
