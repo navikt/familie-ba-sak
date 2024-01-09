@@ -3,16 +3,18 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -27,9 +29,9 @@ class VilkårsvurderingValideringTest {
         val søker = lagPersonEnkel(PersonType.SØKER)
         val barn1 = lagPersonEnkel(PersonType.BARN)
         val barn2 = lagPersonEnkel(PersonType.BARN)
-        val personResultatSøker = byggPersonResultatForPerson(søker, Regelverk.NASJONALE_REGLER, vilkårsvurdering)
-        val personResultatBarn1 = byggPersonResultatForPerson(barn1, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
-        val personResultatBarn2 = byggPersonResultatForPerson(barn2, Regelverk.NASJONALE_REGLER, vilkårsvurdering)
+        val personResultatSøker = byggPersonResultatForPersonEnkel(søker, Regelverk.NASJONALE_REGLER, vilkårsvurdering)
+        val personResultatBarn1 = byggPersonResultatForPersonEnkel(barn1, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
+        val personResultatBarn2 = byggPersonResultatForPersonEnkel(barn2, Regelverk.NASJONALE_REGLER, vilkårsvurdering)
 
         vilkårsvurdering.personResultater = setOf(
             personResultatSøker,
@@ -37,7 +39,12 @@ class VilkårsvurderingValideringTest {
             personResultatBarn2
         )
 
-        assertThrows<FunksjonellFeil> { validerIkkeBlandetRegelverk(vilkårsvurdering = vilkårsvurdering, søkerOgBarn = listOf(søker, barn1, barn2)) }
+        assertThrows<FunksjonellFeil> {
+            validerIkkeBlandetRegelverk(
+                vilkårsvurdering = vilkårsvurdering,
+                søkerOgBarn = listOf(søker, barn1, barn2)
+            )
+        }
     }
 
     @Test
@@ -45,15 +52,20 @@ class VilkårsvurderingValideringTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
         val søker = lagPersonEnkel(PersonType.SØKER)
         val barn1 = lagPersonEnkel(PersonType.BARN)
-        val personResultatSøker = byggPersonResultatForPerson(søker, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
-        val personResultatBarn1 = byggPersonResultatForPerson(barn1, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
+        val personResultatSøker = byggPersonResultatForPersonEnkel(søker, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
+        val personResultatBarn1 = byggPersonResultatForPersonEnkel(barn1, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
 
         vilkårsvurdering.personResultater = setOf(
             personResultatSøker,
             personResultatBarn1
         )
 
-        assertDoesNotThrow { validerIkkeBlandetRegelverk(vilkårsvurdering = vilkårsvurdering, søkerOgBarn = listOf(søker, barn1)) }
+        assertDoesNotThrow {
+            validerIkkeBlandetRegelverk(
+                vilkårsvurdering = vilkårsvurdering,
+                søkerOgBarn = listOf(søker, barn1)
+            )
+        }
     }
 
     @Test
@@ -61,8 +73,8 @@ class VilkårsvurderingValideringTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
         val søker = lagPersonEnkel(PersonType.SØKER)
         val barn1 = lagPersonEnkel(PersonType.BARN)
-        val personResultatSøker = byggPersonResultatForPerson(søker, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
-        val personResultatBarn1 = byggPersonResultatForPerson(barn1, Regelverk.NASJONALE_REGLER, vilkårsvurdering)
+        val personResultatSøker = byggPersonResultatForPersonEnkel(søker, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
+        val personResultatBarn1 = byggPersonResultatForPersonEnkel(barn1, Regelverk.NASJONALE_REGLER, vilkårsvurdering)
 
         vilkårsvurdering.personResultater = setOf(
             personResultatSøker,
@@ -82,29 +94,23 @@ class VilkårsvurderingValideringTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
         val søker = lagPersonEnkel(PersonType.SØKER)
         val barn = lagPersonEnkel(PersonType.BARN)
-        val personResultatSøker = byggPersonResultatForPerson(søker, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
-        val personResultatBarn = byggPersonResultatForPerson(barn, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
 
-        val ekstraPeriodeSøker = lagVilkårResultat(
-            personResultat = personResultatSøker,
-            vilkårType = Vilkår.BOSATT_I_RIKET,
-            periodeFom = LocalDate.now().minusMonths(1).plusDays(1),
-            periodeTom = null,
-            resultat = Resultat.OPPFYLT,
-            vurderesEtter = Regelverk.NASJONALE_REGLER
+        val vilkårPerioder = listOf(
+            VilkårPeriode(
+                regelverk = Regelverk.EØS_FORORDNINGEN,
+                fom = LocalDate.now().minusMonths(9),
+                tom = LocalDate.now().minusMonths(1)
+            ),
+            VilkårPeriode(
+                regelverk = Regelverk.NASJONALE_REGLER,
+                fom = LocalDate.now().minusMonths(1).plusMonths(1),
+                tom = null
+            )
         )
 
-        val ekstraPeriodeBarn = lagVilkårResultat(
-            personResultat = personResultatBarn,
-            vilkårType = Vilkår.BOSATT_I_RIKET,
-            periodeFom = LocalDate.now().minusMonths(1).plusDays(1),
-            periodeTom = null,
-            resultat = Resultat.OPPFYLT,
-            vurderesEtter = Regelverk.NASJONALE_REGLER
-        )
+        val personResultatSøker = byggPersonResultatForPersonIPerioder(søker, vilkårPerioder, vilkårsvurdering)
+        val personResultatBarn = byggPersonResultatForPersonIPerioder(barn, vilkårPerioder, vilkårsvurdering)
 
-        personResultatSøker.addVilkårResultat(ekstraPeriodeSøker)
-        personResultatBarn.addVilkårResultat(ekstraPeriodeBarn)
 
         vilkårsvurdering.personResultater = setOf(
             personResultatSøker,
@@ -119,28 +125,87 @@ class VilkårsvurderingValideringTest {
         }
     }
 
-    private fun byggPersonResultatForPerson(
+    private fun byggPersonResultatForPersonEnkel(
         person: PersonEnkel,
         regelverk: Regelverk,
         vilkårsvurdering: Vilkårsvurdering
     ): PersonResultat {
-        return lagPersonResultat(
+        val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
+        val vilkårResultater = lagVilkårResultatForPersonIPeriode(
             vilkårsvurdering = vilkårsvurdering,
             person = lagPerson(type = person.type, aktør = person.aktør),
             periodeFom = LocalDate.now().minusMonths(2),
             periodeTom = LocalDate.now().minusMonths(1),
-            resultat = Resultat.OPPFYLT,
             vurderesEtter = regelverk,
-            lagFullstendigVilkårResultat = true
+            personResultat = personResultat
         )
+
+        personResultat.setSortedVilkårResultater(vilkårResultater)
+
+        return personResultat
     }
 
-    private fun lagPersonEnkel(personType: PersonType): PersonEnkel{
+    private data class VilkårPeriode(
+        val fom: LocalDate,
+        val tom: LocalDate?,
+        val regelverk: Regelverk
+    )
+
+    private fun byggPersonResultatForPersonIPerioder(
+        person: PersonEnkel,
+        perioder: List<VilkårPeriode>,
+        vilkårsvurdering: Vilkårsvurdering
+    ): PersonResultat {
+        val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
+        val vilkårResultater = perioder.flatMap {
+            lagVilkårResultatForPersonIPeriode(
+                vilkårsvurdering = vilkårsvurdering,
+                person = lagPerson(type = person.type, aktør = person.aktør),
+                periodeFom = it.fom,
+                periodeTom = it.tom,
+                vurderesEtter = it.regelverk,
+                personResultat = personResultat
+            )
+        }.toSet()
+
+        personResultat.setSortedVilkårResultater(vilkårResultater)
+
+        return personResultat
+    }
+
+    private fun lagVilkårResultatForPersonIPeriode(
+        person: Person,
+        personResultat: PersonResultat,
+        vilkårsvurdering: Vilkårsvurdering,
+        periodeFom: LocalDate,
+        periodeTom: LocalDate?,
+        vurderesEtter: Regelverk
+    ): Set<VilkårResultat> {
+        return Vilkår.hentVilkårFor(
+            personType = person.type,
+            fagsakType = FagsakType.NORMAL,
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+        ).map {
+            VilkårResultat(
+                personResultat = personResultat,
+                periodeFom = if (it.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else periodeFom,
+                periodeTom = periodeTom,
+                vilkårType = it,
+                resultat = Resultat.OPPFYLT,
+                begrunnelse = "",
+                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                vurderesEtter = vurderesEtter
+            )
+        }.toSet()
+    }
+
+    private fun lagPersonEnkel(personType: PersonType): PersonEnkel {
         return PersonEnkel(
             type = personType,
             aktør = randomAktør(),
             dødsfallDato = null,
-            fødselsdato = if (personType == PersonType.SØKER) LocalDate.now().minusYears(34) else LocalDate.now().minusYears(4),
+            fødselsdato = if (personType == PersonType.SØKER) LocalDate.now().minusYears(34) else LocalDate.now()
+                .minusYears(4),
             målform = Målform.NB
         )
     }
