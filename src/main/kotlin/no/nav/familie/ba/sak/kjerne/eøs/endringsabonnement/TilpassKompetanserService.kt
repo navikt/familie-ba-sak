@@ -158,9 +158,6 @@ fun tilpassKompetanserTilRegelverk(
         .outerJoin(barnasEøsRegelverkTidslinjer) { kompetanse, regelverk ->
             regelverk?.let { kompetanse ?: Kompetanse.NULL }
         }
-        .outerJoin(barnHarAndelTidslinjer) { kompetanse, barnHarAndeler ->
-            kompetanse?.takeIf { barnHarAndeler == true }
-        }
         .mapValues { (_, value) ->
             value.kombinerMed(annenForelderOmfattetAvNorskLovgivningTidslinje) { kompetanse, annenForelderOmfattet ->
                 kompetanse?.copy(erAnnenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet ?: false)

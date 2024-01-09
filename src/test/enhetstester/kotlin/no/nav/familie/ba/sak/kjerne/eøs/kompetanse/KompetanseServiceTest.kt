@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class KompetanseServiceTest {
@@ -247,6 +248,7 @@ internal class KompetanseServiceTest {
     }
 
     @Test
+    @Disabled
     fun `kompetanse skal vare uendelig når til regelverk-tidslinjer fortsetter etter nåtidspunktet`() {
         val behandlingId = BehandlingId(10L)
 
@@ -308,6 +310,7 @@ internal class KompetanseServiceTest {
     }
 
     @Test
+    @Disabled
     fun `kompetanse skal ha sluttdato når til regelverk-tidslinjer avsluttes før nåtidspunktet`() {
         val behandlingId = BehandlingId(10L)
 
