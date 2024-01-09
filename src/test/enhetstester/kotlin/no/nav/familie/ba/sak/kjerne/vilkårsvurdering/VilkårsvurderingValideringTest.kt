@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
+import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -11,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -67,15 +69,66 @@ class VilkårsvurderingValideringTest {
             personResultatBarn1
         )
 
-        assertDoesNotThrow { validerIkkeBlandetRegelverk(vilkårsvurdering = vilkårsvurdering, søkerOgBarn = listOf(søker, barn1)) }
+        assertDoesNotThrow {
+            validerIkkeBlandetRegelverk(
+                vilkårsvurdering = vilkårsvurdering,
+                søkerOgBarn = listOf(søker, barn1)
+            )
+        }
     }
 
-    private fun byggPersonResultatForPerson(person: PersonEnkel, regelverk: Regelverk, vilkårsvurdering: Vilkårsvurdering): PersonResultat{
+    @Test
+    fun `skal ikke kaste feil hvis både søker og barn vurderes etter nasjonal og eøs, men i samme perioder`() {
+        val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
+        val søker = lagPersonEnkel(PersonType.SØKER)
+        val barn = lagPersonEnkel(PersonType.BARN)
+        val personResultatSøker = byggPersonResultatForPerson(søker, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
+        val personResultatBarn = byggPersonResultatForPerson(barn, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
+
+        val ekstraPeriodeSøker = lagVilkårResultat(
+            personResultat = personResultatSøker,
+            vilkårType = Vilkår.BOSATT_I_RIKET,
+            periodeFom = LocalDate.now().minusMonths(1).plusDays(1),
+            periodeTom = null,
+            resultat = Resultat.OPPFYLT,
+            vurderesEtter = Regelverk.NASJONALE_REGLER
+        )
+
+        val ekstraPeriodeBarn = lagVilkårResultat(
+            personResultat = personResultatBarn,
+            vilkårType = Vilkår.BOSATT_I_RIKET,
+            periodeFom = LocalDate.now().minusMonths(1).plusDays(1),
+            periodeTom = null,
+            resultat = Resultat.OPPFYLT,
+            vurderesEtter = Regelverk.NASJONALE_REGLER
+        )
+
+        personResultatSøker.addVilkårResultat(ekstraPeriodeSøker)
+        personResultatBarn.addVilkårResultat(ekstraPeriodeBarn)
+
+        vilkårsvurdering.personResultater = setOf(
+            personResultatSøker,
+            personResultatBarn,
+        )
+
+        assertDoesNotThrow {
+            validerIkkeBlandetRegelverk(
+                vilkårsvurdering = vilkårsvurdering,
+                søkerOgBarn = listOf(søker, barn)
+            )
+        }
+    }
+
+    private fun byggPersonResultatForPerson(
+        person: PersonEnkel,
+        regelverk: Regelverk,
+        vilkårsvurdering: Vilkårsvurdering
+    ): PersonResultat {
         return lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             person = lagPerson(type = person.type, aktør = person.aktør),
             periodeFom = LocalDate.now().minusMonths(2),
-            periodeTom = null,
+            periodeTom = LocalDate.now().minusMonths(1),
             resultat = Resultat.OPPFYLT,
             vurderesEtter = regelverk,
             lagFullstendigVilkårResultat = true

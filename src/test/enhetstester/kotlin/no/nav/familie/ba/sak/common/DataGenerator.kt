@@ -1124,6 +1124,7 @@ fun lagVilkårResultat(
     utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
     erEksplisittAvslagPåSøknad: Boolean = false,
     standardbegrunnelser: List<IVedtakBegrunnelse> = emptyList(),
+    vurderesEtter: Regelverk = Regelverk.NASJONALE_REGLER
 ) = VilkårResultat(
     personResultat = personResultat,
     vilkårType = vilkårType,
@@ -1135,6 +1136,7 @@ fun lagVilkårResultat(
     utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
     erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
     standardbegrunnelser = standardbegrunnelser,
+    vurderesEtter = vurderesEtter
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
