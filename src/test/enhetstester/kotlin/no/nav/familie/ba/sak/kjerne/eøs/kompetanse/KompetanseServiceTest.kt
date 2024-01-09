@@ -35,7 +35,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class KompetanseServiceTest {
@@ -55,7 +54,6 @@ internal class KompetanseServiceTest {
         TilpassKompetanserTilRegelverkService(
             vilkårsvurderingTidslinjeService = vilkårsvurderingTidslinjeService,
             endretUtbetalingAndelTidslinjeService = endretUtbetalingAndelTidslinjeService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             unleashNext = unleashService,
             kompetanseRepository = mockKompetanseRepository,
             endringsabonnenter = emptyList(),
@@ -248,7 +246,6 @@ internal class KompetanseServiceTest {
     }
 
     @Test
-    @Disabled
     fun `kompetanse skal vare uendelig når til regelverk-tidslinjer fortsetter etter nåtidspunktet`() {
         val behandlingId = BehandlingId(10L)
 
@@ -278,8 +275,7 @@ internal class KompetanseServiceTest {
 
         val forventedeKompetanser =
             KompetanseBuilder(treMånederSiden.neste(), behandlingId)
-                .medKompetanse("------", barn1, barn2)
-                .medKompetanse("      ----", barn1)
+                .medKompetanse("->", barn1, barn2)
                 .byggKompetanser()
 
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
@@ -310,7 +306,6 @@ internal class KompetanseServiceTest {
     }
 
     @Test
-    @Disabled
     fun `kompetanse skal ha sluttdato når til regelverk-tidslinjer avsluttes før nåtidspunktet`() {
         val behandlingId = BehandlingId(10L)
 
@@ -341,7 +336,7 @@ internal class KompetanseServiceTest {
         val forventedeKompetanser =
             KompetanseBuilder(seksMånederSiden.neste(), behandlingId)
                 .medKompetanse("--", barn1, barn2) // Begge barna har 3 mnd EØS-regelverk før nå-tidspunktet
-                .medKompetanse("  --------", barn1) // Bare barn 1 har EØS-regelverk etter nå-tidspunktet
+                .medKompetanse("  ->", barn1) // Bare barn 1 har EØS-regelverk etter nå-tidspunktet
                 .byggKompetanser()
 
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
