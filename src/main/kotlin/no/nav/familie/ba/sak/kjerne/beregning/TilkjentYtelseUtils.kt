@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
-import no.nav.familie.ba.sak.kjerne.beregning.domene.RestYtelsePeriodeUtenDatoer
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.medEndring
@@ -325,6 +324,12 @@ internal data class BeregnetAndel(
     val beløp: Int,
     val sats: Int,
     val prosent: BigDecimal,
+)
+
+data class RestYtelsePeriodeUtenDatoer(
+    val kalkulertUtbetalingsbeløp: Int,
+    val ytelseType: YtelseType,
+    val skalUtbetales: Boolean,
 )
 
 fun List<AndelTilkjentYtelse>.tilRestYtelsePerioder(): List<RestYtelsePeriode> {

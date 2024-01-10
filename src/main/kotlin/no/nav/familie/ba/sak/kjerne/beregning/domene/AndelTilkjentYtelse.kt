@@ -194,12 +194,6 @@ data class AndelTilkjentYtelse(
             }
 }
 
-data class RestYtelsePeriodeUtenDatoer(
-    val kalkulertUtbetalingsbeløp: Int,
-    val ytelseType: YtelseType,
-    val skalUtbetales: Boolean,
-)
-
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>, List<AndelTilkjentYtelseMedEndreteUtbetalinger>> {
     return this.utledSegmenter()
         .fold(mutableMapOf()) { acc, segment ->

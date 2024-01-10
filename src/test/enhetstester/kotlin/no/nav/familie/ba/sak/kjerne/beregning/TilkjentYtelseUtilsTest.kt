@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYt
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
@@ -20,13 +21,16 @@ import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.tilyyyyMMdd
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.ekstern.restDomene.RestYtelsePeriode
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.beregnTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -42,6 +46,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import org.assertj.core.api.Assertions
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -1265,6 +1270,40 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
         assertThat(barnasAndeler[0].stønadTom, Is(månedFørBarnBlir6))
         assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
+    }
+
+    @Test
+    fun `Skal slå sammen etterfølgende andeler med samme kalkulert utbetalingsbeløp, ytelsetype og prosent`() {
+        val aktør = randomAktør()
+
+        val andeler =
+            listOf(
+                lagAndelTilkjentYtelse(fom = årMnd("2020-03"), tom = årMnd("2020-12"), ytelseType = YtelseType.ORDINÆR_BARNETRYGD, beløp = 1234, prosent = BigDecimal.valueOf(100), aktør = aktør),
+                lagAndelTilkjentYtelse(fom = årMnd("2021-01"), tom = årMnd("2021-12"), ytelseType = YtelseType.ORDINÆR_BARNETRYGD, beløp = 1234, prosent = BigDecimal.valueOf(100), aktør = aktør),
+            )
+
+        val restYtelsePerioder = andeler.tilRestYtelsePerioder()
+        val forventetRestYtelsePeriode = listOf(RestYtelsePeriode(beløp = 1234, stønadFom = årMnd("2020-03"), stønadTom = årMnd("2021-12"), ytelseType = YtelseType.ORDINÆR_BARNETRYGD, skalUtbetales = true))
+        Assertions.assertThat(restYtelsePerioder).containsAll(forventetRestYtelsePeriode).hasSize(forventetRestYtelsePeriode.size)
+    }
+
+    @Test
+    fun `Skal ikke slå sammen etterfølgende andeler med forskjellig kalkulert utbetalingsbeløp, ytelsetype eller prosent`() {
+        val aktør = randomAktør()
+
+        val andeler =
+            listOf(
+                lagAndelTilkjentYtelse(fom = årMnd("2020-03"), tom = årMnd("2020-12"), ytelseType = YtelseType.SMÅBARNSTILLEGG, beløp = 1234, prosent = BigDecimal.valueOf(100), aktør = aktør),
+                lagAndelTilkjentYtelse(fom = årMnd("2021-01"), tom = årMnd("2021-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, beløp = 1234, prosent = BigDecimal.valueOf(100), aktør = aktør),
+            )
+
+        val restYtelsePerioder = andeler.tilRestYtelsePerioder()
+        val forventetRestYtelsePerioder =
+            listOf(
+                RestYtelsePeriode(beløp = 1234, stønadFom = årMnd("2020-03"), stønadTom = årMnd("2020-12"), ytelseType = YtelseType.SMÅBARNSTILLEGG, skalUtbetales = true),
+                RestYtelsePeriode(beløp = 1234, stønadFom = årMnd("2021-01"), stønadTom = årMnd("2021-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, skalUtbetales = true),
+            )
+        Assertions.assertThat(restYtelsePerioder).containsAll(forventetRestYtelsePerioder).hasSize(forventetRestYtelsePerioder.size)
     }
 
     private data class EndretAndel(
