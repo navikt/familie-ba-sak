@@ -73,24 +73,24 @@ class TilgangService(
         behandlingId: Long,
         event: AuditLoggerEvent,
     ) {
-        val harTilgang =
-            harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
-                val personIdenter =
-                    persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
-                        ?.map { it.aktør.aktivFødselsnummer() }
-                        ?: listOf(behandlingHentOgPersisterService.hent(behandlingId).fagsak.aktør.aktivFødselsnummer())
-                personIdenter.forEach {
-                    auditLogger.log(
-                        Sporingsdata(
-                            event = event,
-                            personIdent = it,
-                            custom1 = CustomKeyValue("behandling", behandlingId.toString()),
-                        ),
-                    )
-                }
-                harTilgangTilPersoner(personIdenter)
+        val personIdenter =
+            persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
+                ?.map { it.aktør.aktivFødselsnummer() }
+                ?: listOf(behandlingHentOgPersisterService.hent(behandlingId).fagsak.aktør.aktivFødselsnummer())
+
+        if (!SikkerhetContext.erSystemKontekst()) {
+            personIdenter.forEach {
+                auditLogger.log(
+                    Sporingsdata(
+                        event = event,
+                        personIdent = it,
+                        custom1 = CustomKeyValue("behandling", behandlingId.toString()),
+                    ),
+                )
             }
-        if (!harTilgang) {
+        }
+
+        if (!harTilgangTilPersoner(personIdenter)) {
             throw RolleTilgangskontrollFeil(
                 "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                     "har ikke tilgang til behandling=$behandlingId",
@@ -103,13 +103,6 @@ class TilgangService(
         event: AuditLoggerEvent,
     ) {
         val aktør = fagsakService.hentAktør(fagsakId)
-        aktør.personidenter.forEach {
-            Sporingsdata(
-                event = event,
-                personIdent = it.fødselsnummer,
-                custom1 = CustomKeyValue("fagsak", fagsakId.toString()),
-            )
-        }
         val personIdenterIFagsak =
             (
                 persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId)
@@ -117,6 +110,16 @@ class TilgangService(
                     ?: emptyList()
             )
                 .ifEmpty { listOf(aktør.aktivFødselsnummer()) }
+
+        personIdenterIFagsak.forEach { fnr ->
+            auditLogger.log(
+                Sporingsdata(
+                    event = event,
+                    personIdent = fnr,
+                    custom1 = CustomKeyValue("fagsak", fagsakId.toString()),
+                ),
+            )
+        }
         val harTilgang = harTilgangTilPersoner(personIdenterIFagsak)
         if (!harTilgang) {
             throw RolleTilgangskontrollFeil(

@@ -85,11 +85,11 @@ Egenskap: Gyldige begrunnelser for opphør fra forrige behandling
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                  | Ugyldige begrunnelser            |
-      | 01.10.2019 | 30.09.2020 | OPPHØR             |           | OPPHØR_AVTALE_DELT_BOSTED_IKKE_GYLDIG | OPPHØR_BARN_BODDE_IKKE_MED_SØKER |
-      | 01.10.2020 | 31.08.2021 | UTBETALING         |           |                                       |                                  |
-      | 01.09.2021 | 31.12.2021 | UTBETALING         |           |                                       |                                  |
-      | 01.01.2022 |            | OPPHØR             |           |                                       |                                  |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                  | Ugyldige begrunnelser |
+      | 01.10.2019 | 30.09.2020 | OPPHØR             |           | OPPHØR_AVTALE_DELT_BOSTED_IKKE_GYLDIG |                       |
+      | 01.10.2020 | 31.08.2021 | UTBETALING         |           |                                       |                       |
+      | 01.09.2021 | 31.12.2021 | UTBETALING         |           |                                       |                       |
+      | 01.01.2022 |            | OPPHØR             |           |                                       |                       |
 
   Scenario: Skal gi opphør fra forrige behandling-begrunnelser knyttet til bosatt i riket
     Gitt følgende fagsaker for begrunnelse
@@ -248,3 +248,4 @@ Egenskap: Gyldige begrunnelser for opphør fra forrige behandling
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                       | Ugyldige begrunnelser |
       | 01.08.2023 |          | OPPHØR             | NASJONALE_REGLER               | OPPHØR_UGYLDIG_KONTONUMMER_FRA_INNVILGELSE |                       |
+

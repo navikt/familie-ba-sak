@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: 'temurin'
@@ -38,9 +38,9 @@ jobs:
           byosbom: target/bom.json
 
       - name: Deploy til dev-gcp
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/app-preprod.yaml
-          IMAGE: ${{ steps.docker-push.outputs.image }}
+          VAR: image=${{ steps.docker-push.outputs.image }}

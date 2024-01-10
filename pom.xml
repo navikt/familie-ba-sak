@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
+        <version>3.2.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -17,39 +17,38 @@
 
     <properties>
         <java.version>21</java.version>
-        <kotlin.version>1.9.21</kotlin.version>
+        <kotlin.version>1.9.22</kotlin.version>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <spring.cloud.version>4.0.0</spring.cloud.version>
-        <prosessering.version>2.20231026103714_2f17845</prosessering.version>
-        <felles.version>2.20231023162434_fa320ce</felles.version>
+        <prosessering.version>2.20240110093731_0eda75e</prosessering.version>
+        <felles.version>2.20231201131108_ea25dd3</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20231120101853_79af021</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20240109111848_d97569f</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230912090318_2267c05</familie.kontrakter.stønadsstatistikk>
-        <utbetalingsgenerator.version>1.0_20230927085000_900743f</utbetalingsgenerator.version>
+        <utbetalingsgenerator.version>1.0_20240104161725_c2493c6</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
-        <cucumber.version>7.14.0</cucumber.version>
+        <cucumber.version>7.15.0</cucumber.version>
         <mockk.version>1.13.5</mockk.version>
         <wiremock.version>3.3.1</wiremock.version>
-        <token-validation-spring.version>3.1.8</token-validation-spring.version>
+        <token-validation-spring.version>3.2.0</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>2.2.0</springdoc.version>
-        <sentry.version>6.34.0</sentry.version>
+        <springdoc.version>2.3.0</springdoc.version>
+        <sentry.version>7.1.0</sentry.version>
         <kotlinx.version>1.7.3</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>2.0.1</mock-oauth2-server.version>
+        <mock-oauth2-server.version>2.1.0</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.19.2</testcontainers.postgresql.version>
-        <unleash.version>8.4.0</unleash.version>
-        <maven.model.version>3.9.5</maven.model.version>
-        <jackson.module.kotlin.version>2.16.0</jackson.module.kotlin.version>
+        <testcontainers.postgresql.version>1.19.3</testcontainers.postgresql.version>
+        <unleash.version>9.2.0</unleash.version>
+        <maven.model.version>3.9.6</maven.model.version>
+        <jackson.module.kotlin.version>2.16.1</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <fpsak-tidslinje.version>2.7.1</fpsak-tidslinje.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
@@ -57,6 +56,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>3.2.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>no.nav.familie.felles</groupId>
                 <artifactId>felles</artifactId>
@@ -216,6 +222,11 @@
         </dependency>
         <dependency>
             <groupId>no.nav.security</groupId>
+            <artifactId>token-client-core</artifactId>
+            <version>${token-validation-spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.security</groupId>
             <artifactId>token-validation-test-support</artifactId>
             <version>${token-validation-test-support.version}</version>
             <scope>test</scope>
@@ -346,7 +357,7 @@
         </dependency>
         <dependency>
             <groupId>org.wiremock</groupId>
-            <artifactId>wiremock</artifactId>
+            <artifactId>wiremock-standalone</artifactId>
             <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
@@ -446,7 +457,7 @@
                         <dependency>
                             <groupId>com.pinterest.ktlint</groupId>
                             <artifactId>ktlint-cli</artifactId>
-                            <version>1.0.1</version>
+                            <version>1.1.1</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -486,7 +497,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.2</version>
+                <version>3.2.3</version>
                 <configuration>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
@@ -497,7 +508,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <phase>generate-test-sources</phase>

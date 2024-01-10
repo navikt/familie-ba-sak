@@ -3,9 +3,8 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenBack2BackAndelsperioderMedSammeBeløp
+import no.nav.familie.ba.sak.kjerne.beregning.tilRestYtelsePerioder
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -32,23 +31,13 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner
             val personId = andelerForPerson.key
             val andeler = andelerForPerson.value
 
-            val sammenslåtteAndeler =
-                andeler.groupBy { it.type }.flatMap { it.value.slåSammenBack2BackAndelsperioderMedSammeBeløp() }
+            val ytelsePerioder = andeler.tilRestYtelsePerioder()
 
             RestPersonMedAndeler(
                 personIdent = this.søkerOgBarn.find { person -> person.aktør == personId }?.aktør?.aktivFødselsnummer(),
-                beløp = sammenslåtteAndeler.sumOf { it.kalkulertUtbetalingsbeløp },
-                stønadFom = sammenslåtteAndeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN.toYearMonth(),
-                stønadTom = sammenslåtteAndeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX.toYearMonth(),
-                ytelsePerioder =
-                    sammenslåtteAndeler.map { it1 ->
-                        RestYtelsePeriode(
-                            beløp = it1.kalkulertUtbetalingsbeløp,
-                            stønadFom = it1.stønadFom,
-                            stønadTom = it1.stønadTom,
-                            ytelseType = it1.type,
-                            skalUtbetales = it1.prosent > BigDecimal.ZERO,
-                        )
-                    },
+                beløp = ytelsePerioder.sumOf { it.beløp },
+                stønadFom = ytelsePerioder.minOfOrNull { it.stønadFom } ?: LocalDate.MIN.toYearMonth(),
+                stønadTom = ytelsePerioder.maxOfOrNull { it.stønadTom } ?: LocalDate.MAX.toYearMonth(),
+                ytelsePerioder = ytelsePerioder,
             )
         }

@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.RestSanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -31,7 +32,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.RestSanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -417,13 +417,13 @@ data class SammenlignbarBegrunnelse(
 )
 
 private object SanityBegrunnelseMock {
-    // For å laste ned begrunnelsene på nytt anbefales https://familie-brev.sanity.studio/ba-brev/vision med query fra SanityQueries.kt .
-    // Kopier URL fra resultatet og kjør kommandoen under i terminalen
-    // curl -XGET <URL> | jq '.result' -c | pbcopy
+    // For å laste ned begrunnelsene kjør kommandoene under eller se https://familie-brev.sanity.studio/ba-brev/vision med query fra SanityQueries.kt .
+    // EØS: curl -XGET https://xsrv1mh6.api.sanity.io/v2022-03-07/data/query/ba-brev\?query\=\*%5B_type+%3D%3D+%22begrunnelse%22+%26%26+regelverk+%3D%3D+%22E%C3%98S%22+%26%26+apiNavn+%21%3D+null+%26%26+navnISystem+%21%3D+null%5D | jq '.result' -c | pbcopy
+    // Ikke-EØS: curl -XGET https://xsrv1mh6.api.sanity.io/v2022-03-07/data/query/ba-brev?query=*%5B_type+%3D%3D+%22begrunnelse%22+%26%26+regelverk+%21%3D+%22E%C3%98S%22+%26%26+apiNavn+%21%3D+null+%26%26+navnISystem+%21%3D+null%5D | jq '.result' -c | pbcopy
     // for å få alle begrunnelsene i clipboardet
     fun hentSanityBegrunnelserMock(): Map<Standardbegrunnelse, SanityBegrunnelse> {
         val restSanityBegrunnelserJson =
-            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityBegrunnelser")!!
+            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/gyldigeBegrunnelser/restSanityBegrunnelser")!!
 
         val restSanityBegrunnelser =
             objectMapper.readValue(restSanityBegrunnelserJson, Array<RestSanityBegrunnelse>::class.java)
@@ -445,7 +445,7 @@ private object SanityBegrunnelseMock {
 
     fun hentSanityEØSBegrunnelserMock(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
         val restSanityEØSBegrunnelserJson =
-            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/begrunnelsetekster/restSanityEØSBegrunnelser")!!
+            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/gyldigeBegrunnelser/restSanityEØSBegrunnelser")!!
 
         val restSanityEØSBegrunnelser =
             objectMapper.readValue(

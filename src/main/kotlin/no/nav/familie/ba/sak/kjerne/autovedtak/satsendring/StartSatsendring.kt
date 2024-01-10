@@ -167,17 +167,17 @@ class StartSatsendring(
         }
     }
 
-    fun hentAktivSatsendringstidspunkt(): YearMonth {
-        return SATSENDRINGMÅNED_JULI_2023
-    }
-
     fun opprettSatsendringForFagsak(fagsakId: Long) {
         opprettTaskService.opprettSatsendringTask(fagsakId, hentAktivSatsendringstidspunkt())
     }
 
     companion object {
+        fun hentAktivSatsendringstidspunkt(): YearMonth {
+            return SATSENDRINGMÅNED_JANUAR_2024
+        }
+
         val logger: Logger = LoggerFactory.getLogger(StartSatsendring::class.java)
         val SATSENDRINGMÅNED_MARS_2023: YearMonth = YearMonth.of(2023, 3)
-        val SATSENDRINGMÅNED_JULI_2023: YearMonth = YearMonth.of(2023, 7)
+        val SATSENDRINGMÅNED_JANUAR_2024: YearMonth = YearMonth.of(2024, 1)
     }
 }

@@ -103,7 +103,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
             WHERE b.aktiv=true AND b.id IN (
                 SELECT pg.behandlingId FROM PersonopplysningGrunnlag pg
                 WHERE pg.aktiv=true AND pg.id IN (
-                    SELECT p.personopplysningGrunnlag FROM Person p 
+                    SELECT p.personopplysningGrunnlag.id FROM Person p 
                     WHERE p.fødselsdato BETWEEN :fom AND :tom 
                     AND p.type = 'BARN'
                 )

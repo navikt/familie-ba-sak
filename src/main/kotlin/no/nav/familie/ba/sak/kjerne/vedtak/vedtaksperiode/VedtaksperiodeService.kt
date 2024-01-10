@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
-import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
@@ -18,7 +17,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
@@ -152,7 +150,7 @@ class VedtaksperiodeService(
                     sanityBegrunnelser[it]
                         ?: return@mapNotNull null
 
-                if (sanityBegrunnelse.ovrigeTriggere.contains(ØvrigTrigger.SATSENDRING)) {
+                if (sanityBegrunnelse.øvrigeTriggere.contains(ØvrigTrigger.SATSENDRING)) {
                     validerSatsendring(
                         fom = vedtaksperiodeMedBegrunnelser.fom,
                         harBarnMedSeksårsdagPåFom =
@@ -589,8 +587,8 @@ class VedtaksperiodeService(
     }
 
     fun skalHaÅrligKontroll(vedtak: Vedtak): Boolean {
-        return vedtak.behandling.kategori == BehandlingKategori.EØS &&
-            hentPersisterteVedtaksperioder(vedtak).any { it.tom?.erSenereEnnInneværendeMåned() != false }
+        return kompetanseRepository.finnFraBehandlingId(vedtak.behandling.id)
+            .any { it.tom == null || it.tom.isAfter(YearMonth.now()) }
     }
 
     fun skalMeldeFraOmEndringerEøsSelvstendigRett(vedtak: Vedtak): Boolean {

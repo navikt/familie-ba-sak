@@ -52,7 +52,12 @@ class TilpassKompetanserTilRegelverkTest {
                 .byggKompetanser()
 
         val faktiskeKompetanser =
-            tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder, emptyMap(), annenForelderOmfattetTidslinje)
+            tilpassKompetanserTilRegelverk(
+                gjeldendeKompetanser = kompetanser,
+                barnaRegelverkTidslinjer = eøsPerioder,
+                barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
+                annenForelderOmfattetAvNorskLovgivningTidslinje = annenForelderOmfattetTidslinje,
+            )
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
@@ -68,7 +73,12 @@ class TilpassKompetanserTilRegelverkTest {
 
         val forventedeKompetanser = emptyList<Kompetanse>()
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder, emptyMap())
+        val faktiskeKompetanser =
+            tilpassKompetanserTilRegelverk(
+                gjeldendeKompetanser = kompetanser,
+                barnaRegelverkTidslinjer = eøsPerioder,
+                barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
+            )
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
@@ -92,9 +102,9 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
-                kompetanser,
-                barnasRegelverkResultatTidslinjer,
-                emptyMap(),
+                gjeldendeKompetanser = kompetanser,
+                barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
+                barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
             )
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -122,9 +132,9 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
-                kompetanser,
-                barnasEgneRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
-                emptyMap(),
+                gjeldendeKompetanser = kompetanser,
+                barnaRegelverkTidslinjer = barnasEgneRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
+                barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
             ).sortedBy { it.fom }
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -166,9 +176,9 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
-                kompetanser,
-                barnasEgneRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
-                emptyMap(),
+                gjeldendeKompetanser = kompetanser,
+                barnaRegelverkTidslinjer = barnasEgneRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
+                barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
             ).sortedBy { it.fom }
 
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
@@ -192,9 +202,9 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
-                kompetanser,
-                barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
-                emptyMap(),
+                gjeldendeKompetanser = kompetanser,
+                barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
+                barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
             ).sortedBy { it.fom }
 
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
@@ -268,10 +278,44 @@ class TilpassKompetanserTilRegelverkTest {
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
-                kompetanser,
-                barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
-                barnasHarEtterbetaling3År,
+                gjeldendeKompetanser = kompetanser,
+                barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
+                barnasSkalIkkeUtbetalesTidslinjer = barnasHarEtterbetaling3År,
             ).sortedBy { it.fom }
+
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun `skal klippe kompetansene basert på endret utbetaling som fører til stans av utbetaling`() {
+        val kompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("->", barn1, barn2)
+                .byggKompetanser()
+
+        val barnasRegelverkResultatTidslinjer =
+            mapOf(
+                barn1.aktør to "EEEEEEEEE".tilRegelverkResultatTidslinje(jan2020),
+                barn2.aktør to "EEEEEEEEE".tilRegelverkResultatTidslinje(jan2020),
+            )
+
+        val barnasSkalIkkeUtbetalesTidslinjer =
+            mapOf(
+                Pair(barn1.aktør, "     tttt".somBoolskTidslinje(jan2020)),
+            )
+
+        val faktiskeKompetanser =
+            tilpassKompetanserTilRegelverk(
+                gjeldendeKompetanser = kompetanser,
+                barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer.mapValues { it.value.kombinertSøkersResultatTidslinje() },
+                barnasSkalIkkeUtbetalesTidslinjer = barnasSkalIkkeUtbetalesTidslinjer,
+            ).sortedBy { it.fom }
+
+        val forventedeKompetanser =
+            KompetanseBuilder(jan2020)
+                .medKompetanse("-----", barn1, barn2)
+                .medKompetanse("     ----", barn2)
+                .byggKompetanser().sortedBy { it.fom }
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }

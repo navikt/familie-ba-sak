@@ -28,7 +28,8 @@ class SatsServiceIntegrationTest : AbstractSpringIntegrationTest() {
             feb(2019).ogTidligere().tilTidslinje { 970 } +
                 (mar(2019)..feb(2023)).tilTidslinje { 1054 } +
                 (mar(2023)..jun(2023)).tilTidslinje { 1083 } +
-                jul(2023).ogSenere().tilTidslinje { 1310 }
+                (jul(2023)..des(2023)).tilTidslinje { 1310 } +
+                jan(2024).ogSenere().tilTidslinje { 1510 }
 
         val faktisk = satstypeTidslinje(ORBA)
 

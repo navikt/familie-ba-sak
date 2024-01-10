@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Gyldige begrunnelser for utenlandsk periodebeløp
+Egenskap: Gyldige begrunnelser for valutakurs
 
   Bakgrunn:
     Gitt følgende fagsaker for begrunnelse
@@ -20,32 +20,32 @@ Egenskap: Gyldige begrunnelser for utenlandsk periodebeløp
       | 2            | 1       | SØKER      | 14.10.1987  |
       | 2            | 2       | BARN       | 10.10.2019  |
 
-  Scenario: Vis kompetansebegrunnelser dersom det er lagt til utenlandskperiode beløp for periode
+  Scenario: Vis kompetansebegrunnelser dersom det er lagt til valutakurs for periode
     Og følgende dagens dato 24.10.2023
     Og lag personresultater for begrunnelse for behandling 1
     Og lag personresultater for begrunnelse for behandling 2
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
-      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
-      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 10.10.2019 |            | OPPFYLT  | Nei                  |                      |
-      | 1       | LOVLIG_OPPHOLD   |                              | 10.10.2019 |            | OPPFYLT  | Nei                  |                      |
+      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 10.10.2019 |            | OPPFYLT  | Nei                  |                  |
+      | 1       | LOVLIG_OPPHOLD   |                              | 10.10.2019 |            | OPPFYLT  | Nei                  |                  |
 
-      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 10.10.2019 |            | OPPFYLT  | Nei                  |                      |
-      | 2       | GIFT_PARTNERSKAP |                              | 10.10.2019 |            | OPPFYLT  | Nei                  |                      |
-      | 2       | UNDER_18_ÅR      |                              | 10.10.2019 | 09.10.2037 | OPPFYLT  | Nei                  |                      |
-      | 2       | LOVLIG_OPPHOLD   |                              | 10.10.2019 |            | OPPFYLT  | Nei                  |                      |
-      | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 10.10.2019 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 10.10.2019 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2       | GIFT_PARTNERSKAP |                              | 10.10.2019 |            | OPPFYLT  | Nei                  |                  |
+      | 2       | UNDER_18_ÅR      |                              | 10.10.2019 | 09.10.2037 | OPPFYLT  | Nei                  |                  |
+      | 2       | LOVLIG_OPPHOLD   |                              | 10.10.2019 |            | OPPFYLT  | Nei                  |                  |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 10.10.2019 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 2
-      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
-      | 1       | LOVLIG_OPPHOLD   |                              | 10.10.2019 |            | OPPFYLT  | Nei                  |                      |
-      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 10.10.2019 |            | OPPFYLT  | Nei                  |                      |
+      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
+      | 1       | LOVLIG_OPPHOLD   |                              | 10.10.2019 |            | OPPFYLT  | Nei                  |                  |
+      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 10.10.2019 |            | OPPFYLT  | Nei                  |                  |
 
-      | 2       | GIFT_PARTNERSKAP |                              | 10.10.2019 |            | OPPFYLT  | Nei                  |                      |
-      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 10.10.2019 |            | OPPFYLT  | Nei                  |                      |
-      | 2       | LOVLIG_OPPHOLD   |                              | 10.10.2019 |            | OPPFYLT  | Nei                  |                      |
-      | 2       | UNDER_18_ÅR      |                              | 10.10.2019 | 09.10.2037 | OPPFYLT  | Nei                  |                      |
-      | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 10.10.2019 |            | OPPFYLT  | Nei                  |                      |
+      | 2       | GIFT_PARTNERSKAP |                              | 10.10.2019 |            | OPPFYLT  | Nei                  |                  |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 10.10.2019 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 2       | LOVLIG_OPPHOLD   |                              | 10.10.2019 |            | OPPFYLT  | Nei                  |                  |
+      | 2       | UNDER_18_ÅR      |                              | 10.10.2019 | 09.10.2037 | OPPFYLT  | Nei                  |                  |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 10.10.2019 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
@@ -74,9 +74,9 @@ Egenskap: Gyldige begrunnelser for utenlandsk periodebeløp
       | 2       | 01.11.2019 |          | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | PL                             | PL                  |
       | 2       | 01.11.2019 |          | NORGE_ER_SEKUNDÆRLAND | 2            | ARBEIDER         | I_ARBEID                  | NO                    | PL                             | PL                  |
 
-    Og med utenlandsk periodebeløp for begrunnelse
-      | AktørId | Fra dato   | Til dato | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
-      | 2       | 01.01.2022 |          | 2            | 500   | PLN         | ÅRLIG     | NO              |
+    Og med valutakurs for begrunnelse
+      | AktørId | Fra dato   | Til dato | BehandlingId | Valutakursdato | Valuta kode | Kurs |
+      | 2       | 01.01.2022 |          | 2            | 30.12.2022     | PLN         | 2.24 |
 
     Når vedtaksperiodene genereres for behandling 2
 

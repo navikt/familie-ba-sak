@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import org.apache.commons.lang3.RandomStringUtils
 import java.time.LocalDate
@@ -129,14 +130,14 @@ fun hentTekstForPersongrunnlag(
     """
     
     Og følgende persongrunnlag for begrunnelse
-      | BehandlingId | AktørId | Persontype | Fødselsdato |""" +
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |""" +
         hentPersongrunnlagRader(persongrunnlagForrigeBehandling) +
         hentPersongrunnlagRader(persongrunnlag)
 
 private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): String =
     persongrunnlag?.personer?.sortedBy { it.fødselsdato }?.joinToString("") {
         """
-      | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|"""
+      | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|${it.dødsfall?.dødsfallDato?.tilddMMyyyy() ?: ""}|"""
     } ?: ""
 
 fun hentTekstForVilkårresultater(
@@ -150,7 +151,7 @@ fun hentTekstForVilkårresultater(
     return """
         
     Og legg til nye vilkårresultater for begrunnelse for behandling $behandlingId
-      | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Standardbegrunnelser |""" +
+      | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter |""" +
         tilVilkårResultatRader(personResultater)
 }
 
@@ -162,6 +163,7 @@ data class VilkårResultatRad(
     val resultat: Resultat,
     val erEksplisittAvslagPåSøknad: Boolean?,
     val standardbegrunnelser: List<IVedtakBegrunnelse>,
+    val vurderesEtter: Regelverk?,
 )
 
 private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
@@ -177,14 +179,19 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
                     it.resultat,
                     it.erEksplisittAvslagPåSøknad,
                     it.standardbegrunnelser,
+                    it.vurderesEtter,
                 )
             }.toList().joinToString("") { (vilkårResultatRad, vilkårResultater) ->
-                """
-      | ${vilkårResultatRad.aktørId} |${vilkårResultater.map { it.vilkårType }.joinToString(",")}|${
-                    vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")
-                }|${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""}|${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""}| ${vilkårResultatRad.resultat} | ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} | ${
-                    vilkårResultatRad.standardbegrunnelser.joinToString(",")
-                } |"""
+                "\n | ${vilkårResultatRad.aktørId} " +
+                    "| ${vilkårResultater.map { it.vilkårType }.joinToString(",")} " +
+                    "| ${vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")} " +
+                    "| ${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""} " +
+                    "| ${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""} " +
+                    "| ${vilkårResultatRad.resultat} " +
+                    "| ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} " +
+                    "| ${vilkårResultatRad.standardbegrunnelser.joinToString(",")}" +
+                    "| ${vilkårResultatRad.vurderesEtter ?: ""} " +
+                    "| "
             }
     } ?: ""
 

@@ -131,7 +131,9 @@ class OpprettTaskService(
         fagsakId: Long,
         satstidspunkt: YearMonth,
     ) {
-        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId, satsTidspunkt = satstidspunkt))
+        if (satskjøringRepository.findByFagsakIdAndSatsTidspunkt(fagsakId, satstidspunkt) == null) {
+            satskjøringRepository.save(Satskjøring(fagsakId = fagsakId, satsTidspunkt = satstidspunkt))
+        }
         overstyrTaskMedNyCallId(IdUtils.generateId()) {
             taskRepository.save(
                 Task(
@@ -168,6 +170,24 @@ class OpprettTaskService(
                 properties =
                     Properties().apply {
                         this["behandlingId"] = behandlingId.toString()
+                    },
+            ),
+        )
+    }
+
+    @Transactional
+    fun opprettTaskForÅPatcheMergetIdent(
+        dto: PatchIdentForBarnPåFagsak,
+    ) {
+        taskRepository.save(
+            Task(
+                type = PatchMergetIdentTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(dto),
+                properties =
+                    Properties().apply {
+                        this["fagsakId"] = dto.fagsakId.toString()
+                        this["gammelIdent"] = dto.gammelIdent.ident
+                        this["nyIdent"] = dto.nyIdent.ident
                     },
             ),
         )

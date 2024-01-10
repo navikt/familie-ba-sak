@@ -17,7 +17,7 @@ class SatsServiceTest {
         val ordinærTidslinje = lagOrdinærTidslinje(barn)
         val ordinærePerioder = ordinærTidslinje.perioder().toList()
 
-        Assertions.assertEquals(8, ordinærePerioder.size)
+        Assertions.assertEquals(9, ordinærePerioder.size)
 
         assertPeriode(TestKrPeriode(beløp = 970, fom = "2017-04", tom = "2019-02"), ordinærePerioder[0])
         assertPeriode(TestKrPeriode(beløp = 1054, fom = "2019-03", tom = "2020-08"), ordinærePerioder[1])
@@ -26,7 +26,8 @@ class SatsServiceTest {
         assertPeriode(TestKrPeriode(beløp = 1676, fom = "2022-01", tom = "2023-02"), ordinærePerioder[4])
         assertPeriode(TestKrPeriode(beløp = 1723, fom = "2023-03", tom = "2023-03"), ordinærePerioder[5])
         assertPeriode(TestKrPeriode(beløp = 1083, fom = "2023-04", tom = "2023-06"), ordinærePerioder[6])
-        assertPeriode(TestKrPeriode(beløp = 1310, fom = "2023-07", tom = null), ordinærePerioder[7])
+        assertPeriode(TestKrPeriode(beløp = 1310, fom = "2023-07", tom = "2023-12"), ordinærePerioder[7])
+        assertPeriode(TestKrPeriode(beløp = 1510, fom = "2024-01", tom = null), ordinærePerioder[8])
     }
 
     private fun assertPeriode(

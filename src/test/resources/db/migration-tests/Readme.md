@@ -1,4 +1,4 @@
-Skriptet som ligg her er ei samanslåing av alle skripta frå main/resources/db/migration, per skrivande stund t.o.m. 247.
+Skriptet som ligg her er ei samanslåing av alle skripta frå main/resources/db/migration, per skrivande stund t.o.m. 256.
 
 Viss du vil gjenskape det som er gjort, køyr skriptet _lagBaseline.sh_.
 

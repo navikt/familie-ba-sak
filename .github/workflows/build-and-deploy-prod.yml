@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: 'temurin'
@@ -58,12 +58,12 @@ jobs:
         with:
           fetch-depth: 0
       - name: Deploy til dev-gcp
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/app-preprod.yaml
-          IMAGE: ${{ needs.bygg.outputs.image }}
+          VAR: image=${{ needs.bygg.outputs.image }}
 
   deploy-to-prod:
     name: Deploy til prod-gcp
@@ -77,7 +77,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Deploy til prod-gcp
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp

@@ -1,11 +1,14 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
+import no.nav.familie.ba.sak.common.EksternTjenesteFeil
+import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.ekstern.bisys.BisysService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -16,15 +19,17 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
 import no.nav.familie.unleash.UnleashService
+import no.nav.fpsak.tidsserie.LocalDateSegment
+import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 import kotlin.random.Random
 
@@ -52,7 +57,8 @@ class PensjonService(
         val aktør = personidentService.hentAktør(personIdent)
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         val barnetrygdTilPensjon = fagsak?.let { hentBarnetrygdTilPensjon(fagsak, fraDato) }
-        val barnetrygdTilPensjonFraInfotrygd = hentBarnetrygdTilPensjonFraInfotrygd(aktør, fraDato)
+        val (barnetrygdTilPensjonFraInfotrygd, barnetrygdFraRelaterteInfotrygdsaker) =
+            hentBarnetrygdTilPensjonFraInfotrygd(aktør, fraDato, barnetrygdTilPensjon?.barna)
 
         if (barnetrygdTilPensjon == null && barnetrygdTilPensjonFraInfotrygd.barnetrygdPerioder.isEmpty()) return emptyList()
 
@@ -65,7 +71,11 @@ class PensjonService(
                 ?.flatten()
                 ?: emptyList()
 
-        return barnetrygdMedRelaterteSaker.plus(barnetrygdTilPensjonFraInfotrygd.plus(barnetrygdTilPensjon)).distinct()
+        return barnetrygdMedRelaterteSaker
+            .plus(barnetrygdFraRelaterteInfotrygdsaker)
+            .plus(
+                barnetrygdTilPensjonFraInfotrygd.plus(barnetrygdTilPensjon),
+            ).minusEventuelleInfotrygdperioderSomOverlapperBA(personIdent, fraDato)
     }
 
     fun lagTaskForHentingAvIdenterTilPensjon(år: Int): String {
@@ -91,19 +101,27 @@ class PensjonService(
     private fun hentBarnetrygdTilPensjonFraInfotrygd(
         aktør: Aktør,
         fraDato: LocalDate,
-    ): BarnetrygdTilPensjon {
-        val personidenter = personidenter(aktør, fraDato)
-        val allePerioderTilhørendeAktør =
-            personidenter.flatMap { ident ->
-                infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident.fødselsnummer, fraDato).fagsaker.flatMap {
-                    it.barnetrygdPerioder.maskerPersonidenteneIPreprod(aktør)
+        barnFnr: List<String>?,
+    ): Pair<BarnetrygdTilPensjon, List<BarnetrygdTilPensjon>> {
+        val personidenter = if (envService.erPreprod()) testidenter(aktør, fraDato) else aktør.personidenter.map { it.fødselsnummer }
+
+        val allePerioderTilhørendeAktør = mutableListOf<BarnetrygdPeriode>()
+        val barnetrygdFraRelaterteSaker = mutableListOf<BarnetrygdTilPensjon>()
+
+        personidenter.forEach { ident ->
+            infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(ident, fraDato).fagsaker.forEach {
+                if (personidenter.contains(it.fagsakEiersIdent)) {
+                    allePerioderTilhørendeAktør.addAll(it.barnetrygdPerioder.maskerPersonidenteneIPreprod(barnFnr))
+                } else if (!envService.erPreprod()) { // tar ikke med relaterte saker i test fra Q2 i denne omgang. Må i så fall maskeres
+                    barnetrygdFraRelaterteSaker.add(it)
                 }
             }
+        }
 
         return BarnetrygdTilPensjon(
             fagsakEiersIdent = aktør.aktivFødselsnummer(),
             barnetrygdPerioder = allePerioderTilhørendeAktør,
-        )
+        ) to barnetrygdFraRelaterteSaker
     }
 
     private fun hentBarnetrygdTilPensjonFraInfotrygdQ(
@@ -139,6 +157,7 @@ class PensjonService(
                 ?: error("Finner ikke tilkjent ytelse for behandling=${behandling.id}")
         return tilkjentYtelse.andelerTilkjentYtelse
             .filter { it.stønadTom.isSameOrAfter(fraDato.toYearMonth()) }
+            .filter { it.type == YtelseType.ORDINÆR_BARNETRYGD } // Pensjon trenger kun forholde seg til periodene med Ordinær BA
             .map { andel ->
                 BarnetrygdPeriode(
                     ytelseTypeEkstern = andel.type.tilPensjonYtelsesType(),
@@ -158,16 +177,15 @@ class PensjonService(
             }
     }
 
-    private fun personidenter(
+    private fun testidenter(
         aktør: Aktør,
         fraDato: LocalDate,
-    ) = when {
-        envService.erPreprod() ->
-            listOfNotNull(
-                tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer(), fraDato.year)?.let { Personident(it, aktør) },
-            )
-
-        else -> aktør.personidenter
+    ) = if (unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
+        emptyList()
+    } else {
+        listOfNotNull(
+            tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer(), fraDato.year),
+        )
     }
 
     @Cacheable("pensjon_testident", cacheManager = "dailyCache")
@@ -184,11 +202,19 @@ class PensjonService(
         }
     }
 
-    private fun List<BarnetrygdPeriode>.maskerPersonidenteneIPreprod(aktør: Aktør) =
+    private fun List<BarnetrygdPeriode>.maskerPersonidenteneIPreprod(barnFnr: List<String>?) =
         when {
             envService.erPreprod() -> {
-                map { it.copy(personIdent = aktør.aktivFødselsnummer()) }
+                val barnetrygdperioerPerPerson = this.groupBy { it.personIdent }.values
+                if (barnFnr != null) {
+                    barnetrygdperioerPerPerson.zip(barnFnr) { barnetrydperioder, barn ->
+                        barnetrydperioder.map { it.copy(personIdent = barn) }
+                    }.flatten()
+                } else {
+                    emptyList()
+                }
             }
+
             else -> this
         }
 
@@ -207,15 +233,96 @@ class PensjonService(
         }
     }
 
+    private fun List<BarnetrygdTilPensjon>.minusEventuelleInfotrygdperioderSomOverlapperBA(
+        personIdent: String,
+        fraDato: LocalDate,
+    ): List<BarnetrygdTilPensjon> {
+        return distinct().groupBy { it.fagsakEiersIdent }.map { (fagsakEiersIdent, barnetrygdTilPensjon) ->
+            val perioderUtenOverlappMellomFagsystemene = mutableListOf<BarnetrygdPeriode>()
+
+            barnetrygdTilPensjon.flatMap { it.barnetrygdPerioder }.groupBy { it.personIdent }
+                .forEach { (_, perioderTilhørendePerson) ->
+                    val (baSakPerioder, opprinneligeInfotrygdPerioder) =
+                        perioderTilhørendePerson.partition { it.kildesystem == "BA" }
+
+                    val infotrygdperioderMinusOverlappMedBA =
+                        try {
+                            baSakPerioder.tidslinje().crossJoin(opprinneligeInfotrygdPerioder.tidslinje()).toSegments().map {
+                                it.value.copy(
+                                    stønadFom = it.fom.toYearMonth(),
+                                    stønadTom = it.tom.toYearMonth(),
+                                )
+                            }.filter {
+                                it.kildesystem == "Infotrygd" && opprinneligeInfotrygdPerioder.fomDatoer().contains(it.stønadFom)
+                            }
+                        } catch (e: Exception) {
+                            logger.error("Klarte ikke kombinere BA og IT-perioder for fjerning av eventuelle overlapp")
+                            secureLogger.warn("Klarte ikke kombinere $baSakPerioder\n og \n$opprinneligeInfotrygdPerioder", e)
+
+                            throw EksternTjenesteFeilException(
+                                eksternTjenesteFeil = EksternTjenesteFeil("/api/ekstern/pensjon/hent-barnetrygd"),
+                                melding = "Det oppstod feil ved kombinering av BA og IT-perioder for fjerning av evt. overlapp",
+                                request = BarnetrygdTilPensjonRequest(personIdent, fraDato),
+                                throwable = e,
+                            )
+                        }
+
+                    sjekkOgLoggOmDetFinnesOverlapp(baSakPerioder, opprinneligeInfotrygdPerioder, infotrygdperioderMinusOverlappMedBA)
+                    perioderUtenOverlappMellomFagsystemene.addAll(baSakPerioder + infotrygdperioderMinusOverlappMedBA)
+                }
+
+            BarnetrygdTilPensjon(
+                fagsakEiersIdent = fagsakEiersIdent,
+                barnetrygdPerioder = perioderUtenOverlappMellomFagsystemene,
+            )
+        }
+    }
+
+    fun sjekkOgLoggOmDetFinnesOverlapp(
+        baSak: List<BarnetrygdPeriode>,
+        infotrygdperioder: List<BarnetrygdPeriode>,
+        infotrygdperioderMinusOverlappeneMedBA: List<BarnetrygdPeriode>,
+    ) {
+        if (infotrygdperioder != infotrygdperioderMinusOverlappeneMedBA) {
+            secureLogger.warn(
+                "Fant overlapp mellom $baSak og $infotrygdperioder. " +
+                    "Infotrygdperioder korrigert for overlapp:\n$infotrygdperioderMinusOverlappeneMedBA",
+            )
+        }
+    }
+
     companion object {
-        private val logger = LoggerFactory.getLogger(BisysService::class.java)
+        private val logger = LoggerFactory.getLogger(PensjonService::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 
+private fun List<BarnetrygdPeriode>.tidslinje() =
+    LocalDateTimeline(
+        map {
+            LocalDateSegment(
+                it.stønadFom.førsteDagIInneværendeMåned(),
+                it.stønadTom.sisteDagIInneværendeMåned(),
+                it,
+            )
+        },
+    )
+
+private fun List<BarnetrygdPeriode>.fomDatoer(): List<YearMonth> = map { it.stønadFom }
+
 private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): List<BarnetrygdTilPensjon> {
-    return if (fagsakEiersIdent == other?.fagsakEiersIdent) {
-        listOf(copy(barnetrygdPerioder = barnetrygdPerioder + other.barnetrygdPerioder))
-    } else {
-        listOfNotNull(this, other)
+    return when {
+        barnetrygdPerioder.isEmpty() -> {
+            listOfNotNull(other)
+        }
+        fagsakEiersIdent == other?.fagsakEiersIdent -> {
+            listOf(copy(barnetrygdPerioder = barnetrygdPerioder + other.barnetrygdPerioder))
+        }
+        else -> {
+            listOfNotNull(this, other)
+        }
     }
 }
+
+private val BarnetrygdTilPensjon.barna: List<String>
+    get() = barnetrygdPerioder.map { it.personIdent }.filter { it != fagsakEiersIdent }

@@ -22,14 +22,14 @@ Egenskap: Brevperioder: Brevperiodetype
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
-      | AktørId | Vilkår                          | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
-      | 2       | BOSATT_I_RIKET                  | OMFATTET_AV_NORSK_LOVGIVNING | 28.07.1985 |            | OPPFYLT  | Nei                  |
-      | 2       | LOVLIG_OPPHOLD                  |                              | 28.07.1985 |            | OPPFYLT  | Nei                  |
+      | AktørId | Vilkår                          | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
+      | 2       | BOSATT_I_RIKET                  | OMFATTET_AV_NORSK_LOVGIVNING | 28.07.1985 |            | OPPFYLT  | Nei                  |                  |
+      | 2       | LOVLIG_OPPHOLD                  |                              | 28.07.1985 |            | OPPFYLT  | Nei                  |                  |
 
-      | 1       | UNDER_18_ÅR                     |                              | 16.03.2022 | 15.03.2040 | OPPFYLT  | Nei                  |
-      | 1       | BOR_MED_SØKER                   | BARN_BOR_I_EØS_MED_SØKER     | 16.03.2022 |            | OPPFYLT  | Nei                  |
-      | 1       | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP |                              | 16.03.2022 |            | OPPFYLT  | Nei                  |
-      | 1       | BOSATT_I_RIKET                  | BARN_BOR_I_NORGE             | 16.03.2022 |            | OPPFYLT  | Nei                  |
+      | 1       | UNDER_18_ÅR                     |                              | 16.03.2022 | 15.03.2040 | OPPFYLT  | Nei                  |                  |
+      | 1       | BOR_MED_SØKER                   | BARN_BOR_I_EØS_MED_SØKER     | 16.03.2022 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
+      | 1       | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP |                              | 16.03.2022 |            | OPPFYLT  | Nei                  |                  |
+      | 1       | BOSATT_I_RIKET                  | BARN_BOR_I_NORGE             | 16.03.2022 |            | OPPFYLT  | Nei                  |                  |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |

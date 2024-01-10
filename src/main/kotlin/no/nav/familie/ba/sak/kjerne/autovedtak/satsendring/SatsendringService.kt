@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -16,6 +17,7 @@ class SatsendringService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val fagsakRepository: FagsakRepository,
+    private val personOpplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 ) {
     private val logger = LoggerFactory.getLogger(SatsendringService::class.java)
 
@@ -23,10 +25,15 @@ class SatsendringService(
         val sisteVedtatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)
 
-        return sisteVedtatteBehandling == null ||
+        return if (sisteVedtatteBehandling == null) {
+            true
+        } else {
+            val personOpplysningGrunnlagSisteVedtatteBehandling = personOpplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) ?: error("Fant ikke persongrunnlag på behandling ${sisteVedtatteBehandling.id}")
+
             andelerTilkjentYtelseOgEndreteUtbetalingerService
                 .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteVedtatteBehandling.id)
-                .erOppdatertMedSisteSatser()
+                .erOppdatertMedSisteSatser(personOpplysningGrunnlagSisteVedtatteBehandling)
+        }
     }
 
     fun finnLøpendeFagsakerUtenSisteSats(callId: String) {
