@@ -131,7 +131,9 @@ class OpprettTaskService(
         fagsakId: Long,
         satstidspunkt: YearMonth,
     ) {
-        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId, satsTidspunkt = satstidspunkt))
+        if (satskjøringRepository.findByFagsakIdAndSatsTidspunkt(fagsakId, satstidspunkt) == null) {
+            satskjøringRepository.save(Satskjøring(fagsakId = fagsakId, satsTidspunkt = satstidspunkt))
+        }
         overstyrTaskMedNyCallId(IdUtils.generateId()) {
             taskRepository.save(
                 Task(

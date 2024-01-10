@@ -130,17 +130,18 @@ fun tilpassKompetanserTilRegelverk(
     val barnasEøsRegelverkTidslinjer =
         barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer(
             brukBarnetsRegelverkVedBlandetResultat,
-        )
-            .leftJoin(barnasSkalIkkeUtbetalesTidslinjer) { regelverk, harEtterbetaling3År ->
-                when (harEtterbetaling3År) {
-                    true -> null // ta bort regelverk hvis barnet har etterbetaling 3 år
-                    else -> regelverk
-                }
+        ).leftJoin(barnasSkalIkkeUtbetalesTidslinjer) { regelverk, skalIkkeUtbetales ->
+            when (skalIkkeUtbetales) {
+                true -> null // ta bort regelverk dersom barnets utbetaling er endret til 0
+                else -> regelverk
             }
+        }.mapValues { (_, tidslinjer) ->
+            tidslinjer.forlengFremtidTilUendelig(MånedTidspunkt.nå())
+        }
 
     return gjeldendeKompetanser.tilSeparateTidslinjerForBarna()
-        .outerJoin(barnasEøsRegelverkTidslinjer) { kompetanse, regelverk ->
-            regelverk?.let { kompetanse ?: Kompetanse.NULL }
+        .outerJoin(barnasEøsRegelverkTidslinjer) { kompetanse, eøsRegelverk ->
+            eøsRegelverk?.let { kompetanse ?: Kompetanse.NULL }
         }
         .mapValues { (_, value) ->
             value.kombinerMed(annenForelderOmfattetAvNorskLovgivningTidslinje) { kompetanse, annenForelderOmfattet ->
@@ -158,12 +159,11 @@ fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(beha
 
 private fun Map<Aktør, Tidslinje<KombinertRegelverkResultat, Måned>>.tilBarnasEøsRegelverkTidslinjer(
     brukBarnetsRegelverkVedBlandetResultat: Boolean,
-) =
-    this.mapValues { (_, tidslinjer) ->
-        tidslinjer.mapTilRegelverk(brukBarnetsRegelverkVedBlandetResultat)
+): Map<Aktør, Tidslinje<Regelverk, Måned>> =
+    this.mapValues { (_, regelverkResultatTidslinje) ->
+        regelverkResultatTidslinje.mapTilRegelverk(brukBarnetsRegelverkVedBlandetResultat)
             .filtrer { it == Regelverk.EØS_FORORDNINGEN }
             .filtrerIkkeNull()
-            .forlengFremtidTilUendelig(MånedTidspunkt.nå())
     }
 
 private fun Tidslinje<KombinertRegelverkResultat, Måned>.mapTilRegelverk(brukBarnetsRegelverkVedBlandetResultat: Boolean) =
