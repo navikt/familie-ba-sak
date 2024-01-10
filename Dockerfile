@@ -1,5 +1,4 @@
 FROM busybox:1.36.1-uclibc as busybox
-
 # Download opentelemetry-javaagent
 # https://opentelemetry.io/docs/instrumentation/java/automatic/agent-config/
 FROM scratch as javaagent
@@ -9,10 +8,9 @@ ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/release
 # Final image
 FROM gcr.io/distroless/java21:nonroot
 COPY --from=javaagent --chown=nonroot:nonroot /instrumentations/java/javaagent.jar /app/javaagent.jar
+COPY --from=busybox /bin/printenv /bin/printenv
 COPY --chown=nonroot:nonroot ./target/familie-ba-sak.jar /app/app.jar
 WORKDIR /app
-
-COPY --from=busybox /bin/printenv /bin/printenv
 
 ENV APP_NAME=familie-ba-sak
 ENV TZ="Europe/Oslo"
