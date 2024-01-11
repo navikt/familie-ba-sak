@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
+import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -189,6 +190,25 @@ class OpprettTaskService(
                         this["gammelIdent"] = dto.gammelIdent.ident
                         this["nyIdent"] = dto.nyIdent.ident
                     },
+            ),
+        )
+    }
+
+    @Transactional
+    fun opprettGrensesnittavstemMotOppdragTask(
+        dto: GrensesnittavstemmingTaskDTO,
+    ) {
+        taskRepository.save(
+            Task(
+                type = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(dto),
+                properties =
+                    Properties().apply {
+                        this["fomDato"] = dto.fomDato.toString()
+                        this["tomDato"] = dto.tomDato.toString()
+                    },
+            ).medTriggerTid(
+                dto.tomDato.toLocalDate().atTime(8, 0),
             ),
         )
     }
