@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -77,8 +78,16 @@ object BehandlingsresultatEndringUtils {
                         )
                     } ?: false // false hvis verken forrige eller nåværende behandling har andeler
 
+                val tidligsteRelevanteFomDatoForPersonIVilkårsvurdering =
+                    if (erEndringIBeløpForPerson) {
+                        TIDENES_MORGEN.toYearMonth()
+                    } else {
+                        nåværendeAndelerForPerson.minOfOrNull { it.stønadFom }?.minusMonths(1) ?: TIDENES_MORGEN.toYearMonth()
+                    }
+
                 val erEndringIVilkårsvurderingForPerson =
                     erEndringIVilkårsvurderingForPerson(
+                        tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering,
                         nåværendePersonResultaterForPerson = nåværendePersonResultatForPerson,
                         forrigePersonResultaterForPerson = forrigePersonResultatForPerson,
                         personIBehandling = personIBehandling,
@@ -189,7 +198,6 @@ private fun Tidslinje<Boolean, Måned>.fjernPerioderEtterOpphørsdato(opphørsti
 private fun Tidslinje<Boolean, Måned>.fjernPerioderLengreEnnToMånederFramITid() =
     this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = YearMonth.now().plusMonths(2).tilTidspunkt())
 
-
 internal fun erEndringIKompetanseForPerson(
     nåværendeKompetanserForPerson: List<Kompetanse>,
     forrigeKompetanserForPerson: List<Kompetanse>,
@@ -208,9 +216,11 @@ internal fun erEndringIVilkårsvurderingForPerson(
     forrigePersonResultaterForPerson: Set<PersonResultat>,
     personIBehandling: Person?,
     personIForrigeBehandling: Person?,
+    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering: YearMonth,
 ): Boolean {
     val endringIVilkårsvurderingTidslinje =
         EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
+            tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering,
             nåværendePersonResultaterForPerson = nåværendePersonResultaterForPerson,
             forrigePersonResultater = forrigePersonResultaterForPerson,
             personIBehandling = personIBehandling,

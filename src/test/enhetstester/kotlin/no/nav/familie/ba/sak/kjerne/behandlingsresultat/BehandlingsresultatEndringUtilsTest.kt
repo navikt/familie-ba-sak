@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -9,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIBeløpForPerson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.utledEndringsresultat
@@ -871,13 +873,13 @@ class BehandlingsresultatEndringUtilsTest {
                 søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
             )
 
-
-        val erEndringIEndretAndeler = listOf(barn1, barn2).any {
-            erEndringIEndretUtbetalingAndelerForPerson(
-                forrigeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2).filter { endretAndel -> endretAndel.person  == it },
-                nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT)).filter { endretAndel -> endretAndel.person  == it },
-            )
-        }
+        val erEndringIEndretAndeler =
+            listOf(barn1, barn2).any {
+                erEndringIEndretUtbetalingAndelerForPerson(
+                    forrigeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2).filter { endretAndel -> endretAndel.person == it },
+                    nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT)).filter { endretAndel -> endretAndel.person == it },
+                )
+            }
 
         assertTrue(erEndringIEndretAndeler)
     }
@@ -1204,6 +1206,7 @@ class BehandlingsresultatEndringUtilsTest {
                 forrigePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
+                tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(false))
@@ -1259,6 +1262,7 @@ class BehandlingsresultatEndringUtilsTest {
                 forrigePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
+                tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1313,6 +1317,7 @@ class BehandlingsresultatEndringUtilsTest {
                 forrigePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
+                tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1371,6 +1376,7 @@ class BehandlingsresultatEndringUtilsTest {
                 forrigePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
+                tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1426,6 +1432,7 @@ class BehandlingsresultatEndringUtilsTest {
                 forrigePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
                 personIBehandling = barn,
                 personIForrigeBehandling = barn,
+                tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(false))
