@@ -61,7 +61,7 @@ class ForvalterService(
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
-kt    fun loggFagsakerHvorsisteVedtatteBehandlingFørSatsendringErEndreMigreringsdato() {
+   fun loggFagsakerHvorsisteVedtatteBehandlingFørSatsendringErEndreMigreringsdato() {
         val fagsaker = fagsakRepository.finnFagsakIderMedEndreMigreringsdatoBehandlinger()
         fagsaker.forEach { fagsakId ->
             val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
