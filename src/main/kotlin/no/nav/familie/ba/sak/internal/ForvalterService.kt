@@ -61,6 +61,21 @@ class ForvalterService(
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
+
+    fun loggFagsakerHvorsisteVedtatteBehandlingFørSatsendringErEndreMigreringsdato() {
+        val fagsaker = fagsakRepository.finnFagsakIderMedEndreMigreringsdatoBehandlinger()
+        fagsaker.forEach { fagsakId ->
+            val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
+            //if last behandling is satsendring and the one before is endre migreringsdato
+            if (behandlinger.size > 1 &&
+                behandlinger.last().type == BehandlingType.REVURDERING &&
+                behandlinger[behandlinger.size - 2].type == BehandlingType.REVURDERING &&
+                behandlinger[behandlinger.size - 2].opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+            ) {
+                logger.info("Fagsak $fagsakId har siste behandling ${behandlinger.last().id} som er satsendring og den før er endre migreringsdato")
+            }
+        }
+    }
     @Transactional
     fun lagOgSendUtbetalingsoppdragTilØkonomiForBehandling(behandlingId: Long) {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
