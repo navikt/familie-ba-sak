@@ -68,7 +68,7 @@ class ForvalterService(
             val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
             //if last behandling is satsendring and the one before is endre migreringsdato
             if (behandlinger.size > 1 &&
-                behandlinger.last().type == BehandlingType.REVURDERING &&
+                behandlinger.last().type == BehandlingType.REVURDERING && behandlinger.last().opprettetÅrsak == BehandlingÅrsak.SATSENDRING &&
                 behandlinger[behandlinger.size - 2].type == BehandlingType.REVURDERING &&
                 behandlinger[behandlinger.size - 2].opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
             ) {
