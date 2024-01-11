@@ -155,8 +155,8 @@ private fun erEndringIBeløpForPersonOgType(
     opphørstidspunktForBehandling: YearMonth,
     erFremstiltKravForPerson: Boolean,
 ): Boolean {
-    val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler.filtrerBortAndelerMedFomLengreEnn2MånederFramITid())
-    val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler.filtrerBortAndelerMedFomLengreEnn2MånederFramITid())
+    val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
+    val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
 
     val endringIBeløpTidslinje =
         nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
@@ -178,12 +178,17 @@ private fun erEndringIBeløpForPersonOgType(
             }
         }
             .fjernPerioderEtterOpphørsdato(opphørstidspunktForBehandling)
+            .fjernPerioderLengreEnnToMånederFramITid()
 
     return endringIBeløpTidslinje.perioder().any { it.innhold == true }
 }
 
 private fun Tidslinje<Boolean, Måned>.fjernPerioderEtterOpphørsdato(opphørstidspunkt: YearMonth) =
     this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = opphørstidspunkt.forrigeMåned().tilTidspunkt())
+
+private fun Tidslinje<Boolean, Måned>.fjernPerioderLengreEnnToMånederFramITid() =
+    this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = YearMonth.now().plusMonths(2).tilTidspunkt())
+
 
 internal fun erEndringIKompetanseForPerson(
     nåværendeKompetanserForPerson: List<Kompetanse>,
@@ -226,13 +231,4 @@ internal fun erEndringIEndretUtbetalingAndelerForPerson(
         )
 
     return endringIEndretUtbetalingAndelTidslinje.perioder().any { it.innhold == true }
-}
-
-/**
- * Når vi beregner om det er endring i beløp så tar vi ikke hensyn til andeler som har fom lengre enn 2 måneder fram i tid
- */
-private fun List<AndelTilkjentYtelse>.filtrerBortAndelerMedFomLengreEnn2MånederFramITid(): List<AndelTilkjentYtelse> {
-    val toMånederFramITid = YearMonth.now().plusMonths(2)
-
-    return this.filterNot { it.stønadFom > toMånederFramITid }
 }
