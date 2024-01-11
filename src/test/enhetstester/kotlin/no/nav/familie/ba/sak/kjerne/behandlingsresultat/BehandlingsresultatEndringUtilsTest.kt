@@ -10,11 +10,9 @@ import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIBeløp
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIEndretUtbetalingAndeler
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIKompetanse
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIBeløpForPerson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.utledEndringsresultat
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
@@ -70,12 +68,14 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i beløp`() {
+        val person = lagPerson()
+
         val forrigeAndel =
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn1Aktør,
+                aktør = person.aktør,
             )
 
         val endringsresultat =
@@ -89,8 +89,8 @@ class BehandlingsresultatEndringUtilsTest {
                 forrigePersonResultat = emptySet(),
                 nåværendeEndretAndeler = emptyList(),
                 forrigeEndretAndeler = emptyList(),
-                personerIBehandling = emptySet(),
-                personerIForrigeBehandling = emptySet(),
+                personerIBehandling = setOf(person),
+                personerIForrigeBehandling = setOf(person),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -192,6 +192,9 @@ class BehandlingsresultatEndringUtilsTest {
     fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i kompetanse`() {
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
+
+        val barnPerson = lagPerson(aktør = barn1Aktør)
+
         val forrigeKompetanse =
             lagKompetanse(
                 behandlingId = forrigeBehandling.id,
@@ -221,8 +224,8 @@ class BehandlingsresultatEndringUtilsTest {
                 forrigePersonResultat = emptySet(),
                 nåværendeEndretAndeler = emptyList(),
                 forrigeEndretAndeler = emptyList(),
-                personerIBehandling = emptySet(),
-                personerIForrigeBehandling = emptySet(),
+                personerIBehandling = setOf(barnPerson),
+                personerIForrigeBehandling = setOf(barnPerson),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -252,8 +255,8 @@ class BehandlingsresultatEndringUtilsTest {
                 forrigePersonResultat = emptySet(),
                 forrigeEndretAndeler = listOf(forrigeEndretAndel),
                 nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT)),
-                personerIBehandling = emptySet(),
-                personerIForrigeBehandling = emptySet(),
+                personerIBehandling = setOf(barn),
+                personerIForrigeBehandling = setOf(barn),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -282,12 +285,14 @@ class BehandlingsresultatEndringUtilsTest {
                 ),
             )
 
+        val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+
         val erEndringIBeløp =
-            erEndringIBeløp(
-                nåværendeAndeler = nåværendeAndeler,
-                forrigeAndeler = forrigeAndeler,
-                nåværendeEndretAndeler = emptyList(),
-                personerFremstiltKravFor = listOf(),
+            erEndringIBeløpForPerson(
+                nåværendeAndelerForPerson = nåværendeAndeler,
+                forrigeAndelerForPerson = forrigeAndeler,
+                opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
+                erFremstiltKravForPerson = false,
             )
 
         assertEquals(false, erEndringIBeløp)
@@ -297,6 +302,7 @@ class BehandlingsresultatEndringUtilsTest {
     fun `Endring i beløp - Skal returnere true når beløp i periode har gått fra større enn 0 til null og det er søkt for person`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+        val personerFramstiltKravFor = listOf(barn1Aktør)
 
         val forrigeAndeler =
             listOf(
@@ -330,12 +336,21 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val erEndringIBeløp =
-            erEndringIBeløp(
-                nåværendeAndeler = nåværendeAndeler,
-                forrigeAndeler = forrigeAndeler,
-                nåværendeEndretAndeler = emptyList(),
-                personerFremstiltKravFor = listOf(barn1Aktør),
-            )
+            listOf(barn1Aktør, barn2Aktør).any { aktør ->
+                val erFremstiltKravForPerson = personerFramstiltKravFor.contains(aktør)
+
+                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+
+                val erEndringIBeløpForPerson =
+                    erEndringIBeløpForPerson(
+                        nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør },
+                        forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
+                        opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
+                        erFremstiltKravForPerson = erFremstiltKravForPerson,
+                    )
+
+                erEndringIBeløpForPerson
+            }
 
         assertEquals(true, erEndringIBeløp)
     }
@@ -344,6 +359,8 @@ class BehandlingsresultatEndringUtilsTest {
     fun `Endring i beløp - Skal returnere false når beløp i periode har gått fra større enn 0 til at annet tall større enn 0 og det er søkt for person`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val personerFramstiltKravFor = listOf(barn1Aktør)
 
         val forrigeAndeler =
             listOf(
@@ -383,12 +400,21 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val erEndringIBeløp =
-            erEndringIBeløp(
-                nåværendeAndeler = nåværendeAndeler,
-                forrigeAndeler = forrigeAndeler,
-                nåværendeEndretAndeler = emptyList(),
-                personerFremstiltKravFor = listOf(barn1Aktør),
-            )
+            listOf(barn1Aktør, barn2Aktør).any { aktør ->
+                val erFremstiltKravForPerson = personerFramstiltKravFor.contains(aktør)
+
+                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+
+                val erEndringIBeløpForPerson =
+                    erEndringIBeløpForPerson(
+                        nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør },
+                        forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
+                        opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
+                        erFremstiltKravForPerson = erFremstiltKravForPerson,
+                    )
+
+                erEndringIBeløpForPerson
+            }
 
         assertEquals(false, erEndringIBeløp)
     }
@@ -430,12 +456,19 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val erEndringIBeløp =
-            erEndringIBeløp(
-                nåværendeAndeler = nåværendeAndeler,
-                forrigeAndeler = forrigeAndeler,
-                nåværendeEndretAndeler = emptyList(),
-                personerFremstiltKravFor = listOf(),
-            )
+            listOf(barn1Aktør, barn2Aktør).any { aktør ->
+                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+
+                val erEndringIBeløpForPerson =
+                    erEndringIBeløpForPerson(
+                        nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør },
+                        forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
+                        opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
+                        erFremstiltKravForPerson = false,
+                    )
+
+                erEndringIBeløpForPerson
+            }
 
         assertEquals(true, erEndringIBeløp)
     }
@@ -444,6 +477,8 @@ class BehandlingsresultatEndringUtilsTest {
     fun `Endring i beløp - Skal returnere false når beløp i periode har gått fra null til et tall større enn 0 og det er søkt for person`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val personerFramstiltKravFor = listOf(barn1Aktør)
 
         val forrigeAndeler =
             listOf(
@@ -477,12 +512,21 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val erEndringIBeløp =
-            erEndringIBeløp(
-                nåværendeAndeler = nåværendeAndeler,
-                forrigeAndeler = forrigeAndeler,
-                nåværendeEndretAndeler = emptyList(),
-                personerFremstiltKravFor = listOf(barn1Aktør),
-            )
+            listOf(barn1Aktør, barn2Aktør).any { aktør ->
+                val erFremstiltKravForPerson = personerFramstiltKravFor.contains(aktør)
+
+                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+
+                val erEndringIBeløpForPerson =
+                    erEndringIBeløpForPerson(
+                        nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør },
+                        forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
+                        opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
+                        erFremstiltKravForPerson = erFremstiltKravForPerson,
+                    )
+
+                erEndringIBeløpForPerson
+            }
 
         assertEquals(false, erEndringIBeløp)
     }
@@ -530,12 +574,20 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val erEndringIBeløp =
-            erEndringIBeløp(
-                nåværendeAndeler = nåværendeAndeler,
-                forrigeAndeler = forrigeAndeler,
-                nåværendeEndretAndeler = emptyList(),
-                personerFremstiltKravFor = listOf(),
-            )
+            listOf(barn1Aktør, barn2Aktør).any { aktør ->
+
+                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+
+                val erEndringIBeløpForPerson =
+                    erEndringIBeløpForPerson(
+                        nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør },
+                        forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
+                        opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
+                        erFremstiltKravForPerson = false,
+                    )
+
+                erEndringIBeløpForPerson
+            }
 
         assertEquals(true, erEndringIBeløp)
     }
@@ -586,12 +638,20 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val erEndringIBeløp =
-            erEndringIBeløp(
-                nåværendeAndeler = nåværendeAndeler,
-                forrigeAndeler = forrigeAndeler,
-                nåværendeEndretAndeler = emptyList(),
-                personerFremstiltKravFor = listOf(),
-            )
+            listOf(søker, barn2Aktør).any { aktør ->
+
+                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+
+                val erEndringIBeløpForPerson =
+                    erEndringIBeløpForPerson(
+                        nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør },
+                        forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
+                        opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
+                        erFremstiltKravForPerson = false,
+                    )
+
+                erEndringIBeløpForPerson
+            }
 
         assertEquals(true, erEndringIBeløp)
     }
@@ -635,12 +695,14 @@ class BehandlingsresultatEndringUtilsTest {
                 ),
             )
 
+        val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+
         val erEndringIBeløp =
-            erEndringIBeløp(
-                nåværendeAndeler = nåværendeAndeler,
-                forrigeAndeler = forrigeAndeler,
-                nåværendeEndretAndeler = emptyList(),
-                personerFremstiltKravFor = listOf(),
+            erEndringIBeløpForPerson(
+                nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == barnAktør },
+                forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == barn1Aktør },
+                opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
+                erFremstiltKravForPerson = false,
             )
 
         assertEquals(false, erEndringIBeløp)
@@ -660,9 +722,9 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val erEndringIEndretAndeler =
-            erEndringIEndretUtbetalingAndeler(
-                forrigeEndretAndeler = listOf(forrigeEndretAndel),
-                nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT)),
+            erEndringIEndretUtbetalingAndelerForPerson(
+                forrigeEndretAndelerForPerson = listOf(forrigeEndretAndel),
+                nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT)),
             )
 
         assertTrue(erEndringIEndretAndeler)
@@ -683,9 +745,9 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val erEndringIEndretAndeler =
-            erEndringIEndretUtbetalingAndeler(
-                forrigeEndretAndeler = listOf(forrigeEndretAndel),
-                nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(avtaletidspunktDeltBosted = feb22.førsteDagIInneværendeMåned())),
+            erEndringIEndretUtbetalingAndelerForPerson(
+                forrigeEndretAndelerForPerson = listOf(forrigeEndretAndel),
+                nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndel.copy(avtaletidspunktDeltBosted = feb22.førsteDagIInneværendeMåned())),
             )
 
         assertTrue(erEndringIEndretAndeler)
@@ -706,9 +768,9 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val erEndringIEndretAndeler =
-            erEndringIEndretUtbetalingAndeler(
-                forrigeEndretAndeler = listOf(forrigeEndretAndel),
-                nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(søknadstidspunkt = feb22.førsteDagIInneværendeMåned())),
+            erEndringIEndretUtbetalingAndelerForPerson(
+                forrigeEndretAndelerForPerson = listOf(forrigeEndretAndel),
+                nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndel.copy(søknadstidspunkt = feb22.førsteDagIInneværendeMåned())),
             )
 
         assertTrue(erEndringIEndretAndeler)
@@ -729,9 +791,9 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val erEndringIEndretAndeler =
-            erEndringIEndretUtbetalingAndeler(
-                forrigeEndretAndeler = listOf(forrigeEndretAndel),
-                nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(prosent = BigDecimal(100))),
+            erEndringIEndretUtbetalingAndelerForPerson(
+                forrigeEndretAndelerForPerson = listOf(forrigeEndretAndel),
+                nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndel.copy(prosent = BigDecimal(100))),
             )
 
         assertFalse(erEndringIEndretAndeler)
@@ -752,9 +814,9 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val erEndringIEndretAndeler =
-            erEndringIEndretUtbetalingAndeler(
-                forrigeEndretAndeler = listOf(forrigeEndretAndel),
-                nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(tom = des22)),
+            erEndringIEndretUtbetalingAndelerForPerson(
+                forrigeEndretAndelerForPerson = listOf(forrigeEndretAndel),
+                nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndel.copy(tom = des22)),
             )
 
         assertFalse(erEndringIEndretAndeler)
@@ -775,9 +837,9 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val erEndringIEndretAndeler =
-            erEndringIEndretUtbetalingAndeler(
-                forrigeEndretAndeler = emptyList(),
-                nåværendeEndretAndeler = listOf(nåværendeEndretAndel),
+            erEndringIEndretUtbetalingAndelerForPerson(
+                forrigeEndretAndelerForPerson = emptyList(),
+                nåværendeEndretAndelerForPerson = listOf(nåværendeEndretAndel),
             )
 
         assertFalse(erEndringIEndretAndeler)
@@ -809,15 +871,13 @@ class BehandlingsresultatEndringUtilsTest {
                 søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
             )
 
-        val erEndringIEndretAndeler =
-            erEndringIEndretUtbetalingAndeler(
-                forrigeEndretAndeler = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2),
-                nåværendeEndretAndeler =
-                    listOf(
-                        forrigeEndretAndelBarn1,
-                        forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT),
-                    ),
+
+        val erEndringIEndretAndeler = listOf(barn1, barn2).any {
+            erEndringIEndretUtbetalingAndelerForPerson(
+                forrigeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2).filter { endretAndel -> endretAndel.person  == it },
+                nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT)).filter { endretAndel -> endretAndel.person  == it },
             )
+        }
 
         assertTrue(erEndringIEndretAndeler)
     }
@@ -841,9 +901,9 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val endring =
-            erEndringIKompetanse(
-                nåværendeKompetanser = listOf(forrigeKompetanse.copy().apply { behandlingId = nåværendeBehandling.id }),
-                forrigeKompetanser = listOf(forrigeKompetanse),
+            erEndringIKompetanseForPerson(
+                nåværendeKompetanserForPerson = listOf(forrigeKompetanse.copy().apply { behandlingId = nåværendeBehandling.id }),
+                forrigeKompetanserForPerson = listOf(forrigeKompetanse),
             )
 
         assertEquals(false, endring)
@@ -868,12 +928,12 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val endring =
-            erEndringIKompetanse(
-                nåværendeKompetanser =
+            erEndringIKompetanseForPerson(
+                nåværendeKompetanserForPerson =
                     listOf(
                         forrigeKompetanse.copy(søkersAktivitetsland = "DK").apply { behandlingId = nåværendeBehandling.id },
                     ),
-                forrigeKompetanser = listOf(forrigeKompetanse),
+                forrigeKompetanserForPerson = listOf(forrigeKompetanse),
             )
 
         assertEquals(true, endring)
@@ -898,13 +958,13 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val endring =
-            erEndringIKompetanse(
-                nåværendeKompetanser =
+            erEndringIKompetanseForPerson(
+                nåværendeKompetanserForPerson =
                     listOf(
                         forrigeKompetanse.copy(søkersAktivitet = KompetanseAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
                             .apply { behandlingId = nåværendeBehandling.id },
                     ),
-                forrigeKompetanser = listOf(forrigeKompetanse),
+                forrigeKompetanserForPerson = listOf(forrigeKompetanse),
             )
 
         assertEquals(true, endring)
@@ -929,13 +989,13 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val endring =
-            erEndringIKompetanse(
-                nåværendeKompetanser =
+            erEndringIKompetanseForPerson(
+                nåværendeKompetanserForPerson =
                     listOf(
                         forrigeKompetanse.copy(annenForeldersAktivitetsland = "DK")
                             .apply { behandlingId = nåværendeBehandling.id },
                     ),
-                forrigeKompetanser = listOf(forrigeKompetanse),
+                forrigeKompetanserForPerson = listOf(forrigeKompetanse),
             )
 
         assertEquals(true, endring)
@@ -960,13 +1020,13 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val endring =
-            erEndringIKompetanse(
-                nåværendeKompetanser =
+            erEndringIKompetanseForPerson(
+                nåværendeKompetanserForPerson =
                     listOf(
                         forrigeKompetanse.copy(annenForeldersAktivitet = KompetanseAktivitet.FORSIKRET_I_BOSTEDSLAND)
                             .apply { behandlingId = nåværendeBehandling.id },
                     ),
-                forrigeKompetanser = listOf(forrigeKompetanse),
+                forrigeKompetanserForPerson = listOf(forrigeKompetanse),
             )
 
         assertEquals(true, endring)
@@ -991,12 +1051,12 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val endring =
-            erEndringIKompetanse(
-                nåværendeKompetanser =
+            erEndringIKompetanseForPerson(
+                nåværendeKompetanserForPerson =
                     listOf(
                         forrigeKompetanse.copy(barnetsBostedsland = "DK").apply { behandlingId = nåværendeBehandling.id },
                     ),
-                forrigeKompetanser = listOf(forrigeKompetanse),
+                forrigeKompetanserForPerson = listOf(forrigeKompetanse),
             )
 
         assertEquals(true, endring)
@@ -1021,13 +1081,13 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val endring =
-            erEndringIKompetanse(
-                nåværendeKompetanser =
+            erEndringIKompetanseForPerson(
+                nåværendeKompetanserForPerson =
                     listOf(
                         forrigeKompetanse.copy(resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND)
                             .apply { behandlingId = nåværendeBehandling.id },
                     ),
-                forrigeKompetanser = listOf(forrigeKompetanse),
+                forrigeKompetanserForPerson = listOf(forrigeKompetanse),
             )
 
         assertEquals(true, endring)
@@ -1052,13 +1112,13 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val endring =
-            erEndringIKompetanse(
-                nåværendeKompetanser =
+            erEndringIKompetanseForPerson(
+                nåværendeKompetanserForPerson =
                     listOf(
                         forrigeKompetanse.copy(fom = YearMonth.now().minusMonths(10))
                             .apply { behandlingId = nåværendeBehandling.id },
                     ),
-                forrigeKompetanser = listOf(forrigeKompetanse),
+                forrigeKompetanserForPerson = listOf(forrigeKompetanse),
             )
 
         assertEquals(false, endring)
@@ -1139,11 +1199,11 @@ class BehandlingsresultatEndringUtilsTest {
         val barn = lagPerson(aktør = aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
 
         val erEndringIVilkårvurderingForPerson =
-            erEndringIVilkårsvurdering(
-                nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-                personerIBehandling = setOf(barn),
-                personerIForrigeBehandling = setOf(barn),
+            erEndringIVilkårsvurderingForPerson(
+                nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+                forrigePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                personIBehandling = barn,
+                personIForrigeBehandling = barn,
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(false))
@@ -1194,11 +1254,11 @@ class BehandlingsresultatEndringUtilsTest {
         val barn = lagPerson(aktør = aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
 
         val erEndringIVilkårvurderingForPerson =
-            erEndringIVilkårsvurdering(
-                nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-                personerIBehandling = setOf(barn),
-                personerIForrigeBehandling = setOf(barn),
+            erEndringIVilkårsvurderingForPerson(
+                nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+                forrigePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                personIBehandling = barn,
+                personIForrigeBehandling = barn,
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1248,11 +1308,11 @@ class BehandlingsresultatEndringUtilsTest {
         val barn = lagPerson(aktør = aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
 
         val erEndringIVilkårvurderingForPerson =
-            erEndringIVilkårsvurdering(
-                nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-                personerIBehandling = setOf(barn),
-                personerIForrigeBehandling = setOf(barn),
+            erEndringIVilkårsvurderingForPerson(
+                nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+                forrigePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                personIBehandling = barn,
+                personIForrigeBehandling = barn,
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1306,11 +1366,11 @@ class BehandlingsresultatEndringUtilsTest {
         val barn = lagPerson(aktør = aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
 
         val erEndringIVilkårvurderingForPerson =
-            erEndringIVilkårsvurdering(
-                nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-                personerIBehandling = setOf(barn),
-                personerIForrigeBehandling = setOf(barn),
+            erEndringIVilkårsvurderingForPerson(
+                nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+                forrigePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                personIBehandling = barn,
+                personIForrigeBehandling = barn,
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1361,11 +1421,11 @@ class BehandlingsresultatEndringUtilsTest {
         val barn = lagPerson(aktør = aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
 
         val erEndringIVilkårvurderingForPerson =
-            erEndringIVilkårsvurdering(
-                nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-                personerIBehandling = setOf(barn),
-                personerIForrigeBehandling = setOf(barn),
+            erEndringIVilkårsvurderingForPerson(
+                nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+                forrigePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                personIBehandling = barn,
+                personIForrigeBehandling = barn,
             )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(false))

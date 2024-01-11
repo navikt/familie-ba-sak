@@ -42,175 +42,197 @@ object BehandlingsresultatEndringUtils {
         personerIBehandling: Set<Person>,
         personerIForrigeBehandling: Set<Person>,
     ): Endringsresultat {
-        val erEndringIBeløp =
-            erEndringIBeløp(
-                nåværendeAndeler = nåværendeAndeler,
-                forrigeAndeler = forrigeAndeler,
-                nåværendeEndretAndeler = nåværendeEndretAndeler,
-                personerFremstiltKravFor = personerFremstiltKravFor,
-            )
+        val relevantePersoner = (personerIBehandling.map { it.aktør } + personerIForrigeBehandling.map { it.aktør }).distinct()
 
-        val erEndringIKompetanse =
-            erEndringIKompetanse(
-                nåværendeKompetanser = nåværendeKompetanser,
-                forrigeKompetanser = forrigeKompetanser,
-            )
+        val endringerForRelevantePersoner =
+            relevantePersoner.any { aktør ->
+                val nåværendePersonResultatForPerson = nåværendePersonResultat.filter { it.aktør == aktør }.toSet()
+                val forrigePersonResultatForPerson = forrigePersonResultat.filter { it.aktør == aktør }.toSet()
 
-        val erEndringIVilkårsvurdering =
-            erEndringIVilkårsvurdering(
-                nåværendePersonResultat = nåværendePersonResultat,
-                forrigePersonResultat = forrigePersonResultat,
-                personerIBehandling = personerIBehandling,
-                personerIForrigeBehandling = personerIForrigeBehandling,
-            )
+                val nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør }
+                val forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør }
 
-        val erEndringIEndretUtbetalingAndeler =
-            erEndringIEndretUtbetalingAndeler(
-                nåværendeEndretAndeler = nåværendeEndretAndeler,
-                forrigeEndretAndeler = forrigeEndretAndeler,
-            )
+                val nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { it.person?.aktør == aktør }
+                val forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.person?.aktør == aktør }
 
-        val erMinstEnEndring =
-            erEndringIBeløp || erEndringIKompetanse || erEndringIVilkårsvurdering || erEndringIEndretUtbetalingAndeler
+                val nåværendeKompetanserForPerson = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) }
+                val forrigeKompetanserForPerson = forrigeKompetanser.filter { it.barnAktører.contains(aktør) }
 
-        if (erMinstEnEndring) {
-            logger.info(
-                "Endringer: " +
-                    "erEndringIBeløp=$erEndringIBeløp, " +
-                    "erEndringIKompetanse=$erEndringIKompetanse, " +
-                    "erEndringIVilkårsvurdering=$erEndringIVilkårsvurdering, " +
-                    "erEndringIEndretUtbetalingAndeler=$erEndringIEndretUtbetalingAndeler",
-            )
+                val personIBehandling = personerIBehandling.singleOrNull { it.aktør == aktør }
+                val personIForrigeBehandling = personerIForrigeBehandling.singleOrNull { it.aktør == aktør }
 
-            val endredeAndelTilkjentYtelse = if (erEndringIBeløp) "nye AndelerTilkjentYtelse: $nåværendeAndeler , " else ""
-            val endredeKompetanser = if (erEndringIKompetanse) "nye kompetanser: $nåværendeKompetanser ," else ""
-            val endredeVilkårsvurderinger = if (erEndringIVilkårsvurdering) "nye personresultater: $nåværendePersonResultat ," else ""
-            val endredeEndretUtbetalingAndeler = if (erEndringIEndretUtbetalingAndeler) "nye endretUtbetalingAndeler: $nåværendeEndretAndeler" else ""
+                val opphørstidspunktForBehandling =
+                    nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                        forrigeAndelerIBehandling = forrigeAndeler,
+                        nåværendeEndretAndelerIBehandling = nåværendeEndretAndeler,
+                    )
 
-            secureLogger.info(
-                "Endringer: $endredeAndelTilkjentYtelse $endredeKompetanser $endredeVilkårsvurderinger $endredeEndretUtbetalingAndeler",
-            )
-        }
+                val erEndringIBeløpForPerson =
+                    opphørstidspunktForBehandling?.let {
+                        erEndringIBeløpForPerson(
+                            nåværendeAndelerForPerson = nåværendeAndelerForPerson,
+                            forrigeAndelerForPerson = forrigeAndelerForPerson,
+                            opphørstidspunktForBehandling = opphørstidspunktForBehandling,
+                            erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør),
+                        )
+                    } ?: false // false hvis verken forrige eller nåværende behandling har andeler
 
-        return if (erMinstEnEndring) Endringsresultat.ENDRING else Endringsresultat.INGEN_ENDRING
+                val erEndringIVilkårsvurderingForPerson =
+                    erEndringIVilkårsvurderingForPerson(
+                        nåværendePersonResultaterForPerson = nåværendePersonResultatForPerson,
+                        forrigePersonResultaterForPerson = forrigePersonResultatForPerson,
+                        personIBehandling = personIBehandling,
+                        personIForrigeBehandling = personIForrigeBehandling,
+                    )
+
+                val erEndringIKompetanseForPerson =
+                    erEndringIKompetanseForPerson(
+                        nåværendeKompetanserForPerson = nåværendeKompetanserForPerson,
+                        forrigeKompetanserForPerson = forrigeKompetanserForPerson,
+                    )
+
+                val erEndringIEndretUtbetalingAndelerForPerson =
+                    erEndringIEndretUtbetalingAndelerForPerson(
+                        nåværendeEndretAndelerForPerson = nåværendeEndretAndelerForPerson,
+                        forrigeEndretAndelerForPerson = forrigeEndretAndelerForPerson,
+                    )
+
+                val erMinstEnEndringForPerson =
+                    erEndringIBeløpForPerson ||
+                        erEndringIKompetanseForPerson ||
+                        erEndringIVilkårsvurderingForPerson ||
+                        erEndringIEndretUtbetalingAndelerForPerson
+
+                if (erMinstEnEndringForPerson) {
+                    logger.info(
+                        "Endringer: " +
+                            "erEndringIBeløp=$erEndringIBeløpForPerson for aktør ${aktør.aktørId}," +
+                            "erEndringIKompetanse=$erEndringIKompetanseForPerson for aktør ${aktør.aktørId}, " +
+                            "erEndringIVilkårsvurdering=$erEndringIVilkårsvurderingForPerson for aktør ${aktør.aktørId}, " +
+                            "erEndringIEndretUtbetalingAndeler=$erEndringIEndretUtbetalingAndelerForPerson for aktør ${aktør.aktørId}",
+                    )
+
+                    val endredeAndelTilkjentYtelseForPerson = if (erEndringIBeløpForPerson) "nye AndelerTilkjentYtelse for aktør ${aktør.aktørId}: $nåværendeAndeler , " else ""
+                    val endredeKompetanserForPerson = if (erEndringIKompetanseForPerson) "nye kompetanser for aktør ${aktør.aktørId}: $nåværendeKompetanser ," else ""
+                    val endredeVilkårsvurderingerForPerson = if (erEndringIVilkårsvurderingForPerson) "nye personresultater for aktør ${aktør.aktørId}: $nåværendePersonResultat ," else ""
+                    val endredeEndretUtbetalingAndelerForPerson = if (erEndringIEndretUtbetalingAndelerForPerson) "nye endretUtbetalingAndeler for aktør ${aktør.aktørId}: $nåværendeEndretAndeler" else ""
+
+                    secureLogger.info(
+                        "Endringer: $endredeAndelTilkjentYtelseForPerson $endredeKompetanserForPerson $endredeVilkårsvurderingerForPerson $endredeEndretUtbetalingAndelerForPerson",
+                    )
+                }
+
+                erMinstEnEndringForPerson
+            }
+
+        return if (endringerForRelevantePersoner) Endringsresultat.ENDRING else Endringsresultat.INGEN_ENDRING
     }
 
     // NB: For personer fremstilt krav for tar vi ikke hensyn til alle endringer i beløp i denne funksjonen
-    internal fun erEndringIBeløp(
-        nåværendeAndeler: List<AndelTilkjentYtelse>,
-        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
-        forrigeAndeler: List<AndelTilkjentYtelse>,
-        personerFremstiltKravFor: List<Aktør>,
-    ): Boolean {
-        val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
-        val opphørstidspunkt =
-            nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
-                forrigeAndeler = forrigeAndeler,
-                nåværendeEndretAndeler = nåværendeEndretAndeler,
-            ) ?: return false // Returnerer false hvis verken forrige eller nåværende behandling har andeler
-
-        val erEndringIBeløpForMinstEnPerson =
-            allePersonerMedAndeler.any { aktør ->
-                val ytelseTyperForPerson = (nåværendeAndeler.map { it.type } + forrigeAndeler.map { it.type }).distinct()
-
-                ytelseTyperForPerson.any { ytelseType ->
-                    erEndringIBeløpForPersonOgType(
-                        nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
-                        forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
-                        opphørstidspunkt = opphørstidspunkt,
-                        erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør),
-                    )
-                }
-            }
-
-        return erEndringIBeløpForMinstEnPerson
-    }
-
-    // Kun interessert i endringer i beløp FØR opphørstidspunkt og perioder som ikke er lengre enn 2 måneder fram i tid
-    private fun erEndringIBeløpForPersonOgType(
-        nåværendeAndeler: List<AndelTilkjentYtelse>,
-        forrigeAndeler: List<AndelTilkjentYtelse>,
-        opphørstidspunkt: YearMonth,
+    internal fun erEndringIBeløpForPerson(
+        nåværendeAndelerForPerson: List<AndelTilkjentYtelse>,
+        forrigeAndelerForPerson: List<AndelTilkjentYtelse>,
         erFremstiltKravForPerson: Boolean,
+        opphørstidspunktForBehandling: YearMonth,
     ): Boolean {
-        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler.filtrerBortAndelerMedFomLengreEnn2MånederFramITid())
-        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler.filtrerBortAndelerMedFomLengreEnn2MånederFramITid())
+        val ytelseTyperForPerson = (nåværendeAndelerForPerson.map { it.type } + forrigeAndelerForPerson.map { it.type }).distinct()
 
-        val endringIBeløpTidslinje =
-            nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
-                val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
-                val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
+        return ytelseTyperForPerson.any { ytelseType ->
+            erEndringIBeløpForPersonOgType(
+                nåværendeAndeler = nåværendeAndelerForPerson.filter { it.type == ytelseType },
+                forrigeAndeler = forrigeAndelerForPerson.filter { it.type == ytelseType },
+                opphørstidspunktForBehandling = opphørstidspunktForBehandling,
+                erFremstiltKravForPerson = erFremstiltKravForPerson,
+            )
+        }
+    }
+}
 
-                if (erFremstiltKravForPerson) {
-                    // Hvis det er søkt for person vil vi kun ha med endringer som går fra beløp > 0 til 0/null
-                    when {
-                        forrigeBeløp > 0 && nåværendeBeløp == 0 -> true
-                        else -> false
-                    }
-                } else {
-                    // Hvis det ikke er søkt for person vil vi ha med alle endringer i beløp
-                    when {
-                        forrigeBeløp != nåværendeBeløp -> true
-                        else -> false
-                    }
+// Kun interessert i endringer i beløp FØR opphørstidspunkt og perioder som ikke er lengre enn 2 måneder fram i tid
+private fun erEndringIBeløpForPersonOgType(
+    nåværendeAndeler: List<AndelTilkjentYtelse>,
+    forrigeAndeler: List<AndelTilkjentYtelse>,
+    opphørstidspunktForBehandling: YearMonth,
+    erFremstiltKravForPerson: Boolean,
+): Boolean {
+    val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler.filtrerBortAndelerMedFomLengreEnn2MånederFramITid())
+    val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler.filtrerBortAndelerMedFomLengreEnn2MånederFramITid())
+
+    val endringIBeløpTidslinje =
+        nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+            val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
+            val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
+
+            if (erFremstiltKravForPerson) {
+                // Hvis det er søkt for person vil vi kun ha med endringer som går fra beløp > 0 til 0/null
+                when {
+                    forrigeBeløp > 0 && nåværendeBeløp == 0 -> true
+                    else -> false
+                }
+            } else {
+                // Hvis det ikke er søkt for person vil vi ha med alle endringer i beløp
+                when {
+                    forrigeBeløp != nåværendeBeløp -> true
+                    else -> false
                 }
             }
-                .fjernPerioderEtterOpphørsdato(opphørstidspunkt)
+        }
+            .fjernPerioderEtterOpphørsdato(opphørstidspunktForBehandling)
 
-        return endringIBeløpTidslinje.perioder().any { it.innhold == true }
-    }
+    return endringIBeløpTidslinje.perioder().any { it.innhold == true }
+}
 
-    private fun Tidslinje<Boolean, Måned>.fjernPerioderEtterOpphørsdato(opphørstidspunkt: YearMonth) =
-        this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = opphørstidspunkt.forrigeMåned().tilTidspunkt())
+private fun Tidslinje<Boolean, Måned>.fjernPerioderEtterOpphørsdato(opphørstidspunkt: YearMonth) =
+    this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = opphørstidspunkt.forrigeMåned().tilTidspunkt())
 
-    internal fun erEndringIKompetanse(
-        nåværendeKompetanser: List<Kompetanse>,
-        forrigeKompetanser: List<Kompetanse>,
-    ): Boolean {
-        val endringIKompetanseTidslinje =
-            EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
-                nåværendeKompetanser = nåværendeKompetanser,
-                forrigeKompetanser = forrigeKompetanser,
-            )
+internal fun erEndringIKompetanseForPerson(
+    nåværendeKompetanserForPerson: List<Kompetanse>,
+    forrigeKompetanserForPerson: List<Kompetanse>,
+): Boolean {
+    val endringIKompetanseTidslinje =
+        EndringIKompetanseUtil.lagEndringIKompetanseForPersonTidslinje(
+            nåværendeKompetanserForPerson = nåværendeKompetanserForPerson,
+            forrigeKompetanserForPerson = forrigeKompetanserForPerson,
+        )
 
-        return endringIKompetanseTidslinje.perioder().any { it.innhold == true }
-    }
+    return endringIKompetanseTidslinje.perioder().any { it.innhold == true }
+}
 
-    internal fun erEndringIVilkårsvurdering(
-        nåværendePersonResultat: Set<PersonResultat>,
-        forrigePersonResultat: Set<PersonResultat>,
-        personerIBehandling: Set<Person>,
-        personerIForrigeBehandling: Set<Person>,
-    ): Boolean {
-        val endringIVilkårsvurderingTidslinje =
-            EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-                nåværendePersonResultater = nåværendePersonResultat,
-                forrigePersonResultater = forrigePersonResultat,
-                personerIBehandling = personerIBehandling,
-                personerIForrigeBehandling = personerIForrigeBehandling,
-            )
-        return endringIVilkårsvurderingTidslinje.perioder().any { it.innhold == true }
-    }
+internal fun erEndringIVilkårsvurderingForPerson(
+    nåværendePersonResultaterForPerson: Set<PersonResultat>,
+    forrigePersonResultaterForPerson: Set<PersonResultat>,
+    personIBehandling: Person?,
+    personIForrigeBehandling: Person?,
+): Boolean {
+    val endringIVilkårsvurderingTidslinje =
+        EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
+            nåværendePersonResultaterForPerson = nåværendePersonResultaterForPerson,
+            forrigePersonResultater = forrigePersonResultaterForPerson,
+            personIBehandling = personIBehandling,
+            personIForrigeBehandling = personIForrigeBehandling,
+        )
 
-    internal fun erEndringIEndretUtbetalingAndeler(
-        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
-        forrigeEndretAndeler: List<EndretUtbetalingAndel>,
-    ): Boolean {
-        val endringIEndretUtbetalingAndelTidslinje =
-            EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUtbetalingAndelTidslinje(
-                nåværendeEndretAndeler = nåværendeEndretAndeler,
-                forrigeEndretAndeler = forrigeEndretAndeler,
-            )
+    return endringIVilkårsvurderingTidslinje.perioder().any { it.innhold == true }
+}
 
-        return endringIEndretUtbetalingAndelTidslinje.perioder().any { it.innhold == true }
-    }
+internal fun erEndringIEndretUtbetalingAndelerForPerson(
+    nåværendeEndretAndelerForPerson: List<EndretUtbetalingAndel>,
+    forrigeEndretAndelerForPerson: List<EndretUtbetalingAndel>,
+): Boolean {
+    val endringIEndretUtbetalingAndelTidslinje =
+        EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUbetalingAndelPerPersonTidslinje(
+            nåværendeEndretAndelerForPerson = nåværendeEndretAndelerForPerson,
+            forrigeEndretAndelerForPerson = forrigeEndretAndelerForPerson,
+        )
 
-    /**
-     * Når vi beregner om det er endring i beløp så tar vi ikke hensyn til andeler som har fom lengre enn 2 måneder fram i tid
-     */
-    private fun List<AndelTilkjentYtelse>.filtrerBortAndelerMedFomLengreEnn2MånederFramITid(): List<AndelTilkjentYtelse> {
-        val toMånederFramITid = YearMonth.now().plusMonths(2)
+    return endringIEndretUtbetalingAndelTidslinje.perioder().any { it.innhold == true }
+}
 
-        return this.filterNot { it.stønadFom > toMånederFramITid }
-    }
+/**
+ * Når vi beregner om det er endring i beløp så tar vi ikke hensyn til andeler som har fom lengre enn 2 måneder fram i tid
+ */
+private fun List<AndelTilkjentYtelse>.filtrerBortAndelerMedFomLengreEnn2MånederFramITid(): List<AndelTilkjentYtelse> {
+    val toMånederFramITid = YearMonth.now().plusMonths(2)
+
+    return this.filterNot { it.stønadFom > toMånederFramITid }
 }
