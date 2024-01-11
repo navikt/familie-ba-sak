@@ -150,7 +150,6 @@ class ForvalterController(
         return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
     }
 
-
     @GetMapping("/loggfagsakermedendremigreringsdatoforsatsendring/")
     fun loggFagsakermedendremigreringsdatoFørSatsendring() {
         forvalterService.loggFagsakerHvorsisteVedtatteBehandlingFørSatsendringErEndreMigreringsdato()
