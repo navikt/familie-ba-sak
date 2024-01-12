@@ -69,7 +69,7 @@ class ForvalterService(
             // if last behandling is satsendring and the one before is endre migreringsdato
             if (behandlinger.size > 1 &&
                 behandlinger.last().type == BehandlingType.REVURDERING && behandlinger.last().opprettetÅrsak == BehandlingÅrsak.SATSENDRING &&
-                behandlinger.last().aktivertTidspunkt.isAfter(LocalDateTime.of(2024,1,1,1,1)) &&
+                behandlinger.last().aktivertTidspunkt.isAfter(LocalDateTime.of(2024, 1, 1, 1, 1)) &&
                 behandlinger[behandlinger.size - 2].type == BehandlingType.REVURDERING &&
                 behandlinger[behandlinger.size - 2].opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
             ) {
