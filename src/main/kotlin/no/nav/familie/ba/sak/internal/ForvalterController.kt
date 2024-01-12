@@ -150,14 +150,6 @@ class ForvalterController(
         return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
     }
 
-    @GetMapping("/loggfagsakermedendremigreringsdatoforsatsendring/")
-    fun loggFagsakermedendremigreringsdatoFørSatsendring() {
-        // create a new thread to run the function
-        thread {
-            forvalterService.loggFagsakerHvorsisteVedtatteBehandlingFørSatsendringErEndreMigreringsdato()
-        }
-    }
-
     @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd/{fraÅrMåned}")
     fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(
         @PathVariable fraÅrMåned: YearMonth,

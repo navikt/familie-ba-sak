@@ -234,11 +234,4 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         nativeQuery = true,
     )
     fun finnFagsakerMedFlereMigreringsbehandlinger(month: LocalDateTime): List<FagsakMedFlereMigreringer>
-
-    @Query(
-        """SELECT distinct(fk_fagsak_id) FROM behandling WHERE opprettet_aarsak = 'ENDRE_MIGRERINGSDATO'
-        """,
-        nativeQuery = true,
-    )
-    fun finnFagsakIderMedEndreMigreringsdatoBehandlinger(): List<Long>
 }
