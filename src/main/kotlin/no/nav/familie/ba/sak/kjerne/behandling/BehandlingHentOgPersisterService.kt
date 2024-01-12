@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
 @Service
 class BehandlingHentOgPersisterService(
@@ -133,10 +132,6 @@ class BehandlingHentOgPersisterService(
 
     fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
-    }
-
-    fun finnÅpneBehandlingerOppprettetFør(før: LocalDateTime): List<Behandling> {
-        return behandlingRepository.finnÅpneBehandlinger(før)
     }
 
     fun finnAvsluttedeBehandlingerPåFagsak(fagsakId: Long): List<Behandling> {
