@@ -152,7 +152,10 @@ class ForvalterController(
 
     @GetMapping("/loggfagsakermedendremigreringsdatoforsatsendring/")
     fun loggFagsakermedendremigreringsdatoFørSatsendring() {
-        forvalterService.loggFagsakerHvorsisteVedtatteBehandlingFørSatsendringErEndreMigreringsdato()
+        // create a new thread to run the function
+        thread {
+            forvalterService.loggFagsakerHvorsisteVedtatteBehandlingFørSatsendringErEndreMigreringsdato()
+        }
     }
 
     @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd/{fraÅrMåned}")
