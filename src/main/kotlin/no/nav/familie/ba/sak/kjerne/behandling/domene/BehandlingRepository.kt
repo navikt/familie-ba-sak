@@ -18,7 +18,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnBehandlinger(fagsakId: Long): List<Behandling>
 
     // find behandlinger sorter på aktivert_tidspunkt
-    @Query(value = "SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND f.arkivert = false AND f.status ='AVSLUTTET' ORDER BY b.aktivertTidspunkt ASC")
+    @Query(value = "SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND f.arkivert = false AND b.status ='AVSLUTTET' ORDER BY b.aktivertTidspunkt ASC")
     fun finnBehandlingerSortertPåAktivertTid(fagsakId: Long): List<Behandling>
 
     @Query(value = "SELECT b FROM Behandling b WHERE b.fagsak.id = :fagsakId AND status = :status")
