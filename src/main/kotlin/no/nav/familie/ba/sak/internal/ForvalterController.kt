@@ -12,8 +12,10 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchIdentForBarnPåFagsak
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -47,6 +49,7 @@ class ForvalterController(
     private val tilgangService: TilgangService,
     private val økonomiService: ØkonomiService,
     private val opprettTaskService: OpprettTaskService,
+    private val taskService: TaskService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -147,6 +150,11 @@ class ForvalterController(
         return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
     }
 
+    @GetMapping("/loggfagsakermedendremigreringsdatoforsatsendring/")
+    fun loggFagsakermedendremigreringsdatoFørSatsendring() {
+        forvalterService.loggFagsakerHvorsisteVedtatteBehandlingFørSatsendringErEndreMigreringsdato()
+    }
+
     @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd/{fraÅrMåned}")
     fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(
         @PathVariable fraÅrMåned: YearMonth,
@@ -230,5 +238,22 @@ class ForvalterController(
         økonomiService.opprettManuellKvitteringPåOppdrag(behandlingId = behandlingId)
 
         return ResponseEntity.ok("ok")
+    }
+
+    @PostMapping("/opprett-grensesnittavstemmingtask/sisteTaskId/{taskId}")
+    @Operation(
+        summary = "Opprett neste grensesnittavstemming basert på taskId av type avstemMotOppdrag ",
+        description =
+            "Dette endepunktet oppretter en ny task for å trigge grensesnittavstemming. Man må sende " +
+                "taskId fra sist avstemMotOppdrag-tasl som har kjørt ok mot oppdrag. Dette endepunktet kan brukes for å opprette neste " +
+                "task hvis man må avvikshåndtere en avstemMotOppdrag task",
+    )
+    fun opprettGrensesnittavstemmingtask(
+        @PathVariable taskId: Long,
+    ): ResponseEntity<String> {
+        val task = taskService.findById(taskId)
+        if (task.type != GrensesnittavstemMotOppdrag.TASK_STEP_TYPE) error("sisteTaskId må være av typen ${GrensesnittavstemMotOppdrag.TASK_STEP_TYPE}")
+        opprettTaskService.opprettGrensesnittavstemMotOppdragTask(GrensesnittavstemMotOppdrag.nesteAvstemmingDTO(task.triggerTid.toLocalDate()))
+        return ResponseEntity.ok("Ok")
     }
 }
