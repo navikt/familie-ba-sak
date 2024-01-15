@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.SatsendringAndelFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
@@ -71,16 +70,16 @@ object TilkjentYtelseValidering {
         andelerGruppert.outerJoin(forrigeAndelerGruppert) { nåværendeAndel, forrigeAndel ->
             when {
                 forrigeAndel == null && nåværendeAndel != null ->
-                    throw SatsendringAndelFeil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
+                    throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
 
                 forrigeAndel != null && nåværendeAndel == null ->
-                    throw SatsendringAndelFeil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
+                    throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
 
                 forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
-                    throw SatsendringAndelFeil("Satsendring kan ikke endre på prosenten til en andel")
+                    throw Feil("Satsendring kan ikke endre på prosenten til en andel")
 
                 forrigeAndel != null && forrigeAndel.type != nåværendeAndel?.type ->
-                    throw SatsendringAndelFeil("Satsendring kan ikke endre YtelseType til en andel")
+                    throw Feil("Satsendring kan ikke endre YtelseType til en andel")
 
                 else -> false
             }
