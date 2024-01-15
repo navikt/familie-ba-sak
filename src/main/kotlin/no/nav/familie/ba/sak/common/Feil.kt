@@ -31,6 +31,14 @@ class VilkårFeil(
     cause: Throwable? = throwable,
 ) : FunksjonellFeil(melding, frontendFeilmelding, httpStatus, throwable, cause)
 
+class SatsendringAndelFeil(
+    melding: String,
+    frontendFeilmelding: String? = melding,
+    httpStatus: HttpStatus = HttpStatus.OK,
+    throwable: Throwable? = null,
+    cause: Throwable? = throwable,
+) : FunksjonellFeil(melding, frontendFeilmelding, httpStatus, throwable, cause)
+
 class UtbetalingsikkerhetFeil(
     melding: String,
     override val frontendFeilmelding: String? = null,

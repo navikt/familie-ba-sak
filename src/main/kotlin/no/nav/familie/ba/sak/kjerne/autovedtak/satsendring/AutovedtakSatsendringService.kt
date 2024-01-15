@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.SatsendringAndelFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.VilkårFeil
 import no.nav.familie.ba.sak.common.secureLogger
@@ -117,6 +118,14 @@ class AutovedtakSatsendringService(
                 logger.error(satsendringSvar.melding)
 
                 return satsendringSvar
+            } catch (e: SatsendringAndelFeil) {
+                val satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER
+
+                satskjøringForFagsak.feiltype = satsendringSvar.name
+                satskjøringRepository.save(satskjøringForFagsak)
+                logger.error(satsendringSvar.melding)
+
+                return satsendringSvar
             }
 
         val opprettetVedtak =
@@ -219,4 +228,5 @@ enum class SatsendringSvar(val melding: String) {
     BEHANDLING_KAN_SNIKES_FORBI("Behandling kan snikes forbi (toggle er slått av)"),
     BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT("Behandlingen kan ikke settes på vent"),
     BEHANDLING_HAR_FEIL_PÅ_VILKÅR("Behandlingen feiler på validering av vilkår."),
+    BEHANDLING_HAR_FEIL_PÅ_ANDELER("Behandlingen feiler på validering av andeler."),
 }
