@@ -115,7 +115,7 @@ class AutovedtakSatsendringService(
 
                 satskjøringForFagsak.feiltype = satsendringSvar.name
                 satskjøringRepository.save(satskjøringForFagsak)
-                logger.error(satsendringSvar.melding)
+                logger.warn(satsendringSvar.melding)
 
                 return satsendringSvar
             } catch (e: SatsendringAndelFeil) {
@@ -123,7 +123,7 @@ class AutovedtakSatsendringService(
 
                 satskjøringForFagsak.feiltype = satsendringSvar.name
                 satskjøringRepository.save(satskjøringForFagsak)
-                logger.error(satsendringSvar.melding)
+                logger.warn(satsendringSvar.melding)
 
                 return satsendringSvar
             }
