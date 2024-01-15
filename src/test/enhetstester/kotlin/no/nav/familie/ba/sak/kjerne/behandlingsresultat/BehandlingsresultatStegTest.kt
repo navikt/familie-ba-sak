@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.SatsendringAndelFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -389,7 +390,7 @@ class BehandlingsresultatStegTest {
             barn = listOf(barn),
         )
 
-        assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }.isInstanceOf(Feil::class.java)
+        assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }.isInstanceOf(SatsendringAndelFeil::class.java)
             .hasMessage("Satsendring kan ikke endre på prosenten til en andel")
     }
 

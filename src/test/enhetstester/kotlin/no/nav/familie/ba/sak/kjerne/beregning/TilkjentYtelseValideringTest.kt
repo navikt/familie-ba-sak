@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.SatsendringAndelFeil
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
@@ -374,7 +374,7 @@ class TilkjentYtelseValideringTest {
                     andelerFraForrigeBehandling = forrigeAndeler,
                     andelerTilkjentYtelse = nåværendeAndeler,
                 )
-            }.isInstanceOf(Feil::class.java)
+            }.isInstanceOf(SatsendringAndelFeil::class.java)
                 .hasMessageContaining("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
         }
 
@@ -408,7 +408,7 @@ class TilkjentYtelseValideringTest {
                     andelerFraForrigeBehandling = forrigeAndeler,
                     andelerTilkjentYtelse = nåværendeAndeler,
                 )
-            }.isInstanceOf(Feil::class.java)
+            }.isInstanceOf(SatsendringAndelFeil::class.java)
                 .hasMessageContaining("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
         }
 
@@ -444,7 +444,7 @@ class TilkjentYtelseValideringTest {
                     andelerFraForrigeBehandling = forrigeAndeler,
                     andelerTilkjentYtelse = nåværendeAndeler,
                 )
-            }.isInstanceOf(Feil::class.java)
+            }.isInstanceOf(SatsendringAndelFeil::class.java)
                 .hasMessageContaining("Satsendring kan ikke endre på prosenten til en andel")
         }
 
@@ -516,7 +516,7 @@ class TilkjentYtelseValideringTest {
                     andelerFraForrigeBehandling = forrigeAndeler,
                     andelerTilkjentYtelse = nåværendeAndeler,
                 )
-            }.isInstanceOf(Feil::class.java)
+            }.isInstanceOf(SatsendringAndelFeil::class.java)
                 .hasMessageContaining("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
         }
 
@@ -549,7 +549,7 @@ class TilkjentYtelseValideringTest {
                     andelerFraForrigeBehandling = forrigeAndeler,
                     andelerTilkjentYtelse = nåværendeAndeler,
                 )
-            }.isInstanceOf(Feil::class.java)
+            }.isInstanceOf(SatsendringAndelFeil::class.java)
                 .hasMessageContaining("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
         }
 
@@ -580,7 +580,7 @@ class TilkjentYtelseValideringTest {
                     ),
                 )
 
-            assertThrows<Feil> {
+            assertThrows<SatsendringAndelFeil> {
                 TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
                     andelerFraForrigeBehandling = forrigeAndeler,
                     andelerTilkjentYtelse = nåværendeAndeler,
@@ -615,7 +615,7 @@ class TilkjentYtelseValideringTest {
                     ),
                 )
 
-            assertThrows<Feil> {
+            assertThrows<SatsendringAndelFeil> {
                 TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
                     andelerFraForrigeBehandling = forrigeAndeler,
                     andelerTilkjentYtelse = nåværendeAndeler,
