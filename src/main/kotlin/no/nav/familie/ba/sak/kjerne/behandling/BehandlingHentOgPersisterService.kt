@@ -65,11 +65,6 @@ class BehandlingHentOgPersisterService(
         return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
     }
 
-    fun hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId: Long): Behandling? {
-        val behandling = hent(behandlingId)
-        return hentForrigeBehandlingSomErIverksatt(behandling)
-    }
-
     /**
      * Henter iverksatte behandlinger FØR en gitt behandling.
      * Bør kun brukes i forbindelse med oppdrag mot økonomisystemet
@@ -132,9 +127,5 @@ class BehandlingHentOgPersisterService(
 
     fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
-    }
-
-    fun finnAvsluttedeBehandlingerPåFagsak(fagsakId: Long): List<Behandling> {
-        return behandlingRepository.findByFagsakAndAvsluttet(fagsakId = fagsakId)
     }
 }

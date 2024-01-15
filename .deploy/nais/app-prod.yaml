@@ -6,6 +6,8 @@ metadata:
   labels:
     team: teamfamilie
   annotations:
+    nais.io/run-as-group: "65532"
+    nais.io/run-as-user: "65532"
     nginx.ingress.kubernetes.io/proxy-next-upstream-tries: '1'
     nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
@@ -28,6 +30,9 @@ spec:
   prometheus:
     enabled: true
     path: /internal/prometheus
+  observability:
+    tracing:
+      enabled: true
   gcp: # Database
     sqlInstances:
       - type: POSTGRES_15 # Read nais doc and https://github.com/navikt/familie/blob/master/doc/Google%20cloud/oppgrader-database.md on how to upgrade
@@ -128,9 +133,16 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
-
-    - name: JAVA_OPTS
-      value: "-XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError"
+    - name: OTEL_METRICS_EXPORTER
+      value: prometheus
+    - name: OTEL_LOGS_EXPORTER
+      value: none
+    - name: OTEL_TRACES_EXPORTER
+      value: otlp
+    - name: OTEL_EXPORTER_METRICS_ENABLED
+      value: "false"
+    - name: OTEL_METRICS_EXEMPLAR_FILTER
+      value: ALWAYS_ON
   kafka:
     pool: nav-prod
   strategy:
