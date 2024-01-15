@@ -25,8 +25,8 @@ object BehandlingsresultatOpphørUtils {
     ): Opphørsresultat {
         val nåværendeBehandlingOpphørsdato =
             nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
-                forrigeAndeler = forrigeAndeler,
-                nåværendeEndretAndeler = nåværendeEndretAndeler,
+                forrigeAndelerIBehandling = forrigeAndeler,
+                nåværendeEndretAndelerIBehandling = nåværendeEndretAndeler,
             )
 
         val forrigeBehandlingOpphørsdato =
@@ -51,12 +51,12 @@ object BehandlingsresultatOpphørUtils {
      * 1. Ingen andeler i denne behandlingen, men andeler i forrige behandling. Da ønsker vi at opphørsdatoen i denne behandlingen skal være "første endring" som altså er lik tidligste fom-dato
      * 2. Ingen andeler i denne behandlingen, ingen andeler i forrige behandling. Da vil denne funksjonen returnere null
      */
-    internal fun List<AndelTilkjentYtelse>.utledOpphørsdatoForNåværendeBehandlingMedFallback(
-        forrigeAndeler: List<AndelTilkjentYtelse>,
-        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
+    fun List<AndelTilkjentYtelse>.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+        forrigeAndelerIBehandling: List<AndelTilkjentYtelse>,
+        nåværendeEndretAndelerIBehandling: List<EndretUtbetalingAndel>,
     ): YearMonth? {
-        return this.filtrerBortIrrelevanteAndeler(endretAndeler = nåværendeEndretAndeler).finnOpphørsdato()
-            ?: forrigeAndeler.minOfOrNull { it.stønadFom }
+        return this.filtrerBortIrrelevanteAndeler(endretAndeler = nåværendeEndretAndelerIBehandling).finnOpphørsdato()
+            ?: forrigeAndelerIBehandling.minOfOrNull { it.stønadFom }
     }
 
     /**

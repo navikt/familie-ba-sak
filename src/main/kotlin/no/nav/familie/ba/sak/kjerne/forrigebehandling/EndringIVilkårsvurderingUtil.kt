@@ -1,12 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -15,57 +19,33 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.time.YearMonth
 
 object EndringIVilkårsvurderingUtil {
-    fun utledEndringstidspunktForVilkårsvurdering(
-        nåværendePersonResultat: Set<PersonResultat>,
-        forrigePersonResultat: Set<PersonResultat>,
-        personerIBehandling: Set<Person>,
-        personerIForrigeBehandling: Set<Person>,
-    ): YearMonth? {
-        val endringIVilkårsvurderingTidslinje =
-            lagEndringIVilkårsvurderingTidslinje(
-                nåværendePersonResultater = nåværendePersonResultat,
-                forrigePersonResultater = forrigePersonResultat,
-                personerIBehandling = personerIBehandling,
-                personerIForrigeBehandling = personerIForrigeBehandling,
-            )
-
-        return endringIVilkårsvurderingTidslinje.tilFørsteEndringstidspunkt()
-    }
-
     fun lagEndringIVilkårsvurderingTidslinje(
-        nåværendePersonResultater: Set<PersonResultat>,
+        nåværendePersonResultaterForPerson: Set<PersonResultat>,
         forrigePersonResultater: Set<PersonResultat>,
-        personerIBehandling: Set<Person>,
-        personerIForrigeBehandling: Set<Person>,
+        personIBehandling: Person?,
+        personIForrigeBehandling: Person?,
+        tidligsteRelevanteFomDatoForPersonIVilkårsvurdering: YearMonth,
     ): Tidslinje<Boolean, Måned> {
-        val allePersonerMedPersonResultat =
-            (nåværendePersonResultater.map { it.aktør } + forrigePersonResultater.map { it.aktør }).distinct()
-
-        val tidslinjerPerPersonOgVilkår =
-            allePersonerMedPersonResultat.flatMap { aktør ->
-                val personIBehandling = personerIBehandling.singleOrNull { it.aktør == aktør }
-                val personIForrigeBehandling = personerIForrigeBehandling.singleOrNull { it.aktør == aktør }
-
-                Vilkår.values().map { vilkår ->
+        val tidslinjePerVilkår =
+            Vilkår.entries.map { vilkår ->
+                val vilkårTidslinje =
                     lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
-                        nåværendeOppfylteVilkårResultater =
-                            nåværendePersonResultater
-                                .filter { it.aktør == aktør }
+                        nåværendeOppfylteVilkårResultaterForPerson =
+                            nåværendePersonResultaterForPerson
                                 .flatMap { it.vilkårResultater }
                                 .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
-                        forrigeOppfylteVilkårResultater =
+                        forrigeOppfylteVilkårResultaterForPerson =
                             forrigePersonResultater
-                                .filter { it.aktør == aktør }
                                 .flatMap { it.vilkårResultater }
                                 .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
                         vilkår = vilkår,
                         personIBehandling = personIBehandling,
                         personIForrigeBehandling = personIForrigeBehandling,
                     )
-                }
+                vilkårTidslinje.fjernPerioderFørRelevantFomDato(tidligsteRelevanteFomDatoForPersonIVilkårsvurdering, personIBehandling)
             }
 
-        return tidslinjerPerPersonOgVilkår.kombiner { finnesMinstEnEndringIPeriode(it) }
+        return tidslinjePerVilkår.kombiner { finnesMinstEnEndringIPeriode(it) }
     }
 
     private fun finnesMinstEnEndringIPeriode(
@@ -77,18 +57,18 @@ object EndringIVilkårsvurderingUtil {
     // 2. Endringer i regelverk
     // 3. Splitt i vilkårsvurderingen
     private fun lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
-        nåværendeOppfylteVilkårResultater: List<VilkårResultat>,
-        forrigeOppfylteVilkårResultater: List<VilkårResultat>,
+        nåværendeOppfylteVilkårResultaterForPerson: List<VilkårResultat>,
+        forrigeOppfylteVilkårResultaterForPerson: List<VilkårResultat>,
         vilkår: Vilkår,
         personIBehandling: Person?,
         personIForrigeBehandling: Person?,
     ): Tidslinje<Boolean, Måned> {
         val nåværendeVilkårResultatTidslinje =
-            nåværendeOppfylteVilkårResultater
+            nåværendeOppfylteVilkårResultaterForPerson
                 .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIBehandling?.fødselsdato)
 
         val tidligereVilkårResultatTidslinje =
-            forrigeOppfylteVilkårResultater
+            forrigeOppfylteVilkårResultaterForPerson
                 .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIForrigeBehandling?.fødselsdato)
 
         val endringIVilkårResultat =
@@ -128,4 +108,10 @@ object EndringIVilkårsvurderingUtil {
             }
         }
     }
+
+    private fun Tidslinje<Boolean, Måned>.fjernPerioderFørRelevantFomDato(
+        relevantFomDato: YearMonth,
+        person: Person?,
+    ) =
+        this.beskjær(fraOgMed = relevantFomDato.tilTidspunkt(), tilOgMed = person?.fødselsdato?.til18ÅrsVilkårsdato()?.tilMånedTidspunkt() ?: throw Feil("Mangler fødselsdato, men prøver å beskjære på 18-år vilkåret"))
 }
