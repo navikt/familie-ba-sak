@@ -22,7 +22,7 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20240110093731_0eda75e</prosessering.version>
-        <felles.version>2.20231201131108_ea25dd3</felles.version>
+        <felles.version>2.20240112101059_13c2d3f</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20240109111848_d97569f</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
@@ -35,7 +35,7 @@
         <token-validation-spring.version>3.2.0</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.3.0</springdoc.version>
-        <sentry.version>7.1.0</sentry.version>
+        <sentry.version>7.2.0</sentry.version>
         <kotlinx.version>1.7.3</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -497,7 +497,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.3</version>
+                <version>3.2.5</version>
                 <configuration>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->

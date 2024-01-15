@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -17,9 +16,10 @@ import java.time.LocalDate
 @TaskStepBeskrivelse(
     taskStepType = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
     beskrivelse = "Grensesnittavstemming mot oppdrag",
-    maxAntallFeil = 3,
+    // Rekjører kun 1 gang siden avstemming kan ha kjørt OK selv om tasken har feilet, så en autoretry kan trigge flere like grensesnittavstemminger
+    maxAntallFeil = 1,
 )
-class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val taskRepository: TaskRepositoryWrapper) :
+class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val opprettTaskService: OpprettTaskService) :
     AsyncTaskStep {
     override fun doTask(task: Task) {
         val avstemmingTask = objectMapper.readValue(task.payload, GrensesnittavstemmingTaskDTO::class.java)
@@ -29,27 +29,17 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
     }
 
     override fun onCompletion(task: Task) {
-        val nesteAvstemmingTaskDTO = nesteAvstemmingDTO(task.triggerTid.toLocalDate())
-
-        val nesteAvstemmingTask =
-            Task(
-                type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(nesteAvstemmingTaskDTO),
-            ).medTriggerTid(
-                nesteAvstemmingTaskDTO.tomDato.toLocalDate().atTime(8, 0),
-            )
-
-        taskRepository.save(nesteAvstemmingTask)
+        opprettTaskService.opprettGrensesnittavstemMotOppdragTask(nesteAvstemmingDTO(task.triggerTid.toLocalDate()))
     }
-
-    fun nesteAvstemmingDTO(tideligereTriggerDato: LocalDate): GrensesnittavstemmingTaskDTO =
-        GrensesnittavstemmingTaskDTO(
-            tideligereTriggerDato.atStartOfDay(),
-            VirkedagerProvider.nesteVirkedag(tideligereTriggerDato).atStartOfDay(),
-        )
 
     companion object {
         const val TASK_STEP_TYPE = "avstemMotOppdrag"
+
+        fun nesteAvstemmingDTO(tideligereTriggerDato: LocalDate): GrensesnittavstemmingTaskDTO =
+            GrensesnittavstemmingTaskDTO(
+                tideligereTriggerDato.atStartOfDay(),
+                VirkedagerProvider.nesteVirkedag(tideligereTriggerDato).atStartOfDay(),
+            )
 
         private val logger: Logger = LoggerFactory.getLogger(GrensesnittavstemMotOppdrag::class.java)
     }
