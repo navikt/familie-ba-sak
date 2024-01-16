@@ -390,7 +390,7 @@ class BehandlingsresultatStegTest {
         )
 
         assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }.isInstanceOf(Feil::class.java)
-            .hasMessage("Satsendring kan ikke endre på prosenten til en andel")
+            .hasMessageContaining("Satsendring kan ikke endre på prosenten til en andel")
     }
 
     private fun lagMocksForPreValiderStegSatsendring(

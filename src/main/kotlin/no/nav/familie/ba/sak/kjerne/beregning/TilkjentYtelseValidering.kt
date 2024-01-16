@@ -70,16 +70,30 @@ object TilkjentYtelseValidering {
         andelerGruppert.outerJoin(forrigeAndelerGruppert) { nåværendeAndel, forrigeAndel ->
             when {
                 forrigeAndel == null && nåværendeAndel != null ->
-                    throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
+                    throw Feil(
+                        "Satsendring kan ikke legge til en andel som ikke var der i forrige behandling. " +
+                            "Satsendringen prøver å legge til en andel i perioden ${nåværendeAndel.stønadFom} - ${nåværendeAndel.stønadTom}",
+                    )
 
                 forrigeAndel != null && nåværendeAndel == null ->
-                    throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
+                    throw Feil(
+                        "Satsendring kan ikke fjerne en andel som fantes i forrige behandling. " +
+                            "Satsendringen prøver å fjerne andel i perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}",
+                    )
 
                 forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
-                    throw Feil("Satsendring kan ikke endre på prosenten til en andel")
+                    throw Feil(
+                        "Satsendring kan ikke endre på prosenten til en andel. " +
+                            "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
+                            "Prøver å endre fra ${forrigeAndel.prosent} til ${nåværendeAndel?.prosent} prosent.",
+                    )
 
                 forrigeAndel != null && forrigeAndel.type != nåværendeAndel?.type ->
-                    throw Feil("Satsendring kan ikke endre YtelseType til en andel")
+                    throw Feil(
+                        "Satsendring kan ikke endre YtelseType til en andel. " +
+                            "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
+                            "Prøver å endre fra ytelsetype ${forrigeAndel.type} til ${nåværendeAndel?.type}.",
+                    )
 
                 else -> false
             }
