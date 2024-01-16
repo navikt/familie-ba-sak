@@ -137,9 +137,9 @@ object EndretUtbetalingAndelValidering {
         behandlingOpprettetTidspunkt: LocalDate?,
     ) {
         val kravDato = endretUtbetalingAndel.søknadstidspunkt ?: behandlingOpprettetTidspunkt
-        if (endretUtbetalingAndel.prosent != BigDecimal.ZERO) {
+        if (endretUtbetalingAndel.prosent == BigDecimal.valueOf(100)) {
             throw FunksjonellFeil(
-                "Du kan ikke sette årsak etterbetaling 3 år når du har valgt at perioden skal utbetales.",
+                "Du kan ikke sette årsak etterbetaling 3 år når du har valgt at perioden skal utbetales fullt.",
             )
         } else if (
             endretUtbetalingAndel.tom?.isAfter(
