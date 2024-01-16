@@ -38,7 +38,7 @@ spec:
       - type: POSTGRES_15 # Read nais doc and https://github.com/navikt/familie/blob/master/doc/Google%20cloud/oppgrader-database.md on how to upgrade
         tier: db-custom-4-3840
         name: familie-ba-sak
-        autoBackupTime: "02:00"
+        autoBackupHour: 2
         diskAutoresize: true
         highAvailability: true
         databases:
