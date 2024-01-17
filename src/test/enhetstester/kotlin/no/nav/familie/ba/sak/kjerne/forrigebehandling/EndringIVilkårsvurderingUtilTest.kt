@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -255,8 +254,7 @@ class EndringIVilkårsvurderingUtilTest {
 
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(jun22, perioderMedEndring.single().fraOgMed.tilYearMonth())
-        Assertions.assertEquals(person.fødselsdato.til18ÅrsVilkårsdato().toYearMonth(), perioderMedEndring.single().tilOgMed.tilYearMonth())
-        Assertions.assertEquals(Uendelighet.INGEN, perioderMedEndring.single().tilOgMed.uendelighet)
+        Assertions.assertEquals(Uendelighet.FREMTID, perioderMedEndring.single().tilOgMed.uendelighet)
     }
 
     @Test
