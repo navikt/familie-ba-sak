@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.harBlandetRegelverk
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
@@ -13,7 +14,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
+
+val logger = LoggerFactory.getLogger("VilkårsvurderingValidering.kt")
 
 fun validerIngenVilkårSattEtterSøkersDød(
     søkerOgBarn: List<PersonEnkel>,
@@ -48,12 +52,17 @@ fun validerIngenVilkårSattEtterSøkersDød(
 fun validerIkkeBlandetRegelverk(
     søkerOgBarn: List<PersonEnkel>,
     vilkårsvurdering: Vilkårsvurdering,
+    behandling: Behandling,
 ) {
     val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(vilkårsvurdering, søkerOgBarn)
     if (vilkårsvurderingTidslinjer.harBlandetRegelverk()) {
-        throw FunksjonellFeil(
-            melding = "Det er forskjellig regelverk for en eller flere perioder for søker eller barna",
-        )
+        val feilmelding = "Det er forskjellig regelverk for en eller flere perioder for søker eller barna."
+
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING) {
+            logger.warn(feilmelding + " Gjelder $behandling")
+        } else {
+            throw FunksjonellFeil(melding = feilmelding)
+        }
     }
 }
 
