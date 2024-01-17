@@ -32,17 +32,7 @@ class VilkårFeil(
     cause: Throwable? = throwable,
 ) : FunksjonellFeil(melding, frontendFeilmelding, httpStatus, throwable, cause)
 
-class SatsendringAndelFeil(
-    melding: String,
-    frontendFeilmelding: String? = melding,
-    httpStatus: HttpStatus = HttpStatus.OK,
-    throwable: Throwable? = null,
-    cause: Throwable? = throwable,
-) : FunksjonellFeil(melding, frontendFeilmelding, httpStatus, throwable, cause)
-
 class SatsendringFeil(melding: String? = "", public val satsendringSvar: SatsendringSvar) : RuntimeException(melding)
-
-class BrukerHarÅpenBehandlingSatsendringFeil() : RuntimeException()
 
 class UtbetalingsikkerhetFeil(
     melding: String,
