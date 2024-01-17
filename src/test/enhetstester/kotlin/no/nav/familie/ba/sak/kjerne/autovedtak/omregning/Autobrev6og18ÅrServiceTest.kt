@@ -79,6 +79,7 @@ internal class Autobrev6og18ÅrServiceTest {
                     andelTilkjentYtelseRepository,
                     endretUtbetalingAndelRepository,
                     mockk(),
+                    mockk(),
                 ),
             startSatsendring = startSatsendring,
         )

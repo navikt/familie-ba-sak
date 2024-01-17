@@ -3,11 +3,14 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.skalAndelerSlåsSammen
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,6 +20,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     @Transactional
     fun finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId: Long): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
@@ -25,23 +29,18 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
 
     @Transactional
     fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
-        // Hvis noen valideringer feiler, så signalerer vi det til frontend ved å fjerne tilknyttede andeler
-        // SB vil få en feilmelding og løsningen blir å slette eller oppdatere endringen
-        // Da vil forhåpentligvis valideringen være ok, koblingene til andelene være beholdt
-        return lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
-            .map {
-                it.utenAndelerVedValideringsfeil {
-                    validerPeriodeInnenforTilkjentytelse(
-                        it.endretUtbetalingAndel,
-                        it.andelerTilkjentYtelse,
-                    )
-                }.utenAndelerVedValideringsfeil {
-                    validerÅrsak(
-                        it.endretUtbetalingAndel,
-                        vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId),
-                    )
-                }
-            }
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val endreteUtbetalingerMedAndeler = lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
+
+        return if (behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
+            // Hvis noen valideringer feiler, så signalerer vi det til frontend ved å fjerne tilknyttede andeler
+            // SB vil få en feilmelding og løsningen blir å slette eller oppdatere endringen
+            // Da vil forhåpentligvis valideringen være ok, koblingene til andelene være beholdt
+            endreteUtbetalingerMedAndeler.filterBortAndelerMedValideringsfeil(vilkårsvurdering)
+        } else {
+            endreteUtbetalingerMedAndeler
+        }
     }
 
     private fun lagKombinator(behandlingId: Long) =
@@ -50,6 +49,21 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
             endretUtbetalingAndelRepository.findByBehandlingId(behandlingId),
         )
 }
+
+fun List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>.filterBortAndelerMedValideringsfeil(vilkårsvurdering: Vilkårsvurdering?): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> =
+    this.map {
+        it.utenAndelerVedValideringsfeil {
+            validerPeriodeInnenforTilkjentytelse(
+                it.endretUtbetalingAndel,
+                it.andelerTilkjentYtelse,
+            )
+        }.utenAndelerVedValideringsfeil {
+            validerÅrsak(
+                it.endretUtbetalingAndel,
+                vilkårsvurdering,
+            )
+        }
+    }
 
 private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
     private val andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
