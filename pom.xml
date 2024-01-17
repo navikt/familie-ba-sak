@@ -22,7 +22,7 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20240110093731_0eda75e</prosessering.version>
-        <felles.version>2.20240112101059_13c2d3f</felles.version>
+        <felles.version>2.20240115122548_b867ed1</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20240116082529_ee44807</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
@@ -551,7 +551,7 @@
                 <!-- For å få dependency graph i SLSA som pushes av docker-build-push parameter byosbom -->
                 <groupId>org.cyclonedx</groupId>
                 <artifactId>cyclonedx-maven-plugin</artifactId>
-                <version>2.7.10</version>
+                <version>2.7.11</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
