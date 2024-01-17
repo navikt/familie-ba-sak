@@ -115,7 +115,7 @@ object EndretUtbetalingAndelValidering {
             }
 
             Årsak.ETTERBETALING_3ÅR ->
-                validerEtterbetaling3År(
+                validerEtterbetalingMaks3ÅrFørSøknadstidspunkt(
                     endretUtbetalingAndel = endretUtbetalingAndel,
                     behandlingOpprettetTidspunkt = vilkårsvurdering?.behandling?.opprettetTidspunkt?.toLocalDate(),
                 )
@@ -132,14 +132,14 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
-    private fun validerEtterbetaling3År(
+    private fun validerEtterbetalingMaks3ÅrFørSøknadstidspunkt(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         behandlingOpprettetTidspunkt: LocalDate?,
     ) {
         val kravDato = endretUtbetalingAndel.søknadstidspunkt ?: behandlingOpprettetTidspunkt
-        if (endretUtbetalingAndel.prosent != BigDecimal.ZERO) {
+        if (endretUtbetalingAndel.prosent == BigDecimal.valueOf(100)) {
             throw FunksjonellFeil(
-                "Du kan ikke sette årsak etterbetaling 3 år når du har valgt at perioden skal utbetales.",
+                "Du kan ikke endre til full utbetaling når det er mer enn tre år siden søknadstidspunktet.",
             )
         } else if (
             endretUtbetalingAndel.tom?.isAfter(
