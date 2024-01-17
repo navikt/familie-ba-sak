@@ -43,6 +43,7 @@ class VilkårsvurderingValideringTest {
             validerIkkeBlandetRegelverk(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn = listOf(søker, barn1, barn2),
+                behandling = lagBehandling(),
             )
         }
     }
@@ -65,6 +66,7 @@ class VilkårsvurderingValideringTest {
             validerIkkeBlandetRegelverk(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn = listOf(søker, barn1),
+                behandling = lagBehandling(),
             )
         }
     }
@@ -87,6 +89,7 @@ class VilkårsvurderingValideringTest {
             validerIkkeBlandetRegelverk(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn = listOf(søker, barn1),
+                behandling = lagBehandling(),
             )
         }
     }
@@ -124,6 +127,7 @@ class VilkårsvurderingValideringTest {
             validerIkkeBlandetRegelverk(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn = listOf(søker, barn),
+                behandling = lagBehandling(),
             )
         }
     }
