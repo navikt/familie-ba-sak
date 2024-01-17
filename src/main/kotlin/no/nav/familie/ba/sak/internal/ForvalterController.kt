@@ -254,7 +254,7 @@ class ForvalterController(
         return ResponseEntity.ok("Ok")
     }
 
-    @PostMapping("/satsendringer/feiltype/{feiltype}/rekjør")
+    @PostMapping("/satsendringer/{satstid}/feiltype/{feiltype}/rekjør")
     @Operation(
         summary = "Rekjør satsendringer med feiltype lik feiltypen som er sendt inn",
         description =
@@ -262,9 +262,10 @@ class ForvalterController(
                 "Det gjør at satsendringen kjøres på nytt på fagsaken.",
     )
     fun rekjørSatsendringMedFeiltype(
+        @PathVariable satstid: YearMonth,
         @PathVariable feiltype: String,
     ): ResponseEntity<String> {
-        val satskjøringerSomSkalRekjøres = satskjøringRepository.finnPåFeilTypeOgFerdigTidIkkeNull(feiltype)
+        val satskjøringerSomSkalRekjøres = satskjøringRepository.finnPåFeilTypeOgFerdigTidIkkeNull(feiltype, satstid)
         satskjøringRepository.deleteAll(satskjøringerSomSkalRekjøres)
         return ResponseEntity.ok("Ok")
     }
