@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.common
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar
 import org.springframework.http.HttpStatus
 import java.time.LocalDateTime
 import kotlin.contracts.ExperimentalContracts
@@ -38,6 +39,10 @@ class SatsendringAndelFeil(
     throwable: Throwable? = null,
     cause: Throwable? = throwable,
 ) : FunksjonellFeil(melding, frontendFeilmelding, httpStatus, throwable, cause)
+
+class SatsendringFeil(melding: String? = "", public val satsendringSvar: SatsendringSvar) : RuntimeException(melding)
+
+class BrukerHarÅpenBehandlingSatsendringFeil() : RuntimeException()
 
 class UtbetalingsikkerhetFeil(
     melding: String,
