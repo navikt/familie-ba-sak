@@ -1,16 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -42,7 +39,7 @@ object EndringIVilkårsvurderingUtil {
                         personIBehandling = personIBehandling,
                         personIForrigeBehandling = personIForrigeBehandling,
                     )
-                vilkårTidslinje.fjernPerioderFørRelevantFomDato(tidligsteRelevanteFomDatoForPersonIVilkårsvurdering, personIBehandling)
+                vilkårTidslinje.beskjærFraOgMed(fraOgMed = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering.tilTidspunkt())
             }
 
         return tidslinjePerVilkår.kombiner { finnesMinstEnEndringIPeriode(it) }
@@ -108,10 +105,4 @@ object EndringIVilkårsvurderingUtil {
             }
         }
     }
-
-    private fun Tidslinje<Boolean, Måned>.fjernPerioderFørRelevantFomDato(
-        relevantFomDato: YearMonth,
-        person: Person?,
-    ) =
-        this.beskjær(fraOgMed = relevantFomDato.tilTidspunkt(), tilOgMed = person?.fødselsdato?.til18ÅrsVilkårsdato()?.tilMånedTidspunkt() ?: throw Feil("Mangler fødselsdato, men prøver å beskjære på 18-år vilkåret"))
 }
