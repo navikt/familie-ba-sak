@@ -256,12 +256,12 @@ class ForvalterController(
 
     @PostMapping("/satsendringer/feiltype/{feiltype}/rekjør")
     @Operation(
-        summary = "Opprett neste grensesnittavstemming basert på taskId av type avstemMotOppdrag ",
+        summary = "Rekjør satsendringer med feiltype lik feiltypen som er sendt inn",
         description =
             "Dette endepunktet sletter alle rader fra Satskjøring der ferdigtid ikke er satt og med feiltypen som er sendt inn. " +
                 "Det gjør at satsendringen kjøres på nytt på fagsaken.",
     )
-    fun rekjør(
+    fun rekjørSatsendringMedFeiltype(
         @PathVariable feiltype: String,
     ): ResponseEntity<String> {
         val satskjøringerSomSkalRekjøres = satskjøringRepository.finnPåFeilTypeOgFerdigTidIkkeNull(feiltype)
