@@ -28,17 +28,18 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
         // Hvis noen valideringer feiler, så signalerer vi det til frontend ved å fjerne tilknyttede andeler
         // SB vil få en feilmelding og løsningen blir å slette eller oppdatere endringen
         // Da vil forhåpentligvis valideringen være ok, koblingene til andelene være beholdt
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
         return lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
             .map {
                 it.utenAndelerVedValideringsfeil {
                     validerPeriodeInnenforTilkjentytelse(
-                        it.endretUtbetalingAndel,
-                        it.andelerTilkjentYtelse,
+                        endretUtbetalingAndel = it.endretUtbetalingAndel,
+                        andelTilkjentYtelser = it.andelerTilkjentYtelse,
                     )
                 }.utenAndelerVedValideringsfeil {
                     validerÅrsak(
-                        it.endretUtbetalingAndel,
-                        vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId),
+                        endretUtbetalingAndel = it.endretUtbetalingAndel,
+                        vilkårsvurdering = vilkårsvurdering,
                     )
                 }
             }
