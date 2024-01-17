@@ -75,6 +75,7 @@ class BeregningServiceTest {
             andelTilkjentYtelseRepository,
             endretUtbetalingAndelRepository,
             vilkårsvurderingRepository,
+            behandlingHentOgPersisterService,
         )
 
     private lateinit var beregningService: BeregningService
@@ -126,6 +127,7 @@ class BeregningServiceTest {
     @Test
     fun `Skal mappe perioderesultat til andel ytelser for innvilget vedtak med 18-års vilkår som sluttdato`() {
         val behandling = lagBehandling()
+        every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
 
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2002, 7, 1))
         val søker = lagPerson(type = PersonType.SØKER)
@@ -191,6 +193,7 @@ class BeregningServiceTest {
     @Test
     fun `Skal mappe perioderesultat til andel ytelser for innvilget vedtak som spenner over flere satsperioder`() {
         val behandling = lagBehandling()
+        every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
 
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 5, 4))
         val søker = lagPerson(type = PersonType.SØKER)
@@ -265,6 +268,7 @@ class BeregningServiceTest {
     @Test
     fun `Skal verifisere at endret utbetaling andel appliseres på en innvilget utbetaling andel`() {
         val behandling = lagBehandling()
+        every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 4, 5))
         val søker = lagPerson(type = PersonType.SØKER)
         val vilkårsvurdering =
@@ -364,6 +368,7 @@ class BeregningServiceTest {
     @Test
     fun `Skal mappe perioderesultat til andel ytelser for avslått vedtak`() {
         val behandling = lagBehandling()
+        every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
         val barn = lagPerson(type = PersonType.BARN)
         val søker = lagPerson(type = PersonType.SØKER)
         val vilkårsvurdering =
@@ -419,6 +424,7 @@ class BeregningServiceTest {
     @Test
     fun `For flere barn med forskjellige perioderesultat skal perioderesultat mappes til andel ytelser`() {
         val behandling = lagBehandling()
+        every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
         val barnFødselsdato = LocalDate.of(2019, 1, 1)
         val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = barnFødselsdato)
         val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = barnFødselsdato)
@@ -1075,6 +1081,8 @@ class BeregningServiceTest {
         skalLageSplitt: Boolean,
     ) {
         val behandling = lagBehandling()
+        every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
+
         val barnFødselsdato = LocalDate.of(2019, 1, 1)
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = barnFødselsdato)
         val søker = lagPerson(type = PersonType.SØKER)
@@ -1235,6 +1243,7 @@ class BeregningServiceTest {
         søker: Person,
     ): List<AndelTilkjentYtelse> {
         val behandling = lagBehandling()
+        every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
         val vilkårsvurdering =
             lagVilkårsvurdering(søkerAktør = søker.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
 
