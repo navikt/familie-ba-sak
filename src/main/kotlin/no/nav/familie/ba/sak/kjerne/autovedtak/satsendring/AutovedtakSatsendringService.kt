@@ -6,18 +6,12 @@ import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.VilkårFeil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -26,21 +20,14 @@ import java.time.LocalDateTime
 
 @Service
 class AutovedtakSatsendringService(
-    private val taskRepository: TaskRepositoryWrapper,
-    private val behandlingRepository: BehandlingRepository,
-    private val autovedtakService: AutovedtakService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val behandlingService: BehandlingService,
     private val satsendringService: SatsendringService,
-    private val loggService: LoggService,
-    private val snikeIKøenService: SnikeIKøenService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val autovedtakSatsendringRollbackService: AutovedtakSatsendringRollbackService,
 ) {
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
     private val satsendringIverksatt = Metrics.counter("satsendring.iverksatt")
-    private val satsendringIgnorertÅpenBehandling = Metrics.counter("satsendring.ignorert.aapenbehandling")
 
     /**
      * Gjennomfører og commiter revurderingsbehandling

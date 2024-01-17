@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -32,15 +31,13 @@ class AutovedtakSatsendringRollbackService(
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingRepository: BehandlingRepository,
     private val autovedtakService: AutovedtakService,
-    private val satskjøringRepository: SatskjøringRepository,
     private val behandlingService: BehandlingService,
-    private val satsendringService: SatsendringService,
     private val loggService: LoggService,
     private val snikeIKøenService: SnikeIKøenService,
-    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
+    private val satsendringIgnorertÅpenBehandling = Metrics.counter("satsendring.ignorert.aapenbehandling")
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun kjørSatsendring(fagsakId: Long) {
@@ -61,6 +58,7 @@ class AutovedtakSatsendringRollbackService(
                     SettPåMaskinellVentÅrsak.SATSENDRING,
                 )
             } else {
+                satsendringIgnorertÅpenBehandling.increment()
                 throw SatsendringFeil(satsendringSvar = brukerHarÅpenBehandlingSvar)
             }
         }
