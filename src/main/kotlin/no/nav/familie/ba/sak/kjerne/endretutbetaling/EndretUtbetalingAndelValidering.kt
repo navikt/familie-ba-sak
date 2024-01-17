@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.VilkårFeil
 import no.nav.familie.ba.sak.common.erBack2BackIMånedsskifte
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.erMellom
@@ -379,7 +380,7 @@ fun validerBarnasVilkår(
     }
 
     if (listeAvFeil.isNotEmpty()) {
-        throw FunksjonellFeil(listeAvFeil.joinToString(separator = "\n"))
+        throw VilkårFeil(listeAvFeil.joinToString(separator = "\n"))
     }
 }
 

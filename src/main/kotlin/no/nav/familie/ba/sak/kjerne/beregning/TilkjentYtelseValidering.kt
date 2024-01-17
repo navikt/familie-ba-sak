@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.SatsendringAndelFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
@@ -70,26 +71,26 @@ object TilkjentYtelseValidering {
         andelerGruppert.outerJoin(forrigeAndelerGruppert) { nåværendeAndel, forrigeAndel ->
             when {
                 forrigeAndel == null && nåværendeAndel != null ->
-                    throw Feil(
+                    throw SatsendringAndelFeil(
                         "Satsendring kan ikke legge til en andel som ikke var der i forrige behandling. " +
                             "Satsendringen prøver å legge til en andel i perioden ${nåværendeAndel.stønadFom} - ${nåværendeAndel.stønadTom}",
                     )
 
                 forrigeAndel != null && nåværendeAndel == null ->
-                    throw Feil(
+                    throw SatsendringAndelFeil(
                         "Satsendring kan ikke fjerne en andel som fantes i forrige behandling. " +
                             "Satsendringen prøver å fjerne andel i perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}",
                     )
 
                 forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
-                    throw Feil(
+                    throw SatsendringAndelFeil(
                         "Satsendring kan ikke endre på prosenten til en andel. " +
                             "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
                             "Prøver å endre fra ${forrigeAndel.prosent} til ${nåværendeAndel?.prosent} prosent.",
                     )
 
                 forrigeAndel != null && forrigeAndel.type != nåværendeAndel?.type ->
-                    throw Feil(
+                    throw SatsendringAndelFeil(
                         "Satsendring kan ikke endre YtelseType til en andel. " +
                             "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
                             "Prøver å endre fra ytelsetype ${forrigeAndel.type} til ${nåværendeAndel?.type}.",
