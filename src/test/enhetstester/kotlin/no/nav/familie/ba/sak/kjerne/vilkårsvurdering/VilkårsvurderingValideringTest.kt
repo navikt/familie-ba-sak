@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -43,6 +44,33 @@ class VilkårsvurderingValideringTest {
             validerIkkeBlandetRegelverk(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn = listOf(søker, barn1, barn2),
+                behandling = lagBehandling(),
+            )
+        }
+    }
+
+    @Test
+    fun `skal ikke kaste feil hvis søker vurderes etter nasjonal og minst ett barn etter EØS om der er satsendring`() {
+        val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
+        val søker = lagPersonEnkel(PersonType.SØKER)
+        val barn1 = lagPersonEnkel(PersonType.BARN)
+        val barn2 = lagPersonEnkel(PersonType.BARN)
+        val personResultatSøker = byggPersonResultatForPersonEnkel(søker, Regelverk.NASJONALE_REGLER, vilkårsvurdering)
+        val personResultatBarn1 = byggPersonResultatForPersonEnkel(barn1, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
+        val personResultatBarn2 = byggPersonResultatForPersonEnkel(barn2, Regelverk.NASJONALE_REGLER, vilkårsvurdering)
+
+        vilkårsvurdering.personResultater =
+            setOf(
+                personResultatSøker,
+                personResultatBarn1,
+                personResultatBarn2,
+            )
+
+        assertDoesNotThrow {
+            validerIkkeBlandetRegelverk(
+                vilkårsvurdering = vilkårsvurdering,
+                søkerOgBarn = listOf(søker, barn1, barn2),
+                behandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING),
             )
         }
     }
@@ -65,6 +93,7 @@ class VilkårsvurderingValideringTest {
             validerIkkeBlandetRegelverk(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn = listOf(søker, barn1),
+                behandling = lagBehandling(),
             )
         }
     }
@@ -87,6 +116,7 @@ class VilkårsvurderingValideringTest {
             validerIkkeBlandetRegelverk(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn = listOf(søker, barn1),
+                behandling = lagBehandling(),
             )
         }
     }
@@ -124,6 +154,7 @@ class VilkårsvurderingValideringTest {
             validerIkkeBlandetRegelverk(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn = listOf(søker, barn),
+                behandling = lagBehandling(),
             )
         }
     }

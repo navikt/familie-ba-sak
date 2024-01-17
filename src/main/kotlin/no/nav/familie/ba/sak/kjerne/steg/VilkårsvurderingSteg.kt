@@ -45,6 +45,7 @@ class VilkårsvurderingSteg(
             validerIkkeBlandetRegelverk(
                 søkerOgBarn = søkerOgBarn,
                 vilkårsvurdering = this,
+                behandling = behandling,
             )
 
             valider18ÅrsVilkårEksistererFraFødselsdato(
