@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -250,5 +251,19 @@ class ForvalterController(
         if (task.type != GrensesnittavstemMotOppdrag.TASK_STEP_TYPE) error("sisteTaskId må være av typen ${GrensesnittavstemMotOppdrag.TASK_STEP_TYPE}")
         opprettTaskService.opprettGrensesnittavstemMotOppdragTask(GrensesnittavstemMotOppdrag.nesteAvstemmingDTO(task.triggerTid.toLocalDate()))
         return ResponseEntity.ok("Ok")
+    }
+
+    @PatchMapping("/flytt-vilkaar-fom-dato-til-foedselsdato/behandling/{behandlingId}")
+    @Operation(
+        summary = "Sett periodeFom på vilkårresultater i behandling som er tidligere enn personens fødselsdato til å være fødselsdato. ",
+        description =
+            "Dette endepunktet henter alle vilkårresultater og setter periodefom = fødselsdato til personen vilkårresultatet tilhører dersom " +
+                "vilkårresultatet sin periodeFom < personens fødselsdato.",
+    )
+    fun flyttVilkårFomDatoTilFødselsdato(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Vilkårsvurdering> {
+        val endretVilkårsvurdering = forvalterService.settFomPåVilkårTilPersonsFødselsdato(behandlingId)
+        return ResponseEntity.ok(endretVilkårsvurdering)
     }
 }
