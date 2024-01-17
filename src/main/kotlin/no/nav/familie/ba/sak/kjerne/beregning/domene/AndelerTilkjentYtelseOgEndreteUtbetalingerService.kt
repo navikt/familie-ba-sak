@@ -29,14 +29,14 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
 
     @Transactional
     fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
-        // Hvis noen valideringer feiler, så signalerer vi det til frontend ved å fjerne tilknyttede andeler
-        // SB vil få en feilmelding og løsningen blir å slette eller oppdatere endringen
-        // Da vil forhåpentligvis valideringen være ok, koblingene til andelene være beholdt
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val endreteUtbetalingerMedAndeler = lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
 
         return if (behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
+            // Hvis noen valideringer feiler, så signalerer vi det til frontend ved å fjerne tilknyttede andeler
+            // SB vil få en feilmelding og løsningen blir å slette eller oppdatere endringen
+            // Da vil forhåpentligvis valideringen være ok, koblingene til andelene være beholdt
             endreteUtbetalingerMedAndeler.filterBortAndelerMedValideringsfeil(vilkårsvurdering)
         } else {
             endreteUtbetalingerMedAndeler
