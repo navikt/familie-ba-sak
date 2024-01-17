@@ -100,19 +100,18 @@ class ForvalterServiceTest {
 
     @Test
     fun `Skal endre periodeFom på vilkårresultat når den er før fødselsdato på person`() {
-        val behandling = lagBehandling()
-        behandling.status = BehandlingStatus.AVSLUTTET
+        val behandling = lagBehandling(status = BehandlingStatus.AVSLUTTET)
 
         val barnFødselsdato = LocalDate.now().minusYears(1).withDayOfMonth(15)
-        val søker = lagPerson()
-        val barn = lagPerson(fødselsdato = barnFødselsdato)
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = barnFødselsdato)
 
-        val vilkårsVurderingSomSkalFlushes = slot<Vilkårsvurdering>()
-        every { vilkårsvurderingService.oppdater(capture(vilkårsVurderingSomSkalFlushes)) } answers {
-            if (vilkårsVurderingSomSkalFlushes.isCaptured) {
-                vilkårsVurderingSomSkalFlushes.captured
+        val vilkårsvurderingSomSkalFlushes = slot<Vilkårsvurdering>()
+        every { vilkårsvurderingService.oppdater(capture(vilkårsvurderingSomSkalFlushes)) } answers {
+            if (vilkårsvurderingSomSkalFlushes.isCaptured) {
+                vilkårsvurderingSomSkalFlushes.captured
             } else {
-                throw Feil("Noe gikk feil ved capturing av vilkårsvurdring.")
+                throw Feil("Noe gikk feil ved capturing av vilkårsvurdering.")
             }
         }
 
@@ -133,7 +132,8 @@ class ForvalterServiceTest {
         val barnResultat = PersonResultat(vilkårsvurdering = vilkårsVurdering, aktør = barn.aktør)
         barnResultat.setSortedVilkårResultater(
             setOf(
-                lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato.førsteDagIInneværendeMåned(), vilkårType = Vilkår.BOSATT_I_RIKET),
+                lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato.førsteDagIInneværendeMåned(), periodeTom = barn.fødselsdato.plusMonths(3), vilkårType = Vilkår.BOSATT_I_RIKET),
+                lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato.plusMonths(4), vilkårType = Vilkår.BOSATT_I_RIKET),
                 lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato, vilkårType = Vilkår.UNDER_18_ÅR),
                 lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato, periodeTom = barnFødselsdato.plusMonths(2), vilkårType = Vilkår.BOR_MED_SØKER),
                 lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato.plusMonths(3), vilkårType = Vilkår.BOR_MED_SØKER),
@@ -154,7 +154,7 @@ class ForvalterServiceTest {
         val vilkårResultaterMedFomEtterBarnsFødselsDato =
             vilkårsvurderingEndret.personResultater.singleOrNull { !it.erSøkersResultater() }?.vilkårResultater
                 ?.filter { it.periodeFom?.isAfter(barn.fødselsdato) ?: false }
-        assertThat(vilkårResultaterMedFomEtterBarnsFødselsDato?.size).isEqualTo(1)
+        assertThat(vilkårResultaterMedFomEtterBarnsFødselsDato?.size).isEqualTo(2)
             .`as`("Vilkårresultater med fom etter barns fødselsdato har også blitt endret: $vilkårResultaterMedFomEtterBarnsFødselsDato")
     }
 
@@ -167,10 +167,10 @@ class ForvalterServiceTest {
         val søker = lagPerson()
         val barn = lagPerson(fødselsdato = barnFødselsdato)
 
-        val vilkårsVurderingSomSkalFlushes = slot<Vilkårsvurdering>()
-        every { vilkårsvurderingService.oppdater(capture(vilkårsVurderingSomSkalFlushes)) } answers {
-            if (vilkårsVurderingSomSkalFlushes.isCaptured) {
-                vilkårsVurderingSomSkalFlushes.captured
+        val vilkårsvurderingSomSkalFlushes = slot<Vilkårsvurdering>()
+        every { vilkårsvurderingService.oppdater(capture(vilkårsvurderingSomSkalFlushes)) } answers {
+            if (vilkårsvurderingSomSkalFlushes.isCaptured) {
+                vilkårsvurderingSomSkalFlushes.captured
             } else {
                 throw Feil("Noe gikk feil ved capturing av vilkårsvurdring.")
             }
@@ -228,10 +228,10 @@ class ForvalterServiceTest {
         val søker = lagPerson()
         val barn = lagPerson(fødselsdato = barnFødselsdato)
 
-        val vilkårsVurderingSomSkalFlushes = slot<Vilkårsvurdering>()
-        every { vilkårsvurderingService.oppdater(capture(vilkårsVurderingSomSkalFlushes)) } answers {
-            if (vilkårsVurderingSomSkalFlushes.isCaptured) {
-                vilkårsVurderingSomSkalFlushes.captured
+        val vilkårsvurderingSomSkalFlushes = slot<Vilkårsvurdering>()
+        every { vilkårsvurderingService.oppdater(capture(vilkårsvurderingSomSkalFlushes)) } answers {
+            if (vilkårsvurderingSomSkalFlushes.isCaptured) {
+                vilkårsvurderingSomSkalFlushes.captured
             } else {
                 throw Feil("Noe gikk feil ved capturing av vilkårsvurdring.")
             }
