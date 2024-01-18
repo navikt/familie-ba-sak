@@ -36,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
@@ -223,7 +224,9 @@ class ForvalterService(
                 ?: throw Feil("Det er ingen vilkårsvurdering for behandling: $behandlingId")
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
-            personResultat.vilkårResultater.forEach { vilkårResultat ->
+            personResultat.vilkårResultater.forEach vilkårresultatLoop@{ vilkårResultat ->
+                if (vilkårResultat.vilkårType == UNDER_18_ÅR) return@vilkårresultatLoop
+
                 val person =
                     personerPåBehandling?.singleOrNull { it.aktør == personResultat.aktør }
                         ?: throw Feil("Finner ikke person på behandling med aktørId ${personResultat.aktør.aktørId}.")
@@ -252,7 +255,7 @@ class ForvalterService(
                 personerPåBehandling?.singleOrNull { it.aktør == personResultat.aktør }
                     ?: throw Feil("Finner ikke person på behandling.")
 
-            if (personResultat.vilkårResultater.any { it.periodeFom?.isBefore(person.fødselsdato) == true }) {
+            if (personResultat.vilkårResultater.any { it.periodeFom?.isBefore(person.fødselsdato) == true && it.vilkårType != UNDER_18_ÅR }) {
                 throw Feil("Er fortsatt vilkår som starter før fødselsdato på barn.")
             }
         }
