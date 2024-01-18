@@ -48,6 +48,34 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.YearMonth
 
+private const val UTBETALINGS_OPPDRAG = """
+    {
+      "kodeEndring": "NY",
+      "fagSystem": "BA",
+      "saksnummer": "100",
+      "aktoer": "123456",
+      "saksbehandlerId": "Z994212",
+      "avstemmingTidspunkt": "2024-01-04T13:41:32.190821",
+      "utbetalingsperiode": [
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 0,
+          "forrigePeriodeId": null,
+          "datoForVedtak": "2024-01-04",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2018-02-01",
+          "vedtakdatoTom": "2019-02-28",
+          "sats": 970,
+          "satsType": "MND",
+          "utbetalesTil": "123456",
+          "behandlingId": 1000,
+          "utbetalingsgrad": null
+        }
+      ]
+    }
+"""
+
 class UtbetalingsoppdragIntegrasjonTest(
     @Autowired
     private val beregningService: BeregningService,
@@ -295,7 +323,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 ),
             )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
+        tilkjentYtelse.utbetalingsoppdrag = UTBETALINGS_OPPDRAG
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             "saksbehandler",
@@ -446,7 +474,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 ),
             )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
+        tilkjentYtelse.utbetalingsoppdrag = UTBETALINGS_OPPDRAG
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             "saksbehandler",
@@ -697,7 +725,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
 
-        tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
+        tilkjentYtelse.utbetalingsoppdrag = UTBETALINGS_OPPDRAG
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             "saksbehandler",
@@ -868,7 +896,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 ),
             )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
+        tilkjentYtelse.utbetalingsoppdrag = UTBETALINGS_OPPDRAG
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             "saksbehandler",
@@ -1017,7 +1045,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 ),
             )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
+        tilkjentYtelse.utbetalingsoppdrag = UTBETALINGS_OPPDRAG
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             "saksbehandler",
@@ -1042,7 +1070,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val andelerRevurdering = emptyList<AndelTilkjentYtelse>()
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
-        tilkjentYtelse2.utbetalingsoppdrag = "Oppdrag"
+        tilkjentYtelse2.utbetalingsoppdrag = UTBETALINGS_OPPDRAG
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             "saksbehandler",
@@ -1115,7 +1143,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 ),
             )
         førsteTilkjentYtelse.andelerTilkjentYtelse.addAll(førsteAndelerTilkjentYtelse)
-        førsteTilkjentYtelse.utbetalingsoppdrag = "utbetalingsoppdrg"
+        førsteTilkjentYtelse.utbetalingsoppdrag = UTBETALINGS_OPPDRAG
         tilkjentYtelseRepository.saveAndFlush(førsteTilkjentYtelse)
 
         utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -1254,7 +1282,7 @@ class UtbetalingsoppdragIntegrasjonTest(
 
         @Test
         fun `skal hente siste andelene per ident og ytelsestype`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGS_OPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndel(this, fom, tom),
@@ -1270,7 +1298,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             val andreBehandling = opprettRevurdering()
             val andreVedtak = lagVedtak(behandling = andreBehandling)
 
-            with(lagInitiellTilkjentYtelse(andreBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(andreBehandling, utbetalingsoppdrag = UTBETALINGS_OPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndel(this, fom, tom),
@@ -1304,7 +1332,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             val barn = tilfeldigPerson()
             val aktørBarn = personidentService.hentOgLagreAktør(barn.aktør.aktivFødselsnummer(), true)
 
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGS_OPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndelTilkjentYtelse(
@@ -1360,7 +1388,7 @@ class UtbetalingsoppdragIntegrasjonTest(
 
             val revurdering = opprettRevurdering()
 
-            with(lagInitiellTilkjentYtelse(revurdering, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(revurdering, utbetalingsoppdrag = UTBETALINGS_OPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndelTilkjentYtelse(
@@ -1437,7 +1465,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 }
             }
 
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGS_OPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndel(this, fom = fom, tom = tom),
@@ -1452,7 +1480,7 @@ class UtbetalingsoppdragIntegrasjonTest(
 
             val andreBehandling = opprettRevurdering()
 
-            with(lagInitiellTilkjentYtelse(andreBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(andreBehandling, utbetalingsoppdrag = UTBETALINGS_OPPDRAG)) {
                 andelerTilkjentYtelse.add(lagAndel(this, fom = fom, tom = tom))
                 tilkjentYtelseRepository.saveAndFlush(this)
             }
@@ -1462,7 +1490,7 @@ class UtbetalingsoppdragIntegrasjonTest(
 
             avsluttOgLagreBehandling(andreBehandling)
             val tredjeBehandling = opprettRevurdering()
-            with(lagInitiellTilkjentYtelse(tredjeBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(tredjeBehandling, utbetalingsoppdrag = UTBETALINGS_OPPDRAG)) {
                 tilkjentYtelseRepository.saveAndFlush(this)
             }
             with(genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(lagVedtak(behandling = tredjeBehandling))) {
@@ -1472,7 +1500,7 @@ class UtbetalingsoppdragIntegrasjonTest(
 
         @Test
         fun `ny andel etter opphør skal peke til siste andelen`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGS_OPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndel(this, fom = fom, tom = tom),
@@ -1487,7 +1515,7 @@ class UtbetalingsoppdragIntegrasjonTest(
 
             val andreBehandling = opprettRevurdering()
 
-            with(lagInitiellTilkjentYtelse(andreBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(andreBehandling, utbetalingsoppdrag = UTBETALINGS_OPPDRAG)) {
                 andelerTilkjentYtelse.add(lagAndel(this, fom = fom, tom = tom))
                 tilkjentYtelseRepository.saveAndFlush(this)
             }
@@ -1495,7 +1523,7 @@ class UtbetalingsoppdragIntegrasjonTest(
 
             avsluttOgLagreBehandling(andreBehandling)
             val tredjeBehandling = opprettRevurdering()
-            with(lagInitiellTilkjentYtelse(tredjeBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(tredjeBehandling, utbetalingsoppdrag = UTBETALINGS_OPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndel(this, fom = fom, tom = tom),
