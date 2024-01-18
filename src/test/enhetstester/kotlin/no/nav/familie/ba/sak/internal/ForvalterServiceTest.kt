@@ -164,8 +164,8 @@ class ForvalterServiceTest {
         behandling.status = BehandlingStatus.AVSLUTTET
 
         val barnFødselsdato = LocalDate.now().minusYears(1).withDayOfMonth(15)
-        val søker = lagPerson()
-        val barn = lagPerson(fødselsdato = barnFødselsdato)
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = barnFødselsdato)
 
         val vilkårsvurderingSomSkalFlushes = slot<Vilkårsvurdering>()
         every { vilkårsvurderingService.oppdater(capture(vilkårsvurderingSomSkalFlushes)) } answers {
@@ -225,8 +225,8 @@ class ForvalterServiceTest {
         behandling.status = BehandlingStatus.AVSLUTTET
 
         val barnFødselsdato = LocalDate.now().minusYears(1).withDayOfMonth(15)
-        val søker = lagPerson()
-        val barn = lagPerson(fødselsdato = barnFødselsdato)
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = barnFødselsdato)
 
         val vilkårsvurderingSomSkalFlushes = slot<Vilkårsvurdering>()
         every { vilkårsvurderingService.oppdater(capture(vilkårsvurderingSomSkalFlushes)) } answers {
