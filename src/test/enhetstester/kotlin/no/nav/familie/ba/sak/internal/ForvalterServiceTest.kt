@@ -123,13 +123,13 @@ class ForvalterServiceTest {
 
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
 
-        val vilkårsVurdering =
+        val vilkårsvurdering =
             lagVilkårsvurdering(
                 behandling = behandling,
                 søkerAktør = søker.aktør,
                 resultat = Resultat.OPPFYLT,
             )
-        val barnResultat = PersonResultat(vilkårsvurdering = vilkårsVurdering, aktør = barn.aktør)
+        val barnResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn.aktør)
         barnResultat.setSortedVilkårResultater(
             setOf(
                 lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato.førsteDagIInneværendeMåned(), periodeTom = barn.fødselsdato.plusMonths(3), vilkårType = Vilkår.BOSATT_I_RIKET),
@@ -141,9 +141,9 @@ class ForvalterServiceTest {
                 lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato, vilkårType = Vilkår.GIFT_PARTNERSKAP),
             ),
         )
-        vilkårsVurdering.personResultater += barnResultat
+        vilkårsvurdering.personResultater += barnResultat
 
-        every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns vilkårsVurdering
+        every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns vilkårsvurdering
 
         val vilkårsvurderingEndret = forvalterService.settFomPåVilkårTilPersonsFødselsdato(behandling.id)
         vilkårsvurderingEndret.personResultater.singleOrNull { !it.erSøkersResultater() }
@@ -184,13 +184,13 @@ class ForvalterServiceTest {
 
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
 
-        val vilkårsVurdering =
+        val vilkårsvurdering =
             lagVilkårsvurdering(
                 behandling = behandling,
                 søkerAktør = søker.aktør,
                 resultat = Resultat.OPPFYLT,
             )
-        val barnResultat = PersonResultat(vilkårsvurdering = vilkårsVurdering, aktør = barn.aktør)
+        val barnResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn.aktør)
         barnResultat.setSortedVilkårResultater(
             setOf(
                 lagVilkårResultat(
@@ -210,9 +210,9 @@ class ForvalterServiceTest {
                 lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato, vilkårType = Vilkår.GIFT_PARTNERSKAP),
             ),
         )
-        vilkårsVurdering.personResultater += barnResultat
+        vilkårsvurdering.personResultater += barnResultat
 
-        every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns vilkårsVurdering
+        every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns vilkårsvurdering
 
         assertThrows<Feil> {
             forvalterService.settFomPåVilkårTilPersonsFødselsdato(behandling.id)
@@ -245,13 +245,13 @@ class ForvalterServiceTest {
 
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
 
-        val vilkårsVurdering =
+        val vilkårsvurdering =
             lagVilkårsvurdering(
                 behandling = behandling,
                 søkerAktør = søker.aktør,
                 resultat = Resultat.OPPFYLT,
             )
-        val barnResultat = PersonResultat(vilkårsvurdering = vilkårsVurdering, aktør = barn.aktør)
+        val barnResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn.aktør)
         barnResultat.setSortedVilkårResultater(
             setOf(
                 lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato.minusMonths(2), vilkårType = Vilkår.BOSATT_I_RIKET),
@@ -261,9 +261,9 @@ class ForvalterServiceTest {
                 lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato, vilkårType = Vilkår.GIFT_PARTNERSKAP),
             ),
         )
-        vilkårsVurdering.personResultater += barnResultat
+        vilkårsvurdering.personResultater += barnResultat
 
-        every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns vilkårsVurdering
+        every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns vilkårsvurdering
 
         assertThrows<Feil> {
             forvalterService.settFomPåVilkårTilPersonsFødselsdato(behandling.id)
@@ -296,13 +296,13 @@ class ForvalterServiceTest {
 
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
 
-        val vilkårsVurdering =
+        val vilkårsvurdering =
             lagVilkårsvurdering(
                 behandling = behandling,
                 søkerAktør = søker.aktør,
                 resultat = Resultat.OPPFYLT,
             )
-        val barnResultat = PersonResultat(vilkårsvurdering = vilkårsVurdering, aktør = barn.aktør)
+        val barnResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn.aktør)
         barnResultat.setSortedVilkårResultater(
             setOf(
                 lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato.førsteDagIInneværendeMåned(), vilkårType = Vilkår.BOSATT_I_RIKET),
@@ -312,9 +312,9 @@ class ForvalterServiceTest {
                 lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato, vilkårType = Vilkår.GIFT_PARTNERSKAP),
             ),
         )
-        vilkårsVurdering.personResultater += barnResultat
+        vilkårsvurdering.personResultater += barnResultat
 
-        every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns vilkårsVurdering
+        every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns vilkårsvurdering
 
         val vilkårsvurderingEndret = forvalterService.settFomPåVilkårTilPersonsFødselsdato(behandling.id)
         vilkårsvurderingEndret.personResultater.singleOrNull { !it.erSøkersResultater() }
