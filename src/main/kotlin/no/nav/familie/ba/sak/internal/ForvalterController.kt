@@ -11,10 +11,10 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchIdentForBarnPåFagsak
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -262,8 +262,8 @@ class ForvalterController(
     )
     fun flyttVilkårFomDatoTilFødselsdato(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Vilkårsvurdering> {
-        val endretVilkårsvurdering = forvalterService.settFomPåVilkårTilPersonsFødselsdato(behandlingId)
-        return ResponseEntity.ok(endretVilkårsvurdering)
+    ): ResponseEntity<String> {
+        opprettTaskService.opprettTaskForÅPatcheVilkårFom(PatchFomPåVilkårTilFødselsdato(behandlingId))
+        return ResponseEntity.ok("Ok")
     }
 }
