@@ -265,7 +265,9 @@ class ForvalterController(
     fun flyttVilkårFomDatoTilFødselsdato(
         @RequestBody behandlinger: Set<Long>,
     ): ResponseEntity<String> {
-        opprettTaskService.opprettTaskForÅPatcheVilkårFom(PatchFomPåVilkårTilFødselsdato(behandlinger))
+        behandlinger.forEach {
+            opprettTaskService.opprettTaskForÅPatcheVilkårFom(PatchFomPåVilkårTilFødselsdato(it))
+        }
         return ResponseEntity.ok("Ok")
     }
 

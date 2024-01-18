@@ -204,7 +204,7 @@ class OpprettTaskService(
                 payload = objectMapper.writeValueAsString(dto),
                 properties =
                     Properties().apply {
-                        this["behandlingId"] = dto.behandlinger.toString()
+                        this["behandlingId"] = dto.behandlingId.toString()
                     },
             ),
         )
