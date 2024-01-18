@@ -270,6 +270,64 @@ class ForvalterServiceTest {
         }
     }
 
+    @Test
+    fun `Skal ikke endre på fom på under-18-vilkår`() {
+        val behandling = lagBehandling()
+        behandling.status = BehandlingStatus.AVSLUTTET
+
+        val barnFødselsdato = LocalDate.now().minusYears(1).withDayOfMonth(15)
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = barnFødselsdato)
+
+        val vilkårsvurderingSomSkalFlushes = slot<Vilkårsvurdering>()
+        every { vilkårsvurderingService.oppdater(capture(vilkårsvurderingSomSkalFlushes)) } answers {
+            if (vilkårsvurderingSomSkalFlushes.isCaptured) {
+                vilkårsvurderingSomSkalFlushes.captured
+            } else {
+                throw Feil("Noe gikk feil ved capturing av vilkårsvurdring.")
+            }
+        }
+
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandling(any()) } returns
+            listOf(
+                personTilPersonEnkel(barn),
+                personTilPersonEnkel(søker),
+            )
+
+        every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
+
+        val vilkårsVurdering =
+            lagVilkårsvurdering(
+                behandling = behandling,
+                søkerAktør = søker.aktør,
+                resultat = Resultat.OPPFYLT,
+            )
+        val barnResultat = PersonResultat(vilkårsvurdering = vilkårsVurdering, aktør = barn.aktør)
+        barnResultat.setSortedVilkårResultater(
+            setOf(
+                lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato.førsteDagIInneværendeMåned(), vilkårType = Vilkår.BOSATT_I_RIKET),
+                lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato.førsteDagIInneværendeMåned(), vilkårType = Vilkår.UNDER_18_ÅR),
+                lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato, vilkårType = Vilkår.BOR_MED_SØKER),
+                lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato, vilkårType = Vilkår.LOVLIG_OPPHOLD),
+                lagVilkårResultat(barnResultat = barnResultat, periodeFom = barn.fødselsdato, vilkårType = Vilkår.GIFT_PARTNERSKAP),
+            ),
+        )
+        vilkårsVurdering.personResultater += barnResultat
+
+        every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns vilkårsVurdering
+
+        val vilkårsvurderingEndret = forvalterService.settFomPåVilkårTilPersonsFødselsdato(behandling.id)
+        vilkårsvurderingEndret.personResultater.singleOrNull { !it.erSøkersResultater() }
+            ?.vilkårResultater
+            ?.forEach { vilkårResultat ->
+                if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR) {
+                    assertThat(vilkårResultat.periodeFom == barn.fødselsdato.førsteDagIInneværendeMåned())
+                } else {
+                    assertTrue(vilkårResultat.periodeFom?.isSameOrAfter(barn.fødselsdato) ?: false)
+                }
+            }
+    }
+
     private fun personTilPersonEnkel(barn: Person) =
         PersonEnkel(
             type = PersonType.BARN,
