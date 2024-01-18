@@ -99,7 +99,7 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
               JOIN Behandling b ON b.id = aty.fk_behandling_id
              WHERE b.fk_fagsak_id = :fagsakId
                AND ty.utbetalingsoppdrag IS NOT NULL
-               AND json_extract_path_text(cast(utbetalingsoppdrag as json), 'utbetalingsperiode') != '[]'
+               AND json_extract_path_text(cast(ty.utbetalingsoppdrag as json), 'utbetalingsperiode') != '[]'
                AND aty.periode_offset IS NOT NULL
                AND b.status = 'AVSLUTTET')
         SELECT aty.* FROM andel_tilkjent_ytelse aty WHERE id IN (SELECT id FROM andeler WHERE rn = 1)
