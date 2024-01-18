@@ -17,11 +17,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAt
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
@@ -35,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -81,21 +80,7 @@ class BehandlingsresultatSteg(
             andelerTilkjentYtelseOgEndreteUtbetalingerService
                 .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
 
-        validerAtAlleOpprettedeEndringerErUtfylt(endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel })
-        validerAtEndringerErTilknyttetAndelTilkjentYtelse(endreteUtbetalingerMedAndeler)
-        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-            endretUtbetalingAndelerMedÅrsakDeltBosted = endreteUtbetalingerMedAndeler.filter { it.årsak == Årsak.DELT_BOSTED },
-        )
-
-        validerPeriodeInnenforTilkjentytelse(
-            endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-            tilkjentYtelse.andelerTilkjentYtelse,
-        )
-
-        validerÅrsak(
-            endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-            vilkårService.hentVilkårsvurdering(behandling.id),
-        )
+        endreteUtbetalingerMedAndeler.validerEndredeUtbetalingsandeler(tilkjentYtelse, vilkårService.hentVilkårsvurdering(behandling.id))
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
             validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling)
@@ -228,4 +213,25 @@ class BehandlingsresultatSteg(
     companion object {
         val logger = LoggerFactory.getLogger(this::class.java)!!
     }
+}
+
+private fun List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>.validerEndredeUtbetalingsandeler(
+    tilkjentYtelse: TilkjentYtelse,
+    vilkårsvurdering: Vilkårsvurdering?,
+) {
+    EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt(map { it.endretUtbetalingAndel })
+    EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse(this)
+    validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
+        endretUtbetalingAndelerMedÅrsakDeltBosted = filter { it.årsak == Årsak.DELT_BOSTED },
+    )
+
+    EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse(
+        map { it.endretUtbetalingAndel },
+        tilkjentYtelse.andelerTilkjentYtelse,
+    )
+
+    EndretUtbetalingAndelValidering.validerÅrsak(
+        map { it.endretUtbetalingAndel },
+        vilkårsvurdering,
+    )
 }
