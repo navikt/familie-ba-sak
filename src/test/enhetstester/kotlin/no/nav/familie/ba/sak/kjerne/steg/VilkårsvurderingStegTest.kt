@@ -4,6 +4,7 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import junit.framework.TestCase.assertTrue
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
@@ -30,7 +31,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -165,9 +165,6 @@ class VilkårsvurderingStegTest {
         every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id) } returns søkerOgBarnPåBehandling
 
         val exception = assertThrows<FunksjonellFeil> { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
-        assertEquals(
-            "Det er forskjellig regelverk for en eller flere perioder for søker eller barna",
-            exception.message,
-        )
+        assertTrue(exception.message?.contains("Det er forskjellig regelverk for en eller flere perioder for søker eller barna.") == true)
     }
 }

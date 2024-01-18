@@ -3,10 +3,12 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -70,29 +72,37 @@ object TilkjentYtelseValidering {
         andelerGruppert.outerJoin(forrigeAndelerGruppert) { nåværendeAndel, forrigeAndel ->
             when {
                 forrigeAndel == null && nåværendeAndel != null ->
-                    throw Feil(
-                        "Satsendring kan ikke legge til en andel som ikke var der i forrige behandling. " +
-                            "Satsendringen prøver å legge til en andel i perioden ${nåværendeAndel.stønadFom} - ${nåværendeAndel.stønadTom}",
+                    throw SatsendringFeil(
+                        melding =
+                            "Satsendring kan ikke legge til en andel som ikke var der i forrige behandling. " +
+                                "Satsendringen prøver å legge til en andel i perioden ${nåværendeAndel.stønadFom} - ${nåværendeAndel.stønadTom}",
+                        satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
                     )
 
                 forrigeAndel != null && nåværendeAndel == null ->
-                    throw Feil(
-                        "Satsendring kan ikke fjerne en andel som fantes i forrige behandling. " +
-                            "Satsendringen prøver å fjerne andel i perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}",
+                    throw SatsendringFeil(
+                        melding =
+                            "Satsendring kan ikke fjerne en andel som fantes i forrige behandling. " +
+                                "Satsendringen prøver å fjerne andel i perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}",
+                        satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
                     )
 
                 forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
-                    throw Feil(
-                        "Satsendring kan ikke endre på prosenten til en andel. " +
-                            "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
-                            "Prøver å endre fra ${forrigeAndel.prosent} til ${nåværendeAndel?.prosent} prosent.",
+                    throw SatsendringFeil(
+                        melding =
+                            "Satsendring kan ikke endre på prosenten til en andel. " +
+                                "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
+                                "Prøver å endre fra ${forrigeAndel.prosent} til ${nåværendeAndel?.prosent} prosent.",
+                        satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
                     )
 
                 forrigeAndel != null && forrigeAndel.type != nåværendeAndel?.type ->
-                    throw Feil(
-                        "Satsendring kan ikke endre YtelseType til en andel. " +
-                            "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
-                            "Prøver å endre fra ytelsetype ${forrigeAndel.type} til ${nåværendeAndel?.type}.",
+                    throw SatsendringFeil(
+                        melding =
+                            "Satsendring kan ikke endre YtelseType til en andel. " +
+                                "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
+                                "Prøver å endre fra ytelsetype ${forrigeAndel.type} til ${nåværendeAndel?.type}.",
+                        satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
                     )
 
                 else -> false

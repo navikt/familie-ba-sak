@@ -9,11 +9,13 @@ import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchIdentForBarnPåFagsak
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -50,6 +52,7 @@ class ForvalterController(
     private val økonomiService: ØkonomiService,
     private val opprettTaskService: OpprettTaskService,
     private val taskService: TaskService,
+    private val satskjøringRepository: SatskjøringRepository,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -249,6 +252,38 @@ class ForvalterController(
         val task = taskService.findById(taskId)
         if (task.type != GrensesnittavstemMotOppdrag.TASK_STEP_TYPE) error("sisteTaskId må være av typen ${GrensesnittavstemMotOppdrag.TASK_STEP_TYPE}")
         opprettTaskService.opprettGrensesnittavstemMotOppdragTask(GrensesnittavstemMotOppdrag.nesteAvstemmingDTO(task.triggerTid.toLocalDate()))
+        return ResponseEntity.ok("Ok")
+    }
+
+    @PatchMapping("/flytt-vilkaar-fom-dato-til-foedselsdato")
+    @Operation(
+        summary = "Sett periodeFom på vilkårresultater i behandling som er tidligere enn personens fødselsdato til å være fødselsdato. ",
+        description =
+            "Dette endepunktet henter alle vilkårresultater og setter periodefom = fødselsdato til personen vilkårresultatet tilhører dersom " +
+                "vilkårresultatet sin periodeFom < personens fødselsdato.",
+    )
+    fun flyttVilkårFomDatoTilFødselsdato(
+        @RequestBody behandlinger: Set<Long>,
+    ): ResponseEntity<String> {
+        behandlinger.forEach {
+            opprettTaskService.opprettTaskForÅPatcheVilkårFom(PatchFomPåVilkårTilFødselsdato(it))
+        }
+        return ResponseEntity.ok("Ok")
+    }
+
+    @PostMapping("/satsendringer/{satstid}/feiltype/{feiltype}/rekjør")
+    @Operation(
+        summary = "Rekjør satsendringer med feiltype lik feiltypen som er sendt inn",
+        description =
+            "Dette endepunktet sletter alle rader fra Satskjøring der ferdigtid ikke er satt og med feiltypen som er sendt inn. " +
+                "Det gjør at satsendringen kjøres på nytt på fagsaken.",
+    )
+    fun rekjørSatsendringMedFeiltype(
+        @PathVariable satstid: YearMonth,
+        @PathVariable feiltype: String,
+    ): ResponseEntity<String> {
+        val satskjøringerSomSkalRekjøres = satskjøringRepository.finnPåFeilTypeOgFerdigTidIkkeNull(feiltype, satstid)
+        satskjøringRepository.deleteAll(satskjøringerSomSkalRekjøres)
         return ResponseEntity.ok("Ok")
     }
 }

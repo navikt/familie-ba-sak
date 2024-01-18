@@ -160,10 +160,14 @@ class StartSatsendring(
 
             SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG,
             SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT,
-            ->
-                throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
+            -> throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
+
             SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI ->
                 throw FunksjonellFeil(resultatSatsendringBehandling.melding)
+
+            SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_VILKÅR,
+            SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
+            -> throw FunksjonellFeil("Satsendring feiler." + resultatSatsendringBehandling.melding)
         }
     }
 

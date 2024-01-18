@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.time.YearMonth
 
@@ -14,4 +15,10 @@ interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
         fagsakId: Long,
         satsTidspunkt: YearMonth,
     ): Satskjøring?
+
+    @Query(value = "SELECT sk from Satskjøring sk where sk.ferdigTidspunkt IS NULL and sk.feiltype = :feiltype and sk.satsTidspunkt = :satsTidspunkt")
+    fun finnPåFeilTypeOgFerdigTidIkkeNull(
+        feiltype: String,
+        satsTidspunkt: YearMonth,
+    ): List<Satskjøring>
 }

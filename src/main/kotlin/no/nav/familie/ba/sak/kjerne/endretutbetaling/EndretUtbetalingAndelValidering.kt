@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.VilkårFeil
 import no.nav.familie.ba.sak.common.erBack2BackIMånedsskifte
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.erMellom
@@ -115,7 +116,7 @@ object EndretUtbetalingAndelValidering {
             }
 
             Årsak.ETTERBETALING_3ÅR ->
-                validerEtterbetaling3År(
+                validerEtterbetalingMaks3ÅrFørSøknadstidspunkt(
                     endretUtbetalingAndel = endretUtbetalingAndel,
                     behandlingOpprettetTidspunkt = vilkårsvurdering?.behandling?.opprettetTidspunkt?.toLocalDate(),
                 )
@@ -132,14 +133,14 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
-    private fun validerEtterbetaling3År(
+    private fun validerEtterbetalingMaks3ÅrFørSøknadstidspunkt(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         behandlingOpprettetTidspunkt: LocalDate?,
     ) {
         val kravDato = endretUtbetalingAndel.søknadstidspunkt ?: behandlingOpprettetTidspunkt
-        if (endretUtbetalingAndel.prosent != BigDecimal.ZERO) {
+        if (endretUtbetalingAndel.prosent == BigDecimal.valueOf(100)) {
             throw FunksjonellFeil(
-                "Du kan ikke sette årsak etterbetaling 3 år når du har valgt at perioden skal utbetales.",
+                "Du kan ikke endre til full utbetaling når det er mer enn tre år siden søknadstidspunktet.",
             )
         } else if (
             endretUtbetalingAndel.tom?.isAfter(
@@ -379,7 +380,7 @@ fun validerBarnasVilkår(
     }
 
     if (listeAvFeil.isNotEmpty()) {
-        throw FunksjonellFeil(listeAvFeil.joinToString(separator = "\n"))
+        throw VilkårFeil(listeAvFeil.joinToString(separator = "\n"))
     }
 }
 

@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
@@ -29,8 +30,13 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.log.mdc.MDCConstants
@@ -40,6 +46,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -58,6 +65,8 @@ class ForvalterService(
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val infotrygdService: InfotrygdService,
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val persongrunnlagService: PersongrunnlagService,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -199,6 +208,71 @@ class ForvalterService(
         return fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger(
             fraÅrMåned.førsteDagIInneværendeMåned().atStartOfDay(),
         ).map { Pair(it.fagsakId, it.fødselsnummer) }
+    }
+
+    fun settFomPåVilkårTilPersonsFødselsdato(behandlingId: Long): Vilkårsvurdering {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val personerPåBehandling = persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
+
+        if (!behandling.aktiv || !behandling.erVedtatt()) {
+            throw Feil("Behandlingen er ikke aktiv eller ikke vedtatt, så den burde ikke patches.")
+        }
+
+        val vilkårsvurdering =
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId)
+                ?: throw Feil("Det er ingen vilkårsvurdering for behandling: $behandlingId")
+
+        vilkårsvurdering.personResultater.forEach { personResultat ->
+            personResultat.vilkårResultater.forEach { vilkårResultat ->
+                val person =
+                    personerPåBehandling?.singleOrNull { it.aktør == personResultat.aktør }
+                        ?: throw Feil("Finner ikke person på behandling med aktørId ${personResultat.aktør.aktørId}.")
+
+                validerKunEttVilkårResultatFørFødselsdato(personResultat, vilkårResultat.vilkårType, person.fødselsdato)
+
+                val vilkårFomErFørFødselsdato =
+                    vilkårResultat.periodeFom?.isBefore(person.fødselsdato)
+                        ?: throw Feil("Vilkår ${vilkårResultat.id} har ingen fom-dato og kan ikke patches.")
+
+                val periodeFomOgFødselsdatoErISammeMåned = vilkårResultat.periodeFom!!.toYearMonth() == person.fødselsdato.toYearMonth()
+                if (vilkårFomErFørFødselsdato && periodeFomOgFødselsdatoErISammeMåned) {
+                    secureLogger.info(
+                        "Vilkårresultat ${vilkårResultat.vilkårType} med id=${vilkårResultat.id} på behandling $behandlingId har periodeFom ${vilkårResultat.periodeFom} som er før personens fødselsdato ${person.fødselsdato}. " +
+                            "Setter den til personens fødselsdato.",
+                    )
+                    vilkårResultat.periodeFom = person.fødselsdato
+                } else if (vilkårFomErFørFødselsdato) {
+                    throw Feil("Vilkår ${vilkårResultat.id} har fom-dato før ${person.fødselsdato}, men de er ikke i samme måned.")
+                }
+            }
+        }
+
+        vilkårsvurdering.personResultater.forEach { personResultat ->
+            val person =
+                personerPåBehandling?.singleOrNull { it.aktør == personResultat.aktør }
+                    ?: throw Feil("Finner ikke person på behandling.")
+
+            if (personResultat.vilkårResultater.any { it.periodeFom?.isBefore(person.fødselsdato) == true }) {
+                throw Feil("Er fortsatt vilkår som starter før fødselsdato på barn.")
+            }
+        }
+        return vilkårsvurderingService.oppdater(vilkårsvurdering)
+    }
+
+    private fun validerKunEttVilkårResultatFørFødselsdato(
+        personResultat: PersonResultat,
+        vilkårType: Vilkår,
+        fødselsdato: LocalDate,
+    ) {
+        val vilkårResultatAvSammeTypeFørFødselsdatoForPerson =
+            personResultat.vilkårResultater
+                .filter {
+                    it.vilkårType == vilkårType &&
+                        it.periodeFom?.isBefore(fødselsdato) ?: true
+                }
+        if (vilkårResultatAvSammeTypeFørFødselsdatoForPerson.size > 1) {
+            throw Feil("Det finnes flere vilkårresultater som begynner før fødselsdato til person: $this")
+        }
     }
 }
 

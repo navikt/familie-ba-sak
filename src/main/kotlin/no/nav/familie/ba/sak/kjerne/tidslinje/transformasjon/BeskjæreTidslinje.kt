@@ -77,3 +77,15 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjær(
 
     return (fom..tom).tidslinjeFraTidspunkt { tidspunkt -> innholdForTidspunkt(tidspunkt) }
 }
+
+/**
+ * Extension-metode for å beskjære fom dato på en tidslinje
+ * Etter beskjæringen vil tidslinjen maksimalt strekke seg fra innsendt [fraOgMed] og til eksisterende tilOgMed
+ */
+fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærFraOgMed(
+    fraOgMed: Tidspunkt<T>,
+): Tidslinje<I, T> =
+    when {
+        this.tidsrom().isEmpty() -> TomTidslinje()
+        else -> beskjær(fraOgMed, this.tilOgMed()!!)
+    }
