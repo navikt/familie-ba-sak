@@ -253,7 +253,7 @@ class ForvalterController(
         return ResponseEntity.ok("Ok")
     }
 
-    @PatchMapping("/flytt-vilkaar-fom-dato-til-foedselsdato/behandling/{behandlingId}")
+    @PatchMapping("/flytt-vilkaar-fom-dato-til-foedselsdato")
     @Operation(
         summary = "Sett periodeFom på vilkårresultater i behandling som er tidligere enn personens fødselsdato til å være fødselsdato. ",
         description =
@@ -261,9 +261,9 @@ class ForvalterController(
                 "vilkårresultatet sin periodeFom < personens fødselsdato.",
     )
     fun flyttVilkårFomDatoTilFødselsdato(
-        @PathVariable behandlingId: Long,
+        @RequestBody behandlinger: Set<Long>,
     ): ResponseEntity<String> {
-        opprettTaskService.opprettTaskForÅPatcheVilkårFom(PatchFomPåVilkårTilFødselsdato(behandlingId))
+        opprettTaskService.opprettTaskForÅPatcheVilkårFom(PatchFomPåVilkårTilFødselsdato(behandlinger))
         return ResponseEntity.ok("Ok")
     }
 }

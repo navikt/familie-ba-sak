@@ -20,7 +20,9 @@ class PatchFomPåVilkårTilFødselsdatoTask(
     override fun doTask(task: Task) {
         val dto = objectMapper.readValue(task.payload, PatchFomPåVilkårTilFødselsdato::class.java)
 
-        forvalterService.settFomPåVilkårTilPersonsFødselsdato(dto.behandlingId)
+        dto.behandlinger.forEach {
+            forvalterService.settFomPåVilkårTilPersonsFødselsdato(it)
+        }
     }
 
     companion object {
@@ -29,5 +31,5 @@ class PatchFomPåVilkårTilFødselsdatoTask(
 }
 
 data class PatchFomPåVilkårTilFødselsdato(
-    val behandlingId: Long,
+    val behandlinger: Set<Long>,
 )
