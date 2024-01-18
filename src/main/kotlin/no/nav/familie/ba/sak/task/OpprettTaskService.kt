@@ -195,6 +195,22 @@ class OpprettTaskService(
     }
 
     @Transactional
+    fun opprettTaskForÅPatcheVilkårFom(
+        dto: PatchFomPåVilkårTilFødselsdato,
+    ) {
+        taskRepository.save(
+            Task(
+                type = PatchFomPåVilkårTilFødselsdatoTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(dto),
+                properties =
+                    Properties().apply {
+                        this["behandlingId"] = dto.behandlingId.toString()
+                    },
+            ),
+        )
+    }
+
+    @Transactional
     fun opprettGrensesnittavstemMotOppdragTask(
         dto: GrensesnittavstemmingTaskDTO,
     ) {
