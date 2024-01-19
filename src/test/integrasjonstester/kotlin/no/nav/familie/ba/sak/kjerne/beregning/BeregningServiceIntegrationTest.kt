@@ -43,6 +43,34 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.YearMonth
 
+private const val UTBETALINGSOPPDRAG = """
+    {
+      "kodeEndring": "NY",
+      "fagSystem": "BA",
+      "saksnummer": "100",
+      "aktoer": "123456",
+      "saksbehandlerId": "Z994212",
+      "avstemmingTidspunkt": "2024-01-04T13:41:32.190821",
+      "utbetalingsperiode": [
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 0,
+          "forrigePeriodeId": null,
+          "datoForVedtak": "2024-01-04",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2018-02-01",
+          "vedtakdatoTom": "2019-02-28",
+          "sats": 970,
+          "satsType": "MND",
+          "utbetalesTil": "123456",
+          "behandlingId": 1000,
+          "utbetalingsgrad": null
+        }
+      ]
+    }
+    """
+
 class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
     @Autowired
     private lateinit var beregningService: BeregningService
@@ -360,7 +388,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         @Test
         fun `gitt fagsak har ikke noen andeler`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndel(
@@ -381,7 +409,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         @Test
         fun `2 ulike personer med samme type`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndel(
@@ -423,7 +451,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         @Test
         fun `førstegångsbehandling med flere andeler per person`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndel(
@@ -471,7 +499,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         @Test
         fun `siste andelen kommer fra revurderingen`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndel(
@@ -486,7 +514,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             }
             avsluttOgLagreBehandling(førsteBehandling)
             val revurdering = lagRevurdering()
-            with(lagInitiellTilkjentYtelse(revurdering, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(revurdering, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndel(
@@ -515,7 +543,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         @Test
         fun `en revurdering opphører en andel, sånn at siste andelen finnes i en tidligere behandling`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndel(
@@ -537,7 +565,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             }
             avsluttOgLagreBehandling(førsteBehandling)
             val revurdering = lagRevurdering()
-            with(lagInitiellTilkjentYtelse(revurdering, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            with(lagInitiellTilkjentYtelse(revurdering, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
                 val andeler =
                     listOf(
                         lagAndel(
