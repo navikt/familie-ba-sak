@@ -237,7 +237,7 @@ internal fun ISanityBegrunnelse.skalVisesSelvOmIkkeEndring(
         when (this.periodeResultat) {
             SanityPeriodeResultat.INNVILGET_ELLER_ØKNING, SanityPeriodeResultat.INGEN_ENDRING, SanityPeriodeResultat.REDUKSJON ->
                 this.vilkår.isNotEmpty() &&
-                    this.vilkår.all { vilkår ->
+                    this.vilkår.any { vilkår ->
                         begrunnelseGrunnlagForPersonIPeriode.vilkårResultater.any { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT }
                     }
 
