@@ -11,6 +11,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(
@@ -25,7 +26,7 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
         val avstemmingTask = objectMapper.readValue(task.payload, GrensesnittavstemmingTaskDTO::class.java)
         logger.info("Gjør avstemming mot oppdrag fra og med ${avstemmingTask.fomDato} til og med ${avstemmingTask.tomDato}")
 
-        avstemmingService.grensesnittavstemOppdrag(avstemmingTask.fomDato, avstemmingTask.tomDato)
+        avstemmingService.grensesnittavstemOppdrag(avstemmingTask.fomDato, avstemmingTask.tomDato, avstemmingTask.avstemmingId)
     }
 
     override fun onCompletion(task: Task) {
@@ -39,6 +40,7 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
             GrensesnittavstemmingTaskDTO(
                 tideligereTriggerDato.atStartOfDay(),
                 VirkedagerProvider.nesteVirkedag(tideligereTriggerDato).atStartOfDay(),
+                avstemmingId = UUID.randomUUID(),
             )
 
         private val logger: Logger = LoggerFactory.getLogger(GrensesnittavstemMotOppdrag::class.java)

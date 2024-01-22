@@ -32,8 +32,9 @@ class AvstemmingService(
     fun grensesnittavstemOppdrag(
         fraDato: LocalDateTime,
         tilDato: LocalDateTime,
+        avstemmingId: UUID,
     ) {
-        økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato)
+        økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato, avstemmingId)
     }
 
     fun sendKonsistensavstemmingStart(
