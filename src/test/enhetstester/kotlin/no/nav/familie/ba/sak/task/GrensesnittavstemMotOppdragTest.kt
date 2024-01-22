@@ -16,6 +16,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.time.LocalDate
 import java.util.Properties
+import java.util.UUID
 
 class GrensesnittavstemMotOppdragTest {
     private lateinit var grensesnittavstemMotOppdrag: GrensesnittavstemMotOppdrag
@@ -50,6 +51,7 @@ class GrensesnittavstemMotOppdragTest {
                         GrensesnittavstemmingTaskDTO(
                             fomDato = triggerDato.minusDays(1).atStartOfDay(),
                             tomDato = triggerDato.atStartOfDay(),
+                            avstemmingId = UUID.randomUUID(),
                         ),
                     ),
                 properties = Properties(),
@@ -116,6 +118,7 @@ class GrensesnittavstemMotOppdragTest {
                         GrensesnittavstemmingTaskDTO(
                             iDag.minusDays(1),
                             iDag,
+                            avstemmingId = UUID.randomUUID(),
                         ),
                     ),
             ).medTriggerTid(
