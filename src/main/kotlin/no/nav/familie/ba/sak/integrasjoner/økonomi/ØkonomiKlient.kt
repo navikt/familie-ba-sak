@@ -97,6 +97,7 @@ class ØkonomiKlient(
                     fagsystem = FAGSYSTEM,
                     fra = fraDato,
                     til = tilDato,
+                    avstemmingId = avstemmingId,
                 ),
             )
         }
