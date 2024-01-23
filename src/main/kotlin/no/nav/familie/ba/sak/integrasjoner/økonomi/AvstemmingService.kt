@@ -32,7 +32,7 @@ class AvstemmingService(
     fun grensesnittavstemOppdrag(
         fraDato: LocalDateTime,
         tilDato: LocalDateTime,
-        avstemmingId: UUID,
+        avstemmingId: UUID?,
     ) {
         økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato, avstemmingId)
     }

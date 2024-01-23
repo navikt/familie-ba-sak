@@ -83,7 +83,7 @@ class ØkonomiKlient(
     fun grensesnittavstemOppdrag(
         fraDato: LocalDateTime,
         tilDato: LocalDateTime,
-        avstemmingId: UUID,
+        avstemmingId: UUID?,
     ): String {
         val uri = URI.create("$familieOppdragUri/grensesnittavstemming")
         return kallEksternTjenesteRessurs(
