@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.validerPerioderInneholderBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.task.FerdigstillOppgaver
+import no.nav.familie.ba.sak.task.FerdigstillLagVedtakOppgaver
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
@@ -85,26 +85,11 @@ class SendTilBeslutter(
             loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = true)
         }
 
-        opprettFerdigstillOppgaveTasker(behandling)
+        taskRepository.save(FerdigstillLagVedtakOppgaver.opprettTask(behandling.id))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
 
         return hentNesteStegForNormalFlyt(behandling)
-    }
-
-    private fun opprettFerdigstillOppgaveTasker(behandling: Behandling) {
-        listOf(
-            Oppgavetype.BehandleSak,
-            Oppgavetype.BehandleUnderkjentVedtak,
-            Oppgavetype.VurderLivshendelse,
-        ).forEach { oppgavetype ->
-            oppgaveService.hentOppgaverSomIkkeErFerdigstilt(oppgavetype, behandling).also {
-                if (it.isNotEmpty()) {
-                    val ferdigstillOppgaverTask = FerdigstillOppgaver.opprettTask(behandling.id, oppgavetype)
-                    taskRepository.save(ferdigstillOppgaverTask)
-                }
-            }
-        }
     }
 
     override fun stegType(): StegType {

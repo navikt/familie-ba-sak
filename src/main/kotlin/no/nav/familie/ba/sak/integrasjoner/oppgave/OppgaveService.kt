@@ -376,6 +376,32 @@ class OppgaveService(
         }
     }
 
+    fun ferdigstillLagVedtakOppgaver(behandlingId: Long) {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val oppgaverPåBehandling = oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(behandling)
+
+        val lagVedtakOppgaver =
+            oppgaverPåBehandling.filter {
+                it.type in
+                    listOf(
+                        Oppgavetype.BehandleSak,
+                        Oppgavetype.BehandleUnderkjentVedtak,
+                        Oppgavetype.VurderLivshendelse,
+                    )
+            }
+
+        if (lagVedtakOppgaver.isEmpty() && !behandling.skalBehandlesAutomatisk) {
+            throw Feil("Fant ingen oppgaver")
+        }
+
+        lagVedtakOppgaver
+            .filter { !it.erFerdigstilt }
+            .forEach {
+                logger.info("Ferdigstiller ${it.type}-oppgave på behandling $behandlingId")
+                it.ferdigstill()
+            }
+    }
+
     companion object {
         private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
         private val oppgavetyperSomBehandlesAvBaSak =
