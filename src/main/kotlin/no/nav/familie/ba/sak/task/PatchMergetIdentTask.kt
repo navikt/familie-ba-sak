@@ -41,9 +41,14 @@ class PatchMergetIdentTask(
             throw IllegalArgumentException("ident som skal patches er lik ident som det skal patches til")
         }
 
-        val aktørForBarnSomSkalPatches =
-            persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId = dto.fagsakId)
-                ?.singleOrNull { it.type == PersonType.BARN && it.aktør.aktivFødselsnummer() == dto.gammelIdent.ident }?.aktør ?: error("Fant ikke ident som skal patches som barn på fagsak=${dto.fagsakId}")
+        val aktørerForBarnSomSkalPatches =
+            (
+                persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId = dto.fagsakId)
+                    ?.filter { it.type == PersonType.BARN && it.aktør.aktivFødselsnummer() == dto.gammelIdent.ident }
+                    ?.map { it.aktør.aktørId } ?: emptyList()
+            ).toSet()
+
+        val aktørForBarnSomSkalPatches = aktørerForBarnSomSkalPatches.firstOrNull() ?: error("Fant ikke ident som skal patches som barn på fagsak=${dto.fagsakId} aktører=$aktørerForBarnSomSkalPatches")
 
         val identer = pdlIdentRestClient.hentIdenter(personIdent = dto.nyIdent.ident, historikk = true)
         if (dto.skalSjekkeAtGammelIdentErHistoriskAvNyIdent) {
@@ -57,7 +62,7 @@ class PatchMergetIdentTask(
 
         // Denne patcher med å bruke on cascade update på aktørid
         aktørIdRepository.patchAktørMedNyAktørId(
-            gammelAktørId = aktørForBarnSomSkalPatches.aktørId,
+            gammelAktørId = aktørForBarnSomSkalPatches,
             nyAktørId = identer.hentAktivAktørId(),
         )
 
@@ -69,7 +74,7 @@ class PatchMergetIdentTask(
         aktørMergeLoggRepository.save(
             AktørMergeLogg(
                 fagsakId = dto.fagsakId,
-                historiskAktørId = aktørForBarnSomSkalPatches.aktørId,
+                historiskAktørId = aktørForBarnSomSkalPatches,
                 nyAktørId = nyAktør.aktørId,
                 mergeTidspunkt = LocalDateTime.now(),
             ),
