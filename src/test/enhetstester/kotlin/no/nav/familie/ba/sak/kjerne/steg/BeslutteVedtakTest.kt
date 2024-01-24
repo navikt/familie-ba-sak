@@ -20,11 +20,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.brev.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -42,37 +40,37 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class BeslutteVedtakTest {
-    private lateinit var beslutteVedtak: BeslutteVedtak
-    private lateinit var vedtakService: VedtakService
-    private lateinit var behandlingService: BehandlingService
-    private lateinit var beregningService: BeregningService
-    private lateinit var taskRepository: TaskRepositoryWrapper
-    private lateinit var dokumentService: DokumentService
-    private lateinit var vilkårsvurderingService: VilkårsvurderingService
-    private val unleashService = mockk<UnleashNextMedContextService>()
-    private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
-    private lateinit var simuleringService: SimuleringService
-    private lateinit var automatiskBeslutningService: AutomatiskBeslutningService
-
+    private val toTrinnKontrollService = mockk<TotrinnskontrollService>()
+    private val vedtakService: VedtakService = mockk()
+    private val behandlingService: BehandlingService = mockk()
+    private val beregningService: BeregningService = mockk()
+    private val taskRepository: TaskRepositoryWrapper = mockk()
+    private val vilkårsvurderingService: VilkårsvurderingService = mockk()
+    private val unleashService: UnleashNextMedContextService = mockk()
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService = mockk()
+    private val automatiskBeslutningService: AutomatiskBeslutningService = mockk()
     private val saksbehandlerContext = mockk<SaksbehandlerContext>()
+    private val loggService = mockk<LoggService>()
+
+    val beslutteVedtak =
+        BeslutteVedtak(
+            totrinnskontrollService = toTrinnKontrollService,
+            vedtakService = vedtakService,
+            behandlingService = behandlingService,
+            beregningService = beregningService,
+            taskRepository = taskRepository,
+            loggService = loggService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            unleashService = unleashService,
+            tilkjentYtelseValideringService = tilkjentYtelseValideringService,
+            saksbehandlerContext = saksbehandlerContext,
+            automatiskBeslutningService = automatiskBeslutningService,
+        )
 
     private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
     @BeforeEach
     fun setUp() {
-        val toTrinnKontrollService = mockk<TotrinnskontrollService>()
-        vedtakService = mockk()
-        taskRepository = mockk()
-        dokumentService = mockk()
-        behandlingService = mockk()
-        beregningService = mockk()
-        vilkårsvurderingService = mockk()
-        tilkjentYtelseValideringService = mockk()
-        simuleringService = mockk()
-        automatiskBeslutningService = mockk()
-
-        val loggService = mockk<LoggService>()
-
         every { taskRepository.save(any()) } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
         every {
             toTrinnKontrollService.besluttTotrinnskontroll(
@@ -94,21 +92,6 @@ class BeslutteVedtakTest {
         every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns randomVilkårsvurdering
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
-
-        beslutteVedtak =
-            BeslutteVedtak(
-                totrinnskontrollService = toTrinnKontrollService,
-                vedtakService = vedtakService,
-                behandlingService = behandlingService,
-                beregningService = beregningService,
-                taskRepository = taskRepository,
-                loggService = loggService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                unleashService = unleashService,
-                tilkjentYtelseValideringService = tilkjentYtelseValideringService,
-                saksbehandlerContext = saksbehandlerContext,
-                automatiskBeslutningService = automatiskBeslutningService,
-            )
     }
 
     @Test
