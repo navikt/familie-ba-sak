@@ -390,8 +390,12 @@ class OppgaveService(
                     )
             }
 
-        if (lagVedtakOppgaver.isEmpty() && !behandling.skalBehandlesAutomatisk) {
-            throw Feil("Fant ingen oppgaver")
+        if (lagVedtakOppgaver.isEmpty() &&
+            !behandling.skalBehandlesAutomatisk &&
+            !behandling.erMigrering() &&
+            !behandling.erTekniskBehandling()
+        ) {
+            throw Feil("Fant ingen oppgaver å avslutte ved sending til godkjenner på $behandling")
         }
 
         lagVedtakOppgaver
