@@ -249,23 +249,27 @@ class OppgaveService(
                     behandlingId = behandlingId,
                 ),
         ).forEach {
-            val oppgave = hentOppgave(it.gsakId.toLong())
+            it.ferdigstill()
+        }
+    }
 
-            if (oppgave.status == FERDIGSTILT || oppgave.status == FEILREGISTRERT) {
-                it.erFerdigstilt = true
+    private fun DbOppgave.ferdigstill() {
+        val oppgave = hentOppgave(gsakId.toLong())
 
-                // Her sørger vi for at oppgaver som blir ferdigstilt riktig får samme status hos oss selv om en av de andre dbOppgavene feiler.
-                oppgaveRepository.saveAndFlush(it)
-            } else {
-                try {
-                    integrasjonClient.ferdigstillOppgave(it.gsakId.toLong())
+        if (oppgave.status == FERDIGSTILT || oppgave.status == FEILREGISTRERT) {
+            erFerdigstilt = true
 
-                    it.erFerdigstilt = true
-                    // I tilfelle noen av de andre dbOppgavene feiler
-                    oppgaveRepository.saveAndFlush(it)
-                } catch (exception: Exception) {
-                    throw Feil(message = "Klarte ikke å ferdigstille oppgave med id ${it.gsakId}.", cause = exception)
-                }
+            // Her sørger vi for at oppgaver som blir ferdigstilt riktig får samme status hos oss selv om en av de andre dbOppgavene feiler.
+            oppgaveRepository.saveAndFlush(this)
+        } else {
+            try {
+                integrasjonClient.ferdigstillOppgave(gsakId.toLong())
+
+                erFerdigstilt = true
+                // I tilfelle noen av de andre dbOppgavene feiler
+                oppgaveRepository.saveAndFlush(this)
+            } catch (exception: Exception) {
+                throw Feil(message = "Klarte ikke å ferdigstille oppgave med id $gsakId.", cause = exception)
             }
         }
     }
