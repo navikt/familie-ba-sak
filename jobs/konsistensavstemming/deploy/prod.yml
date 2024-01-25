@@ -1,0 +1,22 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  labels:
+    team: teamfamilie
+  name: konsistensavstemming
+  namespace: teamfamilie
+spec:
+  image: {{image}}
+  kafka:
+    pool: nav-prod
+  gcp:
+    permissions:
+      - resource:
+          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+          kind: Project
+        role: roles/cloudsql.client
+  envFrom:
+    - secret: google-sql-familie-ba-sak-hvor-finner-jeg-denne
+  env:
+    - name: CLOUD_SQL_INSTANCE
+      value: eamfamilie-prod-160d:europe-north1:familie-ba-sak-instance
