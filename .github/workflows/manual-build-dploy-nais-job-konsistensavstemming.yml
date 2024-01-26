@@ -1,7 +1,6 @@
 name: deploy nais job konsistensavstemming
 
-on:
-  workflow_dispatch:
+on: push
 
 jobs:
   deploy:
