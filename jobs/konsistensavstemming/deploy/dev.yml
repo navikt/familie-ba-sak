@@ -16,7 +16,7 @@ spec:
           kind: Project
         role: roles/cloudsql.client
   envFrom:
-    - secret: google-sql-familie-ba-sak-hvor-finner-jeg-denne
+    - secret: google-sql-familie-ba-sak-familie-ba-sak---id-hvor-finner-jeg-denne
   env:
     - name: CLOUD_SQL_INSTANCE
       value: teamfamilie-dev-ae07:europe-north1:familie-ba-sak-instance

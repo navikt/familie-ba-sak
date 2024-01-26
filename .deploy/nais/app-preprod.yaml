@@ -42,6 +42,8 @@ spec:
         databases:
           - name: familie-ba-sak
             envVarPrefix: DB
+            users:
+              - name: naisjob
   azure:
     application:
       enabled: true
