@@ -34,7 +34,9 @@ jobs:
           team: teamfamilie
           push_image: true
           dockerfile: Dockerfile
-          docker_context: .
+          docker_context: jobs/konsistensavstemming/
+          image_suffix: ${{ github.workflow }}
+          tag: ${{ env.GITHUB_REF_SLUG }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           byosbom: target/bom.json
