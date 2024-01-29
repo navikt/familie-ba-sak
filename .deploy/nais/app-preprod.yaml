@@ -147,6 +147,8 @@ spec:
       value: "false"
     - name: OTEL_METRICS_EXEMPLAR_FILTER
       value: ALWAYS_ON
+    - name: JAVA_OPTS
+      value: "-XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError"
   kafka:
     pool: nav-dev
   strategy:
