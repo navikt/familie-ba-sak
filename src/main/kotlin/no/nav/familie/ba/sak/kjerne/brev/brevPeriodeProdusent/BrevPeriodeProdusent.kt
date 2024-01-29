@@ -125,7 +125,7 @@ private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling():
 
     return filterKeys { it.type == PersonType.BARN }
         .filterValues { grunnlag ->
-            val endretUtbetalingGjelderAlleredeDeltBosted =
+            val endretUtbetalingGjelderDeltBosted =
                 grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
 
             val erUtvidetIPeriodenOgBarnHarEndretUtbetalingAlleredeUtbetalt =
@@ -134,7 +134,7 @@ private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling():
             val harAndelerSomIkkeErPåNullProsent =
                 grunnlag.dennePerioden.andeler.filter { it.prosent != BigDecimal.ZERO }.toList().isNotEmpty()
 
-            harAndelerSomIkkeErPåNullProsent || endretUtbetalingGjelderAlleredeDeltBosted || erUtvidetIPeriodenOgBarnHarEndretUtbetalingAlleredeUtbetalt
+            harAndelerSomIkkeErPåNullProsent || endretUtbetalingGjelderDeltBosted || erUtvidetIPeriodenOgBarnHarEndretUtbetalingAlleredeUtbetalt
         }
 }
 fun Set<Person>.tilBarnasFødselsdatoer(): String {
