@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
-import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
@@ -100,19 +99,6 @@ class TestVerktøyController(
         } else {
             ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
-    }
-
-    @GetMapping(path = ["/kjor-intern-konsistensavstemming/{maksAntallTasker}"])
-    @Unprotected
-    fun kjørInternKonsistensavstemming(
-        @PathVariable maksAntallTasker: Int,
-    ): ResponseEntity<Ressurs<String>> {
-        if (!envService.erPreprod() && !envService.erDev()) {
-            return ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
-        }
-
-        taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask(maksAntallTasker))
-        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 
     @GetMapping(path = ["/ta-behandlinger-etter-ventefrist-av-vent"])
