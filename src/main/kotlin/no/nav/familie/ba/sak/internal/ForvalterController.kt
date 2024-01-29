@@ -17,6 +17,8 @@ import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchIdentForBarnPåFagsak
+import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -285,5 +287,13 @@ class ForvalterController(
         val satskjøringerSomSkalRekjøres = satskjøringRepository.finnPåFeilTypeOgFerdigTidIkkeNull(feiltype, satstid)
         satskjøringRepository.deleteAll(satskjøringerSomSkalRekjøres)
         return ResponseEntity.ok("Ok")
+    }
+
+    @GetMapping(path = ["/kjor-intern-konsistensavstemming/{maksAntallTasker}"])
+    fun kjørInternKonsistensavstemming(
+        @PathVariable maksAntallTasker: Int = Int.MAX_VALUE,
+    ): ResponseEntity<Ressurs<String>> {
+        taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask(maksAntallTasker))
+        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 }

@@ -28,7 +28,7 @@ class InternKonsistensavstemmingService(
     val fagsakRepository: FagsakRepository,
     val taskService: TaskService,
 ) {
-    fun validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(
+    fun validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåFagsaker(
         maksAntallTasker: Int = Int.MAX_VALUE,
         sidetall: Int = 0,
         startTid: LocalDateTime = LocalDateTime.now(),
@@ -45,7 +45,7 @@ class InternKonsistensavstemmingService(
         }
 
         if (fagsakerSomIkkeErArkivertSlice.hasNext()) {
-            validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(
+            validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåFagsaker(
                 maksAntallTasker = maksAntallTasker,
                 sidetall = sidetall + 1,
                 // Venter 15 sekunder mellom hver task for å ikke overkjøre familie-oppdrag siden ba-sak har mer ressurser
