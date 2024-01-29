@@ -4,6 +4,7 @@ import lagBrevBegrunnelse
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.lagBrevBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
@@ -118,21 +119,24 @@ private fun VedtaksperiodeMedBegrunnelser.hentTomTekstForBrev(
 private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentTotaltUtbetaltIPeriode() =
     this.values.sumOf { it.dennePerioden.andeler.sumOf { andeler -> andeler.kalkulertUtbetalingsbeløp } }
 
-private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling() =
-    filterKeys { it.type == PersonType.BARN }
+private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling(): Map<Person, IBegrunnelseGrunnlagForPeriode> {
+    val utbetalesUtvidetIDennePerioden =
+        any { it.value.dennePerioden.andeler.any { andel -> andel.type == YtelseType.UTVIDET_BARNETRYGD && andel.kalkulertUtbetalingsbeløp > 0 } }
+
+    return filterKeys { it.type == PersonType.BARN }
         .filterValues { grunnlag ->
             val endretUtbetalingGjelderAlleredeDeltBosted =
                 grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
 
-            val endretUtbetalingGjelderAlleredeUtbetalt =
-                grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.ALLEREDE_UTBETALT
+            val erUtvidetIPeriodenOgBarnHarEndretUtbetalingAlleredeUtbetalt =
+                grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.ALLEREDE_UTBETALT && utbetalesUtvidetIDennePerioden
 
             val harAndelerSomIkkeErPåNullProsent =
                 grunnlag.dennePerioden.andeler.filter { it.prosent != BigDecimal.ZERO }.toList().isNotEmpty()
 
-            harAndelerSomIkkeErPåNullProsent || endretUtbetalingGjelderAlleredeDeltBosted || endretUtbetalingGjelderAlleredeUtbetalt
+            harAndelerSomIkkeErPåNullProsent || endretUtbetalingGjelderAlleredeDeltBosted || erUtvidetIPeriodenOgBarnHarEndretUtbetalingAlleredeUtbetalt
         }
-
+}
 fun Set<Person>.tilBarnasFødselsdatoer(): String {
     val barnasFødselsdatoerListe: List<String> =
         this.filter { it.type == PersonType.BARN }
