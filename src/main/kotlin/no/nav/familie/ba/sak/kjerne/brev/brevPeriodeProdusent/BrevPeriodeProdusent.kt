@@ -137,6 +137,7 @@ private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling():
             harAndelerSomIkkeErPåNullProsent || endretUtbetalingGjelderDeltBosted || erUtvidetIPeriodenOgBarnHarEndretUtbetalingAlleredeUtbetalt
         }
 }
+
 fun Set<Person>.tilBarnasFødselsdatoer(): String {
     val barnasFødselsdatoerListe: List<String> =
         this.filter { it.type == PersonType.BARN }
