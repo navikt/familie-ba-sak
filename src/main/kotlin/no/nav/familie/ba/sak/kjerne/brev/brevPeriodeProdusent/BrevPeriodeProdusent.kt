@@ -132,7 +132,7 @@ private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling():
                 grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.ALLEREDE_UTBETALT && utbetalesUtvidetIDennePerioden
 
             val harAndelerSomIkkeErPåNullProsent =
-                grunnlag.dennePerioden.andeler.filter { it.prosent != BigDecimal.ZERO }.toList().isNotEmpty()
+                grunnlag.dennePerioden.andeler.any { it.prosent != BigDecimal.ZERO }
 
             harAndelerSomIkkeErPåNullProsent || endretUtbetalingGjelderDeltBosted || erUtvidetIPeriodenOgBarnHarEndretUtbetalingAlleredeUtbetalt
         }
