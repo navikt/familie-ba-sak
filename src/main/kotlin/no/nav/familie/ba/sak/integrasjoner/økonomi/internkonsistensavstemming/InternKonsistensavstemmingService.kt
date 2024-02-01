@@ -16,6 +16,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.log.IdUtils
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -27,27 +28,30 @@ class InternKonsistensavstemmingService(
     val fagsakRepository: FagsakRepository,
     val taskService: TaskService,
 ) {
-    fun validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(maksAntallTasker: Int = Int.MAX_VALUE) {
-        val fagsakerSomIkkeErArkivert =
-            fagsakRepository
-                .hentFagsakerSomIkkeErArkivert()
-                .map { it.id }
-                .sortedBy { it }
+    fun validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåFagsaker(
+        maksAntallTasker: Int = Int.MAX_VALUE,
+        sidetall: Int = 0,
+        startTid: LocalDateTime = LocalDateTime.now(),
+    ) {
+        if (sidetall == maksAntallTasker) return
 
-        val startTid = LocalDateTime.now()
+        // Antall fagsaker per task burde være en multippel av 3000 siden vi chunker databasekallet i 3000 i familie-oppdrag
+        val fagsakerSomIkkeErArkivertSlice = fagsakRepository.hentFagsakerSomIkkeErArkivert(PageRequest.of(sidetall, 3000))
 
-        fagsakerSomIkkeErArkivert
-            // Antall fagsaker per task burde være en multippel av 3000 siden vi chunker databasekallet i 3000 i familie-oppdrag
-            .chunked(3000)
-            .take(maksAntallTasker)
-            .forEachIndexed { index, fagsaker ->
+        val startTidForTask = startTid.plusSeconds(15L * sidetall)
+        overstyrTaskMedNyCallId(IdUtils.generateId()) {
+            val task = InternKonsistensavstemmingTask.opprettTask(fagsakerSomIkkeErArkivertSlice.toSet(), startTidForTask)
+            taskService.save(task)
+        }
+
+        if (fagsakerSomIkkeErArkivertSlice.hasNext()) {
+            validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåFagsaker(
+                maksAntallTasker = maksAntallTasker,
+                sidetall = sidetall + 1,
                 // Venter 15 sekunder mellom hver task for å ikke overkjøre familie-oppdrag siden ba-sak har mer ressurser
-                val startTidForTask = startTid.plusSeconds(15 * index.toLong())
-                overstyrTaskMedNyCallId(IdUtils.generateId()) {
-                    val task = InternKonsistensavstemmingTask.opprettTask(fagsaker.toSet(), startTidForTask)
-                    taskService.save(task)
-                }
-            }
+                startTid = startTid.plusSeconds(15),
+            )
+        }
     }
 
     fun validerLikUtbetalingIAndeleneOgUtbetalingsoppdraget(fagsaker: Set<Long>) {

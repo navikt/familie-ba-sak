@@ -112,7 +112,7 @@ Egenskap: Brevperioder: Endret utbetaling
       | Brevperiodetype | Fra dato     | Til dato         | Beløp | Antall barn med utbetaling | Barnas fødselsdager  | Du eller institusjonen |
       | UTBETALING      | oktober 2011 | til oktober 2011 | 970   | 2                          | 24.05.10 og 06.09.11 | du                     |
 
-  Scenario: Skal ta med barna det allerede er utbetalt for i tidligere behandling i periodeteksten
+  Scenario: Skal ta med barna det allerede er utbetalt for i periodeteksten hvis det finnes utvidet barnetrygd i perioden
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
@@ -164,3 +164,73 @@ Egenskap: Brevperioder: Endret utbetaling
     Så forvent følgende brevperioder for behandling 1
       | Brevperiodetype | Fra dato       | Til dato          | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
       | UTBETALING      | september 2023 | til november 2023 | 2516  | 1                          | 26.06.11            | du                     |
+
+  Scenario: Skal ikke ta med barn med allerede utbetalt i periodetekst
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | DELVIS_INNVILGET    | SØKNAD           | Nei                       | EØS                 |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
+      | 1            | 1       | SØKER      | 15.08.1985  |              |
+      | 1            | 2       | BARN       | 22.03.2019  |              |
+      | 1            | 3       | BARN       | 21.07.2023  |              |
+
+    Og følgende dagens dato 29.01.2024
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår           | Utdypende vilkår                            | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET   | ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING | 24.02.2020 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 1       | LOVLIG_OPPHOLD   |                                             | 24.02.2020 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+      | 2       | UNDER_18_ÅR      |                                             | 22.03.2019 | 21.03.2037 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | GIFT_PARTNERSKAP |                                             | 22.03.2019 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER                    | 24.02.2020 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS                              | 24.02.2020 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | LOVLIG_OPPHOLD   |                                             | 24.02.2020 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+      | 3       | BOSATT_I_RIKET   | BARN_BOR_I_EØS                              | 21.07.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 3       | LOVLIG_OPPHOLD   |                                             | 21.07.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 3       | GIFT_PARTNERSKAP |                                             | 21.07.2023 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER                    | 21.07.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 3       | UNDER_18_ÅR      |                                             | 21.07.2023 | 20.07.2041 | OPPFYLT  | Nei                  |                      |                  |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+
+      | 2       | 1            | 01.03.2020 | 31.12.2023 | 0     | ORDINÆR_BARNETRYGD | 0       | 1054 |
+      | 2       | 1            | 01.01.2024 | 28.02.2025 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.03.2025 | 28.02.2037 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 |
+      | 3       | 1            | 01.08.2023 | 31.12.2023 | 471   | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 3       | 1            | 01.01.2024 | 30.06.2029 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 3       | 1            | 01.07.2029 | 30.06.2041 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 |
+
+    Og med endrede utbetalinger for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
+      | 2       | 1            | 01.03.2020 | 31.12.2023 | ALLEREDE_UTBETALT | 0       | 12.01.2024       |                             |
+
+    Og med kompetanser for begrunnelse
+      | AktørId | Fra dato   | Til dato   | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
+      | 2, 3    | 01.01.2024 |            | NORGE_ER_SEKUNDÆRLAND | 1            | I_ARBEID         | ARBEIDER                  | PL                    | NO                             | PL                  |
+      | 3       | 01.08.2023 | 31.12.2023 | NORGE_ER_SEKUNDÆRLAND | 1            | I_ARBEID         | ARBEIDER                  | PL                    | NO                             | PL                  |
+
+    Når vedtaksperiodene genereres for behandling 1
+
+    Og når disse begrunnelsene er valgt for behandling 1
+      | Fra dato   | Til dato   | Standardbegrunnelser                                    | Eøsbegrunnelser                                  | Fritekster |
+      | 01.03.2020 | 31.07.2023 | ENDRET_UTBETALING_ALLEREDE_UTBETALT_FORELDRE_BOR_SAMMEN |                                                  |            |
+      | 01.08.2023 | 31.12.2023 |                                                         | INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_STANDARD |            |
+      | 01.01.2024 | 28.02.2037 |                                                         | INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_STANDARD |            |
+      | 01.03.2037 | 30.06.2041 |                                                         |                                                  |            |
+      | 01.07.2041 |            |                                                         |                                                  |            |
+
+    Så forvent følgende brevperioder for behandling 1
+      | Brevperiodetype  | Fra dato    | Til dato          | Beløp | Antall barn med utbetaling | Barnas fødselsdager  | Du eller institusjonen |
+      | INGEN_UTBETALING | mars 2020   |                   | 0     | 0                          |                      | du                     |
+      | UTBETALING       | august 2023 | til desember 2023 | 471   | 1                          | 21.07.23             | du                     |
+      | UTBETALING       | januar 2024 | til februar 2037  | 0     | 2                          | 22.03.19 og 21.07.23 | du                     |

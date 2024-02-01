@@ -26,7 +26,7 @@ class OpprettInternKonsistensavstemmingTaskerTask(
     override fun doTask(task: Task) {
         val maksAntallTasker: Int = objectMapper.readValue(task.payload)
         internKonsistensavstemmingService
-            .validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(maksAntallTasker)
+            .validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåFagsaker(maksAntallTasker)
     }
 
     companion object {
