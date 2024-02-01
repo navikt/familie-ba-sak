@@ -2,6 +2,8 @@
 
 Saksbehandling for barnetrygd
 
+test
+
 ## Kjøring lokalt
 
 For å kjøre opp appen lokalt kan en kjøre
