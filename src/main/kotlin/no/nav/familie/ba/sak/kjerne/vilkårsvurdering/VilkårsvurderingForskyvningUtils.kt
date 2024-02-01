@@ -116,7 +116,9 @@ object VilkårsvurderingForskyvningUtils {
             .tilMånedFraMånedsskifte { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
                 when {
                     vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned?.erDeltBosted() == true -> innholdSisteDagForrigeMåned
-                    innholdSisteDagForrigeMåned?.erOppfylt() != true -> innholdSisteDagForrigeMåned
+                    innholdFørsteDagDenneMåned != null && innholdSisteDagForrigeMåned?.erOppfylt() == true -> innholdSisteDagForrigeMåned
+                    innholdSisteDagForrigeMåned?.erEksplisittAvslagPåSøknad == true && innholdFørsteDagDenneMåned == null -> innholdSisteDagForrigeMåned
+                    innholdFørsteDagDenneMåned == null || innholdSisteDagForrigeMåned == null -> null
                     else -> innholdFørsteDagDenneMåned
                 }
             }

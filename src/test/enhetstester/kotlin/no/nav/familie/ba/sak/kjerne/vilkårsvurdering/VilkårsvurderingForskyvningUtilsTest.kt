@@ -277,6 +277,53 @@ class VilkårsvurderingForskyvningUtilsTest {
     }
 
     @Test
+    fun `skal lage en periode for neste måned når vi har eksplisitt avslag som bare varer én måned`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
+
+        val vilkårResultat =
+            listOf(
+                lagVilkårResultat(
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = LocalDate.of(2023, 1, 16),
+                    periodeTom = LocalDate.of(2023, 1, 31),
+                    erEksplisittAvslagPåSøknad = true,
+                ),
+            )
+
+        val forskjøvedeVilkår =
+            vilkårResultat.tilForskjøvetTidslinje(
+                vilkår = Vilkår.UTVIDET_BARNETRYGD,
+                fødselsdato = barn.fødselsdato,
+            ).perioder()
+
+        Assertions.assertEquals(1, forskjøvedeVilkår.size)
+    }
+
+    @Test
+    fun `skal ikke lage en periode for neste måned når vi har opphørsperiode som bare varer én måned`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
+
+        val vilkårResultat =
+            listOf(
+                lagVilkårResultat(
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = LocalDate.of(2023, 1, 16),
+                    periodeTom = LocalDate.of(2023, 1, 31),
+                ),
+            )
+
+        val forskjøvedeVilkår =
+            vilkårResultat.tilForskjøvetTidslinje(
+                vilkår = Vilkår.UTVIDET_BARNETRYGD,
+                fødselsdato = barn.fødselsdato,
+            ).perioder()
+
+        Assertions.assertEquals(0, forskjøvedeVilkår.size)
+    }
+
+    @Test
     fun `Skal kutte UNDER_18 tidslinjen måneden før 18-årsdag`() {
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
