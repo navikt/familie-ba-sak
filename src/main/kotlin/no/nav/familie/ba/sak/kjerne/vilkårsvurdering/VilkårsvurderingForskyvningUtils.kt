@@ -114,12 +114,18 @@ object VilkårsvurderingForskyvningUtils {
         return filter { it.vilkårType == vilkår }
             .tilTidslinje()
             .tilMånedFraMånedsskifte { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
-                when {
-                    vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned?.erDeltBosted() == true && innholdSisteDagForrigeMåned != null -> innholdSisteDagForrigeMåned
-                    innholdFørsteDagDenneMåned != null && innholdSisteDagForrigeMåned != null && !innholdSisteDagForrigeMåned.erOppfylt() -> innholdSisteDagForrigeMåned
-                    innholdSisteDagForrigeMåned?.erEksplisittAvslagPåSøknad == true && innholdFørsteDagDenneMåned == null -> innholdSisteDagForrigeMåned
-                    innholdFørsteDagDenneMåned == null || innholdSisteDagForrigeMåned == null -> null
-                    else -> innholdFørsteDagDenneMåned
+                if (innholdSisteDagForrigeMåned == null || innholdFørsteDagDenneMåned == null) {
+                    if (innholdSisteDagForrigeMåned?.erEksplisittAvslagPåSøknad == true) {
+                        innholdSisteDagForrigeMåned
+                    } else {
+                        null
+                    }
+                } else {
+                    when {
+                        vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
+                        !innholdSisteDagForrigeMåned.erOppfylt() -> innholdSisteDagForrigeMåned
+                        else -> innholdFørsteDagDenneMåned
+                    }
                 }
             }
     }

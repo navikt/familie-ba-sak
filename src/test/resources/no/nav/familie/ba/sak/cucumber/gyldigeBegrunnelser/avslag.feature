@@ -3,6 +3,16 @@
 
 Egenskap: Gyldige begrunnelser for avslag
 
+  Bakgrunn:
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId |
+      | 1            | 1        |                     |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 03.01.1978  |
+      | 1            | 2       | BARN       | 16.02.2007  |
+
   Scenario: Skal ikke krasje ved avslag uten fom- eller tomdato
     Og lag personresultater for begrunnelse for behandling 1
 
