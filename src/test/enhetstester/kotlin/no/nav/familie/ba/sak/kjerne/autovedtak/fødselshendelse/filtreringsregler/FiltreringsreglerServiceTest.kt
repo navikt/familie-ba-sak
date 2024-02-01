@@ -527,7 +527,7 @@ class FiltreringsreglerServiceTest {
 
         every { personopplysningerService.harVerge(mor.aktør) } returns VergeResponse(false)
 
-        every { localDateService.now() } returns LocalDate.now()
+        every { localDateService.now() } returns LocalDate.of(2024, 2, 1)
 
         every {
             tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
