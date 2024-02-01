@@ -36,14 +36,14 @@ jobs:
     name: Enhetstester
     runs-on: ubuntu-latest
     steps:
+      - run: sudo timedatectl set-timezone Europe/Oslo
+
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: 'temurin'
           cache: 'maven'
-
-      - run: sudo timedatectl set-timezone Europe/Oslo
 
       - name: Kjør enhetstester
         env:
