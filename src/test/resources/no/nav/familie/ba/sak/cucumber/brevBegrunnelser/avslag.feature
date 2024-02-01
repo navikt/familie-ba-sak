@@ -236,3 +236,59 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
     Så forvent følgende brevbegrunnelser for behandling 1 i periode - til -
       | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Beløp |
       | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Ja            | 07.08.20             | 1           | 0     |
+
+
+  Scenario: Skal gi avslag for etterfølgende måned selv når avslag varer under en måned og flette inn riktige flettefelt
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat        | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | DELVIS_INNVILGET_OG_ENDRET | SØKNAD           | Nei                       | NASJONAL            |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
+      | 1            | 1       | SØKER      | 26.03.1977  |              |
+      | 1            | 2       | BARN       | 09.01.2012  |              |
+
+    Og følgende dagens dato 25.01.2024
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                        | Utdypende vilkår            | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser              | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                             | 01.02.2022 |            | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
+      | 1       | UTVIDET_BARNETRYGD            |                             | 16.01.2023 | 31.01.2023 | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE |                  |
+      | 1       | UTVIDET_BARNETRYGD            |                             | 01.02.2023 |            | OPPFYLT      | Nei                  |                                   |                  |
+
+      | 2       | UNDER_18_ÅR                   |                             | 09.01.2012 | 08.01.2030 | OPPFYLT      | Nei                  |                                   |                  |
+      | 2       | GIFT_PARTNERSKAP              |                             | 09.01.2012 |            | OPPFYLT      | Nei                  |                                   |                  |
+      | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                             | 01.02.2022 |            | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
+      | 2       | BOR_MED_SØKER                 |                             | 01.02.2022 | 31.01.2023 | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
+      | 2       | BOR_MED_SØKER                 | DELT_BOSTED_SKAL_IKKE_DELES | 01.02.2023 |            | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 1       | 1            | 01.03.2023 | 30.06.2023 | 2489  | UTVIDET_BARNETRYGD | 100     | 2489 |
+      | 1       | 1            | 01.07.2023 | 31.12.2029 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 2       | 1            | 01.03.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 1            | 01.07.2023 | 31.12.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 2       | 1            | 01.01.2024 | 31.12.2029 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
+
+    Når vedtaksperiodene genereres for behandling 1
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser              | Ugyldige begrunnelser |
+      | 01.02.2023 | 28.02.2023 | AVSLAG             |                                | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE |                       |
+      | 01.03.2023 | 30.06.2023 | UTBETALING         |                                |                                   |                       |
+      | 01.07.2023 | 31.12.2023 | UTBETALING         |                                |                                   |                       |
+      | 01.01.2024 | 31.12.2029 | UTBETALING         |                                |                                   |                       |
+      | 01.01.2030 |            | OPPHØR             |                                |                                   |                       |
+
+
+    Og når disse begrunnelsene er valgt for behandling 1
+      | Fra dato   | Til dato   | Standardbegrunnelser              | Eøsbegrunnelser | Fritekster |
+      | 01.02.2023 | 28.02.2023 | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE |                 |            |
+
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.02.2023 til 28.02.2023
+      | Begrunnelse                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp |
+      | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE | STANDARD | Ja            | 09.01.12             | 0           | januar 2023                          | 1 054 |
