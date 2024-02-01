@@ -265,7 +265,9 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ForrigeMåned)
 
         logger.info("Yngste barn fødesldato" + peronsopplysningGrunnalg.yngsteBarnSinFødselsdato.toYearMonth().toString())
+        println("Yngste barn fødesldato" + peronsopplysningGrunnalg.yngsteBarnSinFødselsdato.toYearMonth().toString())
         logger.info("Forventet fødesldato" + LocalDate.now().minusYears(3).minusMonths(1))
+        println("Forventet fødesldato" + LocalDate.now().minusYears(3).minusMonths(1))
 
         assertTrue(autobrevOpphørSmåbarnstilleggService.yngsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
     }
