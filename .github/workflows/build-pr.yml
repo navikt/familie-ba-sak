@@ -43,7 +43,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - run sudo timedatectl set-timezone Europe/Oslo
+      - run: sudo timedatectl set-timezone Europe/Oslo
 
       - name: Kjør enhetstester
         env:
