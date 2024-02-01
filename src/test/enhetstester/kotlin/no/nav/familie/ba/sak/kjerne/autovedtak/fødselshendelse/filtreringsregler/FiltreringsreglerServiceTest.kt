@@ -80,10 +80,18 @@ class FiltreringsreglerServiceTest {
     @MockK
     private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 
+    val søkerFødselsdato = LocalDate.now().minusYears(40).withMonth(1).withDayOfMonth(1)
+    val barnFødselsdato = LocalDate.now().minusYears(3).withMonth(1).withDayOfMonth(1)
+    val jan1For2ÅrSiden = LocalDate.now().minusYears(2).withMonth(1).withDayOfMonth(1)
+    val feb1For3ÅrSiden = LocalDate.now().minusYears(3).withMonth(2).withDayOfMonth(1)
+    val nov1For3ÅrSiden = LocalDate.now().minusYears(3).withMonth(11).withDayOfMonth(1)
+    val nov1For4ÅrSiden = LocalDate.now().minusYears(4).withMonth(11).withDayOfMonth(1)
+    val nov1For5ÅrSiden = LocalDate.now().minusYears(5).withMonth(11).withDayOfMonth(1)
+
     @Test
     fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når mors vilkår om utvidet barnetrygd er oppfylt i tidsrommet barnet er mellom 0 og 18`() {
-        val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
-        val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
+        val mor = tilfeldigSøker(fødselsdato = søkerFødselsdato)
+        val barn = tilfeldigPerson(fødselsdato = barnFødselsdato)
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val sisteVedtatteBehandling = lagBehandling()
         val behandling = lagBehandling()
@@ -104,8 +112,8 @@ class FiltreringsreglerServiceTest {
                             listOf(
                                 lagVilkårResultat(
                                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                    periodeFom = LocalDate.of(2020, 11, 1),
-                                    periodeTom = LocalDate.of(2021, 2, 1),
+                                    periodeFom = nov1For4ÅrSiden,
+                                    periodeTom = feb1For3ÅrSiden,
                                 ),
                             ),
                         ),
@@ -132,8 +140,8 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat oppfylt når mors vilkår om utvidet barnetrygd er oppfylt utenfor tidsrommet barnet er mellom 0 og 18`() {
-        val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
-        val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
+        val mor = tilfeldigSøker(fødselsdato = søkerFødselsdato)
+        val barn = tilfeldigPerson(fødselsdato = barnFødselsdato)
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val behandling = lagBehandling()
         val sisteVedtatteBehandling = lagBehandling()
@@ -154,8 +162,8 @@ class FiltreringsreglerServiceTest {
                             listOf(
                                 lagVilkårResultat(
                                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                    periodeFom = LocalDate.of(2020, 11, 1),
-                                    periodeTom = LocalDate.of(2021, 1, 1),
+                                    periodeFom = nov1For4ÅrSiden,
+                                    periodeTom = LocalDate.now().minusYears(3).withMonth(1).withDayOfMonth(1),
                                 ),
                             ),
                         ),
@@ -182,8 +190,8 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når en vilkårsperiode for utvidet barnetrygd er oppfylt i tidsrommet barnet er mellom 0 og 18`() {
-        val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
-        val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
+        val mor = tilfeldigSøker(fødselsdato = søkerFødselsdato)
+        val barn = tilfeldigPerson(fødselsdato = barnFødselsdato)
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val behandling = lagBehandling()
         val sisteVedtatteBehandling = lagBehandling()
@@ -204,13 +212,13 @@ class FiltreringsreglerServiceTest {
                             listOf(
                                 lagVilkårResultat(
                                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                    periodeFom = LocalDate.of(2020, 11, 1),
-                                    periodeTom = LocalDate.of(2021, 1, 1),
+                                    periodeFom = nov1For4ÅrSiden,
+                                    periodeTom = barnFødselsdato,
                                 ),
                                 lagVilkårResultat(
                                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                    periodeFom = LocalDate.of(2022, 1, 1),
-                                    periodeTom = LocalDate.of(2023, 1, 1),
+                                    periodeFom = jan1For2ÅrSiden,
+                                    periodeTom = LocalDate.now().minusYears(1).withMonth(1).withDayOfMonth(1),
                                 ),
                             ),
                         ),
@@ -237,8 +245,8 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når tom-dato er null på vilkåret utvidet barnetrygd`() {
-        val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
-        val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
+        val mor = tilfeldigSøker(fødselsdato = søkerFødselsdato)
+        val barn = tilfeldigPerson(fødselsdato = barnFødselsdato)
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val behandling = lagBehandling()
         val sisteVedtatteBehandling = lagBehandling()
@@ -259,12 +267,12 @@ class FiltreringsreglerServiceTest {
                             listOf(
                                 lagVilkårResultat(
                                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                    periodeFom = LocalDate.of(2020, 11, 1),
-                                    periodeTom = LocalDate.of(2021, 1, 1),
+                                    periodeFom = nov1For4ÅrSiden,
+                                    periodeTom = nov1For3ÅrSiden,
                                 ),
                                 lagVilkårResultat(
                                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                    periodeFom = LocalDate.of(2022, 1, 1),
+                                    periodeFom = LocalDate.now().minusYears(2).withMonth(1).withDayOfMonth(1),
                                     periodeTom = null,
                                 ),
                             ),
@@ -292,9 +300,9 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat oppfylt når begge barnas fødselsdatoer er etter tom på vilkåret utvidet barnetrygd`() {
-        val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
-        val barn1 = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val barn2 = tilfeldigPerson(fødselsdato = LocalDate.of(2020, 1, 1))
+        val mor = tilfeldigSøker(fødselsdato = LocalDate.now().minusYears(40).withDayOfMonth(1).withDayOfMonth(1))
+        val barn1 = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).withDayOfMonth(1).withDayOfMonth(1))
+        val barn2 = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(4).withDayOfMonth(1).withDayOfMonth(1))
 
         val nyBehandlingHendelse =
             NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
@@ -322,8 +330,8 @@ class FiltreringsreglerServiceTest {
                             listOf(
                                 lagVilkårResultat(
                                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                    periodeFom = LocalDate.of(2019, 11, 1),
-                                    periodeTom = LocalDate.of(2020, 1, 1),
+                                    periodeFom = nov1For5ÅrSiden,
+                                    periodeTom = LocalDate.now().minusYears(4).withMonth(1).withDayOfMonth(1),
                                 ),
                             ),
                         ),
@@ -350,9 +358,9 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når mors vilkår om utvidet barnetrygd er oppfylt i tidsrommet et av barna er mellom 0 og 18`() {
-        val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
-        val barn1 = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val barn2 = tilfeldigPerson(fødselsdato = LocalDate.of(2020, 1, 1))
+        val mor = tilfeldigSøker(fødselsdato = LocalDate.now().minusYears(40).withDayOfMonth(1).withDayOfMonth(1))
+        val barn1 = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).withDayOfMonth(1).withDayOfMonth(1))
+        val barn2 = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(4).withDayOfMonth(1).withDayOfMonth(1))
 
         val nyBehandlingHendelse =
             NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
@@ -380,8 +388,8 @@ class FiltreringsreglerServiceTest {
                             listOf(
                                 lagVilkårResultat(
                                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                    periodeFom = LocalDate.of(2019, 11, 1),
-                                    periodeTom = LocalDate.of(2021, 1, 1),
+                                    periodeFom = nov1For5ÅrSiden,
+                                    periodeTom = nov1For3ÅrSiden,
                                 ),
                             ),
                         ),
@@ -408,8 +416,8 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når mor har opphørt barnetrygd`() {
-        val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
-        val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
+        val mor = tilfeldigSøker(fødselsdato = søkerFødselsdato)
+        val barn = tilfeldigPerson(fødselsdato = barnFødselsdato)
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val sisteVedtatteBehandling = lagBehandling()
         val behandling = lagBehandling()
@@ -420,7 +428,7 @@ class FiltreringsreglerServiceTest {
         clearMocks(andelTilkjentYtelseRepository)
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns
             listOf(
-                MånedPeriode(YearMonth.of(2018, 1), YearMonth.now()),
+                MånedPeriode(YearMonth.now().minusYears(6).withMonth(1), YearMonth.now()),
             )
                 .map {
                     lagAndelTilkjentYtelse(it.fom, it.tom)
@@ -446,8 +454,8 @@ class FiltreringsreglerServiceTest {
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat oppfylt når vilkår er oppfylt og mor ikke har opphørt barnetrygd`() {
-        val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
-        val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
+        val mor = tilfeldigSøker(fødselsdato = søkerFødselsdato)
+        val barn = tilfeldigPerson(fødselsdato = barnFødselsdato)
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val sisteVedtatteBehandling = lagBehandling()
         val behandling = lagBehandling()
@@ -527,7 +535,7 @@ class FiltreringsreglerServiceTest {
 
         every { personopplysningerService.harVerge(mor.aktør) } returns VergeResponse(false)
 
-        every { localDateService.now() } returns LocalDate.of(2024, 2, 1)
+        every { localDateService.now() } returns LocalDate.now()
 
         every {
             tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
