@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -33,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -261,6 +263,9 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         val barn3ForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
         val peronsopplysningGrunnalg: PersonopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ForrigeMåned)
+
+        logger.info("Yngste barn fødesldato" + peronsopplysningGrunnalg.yngsteBarnSinFødselsdato.toYearMonth().toString())
+        logger.info("Forventet fødesldato" + LocalDate.now().minusYears(3).minusMonths(1))
 
         assertTrue(autobrevOpphørSmåbarnstilleggService.yngsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
     }
