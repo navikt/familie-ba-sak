@@ -94,7 +94,7 @@ object VilkårsvurderingForskyvningUtils {
             .tilTidslinje()
             .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
                 when {
-                    innholdSisteDagForrigeMåned?.erOppfylt() != true || innholdFørsteDagDenneMåned?.erOppfylt() != true -> null
+                    !innholdSisteDagForrigeMåned.erOppfylt() || !innholdFørsteDagDenneMåned.erOppfylt() -> null
                     vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
                     else -> innholdFørsteDagDenneMåned
                 }
@@ -115,8 +115,8 @@ object VilkårsvurderingForskyvningUtils {
             .tilTidslinje()
             .tilMånedFraMånedsskifte { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
                 when {
-                    vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned?.erDeltBosted() == true -> innholdSisteDagForrigeMåned
-                    innholdFørsteDagDenneMåned != null && innholdSisteDagForrigeMåned?.erOppfylt() == true -> innholdSisteDagForrigeMåned
+                    vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned?.erDeltBosted() == true && innholdSisteDagForrigeMåned != null -> innholdSisteDagForrigeMåned
+                    innholdFørsteDagDenneMåned != null && innholdSisteDagForrigeMåned != null && !innholdSisteDagForrigeMåned.erOppfylt() -> innholdSisteDagForrigeMåned
                     innholdSisteDagForrigeMåned?.erEksplisittAvslagPåSøknad == true && innholdFørsteDagDenneMåned == null -> innholdSisteDagForrigeMåned
                     innholdFørsteDagDenneMåned == null || innholdSisteDagForrigeMåned == null -> null
                     else -> innholdFørsteDagDenneMåned
