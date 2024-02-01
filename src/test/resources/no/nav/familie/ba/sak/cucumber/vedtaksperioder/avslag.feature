@@ -65,7 +65,7 @@ Egenskap: Vedtaksperioder med mor og to barn
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar            |
       |            |            | AVSLAG             | Kun søker har avslag |
-      | 01.01.2021 | 30.09.2021 | AVSLAG             | Barn har avslag      |
+      | 01.01.2021 | 31.10.2021 | AVSLAG             | Barn har avslag      |
 
 
   Scenario: Skal lage avslagsperioder når søker har konstant avslag og barn har vilkår med overlappende avslag
@@ -103,12 +103,12 @@ Egenskap: Vedtaksperioder med mor og to barn
       |            |            | AVSLAG             | Søker har avslag                   |
 
       | 01.07.2020 | 31.12.2020 | AVSLAG             | Barn1 har avslag på LOVLIG_OPPHOLD |
-      | 01.01.2021 | 30.09.2021 | AVSLAG             | Barn1 har avslag på to vilkår      |
-      | 01.10.2021 | 31.12.2021 | AVSLAG             | Barn1 har avslag på BOR_MED_SØKER  |
+      | 01.01.2021 | 31.10.2021 | AVSLAG             | Barn1 har avslag på to vilkår      |
+      | 01.11.2021 | 31.01.2022 | AVSLAG             | Barn1 har avslag på BOR_MED_SØKER  |
 
       | 01.07.2021 | 31.12.2021 | AVSLAG             | Barn2 har avslag på LOVLIG_OPPHOLD |
-      | 01.01.2022 | 30.09.2022 | AVSLAG             | Barn2 har avslag på to vilkår      |
-      | 01.10.2022 | 31.12.2022 | AVSLAG             | Barn2 har avslag på BOR_MED_SØKER  |
+      | 01.01.2022 | 31.10.2022 | AVSLAG             | Barn2 har avslag på to vilkår      |
+      | 01.11.2022 | 31.01.2023 | AVSLAG             | Barn2 har avslag på BOR_MED_SØKER  |
 
 
   Scenario: Skal lage opphørsperiode når det er overlapp i opphør og avslag på tvers av tvillinger der en har eksplisitt avslag

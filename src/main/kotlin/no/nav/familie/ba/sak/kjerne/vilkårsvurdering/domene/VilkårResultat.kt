@@ -152,6 +152,7 @@ class VilkårResultat(
             erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
             vurderesEtter = vurderesEtter,
             utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
+            standardbegrunnelser = standardbegrunnelser,
         )
     }
 

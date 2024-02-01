@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifteIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifte
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -91,9 +91,9 @@ object VilkårsvurderingForskyvningUtils {
         return this
             .filter { it.vilkårType == vilkår && it.erOppfylt() }
             .tilTidslinje()
-            .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
+            .tilMånedFraMånedsskifte { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
                 when {
-                    !innholdSisteDagForrigeMåned.erOppfylt() || !innholdFørsteDagDenneMåned.erOppfylt() -> null
+                    innholdSisteDagForrigeMåned?.erOppfylt() != true || innholdFørsteDagDenneMåned?.erOppfylt() != true -> null
                     vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
                     else -> innholdFørsteDagDenneMåned
                 }
@@ -110,13 +110,12 @@ object VilkårsvurderingForskyvningUtils {
     }
 
     private fun Collection<VilkårResultat>.lagForskjøvetTidslinje(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> {
-        return this
-            .filter { it.vilkårType == vilkår }
+        return filter { it.vilkårType == vilkår }
             .tilTidslinje()
-            .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
+            .tilMånedFraMånedsskifte { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
                 when {
-                    vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
-                    !innholdSisteDagForrigeMåned.erOppfylt() -> innholdSisteDagForrigeMåned
+                    vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned?.erDeltBosted() == true -> innholdSisteDagForrigeMåned
+                    innholdSisteDagForrigeMåned?.erOppfylt() != true -> innholdSisteDagForrigeMåned
                     else -> innholdFørsteDagDenneMåned
                 }
             }
