@@ -503,6 +503,7 @@
                     <!--suppress UnresolvedMavenProperty -->
                     <excludedGroups>${excludedGroups}</excludedGroups>
                     <threadCount>1</threadCount>
+                    <runOrder>random</runOrder>
                 </configuration>
             </plugin>
             <plugin>
