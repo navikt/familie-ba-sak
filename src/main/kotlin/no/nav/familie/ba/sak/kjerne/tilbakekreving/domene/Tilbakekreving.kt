@@ -46,10 +46,9 @@ data class Tilbakekreving(
     var tilbakekrevingsbehandlingId: String?,
 ) : BaseEntitet() {
     init {
-        if (varsel == null && valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-            {
-                throw FunksjonellFeil("Varsel må settes dersom vi har valgt tilbakekreving med varsel.")
-            }
+        if (varsel == null && valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
+            throw FunksjonellFeil("Varsel må settes dersom vi har valgt tilbakekreving med varsel.")
+        }
     }
 
     override fun hashCode() = id.hashCode()
