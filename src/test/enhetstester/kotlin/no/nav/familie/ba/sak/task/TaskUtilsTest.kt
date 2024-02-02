@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.task
 
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -10,6 +12,11 @@ import org.springframework.core.env.Environment
 import java.time.LocalDateTime
 
 class TaskUtilsTest {
+    @AfterAll
+    fun clearMocks() {
+        clearAllMocks()
+    }
+
     @ParameterizedTest
     @CsvSource(
         "2020-06-09T13:37:00, 2020-06-09T14:37:00, Innenfor dagtid",

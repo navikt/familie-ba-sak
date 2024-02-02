@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.internal
 
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -9,6 +10,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.task.FinnSakerMedFlereMigreringsbehandlingerTask
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -25,6 +27,11 @@ class ForvalterSchedulerTest {
         every { YearMonth.now() }.returns(YearMonth.of(2022, 5))
         every { envService.erDev() } returns true
         every { taskRepository.save(capture(slot)) } returns Task(type = FinnSakerMedFlereMigreringsbehandlingerTask.TASK_STEP_TYPE, payload = "")
+    }
+
+    @AfterAll
+    fun clearMocks() {
+        clearAllMocks()
     }
 
     @Test
