@@ -13,6 +13,7 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
@@ -44,6 +45,13 @@ data class Tilbakekreving(
     @Column(name = "tilbakekrevingsbehandling_id")
     var tilbakekrevingsbehandlingId: String?,
 ) : BaseEntitet() {
+    init {
+        if (varsel == null && valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+            {
+                throw FunksjonellFeil("Varsel må settes dersom vi har valgt tilbakekreving med varsel.")
+            }
+    }
+
     override fun hashCode() = id.hashCode()
 
     override fun equals(other: Any?): Boolean {
