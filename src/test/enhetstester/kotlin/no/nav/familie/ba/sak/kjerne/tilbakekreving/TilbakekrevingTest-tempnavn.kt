@@ -7,7 +7,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
 
-class TilbakekrevingTest {
+class `TilbakekrevingTest-tempnavn` {
     @Test
     fun `Skal ikke være mulig å opprette en tilbakekreving med varsel uten varsel`() {
         assertThrows<FunksjonellFeil> {
