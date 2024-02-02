@@ -503,7 +503,7 @@
                     <!--suppress UnresolvedMavenProperty -->
                     <excludedGroups>${excludedGroups}</excludedGroups>
                     <threadCount>1</threadCount>
-                    <runOrder>alphabetical</runOrder>
+                    <runOrder>reversealphabetical</runOrder>
                 </configuration>
             </plugin>
             <plugin>
