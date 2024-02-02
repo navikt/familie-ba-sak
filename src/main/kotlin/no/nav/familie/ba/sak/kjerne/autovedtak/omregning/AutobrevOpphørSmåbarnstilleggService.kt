@@ -91,6 +91,9 @@ class AutobrevOpphørSmåbarnstilleggService(
         val yngsteBarnSinFødselsdato: YearMonth =
             personopplysningGrunnlag.yngsteBarnSinFødselsdato.toYearMonth()
 
+        logger.info("venstreside: " + yngsteBarnSinFødselsdato.plusYears(3))
+        logger.info("høyreside: " + YearMonth.now().minusMonths(1))
+
         return yngsteBarnSinFødselsdato.plusYears(3) == YearMonth.now().minusMonths(1)
     }
 

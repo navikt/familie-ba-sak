@@ -269,7 +269,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         logger.error("Forventet fødesldato" + LocalDate.now().minusYears(3).minusMonths(1))
         println("Forventet fødesldato" + LocalDate.now().minusYears(3).minusMonths(1))
 
-        // assertTrue(autobrevOpphørSmåbarnstilleggService.yngsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
+        assertTrue(autobrevOpphørSmåbarnstilleggService.yngsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
     }
 
     @Test
