@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpph�
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.hentOpphørsresultatPåBehandling
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -28,7 +28,7 @@ class BehandlingsresultatOpphørUtilsTest {
     val mai22 = YearMonth.of(2022, 5)
     val aug22 = YearMonth.of(2022, 8)
 
-    @BeforeEach
+    @AfterEach
     fun reset() {
         clearStaticMockk(YearMonth::class)
     }

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.internal
 
+import io.mockk.clearStaticMockk
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -9,6 +10,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.task.FinnSakerMedFlereMigreringsbehandlingerTask
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -18,6 +20,11 @@ class ForvalterSchedulerTest {
     private val envService = mockk<EnvService>()
     private val service = ForvalterScheduler(taskRepository, envService)
     private val slot = slot<Task>()
+
+    @AfterEach
+    fun reset() {
+        clearStaticMockk(YearMonth::class)
+    }
 
     @BeforeEach
     fun initTest() {

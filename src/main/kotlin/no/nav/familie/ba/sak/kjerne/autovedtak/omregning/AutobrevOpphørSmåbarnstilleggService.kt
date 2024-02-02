@@ -93,6 +93,7 @@ class AutobrevOpphørSmåbarnstilleggService(
 
         logger.info("venstreside: " + yngsteBarnSinFødselsdato.plusYears(3))
         logger.info("høyreside: " + YearMonth.now().minusMonths(1))
+        logger.info("høyreside: " + YearMonth.now().minusMonths(1)::class)
         logger.info("er like: " + yngsteBarnSinFødselsdato.plusYears(3).equals(YearMonth.now().minusMonths(1)))
 
         return yngsteBarnSinFødselsdato.plusYears(3).equals(YearMonth.now().minusMonths(1))
