@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
@@ -49,6 +50,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import kotlin.random.Random
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EndretUtbetalingAndelValideringTest {
     val søker = lagPerson(type = PersonType.SØKER)
     val barn = lagPerson(type = PersonType.BARN)

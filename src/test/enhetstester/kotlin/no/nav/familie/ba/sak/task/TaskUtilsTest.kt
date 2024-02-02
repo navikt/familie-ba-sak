@@ -6,11 +6,13 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.springframework.core.env.Environment
 import java.time.LocalDateTime
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TaskUtilsTest {
     @AfterAll
     fun clearMocks() {

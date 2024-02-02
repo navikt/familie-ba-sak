@@ -16,11 +16,13 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.YearMonth
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class BehandlingsresultatOpphørUtilsTest {
     val søker = tilfeldigPerson()
 

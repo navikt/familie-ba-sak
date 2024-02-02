@@ -13,8 +13,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.time.YearMonth
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ForvalterSchedulerTest {
     private val taskRepository = mockk<TaskRepositoryWrapper>()
     private val envService = mockk<EnvService>()
