@@ -13,7 +13,7 @@ Egenskap: Utbetalingsoppdrag: Ulike ytelsestyper på andelene
 
     Når beregner utbetalingsoppdrag
 
-    Så forvent følgende utbetalingsoppdrag
+    Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Ytelse             | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 03.2021  |             | 700   | UTVIDET_BARNETRYGD | NY           | Nei        | 0          |                    |
       | 1            | 03.2021  | 03.2021  |             | 800   | SMÅBARNSTILLEGG    | NY           | Nei        | 1          |                    |
@@ -30,7 +30,7 @@ Egenskap: Utbetalingsoppdrag: Ulike ytelsestyper på andelene
 
     Når beregner utbetalingsoppdrag
 
-    Så forvent følgende utbetalingsoppdrag
+    Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Ytelse             | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 05.2021  |             | 700   | UTVIDET_BARNETRYGD | NY           | Nei        | 0          |                    |
       | 1            | 03.2021  | 05.2021  |             | 800   | SMÅBARNSTILLEGG    | NY           | Nei        | 1          |                    |
@@ -54,7 +54,7 @@ Egenskap: Utbetalingsoppdrag: Ulike ytelsestyper på andelene
 
     Når beregner utbetalingsoppdrag
 
-    Så forvent følgende utbetalingsoppdrag
+    Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Ytelse             | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 03.2021  |             | 100   | UTVIDET_BARNETRYGD | NY           | Nei        | 0          |                    |
       | 1            | 03.2021  | 03.2021  |             | 200   | SMÅBARNSTILLEGG    | NY           | Nei        | 1          |                    |

@@ -15,14 +15,6 @@ Egenskap: Utbetalingsoppdrag: Håndtering av 0-beløp
 
     Når beregner utbetalingsoppdrag
 
-    Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 1            | 04.2021  | 04.2021  |             | 700   | NY           | Nei        | 1          | 0                  |
-
-      | 2            | 04.2021  | 04.2021  | 03.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
-      | 2            | 04.2021  | 04.2021  |             | 700   | ENDR         | Nei        | 2          | 1                  |
-
     Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |

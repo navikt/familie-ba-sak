@@ -13,11 +13,6 @@ Egenskap: Utbetalingsoppdrag: Opphør
 
     Når beregner utbetalingsoppdrag
 
-    Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 2            | 03.2021  | 03.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    |
-
     Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
@@ -32,12 +27,6 @@ Egenskap: Utbetalingsoppdrag: Opphør
       | 3            |              | 03.2021  | 03.2021  | 700   |
 
     Når beregner utbetalingsoppdrag
-
-    Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 2            | 03.2021  | 03.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    |
-      | 3            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
 
     Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
@@ -55,12 +44,6 @@ Egenskap: Utbetalingsoppdrag: Opphør
 
     Når beregner utbetalingsoppdrag
 
-    Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 1            | 04.2021  | 04.2021  |             | 800   | NY           | Nei        | 1          | 0                  |
-      | 2            | 04.2021  | 04.2021  | 04.2021     | 800   | ENDR         | Ja         | 1          | 0                  |
-
     Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
@@ -76,12 +59,6 @@ Egenskap: Utbetalingsoppdrag: Opphør
 
     Når beregner utbetalingsoppdrag
 
-    Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 06.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 2            | 03.2021  | 06.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    |
-      | 2            | 03.2021  | 04.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
-
     Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 06.2021  |             | 700   | NY           | Nei        | 0          |                    |
@@ -96,15 +73,6 @@ Egenskap: Utbetalingsoppdrag: Opphør
       | 2            | 04.2021  | 04.2021  | 700   |
 
     Når beregner utbetalingsoppdrag
-
-    Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    | 1               |
-      | 1            | 04.2021  | 04.2021  |             | 700   | NY           | Nei        | 1          | 0                  | 1               |
-
-      # kildebehandling på den første raden burde peke til den første behandlingen. EF gjør det samme her
-      | 2            | 04.2021  | 04.2021  | 03.2021     | 700   | ENDR         | Ja         | 1          | 0                  | 2               |
-      | 2            | 04.2021  | 04.2021  |             | 700   | ENDR         | Nei        | 2          | 1                  | 2               |
 
     Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
@@ -124,14 +92,6 @@ Egenskap: Utbetalingsoppdrag: Opphør
       | 2            | 04.2021  | 04.2021  | 700   |
 
     Når beregner utbetalingsoppdrag
-
-    Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 1            | 04.2021  | 04.2021  |             | 700   | NY           | Nei        | 1          | 0                  |
-
-      | 2            | 04.2021  | 04.2021  | 03.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
-      | 2            | 04.2021  | 04.2021  |             | 700   | ENDR         | Nei        | 2          | 1                  |
 
     Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
@@ -155,16 +115,6 @@ Egenskap: Utbetalingsoppdrag: Opphør
 
     Når beregner utbetalingsoppdrag
 
-    Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 1            | 04.2021  | 04.2021  |             | 800   | NY           | Nei        | 1          | 0                  |
-      | 1            | 05.2021  | 05.2021  |             | 900   | NY           | Nei        | 2          | 1                  |
-
-      | 2            | 05.2021  | 05.2021  | 05.2021     | 900   | ENDR         | Ja         | 2          | 1                  |
-
-      | 3            | 05.2021  | 05.2021  | 04.2021     | 900   | ENDR         | Ja         | 2          | 1                  |
-
     Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
@@ -186,13 +136,6 @@ Egenskap: Utbetalingsoppdrag: Opphør
 
     Når beregner utbetalingsoppdrag
 
-    Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 08.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 2            | 03.2021  | 08.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    |
-      | 2            | 03.2021  | 04.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
-      | 2            | 07.2021  | 08.2021  |             | 700   | ENDR         | Nei        | 2          | 1                  |
-
     Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 08.2021  |             | 700   | NY           | Nei        | 0          |                    |
@@ -210,14 +153,6 @@ Egenskap: Utbetalingsoppdrag: Opphør
       | 3            | 03.2021  | 03.2021  | 700   |
 
     Når beregner utbetalingsoppdrag
-
-    Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 1            | 04.2021  | 08.2021  |             | 700   | NY           | Nei        | 1          | 0                  |
-      | 2            | 04.2021  | 08.2021  | 04.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
-      | 2            | 04.2021  | 05.2021  |             | 700   | ENDR         | Nei        | 2          | 1                  |
-      | 3            | 04.2021  | 05.2021  | 04.2021     | 700   | ENDR         | Ja         | 2          | 1                  |
 
     Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |

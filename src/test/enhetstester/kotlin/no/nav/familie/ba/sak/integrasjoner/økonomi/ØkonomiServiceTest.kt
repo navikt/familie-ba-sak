@@ -12,15 +12,12 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.simulering.KontrollerNyUtbetalingsgeneratorService
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode
-import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
@@ -41,46 +38,13 @@ internal class ØkonomiServiceTest {
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     @MockK
-    private lateinit var kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService
-
-    @MockK
     private lateinit var utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService
-
-    @MockK
-    private lateinit var unleashService: UnleashService
 
     @MockK
     private lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 
     @InjectMockKs
     private lateinit var økonomiService: ØkonomiService
-
-    @Test
-    fun `oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett - skal bruke gammel utbetalingsgenerator når toggel er av`() {
-        setupMocks(toggelPå = false)
-
-        økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
-            lagVedtak(),
-            "123abc",
-            AndelTilkjentYtelseForIverksettingFactory(),
-        )
-
-        verify(exactly = 1) {
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                vedtak = any(),
-                saksbehandlerId = any(),
-                andelTilkjentYtelseForUtbetalingsoppdragFactory = any(),
-            )
-        }
-        verify(exactly = 1) { beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(any(), any()) }
-        verify(exactly = 0) {
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                vedtak = any(),
-                saksbehandlerId = any(),
-                erSimulering = any(),
-            )
-        }
-    }
 
     @Test
     fun `oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett - skal bruke ny utbetalingsgenerator når toggel er på`() {
@@ -92,13 +56,6 @@ internal class ØkonomiServiceTest {
             AndelTilkjentYtelseForIverksettingFactory(),
         )
 
-        verify(exactly = 0) {
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                vedtak = any(),
-                saksbehandlerId = any(),
-                andelTilkjentYtelseForUtbetalingsoppdragFactory = any(),
-            )
-        }
         verify(exactly = 0) { beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(any(), any()) }
         verify(exactly = 1) {
             utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -129,26 +86,7 @@ internal class ØkonomiServiceTest {
                     ),
                 ),
             )
-        every {
-            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-                any(),
-                any(),
-            )
-        } returns emptyList()
-        every {
-            unleashService.isEnabled(
-                toggleId = FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-                properties = any(),
-            )
-        } returns toggelPå
 
-        every {
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                vedtak = any(),
-                saksbehandlerId = any(),
-                andelTilkjentYtelseForUtbetalingsoppdragFactory = any(),
-            )
-        } returns utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
         every {
             utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 vedtak = any(),

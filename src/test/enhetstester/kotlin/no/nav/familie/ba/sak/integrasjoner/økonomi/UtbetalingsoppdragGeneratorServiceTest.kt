@@ -14,18 +14,15 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
-import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -45,12 +42,6 @@ class UtbetalingsoppdragGeneratorServiceTest {
 
     @MockK
     private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
-
-    @MockK
-    private lateinit var beregningService: BeregningService
-
-    @MockK
-    private lateinit var unleashService: UnleashService
 
     @InjectMockKs
     private lateinit var utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
@@ -634,66 +625,6 @@ class UtbetalingsoppdragGeneratorServiceTest {
         )
     }
 
-    @Test
-    fun `genererUtbetalingsoppdrag - skal generere nytt utbetalingsoppdrag men ikke oppdatere andeler med offset når toggel er av`() {
-        val vedtak = lagVedtak()
-        val tilkjentYtelse = lagInitiellTilkjentYtelse(vedtak.behandling)
-        val person = tilfeldigPerson()
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(
-            mutableSetOf(
-                lagAndelTilkjentYtelse(
-                    id = 1,
-                    fom = YearMonth.of(2023, 1),
-                    tom = YearMonth.of(2023, 3),
-                    beløp = 250,
-                    person = person,
-                ),
-                lagAndelTilkjentYtelse(
-                    id = 2,
-                    fom = YearMonth.of(2023, 4),
-                    tom = YearMonth.of(2023, 5),
-                    beløp = 350,
-                    person = person,
-                ),
-                lagAndelTilkjentYtelse(
-                    id = 3,
-                    fom = YearMonth.of(2023, 6),
-                    tom = YearMonth.of(2023, 8),
-                    beløp = 250,
-                    person = person,
-                ),
-            ),
-        )
-        val tilkjentYtelseSlot = slot<TilkjentYtelse>()
-        setUpMocks(
-            behandling = vedtak.behandling,
-            tilkjentYtelse = tilkjentYtelse,
-            tilkjentYtelseSlot = tilkjentYtelseSlot,
-            brukNyUtbetalingsgeneratorToggleErPå = false,
-        )
-
-        val beregnetUtbetalingsoppdrag =
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                vedtak = vedtak,
-                "abc123",
-            )
-
-        verify(exactly = 0) { tilkjentYtelseRepository.save(any()) }
-
-        validerBeregnetUtbetalingsoppdragOgAndeler(
-            beregnetUtbetalingsoppdrag = beregnetUtbetalingsoppdrag,
-            andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse,
-            forventetAntallAndeler = 3,
-            forventetAntallUtbetalingsperioder = 3,
-            forventedeOffsets =
-                listOf(
-                    Pair(null, null),
-                    Pair(null, null),
-                    Pair(null, null),
-                ),
-        )
-    }
-
     private fun validerBeregnetUtbetalingsoppdragOgAndeler(
         beregnetUtbetalingsoppdrag: BeregnetUtbetalingsoppdragLongId,
         andelerTilkjentYtelse: Set<AndelTilkjentYtelse>,
@@ -739,7 +670,6 @@ class UtbetalingsoppdragGeneratorServiceTest {
         behandling: Behandling,
         tilkjentYtelse: TilkjentYtelse,
         tilkjentYtelseSlot: CapturingSlot<TilkjentYtelse>,
-        brukNyUtbetalingsgeneratorToggleErPå: Boolean = true,
         forrigeTilkjentYtelse: TilkjentYtelse? = null,
         migreringsdato: LocalDate? = null,
     ) {
@@ -762,13 +692,6 @@ class UtbetalingsoppdragGeneratorServiceTest {
         every { behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id) } returns listOf(behandling)
 
         every { behandlingService.hentMigreringsdatoPåFagsak(behandling.fagsak.id) } returns migreringsdato
-
-        every {
-            unleashService.isEnabled(
-                toggleId = FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-                properties = any(),
-            )
-        } returns brukNyUtbetalingsgeneratorToggleErPå
 
         every { tilkjentYtelseRepository.save(capture(tilkjentYtelseSlot)) } returns mockk()
     }
