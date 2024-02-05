@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.mapInnhold
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFramtid
@@ -41,6 +42,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -220,13 +222,24 @@ private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
 
         val avslagsbegrunnelserTisdlinje =
             vilkårResultaterForPerson
-                .filter { it.erEksplisittAvslagPåSøknad == true }
                 .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
+                .filtrerKunEksplisittAvslagsPerioder()
                 .kombiner { vilkårResultaterIPeriode -> vilkårResultaterIPeriode.flatMap { it.standardbegrunnelser } }
 
         tidslinjeMedVedtaksperioden.kombinerMed(avslagsbegrunnelserTisdlinje) { vedtaksperiode, avslagsbegrunnelser ->
             avslagsbegrunnelser.takeIf { vedtaksperiode != null }
         }.perioder().mapNotNull { it.innhold }.flatten().toSet()
+    }
+}
+
+private fun List<Tidslinje<VilkårResultat, Måned>>.filtrerKunEksplisittAvslagsPerioder(): List<Tidslinje<VilkårResultat, Måned>> {
+    return this.map { tidslinjeForVilkår ->
+        val eksplisittAvslagsPerioder =
+            tidslinjeForVilkår
+                .perioder()
+                .filter { it.innhold?.erEksplisittAvslagPåSøknad == true }
+
+        tidslinje { eksplisittAvslagsPerioder }
     }
 }
 
