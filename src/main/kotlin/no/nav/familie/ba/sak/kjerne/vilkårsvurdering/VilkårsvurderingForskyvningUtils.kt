@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -135,7 +136,7 @@ object VilkårsvurderingForskyvningUtils {
     private fun VilkårResultat?.erEksplisittAvslagInnenforSammeMåned(): Boolean {
         return this?.erEksplisittAvslagPåSøknad == true &&
             this.periodeFom != null &&
-            this.periodeFom!!.month == this.periodeTom?.month
+            this.periodeFom!!.toYearMonth() == this.periodeTom?.toYearMonth()
     }
 
     private fun Tidslinje<VilkårResultat, Måned>.beskjærPå18ÅrHvisUnder18ÅrVilkår(

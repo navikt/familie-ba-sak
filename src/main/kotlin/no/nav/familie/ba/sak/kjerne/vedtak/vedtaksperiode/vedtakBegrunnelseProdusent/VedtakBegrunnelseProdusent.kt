@@ -220,13 +220,27 @@ private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
             behandlingsGrunnlagForVedtaksperioder
                 .personResultater.firstOrNull { it.aktør == person.aktør }?.vilkårResultater ?: emptyList()
 
-        val avslagsbegrunnelserTisdlinje =
-            vilkårResultaterForPerson
+        val (generelleAvslag, vilkårResultaterUtenGenerelleAvslag) =
+            vilkårResultaterForPerson.partition {
+                it.erEksplisittAvslagPåSøknad == true &&
+                    it.periodeFom == null &&
+                    it.periodeTom == null
+            }
+
+        val generelleAvslagsBegrunnelser =
+            generelleAvslag
+                .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
+
+        val ikkeGenerelleAvslagsbegrunnelserTidslinjer =
+            vilkårResultaterUtenGenerelleAvslag
                 .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
                 .filtrerKunEksplisittAvslagsPerioder()
+
+        val avslagsBegrunnelserTidslinje =
+            (generelleAvslagsBegrunnelser + ikkeGenerelleAvslagsbegrunnelserTidslinjer)
                 .kombiner { vilkårResultaterIPeriode -> vilkårResultaterIPeriode.flatMap { it.standardbegrunnelser } }
 
-        tidslinjeMedVedtaksperioden.kombinerMed(avslagsbegrunnelserTisdlinje) { vedtaksperiode, avslagsbegrunnelser ->
+        tidslinjeMedVedtaksperioden.kombinerMed(avslagsBegrunnelserTidslinje) { vedtaksperiode, avslagsbegrunnelser ->
             avslagsbegrunnelser.takeIf { vedtaksperiode != null }
         }.perioder().mapNotNull { it.innhold }.flatten().toSet()
     }
