@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -31,6 +32,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
 
     @BeforeEach
     fun førHverTest() {
+        clearAllMocks()
         mockkObject(SatsTidspunkt)
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
     }

@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling.behandlingstema
 
+import io.mockk.MockK
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.defaultFagsak
@@ -56,6 +58,9 @@ class BehandlingstemaServiceTest {
 
     @BeforeAll
     fun init() {
+        clearAllMocks()
+
+        MockK.useImpl { }
         every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(defaultFagsak.id) } returns defaultBehandling
     }
 
