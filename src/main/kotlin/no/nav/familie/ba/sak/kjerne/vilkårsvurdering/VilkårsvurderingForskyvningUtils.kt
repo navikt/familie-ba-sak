@@ -127,7 +127,6 @@ object VilkårsvurderingForskyvningUtils {
                     innholdSisteDagForrigeMåned
                 } else {
                     null
-                    
                 }
             }
     }
