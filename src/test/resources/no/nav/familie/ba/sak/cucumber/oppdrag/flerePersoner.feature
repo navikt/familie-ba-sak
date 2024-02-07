@@ -13,7 +13,7 @@ Egenskap: Utbetalingsoppdrag: Vedtak med flere identer
 
     Når beregner utbetalingsoppdrag
 
-    Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
+    Så forvent følgende utbetalingsoppdrag
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    | 1               |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 1          |                    | 1               |
@@ -32,7 +32,7 @@ Egenskap: Utbetalingsoppdrag: Vedtak med flere identer
 
     Når beregner utbetalingsoppdrag
 
-    Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
+    Så forvent følgende utbetalingsoppdrag
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    | 1               |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 1          |                    | 1               |
