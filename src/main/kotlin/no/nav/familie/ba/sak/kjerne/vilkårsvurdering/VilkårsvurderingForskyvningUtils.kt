@@ -122,13 +122,12 @@ object VilkårsvurderingForskyvningUtils {
                         !innholdSisteDagForrigeMåned.erOppfylt() -> innholdSisteDagForrigeMåned
                         else -> innholdFørsteDagDenneMåned
                     }
+                } else if (innholdFørsteDagDenneMåned == null && innholdSisteDagForrigeMåned.erEksplisittAvslagInnenforSammeMåned()
+                ) {
+                    innholdSisteDagForrigeMåned
                 } else {
-                    if (innholdFørsteDagDenneMåned == null && innholdSisteDagForrigeMåned.erEksplisittAvslagInnenforSammeMåned()
-                    ) {
-                        innholdSisteDagForrigeMåned
-                    } else {
-                        null
-                    }
+                    null
+                    
                 }
             }
     }
