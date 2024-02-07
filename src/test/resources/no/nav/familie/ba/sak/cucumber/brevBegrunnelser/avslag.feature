@@ -236,3 +236,55 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
     Så forvent følgende brevbegrunnelser for behandling 1 i periode - til -
       | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Beløp |
       | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Ja            | 07.08.20             | 1           | 0     |
+
+  Scenario: Skal ta med alle barna i begrunnelse når det er avslag på søker
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | AVSLÅTT             | SØKNAD           | Nei                       | NASJONAL            |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
+      | 1            | 1       | SØKER      | 30.01.1984  |              |
+      | 1            | 2       | BARN       | 16.02.2013  |              |
+      | 1            | 3       | BARN       | 02.08.2016  |              |
+
+    Og følgende dagens dato 01.02.2024
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser                              | Vurderes etter   |
+      | 1       | LOVLIG_OPPHOLD               |                  | 25.09.2023 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | NASJONALE_REGLER |
+      | 1       | BOSATT_I_RIKET               |                  | 25.09.2023 |            | OPPFYLT      | Nei                  |                                                   | NASJONALE_REGLER |
+
+      | 2       | UNDER_18_ÅR                  |                  | 16.02.2013 | 15.02.2031 | OPPFYLT      | Nei                  |                                                   |                  |
+      | 2       | GIFT_PARTNERSKAP             |                  | 16.02.2013 |            | OPPFYLT      | Nei                  |                                                   |                  |
+      | 2       | BOSATT_I_RIKET,BOR_MED_SØKER |                  | 02.11.2023 |            | OPPFYLT      | Nei                  |                                                   | NASJONALE_REGLER |
+      | 2       | LOVLIG_OPPHOLD               |                  | 02.11.2023 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | NASJONALE_REGLER |
+
+      | 3       | GIFT_PARTNERSKAP             |                  | 02.08.2016 |            | OPPFYLT      | Nei                  |                                                   |                  |
+      | 3       | UNDER_18_ÅR                  |                  | 02.08.2016 | 01.08.2034 | OPPFYLT      | Nei                  |                                                   |                  |
+      | 3       | BOSATT_I_RIKET               |                  | 23.09.2023 |            | OPPFYLT      | Nei                  |                                                   | NASJONALE_REGLER |
+      | 3       | BOR_MED_SØKER                |                  | 02.11.2023 |            | OPPFYLT      | Nei                  |                                                   | NASJONALE_REGLER |
+      | 3       | LOVLIG_OPPHOLD               |                  | 02.11.2023 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | NASJONALE_REGLER |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
+
+    Når vedtaksperiodene genereres for behandling 1
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                                                                                 | Ugyldige begrunnelser |
+      | 01.10.2023 |          | AVSLAG             |                                | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER, AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                       |
+      | 01.12.2023 |          | AVSLAG             |                                | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER, AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                       |
+
+    Og når disse begrunnelsene er valgt for behandling 1
+      | Fra dato   | Til dato | Standardbegrunnelser                                                                                 | Eøsbegrunnelser | Fritekster |
+      | 01.10.2023 |          | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER, AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                 |            |
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.10.2023 til -
+      | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
+      | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Ja            | 16.02.13 og 02.08.16 | 2           | september 2023                       | NB      | 0     |                  |                         |                             |

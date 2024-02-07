@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -36,10 +37,12 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
@@ -47,6 +50,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import kotlin.random.Random
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EndretUtbetalingAndelValideringTest {
     val søker = lagPerson(type = PersonType.SØKER)
     val barn = lagPerson(type = PersonType.BARN)
@@ -54,6 +58,11 @@ class EndretUtbetalingAndelValideringTest {
         endretUtbetalingAndel(søker, YtelseType.UTVIDET_BARNETRYGD, BigDecimal.ZERO)
     val endretUtbetalingAndelDeltBostedNullutbetaling =
         endretUtbetalingAndel(barn, YtelseType.ORDINÆR_BARNETRYGD, BigDecimal.ZERO)
+
+    @AfterAll
+    fun clearMocks() {
+        clearAllMocks()
+    }
 
     @Test
     fun `skal sjekke at en endret periode ikke overlapper med eksisterende endringsperioder`() {
