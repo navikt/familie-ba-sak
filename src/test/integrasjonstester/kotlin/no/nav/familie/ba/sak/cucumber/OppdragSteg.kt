@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningTestUtil.sisteAndelPerIdent
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningTestUtil.sisteAndelPerIdentNy
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
@@ -34,8 +33,8 @@ class OppdragSteg {
     private var behandlinger = mapOf<Long, Behandling>()
     private var tilkjenteYtelser = listOf<TilkjentYtelse>()
     private var tilkjenteYtelserNy = listOf<TilkjentYtelse>()
-    private var beregnetUtbetalingsoppdragNy = mutableMapOf<Long, BeregnetUtbetalingsoppdragLongId>()
-    private var beregnetUtbetalingsoppdragSimuleringNy = mutableMapOf<Long, BeregnetUtbetalingsoppdragLongId>()
+    private var beregnetUtbetalingsoppdrag = mutableMapOf<Long, BeregnetUtbetalingsoppdragLongId>()
+    private var beregnetUtbetalingsoppdragSimulering = mutableMapOf<Long, BeregnetUtbetalingsoppdragLongId>()
     private var endretMigreringsdatoMap = mutableMapOf<Long, YearMonth>()
     private var kastedeFeil = mutableMapOf<Long, Exception>()
 
@@ -67,9 +66,9 @@ class OppdragSteg {
             val behandlingId = tilkjentYtelse.behandling.id
             try {
                 genererUtbetalingsoppdragForSimuleringNy(behandlingId, acc, tilkjentYtelse)
-                beregnetUtbetalingsoppdragNy[behandlingId] = beregnUtbetalingsoppdragNy(acc, tilkjentYtelse)
+                beregnetUtbetalingsoppdrag[behandlingId] = beregnUtbetalingsoppdragNy(acc, tilkjentYtelse)
                 oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
-                    beregnetUtbetalingsoppdragNy[behandlingId]!!,
+                    beregnetUtbetalingsoppdrag[behandlingId]!!,
                     tilkjentYtelse,
                 )
             } catch (e: Exception) {
@@ -86,7 +85,7 @@ class OppdragSteg {
         tilkjentYtelse: TilkjentYtelse,
     ) {
         try {
-            beregnetUtbetalingsoppdragSimuleringNy[behandlingId] =
+            beregnetUtbetalingsoppdragSimulering[behandlingId] =
                 beregnUtbetalingsoppdragNy(tilkjenteYtelser, tilkjentYtelse, erSimulering = true)
         } catch (e: Exception) {
             logger.error("Feilet beregning av oppdrag ved simulering for behandling=$behandlingId")
@@ -134,30 +133,30 @@ class OppdragSteg {
         assertThat(kastedeFeil[behandlingId]).isNotNull
     }
 
-    @Så("forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator")
-    fun `forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator`(dataTable: DataTable) {
+    @Så("forvent følgende utbetalingsoppdrag")
+    fun `forvent følgende utbetalingsoppdrag`(dataTable: DataTable) {
         validerForventetUtbetalingsoppdrag(
             dataTable,
-            beregnetUtbetalingsoppdragNy.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+            beregnetUtbetalingsoppdrag.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
                 .toMutableMap(),
         )
         assertSjekkBehandlingIder(
             dataTable,
-            beregnetUtbetalingsoppdragNy.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+            beregnetUtbetalingsoppdrag.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
                 .toMutableMap(),
         )
     }
 
-    @Så("forvent følgende simulering med ny utbetalingsgenerator")
-    fun `forvent følgende simulering med ny utbetalingsgenerator`(dataTable: DataTable) {
+    @Så("forvent følgende simulering")
+    fun `forvent følgende simulering`(dataTable: DataTable) {
         validerForventetUtbetalingsoppdrag(
             dataTable,
-            beregnetUtbetalingsoppdragSimuleringNy.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+            beregnetUtbetalingsoppdragSimulering.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
                 .toMutableMap(),
         )
         assertSjekkBehandlingIder(
             dataTable,
-            beregnetUtbetalingsoppdragSimuleringNy.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+            beregnetUtbetalingsoppdragSimulering.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
                 .toMutableMap(),
         )
     }
