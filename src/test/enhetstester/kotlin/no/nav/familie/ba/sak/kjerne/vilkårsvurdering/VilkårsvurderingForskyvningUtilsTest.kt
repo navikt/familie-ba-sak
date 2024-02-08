@@ -277,6 +277,118 @@ class VilkårsvurderingForskyvningUtilsTest {
     }
 
     @Test
+    fun `skal forskyve eksplisitt avslag når avslaget starter og opphører innenfor samme måned`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
+
+        val vilkårResultat =
+            listOf(
+                lagVilkårResultat(
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = LocalDate.of(2023, 1, 16),
+                    periodeTom = LocalDate.of(2023, 1, 31),
+                    erEksplisittAvslagPåSøknad = true,
+                ),
+            )
+
+        val forskjøvedeVilkår =
+            vilkårResultat.tilForskjøvetTidslinje(
+                vilkår = Vilkår.BOSATT_I_RIKET,
+                fødselsdato = barn.fødselsdato,
+            ).perioder()
+
+        Assertions.assertEquals(1, forskjøvedeVilkår.size)
+
+        val periode = forskjøvedeVilkår.single()
+        Assertions.assertEquals(YearMonth.of(2023, 2), periode.fraOgMed.tilYearMonth())
+        Assertions.assertEquals(YearMonth.of(2023, 2), periode.tilOgMed.tilYearMonth())
+    }
+
+    @Test
+    fun `skal forskyve eksplisitt avslag når avslaget blir etterfulgt av en innvilget periode`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
+
+        val vilkårResultat =
+            listOf(
+                lagVilkårResultat(
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = LocalDate.of(2023, 1, 16),
+                    periodeTom = LocalDate.of(2023, 2, 28),
+                    erEksplisittAvslagPåSøknad = true,
+                ),
+                lagVilkårResultat(
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = LocalDate.of(2023, 3, 1),
+                    periodeTom = LocalDate.of(2023, 5, 31),
+                ),
+            )
+
+        val forskjøvedeVilkår =
+            vilkårResultat.tilForskjøvetTidslinje(
+                vilkår = Vilkår.BOSATT_I_RIKET,
+                fødselsdato = barn.fødselsdato,
+            ).perioder()
+
+        Assertions.assertEquals(2, forskjøvedeVilkår.size)
+
+        val periode = forskjøvedeVilkår.single { it.innhold?.erEksplisittAvslagPåSøknad == true }
+        Assertions.assertEquals(YearMonth.of(2023, 2), periode.fraOgMed.tilYearMonth())
+        Assertions.assertEquals(YearMonth.of(2023, 3), periode.tilOgMed.tilYearMonth())
+    }
+
+    @Test
+    fun `skal ikke forskyve eksplisitt avslag når avslaget ikke opphører innenfor samme måned`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
+
+        val vilkårResultat =
+            listOf(
+                lagVilkårResultat(
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = LocalDate.of(2023, 1, 16),
+                    periodeTom = LocalDate.of(2023, 2, 28),
+                    erEksplisittAvslagPåSøknad = true,
+                ),
+            )
+
+        val forskjøvedeVilkår =
+            vilkårResultat.tilForskjøvetTidslinje(
+                vilkår = Vilkår.BOSATT_I_RIKET,
+                fødselsdato = barn.fødselsdato,
+            ).perioder()
+
+        Assertions.assertEquals(1, forskjøvedeVilkår.size)
+        val periode = forskjøvedeVilkår.single()
+        Assertions.assertEquals(YearMonth.of(2023, 2), periode.fraOgMed.tilYearMonth())
+        Assertions.assertEquals(YearMonth.of(2023, 2), periode.tilOgMed.tilYearMonth())
+    }
+
+    @Test
+    fun `skal ikke forskyve opphørsperioder som starter og slutter innenfor samme måned`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
+
+        val vilkårResultat =
+            listOf(
+                lagVilkårResultat(
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = LocalDate.of(2023, 1, 16),
+                    periodeTom = LocalDate.of(2023, 1, 31),
+                ),
+            )
+
+        val forskjøvedeVilkår =
+            vilkårResultat.tilForskjøvetTidslinje(
+                vilkår = Vilkår.BOSATT_I_RIKET,
+                fødselsdato = barn.fødselsdato,
+            ).perioder()
+
+        Assertions.assertEquals(0, forskjøvedeVilkår.size)
+    }
+
+    @Test
     fun `Skal kutte UNDER_18 tidslinjen måneden før 18-årsdag`() {
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
