@@ -43,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvni
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -228,8 +229,9 @@ private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
             }
 
         val generelleAvslagsBegrunnelser =
-            generelleAvslag
-                .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
+            generelleAvslag.groupBy { it.vilkårType }.mapNotNull { (_, vilkårResultater) ->
+                listOf(månedPeriodeAv(null, null, vilkårResultater.single())).tilTidslinje()
+            }
 
         val ikkeGenerelleAvslagsbegrunnelserTidslinjer =
             vilkårResultaterUtenGenerelleAvslag
