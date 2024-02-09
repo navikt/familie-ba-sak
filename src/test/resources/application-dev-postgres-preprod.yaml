@@ -122,15 +122,6 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
-      familie-statistikk-clientcredentials:
-        resource-url: ${FAMILIE_STATISTIKK_URL}
-        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
-        grant-type: client_credentials
-        scope: api://dev-fss.teamfamilie.familie-ba-statistikk/.default
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
 
 prosessering.fixedDelayString.in.milliseconds: 15000
 prosessering.rolle: "928636f4-fd0d-4149-978e-a6fb68bb19de" # 0000-GA-STDAPPS
@@ -185,8 +176,6 @@ FAMILIE_KLAGE_URL: https://familie-klage-backend.intern.dev.nav.no
 FAMILIE_BA_SAK_API_URL: http://localhost:8086/api
 FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.dev.intern.nav.no
 FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd/.default
-FAMILIE_STATISTIKK_URL: https://familie-ba-statistikk.dev.intern.nav.no
-
 FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.intern.dev.nav.no
 FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.intern.dev,nav.no
