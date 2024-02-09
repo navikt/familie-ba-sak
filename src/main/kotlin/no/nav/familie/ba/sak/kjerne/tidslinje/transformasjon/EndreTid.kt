@@ -69,6 +69,32 @@ fun <I, R> Tidslinje<I, Dag>.tilMånedFraMånedsskifteIkkeNull(
 }
 
 /**
+ * Extention-metode som konverterer en dag-basert tidslinje til en måned-basert tidslinje.
+ * <mapper>-funksjonen tar inn verdiene fra de to dagene før og etter månedsskiftet,
+ * det vil si verdiene fra siste dag i forrige måned og første dag i inneværemde måned.
+ * Return-verdien er innholdet som blir brukt for inneværende måned.
+ * Hvis retur-verdien er <null>, vil den resulterende måneden mangle verdi.
+ * Funksjonen vil bruke månedsskiftene fra måneden før tidslinjens <fraOgMed> frem til og med måneden etter <tilOgMed>
+ */
+fun <I, R> Tidslinje<I, Dag>.tilMånedFraMånedsskifte(
+    mapper: (innholdSisteDagForrigeMåned: I?, innholdFørsteDagDenneMåned: I?) -> R?,
+): Tidslinje<R, Måned> {
+    val fraOgMed = fraOgMed()
+    val tilOgMed = tilOgMed()
+
+    return if (fraOgMed == null || tilOgMed == null) {
+        TomTidslinje()
+    } else {
+        (fraOgMed.tilForrigeMåned()..tilOgMed.tilNesteMåned()).tidslinjeFraTidspunkt { måned ->
+            val innholdSisteDagForrigeMåned = innholdForTidspunkt(måned.forrige().tilSisteDagIMåneden())
+            val innholdFørsteDagDenneMåned = innholdForTidspunkt(måned.tilFørsteDagIMåneden())
+
+            mapper(innholdSisteDagForrigeMåned.innhold, innholdFørsteDagDenneMåned.innhold).tilVerdi()
+        }
+    }
+}
+
+/**
  * Extension-metode for å konvertere fra Måned-tidslinje til Dag-tidslinje
  * Første dag i fra-og-med-måneden brukes som første dag i perioden
  * Siste dag i til-og-med-måneden brukes som siste dag i perioden
