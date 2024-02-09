@@ -19,7 +19,7 @@ spec:
       application: familie-ba-sak #owner
       access: write   # readwrite
     - team: teamfamilie
-      application: familie-ba-kafka-manager
+      application: familie-baks-kafka-manager
       access: read
     - team: ptsak
       application: pt-sak-barnetrygd
