@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import io.mockk.clearAllMocks
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -807,16 +805,12 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal kaste feil dersom endringsårsak er 'Allerede utbetalt' men tom dato er satt til etter inneværende måned`() {
-        val innværendeMåned = YearMonth.of(2022, 5)
-        mockkStatic(YearMonth::class)
-        every { YearMonth.now() } returns innværendeMåned
-
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
                 person = tilfeldigPerson(),
-                fom = YearMonth.of(2022, 2),
-                tom = YearMonth.of(2022, 6),
+                fom = YearMonth.now().minusMonths(3),
+                tom = YearMonth.now().plusMonths(1),
                 årsak = Årsak.ALLEREDE_UTBETALT,
                 begrunnelse = "begrunnelse",
                 prosent = BigDecimal(100),
@@ -840,17 +834,12 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal kaste ikke feil dersom endringsårsak er 'Allerede utbetalt' og tom dato er satt til å være lik eller før inneværende måned`() {
-        val innværendeMåned = YearMonth.of(2022, 6)
-
-        mockkStatic(YearMonth::class)
-        every { YearMonth.now() } returns innværendeMåned
-
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
                 person = tilfeldigPerson(),
-                fom = YearMonth.of(2022, 2),
-                tom = YearMonth.of(2022, 6),
+                fom = YearMonth.now().minusMonths(4),
+                tom = YearMonth.now(),
                 årsak = Årsak.ALLEREDE_UTBETALT,
                 begrunnelse = "begrunnelse",
                 prosent = BigDecimal(100),
