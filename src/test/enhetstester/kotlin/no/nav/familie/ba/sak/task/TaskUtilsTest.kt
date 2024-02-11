@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import io.mockk.clearAllMocks
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance
@@ -40,11 +38,8 @@ class TaskUtilsTest {
         expected: LocalDateTime,
         kommentar: String,
     ) {
-        mockkStatic(LocalDateTime::class)
         mockk<Environment>(relaxed = true)
 
-        every { LocalDateTime.now() } returns input
-
-        assertEquals(expected, nesteGyldigeTriggertidForBehandlingIHverdager(60))
+        assertEquals(expected, nesteGyldigeTriggertidForBehandlingIHverdager(60, input))
     }
 }

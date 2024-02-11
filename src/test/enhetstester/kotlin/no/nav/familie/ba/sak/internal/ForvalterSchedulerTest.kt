@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.internal
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -25,8 +24,6 @@ class ForvalterSchedulerTest {
 
     @BeforeEach
     fun initTest() {
-        mockkStatic(YearMonth::class)
-        every { YearMonth.now() }.returns(YearMonth.of(2022, 5))
         every { envService.erDev() } returns true
         every { taskRepository.save(capture(slot)) } returns Task(type = FinnSakerMedFlereMigreringsbehandlingerTask.TASK_STEP_TYPE, payload = "")
     }
@@ -40,7 +37,7 @@ class ForvalterSchedulerTest {
     fun `Skal opprette task av type finnSakerMedFlereMigreringsbehandlinger`() {
         service.opprettFinnSakerMedFlereMigreringsbehandlingerTask()
 
-        assertThat(slot.captured.payload).isEqualTo("2022-04")
+        assertThat(slot.captured.payload).isEqualTo(YearMonth.now().minusMonths(1).toString())
         assertThat(slot.captured.type).isEqualTo("finnSakerMedFlereMigreringsbehandlinger")
     }
 }
