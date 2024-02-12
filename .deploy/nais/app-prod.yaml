@@ -75,8 +75,6 @@ spec:
           cluster: prod-gcp
         - application: familie-klage
           cluster: prod-gcp
-        - application: familie-ba-statistikk
-          cluster: prod-fss
         - application: bidrag-grunnlag-feature
           namespace: bidrag
           cluster: prod-gcp
@@ -110,7 +108,6 @@ spec:
         - host: pdl-api.prod-fss-pub.nais.io
         - host: familie-integrasjoner.prod-fss-pub.nais.io
         - host: familie-oppdrag.prod-fss-pub.nais.io
-        - host: familie-ba-statistikk.prod-fss-pub.nais.io
         - host: familie-ba-infotrygd.prod-fss-pub.nais.io
         - host: familie-ba-infotrygd-feed.prod-fss-pub.nais.io
         - host: sdw-wsrest.ecb.europa.eu
