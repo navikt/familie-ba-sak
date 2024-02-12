@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.config
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.guttenBarnesenFødselsdato
@@ -39,7 +38,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
-import no.nav.familie.leader.LeaderClient
 import no.nav.familie.unleash.UnleashService
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -640,15 +638,6 @@ class ClientMocks {
                         adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
                     ),
             )
-    }
-
-    @Bean
-    @Profile("mock-leader-client")
-    @Primary
-    fun mockLeaderClient(): LeaderClient {
-        mockkStatic(LeaderClient::class)
-        every { LeaderClient.isLeader() } returns true
-        return LeaderClient
     }
 }
 

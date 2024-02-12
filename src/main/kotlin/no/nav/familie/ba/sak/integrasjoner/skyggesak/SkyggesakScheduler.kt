@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.integrasjoner.skyggesak
 
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.leader.LeaderClient
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -19,17 +19,18 @@ class SkyggesakScheduler(
     val skyggesakRepository: SkyggesakRepository,
     val fagsakRepository: FagsakRepository,
     val integrasjonClient: IntegrasjonClient,
+    val leaderClientService: LeaderClientService,
 ) {
     @Scheduled(fixedDelay = 60000)
     fun opprettSkyggesaker() {
-        if (LeaderClient.isLeader() == true) {
+        if (leaderClientService.isLeader() == true) {
             sendSkyggesaker()
         }
     }
 
     @Scheduled(cron = "0 0 6 * * *")
     fun ryddOppISendteSkyggesaker() {
-        if (LeaderClient.isLeader() == true) {
+        if (leaderClientService.isLeader() == true) {
             fjernGamleSkyggesakInnslag()
         }
     }

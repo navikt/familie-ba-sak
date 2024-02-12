@@ -4,9 +4,9 @@ import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.MultiGauge
 import io.micrometer.core.instrument.Tags
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -18,6 +18,7 @@ import java.time.YearMonth
 class TeamStatistikkService(
     private val behandlingRepository: BehandlingRepository,
     private val fagsakRepository: FagsakRepository,
+    private val leaderClientService: LeaderClientService,
 ) {
     val utbetalingerPerMånedGauge =
         MultiGauge.builder("UtbetalingerPerMaanedGauge").register(Metrics.globalRegistry)
@@ -179,7 +180,7 @@ class TeamStatistikkService(
     }
 
     private fun erLeader(): Boolean {
-        return LeaderClient.isLeader() == true
+        return leaderClientService.isLeader() == true
     }
 
     companion object {

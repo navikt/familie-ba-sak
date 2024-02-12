@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.config.MockLeaderClientService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.junit.jupiter.api.Assertions
@@ -28,11 +29,20 @@ class SkyggesakSchedulerTest {
     @Autowired
     lateinit var skyggesakRepository: SkyggesakRepository
 
+    @Autowired
+    lateinit var mockLeaderClientService: MockLeaderClientService
+
     lateinit var skyggesakScheduler: SkyggesakScheduler
 
     @BeforeEach
     fun init() {
-        skyggesakScheduler = SkyggesakScheduler(skyggesakRepository, mockk(), mockk(relaxed = true))
+        skyggesakScheduler =
+            SkyggesakScheduler(
+                skyggesakRepository = skyggesakRepository,
+                fagsakRepository = mockk(),
+                integrasjonClient = mockk(relaxed = true),
+                leaderClientService = mockLeaderClientService,
+            )
         skyggesakRepository.deleteAll()
     }
 
