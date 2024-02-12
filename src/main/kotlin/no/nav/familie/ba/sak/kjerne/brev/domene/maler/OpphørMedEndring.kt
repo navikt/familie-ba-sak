@@ -36,7 +36,7 @@ data class OpphørMedEndring(
                             refusjonEosAvklart = refusjonEosAvklart,
                             refusjonEosUavklart = refusjonEosUavklart,
                             klage = erKlage,
-                            ),
+                        ),
                     flettefelter =
                         FlettefelterForDokumentImpl(
                             gjelder = flettefelt(vedtakFellesfelter.gjelder),
@@ -63,6 +63,6 @@ data class OpphørMedEndringData(
         val korrigertVedtak: KorrigertVedtakData?,
         val refusjonEosAvklart: RefusjonEøsAvklart?,
         val refusjonEosUavklart: RefusjonEøsUavklart?,
-        val klage: Boolean
+        val klage: Boolean,
     )
 }
