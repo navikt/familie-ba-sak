@@ -157,7 +157,8 @@ class BrevService(
                     erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
                     refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
                     refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
-                )
+                    erKlage = behandling.erKlage(),
+                    )
 
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON ->
                 OpphørMedEndring(
@@ -165,7 +166,8 @@ class BrevService(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
                     erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
-                )
+                    erKlage = behandling.erKlage(),
+                    )
 
             Brevmal.VEDTAK_AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
             Brevmal.VEDTAK_AVSLAG_INSTITUSJON ->
