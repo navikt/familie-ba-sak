@@ -14,6 +14,7 @@ data class OpphørMedEndring(
         etterbetalingInstitusjon: EtterbetalingInstitusjon? = null,
         refusjonEosAvklart: RefusjonEøsAvklart? = null,
         refusjonEosUavklart: RefusjonEøsUavklart? = null,
+        erKlage: Boolean,
     ) :
         this(
             mal = mal,
@@ -34,6 +35,7 @@ data class OpphørMedEndring(
                             korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
                             refusjonEosAvklart = refusjonEosAvklart,
                             refusjonEosUavklart = refusjonEosUavklart,
+                            klage = erKlage,
                         ),
                     flettefelter =
                         FlettefelterForDokumentImpl(
@@ -61,5 +63,6 @@ data class OpphørMedEndringData(
         val korrigertVedtak: KorrigertVedtakData?,
         val refusjonEosAvklart: RefusjonEøsAvklart?,
         val refusjonEosUavklart: RefusjonEøsUavklart?,
+        val klage: Boolean,
     )
 }
