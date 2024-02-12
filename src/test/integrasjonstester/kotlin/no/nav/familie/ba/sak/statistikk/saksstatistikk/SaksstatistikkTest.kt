@@ -31,7 +31,9 @@ import org.junit.jupiter.api.Test
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.test.context.ActiveProfiles
 
+@ActiveProfiles("mock-leader-client")
 class SaksstatistikkTest(
     @Autowired
     private val fagsakService: FagsakService,

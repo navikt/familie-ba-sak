@@ -23,7 +23,7 @@ import java.time.LocalDateTime
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "integrasjonstest")
+@ActiveProfiles("postgres", "integrasjonstest", "mock-leader-client")
 @Tag("integration")
 class SkyggesakSchedulerTest {
     @Autowired
