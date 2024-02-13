@@ -258,8 +258,6 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     val barnMedUtbetaling =
         hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
     val uregistrerteBarnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn
-    val barnMedEksplisitteAvslag =
-        begrunnelsesGrunnlagPerPerson.hentPersonerMedAvslagIPeriode().filter { it.type == PersonType.BARN }
 
     val barnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
 
@@ -283,7 +281,6 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                         } else {
                             barnMedUtbetalingIForrigeperiode +
                                 barnMedOppfylteVilkår +
-                                barnMedEksplisitteAvslag +
                                 barnMistetUtbetalingFraForrigeBehandling
                         }.toSet()
 
