@@ -298,3 +298,75 @@ Egenskap: Brevbegrunnelser ved opphør
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.02.2022 til -
       | Begrunnelse                          | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | OPPHØR_VURDERING_IKKE_BOSATT_I_NORGE | STANDARD | Ja            | 25.12.18             | 0           | januar 2022                          | NB      | 0     |
+
+  Scenario: Skal ikke flette inn barn med eksplisitt avslag i opphørstekst
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | FORTSATT_INNVILGET  | SATSENDRING      | Ja                        | NASJONAL            |
+      | 2            | 1        | 1                   | AVSLÅTT_OG_OPPHØRT  | SØKNAD           | Nei                       | NASJONAL            |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
+      | 1            | 1       | SØKER      | 09.05.1995  |              |
+      | 1            | 3       | BARN       | 08.12.2023  |              |
+      | 2            | 1       | SØKER      | 09.05.1995  |              |
+      | 2            | 2       | BARN       | 06.06.2017  |              |
+      | 2            | 3       | BARN       | 08.12.2023  |              |
+
+    Og følgende dagens dato 12.02.2024
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET                              |                  | 29.03.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 1       | LOVLIG_OPPHOLD                              |                  | 08.12.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+      | 3       | UNDER_18_ÅR                                 |                  | 08.12.2023 | 07.12.2041 | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | GIFT_PARTNERSKAP                            |                  | 08.12.2023 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 08.12.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser                              | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET               |                  | 29.03.2023 |            | OPPFYLT      | Nei                  |                                                   | NASJONALE_REGLER |
+      | 1       | LOVLIG_OPPHOLD               |                  | 01.12.2023 |            | IKKE_OPPFYLT | Nei                  |                                                   | NASJONALE_REGLER |
+
+      | 2       | LOVLIG_OPPHOLD               |                  |            |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | NASJONALE_REGLER |
+      | 2       | GIFT_PARTNERSKAP             |                  | 06.06.2017 |            | OPPFYLT      | Nei                  |                                                   |                  |
+      | 2       | UNDER_18_ÅR                  |                  | 06.06.2017 | 05.06.2035 | OPPFYLT      | Nei                  |                                                   |                  |
+      | 2       | BOR_MED_SØKER,BOSATT_I_RIKET |                  | 29.03.2023 |            | OPPFYLT      | Nei                  |                                                   | NASJONALE_REGLER |
+
+      | 3       | UNDER_18_ÅR                  |                  | 08.12.2023 | 07.12.2041 | OPPFYLT      | Nei                  |                                                   |                  |
+      | 3       | BOR_MED_SØKER,BOSATT_I_RIKET |                  | 08.12.2023 |            | OPPFYLT      | Nei                  |                                                   | NASJONALE_REGLER |
+      | 3       | GIFT_PARTNERSKAP             |                  | 08.12.2023 |            | OPPFYLT      | Nei                  |                                                   |                  |
+      | 3       | LOVLIG_OPPHOLD               |                  | 08.12.2023 |            | IKKE_OPPFYLT | Nei                  |                                                   | NASJONALE_REGLER |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 3       | 1            | 01.01.2024 | 30.11.2029 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 3       | 1            | 01.12.2029 | 30.11.2041 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
+
+
+    Når vedtaksperiodene genereres for behandling 2
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                              | Ugyldige begrunnelser |
+      |            |          | AVSLAG             |                                | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                       |
+      | 01.01.2024 |          | OPPHØR             |                                | OPPHØR_IKKE_OPPHOLDSTILLATELSE                    |                       |
+
+    Og når disse begrunnelsene er valgt for behandling 2
+      | Fra dato   | Til dato | Standardbegrunnelser                              | Eøsbegrunnelser | Fritekster |
+      |            |          | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                 |            |
+      | 01.01.2024 |          | OPPHØR_IKKE_OPPHOLDSTILLATELSE                    |                 |            |
+
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode - til -
+      | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
+      | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Nei           | 06.06.17             | 1           |                                      | NB      | 0     |
+
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.01.2024 til -
+      | Begrunnelse                    | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
+      | OPPHØR_IKKE_OPPHOLDSTILLATELSE | STANDARD | Ja            | 08.12.23             | 1           | desember 2023                        | NB      | 0     |

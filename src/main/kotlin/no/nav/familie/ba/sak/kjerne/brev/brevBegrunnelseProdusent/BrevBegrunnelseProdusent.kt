@@ -258,8 +258,6 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     val barnMedUtbetaling =
         hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
     val uregistrerteBarnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn
-    val barnMedEksplisitteAvslag =
-        begrunnelsesGrunnlagPerPerson.hentPersonerMedAvslagIPeriode().filter { it.type == PersonType.BARN }
 
     val barnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
 
@@ -275,7 +273,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         gjelderSøker && !this.gjelderEtterEndretUtbetaling && !this.gjelderEndretutbetaling -> {
             when (this.periodeResultat) {
                 SanityPeriodeResultat.IKKE_INNVILGET -> {
-                    val erAvslagPåSøker = erAvslagPåSøker(begrunnelsesGrunnlagPerPerson, grunnlag)
+                    val erAvslagPåSøker = erEksplisittAvslagPåSøker(begrunnelsesGrunnlagPerPerson, grunnlag)
 
                     val relevanteBarn =
                         if (erAvslagPåSøker) {
@@ -283,7 +281,6 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                         } else {
                             barnMedUtbetalingIForrigeperiode +
                                 barnMedOppfylteVilkår +
-                                barnMedEksplisitteAvslag +
                                 barnMistetUtbetalingFraForrigeBehandling
                         }.toSet()
 
@@ -301,7 +298,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     }
 }
 
-private fun ISanityBegrunnelse.erAvslagPåSøker(
+private fun ISanityBegrunnelse.erEksplisittAvslagPåSøker(
     begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
     grunnlag: GrunnlagForBegrunnelse,
 ): Boolean {
