@@ -273,7 +273,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         gjelderSøker && !this.gjelderEtterEndretUtbetaling && !this.gjelderEndretutbetaling -> {
             when (this.periodeResultat) {
                 SanityPeriodeResultat.IKKE_INNVILGET -> {
-                    val erAvslagPåSøker = erAvslagPåSøker(begrunnelsesGrunnlagPerPerson, grunnlag)
+                    val erAvslagPåSøker = erEksplisittAvslagPåSøker(begrunnelsesGrunnlagPerPerson, grunnlag)
 
                     val relevanteBarn =
                         if (erAvslagPåSøker) {
@@ -298,7 +298,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     }
 }
 
-private fun ISanityBegrunnelse.erAvslagPåSøker(
+private fun ISanityBegrunnelse.erEksplisittAvslagPåSøker(
     begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
     grunnlag: GrunnlagForBegrunnelse,
 ): Boolean {
