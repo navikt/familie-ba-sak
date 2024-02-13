@@ -18,7 +18,7 @@ class SaksstatistikkScheduler(
 ) {
     @Scheduled(fixedDelay = 60000)
     fun sendKafkameldinger() {
-        if (leaderClientService.isLeader() == true) {
+        if (leaderClientService.isLeader()) {
             sendSaksstatistikk()
         }
     }

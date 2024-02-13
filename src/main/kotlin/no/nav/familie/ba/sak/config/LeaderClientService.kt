@@ -4,12 +4,12 @@ import no.nav.familie.leader.LeaderClient
 import org.springframework.stereotype.Service
 
 interface LeaderClientService {
-    fun isLeader(): Boolean?
+    fun isLeader(): Boolean
 }
 
 @Service
 class DefaultLeaderClientService : LeaderClientService {
-    override fun isLeader(): Boolean? {
-        return LeaderClient.isLeader()
+    override fun isLeader(): Boolean {
+        return LeaderClient.isLeader() == true
     }
 }

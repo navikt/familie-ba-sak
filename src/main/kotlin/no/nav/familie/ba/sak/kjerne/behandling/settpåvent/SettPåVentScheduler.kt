@@ -23,7 +23,7 @@ class SettPåVentScheduler(
                 logger.info("Opprettet taBehandlingerAvVentTask")
             }
 
-            false, null -> {
+            false -> {
                 logger.info("Ikke opprettet taBehandlingerAvVentTask på denne poden")
             }
         }

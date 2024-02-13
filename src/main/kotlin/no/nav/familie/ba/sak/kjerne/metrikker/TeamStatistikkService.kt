@@ -180,7 +180,7 @@ class TeamStatistikkService(
     }
 
     private fun erLeader(): Boolean {
-        return leaderClientService.isLeader() == true
+        return leaderClientService.isLeader()
     }
 
     companion object {

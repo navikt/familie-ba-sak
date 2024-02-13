@@ -22,7 +22,7 @@ class FagsakStatusScheduler(
 
     @Scheduled(cron = "\${CRON_FAGSAKSTATUS_SCHEDULER}")
     fun oppdaterFagsakStatuser() {
-        when (leaderClientService.isLeader() == true || envService.erDev()) {
+        when (leaderClientService.isLeader() || envService.erDev()) {
             true -> {
                 val oppdaterLøpendeFlaggTask = Task(type = OppdaterLøpendeFlagg.TASK_STEP_TYPE, payload = "")
                 taskRepository.save(oppdaterLøpendeFlaggTask)

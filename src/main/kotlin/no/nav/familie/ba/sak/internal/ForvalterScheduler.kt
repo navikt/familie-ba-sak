@@ -21,7 +21,7 @@ class ForvalterScheduler(
      */
     @Scheduled(cron = "0 0 7 1 * *")
     fun opprettFinnSakerMedFlereMigreringsbehandlingerTask() {
-        when (leaderClientService.isLeader() == true || envService.erDev()) {
+        when (leaderClientService.isLeader() || envService.erDev()) {
             true -> {
                 val finnSakerMedFlereMigreringsbehandlingerTask =
                     Task(

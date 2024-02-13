@@ -13,7 +13,7 @@ class InternKonsistensavstemmingScheduler(
 ) {
     @Scheduled(cron = "0 0 0 29 * *")
     fun startInternKonsistensavstemming() {
-        if (leaderClientService.isLeader() == true) {
+        if (leaderClientService.isLeader()) {
             taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask())
         }
     }

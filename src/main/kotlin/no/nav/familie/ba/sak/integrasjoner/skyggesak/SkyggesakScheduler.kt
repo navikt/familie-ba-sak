@@ -23,14 +23,14 @@ class SkyggesakScheduler(
 ) {
     @Scheduled(fixedDelay = 60000)
     fun opprettSkyggesaker() {
-        if (leaderClientService.isLeader() == true) {
+        if (leaderClientService.isLeader()) {
             sendSkyggesaker()
         }
     }
 
     @Scheduled(cron = "0 0 6 * * *")
     fun ryddOppISendteSkyggesaker() {
-        if (leaderClientService.isLeader() == true) {
+        if (leaderClientService.isLeader()) {
             fjernGamleSkyggesakInnslag()
         }
     }

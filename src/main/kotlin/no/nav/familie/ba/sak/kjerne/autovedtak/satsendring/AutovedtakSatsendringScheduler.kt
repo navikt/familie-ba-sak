@@ -37,7 +37,7 @@ class AutovedtakSatsendringScheduler(
     }
 
     private fun startSatsendring(antallFagsaker: Int) {
-        if (leaderClientService.isLeader() == true) {
+        if (leaderClientService.isLeader()) {
             logger.info("Starter schedulert jobb for satsendring 2024-01. antallFagsaker=$antallFagsaker")
             startSatsendring.startSatsendring(
                 antallFagsaker = antallFagsaker,

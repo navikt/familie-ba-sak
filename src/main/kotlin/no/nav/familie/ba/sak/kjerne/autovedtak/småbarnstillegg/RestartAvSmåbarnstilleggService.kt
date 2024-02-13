@@ -40,7 +40,7 @@ class RestartAvSmåbarnstilleggService(
     @Scheduled(cron = "0 0 7 1 * *")
     @Transactional
     fun scheduledFinnRestartetSmåbarnstilleggOgOpprettOppgave() {
-        if (leaderClientService.isLeader() == true) {
+        if (leaderClientService.isLeader()) {
             finnOgOpprettetOppgaveForSmåbarnstilleggSomSkalRestartesIDenneMåned(true)
         }
     }
