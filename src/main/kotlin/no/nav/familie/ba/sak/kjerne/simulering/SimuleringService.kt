@@ -4,8 +4,6 @@ import io.micrometer.core.instrument.Metrics
 import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
@@ -27,8 +25,6 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
-import no.nav.familie.unleash.UnleashContextFields
-import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -40,12 +36,10 @@ class SimuleringService(
     private val beregningService: BeregningService,
     private val økonomiSimuleringMottakerRepository: ØkonomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
-    private val unleashService: UnleashService,
     private val vedtakRepository: VedtakRepository,
     private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val kontrollerNyUtbetalingsgeneratorService: KontrollerNyUtbetalingsgeneratorService,
 ) {
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
@@ -54,48 +48,22 @@ class SimuleringService(
             return null
         }
 
-        val brukNyUtbetalingsoppdragGenerator =
-            unleashService.isEnabled(
-                FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-                mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
-            )
-
         /**
          * SOAP integrasjonen støtter ikke full epost som MQ,
          * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
          * Denne verdien brukes ikke til noe i simulering.
          */
         val utbetalingsoppdrag: Utbetalingsoppdrag =
-            if (brukNyUtbetalingsoppdragGenerator
-            ) {
-                logger.info("Bruker ny utbetalingsgenerator for simulering for behandling ${vedtak.behandling.id}")
-                utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                    vedtak = vedtak,
-                    saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-                    erSimulering = true,
-                ).utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
-            } else {
-                utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                    vedtak = vedtak,
-                    saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-                    andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
-                    erSimulering = true,
-                )
-            }
+            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = vedtak,
+                saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                erSimulering = true,
+            ).utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
 
         // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
         if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
 
         val detaljertSimuleringResultat = økonomiKlient.hentSimulering(utbetalingsoppdrag)
-
-        if (!brukNyUtbetalingsoppdragGenerator) {
-            kontrollerNyUtbetalingsgeneratorService.kontrollerNyUtbetalingsgenerator(
-                vedtak = vedtak,
-                gammeltSimuleringResultat = detaljertSimuleringResultat,
-                gammeltUtbetalingsoppdrag = utbetalingsoppdrag,
-                erSimulering = true,
-            )
-        }
 
         simulert.increment()
         return detaljertSimuleringResultat

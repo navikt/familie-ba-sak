@@ -2,15 +2,10 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -20,9 +15,6 @@ import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.familie.unleash.UnleashContextFields
-import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -35,8 +27,6 @@ class UtbetalingsoppdragGeneratorService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
-    private val beregningService: BeregningService,
-    private val unleashService: UnleashService,
 ) {
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -63,12 +53,7 @@ class UtbetalingsoppdragGeneratorService(
                 endretMigreringsDato = endretMigreringsDato,
             )
 
-        if (!erSimulering &&
-            unleashService.isEnabled(
-                FeatureToggleConfig.BRUK_NY_UTBETALINGSGENERATOR,
-                mapOf(UnleashContextFields.FAGSAK_ID to vedtak.behandling.fagsak.id.toString()),
-            )
-        ) {
+        if (!erSimulering) {
             oppdaterTilkjentYtelse(nyTilkjentYtelse, beregnetUtbetalingsoppdrag)
         }
 
@@ -99,93 +84,6 @@ class UtbetalingsoppdragGeneratorService(
     private fun hentSisteAndelTilkjentYtelse(fagsak: Fagsak) =
         andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(fagsakId = fagsak.id)
             .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
-
-    @Transactional
-    fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-        vedtak: Vedtak,
-        saksbehandlerId: String,
-        andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
-        erSimulering: Boolean = false,
-        skalValideres: Boolean = true,
-    ): Utbetalingsoppdrag {
-        val oppdatertBehandling = vedtak.behandling
-        val oppdatertTilstand =
-            beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = oppdatertBehandling.id)
-                .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
-
-        val oppdaterteKjeder = grupperAndeler(oppdatertTilstand)
-
-        val erFørsteIverksatteBehandlingPåFagsak =
-            beregningService.hentSisteAndelPerIdent(fagsakId = oppdatertBehandling.fagsak.id)
-                .isEmpty()
-
-        val utbetalingsoppdrag =
-            if (erFørsteIverksatteBehandlingPåFagsak) {
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                    saksbehandlerId = saksbehandlerId,
-                    vedtak = vedtak,
-                    erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
-                    oppdaterteKjeder = oppdaterteKjeder,
-                    erSimulering = erSimulering,
-                )
-            } else {
-                val forrigeBehandling =
-                    behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
-                        ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
-
-                val forrigeTilstand =
-                    beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
-                        .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
-
-                val forrigeKjeder = grupperAndeler(forrigeTilstand)
-
-                val sisteAndelPerIdent = beregningService.hentSisteAndelPerIdent(forrigeBehandling.fagsak.id)
-
-                if (oppdatertTilstand.isNotEmpty()) {
-                    oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
-                    val tilkjentYtelseMedOppdaterteAndeler = oppdatertTilstand.first().tilkjentYtelse
-                    beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
-                }
-
-                val utbetalingsoppdrag =
-                    utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                        saksbehandlerId = saksbehandlerId,
-                        vedtak = vedtak,
-                        erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
-                        forrigeKjeder = forrigeKjeder,
-                        sisteAndelPerIdent = sisteAndelPerIdent,
-                        oppdaterteKjeder = oppdaterteKjeder,
-                        erSimulering = erSimulering,
-                        endretMigreringsDato =
-                            beregnOmMigreringsDatoErEndret(
-                                vedtak.behandling,
-                                forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom,
-                            ),
-                    )
-
-                if (!erSimulering && (
-                        oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
-                            oppdatertBehandling.id,
-                        ).resultat == Behandlingsresultat.OPPHØRT
-                    )
-                ) {
-                    utbetalingsoppdrag.validerOpphørsoppdrag()
-                }
-
-                utbetalingsoppdrag
-            }
-
-        if (skalValideres) {
-            utbetalingsoppdrag.validerNullutbetaling(
-                behandlingskategori = vedtak.behandling.kategori,
-                andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id),
-            )
-        }
-
-        opprettAdvarselLoggVedForstattInnvilgetMedUtbetaling(utbetalingsoppdrag, vedtak.behandling)
-
-        return utbetalingsoppdrag
-    }
 
     private fun beregnOmMigreringsDatoErEndret(
         behandling: Behandling,
