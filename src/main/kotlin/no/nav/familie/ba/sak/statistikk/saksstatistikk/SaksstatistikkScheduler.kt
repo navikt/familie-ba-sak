@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
-import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -14,10 +14,11 @@ import org.springframework.transaction.annotation.Transactional
 class SaksstatistikkScheduler(
     val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     val kafkaProducer: KafkaProducer,
+    val leaderClientService: LeaderClientService,
 ) {
     @Scheduled(fixedDelay = 60000)
     fun sendKafkameldinger() {
-        if (LeaderClient.isLeader() == true) {
+        if (leaderClientService.isLeader()) {
             sendSaksstatistikk()
         }
     }

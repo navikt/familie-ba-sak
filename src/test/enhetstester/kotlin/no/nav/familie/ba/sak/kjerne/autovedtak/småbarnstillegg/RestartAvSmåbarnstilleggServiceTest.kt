@@ -24,6 +24,7 @@ class RestartAvSmåbarnstilleggServiceTest {
                 vedtaksperiodeService = mockk(),
                 behandlingMigreringsinfoRepository = behandlingMigreringsinfoRepository,
                 andelerTilkjentYtelseRepository = mockk(),
+                leaderClientService = mockk(relaxed = true),
             ),
         )
 

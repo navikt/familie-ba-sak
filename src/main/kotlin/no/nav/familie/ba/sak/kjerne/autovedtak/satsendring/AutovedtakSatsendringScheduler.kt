@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.leader.LeaderClient
+import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service
 class AutovedtakSatsendringScheduler(
     private val startSatsendring: StartSatsendring,
     private val unleashService: UnleashService,
+    private val leaderClientService: LeaderClientService,
 ) {
     @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
     fun triggSatsendring() {
@@ -36,7 +37,7 @@ class AutovedtakSatsendringScheduler(
     }
 
     private fun startSatsendring(antallFagsaker: Int) {
-        if (LeaderClient.isLeader() == true) {
+        if (leaderClientService.isLeader()) {
             logger.info("Starter schedulert jobb for satsendring 2024-01. antallFagsaker=$antallFagsaker")
             startSatsendring.startSatsendring(
                 antallFagsaker = antallFagsaker,

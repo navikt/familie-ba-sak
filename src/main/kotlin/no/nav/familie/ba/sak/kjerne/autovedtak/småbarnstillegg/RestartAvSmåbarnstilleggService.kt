@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -13,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.erAlleredeBegrunnetMedBegrunne
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -30,6 +30,7 @@ class RestartAvSmåbarnstilleggService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
     private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val leaderClientService: LeaderClientService,
 ) {
     /**
      * Første dag hver måned sjekkes det om noen fagsaker har oppstart av småbarnstillegg inneværende måned, etter å ha
@@ -39,7 +40,7 @@ class RestartAvSmåbarnstilleggService(
     @Scheduled(cron = "0 0 7 1 * *")
     @Transactional
     fun scheduledFinnRestartetSmåbarnstilleggOgOpprettOppgave() {
-        if (LeaderClient.isLeader() == true) {
+        if (leaderClientService.isLeader()) {
             finnOgOpprettetOppgaveForSmåbarnstilleggSomSkalRestartesIDenneMåned(true)
         }
     }

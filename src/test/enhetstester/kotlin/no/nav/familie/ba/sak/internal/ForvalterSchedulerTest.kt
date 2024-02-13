@@ -19,7 +19,7 @@ import java.time.YearMonth
 class ForvalterSchedulerTest {
     private val taskRepository = mockk<TaskRepositoryWrapper>()
     private val envService = mockk<EnvService>()
-    private val service = ForvalterScheduler(taskRepository, envService)
+    private val service = ForvalterScheduler(taskRepository = taskRepository, envService = envService, mockk(relaxed = true))
     private val slot = slot<Task>()
 
     @BeforeEach
