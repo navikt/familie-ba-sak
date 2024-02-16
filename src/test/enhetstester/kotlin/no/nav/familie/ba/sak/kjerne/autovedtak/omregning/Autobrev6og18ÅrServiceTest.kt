@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -240,6 +241,33 @@ internal class Autobrev6og18ÅrServiceTest {
     }
 
     @Test
+    fun `Verifiser at behandling for omregning ikke blir trigget for løpende fagsak med barn som fyller 6år inneværende måned, hvis det er nullutbetaling eøs`() {
+        val behandling = initMock(alder = 6, medSøsken = false, eøsNullUtbetaling = true).first
+
+        val autobrev6og18ÅrDTO =
+            Autobrev6og18ÅrDTO(
+                fagsakId = behandling.fagsak.id,
+                alder = Alder.SEKS.år,
+                årMåned = inneværendeMåned(),
+            )
+
+        every { stegService.håndterVilkårsvurdering(any()) } returns behandling
+        every { stegService.håndterNyBehandling(any()) } returns behandling
+        every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
+        every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
+        every { autovedtakStegService.kjørBehandlingOmregning(any(), any()) } returns ""
+
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+
+        verify(exactly = 0) {
+            autovedtakStegService.kjørBehandlingOmregning(
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
     fun `Verifiser at behandling for omregning ikke blir trigget for løpende fagsak med barn som fyller 18år inneværende måned, hvis barnet ikke har løpende andel tilkjent ytelse`() {
         val (behandling, _, barnIBrytningsalder) = initMock(alder = 18, medSøsken = true)
 
@@ -331,11 +359,13 @@ internal class Autobrev6og18ÅrServiceTest {
         fagsakStatus: FagsakStatus = FagsakStatus.LØPENDE,
         alder: Long,
         medSøsken: Boolean,
+        eøsNullUtbetaling: Boolean = false,
     ): Triple<Behandling, Person, Person> {
         val behandling =
             lagBehandling().also {
                 it.fagsak.status = fagsakStatus
                 it.status = behandlingStatus
+                it.kategori = if (eøsNullUtbetaling) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
             }
 
         val søker = tilfeldigSøker()
@@ -352,6 +382,8 @@ internal class Autobrev6og18ÅrServiceTest {
                         tom = søsken.fødselsdato.plusYears(6).toYearMonth(),
                         beløp = 1676,
                         person = søsken,
+                        kalkulertUtbetalingsbeløp = 0,
+                        differanseberegnetPeriodebeløp = 0,
                     )
                 }
             every {

@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.OmregningBrevData
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -88,6 +89,16 @@ class Autobrev6og18ÅrService(
             )
         }
 
+        if (erEØSMedNullutbetaling(
+                alder = autobrev6og18ÅrDTO.alder,
+                behandling = behandling,
+                årMåned = autobrev6og18ÅrDTO.årMåned,
+            )
+        ) {
+            logger.info("Sender ikke ut omregningsbrev for EØS med nullutbetaling for fagsak=${behandling.fagsak.id}")
+            return
+        }
+
         autovedtakStegService.kjørBehandlingOmregning(
             mottakersAktør = behandling.fagsak.aktør,
             behandlingsdata =
@@ -139,6 +150,43 @@ class Autobrev6og18ÅrService(
         behandlingId: Long,
         årMåned: YearMonth,
     ): Boolean {
+        val andelerTilBarnIBrytningsalder =
+            finnAndelerTilBarnIBrytningsalder(behandlingId, alder)
+
+        return harBarnIBrytningsalderLøpendeAndeler(alder, andelerTilBarnIBrytningsalder, årMåned)
+    }
+
+    private fun harBarnIBrytningsalderLøpendeAndeler(
+        alder: Int,
+        andelerTilBarnIBrytningsalder: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        årMåned: YearMonth,
+    ) = when (alder) {
+        Alder.ATTEN.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned }
+        Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned && !it.erAndelSomharNullutbetaling() } && andelerTilBarnIBrytningsalder.any { it.stønadFom == årMåned }
+        else -> throw Feil("Ugyldig alder")
+    }
+
+    private fun erEØSMedNullutbetaling(
+        alder: Int,
+        behandling: Behandling,
+        årMåned: YearMonth,
+    ): Boolean {
+        if (behandling.kategori != BehandlingKategori.EØS) {
+            return false
+        }
+        val andelerTilBarnIBrytningsalder =
+            finnAndelerTilBarnIBrytningsalder(behandling.id, alder)
+
+        return when (alder) {
+            Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned && !it.erAndelSomharNullutbetaling() }
+            else -> false
+        }
+    }
+
+    private fun finnAndelerTilBarnIBrytningsalder(
+        behandlingId: Long,
+        alder: Int,
+    ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         val barnIBrytningsalder =
             barnMedAngittAlderInneværendeMåned(behandlingId = behandlingId, alder = alder).map { it.aktør }
 
@@ -150,18 +198,7 @@ class Autobrev6og18ÅrService(
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
                 behandlingId,
             ).filter { it.aktør in barnIBrytningsalder }
-
-        return harBarnIBrytningsalderLøpendeAndeler(alder, andelerTilBarnIBrytningsalder, årMåned)
-    }
-
-    private fun harBarnIBrytningsalderLøpendeAndeler(
-        alder: Int,
-        andelerTilBarnIBrytningsalder: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        årMåned: YearMonth,
-    ) = when (alder) {
-        Alder.ATTEN.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned }
-        Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned } && andelerTilBarnIBrytningsalder.any { it.stønadFom == årMåned }
-        else -> throw Feil("Ugyldig alder")
+        return andelerTilBarnIBrytningsalder
     }
 
     companion object {
