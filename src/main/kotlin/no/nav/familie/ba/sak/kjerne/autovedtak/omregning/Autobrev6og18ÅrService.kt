@@ -162,7 +162,7 @@ class Autobrev6og18ÅrService(
         årMåned: YearMonth,
     ) = when (alder) {
         Alder.ATTEN.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned }
-        Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned && !it.erAndelSomharNullutbetaling() } && andelerTilBarnIBrytningsalder.any { it.stønadFom == årMåned }
+        Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned } && andelerTilBarnIBrytningsalder.any { it.stønadFom == årMåned }
         else -> throw Feil("Ugyldig alder")
     }
 
@@ -178,7 +178,7 @@ class Autobrev6og18ÅrService(
             finnAndelerTilBarnIBrytningsalder(behandling.id, alder)
 
         return when (alder) {
-            Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned && !it.erAndelSomharNullutbetaling() }
+            Alder.ATTEN.år, Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned && it.erAndelSomharNullutbetaling() }
             else -> false
         }
     }

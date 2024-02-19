@@ -382,8 +382,8 @@ internal class Autobrev6og18ÅrServiceTest {
                         tom = søsken.fødselsdato.plusYears(6).toYearMonth(),
                         beløp = 1676,
                         person = søsken,
-                        kalkulertUtbetalingsbeløp = 0,
-                        differanseberegnetPeriodebeløp = 0,
+                        kalkulertUtbetalingsbeløp = if (eøsNullUtbetaling) 0 else 1676,
+                        differanseberegnetPeriodebeløp = if (eøsNullUtbetaling) 0 else null,
                     )
                 }
             every {
@@ -397,12 +397,16 @@ internal class Autobrev6og18ÅrServiceTest {
                         tom = inneværendeMåned().minusMonths(1),
                         beløp = 1676,
                         person = barnIBrytningsalder,
+                        kalkulertUtbetalingsbeløp = if (eøsNullUtbetaling) 0 else 1676,
+                        differanseberegnetPeriodebeløp = if (eøsNullUtbetaling) 0 else null,
                     ),
                     lagAndelTilkjentYtelse(
                         fom = inneværendeMåned(),
                         tom = YearMonth.now().plusYears(12),
                         beløp = 1054,
                         person = barnIBrytningsalder,
+                        kalkulertUtbetalingsbeløp = if (eøsNullUtbetaling) 0 else 1054,
+                        differanseberegnetPeriodebeløp = if (eøsNullUtbetaling) 0 else null,
                     ),
                     andelTilkjentYtelseSøsken,
                 )
@@ -417,6 +421,8 @@ internal class Autobrev6og18ÅrServiceTest {
                         tom = søsken.fødselsdato.plusYears(6).toYearMonth(),
                         beløp = 1676,
                         person = søsken,
+                        kalkulertUtbetalingsbeløp = if (eøsNullUtbetaling) 0 else 1676,
+                        differanseberegnetPeriodebeløp = if (eøsNullUtbetaling) 0 else null,
                     )
                 }
             every {
@@ -430,6 +436,8 @@ internal class Autobrev6og18ÅrServiceTest {
                         tom = inneværendeMåned().minusMonths(1),
                         beløp = 1054,
                         person = barnIBrytningsalder,
+                        kalkulertUtbetalingsbeløp = if (eøsNullUtbetaling) 0 else 1054,
+                        differanseberegnetPeriodebeløp = if (eøsNullUtbetaling) 0 else null,
                     ),
                     andelTilkjentYtelseSøsken,
                 )
