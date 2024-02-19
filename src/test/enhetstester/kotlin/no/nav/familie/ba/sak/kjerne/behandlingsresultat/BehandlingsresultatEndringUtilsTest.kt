@@ -664,7 +664,7 @@ class BehandlingsresultatEndringUtilsTest {
         val barnAktør = lagPerson(type = PersonType.BARN).aktør
         val denneMåned = YearMonth.now()
         val enMånedFramITid = denneMåned.plusMonths(1)
-        val toMånedFramITid = enMånedFramITid.plusMonths(1)
+        val toMånederFramITid = enMånedFramITid.plusMonths(1)
 
         val forrigeAndeler =
             listOf(
@@ -675,8 +675,8 @@ class BehandlingsresultatEndringUtilsTest {
                     aktør = søker,
                 ),
                 lagAndelTilkjentYtelse(
-                    fom = toMånedFramITid,
-                    tom = toMånedFramITid,
+                    fom = toMånederFramITid,
+                    tom = toMånederFramITid,
                     beløp = 1054,
                     aktør = barnAktør,
                 ),
@@ -690,8 +690,8 @@ class BehandlingsresultatEndringUtilsTest {
                     aktør = søker,
                 ),
                 lagAndelTilkjentYtelse(
-                    fom = toMånedFramITid,
-                    tom = toMånedFramITid,
+                    fom = toMånederFramITid,
+                    tom = toMånederFramITid,
                     beløp = 1070,
                     aktør = barnAktør,
                 ),
