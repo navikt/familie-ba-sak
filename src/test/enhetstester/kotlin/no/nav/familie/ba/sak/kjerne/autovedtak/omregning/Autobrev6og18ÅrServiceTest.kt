@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.prosessering.domene.Task
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
@@ -96,7 +97,9 @@ internal class Autobrev6og18ÅrServiceTest {
                 årMåned = inneværendeMåned(),
             )
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+        assertThat(
+            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO),
+        ).isEqualTo(Autobrev6Og18Svar.INGEN_LØPENDE_UTBETALING_FOR_BARN_UNDER_18)
 
         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
@@ -112,7 +115,9 @@ internal class Autobrev6og18ÅrServiceTest {
                 årMåned = inneværendeMåned(),
             )
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+        assertThat(
+            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO),
+        ).isEqualTo(Autobrev6Og18Svar.INGEN_BARN_I_ALDER)
 
         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
@@ -128,7 +133,9 @@ internal class Autobrev6og18ÅrServiceTest {
                 årMåned = inneværendeMåned(),
             )
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+        assertThat(
+            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO),
+        ).isEqualTo(Autobrev6Og18Svar.FAGSAK_IKKE_LØPENDE)
 
         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
@@ -150,7 +157,9 @@ internal class Autobrev6og18ÅrServiceTest {
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
         every { autovedtakStegService.kjørBehandlingOmregning(any(), any()) } returns ""
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+        assertThat(
+            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO),
+        ).isEqualTo(Autobrev6Og18Svar.OK)
 
         verify(exactly = 1) {
             autovedtakStegService.kjørBehandlingOmregning(
@@ -177,7 +186,9 @@ internal class Autobrev6og18ÅrServiceTest {
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
         every { autovedtakStegService.kjørBehandlingOmregning(any(), any()) } returns ""
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+        assertThat(
+            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO),
+        ).isEqualTo(Autobrev6Og18Svar.OK)
 
         verify(exactly = 1) {
             autovedtakStegService.kjørBehandlingOmregning(
@@ -230,34 +241,9 @@ internal class Autobrev6og18ÅrServiceTest {
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
         every { autovedtakStegService.kjørBehandlingOmregning(any(), any()) } returns ""
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
-
-        verify(exactly = 0) {
-            autovedtakStegService.kjørBehandlingOmregning(
-                any(),
-                any(),
-            )
-        }
-    }
-
-    @Test
-    fun `Verifiser at behandling for omregning ikke blir trigget for løpende fagsak med barn som fyller 6år inneværende måned, hvis det er nullutbetaling eøs`() {
-        val behandling = initMock(alder = 6, medSøsken = false, eøsNullUtbetaling = true).first
-
-        val autobrev6og18ÅrDTO =
-            Autobrev6og18ÅrDTO(
-                fagsakId = behandling.fagsak.id,
-                alder = Alder.SEKS.år,
-                årMåned = inneværendeMåned(),
-            )
-
-        every { stegService.håndterVilkårsvurdering(any()) } returns behandling
-        every { stegService.håndterNyBehandling(any()) } returns behandling
-        every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
-        every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
-        every { autovedtakStegService.kjørBehandlingOmregning(any(), any()) } returns ""
-
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+        assertThat(
+            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO),
+        ).isEqualTo(Autobrev6Og18Svar.INGEN_LØPENDE_YTELSE_FOR_BARN_I_BRYTNINGSALDER)
 
         verify(exactly = 0) {
             autovedtakStegService.kjørBehandlingOmregning(
@@ -308,7 +294,67 @@ internal class Autobrev6og18ÅrServiceTest {
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
         every { autovedtakStegService.kjørBehandlingOmregning(any(), any()) } returns ""
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+        assertThat(
+            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO),
+        ).isEqualTo(Autobrev6Og18Svar.INGEN_LØPENDE_YTELSE_FOR_BARN_I_BRYTNINGSALDER)
+
+        verify(exactly = 0) {
+            autovedtakStegService.kjørBehandlingOmregning(
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun `Verifiser at behandling for omregning ikke blir trigget for løpende fagsak med barn som fyller 6 år inneværende måned, hvis det er nullutbetaling eøs`() {
+        val behandling = initMock(alder = 6, medSøsken = false, eøsNullUtbetaling = true).first
+
+        val autobrev6og18ÅrDTO =
+            Autobrev6og18ÅrDTO(
+                fagsakId = behandling.fagsak.id,
+                alder = Alder.SEKS.år,
+                årMåned = inneværendeMåned(),
+            )
+
+        every { stegService.håndterVilkårsvurdering(any()) } returns behandling
+        every { stegService.håndterNyBehandling(any()) } returns behandling
+        every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
+        every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
+        every { autovedtakStegService.kjørBehandlingOmregning(any(), any()) } returns ""
+
+        assertThat(
+            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO),
+        ).isEqualTo(Autobrev6Og18Svar.EØS_MED_NULLUTBETALING)
+
+        verify(exactly = 0) {
+            autovedtakStegService.kjørBehandlingOmregning(
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun `Verifiser at behandling for omregning ikke blir trigget for løpende fagsak med barn som fyller 18 år inneværende måned, hvis det er nullutbetaling eøs`() {
+        val behandling = initMock(alder = 18, medSøsken = true, eøsNullUtbetaling = true).first
+
+        val autobrev6og18ÅrDTO =
+            Autobrev6og18ÅrDTO(
+                fagsakId = behandling.fagsak.id,
+                alder = Alder.ATTEN.år,
+                årMåned = inneværendeMåned(),
+            )
+
+        every { stegService.håndterVilkårsvurdering(any()) } returns behandling
+        every { stegService.håndterNyBehandling(any()) } returns behandling
+        every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
+        every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
+        every { autovedtakStegService.kjørBehandlingOmregning(any(), any()) } returns ""
+
+        assertThat(
+            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO),
+        ).isEqualTo(Autobrev6Og18Svar.EØS_MED_NULLUTBETALING)
 
         verify(exactly = 0) {
             autovedtakStegService.kjørBehandlingOmregning(
@@ -334,7 +380,10 @@ internal class Autobrev6og18ÅrServiceTest {
         every { stegService.håndterNyBehandling(any()) } returns behandling
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+
+        assertThat(
+            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO),
+        ).isEqualTo(Autobrev6Og18Svar.HAR_ALT_SENDT)
 
         verify(exactly = 0) {
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
