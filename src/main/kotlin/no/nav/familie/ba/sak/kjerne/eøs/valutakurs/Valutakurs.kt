@@ -97,7 +97,7 @@ data class Valutakurs(
     companion object {
         val NULL = Valutakurs(null, null, emptySet())
 
-        //Nøyaktig tre uppercase bokstaver
+        // Nøyaktig tre uppercase bokstaver
         private const val VALID_REGEXP = "^[A-Z]{3}\$"
 
         fun validerValutakode(valutakode: String): Boolean {
