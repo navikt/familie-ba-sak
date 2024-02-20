@@ -127,7 +127,7 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
 
     fun erAndelSomSkalSendesTilOppdrag() = andelTilkjentYtelse.erAndelSomSkalSendesTilOppdrag()
 
-    fun erAndelSomharNullutbetaling() = andelTilkjentYtelse.erAndelSomharNullutbetaling()
+    fun erAndelSomharNullutbetalingPgaDifferanseberegning() = andelTilkjentYtelse.erAndelSomharNullutbetalingPgaDifferanseberegning()
 
     fun overlapperPeriode(månedPeriode: MånedPeriode) = andelTilkjentYtelse.overlapperPeriode(månedPeriode)
 

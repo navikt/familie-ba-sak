@@ -179,7 +179,7 @@ class Autobrev6og18ÅrService(
             finnAndelerTilBarnIBrytningsalder(behandling.id, alder)
 
         return when (alder) {
-            Alder.ATTEN.år, Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned && it.erAndelSomharNullutbetaling() }
+            Alder.ATTEN.år, Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned && it.erAndelSomharNullutbetalingPgaDifferanseberegning() }
             else -> false
         }
     }

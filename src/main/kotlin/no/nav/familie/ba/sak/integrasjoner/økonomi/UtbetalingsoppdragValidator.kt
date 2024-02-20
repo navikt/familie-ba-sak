@@ -32,4 +32,4 @@ private fun kanHaNullutbetaling(
     behandlingskategori: BehandlingKategori,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ) = behandlingskategori == BehandlingKategori.EØS &&
-    andelerTilkjentYtelse.any { it.erAndelSomharNullutbetaling() }
+    andelerTilkjentYtelse.any { it.erAndelSomharNullutbetalingPgaDifferanseberegning() }
