@@ -61,6 +61,10 @@ data class Valutakurs(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     override var behandlingId: Long = 0
 
+    init {
+        if (valutakode != null) require(validerValutakode(valutakode))
+    }
+
     // Valutakode skal alltid være satt (muligens til null), så den slettes ikke
     override fun utenInnhold() =
         copy(
@@ -92,6 +96,13 @@ data class Valutakurs(
 
     companion object {
         val NULL = Valutakurs(null, null, emptySet())
+
+        //Nøyaktig tre uppercase bokstaver
+        private const val VALID_REGEXP = "^[A-Z]{3}\$"
+
+        fun validerValutakode(valutakode: String): Boolean {
+            return Regex(VALID_REGEXP).matches(valutakode)
+        }
     }
 }
 

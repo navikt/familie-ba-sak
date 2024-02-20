@@ -16,6 +16,12 @@ data class RestValutakurs(
     val kurs: BigDecimal?,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
 ) : AbstractUtfyltStatus<RestValutakurs>() {
+
+    init {
+        if (valutakode != null) {
+            require(Valutakurs.validerValutakode(valutakode))
+        }
+    }
     override fun medUtfyltStatus(): RestValutakurs {
         return this.copy(status = utfyltStatus(finnAntallUtfylt(listOf(this.valutakursdato, this.kurs)), 2))
     }

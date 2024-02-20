@@ -8,7 +8,9 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import jakarta.validation.constraints.Pattern
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -27,4 +29,10 @@ data class ECBValutakursCache(
     val valutakode: String? = null,
     @Column(name = "kurs", nullable = false)
     val kurs: BigDecimal,
-) : BaseEntitet()
+) : BaseEntitet() {
+    init {
+        if (valutakode != null) {
+            require(Valutakurs.validerValutakode(valutakode))
+        }
+    }
+}
