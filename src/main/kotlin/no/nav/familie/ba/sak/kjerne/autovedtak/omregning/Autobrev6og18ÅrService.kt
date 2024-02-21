@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.OmregningBrevData
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -31,7 +32,7 @@ class Autobrev6og18ÅrService(
     private val startSatsendring: StartSatsendring,
 ) {
     @Transactional
-    fun opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO) {
+    fun opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Autobrev6Og18Svar {
         logger.info("opprettOmregningsoppgaveForBarnIBrytingsalder for fagsak ${autobrev6og18ÅrDTO.fagsakId}")
 
         val behandling =
@@ -49,12 +50,12 @@ class Autobrev6og18ÅrService(
                 standardbegrunnelser = AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(autobrev6og18ÅrDTO.alder),
             )
         ) {
-            return
+            return Autobrev6Og18Svar.HAR_ALT_SENDT
         }
 
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) {
             logger.info("Fagsak ${behandling.fagsak.id} har ikke status løpende, og derfor prosesseres den ikke videre.")
-            return
+            return Autobrev6Og18Svar.FAGSAK_IKKE_LØPENDE
         }
 
         if (!barnMedAngittAlderInneværendeMånedEksisterer(
@@ -63,12 +64,12 @@ class Autobrev6og18ÅrService(
             )
         ) {
             logger.warn("Fagsak ${behandling.fagsak.id} har ikke noe barn med alder ${autobrev6og18ÅrDTO.alder} ")
-            return
+            return Autobrev6Og18Svar.INGEN_BARN_I_ALDER
         }
 
         if (barnetrygdOpphører(autobrev6og18ÅrDTO, behandling)) {
             logger.info("Fagsak ${behandling.fagsak.id} har ikke løpende utbetalinger for barn under 18 år og vil opphøre.")
-            return
+            return Autobrev6Og18Svar.INGEN_LØPENDE_UTBETALING_FOR_BARN_UNDER_18
         }
 
         if (!barnIBrytningsalderHarLøpendeYtelse(
@@ -78,7 +79,7 @@ class Autobrev6og18ÅrService(
             )
         ) {
             logger.info("Ingen løpende ytelse for barnet i brytningsalder for fagsak=${behandling.fagsak.id} behandlingsårsak=$behandlingsårsak")
-            return
+            return Autobrev6Og18Svar.INGEN_LØPENDE_YTELSE_FOR_BARN_I_BRYTNINGSALDER
         }
 
         if (startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(autobrev6og18ÅrDTO.fagsakId)) {
@@ -86,6 +87,16 @@ class Autobrev6og18ÅrService(
                 "Satsedring skal kjøre ferdig før man behandler autobrev 6 og 18 år",
                 LocalDateTime.now().plusHours(1),
             )
+        }
+
+        if (erEØSMedNullutbetaling(
+                alder = autobrev6og18ÅrDTO.alder,
+                behandling = behandling,
+                årMåned = autobrev6og18ÅrDTO.årMåned,
+            )
+        ) {
+            logger.info("Sender ikke ut omregningsbrev for EØS med nullutbetaling for fagsak=${behandling.fagsak.id}")
+            return Autobrev6Og18Svar.EØS_MED_NULLUTBETALING
         }
 
         autovedtakStegService.kjørBehandlingOmregning(
@@ -101,6 +112,7 @@ class Autobrev6og18ÅrService(
                     fagsakId = behandling.fagsak.id,
                 ),
         )
+        return Autobrev6Og18Svar.OK
     }
 
     private fun barnetrygdOpphører(
@@ -139,17 +151,8 @@ class Autobrev6og18ÅrService(
         behandlingId: Long,
         årMåned: YearMonth,
     ): Boolean {
-        val barnIBrytningsalder =
-            barnMedAngittAlderInneværendeMåned(behandlingId = behandlingId, alder = alder).map { it.aktør }
-
-        if (barnIBrytningsalder.isEmpty()) {
-            throw Feil("Forventer å finne minst et barn i brytningsalder for omregning 6 eller 18 år for behandling=$behandlingId")
-        }
-
         val andelerTilBarnIBrytningsalder =
-            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandlingId,
-            ).filter { it.aktør in barnIBrytningsalder }
+            finnAndelerTilBarnIBrytningsalder(behandlingId, alder)
 
         return harBarnIBrytningsalderLøpendeAndeler(alder, andelerTilBarnIBrytningsalder, årMåned)
     }
@@ -164,6 +167,41 @@ class Autobrev6og18ÅrService(
         else -> throw Feil("Ugyldig alder")
     }
 
+    private fun erEØSMedNullutbetaling(
+        alder: Int,
+        behandling: Behandling,
+        årMåned: YearMonth,
+    ): Boolean {
+        if (behandling.kategori != BehandlingKategori.EØS) {
+            return false
+        }
+        val andelerTilBarnIBrytningsalder =
+            finnAndelerTilBarnIBrytningsalder(behandling.id, alder)
+
+        return when (alder) {
+            Alder.ATTEN.år, Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned && it.erAndelSomharNullutbetalingPgaDifferanseberegning() }
+            else -> false
+        }
+    }
+
+    private fun finnAndelerTilBarnIBrytningsalder(
+        behandlingId: Long,
+        alder: Int,
+    ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
+        val barnIBrytningsalder =
+            barnMedAngittAlderInneværendeMåned(behandlingId = behandlingId, alder = alder).map { it.aktør }
+
+        if (barnIBrytningsalder.isEmpty()) {
+            throw Feil("Forventer å finne minst et barn i brytningsalder for omregning 6 eller 18 år for behandling=$behandlingId")
+        }
+
+        val andelerTilBarnIBrytningsalder =
+            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
+                behandlingId,
+            ).filter { it.aktør in barnIBrytningsalder }
+        return andelerTilBarnIBrytningsalder
+    }
+
     companion object {
         private val logger = LoggerFactory.getLogger(Autobrev6og18ÅrService::class.java)
     }
@@ -172,4 +210,14 @@ class Autobrev6og18ÅrService(
 enum class Alder(val år: Int) {
     SEKS(år = 6),
     ATTEN(år = 18),
+}
+
+enum class Autobrev6Og18Svar {
+    OK,
+    FAGSAK_IKKE_LØPENDE,
+    INGEN_BARN_I_ALDER,
+    HAR_ALT_SENDT,
+    INGEN_LØPENDE_UTBETALING_FOR_BARN_UNDER_18,
+    EØS_MED_NULLUTBETALING,
+    INGEN_LØPENDE_YTELSE_FOR_BARN_I_BRYTNINGSALDER,
 }

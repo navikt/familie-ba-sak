@@ -173,7 +173,7 @@ data class AndelTilkjentYtelse(
         return this.kalkulertUtbetalingsbeløp != 0
     }
 
-    fun erAndelSomharNullutbetaling() =
+    fun erAndelSomharNullutbetalingPgaDifferanseberegning() =
         this.kalkulertUtbetalingsbeløp == 0 &&
             this.differanseberegnetPeriodebeløp != null &&
             this.differanseberegnetPeriodebeløp <= 0
