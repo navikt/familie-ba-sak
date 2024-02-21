@@ -169,6 +169,7 @@ enum class SanityPeriodeResultat {
     INGEN_ENDRING,
     IKKE_INNVILGET,
     REDUKSJON,
+    IKKE_RELEVANT,
 }
 
 enum class EndretUtbetalingsperiodeTrigger {

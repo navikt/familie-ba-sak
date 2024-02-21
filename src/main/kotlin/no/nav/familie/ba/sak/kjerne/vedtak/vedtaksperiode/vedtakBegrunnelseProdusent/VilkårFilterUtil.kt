@@ -112,7 +112,9 @@ private fun finnUtgjørendeVilkår(
             SanityPeriodeResultat.REDUKSJON,
             -> vilkårTapt + vilkårEndret
 
-            null -> emptyList()
+            SanityPeriodeResultat.IKKE_RELEVANT,
+            null,
+            -> emptyList()
         }
     } else {
         vilkårTapt.takeIf {
