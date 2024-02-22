@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.sikkerhet
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.security.token.support.core.context.TokenValidationContext
+import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 
 object SikkerhetContext {
@@ -24,7 +26,9 @@ object SikkerhetContext {
     fun hentSaksbehandler(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
-                onSuccess = { it.getClaims("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE },
+                onSuccess = {
+                    it.hentClaimsForIssuer("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE
+                },
                 onFailure = { SYSTEM_FORKORTELSE },
             )
     }
@@ -32,7 +36,7 @@ object SikkerhetContext {
     fun hentSaksbehandlerEpost(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
-                onSuccess = { it.getClaims("azuread")?.get("preferred_username")?.toString() ?: SYSTEM_FORKORTELSE },
+                onSuccess = { it.hentClaimsForIssuer("azuread")?.get("preferred_username")?.toString() ?: SYSTEM_FORKORTELSE },
                 onFailure = { SYSTEM_FORKORTELSE },
             )
     }
@@ -40,7 +44,7 @@ object SikkerhetContext {
     fun hentSaksbehandlerNavn(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
-                onSuccess = { it.getClaims("azuread")?.get("name")?.toString() ?: SYSTEM_NAVN },
+                onSuccess = { it.hentClaimsForIssuer("azuread")?.get("name")?.toString() ?: SYSTEM_NAVN },
                 onFailure = { SYSTEM_NAVN },
             )
     }
@@ -84,10 +88,14 @@ object SikkerhetContext {
             .fold(
                 onSuccess = {
                     @Suppress("UNCHECKED_CAST")
-                    it.getClaims("azuread").get("groups") as List<String>? ?: emptyList()
+                    it.hentClaimsForIssuer("azuread")?.get("groups") as List<String>? ?: emptyList()
                 },
                 onFailure = { emptyList() },
             )
+    }
+
+    fun TokenValidationContext.hentClaimsForIssuer(issuer: String): JwtTokenClaims? {
+        return if (this.issuers.contains(issuer)) this.getClaims(issuer) else null
     }
 
     fun kallKommerFraKlage(): Boolean {
