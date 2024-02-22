@@ -25,16 +25,16 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestUtvidetVedt
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpHeaders
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import org.springframework.web.util.UriUtils.encodePath
 import java.net.URI
 import java.time.LocalDate
 
 class FamilieBaSakKlient(
     private val baSakUrl: String,
-    restOperations: RestOperations,
+    restClient: RestClient,
     private val headers: HttpHeaders,
-) : AbstractRestClient(restOperations, "familie-ba-sak") {
+) : AbstractRestClient(restClient, "familie-ba-sak") {
     fun opprettFagsak(søkersIdent: String): Ressurs<RestMinimalFagsak> {
         val uri = URI.create("$baSakUrl/api/fagsaker")
 

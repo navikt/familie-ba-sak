@@ -14,15 +14,15 @@ import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.io.IOException
 import java.net.URI
 
 @Component
 class InfotrygdFeedClient(
     @Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") private val clientUri: URI,
-    @Qualifier("jwtBearer") restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "infotrygd_feed") {
+    @Qualifier("jwtBearer") restClient: RestClient,
+) : AbstractRestClient(restClient, "infotrygd_feed") {
     fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) {
         return try {
             sendFeedTilInfotrygd(

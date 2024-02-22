@@ -9,15 +9,15 @@ import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
 class KlageClient(
-    @Qualifier("jwtBearer") restOperations: RestOperations,
+    @Qualifier("jwtBearer") restClient: RestClient,
     @Value("\${FAMILIE_KLAGE_URL}") private val familieKlageUri: URI,
-) : AbstractRestClient(restOperations, "integrasjon") {
+) : AbstractRestClient(restClient, "integrasjon") {
     fun opprettKlage(opprettKlagebehandlingRequest: OpprettKlagebehandlingRequest) {
         val uri =
             UriComponentsBuilder

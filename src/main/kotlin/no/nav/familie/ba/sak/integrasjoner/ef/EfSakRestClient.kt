@@ -10,14 +10,14 @@ import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 @Component
 class EfSakRestClient(
     @Value("\${FAMILIE_EF_SAK_API_URL}") private val efSakBaseUrl: URI,
-    @Qualifier("jwtBearer") restTemplate: RestOperations,
-) : AbstractRestClient(restTemplate, "ef-sak") {
+    @Qualifier("jwtBearer") restClient: RestClient,
+) : AbstractRestClient(restClient, "ef-sak") {
     fun hentPerioderMedFullOvergangsstønad(personIdent: String): EksternePerioderResponse {
         val uri = UriUtil.uri(efSakBaseUrl, "ekstern/perioder/full-overgangsstonad")
 

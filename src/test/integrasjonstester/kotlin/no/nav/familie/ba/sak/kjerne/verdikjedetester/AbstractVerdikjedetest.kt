@@ -9,7 +9,7 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.support.TestPropertySourceUtils
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import org.testcontainers.containers.FixedHostPortGenericContainer
 import org.testcontainers.images.PullPolicy
 
@@ -56,19 +56,19 @@ class VerdikjedetesterPropertyOverrideContextInitializer :
 @Tag("verdikjedetest")
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
     @Autowired
-    lateinit var restOperations: RestOperations
+    lateinit var restClient: RestClient
 
     fun familieBaSakKlient(): FamilieBaSakKlient =
         FamilieBaSakKlient(
             baSakUrl = hentUrl(""),
-            restOperations = restOperations,
+            restClient = restClient,
             headers = hentHeadersForSystembruker(),
         )
 
     fun mockServerKlient(): MockserverKlient =
         MockserverKlient(
             mockServerUrl = "http://localhost:1337",
-            restOperations = restOperations,
+            restClient = restClient,
         )
 }
 

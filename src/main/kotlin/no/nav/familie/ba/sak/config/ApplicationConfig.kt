@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
+import org.springframework.boot.web.client.ClientHttpRequestFactories
+import org.springframework.boot.web.client.ClientHttpRequestFactorySettings
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
@@ -22,6 +24,7 @@ import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Primary
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.retry.annotation.EnableRetry
+import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestTemplate
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -73,10 +76,15 @@ class ApplicationConfig {
     @Bean
     @Primary
     fun oAuth2HttpClient(): OAuth2HttpClient {
+        val clientHttpRequestFactorySettings =
+            ClientHttpRequestFactorySettings.DEFAULTS
+                .withConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                .withReadTimeout(Duration.of(4, ChronoUnit.SECONDS))
+        val requestFactory = ClientHttpRequestFactories.get(clientHttpRequestFactorySettings)
+
         return RetryOAuth2HttpClient(
-            RestTemplateBuilder()
-                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS)),
+            RestClient.builder()
+                .requestFactory(requestFactory).build(),
         )
     }
 
@@ -86,7 +94,7 @@ class ApplicationConfig {
     ) = object : ProsesseringInfoProvider {
         override fun hentBrukernavn(): String =
             try {
-                SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread").getStringClaim("preferred_username")
+                SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread").getStringClaim("preferred_username")
             } catch (e: Exception) {
                 "VL"
             }
@@ -96,7 +104,7 @@ class ApplicationConfig {
         @Suppress("UNCHECKED_CAST")
         private fun grupper(): List<String> {
             return try {
-                SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
+                SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread")
                     ?.get("groups") as List<String>? ?: emptyList()
             } catch (e: Exception) {
                 emptyList()

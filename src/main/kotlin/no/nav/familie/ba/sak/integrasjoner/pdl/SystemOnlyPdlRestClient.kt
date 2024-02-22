@@ -16,15 +16,15 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 @Service
 class SystemOnlyPdlRestClient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
-    @Qualifier("jwtBearerClientCredentials") override val restTemplate: RestOperations,
+    @Qualifier("jwtBearerClientCredentials") restClient: RestClient,
     override val personidentService: PersonidentService,
-) : PdlRestClient(pdlBaseUrl, restTemplate, personidentService) {
+) : PdlRestClient(pdlBaseUrl, restClient, personidentService) {
     @Cacheable("adressebeskyttelse", cacheManager = "shortCache")
     fun hentAdressebeskyttelse(aktør: Aktør): List<Adressebeskyttelse> {
         val pdlPersonRequest =

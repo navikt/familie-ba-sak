@@ -66,7 +66,7 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 import java.time.LocalDate
 import kotlin.random.Random
@@ -74,7 +74,7 @@ import kotlin.random.Random
 class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
     @Autowired
     @Qualifier("jwtBearer")
-    lateinit var restOperations: RestOperations
+    lateinit var restClient: RestClient
 
     lateinit var integrasjonClient: IntegrasjonClient
     lateinit var utgåendeJournalføringService: UtgåendeJournalføringService
@@ -84,7 +84,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         integrasjonClient =
             IntegrasjonClient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
-                restOperations,
+                restClient,
             )
         utgåendeJournalføringService =
             UtgåendeJournalføringService(

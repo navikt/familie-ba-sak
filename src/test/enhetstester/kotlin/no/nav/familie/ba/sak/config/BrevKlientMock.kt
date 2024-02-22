@@ -11,12 +11,12 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.RestClient
 
 @Service
 class BrevKlientMock : BrevKlient(
     familieBrevUri = "brev_uri_mock",
-    restTemplate = RestTemplate(),
+    restClient = RestClient.create(),
     sanityDataset = "",
     testVerktøyService = mockk(),
 ) {

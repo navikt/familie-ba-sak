@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.env.Environment
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
@@ -33,7 +33,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     @Qualifier("jwtBearer")
-    lateinit var restOperations: RestOperations
+    lateinit var restClient: RestClient
 
     @Autowired
     lateinit var environment: Environment
@@ -45,7 +45,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
         client =
             InfotrygdBarnetrygdClient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
-                restOperations,
+                restClient,
             )
     }
 

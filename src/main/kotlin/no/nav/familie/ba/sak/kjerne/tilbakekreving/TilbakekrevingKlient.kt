@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 typealias TilbakekrevingId = String
@@ -26,8 +26,8 @@ data class FinnesBehandlingsresponsDto(val finnesÅpenBehandling: Boolean)
 @Component
 class TilbakekrevingKlient(
     @Value("\${FAMILIE_TILBAKE_API_URL}") private val familieTilbakeUri: URI,
-    @Qualifier("jwtBearer") restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "Tilbakekreving") {
+    @Qualifier("jwtBearer") restClient: RestClient,
+) : AbstractRestClient(restClient, "Tilbakekreving") {
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
         val uri = URI.create("$familieTilbakeUri/dokument/forhandsvis-varselbrev")
 

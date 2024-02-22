@@ -22,13 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
     @Autowired
     @Qualifier("jwtBearer")
-    lateinit var restOperations: RestOperations
+    lateinit var restClient: RestClient
 
     lateinit var integrasjonClient: IntegrasjonClient
 
@@ -37,7 +37,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
         integrasjonClient =
             IntegrasjonClient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
-                restOperations,
+                restClient,
             )
     }
 

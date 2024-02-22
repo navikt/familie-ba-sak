@@ -30,16 +30,16 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 import java.time.LocalDate
 
 @Service
 class PdlRestClient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
-    @Qualifier("jwtBearer") val restTemplate: RestOperations,
+    @Qualifier("jwtBearer") restClient: RestClient,
     val personidentService: PersonidentService,
-) : AbstractRestClient(restTemplate, "pdl.personinfo") {
+) : AbstractRestClient(restClient, "pdl.personinfo") {
     protected val pdlUri = UriUtil.uri(pdlBaseUrl, PATH_GRAPHQL)
 
     @Cacheable("personopplysninger", cacheManager = "shortCache")

@@ -3,16 +3,16 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import org.slf4j.LoggerFactory
-import org.springframework.web.client.RestOperations
-import org.springframework.web.client.postForEntity
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 
 class MockserverKlient(
     private val mockServerUrl: String,
-    private val restOperations: RestOperations,
+    private val restClient: RestClient,
 ) {
     fun lagScenario(restScenario: RestScenario): RestScenario {
         val scenario =
-            restOperations.postForEntity<RestScenario>("$mockServerUrl/rest/scenario", restScenario).body
+            restClient.post().body(restScenario).retrieve().body<RestScenario>()
                 ?: error("Klarte ikke lage scenario med data $restScenario")
         logger.info("Laget scenario: ${scenario.convertDataClassToJson()}")
 

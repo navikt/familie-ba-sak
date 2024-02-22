@@ -10,7 +10,7 @@ import no.nav.familie.http.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 val FAMILIE_BREV_TJENESTENAVN = "famile-brev"
@@ -19,9 +19,9 @@ val FAMILIE_BREV_TJENESTENAVN = "famile-brev"
 class BrevKlient(
     @Value("\${FAMILIE_BREV_API_URL}") private val familieBrevUri: String,
     @Value("\${SANITY_DATASET}") private val sanityDataset: String,
-    restTemplate: RestTemplate,
+    restClient: RestClient,
     private val testVerktøyService: TestVerktøyService,
-) : AbstractRestClient(restTemplate, "familie-brev") {
+) : AbstractRestClient(restClient, "familie-brev") {
     fun genererBrev(
         målform: String,
         brev: Brev,

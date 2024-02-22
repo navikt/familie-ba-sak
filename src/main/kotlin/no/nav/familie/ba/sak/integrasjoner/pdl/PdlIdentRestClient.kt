@@ -16,14 +16,14 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 @Component
 class PdlIdentRestClient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
-    @Qualifier("jwtBearer") val restTemplate: RestOperations,
-) : AbstractRestClient(restTemplate, "pdl.ident") {
+    @Qualifier("jwtBearer") restClient: RestClient,
+) : AbstractRestClient(restClient, "pdl.ident") {
     protected val pdlUri = UriUtil.uri(pdlBaseUrl, PATH_GRAPHQL)
 
     private val hentIdenterQuery = hentGraphqlQuery("hentIdenter")

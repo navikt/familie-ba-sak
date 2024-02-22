@@ -14,7 +14,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 import java.nio.charset.StandardCharsets
-import java.time.Duration
 
 @TestConfiguration
 @Import(
@@ -81,14 +80,14 @@ class RestTemplateTestConfig {
             .build()
     }
 
-    @Bean
-    fun restTemplateBuilderMedProxy(
-        consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-        mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor,
-    ): RestTemplateBuilder {
-        return RestTemplateBuilder()
-            .setConnectTimeout(Duration.ofSeconds(5))
-            .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
-            .setReadTimeout(Duration.ofSeconds(5))
-    }
+    // @Bean
+    // fun restTemplateBuilderMedProxy(
+    //     consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+    //     mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor,
+    // ): RestTemplateBuilder {
+    //     return RestTemplateBuilder()
+    //         .setConnectTimeout(Duration.ofSeconds(5))
+    //         .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
+    //         .setReadTimeout(Duration.ofSeconds(5))
+    // }
 }

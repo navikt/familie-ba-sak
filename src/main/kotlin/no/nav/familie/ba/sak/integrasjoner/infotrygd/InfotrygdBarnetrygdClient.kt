@@ -24,7 +24,7 @@ import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 import java.time.LocalDate
 import java.time.YearMonth
@@ -32,8 +32,8 @@ import java.time.YearMonth
 @Component
 class InfotrygdBarnetrygdClient(
     @Value("\${FAMILIE_BA_INFOTRYGD_API_URL}") private val clientUri: URI,
-    @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "infotrygd") {
+    @Qualifier("jwtBearerMedLangTimeout") restClient: RestClient,
+) : AbstractRestClient(restClient, "infotrygd") {
     fun harLøpendeSakIInfotrygd(
         søkersIdenter: List<String>,
         barnasIdenter: List<String> = emptyList(),

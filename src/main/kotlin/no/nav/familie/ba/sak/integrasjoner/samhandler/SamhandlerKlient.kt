@@ -9,15 +9,15 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 @Service
 class SamhandlerKlient(
     @Value("\${FAMILIE_OPPDRAG_API_URL}")
     private val familieOppdragUri: String,
-    @Qualifier("jwtBearer") restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "samhandler") {
+    @Qualifier("jwtBearer") restClient: RestClient,
+) : AbstractRestClient(restClient, "samhandler") {
     @Cacheable("hent-samhandler", cacheManager = "dailyCache")
     fun hentSamhandler(orgNummer: String): SamhandlerInfo {
         val uri = URI.create("$familieOppdragUri/tss/orgnr/$orgNummer")
