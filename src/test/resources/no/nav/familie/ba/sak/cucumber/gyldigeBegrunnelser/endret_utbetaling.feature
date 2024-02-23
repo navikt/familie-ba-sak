@@ -274,10 +274,8 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 08.02.1988  |              |
       | 1            | 2       | BARN       | 28.01.2011  |              |
-      | 1            | 3       | BARN       | 01.07.2015  |              |
       | 2            | 1       | SØKER      | 08.02.1988  |              |
       | 2            | 2       | BARN       | 28.01.2011  |              |
-      | 2            | 3       | BARN       | 01.07.2015  |              |
 
     Og lag personresultater for begrunnelse for behandling 1
     Og lag personresultater for begrunnelse for behandling 2
@@ -293,10 +291,6 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | 2       | LOVLIG_OPPHOLD,BOSATT_I_RIKET               |                  | 01.01.2013 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 2       | BOR_MED_SØKER                               | DELT_BOSTED      | 20.02.2013 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
-      | 3       | BOR_MED_SØKER,LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 01.07.2015 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
-      | 3       | GIFT_PARTNERSKAP                            |                  | 01.07.2015 |            | OPPFYLT  | Nei                  |                      |                  |
-      | 3       | UNDER_18_ÅR                                 |                  | 01.07.2015 | 30.06.2033 | OPPFYLT  | Nei                  |                      |                  |
-
     Og legg til nye vilkårresultater for begrunnelse for behandling 2
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD               |                  | 01.01.2013 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
@@ -309,10 +303,6 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | 2       | BOR_MED_SØKER                               | DELT_BOSTED      | 20.02.2013 | 10.05.2015 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 2       | BOR_MED_SØKER                               |                  | 11.05.2015 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
-      | 3       | LOVLIG_OPPHOLD,BOSATT_I_RIKET,BOR_MED_SØKER |                  | 01.07.2015 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
-      | 3       | UNDER_18_ÅR                                 |                  | 01.07.2015 | 30.06.2033 | OPPFYLT  | Nei                  |                      |                  |
-      | 3       | GIFT_PARTNERSKAP                            |                  | 01.07.2015 |            | OPPFYLT  | Nei                  |                      |                  |
-
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 1       | 2            | 01.03.2013 | 30.04.2015 | 485   | UTVIDET_BARNETRYGD | 50      | 970  |
@@ -323,13 +313,7 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
       | 2       | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
       | 2       | 2            | 01.07.2023 | 31.12.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
       | 2       | 2            | 01.01.2024 | 31.12.2028 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
-      | 3       | 2            | 01.08.2015 | 28.02.2019 | 970   | ORDINÆR_BARNETRYGD | 100     | 970  |
-      | 3       | 2            | 01.03.2019 | 31.08.2020 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
-      | 3       | 2            | 01.09.2020 | 30.06.2021 | 1354  | ORDINÆR_BARNETRYGD | 100     | 1354 |
-      | 3       | 2            | 01.07.2021 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
-      | 3       | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
-      | 3       | 2            | 01.07.2023 | 31.12.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
-      | 3       | 2            | 01.01.2024 | 30.06.2033 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
+
 
     Og med endrede utbetalinger for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
@@ -339,14 +323,6 @@ Egenskap: Gyldige begrunnelser for endret utbetaling
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                              | Ugyldige begrunnelser |
-      | 01.06.2015 | 31.07.2015 | UTBETALING         |                                | ENDRET_UTBETALING_TRE_ÅR_TILBAKE_I_TID_UTBETALING |                       |
-      | 01.08.2015 | 28.02.2019 | UTBETALING         |                                | ENDRET_UTBETALING_TRE_ÅR_TILBAKE_I_TID_UTBETALING |                       |
-      | 01.03.2019 | 31.08.2020 | UTBETALING         |                                | ENDRET_UTBETALING_TRE_ÅR_TILBAKE_I_TID_UTBETALING |                       |
-      | 01.09.2020 | 31.10.2020 | UTBETALING         |                                | ENDRET_UTBETALING_TRE_ÅR_TILBAKE_I_TID_UTBETALING |                       |
-      | 01.11.2020 | 30.06.2021 | UTBETALING         |                                | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR     |                       |
-      | 01.07.2021 | 28.02.2023 | UTBETALING         |                                |                                                   |                       |
-      | 01.03.2023 | 30.06.2023 | UTBETALING         |                                |                                                   |                       |
-      | 01.07.2023 | 31.12.2023 | UTBETALING         |                                |                                                   |                       |
-      | 01.01.2024 | 31.12.2028 | UTBETALING         |                                |                                                   |                       |
-      | 01.01.2029 | 30.06.2033 | UTBETALING         |                                |                                                   |                       |
-      | 01.07.2033 |            | OPPHØR             |                                |                                                   |                       |
+      | 01.06.2015 | 28.02.2019 | UTBETALING         |                                | ENDRET_UTBETALING_TRE_ÅR_TILBAKE_I_TID_UTBETALING |                       |
+      | 01.03.2019 | 31.10.2020 | UTBETALING         |                                | ENDRET_UTBETALING_TRE_ÅR_TILBAKE_I_TID_UTBETALING |                       |
+      | 01.11.2020 | 28.02.2023 | UTBETALING         |                                | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR     |                       |
