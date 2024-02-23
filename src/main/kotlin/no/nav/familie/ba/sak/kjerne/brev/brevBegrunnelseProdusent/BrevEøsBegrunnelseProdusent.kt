@@ -52,7 +52,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
                 }
             }
 
-            null -> error("Feltet 'periodeResultat' er ikke satt for begrunnelse fra sanity '${sanityBegrunnelse.apiNavn}'.")
+            else -> error("Feltet 'periodeResultat' er ikke satt for begrunnelse fra sanity '${sanityBegrunnelse.apiNavn}'.")
         }
 
     val barnPåBehandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna

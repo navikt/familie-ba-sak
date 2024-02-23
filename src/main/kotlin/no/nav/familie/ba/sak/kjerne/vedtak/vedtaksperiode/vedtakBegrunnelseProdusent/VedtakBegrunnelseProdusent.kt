@@ -43,7 +43,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvni
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -270,7 +269,7 @@ internal fun ISanityBegrunnelse.skalVisesSelvOmIkkeEndring(
                         begrunnelseGrunnlagForPersonIPeriode.vilkårResultater.any { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT }
                     }
 
-            SanityPeriodeResultat.IKKE_INNVILGET -> false
+            SanityPeriodeResultat.IKKE_INNVILGET, SanityPeriodeResultat.IKKE_RELEVANT -> false
             null -> false
         }
     val begrunnelseSkalVisesSelvOmIkkeEndring =
@@ -324,6 +323,7 @@ fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
             SanityPeriodeResultat.REDUKSJON,
             -> begrunnelseGrunnlag.forrigePeriode?.kompetanse ?: return false
 
+            SanityPeriodeResultat.IKKE_RELEVANT,
             null,
             -> return false
         }
