@@ -27,6 +27,7 @@ object BehandlingsresultatOpphørUtils {
             nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
                 forrigeAndelerIBehandling = forrigeAndeler,
                 nåværendeEndretAndelerIBehandling = nåværendeEndretAndeler,
+                endretAndelerForForrigeBehandling = forrigeEndretAndeler
             )
 
         val forrigeBehandlingOpphørsdato =
@@ -54,9 +55,10 @@ object BehandlingsresultatOpphørUtils {
     fun List<AndelTilkjentYtelse>.utledOpphørsdatoForNåværendeBehandlingMedFallback(
         forrigeAndelerIBehandling: List<AndelTilkjentYtelse>,
         nåværendeEndretAndelerIBehandling: List<EndretUtbetalingAndel>,
+        endretAndelerForForrigeBehandling: List<EndretUtbetalingAndel>,
     ): YearMonth? {
         return this.filtrerBortIrrelevanteAndeler(endretAndeler = nåværendeEndretAndelerIBehandling).finnOpphørsdato()
-            ?: forrigeAndelerIBehandling.minOfOrNull { it.stønadFom }
+            ?: forrigeAndelerIBehandling.filtrerBortIrrelevanteAndeler(endretAndeler = endretAndelerForForrigeBehandling).minOfOrNull { it.stønadFom }
     }
 
     /**

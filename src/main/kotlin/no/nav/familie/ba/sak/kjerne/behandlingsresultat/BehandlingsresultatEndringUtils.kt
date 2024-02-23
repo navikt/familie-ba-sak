@@ -66,6 +66,7 @@ object BehandlingsresultatEndringUtils {
                     nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
                         forrigeAndelerIBehandling = forrigeAndeler,
                         nåværendeEndretAndelerIBehandling = nåværendeEndretAndeler,
+                        endretAndelerForForrigeBehandling = forrigeEndretAndeler
                     )
 
                 val erEndringIBeløpForPerson =
