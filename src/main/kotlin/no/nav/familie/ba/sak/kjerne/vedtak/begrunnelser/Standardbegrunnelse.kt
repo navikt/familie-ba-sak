@@ -369,6 +369,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetTillleggstekstSamboerUnder12MaanederForGift"
     },
+    INNVILGET_TILLEGGSTEKST_DELT_FOR_AVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstPraktisertDeltForAvtale"
+    },
     INNVILGET_TILLEGGSTEKST_SAMBOER_UNDER_12_MÅNEDER_FØR_NYTT_BARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetTilleggstekstSamboerUnder12MaanederForNyttBarn"
@@ -824,6 +828,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     AVSLAG_IKKE_FRIVILLIG_MEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagIkkeFrivilligMedlem"
+    },
+    AVSLAG_IKKE_FRIVILLIG_ELLER_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeFrivilligEllerPliktigMedlem"
     },
     AVSLAG_IKKE_PLIKTIG_MEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
