@@ -2,8 +2,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.hentBarnasFødselsdatoerForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.hentSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.begrunnelseGjelderOpphørFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserPerPerson
-import java.time.LocalDate
 
 fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     vedtaksperiode: VedtaksperiodeMedBegrunnelser,
@@ -55,16 +54,13 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
             else -> error("Feltet 'periodeResultat' er ikke satt for begrunnelse fra sanity '${sanityBegrunnelse.apiNavn}'.")
         }
 
-    val barnPåBehandling = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
-    val barnIBegrunnelse = personerGjeldendeForBegrunnelse.filter { it.type == PersonType.BARN }
-
     return if (kompetanser.isEmpty() && sanityBegrunnelse.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {
         val barnasFødselsdatoer =
-            hentBarnasFødselsdatoerForAvslagsbegrunnelse(
-                barnIBegrunnelse = barnIBegrunnelse,
-                barnPåBehandling = barnPåBehandling,
-                uregistrerteBarn = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn,
+            sanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
+                grunnlag = grunnlag,
                 gjelderSøker = gjelderSøker,
+                personerIBegrunnelse = personerIBegrunnelse,
+                begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
             )
 
         listOf(
@@ -106,20 +102,6 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
             }
         }
     }
-}
-
-fun hentBarnasFødselsdatoerForAvslagsbegrunnelse(
-    barnIBegrunnelse: List<Person>,
-    barnPåBehandling: List<Person>,
-    uregistrerteBarn: List<BarnMedOpplysninger>,
-    gjelderSøker: Boolean,
-): List<LocalDate> {
-    val registrerteBarnFødselsdatoer =
-        if (gjelderSøker) barnPåBehandling.map { it.fødselsdato } else barnIBegrunnelse.map { it.fødselsdato }
-    val uregistrerteBarnFødselsdatoer =
-        uregistrerteBarn.mapNotNull { it.fødselsdato }
-    val alleBarnaFødselsdatoer = registrerteBarnFødselsdatoer + uregistrerteBarnFødselsdatoer
-    return alleBarnaFødselsdatoer
 }
 
 data class Landkode(val kode: String, val navn: String) {
