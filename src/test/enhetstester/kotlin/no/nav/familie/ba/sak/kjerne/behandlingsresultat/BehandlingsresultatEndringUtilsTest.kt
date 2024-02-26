@@ -287,7 +287,11 @@ class BehandlingsresultatEndringUtilsTest {
                 ),
             )
 
-        val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+        val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+            forrigeAndelerIBehandling = forrigeAndeler,
+            nåværendeEndretAndelerIBehandling = emptyList(),
+            endretAndelerForForrigeBehandling = emptyList()
+        )
 
         val erEndringIBeløp =
             erEndringIBeløpForPerson(
@@ -341,7 +345,11 @@ class BehandlingsresultatEndringUtilsTest {
             listOf(barn1Aktør, barn2Aktør).any { aktør ->
                 val erFremstiltKravForPerson = personerFramstiltKravFor.contains(aktør)
 
-                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                    forrigeAndelerIBehandling = forrigeAndeler,
+                    nåværendeEndretAndelerIBehandling = emptyList(),
+                    endretAndelerForForrigeBehandling = emptyList()
+                )
 
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
@@ -405,7 +413,11 @@ class BehandlingsresultatEndringUtilsTest {
             listOf(barn1Aktør, barn2Aktør).any { aktør ->
                 val erFremstiltKravForPerson = personerFramstiltKravFor.contains(aktør)
 
-                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                    forrigeAndelerIBehandling = forrigeAndeler,
+                    nåværendeEndretAndelerIBehandling = emptyList(),
+                    endretAndelerForForrigeBehandling = emptyList()
+                )
 
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
@@ -459,7 +471,11 @@ class BehandlingsresultatEndringUtilsTest {
 
         val erEndringIBeløp =
             listOf(barn1Aktør, barn2Aktør).any { aktør ->
-                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                    forrigeAndelerIBehandling = forrigeAndeler,
+                    nåværendeEndretAndelerIBehandling = emptyList(),
+                    endretAndelerForForrigeBehandling = emptyList()
+                )
 
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
@@ -517,7 +533,11 @@ class BehandlingsresultatEndringUtilsTest {
             listOf(barn1Aktør, barn2Aktør).any { aktør ->
                 val erFremstiltKravForPerson = personerFramstiltKravFor.contains(aktør)
 
-                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                    forrigeAndelerIBehandling = forrigeAndeler,
+                    nåværendeEndretAndelerIBehandling = emptyList(),
+                    endretAndelerForForrigeBehandling = emptyList()
+                )
 
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
@@ -578,7 +598,11 @@ class BehandlingsresultatEndringUtilsTest {
         val erEndringIBeløp =
             listOf(barn1Aktør, barn2Aktør).any { aktør ->
 
-                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                    forrigeAndelerIBehandling = forrigeAndeler,
+                    nåværendeEndretAndelerIBehandling = emptyList(),
+                    endretAndelerForForrigeBehandling = emptyList()
+                )
 
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
@@ -642,7 +666,11 @@ class BehandlingsresultatEndringUtilsTest {
         val erEndringIBeløp =
             listOf(søker, barn2Aktør).any { aktør ->
 
-                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                    forrigeAndelerIBehandling = forrigeAndeler,
+                    nåværendeEndretAndelerIBehandling = emptyList(),
+                    endretAndelerForForrigeBehandling = emptyList()
+                )
 
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
@@ -697,7 +725,11 @@ class BehandlingsresultatEndringUtilsTest {
                 ),
             )
 
-        val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+        val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+            forrigeAndelerIBehandling = forrigeAndeler,
+            nåværendeEndretAndelerIBehandling = emptyList(),
+            endretAndelerForForrigeBehandling = emptyList()
+        )
 
         val erEndringIBeløp =
             erEndringIBeløpForPerson(
