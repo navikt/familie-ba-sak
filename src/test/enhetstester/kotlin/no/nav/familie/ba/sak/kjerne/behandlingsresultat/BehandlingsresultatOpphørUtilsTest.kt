@@ -453,45 +453,48 @@ class BehandlingsresultatOpphørUtilsTest {
     fun `utledOpphørsdatoForNåværendeBehandlingMedFallback - skal returnere null hvis det ikke finnes andeler i inneværende behandling og kun irrelevante nullutbetalinger i forrige behandling`() {
         val barn = lagPerson(type = PersonType.BARN)
 
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = for3mndSiden,
-                tom = for2mndSiden,
-                beløp = 0,
-                prosent = BigDecimal.ZERO,
-                aktør = barn.aktør
-            ),
-            lagAndelTilkjentYtelse(
-                fom = for1mndSiden,
-                tom = om4mnd,
-                beløp = 0,
-                prosent = BigDecimal.ZERO,
-                aktør = barn.aktør
+        val forrigeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = for3mndSiden,
+                    tom = for2mndSiden,
+                    beløp = 0,
+                    prosent = BigDecimal.ZERO,
+                    aktør = barn.aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = for1mndSiden,
+                    tom = om4mnd,
+                    beløp = 0,
+                    prosent = BigDecimal.ZERO,
+                    aktør = barn.aktør,
+                ),
             )
-        )
 
-        val forrigeEndretAndeler = listOf(
-            lagEndretUtbetalingAndel(
-                person = barn,
-                prosent = BigDecimal.ZERO,
-                fom = for3mndSiden,
-                tom = for2mndSiden,
-                årsak = Årsak.ALLEREDE_UTBETALT
-            ),
-            lagEndretUtbetalingAndel(
-                person = barn,
-                prosent = BigDecimal.ZERO,
-                fom = for1mndSiden,
-                tom = om4mnd,
-                årsak = Årsak.ENDRE_MOTTAKER
+        val forrigeEndretAndeler =
+            listOf(
+                lagEndretUtbetalingAndel(
+                    person = barn,
+                    prosent = BigDecimal.ZERO,
+                    fom = for3mndSiden,
+                    tom = for2mndSiden,
+                    årsak = Årsak.ALLEREDE_UTBETALT,
+                ),
+                lagEndretUtbetalingAndel(
+                    person = barn,
+                    prosent = BigDecimal.ZERO,
+                    fom = for1mndSiden,
+                    tom = om4mnd,
+                    årsak = Årsak.ENDRE_MOTTAKER,
+                ),
             )
-        )
 
-        val opphørstidspunktInneværendeBehandling = emptyList<AndelTilkjentYtelse>().utledOpphørsdatoForNåværendeBehandlingMedFallback(
-            forrigeAndelerIBehandling = forrigeAndeler,
-            endretAndelerForForrigeBehandling = forrigeEndretAndeler,
-            nåværendeEndretAndelerIBehandling = emptyList()
-        )
+        val opphørstidspunktInneværendeBehandling =
+            emptyList<AndelTilkjentYtelse>().utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                forrigeAndelerIBehandling = forrigeAndeler,
+                endretAndelerForForrigeBehandling = forrigeEndretAndeler,
+                nåværendeEndretAndelerIBehandling = emptyList(),
+            )
 
         assertNull(opphørstidspunktInneværendeBehandling)
     }
@@ -500,37 +503,40 @@ class BehandlingsresultatOpphørUtilsTest {
     fun `utledOpphørsdatoForNåværendeBehandlingMedFallback - skal returnere tidligste fom på andeler i forrige behandling hvis det ikke finnes andeler i inneværende behandling`() {
         val barn = lagPerson(type = PersonType.BARN)
 
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = for3mndSiden,
-                tom = for2mndSiden,
-                beløp = 0,
-                prosent = BigDecimal.ZERO,
-                aktør = barn.aktør
-            ),
-            lagAndelTilkjentYtelse(
-                fom = for1mndSiden,
-                tom = om4mnd,
-                prosent = BigDecimal.ZERO,
-                aktør = barn.aktør
+        val forrigeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = for3mndSiden,
+                    tom = for2mndSiden,
+                    beløp = 0,
+                    prosent = BigDecimal.ZERO,
+                    aktør = barn.aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = for1mndSiden,
+                    tom = om4mnd,
+                    prosent = BigDecimal.ZERO,
+                    aktør = barn.aktør,
+                ),
             )
-        )
 
-        val forrigeEndretAndeler = listOf(
-            lagEndretUtbetalingAndel(
-                person = barn,
-                prosent = BigDecimal.ZERO,
-                fom = for3mndSiden,
-                tom = for2mndSiden,
-                årsak = Årsak.ALLEREDE_UTBETALT
+        val forrigeEndretAndeler =
+            listOf(
+                lagEndretUtbetalingAndel(
+                    person = barn,
+                    prosent = BigDecimal.ZERO,
+                    fom = for3mndSiden,
+                    tom = for2mndSiden,
+                    årsak = Årsak.ALLEREDE_UTBETALT,
+                ),
             )
-        )
 
-        val opphørstidspunktInneværendeBehandling = emptyList<AndelTilkjentYtelse>().utledOpphørsdatoForNåværendeBehandlingMedFallback(
-            forrigeAndelerIBehandling = forrigeAndeler,
-            endretAndelerForForrigeBehandling = forrigeEndretAndeler,
-            nåværendeEndretAndelerIBehandling = emptyList()
-        )
+        val opphørstidspunktInneværendeBehandling =
+            emptyList<AndelTilkjentYtelse>().utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                forrigeAndelerIBehandling = forrigeAndeler,
+                endretAndelerForForrigeBehandling = forrigeEndretAndeler,
+                nåværendeEndretAndelerIBehandling = emptyList(),
+            )
 
         assertEquals(for1mndSiden, opphørstidspunktInneværendeBehandling)
     }
