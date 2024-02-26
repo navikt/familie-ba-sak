@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
-import no.nav.familie.ba.sak.task.PatchIdentForBarnPåFagsak
+import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.internal.TaskService
@@ -213,9 +213,9 @@ class ForvalterController(
                     "identen ikke er merget av folketrygden.",
         )
         @RequestBody
-        patchIdentForBarnPåFagsak: PatchIdentForBarnPåFagsak,
+        patchMergetIdentDto: PatchMergetIdentDto,
     ): ResponseEntity<String> {
-        opprettTaskService.opprettTaskForÅPatcheMergetIdent(patchIdentForBarnPåFagsak)
+        opprettTaskService.opprettTaskForÅPatcheMergetIdent(patchMergetIdentDto)
         return ResponseEntity.ok("ok")
     }
 

@@ -34,21 +34,22 @@ class PatchMergetIdentTask(
     private val personidentRepository: PersonidentRepository,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val dto = objectMapper.readValue(task.payload, PatchIdentForBarnPåFagsak::class.java)
-        secureLogger.info("Patcher barnets ident på fagsak $dto")
+        val dto = objectMapper.readValue(task.payload, PatchMergetIdentDto::class.java)
+        secureLogger.info("Patcher ident på fagsak $dto")
 
         if (dto.gammelIdent == dto.nyIdent) {
             throw IllegalArgumentException("ident som skal patches er lik ident som det skal patches til")
         }
 
-        val aktørerForBarnSomSkalPatches =
+        val aktørerForIdentSomSkalPatches =
             (
                 persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId = dto.fagsakId)
-                    ?.filter { it.type == PersonType.BARN && it.aktør.aktivFødselsnummer() == dto.gammelIdent.ident }
+                    ?.filter { it.type in listOf(PersonType.BARN, PersonType.SØKER) && it.aktør.aktivFødselsnummer() == dto.gammelIdent.ident }
                     ?.map { it.aktør.aktørId } ?: emptyList()
             ).toSet()
 
-        val aktørForBarnSomSkalPatches = aktørerForBarnSomSkalPatches.firstOrNull() ?: error("Fant ikke ident som skal patches som barn på fagsak=${dto.fagsakId} aktører=$aktørerForBarnSomSkalPatches")
+        if (aktørerForIdentSomSkalPatches.size > 1) error("Fant flere aktører for ident som skal patches. fagsak=${dto.fagsakId} aktører=$aktørerForIdentSomSkalPatches")
+        val aktørSomSkalPatches = aktørerForIdentSomSkalPatches.firstOrNull() ?: error("Fant ikke ident som skal patches som barn på fagsak=${dto.fagsakId} aktører=$aktørerForIdentSomSkalPatches")
 
         val identer = pdlIdentRestClient.hentIdenter(personIdent = dto.nyIdent.ident, historikk = true)
         if (dto.skalSjekkeAtGammelIdentErHistoriskAvNyIdent) {
@@ -62,7 +63,7 @@ class PatchMergetIdentTask(
 
         // Denne patcher med å bruke on cascade update på aktørid
         aktørIdRepository.patchAktørMedNyAktørId(
-            gammelAktørId = aktørForBarnSomSkalPatches,
+            gammelAktørId = aktørSomSkalPatches,
             nyAktørId = identer.hentAktivAktørId(),
         )
 
@@ -74,7 +75,7 @@ class PatchMergetIdentTask(
         aktørMergeLoggRepository.save(
             AktørMergeLogg(
                 fagsakId = dto.fagsakId,
-                historiskAktørId = aktørForBarnSomSkalPatches,
+                historiskAktørId = aktørSomSkalPatches,
                 nyAktørId = nyAktør.aktørId,
                 mergeTidspunkt = LocalDateTime.now(),
             ),
@@ -86,7 +87,7 @@ class PatchMergetIdentTask(
     }
 }
 
-data class PatchIdentForBarnPåFagsak(
+data class PatchMergetIdentDto(
     val fagsakId: Long,
     val gammelIdent: PersonIdent,
     val nyIdent: PersonIdent,
