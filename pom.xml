@@ -21,26 +21,26 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20240110093731_0eda75e</prosessering.version>
+        <prosessering.version>2.20240214140223_83c31de</prosessering.version>
         <felles.version>2.20240123084817_35f03aa</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20240212214436_02d2bd9</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20240215101759_cea211f</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230912090318_2267c05</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20240208132236_bce5777</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
         <cucumber.version>7.15.0</cucumber.version>
         <mockk.version>1.13.5</mockk.version>
-        <wiremock.version>3.3.1</wiremock.version>
+        <wiremock.version>3.4.1</wiremock.version>
         <token-validation-spring.version>3.2.0</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.3.0</springdoc.version>
         <sentry.version>7.3.0</sentry.version>
-        <kotlinx.version>1.7.3</kotlinx.version>
+        <kotlinx.version>1.8.0</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>2.1.1</mock-oauth2-server.version>
+        <mock-oauth2-server.version>2.1.2</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>

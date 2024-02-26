@@ -694,24 +694,24 @@ class BehandlingsresultatEndringUtilsTest {
     }
 
     @Test
-    fun `Endring i beløp - Skal ikke bry seg om endringer lengre enn 2 måneder fram i tid`() {
+    fun `Endring i beløp - Skal ikke bry seg om endringer lengre enn 1 måneder fram i tid`() {
         val søker = lagPerson(type = PersonType.SØKER).aktør
         val barnAktør = lagPerson(type = PersonType.BARN).aktør
         val denneMåned = YearMonth.now()
-        val toMånederFramITid = denneMåned.plusMonths(2)
-        val treMånederFramITid = toMånederFramITid.plusMonths(1)
+        val enMånedFramITid = denneMåned.plusMonths(1)
+        val toMånederFramITid = enMånedFramITid.plusMonths(1)
 
         val forrigeAndeler =
             listOf(
                 lagAndelTilkjentYtelse(
                     fom = denneMåned,
-                    tom = toMånederFramITid,
+                    tom = enMånedFramITid,
                     beløp = 1054,
                     aktør = søker,
                 ),
                 lagAndelTilkjentYtelse(
-                    fom = treMånederFramITid,
-                    tom = treMånederFramITid,
+                    fom = toMånederFramITid,
+                    tom = toMånederFramITid,
                     beløp = 1054,
                     aktør = barnAktør,
                 ),
@@ -720,13 +720,13 @@ class BehandlingsresultatEndringUtilsTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     fom = denneMåned,
-                    tom = toMånederFramITid,
+                    tom = enMånedFramITid,
                     beløp = 1054,
                     aktør = søker,
                 ),
                 lagAndelTilkjentYtelse(
-                    fom = treMånederFramITid,
-                    tom = treMånederFramITid,
+                    fom = toMånederFramITid,
+                    tom = toMånederFramITid,
                     beløp = 1070,
                     aktør = barnAktør,
                 ),
