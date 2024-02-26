@@ -27,7 +27,7 @@ object BehandlingsresultatOpphørUtils {
             nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
                 forrigeAndelerIBehandling = forrigeAndeler,
                 nåværendeEndretAndelerIBehandling = nåværendeEndretAndeler,
-                endretAndelerForForrigeBehandling = forrigeEndretAndeler
+                endretAndelerForForrigeBehandling = forrigeEndretAndeler,
             )
 
         val forrigeBehandlingOpphørsdato =
