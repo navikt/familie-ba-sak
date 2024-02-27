@@ -178,7 +178,7 @@ class OpprettTaskService(
 
     @Transactional
     fun opprettTaskForÅPatcheMergetIdent(
-        dto: PatchIdentForBarnPåFagsak,
+        dto: PatchMergetIdentDto,
     ) {
         taskRepository.save(
             Task(
