@@ -203,8 +203,8 @@ class ForvalterController(
             .replace("\n", System.lineSeparator())
     }
 
-    @PatchMapping("/patch-fagsak-med-ny-ident-for-barn")
-    fun patchIdentForBarnPåFagsak(
+    @PatchMapping("/patch-fagsak-med-ny-ident")
+    fun patchMergetIdent(
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description =
                 "skalSjekkeAtGammelIdentErHistoriskAvNyIdent - Sjekker at " +

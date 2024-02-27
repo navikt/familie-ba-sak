@@ -105,7 +105,7 @@ class PatchMergetIdentTaskTest {
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns emptySet()
 
         assertThrows<IllegalStateException> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
-            assertThat(it.message).isEqualTo("Fant ikke ident som skal patches som barn på fagsak=${fagsak.id} aktører=[]")
+            assertThat(it.message).isEqualTo("Fant ikke ident som skal patches på fagsak=${fagsak.id} aktører=[]")
         }
     }
 
