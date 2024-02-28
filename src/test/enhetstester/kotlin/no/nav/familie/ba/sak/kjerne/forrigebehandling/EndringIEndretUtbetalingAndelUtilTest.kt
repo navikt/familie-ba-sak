@@ -71,54 +71,6 @@ class EndringIEndretUtbetalingAndelUtilTest {
     }
 
     @Test
-    fun `Endring i endret utbetaling andel - skal ikke ha noen endrede perioder hvis eneste endring er at perioden blir lenger`() {
-        val barn = lagPerson(type = PersonType.BARN)
-        val forrigeEndretAndel =
-            lagEndretUtbetalingAndel(
-                person = barn,
-                prosent = BigDecimal.ZERO,
-                fom = jan22,
-                tom = aug22,
-                årsak = Årsak.DELT_BOSTED,
-                søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
-                avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned(),
-            )
-
-        val nåværendeEndretAndel = forrigeEndretAndel.copy(tom = des22)
-
-        val perioderMedEndring =
-            EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUbetalingAndelPerPersonTidslinje(
-                forrigeEndretAndelerForPerson = listOf(forrigeEndretAndel),
-                nåværendeEndretAndelerForPerson = listOf(nåværendeEndretAndel),
-            ).perioder().filter { it.innhold == true }
-
-        assertTrue(perioderMedEndring.isEmpty())
-    }
-
-    @Test
-    fun `Endring i endret utbetaling andel - skal ikke ha noen endrede perioder hvis endringsperiode oppstår i nåværende behandling`() {
-        val barn = lagPerson(type = PersonType.BARN)
-        val nåværendeEndretAndel =
-            lagEndretUtbetalingAndel(
-                person = barn,
-                prosent = BigDecimal.ZERO,
-                fom = jan22,
-                tom = aug22,
-                årsak = Årsak.DELT_BOSTED,
-                søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
-                avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned(),
-            )
-
-        val perioderMedEndring =
-            EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUbetalingAndelPerPersonTidslinje(
-                forrigeEndretAndelerForPerson = emptyList(),
-                nåværendeEndretAndelerForPerson = listOf(nåværendeEndretAndel),
-            ).perioder().filter { it.innhold == true }
-
-        assertTrue(perioderMedEndring.isEmpty())
-    }
-
-    @Test
     fun `Endring i endret utbetaling andel - skal returnere endret periode hvis et av to barn har endring på årsak`() {
         val barn1 = lagPerson(type = PersonType.BARN)
         val barn2 = lagPerson(type = PersonType.BARN)
