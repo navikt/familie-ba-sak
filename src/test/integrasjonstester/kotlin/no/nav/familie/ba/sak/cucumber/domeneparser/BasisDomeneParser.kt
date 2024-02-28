@@ -322,7 +322,7 @@ inline fun <reified T : Enum<T>> parseEnum(
     domenebegrep: Domenenøkkel,
     rad: Map<String, String>,
 ): T {
-    return parseValgfriEnum<T>(domenebegrep, rad)!!
+    return parseValgfriEnum<T>(domenebegrep, rad) ?: error("Fant ikke enum verdi for ${domenebegrep.nøkkel}. Gjelder rad $rad")
 }
 
 inline fun <reified T : Enum<T>> parseEnumListe(

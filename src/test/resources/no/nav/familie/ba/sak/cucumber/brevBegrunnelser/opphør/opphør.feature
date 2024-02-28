@@ -370,3 +370,4 @@ Egenskap: Brevbegrunnelser ved opphør
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.01.2024 til -
       | Begrunnelse                    | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
       | OPPHØR_IKKE_OPPHOLDSTILLATELSE | STANDARD | Ja            | 08.12.23             | 1           | desember 2023                        | NB      | 0     |
+

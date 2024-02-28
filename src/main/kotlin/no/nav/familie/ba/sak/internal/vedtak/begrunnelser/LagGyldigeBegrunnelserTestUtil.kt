@@ -349,7 +349,7 @@ fun hentTekstValgteBegrunnelser(
 fun hentValgteBegrunnelserRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
-        | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | ${vedtaksperiode.begrunnelser.joinToString { it.standardbegrunnelse.name }} | ${vedtaksperiode.eøsBegrunnelser.joinToString { it.begrunnelse.name }} | ${vedtaksperiode.fritekster.joinToString()} |"""
+        | ${vedtaksperiode.fom?.tilddMMyyyy() ?: ""} |${vedtaksperiode.tom?.tilddMMyyyy() ?: ""} | ${vedtaksperiode.begrunnelser.joinToString { it.standardbegrunnelse.name }} | ${vedtaksperiode.eøsBegrunnelser.joinToString { it.begrunnelse.name }} | |"""
     }
 
 fun hentTekstBrevPerioder(
@@ -365,7 +365,7 @@ fun hentTekstBrevPerioder(
 fun hentBrevPeriodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
         """
-        | | ${vedtaksperiode.fom?.tilMånedÅr() ?: ""} | ${vedtaksperiode.tom?.tilMånedÅr() ?: ""} | | | | |"""
+        | ${vedtaksperiode.type} | ${vedtaksperiode.fom?.tilMånedÅr() ?: ""} | ${vedtaksperiode.tom?.tilMånedÅr() ?: ""} | | | | |"""
     }
 
 fun hentBrevBegrunnelseTekster(
