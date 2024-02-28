@@ -842,7 +842,7 @@ class BehandlingsresultatEndringUtilsTest {
     }
 
     @Test
-    fun `Endring i endret utbetaling andel - skal returnere false hvis eneste endring er at perioden blir lenger`() {
+    fun `Endring i endret utbetaling andel - skal returnere true hvis eneste endring er at perioden blir lenger`() {
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -861,11 +861,11 @@ class BehandlingsresultatEndringUtilsTest {
                 nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndel.copy(tom = des22)),
             )
 
-        assertFalse(erEndringIEndretAndeler)
+        assertTrue(erEndringIEndretAndeler)
     }
 
     @Test
-    fun `Endring i endret utbetaling andel - skal returnere false hvis endringsperiode oppstår i nåværende behandling`() {
+    fun `Endring i endret utbetaling andel - skal returnere true hvis endringsperiode oppstår i nåværende behandling`() {
         val barn = lagPerson(type = PersonType.BARN)
         val nåværendeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -884,7 +884,7 @@ class BehandlingsresultatEndringUtilsTest {
                 nåværendeEndretAndelerForPerson = listOf(nåværendeEndretAndel),
             )
 
-        assertFalse(erEndringIEndretAndeler)
+        assertTrue(erEndringIEndretAndeler)
     }
 
     @Test
