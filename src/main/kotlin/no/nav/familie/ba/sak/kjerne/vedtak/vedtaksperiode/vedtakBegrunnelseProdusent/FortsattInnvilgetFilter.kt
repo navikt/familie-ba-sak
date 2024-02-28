@@ -32,7 +32,7 @@ fun hentFortsattInnvilgetBegrunnelserPerPerson(
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
         val begrunnelseGrunnlagForPerson = begrunnelseGrunnlag.dennePerioden
 
-        val endretUtbetalingDennePerioden = begrunnelseGrunnlagForPerson.endretUtbetalingAndel
+        val endretUtbetalingAndelDennePeriodenForPerson = begrunnelseGrunnlagForPerson.endretUtbetalingAndel
 
         val oppfylteVilkårresultater =
             begrunnelseGrunnlagForPerson.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }.toList()
@@ -45,7 +45,7 @@ fun hentFortsattInnvilgetBegrunnelserPerPerson(
         val standardbegrunnelseSomMatcherEndretUtbetalingAndel =
             relevanteStandardbegrunnelser
                 .filterValues { it.erGjeldendeForRolle(person, fagsakType) }
-                .filterValues { it.erLikEndretUtbetalingIPeriode(endretUtbetalingDennePerioden) }
+                .filterValues { it.erLikEndretUtbetalingIPeriode(endretUtbetalingAndelDennePeriodenForPerson) }
 
         val eøsBegrunnelserSomMatcherKompetanse =
             relevanteEøsBegrunnelser
