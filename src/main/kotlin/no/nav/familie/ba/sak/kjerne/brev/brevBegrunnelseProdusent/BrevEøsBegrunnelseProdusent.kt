@@ -31,9 +31,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     val periodegrunnlagForPersonerIBegrunnelse =
         begrunnelsesGrunnlagPerPerson.filter { (person, _) -> person in personerGjeldendeForBegrunnelse }
 
-    val personerIBegrunnelse = personerGjeldendeForBegrunnelse
-
-    val gjelderSøker = personerIBegrunnelse.any { it.type == PersonType.SØKER }
+    val gjelderSøker = personerGjeldendeForBegrunnelse.any { it.type == PersonType.SØKER }
     val begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = (sanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling()) && gjelderSøker
     val kompetanser =
         when (sanityBegrunnelse.periodeResultat) {
@@ -59,7 +57,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
             sanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                 grunnlag = grunnlag,
                 gjelderSøker = gjelderSøker,
-                personerIBegrunnelse = personerIBegrunnelse,
+                personerIBegrunnelse = personerGjeldendeForBegrunnelse,
                 begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
             )
 
