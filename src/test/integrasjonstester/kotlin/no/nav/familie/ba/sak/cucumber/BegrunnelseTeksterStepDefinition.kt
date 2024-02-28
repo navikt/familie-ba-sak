@@ -417,10 +417,8 @@ data class SammenlignbarBegrunnelse(
 )
 
 private object SanityBegrunnelseMock {
-    // For å laste ned begrunnelsene kjør kommandoene under eller se https://familie-brev.sanity.studio/ba-brev/vision med query fra SanityQueries.kt .
-    // EØS: curl -XGET https://xsrv1mh6.api.sanity.io/v2022-03-07/data/query/ba-brev\?query\=\*%5B_type+%3D%3D+%22begrunnelse%22+%26%26+regelverk+%3D%3D+%22E%C3%98S%22+%26%26+apiNavn+%21%3D+null+%26%26+navnISystem+%21%3D+null%5D | jq '.result' -c | pbcopy
-    // Ikke-EØS: curl -XGET https://xsrv1mh6.api.sanity.io/v2022-03-07/data/query/ba-brev?query=*%5B_type+%3D%3D+%22begrunnelse%22+%26%26+regelverk+%21%3D+%22E%C3%98S%22+%26%26+apiNavn+%21%3D+null+%26%26+navnISystem+%21%3D+null%5D | jq '.result' -c | pbcopy
-    // for å få alle begrunnelsene i clipboardet
+    // For å laste ned begrunnelsene kjør scriptet "src/test/resources/oppdater-sanity-mock.sh" eller
+    // se https://familie-brev.sanity.studio/ba-brev/vision med query fra SanityQueries.kt.
     fun hentSanityBegrunnelserMock(): Map<Standardbegrunnelse, SanityBegrunnelse> {
         val restSanityBegrunnelserJson =
             this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/gyldigeBegrunnelser/restSanityBegrunnelser")!!
