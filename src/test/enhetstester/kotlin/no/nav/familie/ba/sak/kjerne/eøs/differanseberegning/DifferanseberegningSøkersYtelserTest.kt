@@ -9,10 +9,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.TilkjentYtelseBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.barn
 import no.nav.familie.ba.sak.kjerne.eøs.util.født
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jul
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -391,6 +395,345 @@ class DifferanseberegningSøkersYtelserTest {
                 .bygg()
 
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
+    }
+
+    @Test
+    fun `skal differanseberegne utvidet i perioder med sekundærlandsbarn og primærlandsbarn som bor i EØS land med annen forelder`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 13.des(2016)
+        val barn2 = barn født 15.des(2017)
+        val barna = listOf(barn1, barn2)
+        val behandling = lagBehandling()
+
+        // Ett Sekundærlandsbarn og ett primærlandsbarn
+        val kompetanser =
+            KompetanseBuilder(jan(2017))
+                //                 |--- 2017---|--- 2018---|
+                .medKompetanse("SSSSSSSSSSSSSSSSSSSSSSSS", barn1)
+                .medKompetanse("            PPPPPPPPPPPP", barn2)
+                .byggKompetanser()
+
+        // Søker har utvidet barnetrygd og barna har ordinær
+        val tilkjenteYtelserEtterDifferanseberegningForBarna =
+            TilkjentYtelseBuilder(jan(2017), behandling)
+                .forPersoner(søker)
+                //              |--- 2017---|--- 2018---|
+                .medUtvidet("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 })
+                .forPersoner(barn1)
+                .medOrdinær("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .forPersoner(barn2)
+                .medOrdinær("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .bygg()
+
+        // Primærlandsbarnet har utdypende vilkårsvurdering 'Bor i EØS med annen forelder' i hele perioden
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn2, des(2017))
+                //                                 |--- 2018---|
+                .medUtdypendeVilkårsvurdering("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER, UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER)
+                .byggVilkårsvurdering().personResultater
+
+        val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+
+        val forventet =
+            TilkjentYtelseBuilder(jan(2017), behandling)
+                .forPersoner(søker)
+                //              |--- 2017---|--- 2018---|
+                .medUtvidet("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, differanse = { 300 }, kalkulert = { 300 })
+                .forPersoner(barn1)
+                .medOrdinær("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .forPersoner(barn2)
+                .medOrdinær("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .bygg()
+
+        assertEquals(forventet.andelerTilkjentYtelse.sortert(), tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert())
+    }
+
+    @Test
+    fun `skal differanseberegne utvidet i perioder med sekundærlandsbarn og primærlandsbarn som bor i Storbritannia med annen forelder`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 13.des(2016)
+        val barn2 = barn født 15.des(2017)
+        val barna = listOf(barn1, barn2)
+        val behandling = lagBehandling()
+
+        // Ett Sekundærlandsbarn og ett primærlandsbarn
+        val kompetanser =
+            KompetanseBuilder(jan(2017))
+                //                 |--- 2017---|--- 2018---|
+                .medKompetanse("SSSSSSSSSSSSSSSSSSSSSSSS", barn1)
+                .medKompetanse("            PPPPPPPPPPPP", barn2)
+                .byggKompetanser()
+
+        // Søker har utvidet barnetrygd og barna har ordinær
+        val tilkjenteYtelserEtterDifferanseberegningForBarna =
+            TilkjentYtelseBuilder(jan(2017), behandling)
+                .forPersoner(søker)
+                //              |--- 2017---|--- 2018---|
+                .medUtvidet("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 })
+                .forPersoner(barn1)
+                .medOrdinær("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .forPersoner(barn2)
+                .medOrdinær("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .bygg()
+
+        // Primærlandsbarnet har utdypende vilkårsvurdering 'Bor i Storbritannia med annen forelder' i hele perioden
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn2, des(2017))
+                //                                |--- 2018---|
+                .medUtdypendeVilkårsvurdering("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER, UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER)
+                .byggVilkårsvurdering().personResultater
+
+        val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+
+        val forventet =
+            TilkjentYtelseBuilder(jan(2017), behandling)
+                .forPersoner(søker)
+                //              |--- 2017---|--- 2018---|
+                .medUtvidet("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, differanse = { 300 }, kalkulert = { 300 })
+                .forPersoner(barn1)
+                .medOrdinær("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .forPersoner(barn2)
+                .medOrdinær("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .bygg()
+
+        assertEquals(forventet.andelerTilkjentYtelse.sortert(), tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert())
+    }
+
+    @Test
+    fun `skal ikke differanseberegne utvidet i perioder med sekundærlandsbarn og primærlandsbarn uten EØS og Storbritannia krav`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 13.des(2016)
+        val barn2 = barn født 15.des(2017)
+        val barna = listOf(barn1, barn2)
+        val behandling = lagBehandling()
+
+        // Ett Sekundærlandsbarn og ett primærlandsbarn
+        val kompetanser =
+            KompetanseBuilder(jan(2017))
+                //                 |--- 2017---|--- 2018---|
+                .medKompetanse("SSSSSSSSSSSSSSSSSSSSSSSS", barn1)
+                .medKompetanse("            PPPPPPPPPPPP", barn2)
+                .byggKompetanser()
+
+        // Søker har utvidet barnetrygd og barna har ordinær
+        val tilkjenteYtelserEtterDifferanseberegningForBarna =
+            TilkjentYtelseBuilder(jan(2017), behandling)
+                .forPersoner(søker)
+                //              |--- 2017---|--- 2018---|
+                .medUtvidet("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 })
+                .forPersoner(barn1)
+                .medOrdinær("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .forPersoner(barn2)
+                .medOrdinær("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .bygg()
+
+        // Primærlandsbarnet har ikke utdypende vilkårsvurdering for BOR_MED_SØKER vilkåret
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn2, des(2017))
+                //             |--- 2018---|
+                .medVilkår("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER)
+                .byggVilkårsvurdering().personResultater
+
+        val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+
+        val forventet =
+            TilkjentYtelseBuilder(jan(2017), behandling)
+                .forPersoner(søker)
+                //              |--- 2017---|--- 2018---|
+                .medUtvidet("$$$$$$$$$$$$            ", nasjonalt = { 1000 }, differanse = { 300 }, kalkulert = { 300 })
+                .medUtvidet("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .forPersoner(barn1)
+                .medOrdinær("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .forPersoner(barn2)
+                .medOrdinær("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .bygg()
+
+        assertEquals(forventet.andelerTilkjentYtelse.sortert(), tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert())
+    }
+
+    @Test
+    fun `skal ikke differanseberegne utvidet i perioder med sekundærlandsbarn, primærlandsbarn med EØS eller Storbritannia krav og vanlig primærlandsbarn`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 13.des(2016)
+        val barn2 = barn født 15.des(2017)
+        val barn3 = barn født 13.des(2016)
+        val barna = listOf(barn1, barn2, barn3)
+        val behandling = lagBehandling()
+
+        // Ett Sekundærlandsbarn og to primærlandsbarn
+        val kompetanser =
+            KompetanseBuilder(jan(2017))
+                //                 |--- 2017---|--- 2018---|
+                .medKompetanse("SSSSSSSSSSSSSSSSSSSSSSSS", barn1)
+                .medKompetanse("            PPPPPPPPPPPP", barn2)
+                .medKompetanse("PPPPPPPPPPPPPPPPPPPPPPPP", barn3)
+                .byggKompetanser()
+
+        // Søker har utvidet barnetrygd og barna har ordinær
+        val tilkjenteYtelserEtterDifferanseberegningForBarna =
+            TilkjentYtelseBuilder(jan(2017), behandling)
+                .forPersoner(søker)
+                //              |--- 2017---|--- 2018---|
+                .medUtvidet("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 })
+                .forPersoner(barn1)
+                .medOrdinær("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .forPersoner(barn2)
+                .medOrdinær("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .forPersoner(barn3)
+                .medOrdinær("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .bygg()
+
+        // Det ene primærlandsbarnet har utdypende vilkårsvurdering 'Bor i EØS med annen forelder' i hele perioden
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn2, des(2017))
+                //             |--- 2018---|
+                .medUtdypendeVilkårsvurdering("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER, UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER)
+                .byggVilkårsvurdering().personResultater
+
+        val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+
+        val forventet =
+            TilkjentYtelseBuilder(jan(2017), behandling)
+                .forPersoner(søker)
+                //              |--- 2017---|--- 2018---|
+                .medUtvidet("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .forPersoner(barn1)
+                .medOrdinær("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .forPersoner(barn2)
+                .medOrdinær("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .forPersoner(barn3)
+                .medOrdinær("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .bygg()
+
+        assertEquals(forventet.andelerTilkjentYtelse.sortert(), tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert())
+    }
+
+    @Test
+    fun `skal kun differanseberegne utvidet i rene sekundærlandperioder eller i kombinasjon med primærlandsbarn med EØS eller Storbritannia krav`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 13.des(2016)
+        val barn2 = barn født 15.des(2017)
+        val barn3 = barn født 13.des(2016)
+        val barna = listOf(barn1, barn2, barn3)
+        val behandling = lagBehandling()
+
+        // Ett Sekundærlandsbarn og to primærlandsbarn
+        val kompetanser =
+            KompetanseBuilder(jan(2017))
+                //                 |--- 2017---|--- 2018---|
+                .medKompetanse("SSSSSSSSSSSSSSSSSSSSSSSS", barn1)
+                .medKompetanse("            PPPPPPPPPPPP", barn2)
+                .medKompetanse("PPPPSSPPPPPPPPPPPSSPPPPP", barn3)
+                .byggKompetanser()
+
+        // Søker har utvidet barnetrygd og barna har ordinær
+        val tilkjenteYtelserEtterDifferanseberegningForBarna =
+            TilkjentYtelseBuilder(jan(2017), behandling)
+                .forPersoner(søker)
+                //              |--- 2017---|--- 2018---|
+                .medUtvidet("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 })
+                .forPersoner(barn1)
+                .medOrdinær("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .forPersoner(barn2)
+                .medOrdinær("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .forPersoner(barn3)
+                .medOrdinær("$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .medOrdinær("    $$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .medOrdinær("      $$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .medOrdinær("                 $$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .medOrdinær("                   $$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+
+                .bygg()
+
+        // Det ene primærlandsbarnet har utdypende vilkårsvurdering 'Bor i EØS med annen forelder' i hele perioden
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn2, des(2017))
+                //             |--- 2018---|
+                .medUtdypendeVilkårsvurdering("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER, UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER)
+                .byggVilkårsvurdering().personResultater
+
+        val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+
+        val forventet =
+            TilkjentYtelseBuilder(jan(2017), behandling)
+                .forPersoner(søker)
+                //              |--- 2017---|--- 2018---|
+                .medUtvidet("$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .medUtvidet("    $$", nasjonalt = { 1000 }, differanse = { 0 }, kalkulert = { 0 })
+                .medUtvidet("      $$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .medUtvidet("                 $$", nasjonalt = { 1000 }, differanse = { 0 }, kalkulert = { 0 })
+                .medUtvidet("                   $$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .forPersoner(barn1)
+                .medOrdinær("$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .forPersoner(barn2)
+                .medOrdinær("            $$$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .forPersoner(barn3)
+                .medOrdinær("$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .medOrdinær("    $$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .medOrdinær("      $$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .medOrdinær("                 $$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
+                .medOrdinær("                   $$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
+                .bygg()
+
+        assertEquals(forventet.andelerTilkjentYtelse.sortert(), tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert())
+    }
+
+    // https://confluence.adeo.no/display/TFA/Differanseberegning
+    @Test
+    fun `eksempel-scenario fra confluence`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 1.jan(2016)
+        val barn2 = barn født 1.jan(2019)
+        val barna = listOf(barn1, barn2)
+        val behandling = lagBehandling()
+
+        // Ett Sekundærlandsbarn og to primærlandsbarn
+        val kompetanser =
+            KompetanseBuilder(jan(2016))
+                //                 |--- 2016---|--- 2017---|--- 2018---|--- 2019---|
+                .medKompetanse(" SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS", barn1)
+                .medKompetanse("                                     SSSSSSSSSSS", barn2)
+                .byggKompetanser()
+
+        // Søker har utvidet barnetrygd og barna har ordinær
+        val tilkjenteYtelserEtterDifferanseberegningForBarna =
+            TilkjentYtelseBuilder(jan(2016), behandling)
+                .forPersoner(søker)
+                //              |--- 2016---|--- 2017---|--- 2018---|--- 2019---|
+                .medUtvidet(" $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1054 }, kalkulert = { 1054 })
+                .medSmåbarn("                                     $$$$$$$$$$$", nasjonalt = { 660 }, kalkulert = { 660 })
+                .forPersoner(barn1)
+                .medOrdinær(" $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1676 }, differanse = { -446 }, kalkulert = { 0 })
+                .forPersoner(barn2)
+                .medOrdinær("                                     $$$$$$$$$$$", nasjonalt = { 1676 }, differanse = { 400 }, kalkulert = { 400 })
+                .bygg()
+
+        val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser)
+
+        val forventet =
+            TilkjentYtelseBuilder(jan(2016), behandling)
+                .forPersoner(søker)
+                //              |--- 2016---|--- 2017---|--- 2018---|--- 2019---|
+                .medUtvidet(" $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1054 }, differanse = { 608 }, kalkulert = { 608 })
+                .medSmåbarn("                                     $$$$$$$$$$$", nasjonalt = { 660 })
+                .forPersoner(barn1)
+                .medOrdinær(" $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", nasjonalt = { 1676 }, differanse = { -446 }, kalkulert = { 0 })
+                .forPersoner(barn2)
+                .medOrdinær("                                     $$$$$$$$$$$", nasjonalt = { 1676 }, differanse = { 400 }, kalkulert = { 400 })
+                .bygg()
+
+        assertEquals(forventet.andelerTilkjentYtelse.sortert(), tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert())
     }
 }
 
