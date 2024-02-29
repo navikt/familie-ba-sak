@@ -622,8 +622,8 @@ private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOg
             månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + grunnlagPerioderSplittetPåVedtaksperiode
     ).zipWithNext { forrige, denne ->
-            val innholdForrigePeriode = if (forrige.tilOgMed.tilNesteMåned() == denne.fraOgMed) forrige.innhold else null
-            periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(innholdForrigePeriode, denne.innhold))
+        val innholdForrigePeriode = if (forrige.tilOgMed.tilNesteMåned() == denne.fraOgMed) forrige.innhold else null
+        periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(innholdForrigePeriode, denne.innhold))
     }.tilTidslinje()
 }
 
