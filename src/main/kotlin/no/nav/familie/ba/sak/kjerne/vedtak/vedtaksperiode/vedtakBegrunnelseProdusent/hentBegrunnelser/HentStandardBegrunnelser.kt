@@ -259,7 +259,7 @@ private fun SanityBegrunnelse.erEndringsårsakOgGjelderEtterEndretUtbetaling() =
 private fun SanityBegrunnelse.gjelderEndretUtbetaling() =
     this.endringsaarsaker.isNotEmpty() && !this.gjelderEtterEndretUtbetaling()
 
-private fun SanityBegrunnelse.erLikEndretUtbetalingIPeriode(
+internal fun SanityBegrunnelse.erLikEndretUtbetalingIPeriode(
     endretUtbetaling: IEndretUtbetalingAndelForVedtaksperiode?,
 ): Boolean {
     if (endretUtbetaling == null) return false

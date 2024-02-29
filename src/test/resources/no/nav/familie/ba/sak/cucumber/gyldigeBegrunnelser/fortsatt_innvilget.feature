@@ -60,7 +60,7 @@ Egenskap: Gyldige begrunnelser for fortsatt innvilget
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                     | Ugyldige begrunnelser                                                                                                         |
+      | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                     | Ugyldige begrunnelser                                                                |
       |          |          | FORTSATT_INNVILGET |                                | FORTSATT_INNVILGET_MEDLEM_I_FOLKETRYGDEN | FORTSATT_INNVILGET_FORVARING_GIFT, FORTSATT_INNVILGET_FORTSATT_AVTALE_OM_DELT_BOSTED |
       |          |          | FORTSATT_INNVILGET | EØS_FORORDNINGEN               |                                          | FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD                                               |
 
@@ -233,3 +233,98 @@ Egenskap: Gyldige begrunnelser for fortsatt innvilget
       | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                                                             | Ugyldige begrunnelser |
       |          |          | FORTSATT_INNVILGET |                                | FORTSATT_INNVILGET_BOR_ALENE_MED_BARN                                            |                       |
       |          |          | FORTSATT_INNVILGET | EØS_FORORDNINGEN               | FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD, FORTSETT_INNVILGET_SEKUNDÆRLAND_STANDARD |                       |
+
+
+  Scenario: Skal kunne velge endret utbetalingsbegrunnelser med type IKKE_RELEVANT selvom vedtaksperiodetype er fortsatt innvilget
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
+      | 1            | 1        |                     | ENDRET_UTBETALING   | ÅRLIG_KONTROLL   | Nei                       | EØS                 |
+      | 2            | 1        | 1                   | FORTSATT_INNVILGET  | ÅRLIG_KONTROLL   | Nei                       | EØS                 |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
+      | 1            | 1       | SØKER      | 27.03.1981  |              |
+      | 1            | 2       | BARN       | 04.11.2011  |              |
+      | 1            | 3       | BARN       | 23.11.2017  |              |
+      | 2            | 1       | SØKER      | 27.03.1981  |              |
+      | 2            | 2       | BARN       | 04.11.2011  |              |
+      | 2            | 3       | BARN       | 23.11.2017  |              |
+
+    Og følgende dagens dato 28.02.2024
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 1       | LOVLIG_OPPHOLD   |                              | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+      | 2       | GIFT_PARTNERSKAP |                              | 04.11.2011 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | UNDER_18_ÅR      |                              | 04.11.2011 | 03.11.2029 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | LOVLIG_OPPHOLD   |                              | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+      | 3       | GIFT_PARTNERSKAP |                              | 23.11.2017 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | UNDER_18_ÅR      |                              | 23.11.2017 | 22.11.2035 | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 3       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 3       | LOVLIG_OPPHOLD   |                              | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 1       | LOVLIG_OPPHOLD   |                              | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+      | 2       | GIFT_PARTNERSKAP |                              | 04.11.2011 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | UNDER_18_ÅR      |                              | 04.11.2011 | 03.11.2029 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | LOVLIG_OPPHOLD   |                              | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+      | 3       | UNDER_18_ÅR      |                              | 23.11.2017 | 22.11.2035 | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | GIFT_PARTNERSKAP |                              | 23.11.2017 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 3       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 3       | LOVLIG_OPPHOLD   |                              | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.01.2022 | 31.12.2022 | 0     | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 1            | 01.01.2023 | 28.02.2023 | 0     | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 1            | 01.03.2023 | 30.06.2023 | 0     | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 1            | 01.07.2023 | 31.12.2023 | 15    | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 2       | 1            | 01.01.2024 | 31.10.2029 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 |
+      | 3       | 1            | 01.01.2022 | 31.12.2022 | 553   | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 3       | 1            | 01.01.2023 | 28.02.2023 | 381   | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 3       | 1            | 01.03.2023 | 30.06.2023 | 428   | ORDINÆR_BARNETRYGD | 100     | 1723 |
+      | 3       | 1            | 01.07.2023 | 31.10.2023 | 471   | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 3       | 1            | 01.11.2023 | 31.12.2023 | 15    | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 3       | 1            | 01.01.2024 | 31.10.2035 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 |
+
+      | 2       | 2            | 01.01.2022 | 31.12.2022 | 0     | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 2            | 01.01.2023 | 28.02.2023 | 0     | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 2            | 01.03.2023 | 30.06.2023 | 0     | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 2            | 01.07.2023 | 31.12.2023 | 15    | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 2       | 2            | 01.01.2024 | 31.10.2029 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 |
+      | 3       | 2            | 01.01.2022 | 31.12.2022 | 553   | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 3       | 2            | 01.01.2023 | 28.02.2023 | 381   | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 3       | 2            | 01.03.2023 | 30.06.2023 | 428   | ORDINÆR_BARNETRYGD | 100     | 1723 |
+      | 3       | 2            | 01.07.2023 | 31.10.2023 | 471   | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 3       | 2            | 01.11.2023 | 31.12.2023 | 15    | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 3       | 2            | 01.01.2024 | 31.01.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 |
+      | 3       | 2            | 01.02.2024 | 31.10.2035 | 0     | ORDINÆR_BARNETRYGD | 0       | 1510 |
+
+    Og med endrede utbetalinger for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak          | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
+      | 3       | 2            | 01.02.2024 | 31.10.2035 | ENDRE_MOTTAKER | 0       | 23.09.2023       |                             |
+
+    Når vedtaksperiodene genereres for behandling 2
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                       | Ugyldige begrunnelser |
+      |          |          | FORTSATT_INNVILGET |                                | ENDRET_UTBETALING_REDUKSJON_ENDRE_MOTTAKER |                       |
