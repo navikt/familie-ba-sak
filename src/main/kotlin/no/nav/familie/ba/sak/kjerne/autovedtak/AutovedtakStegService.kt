@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -67,6 +69,7 @@ class AutovedtakStegService(
     private val autovedtakFødselshendelseService: AutovedtakFødselshendelseService,
     private val autovedtakBrevService: AutovedtakBrevService,
     private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
+    private val snikeIKøenService: SnikeIKøenService,
 ) {
     private val antallAutovedtak: Map<Autovedtaktype, Counter> =
         Autovedtaktype.values().associateWith {
@@ -196,7 +199,12 @@ class AutovedtakStegService(
                 begrunnelse = "${autovedtaktype.displayName}: Bruker har åpen behandling",
                 manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
             )
-            true
+            if (autovedtaktype == Autovedtaktype.OMREGNING_BREV) {
+                snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(åpenBehandling.id, årsak = SettPåMaskinellVentÅrsak.OMREGNING_6_ELLER_18_ÅR)
+                false
+            } else {
+                true
+            }
         } else if (åpenBehandling.status == BehandlingStatus.IVERKSETTER_VEDTAK || åpenBehandling.status == BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
             throw RekjørSenereException(
                 årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen om 1 time",

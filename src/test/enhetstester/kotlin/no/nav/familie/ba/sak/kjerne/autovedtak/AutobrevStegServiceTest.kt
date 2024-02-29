@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødse
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.prosessering.error.RekjørSenereException
@@ -33,6 +34,7 @@ class AutobrevStegServiceTest {
             autovedtakFødselshendelseService = autovedtakFødselshendelseService,
             autovedtakBrevService = autovedtakBrevService,
             autovedtakSmåbarnstilleggService = autovedtakSmåbarnstilleggService,
+            snikeIKøenService = mockk<SnikeIKøenService>(),
         )
 
     @Test
