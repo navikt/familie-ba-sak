@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -100,12 +101,14 @@ class TilpassDifferanseberegningSøkersYtelserService(
     private val persongrunnlagService: PersongrunnlagService,
     private val kompetanseRepository: KompetanseRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 ) : BarnasDifferanseberegningEndretAbonnent {
     override fun barnasDifferanseberegningEndret(tilkjentYtelse: TilkjentYtelse) {
         val oppdaterteAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
                 kompetanser = kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id),
+                personResultater = vilkårsvurderingRepository.findByBehandlingAndAktiv(tilkjentYtelse.behandling.id)!!.personResultater
             )
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
