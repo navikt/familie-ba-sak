@@ -155,7 +155,7 @@ class PersonidentService(
         if (aktiveAktørerForHistoriskAktørIder.isNotEmpty()) {
             secureLogger.warn("Potensielt merget ident for $alleHistoriskeIdenterFraPdl")
             throw Feil(
-                message = "Mottok potensielt en hendelse på en merget ident for aktørId=${alleHistoriskeIdenterFraPdl.hentAktivAktørId()}. Sjekk securelogger for liste med identer. Sjekk om identen har flere saker. Disse må løses manuelt",
+                message = "Mottok potensielt en hendelse på en merget ident for aktørId=${alleHistoriskeIdenterFraPdl.hentAktivAktørId()}. Sjekk securelogger for liste med identer. Sjekk om identen har flere saker. Disse må løses manuelt. Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3%B8r-sak.md#manuell-patching-av-akt%C3%B8r-for-en-behandling for mer info.",
             )
         }
     }

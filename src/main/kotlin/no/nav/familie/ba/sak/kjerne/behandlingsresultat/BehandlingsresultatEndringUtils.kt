@@ -66,6 +66,7 @@ object BehandlingsresultatEndringUtils {
                     nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
                         forrigeAndelerIBehandling = forrigeAndeler,
                         nåværendeEndretAndelerIBehandling = nåværendeEndretAndeler,
+                        endretAndelerForForrigeBehandling = forrigeEndretAndeler,
                     )
 
                 val erEndringIBeløpForPerson =
@@ -157,7 +158,7 @@ object BehandlingsresultatEndringUtils {
     }
 }
 
-// Kun interessert i endringer i beløp FØR opphørstidspunkt og perioder som ikke er lengre enn 2 måneder fram i tid
+// Kun interessert i endringer i beløp FØR opphørstidspunkt og perioder som ikke er lengre enn 1 måned fram i tid
 private fun erEndringIBeløpForPersonOgType(
     nåværendeAndeler: List<AndelTilkjentYtelse>,
     forrigeAndeler: List<AndelTilkjentYtelse>,
@@ -187,7 +188,7 @@ private fun erEndringIBeløpForPersonOgType(
             }
         }
             .fjernPerioderEtterOpphørsdato(opphørstidspunktForBehandling)
-            .fjernPerioderLengreEnnToMånederFramITid()
+            .fjernPerioderLengreEnnEnMånedFramITid()
 
     return endringIBeløpTidslinje.perioder().any { it.innhold == true }
 }
@@ -195,8 +196,8 @@ private fun erEndringIBeløpForPersonOgType(
 private fun Tidslinje<Boolean, Måned>.fjernPerioderEtterOpphørsdato(opphørstidspunkt: YearMonth) =
     this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = opphørstidspunkt.forrigeMåned().tilTidspunkt())
 
-private fun Tidslinje<Boolean, Måned>.fjernPerioderLengreEnnToMånederFramITid() =
-    this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = YearMonth.now().plusMonths(2).tilTidspunkt())
+private fun Tidslinje<Boolean, Måned>.fjernPerioderLengreEnnEnMånedFramITid() =
+    this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = YearMonth.now().plusMonths(1).tilTidspunkt())
 
 internal fun erEndringIKompetanseForPerson(
     nåværendeKompetanserForPerson: List<Kompetanse>,

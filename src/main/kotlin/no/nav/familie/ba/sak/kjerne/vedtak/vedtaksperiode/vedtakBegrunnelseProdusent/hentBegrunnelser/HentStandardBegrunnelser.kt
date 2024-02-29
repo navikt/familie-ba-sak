@@ -58,7 +58,7 @@ internal fun hentStandardBegrunnelser(
 
     val relevanteBegrunnelser =
         filtrertPåRolleOgFagsaktype
-            .filterValues { it.periodeResultat in relevantePeriodeResultater }
+            .filterValues { it.periodeResultat in relevantePeriodeResultater || it.periodeResultat == SanityPeriodeResultat.IKKE_RELEVANT }
             .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
             .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
             .filterValues { !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && !it.begrunnelseGjelderOpphørFraForrigeBehandling() }
@@ -106,7 +106,10 @@ internal fun hentStandardBegrunnelser(
 
     val filtrertPåEtterEndretUtbetaling =
         filtrertPåTema
-            .filterValues { it.periodeResultat in hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode) }
+            .filterValues {
+                it.periodeResultat in hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode) ||
+                    it.periodeResultat == SanityPeriodeResultat.IKKE_RELEVANT
+            }
             .filterValues { begrunnelse -> begrunnelse.erGjeldendeForRolle(person, behandling.fagsak.type) }
             .filterValues {
                 it.erEtterEndretUtbetaling(
@@ -256,7 +259,7 @@ private fun SanityBegrunnelse.erEndringsårsakOgGjelderEtterEndretUtbetaling() =
 private fun SanityBegrunnelse.gjelderEndretUtbetaling() =
     this.endringsaarsaker.isNotEmpty() && !this.gjelderEtterEndretUtbetaling()
 
-private fun SanityBegrunnelse.erLikEndretUtbetalingIPeriode(
+internal fun SanityBegrunnelse.erLikEndretUtbetalingIPeriode(
     endretUtbetaling: IEndretUtbetalingAndelForVedtaksperiode?,
 ): Boolean {
     if (endretUtbetaling == null) return false

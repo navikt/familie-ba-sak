@@ -261,13 +261,14 @@ fun lagAndelTilkjentYtelse(
     differanseberegnetPeriodebeløp: Int? = null,
     id: Long = 0,
     sats: Int = sats(ytelseType),
+    kalkulertUtbetalingsbeløp: Int? = null,
 ): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
         id = id,
         aktør = aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
-        kalkulertUtbetalingsbeløp = beløp,
+        kalkulertUtbetalingsbeløp = if (kalkulertUtbetalingsbeløp == null) beløp else kalkulertUtbetalingsbeløp,
         nasjonaltPeriodebeløp = beløp,
         stønadFom = fom,
         stønadTom = tom,

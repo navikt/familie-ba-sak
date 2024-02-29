@@ -287,7 +287,12 @@ class BehandlingsresultatEndringUtilsTest {
                 ),
             )
 
-        val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+        val opphørstidspunktForBehandling =
+            nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                forrigeAndelerIBehandling = forrigeAndeler,
+                nåværendeEndretAndelerIBehandling = emptyList(),
+                endretAndelerForForrigeBehandling = emptyList(),
+            )
 
         val erEndringIBeløp =
             erEndringIBeløpForPerson(
@@ -341,7 +346,12 @@ class BehandlingsresultatEndringUtilsTest {
             listOf(barn1Aktør, barn2Aktør).any { aktør ->
                 val erFremstiltKravForPerson = personerFramstiltKravFor.contains(aktør)
 
-                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+                val opphørstidspunktForBehandling =
+                    nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                        forrigeAndelerIBehandling = forrigeAndeler,
+                        nåværendeEndretAndelerIBehandling = emptyList(),
+                        endretAndelerForForrigeBehandling = emptyList(),
+                    )
 
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
@@ -405,7 +415,12 @@ class BehandlingsresultatEndringUtilsTest {
             listOf(barn1Aktør, barn2Aktør).any { aktør ->
                 val erFremstiltKravForPerson = personerFramstiltKravFor.contains(aktør)
 
-                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+                val opphørstidspunktForBehandling =
+                    nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                        forrigeAndelerIBehandling = forrigeAndeler,
+                        nåværendeEndretAndelerIBehandling = emptyList(),
+                        endretAndelerForForrigeBehandling = emptyList(),
+                    )
 
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
@@ -459,7 +474,12 @@ class BehandlingsresultatEndringUtilsTest {
 
         val erEndringIBeløp =
             listOf(barn1Aktør, barn2Aktør).any { aktør ->
-                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+                val opphørstidspunktForBehandling =
+                    nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                        forrigeAndelerIBehandling = forrigeAndeler,
+                        nåværendeEndretAndelerIBehandling = emptyList(),
+                        endretAndelerForForrigeBehandling = emptyList(),
+                    )
 
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
@@ -517,7 +537,12 @@ class BehandlingsresultatEndringUtilsTest {
             listOf(barn1Aktør, barn2Aktør).any { aktør ->
                 val erFremstiltKravForPerson = personerFramstiltKravFor.contains(aktør)
 
-                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+                val opphørstidspunktForBehandling =
+                    nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                        forrigeAndelerIBehandling = forrigeAndeler,
+                        nåværendeEndretAndelerIBehandling = emptyList(),
+                        endretAndelerForForrigeBehandling = emptyList(),
+                    )
 
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
@@ -578,7 +603,12 @@ class BehandlingsresultatEndringUtilsTest {
         val erEndringIBeløp =
             listOf(barn1Aktør, barn2Aktør).any { aktør ->
 
-                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+                val opphørstidspunktForBehandling =
+                    nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                        forrigeAndelerIBehandling = forrigeAndeler,
+                        nåværendeEndretAndelerIBehandling = emptyList(),
+                        endretAndelerForForrigeBehandling = emptyList(),
+                    )
 
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
@@ -642,7 +672,12 @@ class BehandlingsresultatEndringUtilsTest {
         val erEndringIBeløp =
             listOf(søker, barn2Aktør).any { aktør ->
 
-                val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+                val opphørstidspunktForBehandling =
+                    nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                        forrigeAndelerIBehandling = forrigeAndeler,
+                        nåværendeEndretAndelerIBehandling = emptyList(),
+                        endretAndelerForForrigeBehandling = emptyList(),
+                    )
 
                 val erEndringIBeløpForPerson =
                     erEndringIBeløpForPerson(
@@ -659,24 +694,24 @@ class BehandlingsresultatEndringUtilsTest {
     }
 
     @Test
-    fun `Endring i beløp - Skal ikke bry seg om endringer lengre enn 2 måneder fram i tid`() {
+    fun `Endring i beløp - Skal ikke bry seg om endringer lengre enn 1 måneder fram i tid`() {
         val søker = lagPerson(type = PersonType.SØKER).aktør
         val barnAktør = lagPerson(type = PersonType.BARN).aktør
         val denneMåned = YearMonth.now()
-        val toMånederFramITid = denneMåned.plusMonths(2)
-        val treMånederFramITid = toMånederFramITid.plusMonths(1)
+        val enMånedFramITid = denneMåned.plusMonths(1)
+        val toMånederFramITid = enMånedFramITid.plusMonths(1)
 
         val forrigeAndeler =
             listOf(
                 lagAndelTilkjentYtelse(
                     fom = denneMåned,
-                    tom = toMånederFramITid,
+                    tom = enMånedFramITid,
                     beløp = 1054,
                     aktør = søker,
                 ),
                 lagAndelTilkjentYtelse(
-                    fom = treMånederFramITid,
-                    tom = treMånederFramITid,
+                    fom = toMånederFramITid,
+                    tom = toMånederFramITid,
                     beløp = 1054,
                     aktør = barnAktør,
                 ),
@@ -685,19 +720,24 @@ class BehandlingsresultatEndringUtilsTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     fom = denneMåned,
-                    tom = toMånederFramITid,
+                    tom = enMånedFramITid,
                     beløp = 1054,
                     aktør = søker,
                 ),
                 lagAndelTilkjentYtelse(
-                    fom = treMånederFramITid,
-                    tom = treMånederFramITid,
+                    fom = toMånederFramITid,
+                    tom = toMånederFramITid,
                     beløp = 1070,
                     aktør = barnAktør,
                 ),
             )
 
-        val opphørstidspunktForBehandling = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, listOf())
+        val opphørstidspunktForBehandling =
+            nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                forrigeAndelerIBehandling = forrigeAndeler,
+                nåværendeEndretAndelerIBehandling = emptyList(),
+                endretAndelerForForrigeBehandling = emptyList(),
+            )
 
         val erEndringIBeløp =
             erEndringIBeløpForPerson(
@@ -802,7 +842,7 @@ class BehandlingsresultatEndringUtilsTest {
     }
 
     @Test
-    fun `Endring i endret utbetaling andel - skal returnere false hvis eneste endring er at perioden blir lenger`() {
+    fun `Endring i endret utbetaling andel - skal returnere true hvis eneste endring er at perioden blir lenger`() {
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -821,11 +861,11 @@ class BehandlingsresultatEndringUtilsTest {
                 nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndel.copy(tom = des22)),
             )
 
-        assertFalse(erEndringIEndretAndeler)
+        assertTrue(erEndringIEndretAndeler)
     }
 
     @Test
-    fun `Endring i endret utbetaling andel - skal returnere false hvis endringsperiode oppstår i nåværende behandling`() {
+    fun `Endring i endret utbetaling andel - skal returnere true hvis endringsperiode oppstår i nåværende behandling`() {
         val barn = lagPerson(type = PersonType.BARN)
         val nåværendeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -844,7 +884,7 @@ class BehandlingsresultatEndringUtilsTest {
                 nåværendeEndretAndelerForPerson = listOf(nåværendeEndretAndel),
             )
 
-        assertFalse(erEndringIEndretAndeler)
+        assertTrue(erEndringIEndretAndeler)
     }
 
     @Test

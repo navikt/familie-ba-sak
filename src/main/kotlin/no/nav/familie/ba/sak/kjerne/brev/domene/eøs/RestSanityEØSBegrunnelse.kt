@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 data class RestSanityEØSBegrunnelse(
@@ -81,6 +82,7 @@ data class RestSanityEØSBegrunnelse(
                 ovrigeTriggere?.mapNotNull {
                     it.finnEnumverdi<ØvrigTrigger>(apiNavn)
                 } ?: emptyList(),
+            begrunnelseTypeForPerson = begrunnelseTypeForPerson.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
         )
     }
 

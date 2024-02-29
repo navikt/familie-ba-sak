@@ -46,8 +46,8 @@ class PatchMergetIdentTaskTest {
             personidentRepository = personidentRepository,
         )
 
-    private val barnetsGamleAktør = tilAktør(randomFnr())
-    private val barnetsNyeAktør = tilAktør(randomFnr())
+    private val gammelAktør = tilAktør(randomFnr())
+    private val nyAktør = tilAktør(randomFnr())
     private val fagsak = defaultFagsak()
     private val behandling = lagBehandling(fagsak)
     private val søkerAktør = fagsak.aktør
@@ -55,28 +55,28 @@ class PatchMergetIdentTaskTest {
         lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
-            barnasIdenter = listOf(barnetsGamleAktør.aktivFødselsnummer()),
+            barnasIdenter = listOf(gammelAktør.aktivFødselsnummer()),
         )
 
     @Test
     fun `Skal kunne patche barnets ident for en fagsak hvor gammel ident er en historisk ident av ny ident`() {
         val dto =
-            PatchIdentForBarnPåFagsak(
+            PatchMergetIdentDto(
                 fagsakId = fagsak.id,
-                gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-                nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
+                gammelIdent = PersonIdent(gammelAktør.aktivFødselsnummer()),
+                nyIdent = PersonIdent(nyAktør.aktivFødselsnummer()),
             )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
-        every { pdlIdentRestClient.hentIdenter(barnetsNyeAktør.aktivFødselsnummer(), true) } returns
+        every { pdlIdentRestClient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns
             listOf(
-                IdentInformasjon(barnetsGamleAktør.aktørId, true, "AKTORID"),
-                IdentInformasjon(barnetsGamleAktør.aktivFødselsnummer(), true, "FOLKEREGISTERIDENT"),
-                IdentInformasjon(barnetsNyeAktør.aktørId, false, "AKTORID"),
-                IdentInformasjon(barnetsNyeAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
+                IdentInformasjon(gammelAktør.aktørId, true, "AKTORID"),
+                IdentInformasjon(gammelAktør.aktivFødselsnummer(), true, "FOLKEREGISTERIDENT"),
+                IdentInformasjon(nyAktør.aktørId, false, "AKTORID"),
+                IdentInformasjon(nyAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
             )
 
-        every { personidentService.hentOgLagreAktør(barnetsNyeAktør.aktivFødselsnummer(), true) } returns barnetsNyeAktør
+        every { personidentService.hentOgLagreAktør(nyAktør.aktivFødselsnummer(), true) } returns nyAktør
         every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns null
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
@@ -84,9 +84,9 @@ class PatchMergetIdentTaskTest {
         task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
 
         val aktørMergeLogg = aktørMergeLoggSlot.captured
-        assertThat(aktørMergeLogg.nyAktørId).isEqualTo(barnetsNyeAktør.aktørId)
+        assertThat(aktørMergeLogg.nyAktørId).isEqualTo(nyAktør.aktørId)
         assertThat(aktørMergeLogg.fagsakId).isEqualTo(dto.fagsakId)
-        assertThat(aktørMergeLogg.historiskAktørId).isEqualTo(barnetsGamleAktør.aktørId)
+        assertThat(aktørMergeLogg.historiskAktørId).isEqualTo(gammelAktør.aktørId)
         assertThat(aktørMergeLogg.mergeTidspunkt).isCloseTo(
             LocalDateTime.now(),
             Assertions.within(10, ChronoUnit.SECONDS),
@@ -96,30 +96,30 @@ class PatchMergetIdentTaskTest {
     @Test
     fun `Skal kaste feil ved patching av ident hvis ident på barnet ikke finnes på fagsaken`() {
         val dto =
-            PatchIdentForBarnPåFagsak(
+            PatchMergetIdentDto(
                 fagsakId = fagsak.id,
-                gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-                nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
+                gammelIdent = PersonIdent(gammelAktør.aktivFødselsnummer()),
+                nyIdent = PersonIdent(nyAktør.aktivFødselsnummer()),
             )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns emptySet()
 
         assertThrows<IllegalStateException> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
-            assertThat(it.message).isEqualTo("Fant ikke ident som skal patches som barn på fagsak=${fagsak.id} aktører=[]")
+            assertThat(it.message).isEqualTo("Fant ikke ident som skal patches på fagsak=${fagsak.id} aktører=[]")
         }
     }
 
     @Test
     fun `Skal kaste feil ved patching av ident hvis gammel ident ikke er historisk av ny ident`() {
         val dto =
-            PatchIdentForBarnPåFagsak(
+            PatchMergetIdentDto(
                 fagsakId = fagsak.id,
-                gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-                nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
+                gammelIdent = PersonIdent(gammelAktør.aktivFødselsnummer()),
+                nyIdent = PersonIdent(nyAktør.aktivFødselsnummer()),
             )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
-        every { pdlIdentRestClient.hentIdenter(barnetsNyeAktør.aktivFødselsnummer(), true) } returns emptyList()
+        every { pdlIdentRestClient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns emptyList()
 
         assertThrows<IllegalStateException> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Ident som skal patches finnes ikke som historisk ident av ny ident")
@@ -129,21 +129,21 @@ class PatchMergetIdentTaskTest {
     @Test
     fun `Skal kaste feil ved patching av ident hvis ny personident allerede eksisterer i personident`() {
         val dto =
-            PatchIdentForBarnPåFagsak(
+            PatchMergetIdentDto(
                 fagsakId = fagsak.id,
-                gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-                nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
+                gammelIdent = PersonIdent(gammelAktør.aktivFødselsnummer()),
+                nyIdent = PersonIdent(nyAktør.aktivFødselsnummer()),
                 skalSjekkeAtGammelIdentErHistoriskAvNyIdent = false,
             )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
-        every { pdlIdentRestClient.hentIdenter(barnetsNyeAktør.aktivFødselsnummer(), true) } returns
+        every { pdlIdentRestClient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns
             listOf(
-                IdentInformasjon(barnetsNyeAktør.aktørId, false, "AKTORID"),
-                IdentInformasjon(barnetsNyeAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
+                IdentInformasjon(nyAktør.aktørId, false, "AKTORID"),
+                IdentInformasjon(nyAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
             )
 
-        every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns Personident(barnetsNyeAktør.aktivFødselsnummer(), barnetsNyeAktør)
+        every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns Personident(nyAktør.aktivFødselsnummer(), nyAktør)
 
         assertThrows<IllegalStateException> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Fant allerede en personident for nytt fødselsnummer")
@@ -153,21 +153,21 @@ class PatchMergetIdentTaskTest {
     @Test
     fun `Skal kunne patche barnets ident for en fagsak hvor gammel ident ikke er en historisk ident av ny ident, men man har valgt å overstyre`() {
         val dto =
-            PatchIdentForBarnPåFagsak(
+            PatchMergetIdentDto(
                 fagsakId = fagsak.id,
-                gammelIdent = PersonIdent(barnetsGamleAktør.aktivFødselsnummer()),
-                nyIdent = PersonIdent(barnetsNyeAktør.aktivFødselsnummer()),
+                gammelIdent = PersonIdent(gammelAktør.aktivFødselsnummer()),
+                nyIdent = PersonIdent(nyAktør.aktivFødselsnummer()),
                 skalSjekkeAtGammelIdentErHistoriskAvNyIdent = false,
             )
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
-        every { pdlIdentRestClient.hentIdenter(barnetsNyeAktør.aktivFødselsnummer(), true) } returns
+        every { pdlIdentRestClient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns
             listOf(
-                IdentInformasjon(barnetsNyeAktør.aktørId, false, "AKTORID"),
-                IdentInformasjon(barnetsNyeAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
+                IdentInformasjon(nyAktør.aktørId, false, "AKTORID"),
+                IdentInformasjon(nyAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
             )
 
-        every { personidentService.hentOgLagreAktør(barnetsNyeAktør.aktivFødselsnummer(), true) } returns barnetsNyeAktør
+        every { personidentService.hentOgLagreAktør(nyAktør.aktivFødselsnummer(), true) } returns nyAktør
         every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns null
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
@@ -175,9 +175,44 @@ class PatchMergetIdentTaskTest {
         task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
 
         val aktørMergeLogg = aktørMergeLoggSlot.captured
-        assertThat(aktørMergeLogg.nyAktørId).isEqualTo(barnetsNyeAktør.aktørId)
+        assertThat(aktørMergeLogg.nyAktørId).isEqualTo(nyAktør.aktørId)
         assertThat(aktørMergeLogg.fagsakId).isEqualTo(dto.fagsakId)
-        assertThat(aktørMergeLogg.historiskAktørId).isEqualTo(barnetsGamleAktør.aktørId)
+        assertThat(aktørMergeLogg.historiskAktørId).isEqualTo(gammelAktør.aktørId)
+        assertThat(aktørMergeLogg.mergeTidspunkt).isCloseTo(
+            LocalDateTime.now(),
+            Assertions.within(10, ChronoUnit.SECONDS),
+        )
+    }
+
+    @Test
+    fun `Skal kunne patche søkers ident for en fagsak hvor gammel ident er en historisk ident av ny ident`() {
+        val dto =
+            PatchMergetIdentDto(
+                fagsakId = fagsak.id,
+                gammelIdent = PersonIdent(søkerAktør.aktivFødselsnummer()),
+                nyIdent = PersonIdent(nyAktør.aktivFødselsnummer()),
+            )
+
+        every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
+        every { pdlIdentRestClient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns
+            listOf(
+                IdentInformasjon(søkerAktør.aktørId, true, "AKTORID"),
+                IdentInformasjon(søkerAktør.aktivFødselsnummer(), true, "FOLKEREGISTERIDENT"),
+                IdentInformasjon(nyAktør.aktørId, false, "AKTORID"),
+                IdentInformasjon(nyAktør.aktivFødselsnummer(), false, "FOLKEREGISTERIDENT"),
+            )
+
+        every { personidentService.hentOgLagreAktør(nyAktør.aktivFødselsnummer(), true) } returns nyAktør
+        every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns null
+        val aktørMergeLoggSlot = slot<AktørMergeLogg>()
+        every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
+
+        task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
+
+        val aktørMergeLogg = aktørMergeLoggSlot.captured
+        assertThat(aktørMergeLogg.nyAktørId).isEqualTo(nyAktør.aktørId)
+        assertThat(aktørMergeLogg.fagsakId).isEqualTo(dto.fagsakId)
+        assertThat(aktørMergeLogg.historiskAktørId).isEqualTo(søkerAktør.aktørId)
         assertThat(aktørMergeLogg.mergeTidspunkt).isCloseTo(
             LocalDateTime.now(),
             Assertions.within(10, ChronoUnit.SECONDS),

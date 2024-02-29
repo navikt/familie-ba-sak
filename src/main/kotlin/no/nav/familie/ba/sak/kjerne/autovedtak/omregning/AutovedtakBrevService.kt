@@ -17,8 +17,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.erAlleredeBegrunnetMedBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.prosessering.domene.Task
@@ -126,16 +124,6 @@ class AutovedtakBrevService(
             logger.info("Har ikke sendt autobrev fra infotrygd, lager ny behandling og sender brev på vanlig måte. fagsakId=$fagsakId behandlingsårsak=$behandlingsårsak")
             false
         }
-    }
-
-    private fun barnAlleredeBegrunnet(
-        vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
-        standardbegrunnelser: List<Standardbegrunnelse>,
-    ): Boolean {
-        return vedtaksperioderMedBegrunnelser.erAlleredeBegrunnetMedBegrunnelse(
-            standardbegrunnelser = standardbegrunnelser,
-            måned = YearMonth.now(),
-        )
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {
