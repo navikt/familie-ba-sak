@@ -696,7 +696,7 @@ class DifferanseberegningSøkersYtelserTest {
         val barna = listOf(barn1, barn2)
         val behandling = lagBehandling()
 
-        // Ett Sekundærlandsbarn og to primærlandsbarn
+        // To sekundærlandsbarn
         val kompetanser =
             KompetanseBuilder(jan(2016))
                 //                 |--- 2016---|--- 2017---|--- 2018---|--- 2019---|
@@ -704,7 +704,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .medKompetanse("                                     SSSSSSSSSSS", barn2)
                 .byggKompetanser()
 
-        // Søker har utvidet barnetrygd og barna har ordinær
+        // Søker har utvidet barnetrygd og barna har ordinær. Det ene barnet har fått for mye fra det andre landet. Det andre har fått for lite.
         val tilkjenteYtelserEtterDifferanseberegningForBarna =
             TilkjentYtelseBuilder(jan(2016), behandling)
                 .forPersoner(søker)
