@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -12,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -102,6 +104,7 @@ class TilpassDifferanseberegningSøkersYtelserService(
     private val kompetanseRepository: KompetanseRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val unleashService: UnleashService,
 ) : BarnasDifferanseberegningEndretAbonnent {
     override fun barnasDifferanseberegningEndret(tilkjentYtelse: TilkjentYtelse) {
         val oppdaterteAndeler =
@@ -109,6 +112,7 @@ class TilpassDifferanseberegningSøkersYtelserService(
                 barna = persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
                 kompetanser = kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id),
                 personResultater = vilkårsvurderingRepository.findByBehandlingAndAktiv(tilkjentYtelse.behandling.id)!!.personResultater,
+                skalBrukeUtvidedeRegler = unleashService.isEnabled(FeatureToggleConfig.BRUK_UTVIDEDE_DIFFERANSEBEREGNINGSREGLER, mapOf("fagsakId" to tilkjentYtelse.behandling.fagsak.id.toString())),
             )
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }

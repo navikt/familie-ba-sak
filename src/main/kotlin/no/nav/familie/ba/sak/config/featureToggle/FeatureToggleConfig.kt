@@ -23,5 +23,8 @@ class FeatureToggleConfig {
 
         // Kjører satsendring lørdag
         const val SATSENDRING_LØRDAG: String = "familie-ba-sak.satsendring-lordag"
+
+        // Bruker utvidede regler for differanseberegning
+        const val BRUK_UTVIDEDE_DIFFERANSEBEREGNINGSREGLER: String = "familie-ba-sak.bruk-utvidede-differanseberegningsregler"
     }
 }

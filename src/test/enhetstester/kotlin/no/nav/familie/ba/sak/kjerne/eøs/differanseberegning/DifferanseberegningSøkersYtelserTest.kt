@@ -434,7 +434,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering().personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
-            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater, true)
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -487,7 +487,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering().personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
-            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater, true)
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -540,7 +540,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering().personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
-            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater, true)
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -598,7 +598,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering().personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
-            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater, true)
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -661,7 +661,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .byggVilkårsvurdering().personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
-            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater, true)
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -718,7 +718,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .bygg()
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
-            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser)
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, skalBrukeUtvidedeRegler = true)
 
         val forventet =
             TilkjentYtelseBuilder(jan(2016), behandling)

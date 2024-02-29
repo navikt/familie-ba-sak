@@ -82,6 +82,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     barna: List<Person>,
     kompetanser: Collection<Kompetanse>,
     personResultater: Set<PersonResultat> = emptySet(),
+    skalBrukeUtvidedeRegler: Boolean = false,
 ): List<AndelTilkjentYtelse> {
     // Ta bort eventuell eksisterende differanseberegning, slik at kalkulertUtbetalingsbeløp er nasjonal sats
     // Men behold funksjonelle splitter som er påført tidligere ved å beholde fom og tom på andelene
@@ -98,8 +99,13 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     // Finn alle andelene frem til barna er 18 år. Det vil i praksis være ALLE andelene
     // Bruk bare andelene som kvalifiserer for differanseberegning mot søkers ytelser
     val barnasRelevanteAndelerInntil18År =
-        barnasAndelerTidslinjer
-            .tilAndelerSomSkalDifferanseberegnesMotSøkersYtelser(kompetanser, personResultater)
+        when {
+            skalBrukeUtvidedeRegler ->
+                barnasAndelerTidslinjer
+                    .tilAndelerSomSkalDifferanseberegnesMotSøkersYtelser(kompetanser, personResultater)
+
+            else -> barnasAndelerTidslinjer.kunReneSekundærlandsperioder(kompetanser)
+        }
 
     // Lag tidslinjer for hvert barn som inneholder underskuddet fra differanseberegningen på ordinær barnetrygd.
     // Resultatet er tidslinjer med underskuddet som positivt beløp der det inntreffer
@@ -137,9 +143,14 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     // Bruk bare andelene som kvalifiserer for differanseberegning mot søkers ytelser
     // Må ta utgangspunkt i alle andeler for være sikker på at vi vurderer sekundærlandsperioder bare når barna er inntil 3 år
     val barnasRelevanteAndelerInntil3ÅrTidslinjer =
-        barnasAndelerTidslinjer
-            .kunAndelerTilOgMed3År(barna)
-            .tilAndelerSomSkalDifferanseberegnesMotSøkersYtelser(kompetanser, personResultater)
+        when {
+            skalBrukeUtvidedeRegler ->
+                barnasAndelerTidslinjer
+                    .kunAndelerTilOgMed3År(barna)
+                    .tilAndelerSomSkalDifferanseberegnesMotSøkersYtelser(kompetanser, personResultater)
+
+            else -> barnasAndelerTidslinjer.kunAndelerTilOgMed3År(barna).kunReneSekundærlandsperioder(kompetanser)
+        }
 
     // Vi finner hvor mye hvert barn skal ha som andel av småbarnstillegget på hvert tidspunkt.
     // Det tilsvarer småbarnstillegget på et gitt tidspunkt delt på antall relevante barn under 3 år som har ytelse på det tidspunktet
@@ -165,6 +176,36 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     return this.filter { !it.erSøkersAndel() } +
         differanseberegnetUtvidetBarnetrygdTidslinje.tilAndelTilkjentYtelse() +
         differanseberegnetSmåbarnstilleggTidslinje.tilAndelTilkjentYtelse()
+}
+
+/**
+ * Funksjon som sjekker at hvert barns andel i en periode er vurdert med sekundærland-kompetanser
+ * Hvis ja beholdes andelene for alle barna
+ * Hvis nei fjernes alle andelene, slik at perioden ikke har noen andeler
+ */
+@Deprecated("Bruk tilAndelerSomSkalDifferanseberegnesMotSøkersYtelser")
+fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunReneSekundærlandsperioder(
+    kompetanser: Collection<Kompetanse>,
+): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
+    val barnasKompetanseTidslinjer = kompetanser.tilSeparateTidslinjerForBarna()
+
+    val barnasErSekundærlandTidslinjer =
+        this.leftJoin(barnasKompetanseTidslinjer) { andel, kompetanse ->
+            when {
+                andel != null && kompetanse != null -> kompetanse.resultat == NORGE_ER_SEKUNDÆRLAND
+                andel != null -> false
+                else -> null
+            }
+        }
+
+    val kunSekundærlandsperiodeTidslinje =
+        barnasErSekundærlandTidslinjer.values.kombinerUtenNullOgIkkeTom { erSekundærlandListe ->
+            erSekundærlandListe.all { it }
+        }
+
+    return this.kombinerKunVerdiMed(kunSekundærlandsperiodeTidslinje) { andel, erSekundærland ->
+        andel.takeIf { erSekundærland }
+    }
 }
 
 /**
