@@ -108,7 +108,7 @@ class TilpassDifferanseberegningSøkersYtelserService(
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
                 kompetanser = kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id),
-                personResultater = vilkårsvurderingRepository.findByBehandlingAndAktiv(tilkjentYtelse.behandling.id)!!.personResultater
+                personResultater = vilkårsvurderingRepository.findByBehandlingAndAktiv(tilkjentYtelse.behandling.id)!!.personResultater,
             )
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }

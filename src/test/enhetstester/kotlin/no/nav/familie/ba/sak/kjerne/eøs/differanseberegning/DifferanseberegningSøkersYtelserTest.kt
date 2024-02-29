@@ -650,7 +650,6 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("      $$$$$$$$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
                 .medOrdinær("                 $$", nasjonalt = { 1000 }, differanse = { -700 }, kalkulert = { 0 })
                 .medOrdinær("                   $$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
-
                 .bygg()
 
         // Det ene primærlandsbarnet har utdypende vilkårsvurdering 'Bor i EØS med annen forelder' i hele perioden

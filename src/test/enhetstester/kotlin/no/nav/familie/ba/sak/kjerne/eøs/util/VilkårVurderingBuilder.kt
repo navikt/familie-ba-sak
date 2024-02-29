@@ -78,11 +78,15 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
             return this
         }
 
-        fun medUtdypendeVilkårsvurdering(v: String, vilkår: Vilkår, utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering): PersonResultatBuilder<T> {
+        fun medUtdypendeVilkårsvurdering(
+            v: String,
+            vilkår: Vilkår,
+            utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering,
+        ): PersonResultatBuilder<T> {
             vilkårsresultatTidslinjer.add(
                 v.tilCharTidslinje(startTidspunkt).map {
                     UtdypendeVilkårRegelverkResultat(vilkår, Resultat.OPPFYLT, Regelverk.EØS_FORORDNINGEN, utdypendeVilkårsvurdering)
-                }
+                },
             )
             return this
         }

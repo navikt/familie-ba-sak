@@ -174,7 +174,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
  */
 fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerSomSkalDifferanseberegnesMotSøkersYtelser(
     kompetanser: Collection<Kompetanse>,
-    personResultater: Set<PersonResultat>
+    personResultater: Set<PersonResultat>,
 ): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
     val barnasKompetanseTidslinjer = kompetanser.tilSeparateTidslinjerForBarna()
 
@@ -190,9 +190,10 @@ fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerSomSkalDiffera
     val helePeriodenErSekundærlandEllerPrimærlandMedBorIEØSEllerStorbritanniaMedAnnenForelderTidslinje = barnasKompetanseTidslinjerAvgrensetAvAndelsTidslinjer.tilSekundærlandsbarnEllerPrimærlandsbarnMedBorIEØSEllerStorbritanniaMedAnnenForelderTidslinje(personResultater)
 
     // Finner alle sekundærlandsbarn som faller innenfor periodene som skal differanseberegnes mot søkers ytelser. Det er kun sekundærlandsbarn som skal påvirke differanseberegning til søker.
-    val barnSomSkalPåvirkeSøkersYtelserTidslinje = sekundærlandsbarnTidslinje.kombinerKunVerdiMed(helePeriodenErSekundærlandEllerPrimærlandMedBorIEØSEllerStorbritanniaMedAnnenForelderTidslinje) { _, helePeriodenErSekundærlandEllerPrimærMedBorIEØSEllerStorbritanniaMedAnnenForelder ->
-        helePeriodenErSekundærlandEllerPrimærMedBorIEØSEllerStorbritanniaMedAnnenForelder
-    }
+    val barnSomSkalPåvirkeSøkersYtelserTidslinje =
+        sekundærlandsbarnTidslinje.kombinerKunVerdiMed(helePeriodenErSekundærlandEllerPrimærlandMedBorIEØSEllerStorbritanniaMedAnnenForelderTidslinje) { _, helePeriodenErSekundærlandEllerPrimærMedBorIEØSEllerStorbritanniaMedAnnenForelder ->
+            helePeriodenErSekundærlandEllerPrimærMedBorIEØSEllerStorbritanniaMedAnnenForelder
+        }
 
     // Plukker ut andelene til sekundærlandsbarna som skal påvirke differanseberegning til søker.
     return this.joinIkkeNull(barnSomSkalPåvirkeSøkersYtelserTidslinje) { andel, erBarnSomSkalPåvirkeSøkersYtelser ->
@@ -205,8 +206,9 @@ fun Map<Aktør, Tidslinje<Kompetanse, Måned>>.tilSekundærlandsbarnEllerPrimær
 
     return this.leftJoin(barnBorIEØSEllerStorbritanniaMedAnnenForelderTidslinjer) { kompetanse, borIEØSEllerStorbritanniaMedAnnenForelder ->
         when {
-            kompetanse != null -> kompetanse.resultat == NORGE_ER_SEKUNDÆRLAND ||
-                kompetanse.resultat == NORGE_ER_PRIMÆRLAND && borIEØSEllerStorbritanniaMedAnnenForelder == true
+            kompetanse != null ->
+                kompetanse.resultat == NORGE_ER_SEKUNDÆRLAND ||
+                    kompetanse.resultat == NORGE_ER_PRIMÆRLAND && borIEØSEllerStorbritanniaMedAnnenForelder == true
 
             else -> false
         }
@@ -215,14 +217,16 @@ fun Map<Aktør, Tidslinje<Kompetanse, Måned>>.tilSekundærlandsbarnEllerPrimær
 
 fun Set<PersonResultat>.finnPerioderBarnBorIEØSEllerStorbritanniaMedAnnenForelder(): Map<Aktør, Tidslinje<Boolean, Måned>> =
     associate { personResultat ->
-        personResultat.aktør to personResultat.vilkårResultater.lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOR_MED_SØKER).map { vilkårResultat ->
-            vilkårResultat?.utdypendeVilkårsvurderinger?.any {
-                it in listOf(
-                    UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER,
-                    UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER,
-                )
-            }
-        }.filtrerIkkeNull()
+        personResultat.aktør to
+            personResultat.vilkårResultater.lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOR_MED_SØKER).map { vilkårResultat ->
+                vilkårResultat?.utdypendeVilkårsvurderinger?.any {
+                    it in
+                        listOf(
+                            UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER,
+                            UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER,
+                        )
+                }
+            }.filtrerIkkeNull()
     }
 
 fun Tidslinje<AndelTilkjentYtelse, Måned>.fordelBeløpPåBarnaMedAndeler(
