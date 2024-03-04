@@ -70,7 +70,7 @@ class BehandlingMetrikker(
                 val tittel = sanityEØSBegrunnelser[it]?.navnISystem ?: it.name
 
                 Metrics.counter(
-                    "eøs-begrunnelse",
+                    "eos-begrunnelse",
                     "type",
                     it.name,
                     "beskrivelse",
