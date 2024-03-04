@@ -5,9 +5,11 @@ import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
+import mockAutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
+import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -42,7 +44,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilVedtaksperio
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.genererVedtaksperioder
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import java.time.LocalDate
@@ -419,6 +421,37 @@ class BegrunnelseTeksterStepDefinition {
             .usingRecursiveComparison()
             .ignoringFields("begrunnelser")
             .isEqualTo(forvendtedeBrevperioder)
+    }
+
+    /**
+     * Mulige verdier: | Fra dato | Til dato |
+     */
+    @Når("det kommer nye overgangstønadsperioder på fagsak {} og vi lager atomatisk behandling med id {}")
+    fun `kjør behandling småbarnstillegg på fagsak med behandlingsid`(
+        fagsakId: Long,
+        småbarnstilleggBehandlingId: Long,
+        dataTable: DataTable,
+    ) {
+        val fagsak = fagsaker[fagsakId]!!
+        val internePerioderOvergangsstønad =
+            dataTable.asMaps()
+                .map({ rad ->
+                    InternPeriodeOvergangsstønad(
+                        fomDato = parseDato(Domenebegrep.FRA_DATO, rad),
+                        tomDato = parseDato(Domenebegrep.TIL_DATO, rad),
+                        personIdent = fagsak.aktør.aktivFødselsnummer(),
+                    )
+                })
+
+        mockAutovedtakSmåbarnstilleggService(
+            dataFraCucumber = this,
+            fagsak = fagsak,
+            internPeriodeOvergangsstønadNyBehandling = internePerioderOvergangsstønad,
+            småbarnstilleggBehandlingId = småbarnstilleggBehandlingId,
+        ).kjørBehandlingSmåbarnstillegg(
+            mottakersAktør = fagsak.aktør,
+            aktør = fagsak.aktør,
+        )
     }
 }
 
