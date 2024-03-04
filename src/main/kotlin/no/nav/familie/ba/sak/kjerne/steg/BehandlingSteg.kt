@@ -313,7 +313,9 @@ fun hentNesteSteg(
             }
         }
 
-        BehandlingÅrsak.SMÅBARNSTILLEGG -> {
+        BehandlingÅrsak.SMÅBARNSTILLEGG,
+        BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID,
+        -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
