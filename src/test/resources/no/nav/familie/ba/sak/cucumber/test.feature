@@ -45,12 +45,9 @@ Egenskap: Småbarnstillegg autovedtak
 
     Når vedtaksperiodene genereres for behandling 2
 
-    Når det kommer nye overgangstønadsperioder på fagsak 1 og vi lager atomatisk behandling med id 3
+    Når vi lager automatisk behandling med id 3 på fagsak 1 på grunn av nye overgangsstønadsperioder
       | Fra dato   | Til dato   |
       | 01.05.2022 | 30.06.2024 |
-
-    Så forvent følgende brevperioder for behandling 3
-      | Brevperiodetype | Fra dato | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
 
     Så forvent følgende andeler tilkjent ytelse for behandling 3
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
@@ -63,3 +60,7 @@ Egenskap: Småbarnstillegg autovedtak
       | 2       | 3            | 01.05.2022 | 28.02.2023 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
       | 2       | 3            | 01.03.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
       | 2       | 3            | 01.07.2023 | 30.12.2024 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+
+    # Forventer at det ikke skal være noen brevperioder
+    Så forvent følgende brevperioder for behandling 3
+      | Brevperiodetype | Fra dato | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |

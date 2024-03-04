@@ -426,10 +426,10 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | Fra dato | Til dato |
      */
-    @Når("det kommer nye overgangstønadsperioder på fagsak {} og vi lager atomatisk behandling med id {}")
+    @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av nye overgangsstønadsperioder")
     fun `kjør behandling småbarnstillegg på fagsak med behandlingsid`(
-        fagsakId: Long,
         småbarnstilleggBehandlingId: Long,
+        fagsakId: Long,
         dataTable: DataTable,
     ) {
         val fagsak = fagsaker[fagsakId]!!
