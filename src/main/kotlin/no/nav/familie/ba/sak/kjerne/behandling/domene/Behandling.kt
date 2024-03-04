@@ -363,7 +363,7 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     OMREGNING_SMÅBARNSTILLEGG("Omregning småbarnstillegg"),
     SATSENDRING("Satsendring"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
-    SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID("Småbarnstillegg forlengelse fram i tid"),
+    SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID("Småbarnstillegg endring fram i tid"),
     MIGRERING("Migrering"),
     ENDRE_MIGRERINGSDATO("Endre migreringsdato"),
     HELMANUELL_MIGRERING("Manuell migrering"),
