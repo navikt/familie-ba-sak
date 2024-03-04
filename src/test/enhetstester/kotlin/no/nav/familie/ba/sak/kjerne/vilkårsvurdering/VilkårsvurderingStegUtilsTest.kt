@@ -107,8 +107,11 @@ class VilkårsvurderingStegUtilsTest {
     fun `periode erstattes dersom en periode med overlappende tidsintervall legges til`() {
         val restVilkårResultat =
             RestVilkårResultat(
-                2, vilkår, resultat,
-                LocalDate.of(2010, 6, 2), LocalDate.of(2011, 9, 1),
+                2,
+                vilkår,
+                resultat,
+                LocalDate.of(2010, 6, 2),
+                LocalDate.of(2011, 9, 1),
                 "",
                 "",
                 LocalDateTime.now(),
@@ -141,8 +144,11 @@ class VilkårsvurderingStegUtilsTest {
     fun `periode splittes dersom en periode med inneklemt tidsintervall legges til`() {
         val restVilkårResultat =
             RestVilkårResultat(
-                2, vilkår, resultat,
-                LocalDate.of(2010, 3, 5), LocalDate.of(2010, 5, 20),
+                2,
+                vilkår,
+                resultat,
+                LocalDate.of(2010, 3, 5),
+                LocalDate.of(2010, 5, 20),
                 "",
                 "",
                 LocalDateTime.now(),
@@ -189,8 +195,11 @@ class VilkårsvurderingStegUtilsTest {
     fun `fom-dato flyttes korrekt`() {
         val restVilkårResultat =
             RestVilkårResultat(
-                2, vilkår, resultat,
-                LocalDate.of(2010, 4, 2), LocalDate.of(2010, 8, 1),
+                2,
+                vilkår,
+                resultat,
+                LocalDate.of(2010, 4, 2),
+                LocalDate.of(2010, 8, 1),
                 "",
                 "",
                 LocalDateTime.now(),
@@ -230,8 +239,11 @@ class VilkårsvurderingStegUtilsTest {
     fun `tom-dato flyttes korrekt`() {
         val restVilkårResultat =
             RestVilkårResultat(
-                2, vilkår, resultat,
-                LocalDate.of(2010, 6, 2), LocalDate.of(2010, 9, 1),
+                2,
+                vilkår,
+                resultat,
+                LocalDate.of(2010, 6, 2),
+                LocalDate.of(2010, 9, 1),
                 "",
                 "",
                 LocalDateTime.now(),
