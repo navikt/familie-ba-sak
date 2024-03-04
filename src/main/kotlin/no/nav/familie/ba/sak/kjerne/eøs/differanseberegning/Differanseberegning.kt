@@ -102,7 +102,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
         when {
             skalBrukeUtvidedeRegler ->
                 barnasAndelerTidslinjer
-                    .tilAndelerSomSkalDifferanseberegnesMotSøkersYtelser(kompetanser, personResultater)
+                    .kunAndelerSomSkalDifferanseberegnesMotSøkersYtelser(kompetanser, personResultater)
 
             else -> barnasAndelerTidslinjer.kunReneSekundærlandsperioder(kompetanser)
         }
@@ -147,7 +147,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
             skalBrukeUtvidedeRegler ->
                 barnasAndelerTidslinjer
                     .kunAndelerTilOgMed3År(barna)
-                    .tilAndelerSomSkalDifferanseberegnesMotSøkersYtelser(kompetanser, personResultater)
+                    .kunAndelerSomSkalDifferanseberegnesMotSøkersYtelser(kompetanser, personResultater)
 
             else -> barnasAndelerTidslinjer.kunAndelerTilOgMed3År(barna).kunReneSekundærlandsperioder(kompetanser)
         }
@@ -213,7 +213,7 @@ fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunReneSekundærlandsper
  * Hvis ja beholdes andelene for alle barna med sekundærland-kompetanser
  * Hvis nei fjernes alle andelene, slik at perioden ikke har noen andeler
  */
-fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerSomSkalDifferanseberegnesMotSøkersYtelser(
+fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunAndelerSomSkalDifferanseberegnesMotSøkersYtelser(
     kompetanser: Collection<Kompetanse>,
     personResultater: Set<PersonResultat>,
 ): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
