@@ -65,7 +65,7 @@ class BegrunnelseTeksterStepDefinition {
     var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
     var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
-    var overgangsstønad = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
+    var overgangsstønader = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
     var dagensDato: LocalDate = LocalDate.now()
 
     var gjeldendeBehandlingId: Long? = null
@@ -203,7 +203,7 @@ class BegrunnelseTeksterStepDefinition {
      */
     @Og("med overgangsstønad for begrunnelse")
     fun `med overgangsstønad for begrunnelse`(dataTable: DataTable) {
-        overgangsstønadForVedtaksperiode =
+        overgangsstønader =
             lagOvergangsstønad(
                 dataTable = dataTable,
                 persongrunnlag = persongrunnlag,
@@ -290,7 +290,7 @@ class BegrunnelseTeksterStepDefinition {
                 kompetanser = kompetanser[behandlingId] ?: emptyList(),
                 endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
                 andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
-                perioderOvergangsstønad = overgangsstønadForVedtaksperiode[behandlingId] ?: emptyList(),
+                perioderOvergangsstønad = overgangsstønader[behandlingId] ?: emptyList(),
                 uregistrerteBarn = emptyList(),
                 utenlandskPeriodebeløp = utenlandskPeriodebeløp[behandlingId] ?: emptyList(),
                 valutakurs = valutakurs[behandlingId] ?: emptyList(),
@@ -307,7 +307,7 @@ class BegrunnelseTeksterStepDefinition {
                     kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                     endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
                     andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
-                    perioderOvergangsstønad = overgangsstønadForVedtaksperiode[forrigeBehandlingId] ?: emptyList(),
+                    perioderOvergangsstønad = overgangsstønader[forrigeBehandlingId] ?: emptyList(),
                     uregistrerteBarn = emptyList(),
                     utenlandskPeriodebeløp = utenlandskPeriodebeløp[forrigeBehandlingId] ?: emptyList(),
                     valutakurs = valutakurs[forrigeBehandlingId] ?: emptyList(),
