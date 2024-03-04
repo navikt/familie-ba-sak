@@ -52,28 +52,28 @@ val sanityEØSBegrunnelserMock = SanityBegrunnelseMock.hentSanityEØSBegrunnelse
 
 @Suppress("ktlint:standard:function-naming")
 class BegrunnelseTeksterStepDefinition {
-    private var behandlinger = mutableMapOf<Long, Behandling>()
-    private var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
-    private var vedtaksliste = mutableListOf<Vedtak>()
-    private var persongrunnlag = mutableMapOf<Long, PersonopplysningGrunnlag>()
-    private var vedtaksperioderMedBegrunnelser = listOf<VedtaksperiodeMedBegrunnelser>()
-    private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
-    private var valutakurs = mutableMapOf<Long, List<Valutakurs>>()
-    private var utenlandskPeriodebeløp = mutableMapOf<Long, List<UtenlandskPeriodebeløp>>()
-    private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
-    private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
-    private var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
-    private var overgangsstønadForVedtaksperiode = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
-    private var dagensDato: LocalDate = LocalDate.now()
     var fagsaker: MutableMap<Long, Fagsak> = mutableMapOf()
+    var behandlinger = mutableMapOf<Long, Behandling>()
+    var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
+    var vedtaksliste = mutableListOf<Vedtak>()
+    var persongrunnlag = mutableMapOf<Long, PersonopplysningGrunnlag>()
     var vilkårsvurderinger = mutableMapOf<Long, Vilkårsvurdering>()
+    var vedtaksperioderMedBegrunnelser = listOf<VedtaksperiodeMedBegrunnelser>()
+    var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
+    var valutakurs = mutableMapOf<Long, List<Valutakurs>>()
+    var utenlandskPeriodebeløp = mutableMapOf<Long, List<UtenlandskPeriodebeløp>>()
+    var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
+    var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
+    var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
+    var overgangsstønad = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
+    var dagensDato: LocalDate = LocalDate.now()
 
-    private var gjeldendeBehandlingId: Long? = null
+    var gjeldendeBehandlingId: Long? = null
 
-    private var utvidetVedtaksperiodeMedBegrunnelser = listOf<UtvidetVedtaksperiodeMedBegrunnelser>()
+    var utvidetVedtaksperiodeMedBegrunnelser = listOf<UtvidetVedtaksperiodeMedBegrunnelser>()
 
-    private var målform: Målform = Målform.NB
-    private var søknadstidspunkt: LocalDate? = null
+    var målform: Målform = Målform.NB
+    var søknadstidspunkt: LocalDate? = null
 
     /**
      * Mulige verdier: | FagsakId | Fagsaktype |
