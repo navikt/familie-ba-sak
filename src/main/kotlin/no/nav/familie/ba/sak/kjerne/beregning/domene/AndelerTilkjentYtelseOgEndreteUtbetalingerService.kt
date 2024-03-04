@@ -203,3 +203,9 @@ fun AndelTilkjentYtelse.medEndring(
     andelTilkjentYtelse = this,
     endreteUtbetalingerAndeler = listOf(endretUtbetalingAndelMedAndelerTilkjentYtelse.endretUtbetalingAndel),
 )
+
+fun Collection<AndelTilkjentYtelse>.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(endretUtbetalingAndeler: Collection<EndretUtbetalingAndel>) =
+    AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(this, endretUtbetalingAndeler).lagAndelerMedEndringer()
+
+fun Collection<EndretUtbetalingAndel>.tilEndretUtbetalingAndelMedAndelerTilkjentYtelse(andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>) =
+    AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(andelerTilkjentYtelse, this).lagEndreteUtbetalingMedAndeler()
