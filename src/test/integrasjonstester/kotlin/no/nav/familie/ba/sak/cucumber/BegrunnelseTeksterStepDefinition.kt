@@ -85,7 +85,7 @@ class BegrunnelseTeksterStepDefinition {
 
     /**
      * Mulige felter:
-     * | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
+     * | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Behandlingsstatus |
      */
     @Gitt("følgende behandling")
     fun `følgende behandling`(dataTable: DataTable) {

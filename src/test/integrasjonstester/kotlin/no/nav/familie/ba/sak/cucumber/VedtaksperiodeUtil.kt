@@ -105,6 +105,7 @@ fun lagVedtak(
             val behandlingKategori =
                 parseValgfriEnum<BehandlingKategori>(Domenebegrep.BEHANDLINGSKATEGORI, rad)
                     ?: BehandlingKategori.NASJONAL
+            val status = parseValgfriEnum<BehandlingStatus>(Domenebegrep.BEHANDLINGSSTATUS, rad)
 
             lagBehandling(
                 fagsak = fagsak,
@@ -112,6 +113,7 @@ fun lagVedtak(
                 resultat = behandlingResultat ?: Behandlingsresultat.IKKE_VURDERT,
                 skalBehandlesAutomatisk = skalBehandlesAutomatisk,
                 behandlingKategori = behandlingKategori,
+                status = status ?: BehandlingStatus.UTREDES,
             ).copy(id = behandlingId)
         }.associateBy { it.id },
     )
