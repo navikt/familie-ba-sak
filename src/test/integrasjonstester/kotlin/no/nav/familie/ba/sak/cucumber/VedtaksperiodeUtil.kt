@@ -128,20 +128,26 @@ fun lagVedtak(
     )
 }
 
-fun lagPersonresultater(
+fun lagVilkårsvurdering(
     persongrunnlagForBehandling: PersonopplysningGrunnlag,
     behandling: Behandling,
-) = persongrunnlagForBehandling.personer.map { person ->
-    lagPersonResultat(
-        vilkårsvurdering = lagVilkårsvurdering(person.aktør, behandling, Resultat.OPPFYLT),
-        person = person,
-        resultat = Resultat.OPPFYLT,
-        personType = person.type,
-        lagFullstendigVilkårResultat = true,
-        periodeFom = null,
-        periodeTom = null,
-    )
-}.toSet()
+): Vilkårsvurdering {
+    val vilkårsvurdering = lagVilkårsvurdering(søkerAktør = behandling.fagsak.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
+    val personResultater =
+        persongrunnlagForBehandling.personer.map { person ->
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                person = person,
+                resultat = Resultat.OPPFYLT,
+                personType = person.type,
+                lagFullstendigVilkårResultat = true,
+                periodeFom = null,
+                periodeTom = null,
+            )
+        }.toSet()
+    vilkårsvurdering.personResultater = personResultater
+    return vilkårsvurdering
+}
 
 fun leggTilVilkårResultatPåPersonResultat(
     personResultatForBehandling: Set<PersonResultat>,
@@ -459,7 +465,7 @@ fun lagVedtaksPerioder(
     vedtaksListe: List<Vedtak>,
     behandlingTilForrigeBehandling: MutableMap<Long, Long?>,
     personGrunnlag: Map<Long, PersonopplysningGrunnlag>,
-    personResultater: Map<Long, Set<PersonResultat>>,
+    vilkårsvurderinger: Map<Long, Vilkårsvurdering>,
     kompetanser: Map<Long, List<Kompetanse>>,
     utenlandskPeriodebeløp: Map<Long, List<UtenlandskPeriodebeløp>>,
     valutakurs: Map<Long, List<Valutakurs>>,
@@ -478,7 +484,7 @@ fun lagVedtaksPerioder(
     val grunnlagForVedtaksperiode =
         BehandlingsGrunnlagForVedtaksperioder(
             persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
-            personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
+            personResultater = vilkårsvurderinger[behandlingId]?.personResultater ?: error("Finner ikke personresultater"),
             behandling = vedtak.behandling,
             kompetanser = kompetanser[behandlingId] ?: emptyList(),
             endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
@@ -498,7 +504,7 @@ fun lagVedtaksPerioder(
                     ?: error("Finner ikke vedtak")
             BehandlingsGrunnlagForVedtaksperioder(
                 persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
-                personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
+                personResultater = vilkårsvurderinger[forrigeBehandlingId]?.personResultater ?: error("Finner ikke personresultater"),
                 behandling = forrigeVedtak.behandling,
                 kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                 endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),

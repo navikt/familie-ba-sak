@@ -57,7 +57,6 @@ class BegrunnelseTeksterStepDefinition {
     private var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
     private var vedtaksliste = mutableListOf<Vedtak>()
     private var persongrunnlag = mutableMapOf<Long, PersonopplysningGrunnlag>()
-    private var personResultater = mutableMapOf<Long, Set<PersonResultat>>()
     private var vedtaksperioderMedBegrunnelser = listOf<VedtaksperiodeMedBegrunnelser>()
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
     private var valutakurs = mutableMapOf<Long, List<Valutakurs>>()
@@ -67,6 +66,7 @@ class BegrunnelseTeksterStepDefinition {
     private var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
     private var overgangsstønadForVedtaksperiode = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
     private var dagensDato: LocalDate = LocalDate.now()
+    var vilkårsvurderinger = mutableMapOf<Long, Vilkårsvurdering>()
 
     private var gjeldendeBehandlingId: Long? = null
 
@@ -128,7 +128,8 @@ class BegrunnelseTeksterStepDefinition {
     fun `lag personresultater for begrunnelse`(behandlingId: Long) {
         val persongrunnlagForBehandling = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId)
         val behandling = behandlinger.finnBehandling(behandlingId)
-        personResultater[behandlingId] = lagPersonresultater(persongrunnlagForBehandling, behandling)
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlagForBehandling, behandling)
+        vilkårsvurderinger[behandlingId] = vilkårsvurdering
     }
 
     /**
@@ -142,10 +143,10 @@ class BegrunnelseTeksterStepDefinition {
         val vilkårResultaterPerPerson =
             dataTable.asMaps().groupBy { VedtaksperiodeMedBegrunnelserParser.parseAktørId(it) }
         val personResultatForBehandling =
-            personResultater[behandlingId]
+            vilkårsvurderinger[behandlingId]?.personResultater
                 ?: error("Finner ikke personresultater for behandling med id $behandlingId")
 
-        personResultater[behandlingId] =
+        vilkårsvurderinger[behandlingId]?.personResultater =
             leggTilVilkårResultatPåPersonResultat(personResultatForBehandling, vilkårResultaterPerPerson, behandlingId)
     }
 
@@ -284,7 +285,7 @@ class BegrunnelseTeksterStepDefinition {
         val grunnlagForVedtaksperiode =
             BehandlingsGrunnlagForVedtaksperioder(
                 persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
-                personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
+                personResultater = vilkårsvurderinger[behandlingId]?.personResultater ?: error("Finner ikke personresultater"),
                 behandling = vedtak.behandling,
                 kompetanser = kompetanser[behandlingId] ?: emptyList(),
                 endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
@@ -301,7 +302,7 @@ class BegrunnelseTeksterStepDefinition {
                     vedtaksliste.find { it.behandling.id == forrigeBehandlingId && it.aktiv } ?: error("Finner ikke vedtak")
                 BehandlingsGrunnlagForVedtaksperioder(
                     persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
-                    personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
+                    personResultater = vilkårsvurderinger[forrigeBehandlingId]?.personResultater ?: error("Finner ikke personresultater"),
                     behandling = forrigeVedtak.behandling,
                     kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                     endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
