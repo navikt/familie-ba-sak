@@ -103,7 +103,20 @@ class BegrunnelseTeksterStepDefinition {
      */
     @Og("følgende persongrunnlag for begrunnelse")
     fun `følgende persongrunnlag for begrunnelse`(dataTable: DataTable) {
-        persongrunnlag.putAll(lagPersonGrunnlag(dataTable))
+        val personGrunnlagMap = lagPersonGrunnlag(dataTable)
+        persongrunnlag.putAll(personGrunnlagMap)
+
+        fagsaker =
+            fagsaker.mapValues { (_, fagsak) ->
+                val behandlingerPåFagsak = behandlinger.values.filter { it.fagsak.id == fagsak.id }
+                val søkerAktør = persongrunnlag[behandlingerPåFagsak.first().id]!!.søker.aktør
+                fagsak.copy(aktør = søkerAktør)
+            }
+
+        behandlinger =
+            behandlinger.mapValues { (_, behandling) ->
+                behandling.copy(fagsak = fagsaker[behandling.fagsak.id]!!)
+            }.toMutableMap()
     }
 
     @Og("følgende dagens dato {}")
