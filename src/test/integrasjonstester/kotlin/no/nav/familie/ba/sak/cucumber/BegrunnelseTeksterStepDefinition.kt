@@ -453,6 +453,27 @@ class BegrunnelseTeksterStepDefinition {
             aktør = fagsak.aktør,
         )
     }
+
+    /**
+     * Mulige verdier: | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
+     */
+    @Så("forvent følgende andeler tilkjent ytelse for behandling {}")
+    fun `med andeler tilkjent ytelse`(
+        behandlingId: Long,
+        dataTable: DataTable,
+    ) {
+        val beregnetTilkjentYtelse =
+            andelerTilkjentYtelse[behandlingId]!!
+                .sortedWith(compareBy({ it.aktør.aktørId }, { it.type }, { it.stønadFom }))
+
+        val forventedeAndeler =
+            lagAndelerTilkjentYtelse(dataTable, behandlinger, persongrunnlag)[behandlingId]!!
+                .sortedWith(compareBy({ it.aktør.aktørId }, { it.type }, { it.stønadFom }))
+
+        assertThat(beregnetTilkjentYtelse)
+            .usingRecursiveComparison().ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*kildeBehandlingId", ".*tilkjentYtelse")
+            .isEqualTo(forventedeAndeler)
+    }
 }
 
 data class SammenlignbarBegrunnelse(
