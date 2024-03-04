@@ -230,7 +230,6 @@ fun mockAutovedtakSmåbarnstilleggService(
             beregningService = beregningService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            localDateProvider = MockedDateProvider(dataFraCucumber.dagensDato),
         )
 
     val registrerPersongrunnlag =
