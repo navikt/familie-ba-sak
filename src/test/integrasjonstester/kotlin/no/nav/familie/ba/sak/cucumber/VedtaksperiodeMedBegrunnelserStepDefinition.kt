@@ -30,7 +30,7 @@ import java.time.LocalDate
 
 @Suppress("ktlint:standard:function-naming")
 class VedtaksperiodeMedBegrunnelserStepDefinition {
-    private var fagsaker: Map<Long, Fagsak> = emptyMap()
+    private var fagsaker: MutableMap<Long, Fagsak> = mutableMapOf()
     private var behandlinger = mutableMapOf<Long, Behandling>()
     private var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
     private var vedtaksliste = mutableListOf<Vedtak>()

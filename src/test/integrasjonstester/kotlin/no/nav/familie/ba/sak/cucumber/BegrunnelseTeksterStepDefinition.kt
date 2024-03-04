@@ -52,7 +52,6 @@ val sanityEØSBegrunnelserMock = SanityBegrunnelseMock.hentSanityEØSBegrunnelse
 
 @Suppress("ktlint:standard:function-naming")
 class BegrunnelseTeksterStepDefinition {
-    private var fagsaker: Map<Long, Fagsak> = emptyMap()
     private var behandlinger = mutableMapOf<Long, Behandling>()
     private var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
     private var vedtaksliste = mutableListOf<Vedtak>()
@@ -66,6 +65,7 @@ class BegrunnelseTeksterStepDefinition {
     private var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
     private var overgangsstønadForVedtaksperiode = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
     private var dagensDato: LocalDate = LocalDate.now()
+    var fagsaker: MutableMap<Long, Fagsak> = mutableMapOf()
     var vilkårsvurderinger = mutableMapOf<Long, Vilkårsvurdering>()
 
     private var gjeldendeBehandlingId: Long? = null
@@ -111,7 +111,7 @@ class BegrunnelseTeksterStepDefinition {
                 val behandlingerPåFagsak = behandlinger.values.filter { it.fagsak.id == fagsak.id }
                 val søkerAktør = persongrunnlag[behandlingerPåFagsak.first().id]!!.søker.aktør
                 fagsak.copy(aktør = søkerAktør)
-            }
+            }.toMutableMap()
 
         behandlinger =
             behandlinger.mapValues { (_, behandling) ->

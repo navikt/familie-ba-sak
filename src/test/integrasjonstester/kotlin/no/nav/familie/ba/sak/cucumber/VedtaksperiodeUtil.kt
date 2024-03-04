@@ -85,20 +85,26 @@ fun lagFagsaker(dataTable: DataTable) =
             type = parseValgfriEnum<FagsakType>(Domenebegrep.FAGSAK_TYPE, rad) ?: FagsakType.NORMAL,
             aktør = randomAktør(),
         )
-    }.associateBy { it.id }
+    }.associateBy { it.id }.toMutableMap()
 
 fun lagVedtak(
     dataTable: DataTable,
     behandlinger: MutableMap<Long, Behandling>,
     behandlingTilForrigeBehandling: MutableMap<Long, Long?>,
     vedtaksListe: MutableList<Vedtak>,
-    fagsaker: Map<Long, Fagsak>,
+    fagsaker: MutableMap<Long, Fagsak>,
 ) {
     behandlinger.putAll(
         dataTable.asMaps().map { rad ->
             val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
             val fagsakId = parseValgfriLong(Domenebegrep.FAGSAK_ID, rad)
-            val fagsak = fagsaker[fagsakId] ?: defaultFagsak()
+            val fagsak =
+                fagsaker.getOrDefault(fagsakId, defaultFagsak()).also {
+                    if (it.id !in fagsaker.keys) {
+                        fagsaker[it.id] = it
+                    }
+                }
+
             val behandlingÅrsak = parseValgfriEnum<BehandlingÅrsak>(Domenebegrep.BEHANDLINGSÅRSAK, rad)
             val behandlingResultat = parseValgfriEnum<Behandlingsresultat>(Domenebegrep.BEHANDLINGSRESULTAT, rad)
             val skalBehandlesAutomatisk = parseValgfriBoolean(Domenebegrep.SKAL_BEHANLDES_AUTOMATISK, rad) ?: false
