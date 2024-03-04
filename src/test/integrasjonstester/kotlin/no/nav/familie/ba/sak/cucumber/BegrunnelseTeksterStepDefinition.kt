@@ -464,11 +464,11 @@ class BegrunnelseTeksterStepDefinition {
     ) {
         val beregnetTilkjentYtelse =
             andelerTilkjentYtelse[behandlingId]!!
-                .sortedWith(compareBy({ it.aktør.aktørId }, { it.type }, { it.stønadFom }))
+                .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         val forventedeAndeler =
             lagAndelerTilkjentYtelse(dataTable, behandlinger, persongrunnlag)[behandlingId]!!
-                .sortedWith(compareBy({ it.aktør.aktørId }, { it.type }, { it.stønadFom }))
+                .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         assertThat(beregnetTilkjentYtelse)
             .usingRecursiveComparison().ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*kildeBehandlingId", ".*tilkjentYtelse")
