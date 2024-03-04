@@ -428,6 +428,8 @@ class DifferanseberegningSøkersYtelserTest {
         // Primærlandsbarnet har utdypende vilkårsvurdering 'Bor i EØS med annen forelder' i hele perioden
         val personResultater =
             VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn1, des(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .forPerson(barn2, des(2017))
                 //                                 |--- 2018---|
                 .medUtdypendeVilkårsvurdering("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER, UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER)
@@ -481,6 +483,8 @@ class DifferanseberegningSøkersYtelserTest {
         // Primærlandsbarnet har utdypende vilkårsvurdering 'Bor i Storbritannia med annen forelder' i hele perioden
         val personResultater =
             VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn1, des(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .forPerson(barn2, des(2017))
                 //                                |--- 2018---|
                 .medUtdypendeVilkårsvurdering("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER, UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER)
@@ -534,9 +538,11 @@ class DifferanseberegningSøkersYtelserTest {
         // Primærlandsbarnet har ikke utdypende vilkårsvurdering for BOR_MED_SØKER vilkåret
         val personResultater =
             VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                //             |--- 2017---|--- 2018---|
+                .forPerson(barn1, des(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .forPerson(barn2, des(2017))
-                //             |--- 2018---|
-                .medVilkår("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER)
+                .medVilkår("eeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .byggVilkårsvurdering().personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
@@ -592,9 +598,13 @@ class DifferanseberegningSøkersYtelserTest {
         // Det ene primærlandsbarnet har utdypende vilkårsvurdering 'Bor i EØS med annen forelder' i hele perioden
         val personResultater =
             VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn1, des(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .forPerson(barn2, des(2017))
                 //             |--- 2018---|
                 .medUtdypendeVilkårsvurdering("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER, UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER)
+                .forPerson(barn3, des(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .byggVilkårsvurdering().personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
@@ -655,9 +665,13 @@ class DifferanseberegningSøkersYtelserTest {
         // Det ene primærlandsbarnet har utdypende vilkårsvurdering 'Bor i EØS med annen forelder' i hele perioden
         val personResultater =
             VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn1, des(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .forPerson(barn2, des(2017))
                 //             |--- 2018---|
                 .medUtdypendeVilkårsvurdering("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER, UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER)
+                .forPerson(barn3, des(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .byggVilkårsvurdering().personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
@@ -717,8 +731,17 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("                                     $$$$$$$$$$$", nasjonalt = { 1676 }, differanse = { 400 }, kalkulert = { 400 })
                 .bygg()
 
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                //             |--- 2017---|--- 2018---|
+                .forPerson(barn1, jan(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .forPerson(barn2, des(2017))
+                .medVilkår("eeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .byggVilkårsvurdering().personResultater
+
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
-            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, skalBrukeUtvidedeRegler = true)
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater, skalBrukeUtvidedeRegler = true)
 
         val forventet =
             TilkjentYtelseBuilder(jan(2016), behandling)

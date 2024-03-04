@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import minsteAvHver
+import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.filtrertForPerioderBarnaBorMedSøker
+import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.tilPerioderBarnaBorMedSøkerTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.kunAndelerTilOgMed3År
@@ -11,10 +13,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinjeForSøkersYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPerValutaenhet
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
-import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.filtrerSekundærland
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat.NORGE_ER_PRIMÆRLAND
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat.NORGE_ER_SEKUNDÆRLAND
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
@@ -22,8 +22,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerHverKunVerdi
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.joinIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerKunVerdiMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullOgIkkeTom
@@ -33,11 +31,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.minus
 import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.rundAvTilHeltall
 import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.sum
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetTidslinjeForOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
 import java.math.MathContext
 
@@ -96,13 +90,16 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
 
     val barnasAndelerTidslinjer = this.tilSeparateTidslinjerForBarna()
 
+    val perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerTidslinje()
+
     // Finn alle andelene frem til barna er 18 år. Det vil i praksis være ALLE andelene
     // Bruk bare andelene som kvalifiserer for differanseberegning mot søkers ytelser
     val barnasRelevanteAndelerInntil18År =
         when {
             skalBrukeUtvidedeRegler ->
                 barnasAndelerTidslinjer
-                    .kunAndelerSomSkalDifferanseberegnesMotSøkersYtelser(kompetanser, personResultater)
+                    .filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
+                    .kunReneSekundærlandsperioder(kompetanser)
 
             else -> barnasAndelerTidslinjer.kunReneSekundærlandsperioder(kompetanser)
         }
@@ -147,7 +144,8 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
             skalBrukeUtvidedeRegler ->
                 barnasAndelerTidslinjer
                     .kunAndelerTilOgMed3År(barna)
-                    .kunAndelerSomSkalDifferanseberegnesMotSøkersYtelser(kompetanser, personResultater)
+                    .filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
+                    .kunReneSekundærlandsperioder(kompetanser)
 
             else -> barnasAndelerTidslinjer.kunAndelerTilOgMed3År(barna).kunReneSekundærlandsperioder(kompetanser)
         }
@@ -183,7 +181,6 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
  * Hvis ja beholdes andelene for alle barna
  * Hvis nei fjernes alle andelene, slik at perioden ikke har noen andeler
  */
-@Deprecated("Bruk tilAndelerSomSkalDifferanseberegnesMotSøkersYtelser")
 fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunReneSekundærlandsperioder(
     kompetanser: Collection<Kompetanse>,
 ): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
@@ -192,7 +189,7 @@ fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunReneSekundærlandsper
     val barnasErSekundærlandTidslinjer =
         this.leftJoin(barnasKompetanseTidslinjer) { andel, kompetanse ->
             when {
-                andel != null && kompetanse != null -> kompetanse.resultat == NORGE_ER_SEKUNDÆRLAND
+                andel != null && kompetanse?.resultat == NORGE_ER_SEKUNDÆRLAND -> true
                 andel != null -> false
                 else -> null
             }
@@ -207,68 +204,6 @@ fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunReneSekundærlandsper
         andel.takeIf { erSekundærland }
     }
 }
-
-/**
- * Funksjon som sjekker at hvert barns andel i en periode er vurdert med sekundærland-kompetanser eller sekundærlands-kompetanser og primærlands-kompetanser der barnets BOR_HOS_SØKER vilkår har utdypende vilkårsvurdering satt til enten BARN_BOR_I_EØS_MED_ANNEN_FORELDER eller BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER,
- * Hvis ja beholdes andelene for alle barna med sekundærland-kompetanser
- * Hvis nei fjernes alle andelene, slik at perioden ikke har noen andeler
- */
-fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunAndelerSomSkalDifferanseberegnesMotSøkersYtelser(
-    kompetanser: Collection<Kompetanse>,
-    personResultater: Set<PersonResultat>,
-): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
-    val barnasKompetanseTidslinjer = kompetanser.tilSeparateTidslinjerForBarna()
-
-    val barnasKompetanseTidslinjerAvgrensetAvAndelsTidslinjer =
-        this.joinIkkeNull(barnasKompetanseTidslinjer) { andel, kompetanse ->
-            kompetanse
-        }
-
-    // Finner alle barns sekundærlandsperioder
-    val sekundærlandsbarnTidslinje = barnasKompetanseTidslinjerAvgrensetAvAndelsTidslinjer.filtrerSekundærland()
-
-    // Finner alle rene sekundærlandsperioder og alle sekundærland- og primærlandsperioder hvor barn bor i EØS eller Storbritannia med annen forelder.
-    val helePeriodenErSekundærlandEllerPrimærlandMedBorIEØSEllerStorbritanniaMedAnnenForelderTidslinje = barnasKompetanseTidslinjerAvgrensetAvAndelsTidslinjer.tilSekundærlandsbarnEllerPrimærlandsbarnMedBorIEØSEllerStorbritanniaMedAnnenForelderTidslinje(personResultater)
-
-    // Finner alle sekundærlandsbarn som faller innenfor periodene som skal differanseberegnes mot søkers ytelser. Det er kun sekundærlandsbarn som skal påvirke differanseberegning til søker.
-    val barnSomSkalPåvirkeSøkersYtelserTidslinje =
-        sekundærlandsbarnTidslinje.kombinerKunVerdiMed(helePeriodenErSekundærlandEllerPrimærlandMedBorIEØSEllerStorbritanniaMedAnnenForelderTidslinje) { _, helePeriodenErSekundærlandEllerPrimærMedBorIEØSEllerStorbritanniaMedAnnenForelder ->
-            helePeriodenErSekundærlandEllerPrimærMedBorIEØSEllerStorbritanniaMedAnnenForelder
-        }
-
-    // Plukker ut andelene til sekundærlandsbarna som skal påvirke differanseberegning til søker.
-    return this.joinIkkeNull(barnSomSkalPåvirkeSøkersYtelserTidslinje) { andel, erBarnSomSkalPåvirkeSøkersYtelser ->
-        andel.takeIf { erBarnSomSkalPåvirkeSøkersYtelser }
-    }
-}
-
-fun Map<Aktør, Tidslinje<Kompetanse, Måned>>.tilSekundærlandsbarnEllerPrimærlandsbarnMedBorIEØSEllerStorbritanniaMedAnnenForelderTidslinje(personResultater: Set<PersonResultat>): Tidslinje<Boolean, Måned> {
-    val barnBorIEØSEllerStorbritanniaMedAnnenForelderTidslinjer = personResultater.finnPerioderBarnBorIEØSEllerStorbritanniaMedAnnenForelder()
-
-    return this.leftJoin(barnBorIEØSEllerStorbritanniaMedAnnenForelderTidslinjer) { kompetanse, borIEØSEllerStorbritanniaMedAnnenForelder ->
-        when {
-            kompetanse != null ->
-                kompetanse.resultat == NORGE_ER_SEKUNDÆRLAND ||
-                    kompetanse.resultat == NORGE_ER_PRIMÆRLAND && borIEØSEllerStorbritanniaMedAnnenForelder == true
-
-            else -> false
-        }
-    }.values.kombinerUtenNullOgIkkeTom { erSekundærlandEllerPrimærMedBorIEØSEllerStorbritanniaMedAnnenForelderListe -> erSekundærlandEllerPrimærMedBorIEØSEllerStorbritanniaMedAnnenForelderListe.all { it } }
-}
-
-fun Set<PersonResultat>.finnPerioderBarnBorIEØSEllerStorbritanniaMedAnnenForelder(): Map<Aktør, Tidslinje<Boolean, Måned>> =
-    associate { personResultat ->
-        personResultat.aktør to
-            personResultat.vilkårResultater.lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOR_MED_SØKER).map { vilkårResultat ->
-                vilkårResultat?.utdypendeVilkårsvurderinger?.any {
-                    it in
-                        listOf(
-                            UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER,
-                            UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER,
-                        )
-                }
-            }.filtrerIkkeNull()
-    }
 
 fun Tidslinje<AndelTilkjentYtelse, Måned>.fordelBeløpPåBarnaMedAndeler(
     barnasAndeler: Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>,
