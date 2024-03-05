@@ -272,7 +272,7 @@ internal class UtvidetBarnetrygdTest {
             ).lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = listOf(utvidetVilkår),
                 andelerBarna = barnasAndeler,
-                tidslinjerMedPerioderBarnaBorMedSøker =
+                perioderBarnaBorMedSøkerTidslinje =
                     barnasAndeler
                         .tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } },
             )
@@ -284,7 +284,7 @@ internal class UtvidetBarnetrygdTest {
             ).lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = listOf(utvidetVilkår),
                 andelerBarna = barnasAndeler,
-                tidslinjerMedPerioderBarnaBorMedSøker =
+                perioderBarnaBorMedSøkerTidslinje =
                     barnasAndeler
                         .tilSeparateTidslinjerForBarna().mapValues { it.value.map { andel -> andel?.prosent == BigDecimal(50) } },
             )
@@ -1041,7 +1041,7 @@ internal class UtvidetBarnetrygdTest {
             ).lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = listOf(utvidetVilkår),
                 andelerBarna = barnasAndeler,
-                tidslinjerMedPerioderBarnaBorMedSøker =
+                perioderBarnaBorMedSøkerTidslinje =
                     barnasAndeler.tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } },
             )
         }
@@ -1089,7 +1089,7 @@ internal class UtvidetBarnetrygdTest {
             ).lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = listOf(utvidetVilkår),
                 andelerBarna = barnasAndeler,
-                tidslinjerMedPerioderBarnaBorMedSøker =
+                perioderBarnaBorMedSøkerTidslinje =
                     barnasAndeler
                         .tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } },
             ).sortedBy { it.stønadFom }

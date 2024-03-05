@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
+import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.filtrertForPerioderBarnaBorMedSøker
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -10,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedKunVerdi
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullOgIkkeTom
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -23,7 +23,7 @@ data class UtvidetBarnetrygdGenerator(
     fun lagUtvidetBarnetrygdAndeler(
         utvidetVilkår: List<VilkårResultat>,
         andelerBarna: List<AndelTilkjentYtelse>,
-        tidslinjerMedPerioderBarnaBorMedSøker: Map<Aktør, Tidslinje<Boolean, Måned>>,
+        perioderBarnaBorMedSøkerTidslinje: Map<Aktør, Tidslinje<Boolean, Måned>>,
     ): List<AndelTilkjentYtelse> {
         if (utvidetVilkår.isEmpty() || andelerBarna.isEmpty()) return emptyList()
 
@@ -32,13 +32,7 @@ data class UtvidetBarnetrygdGenerator(
         val utvidetVilkårTidslinje = utvidetVilkår.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson(Vilkår.UTVIDET_BARNETRYGD)
 
         val barnasAndelerFiltrertForPerioderBarnaBorMedSøker =
-            andelerBarna.tilSeparateTidslinjerForBarna()
-                .leftJoin(tidslinjerMedPerioderBarnaBorMedSøker) { andelBarn, barnBorMedSøker ->
-                    when (barnBorMedSøker) {
-                        true -> andelBarn
-                        else -> null
-                    }
-                }
+            andelerBarna.tilSeparateTidslinjerForBarna().filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
 
         val størsteProsentTidslinje =
             barnasAndelerFiltrertForPerioderBarnaBorMedSøker.values
