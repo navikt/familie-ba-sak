@@ -43,8 +43,6 @@ Egenskap: Småbarnstillegg autovedtak
       | BehandlingId | AktørId | Fra dato   | Til dato   |
       | 2            | 1       | 01.05.2022 | 31.01.2024 |
 
-    Når vedtaksperiodene genereres for behandling 2
-
     Når vi lager automatisk behandling med id 3 på fagsak 1 på grunn av nye overgangsstønadsperioder
       | Fra dato   | Til dato   |
       | 01.05.2022 | 30.06.2024 |
