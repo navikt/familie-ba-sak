@@ -5,9 +5,11 @@ import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
+import mockAutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
+import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -42,7 +44,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilVedtaksperio
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.genererVedtaksperioder
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import java.time.LocalDate
@@ -52,28 +54,28 @@ val sanityEØSBegrunnelserMock = SanityBegrunnelseMock.hentSanityEØSBegrunnelse
 
 @Suppress("ktlint:standard:function-naming")
 class BegrunnelseTeksterStepDefinition {
-    private var fagsaker: Map<Long, Fagsak> = emptyMap()
-    private var behandlinger = mutableMapOf<Long, Behandling>()
-    private var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
-    private var vedtaksliste = mutableListOf<Vedtak>()
-    private var persongrunnlag = mutableMapOf<Long, PersonopplysningGrunnlag>()
-    private var personResultater = mutableMapOf<Long, Set<PersonResultat>>()
-    private var vedtaksperioderMedBegrunnelser = listOf<VedtaksperiodeMedBegrunnelser>()
-    private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
-    private var valutakurs = mutableMapOf<Long, List<Valutakurs>>()
-    private var utenlandskPeriodebeløp = mutableMapOf<Long, List<UtenlandskPeriodebeløp>>()
-    private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
-    private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
-    private var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
-    private var overgangsstønadForVedtaksperiode = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
-    private var dagensDato: LocalDate = LocalDate.now()
+    var fagsaker: MutableMap<Long, Fagsak> = mutableMapOf()
+    var behandlinger = mutableMapOf<Long, Behandling>()
+    var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
+    var vedtaksliste = mutableListOf<Vedtak>()
+    var persongrunnlag = mutableMapOf<Long, PersonopplysningGrunnlag>()
+    var vilkårsvurderinger = mutableMapOf<Long, Vilkårsvurdering>()
+    var vedtaksperioderMedBegrunnelser = listOf<VedtaksperiodeMedBegrunnelser>()
+    var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
+    var valutakurs = mutableMapOf<Long, List<Valutakurs>>()
+    var utenlandskPeriodebeløp = mutableMapOf<Long, List<UtenlandskPeriodebeløp>>()
+    var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
+    var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
+    var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
+    var overgangsstønader = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
+    var dagensDato: LocalDate = LocalDate.now()
 
-    private var gjeldendeBehandlingId: Long? = null
+    var gjeldendeBehandlingId: Long? = null
 
-    private var utvidetVedtaksperiodeMedBegrunnelser = listOf<UtvidetVedtaksperiodeMedBegrunnelser>()
+    var utvidetVedtaksperiodeMedBegrunnelser = listOf<UtvidetVedtaksperiodeMedBegrunnelser>()
 
-    private var målform: Målform = Målform.NB
-    private var søknadstidspunkt: LocalDate? = null
+    var målform: Målform = Målform.NB
+    var søknadstidspunkt: LocalDate? = null
 
     /**
      * Mulige verdier: | FagsakId | Fagsaktype |
@@ -85,7 +87,7 @@ class BegrunnelseTeksterStepDefinition {
 
     /**
      * Mulige felter:
-     * | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
+     * | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Behandlingsstatus |
      */
     @Gitt("følgende behandling")
     fun `følgende behandling`(dataTable: DataTable) {
@@ -103,7 +105,20 @@ class BegrunnelseTeksterStepDefinition {
      */
     @Og("følgende persongrunnlag for begrunnelse")
     fun `følgende persongrunnlag for begrunnelse`(dataTable: DataTable) {
-        persongrunnlag.putAll(lagPersonGrunnlag(dataTable))
+        val personGrunnlagMap = lagPersonGrunnlag(dataTable)
+        persongrunnlag.putAll(personGrunnlagMap)
+
+        fagsaker =
+            fagsaker.mapValues { (_, fagsak) ->
+                val behandlingerPåFagsak = behandlinger.values.filter { it.fagsak.id == fagsak.id }
+                val søkerAktør = persongrunnlag[behandlingerPåFagsak.first().id]!!.søker.aktør
+                fagsak.copy(aktør = søkerAktør)
+            }.toMutableMap()
+
+        behandlinger =
+            behandlinger.mapValues { (_, behandling) ->
+                behandling.copy(fagsak = fagsaker[behandling.fagsak.id]!!)
+            }.toMutableMap()
     }
 
     @Og("følgende dagens dato {}")
@@ -115,7 +130,8 @@ class BegrunnelseTeksterStepDefinition {
     fun `lag personresultater for begrunnelse`(behandlingId: Long) {
         val persongrunnlagForBehandling = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId)
         val behandling = behandlinger.finnBehandling(behandlingId)
-        personResultater[behandlingId] = lagPersonresultater(persongrunnlagForBehandling, behandling)
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlagForBehandling, behandling)
+        vilkårsvurderinger[behandlingId] = vilkårsvurdering
     }
 
     /**
@@ -129,10 +145,10 @@ class BegrunnelseTeksterStepDefinition {
         val vilkårResultaterPerPerson =
             dataTable.asMaps().groupBy { VedtaksperiodeMedBegrunnelserParser.parseAktørId(it) }
         val personResultatForBehandling =
-            personResultater[behandlingId]
+            vilkårsvurderinger[behandlingId]?.personResultater
                 ?: error("Finner ikke personresultater for behandling med id $behandlingId")
 
-        personResultater[behandlingId] =
+        vilkårsvurderinger[behandlingId]?.personResultater =
             leggTilVilkårResultatPåPersonResultat(personResultatForBehandling, vilkårResultaterPerPerson, behandlingId)
     }
 
@@ -189,7 +205,7 @@ class BegrunnelseTeksterStepDefinition {
      */
     @Og("med overgangsstønad for begrunnelse")
     fun `med overgangsstønad for begrunnelse`(dataTable: DataTable) {
-        overgangsstønadForVedtaksperiode =
+        overgangsstønader =
             lagOvergangsstønad(
                 dataTable = dataTable,
                 persongrunnlag = persongrunnlag,
@@ -271,12 +287,12 @@ class BegrunnelseTeksterStepDefinition {
         val grunnlagForVedtaksperiode =
             BehandlingsGrunnlagForVedtaksperioder(
                 persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
-                personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
+                personResultater = vilkårsvurderinger[behandlingId]?.personResultater ?: error("Finner ikke personresultater"),
                 behandling = vedtak.behandling,
                 kompetanser = kompetanser[behandlingId] ?: emptyList(),
                 endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
                 andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
-                perioderOvergangsstønad = overgangsstønadForVedtaksperiode[behandlingId] ?: emptyList(),
+                perioderOvergangsstønad = overgangsstønader[behandlingId] ?: emptyList(),
                 uregistrerteBarn = emptyList(),
                 utenlandskPeriodebeløp = utenlandskPeriodebeløp[behandlingId] ?: emptyList(),
                 valutakurs = valutakurs[behandlingId] ?: emptyList(),
@@ -288,12 +304,12 @@ class BegrunnelseTeksterStepDefinition {
                     vedtaksliste.find { it.behandling.id == forrigeBehandlingId && it.aktiv } ?: error("Finner ikke vedtak")
                 BehandlingsGrunnlagForVedtaksperioder(
                     persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
-                    personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
+                    personResultater = vilkårsvurderinger[forrigeBehandlingId]?.personResultater ?: error("Finner ikke personresultater"),
                     behandling = forrigeVedtak.behandling,
                     kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                     endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
                     andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
-                    perioderOvergangsstønad = overgangsstønadForVedtaksperiode[forrigeBehandlingId] ?: emptyList(),
+                    perioderOvergangsstønad = overgangsstønader[forrigeBehandlingId] ?: emptyList(),
                     uregistrerteBarn = emptyList(),
                     utenlandskPeriodebeløp = utenlandskPeriodebeløp[forrigeBehandlingId] ?: emptyList(),
                     valutakurs = valutakurs[forrigeBehandlingId] ?: emptyList(),
@@ -405,6 +421,58 @@ class BegrunnelseTeksterStepDefinition {
             .usingRecursiveComparison()
             .ignoringFields("begrunnelser")
             .isEqualTo(forvendtedeBrevperioder)
+    }
+
+    /**
+     * Mulige verdier: | Fra dato | Til dato |
+     */
+    @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av nye overgangsstønadsperioder")
+    fun `kjør behandling småbarnstillegg på fagsak med behandlingsid`(
+        småbarnstilleggBehandlingId: Long,
+        fagsakId: Long,
+        dataTable: DataTable,
+    ) {
+        val fagsak = fagsaker[fagsakId]!!
+        val internePerioderOvergangsstønad =
+            dataTable.asMaps()
+                .map({ rad ->
+                    InternPeriodeOvergangsstønad(
+                        fomDato = parseDato(Domenebegrep.FRA_DATO, rad),
+                        tomDato = parseDato(Domenebegrep.TIL_DATO, rad),
+                        personIdent = fagsak.aktør.aktivFødselsnummer(),
+                    )
+                })
+
+        mockAutovedtakSmåbarnstilleggService(
+            dataFraCucumber = this,
+            fagsak = fagsak,
+            internPeriodeOvergangsstønadNyBehandling = internePerioderOvergangsstønad,
+            småbarnstilleggBehandlingId = småbarnstilleggBehandlingId,
+        ).kjørBehandlingSmåbarnstillegg(
+            mottakersAktør = fagsak.aktør,
+            aktør = fagsak.aktør,
+        )
+    }
+
+    /**
+     * Mulige verdier: | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
+     */
+    @Så("forvent følgende andeler tilkjent ytelse for behandling {}")
+    fun `med andeler tilkjent ytelse`(
+        behandlingId: Long,
+        dataTable: DataTable,
+    ) {
+        val beregnetTilkjentYtelse =
+            andelerTilkjentYtelse[behandlingId]!!
+                .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
+
+        val forventedeAndeler =
+            lagAndelerTilkjentYtelse(dataTable, behandlinger, persongrunnlag)[behandlingId]!!
+                .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
+
+        assertThat(beregnetTilkjentYtelse)
+            .usingRecursiveComparison().ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*kildeBehandlingId", ".*tilkjentYtelse")
+            .isEqualTo(forventedeAndeler)
     }
 }
 

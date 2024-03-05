@@ -33,6 +33,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -69,6 +70,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -85,26 +87,33 @@ fun lagFagsaker(dataTable: DataTable) =
             type = parseValgfriEnum<FagsakType>(Domenebegrep.FAGSAK_TYPE, rad) ?: FagsakType.NORMAL,
             aktør = randomAktør(),
         )
-    }.associateBy { it.id }
+    }.associateBy { it.id }.toMutableMap()
 
 fun lagVedtak(
     dataTable: DataTable,
     behandlinger: MutableMap<Long, Behandling>,
     behandlingTilForrigeBehandling: MutableMap<Long, Long?>,
     vedtaksListe: MutableList<Vedtak>,
-    fagsaker: Map<Long, Fagsak>,
+    fagsaker: MutableMap<Long, Fagsak>,
 ) {
     behandlinger.putAll(
         dataTable.asMaps().map { rad ->
             val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
             val fagsakId = parseValgfriLong(Domenebegrep.FAGSAK_ID, rad)
-            val fagsak = fagsaker[fagsakId] ?: defaultFagsak()
+            val fagsak =
+                fagsaker.getOrDefault(fagsakId, defaultFagsak()).also {
+                    if (it.id !in fagsaker.keys) {
+                        fagsaker[it.id] = it
+                    }
+                }
+
             val behandlingÅrsak = parseValgfriEnum<BehandlingÅrsak>(Domenebegrep.BEHANDLINGSÅRSAK, rad)
             val behandlingResultat = parseValgfriEnum<Behandlingsresultat>(Domenebegrep.BEHANDLINGSRESULTAT, rad)
             val skalBehandlesAutomatisk = parseValgfriBoolean(Domenebegrep.SKAL_BEHANLDES_AUTOMATISK, rad) ?: false
             val behandlingKategori =
                 parseValgfriEnum<BehandlingKategori>(Domenebegrep.BEHANDLINGSKATEGORI, rad)
                     ?: BehandlingKategori.NASJONAL
+            val status = parseValgfriEnum<BehandlingStatus>(Domenebegrep.BEHANDLINGSSTATUS, rad)
 
             lagBehandling(
                 fagsak = fagsak,
@@ -112,6 +121,7 @@ fun lagVedtak(
                 resultat = behandlingResultat ?: Behandlingsresultat.IKKE_VURDERT,
                 skalBehandlesAutomatisk = skalBehandlesAutomatisk,
                 behandlingKategori = behandlingKategori,
+                status = status ?: BehandlingStatus.UTREDES,
             ).copy(id = behandlingId)
         }.associateBy { it.id },
     )
@@ -126,20 +136,26 @@ fun lagVedtak(
     )
 }
 
-fun lagPersonresultater(
+fun lagVilkårsvurdering(
     persongrunnlagForBehandling: PersonopplysningGrunnlag,
     behandling: Behandling,
-) = persongrunnlagForBehandling.personer.map { person ->
-    lagPersonResultat(
-        vilkårsvurdering = lagVilkårsvurdering(person.aktør, behandling, Resultat.OPPFYLT),
-        person = person,
-        resultat = Resultat.OPPFYLT,
-        personType = person.type,
-        lagFullstendigVilkårResultat = true,
-        periodeFom = null,
-        periodeTom = null,
-    )
-}.toSet()
+): Vilkårsvurdering {
+    val vilkårsvurdering = lagVilkårsvurdering(søkerAktør = behandling.fagsak.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
+    val personResultater =
+        persongrunnlagForBehandling.personer.map { person ->
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                person = person,
+                resultat = Resultat.OPPFYLT,
+                personType = person.type,
+                lagFullstendigVilkårResultat = true,
+                periodeFom = null,
+                periodeTom = null,
+            )
+        }.toSet()
+    vilkårsvurdering.personResultater = personResultater
+    return vilkårsvurdering
+}
 
 fun leggTilVilkårResultatPåPersonResultat(
     personResultatForBehandling: Set<PersonResultat>,
@@ -457,7 +473,7 @@ fun lagVedtaksPerioder(
     vedtaksListe: List<Vedtak>,
     behandlingTilForrigeBehandling: MutableMap<Long, Long?>,
     personGrunnlag: Map<Long, PersonopplysningGrunnlag>,
-    personResultater: Map<Long, Set<PersonResultat>>,
+    vilkårsvurderinger: Map<Long, Vilkårsvurdering>,
     kompetanser: Map<Long, List<Kompetanse>>,
     utenlandskPeriodebeløp: Map<Long, List<UtenlandskPeriodebeløp>>,
     valutakurs: Map<Long, List<Valutakurs>>,
@@ -476,7 +492,7 @@ fun lagVedtaksPerioder(
     val grunnlagForVedtaksperiode =
         BehandlingsGrunnlagForVedtaksperioder(
             persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
-            personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
+            personResultater = vilkårsvurderinger[behandlingId]?.personResultater ?: error("Finner ikke personresultater"),
             behandling = vedtak.behandling,
             kompetanser = kompetanser[behandlingId] ?: emptyList(),
             endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
@@ -496,7 +512,7 @@ fun lagVedtaksPerioder(
                     ?: error("Finner ikke vedtak")
             BehandlingsGrunnlagForVedtaksperioder(
                 persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
-                personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
+                personResultater = vilkårsvurderinger[forrigeBehandlingId]?.personResultater ?: error("Finner ikke personresultater"),
                 behandling = forrigeVedtak.behandling,
                 kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                 endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
