@@ -628,6 +628,7 @@ fun lagPersonResultat(
 fun vurderVilkårsvurderingTilInnvilget(
     vilkårsvurdering: Vilkårsvurdering,
     barn: Person,
+    innvilgetFom: LocalDate? = null,
 ) {
     vilkårsvurdering.personResultater.filter { it.aktør == barn.aktør }.forEach { personResultat ->
         personResultat.vilkårResultater.forEach {
@@ -637,7 +638,7 @@ fun vurderVilkårsvurderingTilInnvilget(
                 it.periodeTom = barn.fødselsdato.plusYears(18)
             } else {
                 it.resultat = Resultat.OPPFYLT
-                it.periodeFom = barn.fødselsdato
+                it.periodeFom = innvilgetFom ?: LocalDate.now()
             }
         }
     }
@@ -714,6 +715,7 @@ fun kjørStegprosessForFGB(
     verge: VergeInfo? = null,
     brevmalService: BrevmalService,
     behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
+    vilkårInnvilgetFom: LocalDate? = null,
 ): Behandling {
     val fagsakType = utledFagsaktype(institusjon, verge)
     val fagsak =
@@ -764,7 +766,7 @@ fun kjørStegprosessForFGB(
 
     val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
     persongrunnlagService.hentAktivThrows(behandlingId = behandling.id).personer.forEach { barn ->
-        vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
+        vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn, vilkårInnvilgetFom)
     }
     vilkårsvurderingService.oppdater(vilkårsvurdering)
 

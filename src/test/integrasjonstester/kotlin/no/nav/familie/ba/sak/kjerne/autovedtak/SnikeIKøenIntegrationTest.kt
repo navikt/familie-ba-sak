@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak
 
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.guttenBarnesenFødselsdato
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.randomFnr
@@ -146,6 +147,7 @@ class SnikeIKøenIntegrationTest(
                 stegService = stegService,
                 vedtaksperiodeService = vedtaksperiodeService,
                 brevmalService = brevmalService,
+                vilkårInnvilgetFom = guttenBarnesenFødselsdato,
             )
 
         return kjørStegprosessForRevurderingÅrligKontroll(
