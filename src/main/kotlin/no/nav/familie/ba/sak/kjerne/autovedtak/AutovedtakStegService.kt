@@ -194,15 +194,16 @@ class AutovedtakStegService(
             false
         } else if (åpenBehandling.status == BehandlingStatus.UTREDES || åpenBehandling.status == BehandlingStatus.FATTER_VEDTAK || åpenBehandling.status == BehandlingStatus.SATT_PÅ_VENT) {
             antallAutovedtakÅpenBehandling[autovedtaktype]?.increment()
-            oppgaveService.opprettOppgaveForManuellBehandling(
-                behandling = åpenBehandling,
-                begrunnelse = "${autovedtaktype.displayName}: Bruker har åpen behandling",
-                manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
-            )
+
             if (autovedtaktype == Autovedtaktype.OMREGNING_BREV) {
                 snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(åpenBehandling.id, årsak = SettPåMaskinellVentÅrsak.OMREGNING_6_ELLER_18_ÅR)
                 false
             } else {
+                oppgaveService.opprettOppgaveForManuellBehandling(
+                    behandling = åpenBehandling,
+                    begrunnelse = "${autovedtaktype.displayName}: Bruker har åpen behandling",
+                    manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
+                )
                 true
             }
         } else if (åpenBehandling.status == BehandlingStatus.IVERKSETTER_VEDTAK || åpenBehandling.status == BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
