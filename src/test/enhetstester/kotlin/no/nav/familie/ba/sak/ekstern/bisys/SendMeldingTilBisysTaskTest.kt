@@ -45,11 +45,11 @@ class SendMeldingTilBisysTaskTest {
         val listenableFutureMock = mockk<CompletableFuture<SendResult<String, String>>>()
         val behandlingHentOgPersisterServiceMock = mockk<BehandlingHentOgPersisterService>()
 
-        val forrigeBehandling = lagBehandling(defaultFagsak(), førsteSteg = StegType.BEHANDLING_AVSLUTTET)
+        val forrigeBehandling = lagBehandling(fagsak = defaultFagsak(), førsteSteg = StegType.BEHANDLING_AVSLUTTET)
 
         val nyBehandling =
             lagBehandling(
-                forrigeBehandling.fagsak,
+                fagsak = forrigeBehandling.fagsak,
                 resultat = Behandlingsresultat.OPPHØRT,
                 førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG,
             )

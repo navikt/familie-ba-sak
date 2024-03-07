@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.erTilogMed3ÅrTidslinje
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -21,13 +20,18 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMåned
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.springframework.http.HttpStatus
@@ -127,16 +131,6 @@ fun kanAutomatiskIverksetteSmåbarnstillegg(
     innvilgedeMånedPerioder: List<MånedPeriode>,
     reduserteMånedPerioder: List<MånedPeriode>,
 ): Boolean {
-    // Kan ikke automatisk innvilge perioder mer enn en måned frem i tid
-    if ((innvilgedeMånedPerioder + reduserteMånedPerioder).any {
-            it.fom.isAfter(
-                YearMonth.now().nesteMåned(),
-            )
-        }
-    ) {
-        return false
-    }
-
     return innvilgedeMånedPerioder.all {
         it.fom.isSameOrAfter(
             YearMonth.now(),
@@ -297,3 +291,36 @@ fun validerUtvidetOgBarnasAndeler(
     if (utvidetAndeler.any { !it.erUtvidet() }) throw Feil("Det finnes andre ytelser enn utvidet blandt utvidet-andelene")
     if (barnasAndeler.any { it.erSøkersAndel() }) throw Feil("Finner andeler for søker blandt barnas andeler")
 }
+
+enum class Endring {
+    INGEN_ENDRING,
+    MISTET_PERIODE,
+    FÅTT_PERIODE,
+}
+
+fun erEndringIOvergangsstønadFramITid(
+    perioderMedFullOvergangsstønadForrigeBehandling: List<InternPeriodeOvergangsstønad>,
+    perioderMedFullOvergangsstønad: List<EksternPeriode>,
+    dagensDato: LocalDate,
+): Boolean {
+    val overgangsstønadForrigeBehandlingTidslinje = perioderMedFullOvergangsstønadForrigeBehandling.tilTidslinje()
+    val overgangsstønadTidslinje = perioderMedFullOvergangsstønad.tilTidslinje()
+
+    val endringTidslinje =
+        overgangsstønadForrigeBehandlingTidslinje.kombinerMed(overgangsstønadTidslinje) { overgangsstønadFraForrigeBehandling, overgangsstønad ->
+            when {
+                overgangsstønadFraForrigeBehandling == null && overgangsstønad != null -> Endring.FÅTT_PERIODE
+                overgangsstønadFraForrigeBehandling != null && overgangsstønad == null -> Endring.MISTET_PERIODE
+                else -> Endring.INGEN_ENDRING
+            }
+        }
+
+    val endringsperioder = endringTidslinje.perioder().filter { it.innhold != Endring.INGEN_ENDRING }
+    val erEndringFramITid = endringsperioder.all { it.fraOgMed.tilYearMonth().isAfter(dagensDato.toYearMonth().plusMonths(1)) }
+    return erEndringFramITid
+}
+
+@JvmName("tilTidslinjeEksternPeriode")
+private fun List<EksternPeriode>.tilTidslinje(): Tidslinje<EksternPeriode, Dag> = map { periodeAv(fraOgMed = it.fomDato, tilOgMed = it.tomDato, it) }.tilTidslinje()
+
+private fun List<InternPeriodeOvergangsstønad>.tilTidslinje(): Tidslinje<InternPeriodeOvergangsstønad, Dag> = map { periodeAv(fraOgMed = it.fomDato, tilOgMed = it.tomDato, it) }.tilTidslinje()

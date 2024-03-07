@@ -121,15 +121,17 @@ class BehandlingsresultatSteg(
         val endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi =
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling)
 
-        if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting(
+        val skalRettFraBehandlingsresultatTilIverksetting =
+            behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting(
                 endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi == ENDRING_I_UTBETALING,
-            ) ||
+            )
+
+        val sistIverksatteBehandling by lazy { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandlingMedOppdatertBehandlingsresultat) }
+
+        if (skalRettFraBehandlingsresultatTilIverksetting ||
             beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
                 behandling = behandlingMedOppdatertBehandlingsresultat,
-                sistIverksatteBehandling =
-                    behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
-                        behandling = behandlingMedOppdatertBehandlingsresultat,
-                    ),
+                sistIverksatteBehandling = sistIverksatteBehandling,
             )
         ) {
             behandlingService.oppdaterStatusPåBehandling(

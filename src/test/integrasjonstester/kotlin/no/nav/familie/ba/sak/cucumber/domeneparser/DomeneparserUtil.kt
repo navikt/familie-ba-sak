@@ -20,6 +20,7 @@ enum class Domenebegrep(override val nøkkel: String) : Domenenøkkel {
     SKAL_BEHANLDES_AUTOMATISK("Skal behandles automatisk"),
     SØKNADSTIDSPUNKT("Søknadstidspunkt"),
     BEHANDLINGSKATEGORI("Behandlingskategori"),
+    BEHANDLINGSSTATUS("Behandlingsstatus"),
 }
 
 object DomeneparserUtil {

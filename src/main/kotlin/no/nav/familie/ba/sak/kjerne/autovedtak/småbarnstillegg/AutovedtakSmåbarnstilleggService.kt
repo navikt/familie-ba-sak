@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -17,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstilleggFeil
+import no.nav.familie.ba.sak.kjerne.beregning.erEndringIOvergangsstønadFramITid
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -45,6 +47,7 @@ class AutovedtakSmåbarnstilleggService(
     private val autovedtakService: AutovedtakService,
     private val oppgaveService: OppgaveService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
+    private val localDateProvider: LocalDateProvider,
 ) : AutovedtakBehandlingService<SmåbarnstilleggData> {
     private val antallVedtakOmOvergangsstønad: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "antall")
@@ -94,11 +97,22 @@ class AutovedtakSmåbarnstilleggService(
         val fagsak =
             fagsakService.hentNormalFagsak(aktør)
                 ?: throw Feil(message = "Fant ikke fagsak av typen NORMAL for aktør ${aktør.aktørId}")
+        val forrigeBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id)
+        val perioderMedFullOvergangsstønadForrigeBehandling = forrigeBehandling?.let { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(forrigeBehandling) } ?: emptyList()
+        val perioderMedFullOvergangsstønad = småbarnstilleggService.hentPerioderMedFullOvergangsstønad(aktør)
+
+        val erEndringIOvergangsstønadFramITid =
+            erEndringIOvergangsstønadFramITid(
+                perioderMedFullOvergangsstønadForrigeBehandling = perioderMedFullOvergangsstønadForrigeBehandling,
+                perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
+                dagensDato = localDateProvider.now(),
+            )
+
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 aktør = aktør,
                 behandlingType = BehandlingType.REVURDERING,
-                behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG,
+                behandlingÅrsak = if (erEndringIOvergangsstønadFramITid) BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID else BehandlingÅrsak.SMÅBARNSTILLEGG,
                 fagsakId = fagsak.id,
             )
 
@@ -111,7 +125,9 @@ class AutovedtakSmåbarnstilleggService(
         }
 
         try {
-            begrunnAutovedtakForSmåbarnstillegg(behandlingEtterBehandlingsresultat)
+            if (behandlingEtterBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
+                begrunnAutovedtakForSmåbarnstillegg(behandlingEtterBehandlingsresultat)
+            }
         } catch (e: VedtaksperiodefinnerSmåbarnstilleggFeil) {
             logger.warn(e.message, e)
 

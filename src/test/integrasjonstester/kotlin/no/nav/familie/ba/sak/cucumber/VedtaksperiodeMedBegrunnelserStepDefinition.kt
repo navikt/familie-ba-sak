@@ -24,18 +24,18 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.assertj.core.api.Assertions
 import java.time.LocalDate
 
 @Suppress("ktlint:standard:function-naming")
 class VedtaksperiodeMedBegrunnelserStepDefinition {
-    private var fagsaker: Map<Long, Fagsak> = emptyMap()
+    private var fagsaker: MutableMap<Long, Fagsak> = mutableMapOf()
     private var behandlinger = mutableMapOf<Long, Behandling>()
     private var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
     private var vedtaksliste = mutableListOf<Vedtak>()
     private var persongrunnlag = mapOf<Long, PersonopplysningGrunnlag>()
-    private var personResultater = mutableMapOf<Long, Set<PersonResultat>>()
+    private var vilkårsvurderinger = mutableMapOf<Long, Vilkårsvurdering>()
     private var vedtaksperioderMedBegrunnelser = listOf<VedtaksperiodeMedBegrunnelser>()
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
     private var valutakurs = mutableMapOf<Long, List<Valutakurs>>()
@@ -83,7 +83,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     fun `lag personresultater`(behandlingId: Long) {
         val persongrunnlagForBehandling = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId)
         val behandling = behandlinger.finnBehandling(behandlingId)
-        personResultater[behandlingId] = lagPersonresultater(persongrunnlagForBehandling, behandling)
+        vilkårsvurderinger[behandlingId] = lagVilkårsvurdering(persongrunnlagForBehandling, behandling)
     }
 
     /**
@@ -96,10 +96,10 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     ) {
         val vilkårResultaterPerPerson = dataTable.asMaps().groupBy { parseAktørId(it) }
         val personResultatForBehandling =
-            personResultater[behandlingId]
+            vilkårsvurderinger[behandlingId]?.personResultater
                 ?: error("Finner ikke personresultater for behandling med id $behandlingId")
 
-        personResultater[behandlingId] =
+        vilkårsvurderinger[behandlingId]?.personResultater =
             leggTilVilkårResultatPåPersonResultat(personResultatForBehandling, vilkårResultaterPerPerson, behandlingId)
     }
 
@@ -170,7 +170,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 vedtaksListe = vedtaksliste,
                 behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
                 personGrunnlag = persongrunnlag,
-                personResultater = personResultater,
+                vilkårsvurderinger = vilkårsvurderinger,
                 kompetanser = kompetanser,
                 endredeUtbetalinger = endredeUtbetalinger,
                 andelerTilkjentYtelse = andelerTilkjentYtelse,

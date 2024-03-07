@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -1384,7 +1385,7 @@ class BeregningServiceTest {
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } just Runs
-        every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any()) } answers {
+        every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
             listOf(
                 InternPeriodeOvergangsstønad(
                     personIdent = søker.aktør.aktivFødselsnummer(),

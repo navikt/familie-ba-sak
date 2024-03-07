@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
@@ -110,7 +111,7 @@ class VedtaksperiodeServiceTest {
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
         } returns listOf(ytelseOpphørtFørEndringstidspunkt)
         every { feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(any()) } returns emptyList()
-        every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any()) } returns emptyList()
+        every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } returns emptyList()
         every { refusjonEøsRepository.finnRefusjonEøsForBehandling(any()) } returns emptyList()
         every { integrasjonClient.hentLandkoderISO2() } returns mapOf(Pair("NO", "NORGE"))
     }

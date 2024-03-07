@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import minsteAvHver
+import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.filtrertForPerioderBarnaBorMedSøker
+import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.tilPerioderBarnaBorMedSøkerTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.kunAndelerTilOgMed3År
@@ -29,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.minus
 import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.rundAvTilHeltall
 import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.sum
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import java.math.BigDecimal
 import java.math.MathContext
 
@@ -72,6 +75,8 @@ fun beregnDifferanse(
 fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     barna: List<Person>,
     kompetanser: Collection<Kompetanse>,
+    personResultater: Set<PersonResultat> = emptySet(),
+    skalBrukeUtvidedeRegler: Boolean = false,
 ): List<AndelTilkjentYtelse> {
     // Ta bort eventuell eksisterende differanseberegning, slik at kalkulertUtbetalingsbeløp er nasjonal sats
     // Men behold funksjonelle splitter som er påført tidligere ved å beholde fom og tom på andelene
@@ -85,11 +90,19 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
 
     val barnasAndelerTidslinjer = this.tilSeparateTidslinjerForBarna()
 
+    val perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerTidslinje()
+
     // Finn alle andelene frem til barna er 18 år. Det vil i praksis være ALLE andelene
-    // Bruk bare andelene der perioden BARE inneholder sekundærlandsandeler
+    // Bruk bare andelene som kvalifiserer for differanseberegning mot søkers ytelser
     val barnasRelevanteAndelerInntil18År =
-        barnasAndelerTidslinjer
-            .kunReneSekundærlandsperioder(kompetanser)
+        when {
+            skalBrukeUtvidedeRegler ->
+                barnasAndelerTidslinjer
+                    .filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
+                    .kunReneSekundærlandsperioder(kompetanser)
+
+            else -> barnasAndelerTidslinjer.kunReneSekundærlandsperioder(kompetanser)
+        }
 
     // Lag tidslinjer for hvert barn som inneholder underskuddet fra differanseberegningen på ordinær barnetrygd.
     // Resultatet er tidslinjer med underskuddet som positivt beløp der det inntreffer
@@ -124,12 +137,18 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
             .filtrerHverKunVerdi { it > BigDecimal.ZERO }
 
     // For hvert barn kombiner andel-tidslinjen med 3-års-tidslinjen. Resultatet er andelene når barna er inntil 3 år
-    // Bruk bare andelene der perioden BARE inneholder sekundærlandsandeler
+    // Bruk bare andelene som kvalifiserer for differanseberegning mot søkers ytelser
     // Må ta utgangspunkt i alle andeler for være sikker på at vi vurderer sekundærlandsperioder bare når barna er inntil 3 år
     val barnasRelevanteAndelerInntil3ÅrTidslinjer =
-        barnasAndelerTidslinjer
-            .kunAndelerTilOgMed3År(barna)
-            .kunReneSekundærlandsperioder(kompetanser)
+        when {
+            skalBrukeUtvidedeRegler ->
+                barnasAndelerTidslinjer
+                    .kunAndelerTilOgMed3År(barna)
+                    .filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
+                    .kunReneSekundærlandsperioder(kompetanser)
+
+            else -> barnasAndelerTidslinjer.kunAndelerTilOgMed3År(barna).kunReneSekundærlandsperioder(kompetanser)
+        }
 
     // Vi finner hvor mye hvert barn skal ha som andel av småbarnstillegget på hvert tidspunkt.
     // Det tilsvarer småbarnstillegget på et gitt tidspunkt delt på antall relevante barn under 3 år som har ytelse på det tidspunktet
@@ -170,7 +189,7 @@ fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunReneSekundærlandsper
     val barnasErSekundærlandTidslinjer =
         this.leftJoin(barnasKompetanseTidslinjer) { andel, kompetanse ->
             when {
-                andel != null && kompetanse != null -> kompetanse.resultat == NORGE_ER_SEKUNDÆRLAND
+                andel != null && kompetanse?.resultat == NORGE_ER_SEKUNDÆRLAND -> true
                 andel != null -> false
                 else -> null
             }

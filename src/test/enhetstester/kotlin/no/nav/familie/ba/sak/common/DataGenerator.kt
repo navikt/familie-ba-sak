@@ -178,9 +178,10 @@ fun lagBehandling(
     underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
     status: BehandlingStatus = initStatus(),
     aktivertTid: LocalDateTime = LocalDateTime.now(),
+    id: Long = nesteBehandlingId(),
 ) =
     Behandling(
-        id = nesteBehandlingId(),
+        id = id,
         fagsak = fagsak,
         skalBehandlesAutomatisk = skalBehandlesAutomatisk,
         type = behandlingType,

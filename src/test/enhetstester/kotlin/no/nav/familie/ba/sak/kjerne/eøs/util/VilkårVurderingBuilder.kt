@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerSisteDagIPerioden
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -74,6 +75,19 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
 
         fun medUtdypendeVilkår(tidslinje: Tidslinje<UtdypendeVilkårRegelverkResultat, T>): PersonResultatBuilder<T> {
             vilkårsresultatTidslinjer.add(tidslinje)
+            return this
+        }
+
+        fun medUtdypendeVilkårsvurdering(
+            v: String,
+            vilkår: Vilkår,
+            utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering,
+        ): PersonResultatBuilder<T> {
+            vilkårsresultatTidslinjer.add(
+                v.tilCharTidslinje(startTidspunkt).map {
+                    UtdypendeVilkårRegelverkResultat(vilkår, Resultat.OPPFYLT, Regelverk.EØS_FORORDNINGEN, utdypendeVilkårsvurdering)
+                },
+            )
             return this
         }
 

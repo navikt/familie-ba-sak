@@ -149,6 +149,7 @@ data class Behandling(
         return when {
             type == BehandlingType.TEKNISK_ENDRING -> false
             opprettetÅrsak == BehandlingÅrsak.SATSENDRING -> false
+            opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID -> false
             erManuellMigrering() -> false
             erMigrering() -> false
             else -> true
@@ -193,6 +194,8 @@ data class Behandling(
             skalBehandlesAutomatisk && erMigrering() && !erManuellMigreringForEndreMigreringsdato() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() -> true
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
+            skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID
+            -> true
             else -> false
         }
     }
@@ -360,6 +363,7 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     OMREGNING_SMÅBARNSTILLEGG("Omregning småbarnstillegg"),
     SATSENDRING("Satsendring"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
+    SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID("Småbarnstillegg endring fram i tid"),
     MIGRERING("Migrering"),
     ENDRE_MIGRERINGSDATO("Endre migreringsdato"),
     HELMANUELL_MIGRERING("Manuell migrering"),

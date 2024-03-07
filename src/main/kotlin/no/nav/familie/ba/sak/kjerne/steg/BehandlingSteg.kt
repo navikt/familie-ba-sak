@@ -313,6 +313,27 @@ fun hentNesteSteg(
             }
         }
 
+        BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID -> {
+            when (utførendeStegType) {
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> IVERKSETT_MOT_OPPDRAG
+                VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
+                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                BESLUTTE_VEDTAK ->
+                    when (endringerIUtbetaling) {
+                        EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING -> IVERKSETT_MOT_OPPDRAG
+                        EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING -> FERDIGSTILLE_BEHANDLING
+                        EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
+                    }
+                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for småbarnstillegg")
+            }
+        }
+
         BehandlingÅrsak.SMÅBARNSTILLEGG -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
