@@ -38,6 +38,9 @@ Egenskap: Småbarnstillegg autovedtak
       | 1       | 2            | 01.03.2023 | 30.06.2023 | 678   | SMÅBARNSTILLEGG    | 100     | 678  |
       | 1       | 2            | 01.07.2023 | 31.01.2024 | 696   | SMÅBARNSTILLEGG    | 100     | 696  |
       | 1       | 2            | 01.07.2023 | 30.11.2024 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 2       | 2            | 01.05.2022 | 28.02.2023 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 2       | 2            | 01.03.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
+      | 2       | 2            | 01.07.2023 | 30.12.2024 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
 
     Og med overgangsstønad for begrunnelse
       | BehandlingId | AktørId | Fra dato   | Til dato   |
