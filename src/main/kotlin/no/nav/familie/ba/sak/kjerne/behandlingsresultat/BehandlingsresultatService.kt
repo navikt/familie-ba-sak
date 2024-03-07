@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import no.nav.familie.ba.sak.common.LocalDateProvider
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -28,6 +30,7 @@ class BehandlingsresultatService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val kompetanseService: KompetanseService,
+    private val localDateProvider: LocalDateProvider,
 ) {
     internal fun finnPersonerFremstiltKravFor(
         behandling: Behandling,
@@ -121,6 +124,7 @@ class BehandlingsresultatService(
                     personerFremstiltKravFor = personerFremstiltKravFor,
                     personerIBehandling = personerIBehandling,
                     personerIForrigeBehandling = personerIForrigeBehandling,
+                    nåMåned = localDateProvider.now().toYearMonth(),
                 )
             } else {
                 Endringsresultat.INGEN_ENDRING
