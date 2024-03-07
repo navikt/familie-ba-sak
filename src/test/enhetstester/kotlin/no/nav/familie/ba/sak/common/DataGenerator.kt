@@ -636,7 +636,7 @@ fun vurderVilkårsvurderingTilInnvilget(
                 it.periodeTom = barn.fødselsdato.plusYears(18)
             } else {
                 it.resultat = Resultat.OPPFYLT
-                it.periodeFom = LocalDate.now()
+                it.periodeFom = barn.fødselsdato
             }
         }
     }
