@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService.Companion.BEHANDLING_FERDIG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -31,7 +32,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-
 
 class SnikeIKøenIntegrationTest(
     @Autowired
@@ -67,7 +67,6 @@ class SnikeIKøenIntegrationTest(
 ) : AbstractSpringIntegrationTest() {
     val søkerFnr = randomFnr()
     val barnFnr = ClientMocks.barnFnr[0]
-    val barn2Fnr = ClientMocks.barnFnr[1]
 
     @BeforeEach
     fun init() {
@@ -79,7 +78,7 @@ class SnikeIKøenIntegrationTest(
         val åpenBehandling = kjørFørstegangsbehandlingOgSåRevurderingTilStegBehandlingsresultat()
 
         assertEquals(
-            "Behandling ferdig",
+            BEHANDLING_FERDIG,
             autovedtakStegService.kjørBehandlingOmregning(
                 åpenBehandling.fagsak.aktør,
                 OmregningBrevData(
@@ -87,28 +86,27 @@ class SnikeIKøenIntegrationTest(
                     behandlingsårsak = BehandlingÅrsak.OMREGNING_6ÅR,
                     standardbegrunnelse = Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
                     fagsakId = åpenBehandling.fagsak.id,
-                )
-            )
+                ),
+            ),
         )
         assertEquals(
             BehandlingStatus.SATT_PÅ_MASKINELL_VENT,
-            behandlingRepository.finnBehandling(åpenBehandling.id).status
+            behandlingRepository.finnBehandling(åpenBehandling.id).status,
         )
         assertEquals(
             LoggType.BEHANDLING_SATT_PÅ_MASKINELL_VENT,
-            loggRepository.hentLoggForBehandling(åpenBehandling.id).maxBy { it.id }.type
+            loggRepository.hentLoggForBehandling(åpenBehandling.id).maxBy { it.id }.type,
         )
 
         fullførTasks()
 
         val åpenBehandlingEtterAutomatiskOmregning = behandlingRepository.finnBehandling(åpenBehandling.id)
 
-
+        assertEquals(StegType.VILKÅRSVURDERING, åpenBehandlingEtterAutomatiskOmregning.steg)
         assertEquals(
             LoggType.BEHANDLING_TATT_AV_MASKINELL_VENT,
-            loggRepository.hentLoggForBehandling(åpenBehandling.id).maxBy { it.id }.type
+            loggRepository.hentLoggForBehandling(åpenBehandling.id).maxBy { it.id }.type,
         )
-        assertEquals(StegType.VILKÅRSVURDERING, åpenBehandlingEtterAutomatiskOmregning.steg)
     }
 
     private fun fullførTasks() {

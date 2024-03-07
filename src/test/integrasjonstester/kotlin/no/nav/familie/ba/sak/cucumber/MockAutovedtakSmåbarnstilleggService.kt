@@ -308,6 +308,7 @@ fun mockAutovedtakSmåbarnstilleggService(
         autovedtakFødselshendelseService = mockk(),
         autovedtakBrevService = mockk(),
         autovedtakSmåbarnstilleggService = autovedtakSmåbarnstilleggService,
+        snikeIKøenService = mockk(),
     )
 }
 
