@@ -194,7 +194,7 @@ data class Behandling(
             skalBehandlesAutomatisk && erMigrering() && !erManuellMigreringForEndreMigreringsdato() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() -> true
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
-            skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID
+            skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == Behandlingsresultat.FORTSATT_INNVILGET
             -> true
             else -> false
         }
