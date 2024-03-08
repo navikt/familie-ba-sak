@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 interface AutovedtakBehandlingService<Behandlingsdata : AutomatiskBehandlingData> {
     fun skalAutovedtakBehandles(behandlingsdata: Behandlingsdata): Boolean
@@ -38,17 +40,20 @@ enum class Autovedtaktype(val displayName: String) {
 
 sealed interface AutomatiskBehandlingData {
     val type: Autovedtaktype
+    val taskOpprettetTid: LocalDateTime
 }
 
 data class FødselshendelseData(
     val nyBehandlingHendelse: NyBehandlingHendelse,
+    override val taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
 ) : AutomatiskBehandlingData {
     override val type = Autovedtaktype.FØDSELSHENDELSE
 }
 
 data class SmåbarnstilleggData(
     val aktør: Aktør,
-) : AutomatiskBehandlingData {
+    override val taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
+    ) : AutomatiskBehandlingData {
     override val type = Autovedtaktype.SMÅBARNSTILLEGG
 }
 
@@ -57,7 +62,8 @@ data class OmregningBrevData(
     val behandlingsårsak: BehandlingÅrsak,
     val standardbegrunnelse: Standardbegrunnelse,
     val fagsakId: Long,
-) : AutomatiskBehandlingData {
+    override val taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
+    ) : AutomatiskBehandlingData {
     override val type = Autovedtaktype.OMREGNING_BREV
 }
 
@@ -84,10 +90,11 @@ class AutovedtakStegService(
     fun kjørBehandlingFødselshendelse(
         mottakersAktør: Aktør,
         nyBehandlingHendelse: NyBehandlingHendelse,
+        taskOpprettetTid: LocalDateTime = LocalDateTime.now()
     ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
-            automatiskBehandlingData = FødselshendelseData(nyBehandlingHendelse),
+            automatiskBehandlingData = FødselshendelseData(nyBehandlingHendelse, taskOpprettetTid),
         )
     }
 
@@ -104,10 +111,11 @@ class AutovedtakStegService(
     fun kjørBehandlingSmåbarnstillegg(
         mottakersAktør: Aktør,
         aktør: Aktør,
+        taskOpprettetTid: LocalDateTime = LocalDateTime.now()
     ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
-            automatiskBehandlingData = SmåbarnstilleggData(aktør),
+            automatiskBehandlingData = SmåbarnstilleggData(aktør, taskOpprettetTid),
         )
     }
 
@@ -138,6 +146,7 @@ class AutovedtakStegService(
                 aktør = mottakersAktør,
                 autovedtaktype = automatiskBehandlingData.type,
                 fagsakId = hentFagsakIdFraBehandlingsdata(automatiskBehandlingData),
+                taskOpprettetTid = automatiskBehandlingData.taskOpprettetTid,
             )
         ) {
             secureLoggAutovedtakBehandling(
@@ -178,6 +187,7 @@ class AutovedtakStegService(
         aktør: Aktør,
         autovedtaktype: Autovedtaktype,
         fagsakId: Long?,
+        taskOpprettetTid: LocalDateTime,
     ): Boolean {
         val fagsak =
             if (fagsakId != null) {
@@ -188,32 +198,47 @@ class AutovedtakStegService(
         val åpenBehandling =
             fagsak?.let {
                 behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(it.id)
+            } ?: return false
+
+        when (åpenBehandling.status) {
+            BehandlingStatus.UTREDES,
+            BehandlingStatus.SATT_PÅ_VENT -> {
+
+                if (autovedtaktype.kanSnikeForan(åpenBehandling)) {
+                    snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
+                        åpenBehandling.id,
+                        årsak = SettPåMaskinellVentÅrsak.OMREGNING_6_ELLER_18_ÅR
+                    )
+                    return false
+                }
             }
-
-        return if (åpenBehandling == null) {
-            false
-        } else if (åpenBehandling.status == BehandlingStatus.UTREDES || åpenBehandling.status == BehandlingStatus.FATTER_VEDTAK || åpenBehandling.status == BehandlingStatus.SATT_PÅ_VENT) {
-            antallAutovedtakÅpenBehandling[autovedtaktype]?.increment()
-
-            if (autovedtaktype == Autovedtaktype.OMREGNING_BREV) {
-                snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(åpenBehandling.id, årsak = SettPåMaskinellVentÅrsak.OMREGNING_6_ELLER_18_ÅR)
-                false
-            } else {
-                oppgaveService.opprettOppgaveForManuellBehandling(
-                    behandling = åpenBehandling,
-                    begrunnelse = "${autovedtaktype.displayName}: Bruker har åpen behandling",
-                    manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
+            BehandlingStatus.FATTER_VEDTAK -> {
+                if (taskOpprettetTid.until(LocalDateTime.now(), ChronoUnit.HOURS) < 72) {
+                    throw RekjørSenereException(
+                        årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen om 12 timer",
+                        triggerTid = LocalDateTime.now().plusHours(12),
+                    )
+                }
+            }
+            BehandlingStatus.IVERKSETTER_VEDTAK,
+            BehandlingStatus.SATT_PÅ_MASKINELL_VENT -> {
+                throw RekjørSenereException(
+                    årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen om 1 time",
+                    triggerTid = LocalDateTime.now().plusHours(1),
                 )
-                true
             }
-        } else if (åpenBehandling.status == BehandlingStatus.IVERKSETTER_VEDTAK || åpenBehandling.status == BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
-            throw RekjørSenereException(
-                årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen om 1 time",
-                triggerTid = LocalDateTime.now().plusHours(1),
-            )
-        } else {
-            throw Feil("Ikke håndtert feilsituasjon på $åpenBehandling")
+            else -> {
+                throw Feil("Ikke håndtert feilsituasjon på $åpenBehandling")
+            }
         }
+
+        antallAutovedtakÅpenBehandling[autovedtaktype]?.increment()
+        oppgaveService.opprettOppgaveForManuellBehandling(
+            behandling = åpenBehandling,
+            begrunnelse = "${autovedtaktype.displayName}: Bruker har åpen behandling",
+            manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
+        )
+        return true
     }
 
     private fun secureLoggAutovedtakBehandling(
@@ -224,8 +249,18 @@ class AutovedtakStegService(
         secureLogger.info("$autovedtaktype(${aktør.aktivFødselsnummer()}): $melding")
     }
 
+    private fun Autovedtaktype.kanSnikeForan(åpenBehandling: Behandling): Boolean {
+        return when (this) {
+            Autovedtaktype.OMREGNING_BREV -> true
+            Autovedtaktype.FØDSELSHENDELSE -> false // TODO
+            Autovedtaktype.SMÅBARNSTILLEGG -> false // TODO
+        }
+    }
+
     companion object {
         const val BEHANDLING_STARTER = "Behandling starter"
         const val BEHANDLING_FERDIG = "Behandling ferdig"
     }
 }
+
+

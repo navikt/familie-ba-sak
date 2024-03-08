@@ -28,7 +28,10 @@ class AutobrevOpphørSmåbarnstilleggService(
     private val startSatsendring: StartSatsendring,
 ) {
     @Transactional
-    fun kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId: Long) {
+    fun kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(
+        fagsakId: Long,
+        taskOpprettetTid: LocalDateTime = LocalDateTime.now()
+    ) {
         val behandling =
             behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsakId)
                 ?: error("Fant ikke aktiv behandling")
@@ -78,6 +81,7 @@ class AutobrevOpphørSmåbarnstilleggService(
                     behandlingsårsak = behandlingsårsak,
                     standardbegrunnelse = standardbegrunnelse,
                     fagsakId = fagsakId,
+                    taskOpprettetTid = taskOpprettetTid,
                 ),
         )
     }
