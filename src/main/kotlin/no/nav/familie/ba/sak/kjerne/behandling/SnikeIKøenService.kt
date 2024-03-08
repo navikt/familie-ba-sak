@@ -60,6 +60,32 @@ class SnikeIKøenService(
         return true
     }
 
+    fun kanSnikeForbi(aktivOgÅpenBehandling: Behandling): Boolean {
+        val behandlingId = aktivOgÅpenBehandling.id
+        val loggSuffix = "endrer status på behandling til på vent"
+        if (aktivOgÅpenBehandling.status == BehandlingStatus.SATT_PÅ_VENT) {
+            logger.info("Behandling=$behandlingId er satt på vent av saksbehandler, $loggSuffix")
+            return true
+        }
+        val sisteLogghendelse = loggService.hentLoggForBehandling(behandlingId).maxBy { it.opprettetTidspunkt }
+        val tid4TimerSiden = LocalDateTime.now().minusHours(4)
+        if (aktivOgÅpenBehandling.endretTidspunkt.isAfter(tid4TimerSiden)) {
+            logger.info(
+                "Behandling=$behandlingId har endretTid=${aktivOgÅpenBehandling.endretTidspunkt} " +
+                        "kan ikke sette behandlingen på maskinell vent",
+            )
+            return false
+        }
+        if (sisteLogghendelse.opprettetTidspunkt.isAfter(tid4TimerSiden)) {
+            logger.info(
+                "Behandling=$behandlingId siste logginslag er " +
+                        "type=${sisteLogghendelse.type} tid=${sisteLogghendelse.opprettetTidspunkt}, $loggSuffix",
+            )
+            return false
+        }
+        return true
+    }
+
     private fun finnBehandlingPåMaskinellVent(
         fagsakId: Long,
     ): Behandling? =

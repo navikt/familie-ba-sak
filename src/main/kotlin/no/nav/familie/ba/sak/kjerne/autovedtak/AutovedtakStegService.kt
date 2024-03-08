@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -203,8 +202,7 @@ class AutovedtakStegService(
         when (åpenBehandling.status) {
             BehandlingStatus.UTREDES,
             BehandlingStatus.SATT_PÅ_VENT -> {
-
-                if (autovedtaktype.kanSnikeForan(åpenBehandling)) {
+                if (snikeIKøenService.kanSnikeForbi(åpenBehandling)) {
                     snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
                         åpenBehandling.id,
                         årsak = SettPåMaskinellVentÅrsak.OMREGNING_6_ELLER_18_ÅR
@@ -247,14 +245,6 @@ class AutovedtakStegService(
         melding: String,
     ) {
         secureLogger.info("$autovedtaktype(${aktør.aktivFødselsnummer()}): $melding")
-    }
-
-    private fun Autovedtaktype.kanSnikeForan(åpenBehandling: Behandling): Boolean {
-        return when (this) {
-            Autovedtaktype.OMREGNING_BREV -> true
-            Autovedtaktype.FØDSELSHENDELSE -> false // TODO
-            Autovedtaktype.SMÅBARNSTILLEGG -> false // TODO
-        }
     }
 
     companion object {
