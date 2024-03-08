@@ -367,7 +367,7 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     MIGRERING("Migrering"),
     ENDRE_MIGRERINGSDATO("Endre migreringsdato"),
     HELMANUELL_MIGRERING("Manuell migrering"),
-    MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering")
+    MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
     ;
 
     fun erOmregningsårsak(): Boolean =
