@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
+import jakarta.validation.Valid
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
@@ -26,7 +27,6 @@ import java.time.LocalDate
 @RestController
 @RequestMapping("/api/differanseberegning/valutakurs")
 @ProtectedWithClaims(issuer = "azuread")
-@Validated
 class ValutakursController(
     private val tilgangService: TilgangService,
     private val valutakursService: ValutakursService,
@@ -37,7 +37,7 @@ class ValutakursController(
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterValutakurs(
         @PathVariable behandlingId: Long,
-        @RequestBody restValutakurs: RestValutakurs,
+        @Valid @RequestBody restValutakurs: RestValutakurs,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(

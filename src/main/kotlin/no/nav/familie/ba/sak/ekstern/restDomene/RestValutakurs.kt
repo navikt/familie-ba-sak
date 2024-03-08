@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import jakarta.validation.constraints.Pattern
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.math.BigDecimal
@@ -12,6 +13,7 @@ data class RestValutakurs(
     val tom: YearMonth?,
     val barnIdenter: List<String>,
     val valutakursdato: LocalDate?,
+    @field:Pattern(regexp = "^[A-Z]{3}\$")
     val valutakode: String?,
     val kurs: BigDecimal?,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
