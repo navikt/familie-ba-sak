@@ -17,16 +17,16 @@
 
     <properties>
         <java.version>21</java.version>
-        <kotlin.version>1.9.22</kotlin.version>
+        <kotlin.version>1.9.23</kotlin.version>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20240214140223_83c31de</prosessering.version>
         <felles.version>3.20240227112134_a79201c</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20240228112956_0728048</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20240307134842_b6c7d85</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20240304153240_55008f7</familie.kontrakter.stønadsstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20240208132236_bce5777</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
         <cucumber.version>7.15.0</cucumber.version>
@@ -45,7 +45,7 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.19.6</testcontainers.postgresql.version>
+        <testcontainers.postgresql.version>1.19.7</testcontainers.postgresql.version>
         <unleash.version>9.2.0</unleash.version>
         <maven.model.version>3.9.6</maven.model.version>
         <jackson.module.kotlin.version>2.16.1</jackson.module.kotlin.version>
