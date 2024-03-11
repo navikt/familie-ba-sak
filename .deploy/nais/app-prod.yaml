@@ -119,10 +119,10 @@ spec:
     max: 4
   resources:
     limits:
-      memory: 4096Mi
+      memory: 2400Mi
     requests:
-      memory: 4096Mi
-      cpu: 500m
+      memory: 2400Mi
+      cpu: 250m
   ingresses:
     - https://familie-ba-sak.intern.nav.no
   secureLogs:
