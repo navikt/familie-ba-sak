@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jul
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jun
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -58,8 +59,18 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("                        $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$>", 100, { 1000 }, { -700 }) { 0 }
                 .bygg()
 
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn1, des(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .forPerson(barn2, des(2017))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .forPerson(barn3, des(2018))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .byggVilkårsvurdering().personResultater
+
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -128,8 +139,16 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("                                                $$$>", 100, { 1000 }, { -700 }) { 0 }
                 .bygg()
 
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn1, des(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .forPerson(barn2, des(2017))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .byggVilkårsvurdering().personResultater
+
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
 
         assertEquals(tilkjentYtelse.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
     }
@@ -156,8 +175,16 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("            $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$>") { 1000 }
                 .bygg()
 
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn1, des(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .forPerson(barn2, des(2017))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .byggVilkårsvurdering().personResultater
+
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
 
         assertEquals(tilkjentYtelse.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
     }
@@ -168,7 +195,7 @@ class DifferanseberegningSøkersYtelserTest {
 
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse
-                .differanseberegnSøkersYtelser(emptyList(), emptyList())
+                .differanseberegnSøkersYtelser(emptyList(), emptyList(), emptySet())
 
         assertEquals(emptyList<AndelTilkjentYtelse>(), nyeAndeler)
     }
@@ -212,8 +239,18 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("                        $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$>") { 1000 }
                 .bygg()
 
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn1, des(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .forPerson(barn2, des(2017))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .forPerson(barn3, des(2018))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .byggVilkårsvurdering().personResultater
+
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
 
         // Dette er litt trist. Men selv om andelene er identiske, kan de ikke slås sammen fordi
         // de er til forveksling like som andeler som har en funksjonell årsak til å være splittet
@@ -266,8 +303,14 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("$>", 100, { 1000 }, { -650 }) { 0 }
                 .bygg()
 
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn1, des(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .byggVilkårsvurdering().personResultater
+
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -302,8 +345,14 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("$>", 100, { 1000 }, { -2650 }) { 0 }
                 .bygg()
 
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn1, des(2016))
+                .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
+                .byggVilkårsvurdering().personResultater
+
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -341,8 +390,18 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("$$$$$$", 100, { 1054 }, { 554 }) { 554 }
                 .bygg()
 
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn1, jun(2020))
+                .medVilkår("eeeeeee", Vilkår.BOR_MED_SØKER)
+                .forPerson(barn2, jun(2020))
+                .medVilkår("eeeeeee", Vilkår.BOR_MED_SØKER)
+                .forPerson(barn3, jun(2020))
+                .medVilkår("eeeeeee", Vilkår.BOR_MED_SØKER)
+                .byggVilkårsvurdering().personResultater
+
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
 
         val forventet =
             TilkjentYtelseBuilder(jul(2020), behandling)
@@ -381,8 +440,18 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("$$$$$$", 100, { 1054 }, { 554 }) { 554 }
                 .bygg()
 
+        val personResultater =
+            VilkårsvurderingBuilder<Måned>(behandling = behandling)
+                .forPerson(barn1, jun(2020))
+                .medVilkår("eeeeeee", Vilkår.BOR_MED_SØKER)
+                .forPerson(barn2, jun(2020))
+                .medVilkår("eeeeeee", Vilkår.BOR_MED_SØKER)
+                .forPerson(barn3, jun(2020))
+                .medVilkår("eeeeeee", Vilkår.BOR_MED_SØKER)
+                .byggVilkårsvurdering().personResultater
+
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
 
         val forventet =
             TilkjentYtelseBuilder(jul(2020), behandling)
