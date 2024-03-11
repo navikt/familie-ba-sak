@@ -6,7 +6,6 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.justRun
-import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
@@ -123,30 +122,5 @@ class ValutakursControllerTest {
         }
         verify(exactly = 1) { ecbService.hentValutakurs("ISK", valutakursDato) }
         verify(exactly = 1) { valutakursService.oppdaterValutakurs(any(), any()) }
-    }
-
-    @Test
-    fun sdfe() {
-
-        val restValutakurs = RestValutakurs(
-            id = 1,
-            fom = null,
-            tom = null,
-            barnIdenter = emptyList(),
-            valutakursdato = LocalDate.now(),
-            valutakode = "efveorvw",
-            kurs = BigDecimal.valueOf(32),
-        )
-
-        ValutakursController(
-            tilgangService = mockk(),
-            valutakursService = mockk(),
-            personidentService = mockk(),
-            utvidetBehandlingService = mockk(),
-            ecbService = mockk(),
-            ).oppdaterValutakurs(
-            12,
-            restValutakurs
-        )
     }
 }
