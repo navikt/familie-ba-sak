@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
+import jakarta.validation.Valid
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestManuellDødsfall
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
@@ -12,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -40,8 +42,11 @@ class PersonController(
     @GetMapping
     fun hentPerson(
         @RequestHeader personIdent: String,
+        @Valid
         @RequestBody personIdentBody: PersonIdent?,
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
+        // Valider personIdent
+        Fødselsnummer(personIdent)
         val aktør = personidentService.hentAktør(personIdent)
         val personinfo =
             familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
@@ -53,8 +58,12 @@ class PersonController(
     @GetMapping(path = ["/enkel"])
     fun hentPersonEnkel(
         @RequestHeader personIdent: String,
+        @Valid
         @RequestBody personIdentBody: PersonIdent?,
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
+        // Valider personIdent
+        Fødselsnummer(personIdent)
+
         val aktør = personidentService.hentAktør(personIdent)
         val personinfo =
             familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
@@ -67,6 +76,9 @@ class PersonController(
     fun hentPersonAdresse(
         @RequestHeader personIdent: String,
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
+        // For validering
+        Fødselsnummer(personIdent)
+
         val aktør = personidentService.hentAktør(personIdent)
         val personinfo =
             familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)

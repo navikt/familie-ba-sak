@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
@@ -56,5 +57,10 @@ class GrunnlagController(
         )
     }
 
-    class LeggTilBarnDto(val barnIdent: String)
+    class LeggTilBarnDto(val barnIdent: String) {
+        // Bruker init til å validere personidenten
+        init {
+            Fødselsnummer(barnIdent)
+        }
+    }
 }

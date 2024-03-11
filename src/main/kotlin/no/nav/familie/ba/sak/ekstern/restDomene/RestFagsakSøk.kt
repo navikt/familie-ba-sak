@@ -3,12 +3,18 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 
 data class RestSøkParam(
     val personIdent: String,
     val barnasIdenter: List<String> = emptyList(),
-)
+) {
+    // Bruker init til å validere personidenten
+    init {
+        Fødselsnummer(personIdent)
+    }
+}
 
 enum class FagsakDeltagerRolle {
     BARN,

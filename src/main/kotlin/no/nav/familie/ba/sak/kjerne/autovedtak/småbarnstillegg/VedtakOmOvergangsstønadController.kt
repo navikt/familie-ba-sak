@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
+import jakarta.validation.Valid
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.Personident
 import no.nav.familie.ba.sak.task.VedtakOmOvergangsstønadTask
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 class VedtakOmOvergangsstønadController(private val taskRepository: TaskRepositoryWrapper) {
     @PostMapping
     fun håndterVedtakOmOvergangsstønad(
+        @Valid
         @RequestBody personIdent: Personident,
     ): Ressurs<String> {
         taskRepository.save(VedtakOmOvergangsstønadTask.opprettTask(personIdent.ident))

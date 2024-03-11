@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.internal
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import jakarta.validation.Valid
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
@@ -217,6 +218,7 @@ class ForvalterController(
                     "identen ikke er merget av folketrygden.",
         )
         @RequestBody
+        @Valid
         patchMergetIdentDto: PatchMergetIdentDto,
     ): ResponseEntity<String> {
         opprettTaskService.opprettTaskForÅPatcheMergetIdent(patchMergetIdentDto)
