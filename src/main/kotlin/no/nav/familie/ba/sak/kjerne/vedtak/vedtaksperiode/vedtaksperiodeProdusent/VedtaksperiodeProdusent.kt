@@ -333,7 +333,7 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
                     gjeldende = gjeldende?.grunnlagForPerson,
                     erReduksjonSidenForrigeBehandling = erReduksjonFraForrigeBehandlingPåMinstEnYtelsestype,
                 )
-            }.slåSammenSammenhengendeOpphørsPerioder()
+            }.slåSammenSammenhengendeOpphørsperioder()
     }
 
 data class GjeldendeMedInnvilgedeYtelsestyperForrigeBehandling(
@@ -364,7 +364,7 @@ private fun erReduksjonFraForrigeBehandlingPåMinstEnYtelsestype(
     }
 }
 
-private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.slåSammenSammenhengendeOpphørsPerioder(): Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned> {
+private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.slåSammenSammenhengendeOpphørsperioder(): Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned> {
     val perioder = this.perioder().sortedBy { it.fraOgMed }.toList()
 
     return perioder.fold(emptyList()) { acc: List<Periode<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>, periode ->
