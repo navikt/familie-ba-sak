@@ -13,7 +13,7 @@ data class RestValutakurs(
     val tom: YearMonth?,
     val barnIdenter: List<String>,
     val valutakursdato: LocalDate?,
-    @field:Pattern(regexp = "^[A-Z]{3}\$")
+    @field:Pattern(regexp = "[A-Z]{3}", message = "Valutakode må ha store bokstaver og være tre bokstaver lang")
     val valutakode: String?,
     val kurs: BigDecimal?,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
