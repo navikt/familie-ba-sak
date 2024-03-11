@@ -213,8 +213,8 @@ class AutovedtakStegService(
             BehandlingStatus.FATTER_VEDTAK -> {
                 if (taskOpprettetTid.until(LocalDateTime.now(), ChronoUnit.HOURS) < 72) {
                     throw RekjørSenereException(
-                        årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen om 12 timer",
-                        triggerTid = LocalDateTime.now().plusHours(12),
+                        årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen om 24 timer",
+                        triggerTid = LocalDateTime.now().plusHours(24),
                     )
                 }
             }
