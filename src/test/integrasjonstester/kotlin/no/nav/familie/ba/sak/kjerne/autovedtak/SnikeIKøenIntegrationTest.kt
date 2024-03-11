@@ -153,7 +153,7 @@ class SnikeIKøenIntegrationTest(
                 behandlingsårsak = BehandlingÅrsak.OMREGNING_6ÅR,
                 standardbegrunnelse = Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
                 fagsakId = åpenBehandling.fagsak.id,
-                taskOpprettetTid = tid72TimerSiden
+                taskOpprettetTid = tid72TimerSiden,
             ),
         )
 
@@ -213,7 +213,10 @@ class SnikeIKøenIntegrationTest(
         )
     }
 
-    private fun kjørRevurderingTilSteg(steg: StegType, fagsakId: Long): Behandling {
+    private fun kjørRevurderingTilSteg(
+        steg: StegType,
+        fagsakId: Long,
+    ): Behandling {
         return kjørStegprosessForRevurderingÅrligKontroll(
             tilSteg = steg,
             søkerFnr = søkerFnr,
@@ -239,7 +242,6 @@ class SnikeIKøenServiceTestConfig(
     @Autowired
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
-
     @Bean
     @Primary
     fun snikeIKøenService() =

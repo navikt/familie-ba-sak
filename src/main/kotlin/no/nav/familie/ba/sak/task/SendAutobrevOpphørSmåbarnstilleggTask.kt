@@ -24,7 +24,7 @@ class SendAutobrevOpphørSmåbarnstilleggTask(
 
         autobrevOpphørSmåbarnstilleggService.kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(
             fagsakId = autobrevDTO.fagsakId,
-            taskOpprettetTid = task.opprettetTid
+            taskOpprettetTid = task.opprettetTid,
         )
     }
 

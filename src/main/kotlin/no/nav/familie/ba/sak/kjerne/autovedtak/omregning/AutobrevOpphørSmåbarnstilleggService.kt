@@ -30,7 +30,7 @@ class AutobrevOpphørSmåbarnstilleggService(
     @Transactional
     fun kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(
         fagsakId: Long,
-        taskOpprettetTid: LocalDateTime = LocalDateTime.now()
+        taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
     ) {
         val behandling =
             behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsakId)

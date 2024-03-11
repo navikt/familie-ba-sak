@@ -52,7 +52,7 @@ data class FødselshendelseData(
 data class SmåbarnstilleggData(
     val aktør: Aktør,
     override val taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
-    ) : AutomatiskBehandlingData {
+) : AutomatiskBehandlingData {
     override val type = Autovedtaktype.SMÅBARNSTILLEGG
 }
 
@@ -62,7 +62,7 @@ data class OmregningBrevData(
     val standardbegrunnelse: Standardbegrunnelse,
     val fagsakId: Long,
     override val taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
-    ) : AutomatiskBehandlingData {
+) : AutomatiskBehandlingData {
     override val type = Autovedtaktype.OMREGNING_BREV
 }
 
@@ -89,7 +89,7 @@ class AutovedtakStegService(
     fun kjørBehandlingFødselshendelse(
         mottakersAktør: Aktør,
         nyBehandlingHendelse: NyBehandlingHendelse,
-        taskOpprettetTid: LocalDateTime = LocalDateTime.now()
+        taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
     ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
@@ -110,7 +110,7 @@ class AutovedtakStegService(
     fun kjørBehandlingSmåbarnstillegg(
         mottakersAktør: Aktør,
         aktør: Aktør,
-        taskOpprettetTid: LocalDateTime = LocalDateTime.now()
+        taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
     ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
@@ -201,11 +201,12 @@ class AutovedtakStegService(
 
         when (åpenBehandling.status) {
             BehandlingStatus.UTREDES,
-            BehandlingStatus.SATT_PÅ_VENT -> {
+            BehandlingStatus.SATT_PÅ_VENT,
+            -> {
                 if (snikeIKøenService.kanSnikeForbi(åpenBehandling)) {
                     snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
                         åpenBehandling.id,
-                        årsak = SettPåMaskinellVentÅrsak.OMREGNING_6_ELLER_18_ÅR
+                        årsak = SettPåMaskinellVentÅrsak.OMREGNING_6_ELLER_18_ÅR,
                     )
                     return false
                 }
@@ -219,7 +220,8 @@ class AutovedtakStegService(
                 }
             }
             BehandlingStatus.IVERKSETTER_VEDTAK,
-            BehandlingStatus.SATT_PÅ_MASKINELL_VENT -> {
+            BehandlingStatus.SATT_PÅ_MASKINELL_VENT,
+            -> {
                 throw RekjørSenereException(
                     årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen om 1 time",
                     triggerTid = LocalDateTime.now().plusHours(1),
@@ -252,5 +254,3 @@ class AutovedtakStegService(
         const val BEHANDLING_FERDIG = "Behandling ferdig"
     }
 }
-
-
