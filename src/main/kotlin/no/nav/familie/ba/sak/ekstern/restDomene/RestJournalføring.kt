@@ -34,6 +34,7 @@ data class RestJournalføring(
     val opprettOgKnyttTilNyBehandling: Boolean,
     val tilknyttedeBehandlingIder: List<String>,
     val dokumenter: List<RestJournalpostDokument>,
+    // Saksbehandler sin ident
     val navIdent: String,
     val nyBehandlingstype: BehandlingType,
     val nyBehandlingsårsak: BehandlingÅrsak,

@@ -6,9 +6,13 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Pattern
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.PERSONIDENT_IKKE_GYLDIG_FEILMELDING
+import no.nav.familie.ba.sak.common.PERSONIDENT_REGEX
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -66,6 +70,7 @@ class BisysController(private val bisysService: BisysService) {
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun hentUtvidetBarnetrygd(
+        @Valid
         @RequestBody
         request: BisysUtvidetBarnetrygdRequest,
     ): ResponseEntity<BisysUtvidetBarnetrygdResponse> {
@@ -107,6 +112,7 @@ class BisysController(private val bisysService: BisysService) {
 }
 
 data class BisysUtvidetBarnetrygdRequest(
+    @field:Pattern(regexp = PERSONIDENT_REGEX, message = PERSONIDENT_IKKE_GYLDIG_FEILMELDING)
     val personIdent: String,
     @Schema(implementation = String::class, example = "2020-12-01") val fraDato: LocalDate,
 )
