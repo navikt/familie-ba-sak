@@ -5,6 +5,8 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.common.randomAktør
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.tilAktør
@@ -398,13 +400,17 @@ class ArbeidsfordelingIntegrationTest(
             fagsakId = fagsakId,
         )
 
+    val søkerAktør = randomAktør()
+    val barnUtenDiskresjonskodetAktør = randomAktør()
+    val barnMedDiskjesjonskodeaktør = randomAktør()
+
     companion object {
         const val MANUELT_OVERSTYRT_ENHET = "1234"
         const val IKKE_FORTROLIG_ENHET = "4820"
         const val FORTROLIG_ENHET = "1122"
-        const val SØKER_FNR = "12445678910"
-        const val BARN_UTEN_DISKRESJONSKODE = "12345678911"
-        const val BARN_MED_DISKRESJONSKODE = "12345678912"
+        val SØKER_FNR = randomFnr()
+        val BARN_UTEN_DISKRESJONSKODE = randomFnr()
+        val BARN_MED_DISKRESJONSKODE = randomFnr()
 
         val søkerBostedsadresse =
             Bostedsadresse(
