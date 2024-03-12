@@ -113,8 +113,8 @@ class Autobrev6og18ÅrService(
                             autobrev6og18ÅrDTO.alder,
                         ),
                     fagsakId = behandling.fagsak.id,
-                    taskOpprettetTid = taskOpprettetTid,
                 ),
+            taskOpprettetTid = taskOpprettetTid,
         )
         return Autobrev6Og18Svar.OK
     }

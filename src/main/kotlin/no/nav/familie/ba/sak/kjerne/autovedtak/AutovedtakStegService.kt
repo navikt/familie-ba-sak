@@ -39,19 +39,16 @@ enum class Autovedtaktype(val displayName: String) {
 
 sealed interface AutomatiskBehandlingData {
     val type: Autovedtaktype
-    val taskOpprettetTid: LocalDateTime
 }
 
 data class FødselshendelseData(
     val nyBehandlingHendelse: NyBehandlingHendelse,
-    override val taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
 ) : AutomatiskBehandlingData {
     override val type = Autovedtaktype.FØDSELSHENDELSE
 }
 
 data class SmåbarnstilleggData(
     val aktør: Aktør,
-    override val taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
 ) : AutomatiskBehandlingData {
     override val type = Autovedtaktype.SMÅBARNSTILLEGG
 }
@@ -61,7 +58,6 @@ data class OmregningBrevData(
     val behandlingsårsak: BehandlingÅrsak,
     val standardbegrunnelse: Standardbegrunnelse,
     val fagsakId: Long,
-    override val taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
 ) : AutomatiskBehandlingData {
     override val type = Autovedtaktype.OMREGNING_BREV
 }
@@ -93,17 +89,20 @@ class AutovedtakStegService(
     ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
-            automatiskBehandlingData = FødselshendelseData(nyBehandlingHendelse, taskOpprettetTid),
+            automatiskBehandlingData = FødselshendelseData(nyBehandlingHendelse),
+            taskOpprettetTid = taskOpprettetTid,
         )
     }
 
     fun kjørBehandlingOmregning(
         mottakersAktør: Aktør,
         behandlingsdata: OmregningBrevData,
+        taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
     ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = behandlingsdata,
+            taskOpprettetTid = taskOpprettetTid,
         )
     }
 
@@ -114,13 +113,15 @@ class AutovedtakStegService(
     ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
-            automatiskBehandlingData = SmåbarnstilleggData(aktør, taskOpprettetTid),
+            automatiskBehandlingData = SmåbarnstilleggData(aktør),
+            taskOpprettetTid = taskOpprettetTid,
         )
     }
 
     private fun kjørBehandling(
         automatiskBehandlingData: AutomatiskBehandlingData,
         mottakersAktør: Aktør,
+        taskOpprettetTid: LocalDateTime,
     ): String {
         secureLoggAutovedtakBehandling(automatiskBehandlingData.type, mottakersAktør, BEHANDLING_STARTER)
         antallAutovedtak[automatiskBehandlingData.type]?.increment()
@@ -145,7 +146,7 @@ class AutovedtakStegService(
                 aktør = mottakersAktør,
                 autovedtaktype = automatiskBehandlingData.type,
                 fagsakId = hentFagsakIdFraBehandlingsdata(automatiskBehandlingData),
-                taskOpprettetTid = automatiskBehandlingData.taskOpprettetTid,
+                taskOpprettetTid = taskOpprettetTid,
             )
         ) {
             secureLoggAutovedtakBehandling(
@@ -206,7 +207,7 @@ class AutovedtakStegService(
                 if (snikeIKøenService.kanSnikeForbi(åpenBehandling)) {
                     snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
                         åpenBehandling.id,
-                        årsak = SettPåMaskinellVentÅrsak.OMREGNING_6_ELLER_18_ÅR,
+                        årsak = autovedtaktype.tilMaskinellVentÅrsak(),
                     )
                     return false
                 }
@@ -254,3 +255,10 @@ class AutovedtakStegService(
         const val BEHANDLING_FERDIG = "Behandling ferdig"
     }
 }
+
+private fun Autovedtaktype.tilMaskinellVentÅrsak() =
+    when (this) {
+        Autovedtaktype.FØDSELSHENDELSE -> SettPåMaskinellVentÅrsak.FØDSELSHENDELSE
+        Autovedtaktype.OMREGNING_BREV -> SettPåMaskinellVentÅrsak.OMREGNING_6_ELLER_18_ÅR
+        Autovedtaktype.SMÅBARNSTILLEGG -> SettPåMaskinellVentÅrsak.SMÅBARNSTILLEGG
+    }

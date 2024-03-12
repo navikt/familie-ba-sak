@@ -81,8 +81,8 @@ class AutobrevOpphørSmåbarnstilleggService(
                     behandlingsårsak = behandlingsårsak,
                     standardbegrunnelse = standardbegrunnelse,
                     fagsakId = fagsakId,
-                    taskOpprettetTid = taskOpprettetTid,
                 ),
+            taskOpprettetTid = taskOpprettetTid,
         )
     }
 

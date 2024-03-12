@@ -46,8 +46,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Profile
+import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDateTime
 
+@ActiveProfiles("snike-i-koen-test-config")
 class SnikeIKøenIntegrationTest(
     @Autowired
     private val stegService: StegService,
@@ -153,8 +156,8 @@ class SnikeIKøenIntegrationTest(
                 behandlingsårsak = BehandlingÅrsak.OMREGNING_6ÅR,
                 standardbegrunnelse = Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
                 fagsakId = åpenBehandling.fagsak.id,
-                taskOpprettetTid = tid72TimerSiden,
             ),
+            taskOpprettetTid = tid72TimerSiden,
         )
 
         val opprettedeTasks = mutableListOf<Task>()
@@ -243,6 +246,7 @@ class SnikeIKøenServiceTestConfig(
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
     @Bean
+    @Profile("snike-i-koen-test-config")
     @Primary
     fun snikeIKøenService() =
         object : SnikeIKøenService(

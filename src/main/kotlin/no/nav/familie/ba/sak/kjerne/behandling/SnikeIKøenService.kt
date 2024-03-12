@@ -142,6 +142,7 @@ enum class SettPåMaskinellVentÅrsak(val årsak: String) {
     SATSENDRING("Satsendring"),
     OMREGNING_6_ELLER_18_ÅR("Omregning 6 eller 18 år"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
+    FØDSELSHENDELSE("Fødselshendelse"),
 }
 
 class BehandlingErIkkeAvsluttetException(val behandling: Behandling) :
