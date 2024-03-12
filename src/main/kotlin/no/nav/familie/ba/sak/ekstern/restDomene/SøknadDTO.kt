@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDate
 
@@ -21,7 +22,12 @@ fun SøknadDTO.writeValueAsString(): String = objectMapper.writeValueAsString(th
 data class SøkerMedOpplysninger(
     val ident: String,
     val målform: Målform = Målform.NB,
-)
+) {
+    // Bruker init til å validere personidenten
+    init {
+        Fødselsnummer(ident)
+    }
+}
 
 data class BarnMedOpplysninger(
     val ident: String,

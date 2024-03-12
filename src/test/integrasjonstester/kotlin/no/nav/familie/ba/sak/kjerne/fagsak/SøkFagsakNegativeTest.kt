@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
@@ -46,7 +48,7 @@ class SøkFagsakNegativeTest {
 
     @Test
     fun `test generer riktig ressur ved feil`() {
-        val ukjentId = "43125678910"
+        val ukjentId = ClientMocks.ukjentId
         val feilId = "41235678910"
 
         val resEntity1 = fagsakController.søkFagsak(RestSøkParam(ukjentId))
@@ -55,7 +57,7 @@ class SøkFagsakNegativeTest {
         assertThat(Ressurs.Status.SUKSESS).isEqualTo(ress.status)
         assertThat(ress.data).isEqualTo(emptyList<RestFagsakDeltager>())
 
-        assertThrows<IntegrasjonException> {
+        assertThrows<FunksjonellFeil> {
             fagsakController.søkFagsak(RestSøkParam(feilId))
         }
     }

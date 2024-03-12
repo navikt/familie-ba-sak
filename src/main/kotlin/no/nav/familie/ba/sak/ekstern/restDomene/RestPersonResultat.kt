@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.ResultatBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -17,7 +18,12 @@ data class RestPersonResultat(
     val personIdent: String,
     val vilkårResultater: List<RestVilkårResultat>,
     val andreVurderinger: List<RestAnnenVurdering> = emptyList(),
-)
+) {
+    // Bruker init til å validere personidenten
+    init {
+        Fødselsnummer(personIdent)
+    }
+}
 
 data class RestVilkårResultat(
     val id: Long,

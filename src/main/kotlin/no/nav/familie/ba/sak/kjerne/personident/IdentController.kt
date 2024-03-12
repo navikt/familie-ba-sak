@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
+import jakarta.validation.Valid
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -19,6 +20,7 @@ class IdentController(
 ) {
     @PostMapping
     fun håndterPdlHendelse(
+        @Valid
         @RequestBody nyIdent: PersonIdent,
     ): ResponseEntity<Ressurs<String>> {
         personidentService.opprettTaskForIdentHendelse(nyIdent)

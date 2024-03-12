@@ -726,7 +726,7 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Skal lagre og sende korrekt sakstatistikk for behandlingsresultat`() {
-        val fnr = "12345678910"
+        val fnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         val behandling =
             behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.data!!.id))
