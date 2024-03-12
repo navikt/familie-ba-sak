@@ -270,8 +270,8 @@ class SøknadGrunnlagTest(
     @Test
     fun `Skal fjerne barn og mapping til restbehandling skal kjøre ok`() {
         val søkerFnr = randomFnr()
-        val barn1Fnr = ClientMocks.barnFnr[0]
-        val barn2Fnr = ClientMocks.barnFnr[1]
+        val barn1Fnr = randomFnr()
+        val barn2Fnr = randomFnr()
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,

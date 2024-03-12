@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Bruker
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.BrukerIdType
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentstatus
@@ -55,4 +56,9 @@ data class RestOppdaterJournalpost(
 data class NavnOgIdent(
     val navn: String,
     val id: String,
-)
+) {
+    // Bruker init til å validere personidenten
+    init {
+        Fødselsnummer(id)
+    }
+}

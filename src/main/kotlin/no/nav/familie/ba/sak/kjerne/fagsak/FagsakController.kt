@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -176,7 +177,12 @@ class FagsakController(
         return ResponseEntity.ok().body(Ressurs.success(fagsakIdOgTilknyttetAktørId))
     }
 
-    data class RestSøkFagsakRequest(val personIdent: String)
+    data class RestSøkFagsakRequest(val personIdent: String) {
+        // Bruker init til å validere personidenten
+        init {
+            Fødselsnummer(personIdent)
+        }
+    }
 
     data class RestFagsakIdOgTilknyttetAktørId(
         val aktørId: String,
@@ -240,7 +246,12 @@ data class FagsakRequest(
     val personIdent: String,
     val fagsakType: FagsakType? = FagsakType.NORMAL,
     val institusjon: InstitusjonInfo? = null,
-)
+) {
+    // Bruker init til å validere personidenten
+    init {
+        Fødselsnummer(personIdent)
+    }
+}
 
 data class RestBeslutningPåVedtak(
     val beslutning: Beslutning,
