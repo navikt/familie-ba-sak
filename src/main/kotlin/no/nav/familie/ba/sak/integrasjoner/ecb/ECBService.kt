@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb
 
 import no.nav.familie.ba.sak.common.del
+import no.nav.familie.ba.sak.common.saniter
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCache
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCacheRepository
@@ -60,7 +61,7 @@ class ECBService(private val ecbClient: ValutakursRestClient, private val ecbVal
                 throw ECBServiceException(e.message, e)
             }
         }
-        logger.info("Valutakurs ble hentet fra cache for $utenlandskValuta på $kursDato")
+        logger.info("Valutakurs ble hentet fra cache for ${utenlandskValuta.saniter()} på $kursDato")
         return valutakurs.kurs
     }
 
