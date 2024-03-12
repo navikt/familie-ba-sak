@@ -40,7 +40,7 @@ class AutovedtakMånedligValutajusteringService(private val behandlingHentOgPers
         val søkerAktør = sisteVedtatteBehandling.fagsak.aktør
 
         if (aktivOgÅpenBehandling != null) {
-            // todo: legg til støtte for å sette på maskinell vent
+            // todo: legg til støtte for å sette på maskinell vent/snike i køen
             throw Feil("Ikke lagt til støtte for å sette på maskinell vent")
         }
 
