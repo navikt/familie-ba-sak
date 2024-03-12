@@ -11,4 +11,13 @@ class TekstSaniteringUtilTest {
 
         assertThat(tekst.saner()).isEqualTo(forventetResultat)
     }
+
+    @Test
+    fun `erSanert fungerer som forventet`() {
+        val tekst = "Dette er en tekst med 1234 og spesialtegn som: !@#¤%&/()=?`^*¨'\""
+        val sanertTekst = "Detteerentekstmed1234ogspesialtegnsom"
+
+        assertThat(tekst.erAlfanummerisk()).isFalse()
+        assertThat(sanertTekst.erAlfanummerisk()).isTrue()
+    }
 }
