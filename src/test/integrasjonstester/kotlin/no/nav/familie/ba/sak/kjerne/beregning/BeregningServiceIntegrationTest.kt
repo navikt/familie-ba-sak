@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
@@ -95,6 +96,9 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     private lateinit var aktørIdRepository: AktørIdRepository
+
+    @Autowired
+    private lateinit var localDateProvider: LocalDateProvider
 
     @BeforeEach
     fun førHverTest() {

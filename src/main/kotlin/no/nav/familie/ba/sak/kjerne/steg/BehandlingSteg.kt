@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.steg.StegType.BEHANDLINGSRESULTAT
@@ -54,7 +55,8 @@ interface BehandlingSteg<T> {
     fun preValiderSteg(
         behandling: Behandling,
         stegService: StegService? = null,
-    ) {}
+    ) {
+    }
 
     fun postValiderSteg(behandling: Behandling) {}
 }
@@ -317,15 +319,17 @@ fun hentNesteSteg(
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> IVERKSETT_MOT_OPPDRAG
+                BEHANDLINGSRESULTAT ->
+                    if (behandling.skalBehandlesAutomatisk &&
+                        behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK
+                    ) {
+                        IVERKSETT_MOT_OPPDRAG
+                    } else {
+                        VURDER_TILBAKEKREVING
+                    }
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK ->
-                    when (endringerIUtbetaling) {
-                        EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING -> IVERKSETT_MOT_OPPDRAG
-                        EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING -> FERDIGSTILLE_BEHANDLING
-                        EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
-                    }
+                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling)
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET

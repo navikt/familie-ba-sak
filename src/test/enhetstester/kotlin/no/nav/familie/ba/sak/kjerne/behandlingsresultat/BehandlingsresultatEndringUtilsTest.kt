@@ -52,6 +52,7 @@ class BehandlingsresultatEndringUtilsTest {
     fun `utledEndringsresultat skal returnere INGEN_ENDRING dersom det ikke finnes noe endringer i behandling`() {
         val endringsresultat =
             utledEndringsresultat(
+                nåMåned = YearMonth.now(),
                 nåværendeAndeler = emptyList(),
                 forrigeAndeler = emptyList(),
                 personerFremstiltKravFor = emptyList(),
@@ -82,6 +83,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
+                nåMåned = YearMonth.now(),
                 forrigeAndeler = listOf(forrigeAndel),
                 nåværendeAndeler = listOf(forrigeAndel.copy(kalkulertUtbetalingsbeløp = 40)),
                 personerFremstiltKravFor = emptyList(),
@@ -174,6 +176,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
+                nåMåned = YearMonth.now(),
                 forrigeAndeler = forrigeAndeler,
                 nåværendeAndeler = nåværendeAndeler,
                 personerFremstiltKravFor = emptyList(),
@@ -213,6 +216,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
+                nåMåned = YearMonth.now(),
                 nåværendeAndeler = emptyList(),
                 forrigeAndeler = emptyList(),
                 personerFremstiltKravFor = emptyList(),
@@ -248,6 +252,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
+                nåMåned = YearMonth.now(),
                 nåværendeAndeler = emptyList(),
                 forrigeAndeler = emptyList(),
                 personerFremstiltKravFor = emptyList(),
@@ -300,6 +305,7 @@ class BehandlingsresultatEndringUtilsTest {
                 forrigeAndelerForPerson = forrigeAndeler,
                 opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
                 erFremstiltKravForPerson = false,
+                nåMåned = YearMonth.now(),
             )
 
         assertEquals(false, erEndringIBeløp)
@@ -359,6 +365,7 @@ class BehandlingsresultatEndringUtilsTest {
                         forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
                         opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
                         erFremstiltKravForPerson = erFremstiltKravForPerson,
+                        nåMåned = YearMonth.now(),
                     )
 
                 erEndringIBeløpForPerson
@@ -428,6 +435,7 @@ class BehandlingsresultatEndringUtilsTest {
                         forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
                         opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
                         erFremstiltKravForPerson = erFremstiltKravForPerson,
+                        nåMåned = YearMonth.now(),
                     )
 
                 erEndringIBeløpForPerson
@@ -487,6 +495,7 @@ class BehandlingsresultatEndringUtilsTest {
                         forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
                         opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
                         erFremstiltKravForPerson = false,
+                        nåMåned = YearMonth.now(),
                     )
 
                 erEndringIBeløpForPerson
@@ -550,6 +559,7 @@ class BehandlingsresultatEndringUtilsTest {
                         forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
                         opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
                         erFremstiltKravForPerson = erFremstiltKravForPerson,
+                        nåMåned = YearMonth.now(),
                     )
 
                 erEndringIBeløpForPerson
@@ -616,6 +626,7 @@ class BehandlingsresultatEndringUtilsTest {
                         forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
                         opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
                         erFremstiltKravForPerson = false,
+                        nåMåned = YearMonth.now(),
                     )
 
                 erEndringIBeløpForPerson
@@ -685,6 +696,7 @@ class BehandlingsresultatEndringUtilsTest {
                         forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
                         opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
                         erFremstiltKravForPerson = false,
+                        nåMåned = YearMonth.now(),
                     )
 
                 erEndringIBeløpForPerson
@@ -745,6 +757,7 @@ class BehandlingsresultatEndringUtilsTest {
                 forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == barn1Aktør },
                 opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
                 erFremstiltKravForPerson = false,
+                nåMåned = YearMonth.now(),
             )
 
         assertEquals(false, erEndringIBeløp)
