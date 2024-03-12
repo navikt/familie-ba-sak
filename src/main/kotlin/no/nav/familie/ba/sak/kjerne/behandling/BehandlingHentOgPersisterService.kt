@@ -111,7 +111,8 @@ class BehandlingHentOgPersisterService(
 
     fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> =
         behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
-
+    fun hentSisteIverksatteEØSBehandlingFraLøpendeFagsaker(): List<Long> =
+        behandlingRepository.finnSisteIverksatteEØSBehandlingFraLøpendeFagsaker()
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
