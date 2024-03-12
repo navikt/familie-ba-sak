@@ -34,7 +34,7 @@ class ECBService(private val ecbClient: ValutakursRestClient, private val ecbVal
     ): BigDecimal {
         val valutakurs = ecbValutakursCacheRepository.findByValutakodeAndValutakursdato(utenlandskValuta, kursDato)
         if (valutakurs == null) {
-            logger.info("Henter valutakurs for $utenlandskValuta på $kursDato")
+            logger.info("Henter valutakurs for ${utenlandskValuta.saniter()} på $kursDato")
             try {
                 val exchangeRates =
                     ecbClient.hentValutakurs(Frequency.Daily, listOf(ECBConstants.NOK, utenlandskValuta), kursDato)
