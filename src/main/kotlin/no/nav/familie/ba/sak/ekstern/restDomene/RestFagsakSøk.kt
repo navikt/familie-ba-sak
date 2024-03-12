@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -12,7 +13,11 @@ data class RestSøkParam(
 ) {
     // Bruker init til å validere personidenten
     init {
-        Fødselsnummer(personIdent)
+        try {
+            Fødselsnummer(personIdent)
+        } catch (e: IllegalStateException) {
+            throw FunksjonellFeil("Ugyldig personident")
+        }
     }
 }
 

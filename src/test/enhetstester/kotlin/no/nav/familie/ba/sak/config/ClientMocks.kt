@@ -146,7 +146,6 @@ class ClientMocks {
             mockPersonopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any())
         } returns "NO"
 
-        val ukjentId = "43125678910"
         val ukjentAktør = tilAktør(ukjentId)
 
         every {
@@ -637,6 +636,7 @@ class ClientMocks {
                         adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
                     ),
             )
+        val ukjentId = randomFnr()
     }
 }
 
