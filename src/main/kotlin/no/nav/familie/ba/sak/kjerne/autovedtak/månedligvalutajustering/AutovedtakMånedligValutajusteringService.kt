@@ -31,7 +31,7 @@ class AutovedtakMånedligValutajusteringService(private val behandlingHentOgPers
         }
 
         // hvis siste vedtatte behandling er valutajustering og opprettet tidspunkt er denne måned hopp ut
-        if (behandling.opprettetTidspunkt.toLocalDate().toYearMonth() == månedligValutajusteringTaskDto.måned) {
+        if (behandling.opprettetTidspunkt.toLocalDate().toYearMonth() == månedligValutajusteringTaskDto.måned && behandling.type == BehandlingType.REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING) {
             return
         }
 
