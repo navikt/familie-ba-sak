@@ -17,8 +17,8 @@ import java.time.YearMonth
 @Service
 @TaskStepBeskrivelse(
     taskStepType =
-    MånedligValutajusteringFinnFagsakerTask
-        .TASK_STEP_TYPE,
+        MånedligValutajusteringFinnFagsakerTask
+            .TASK_STEP_TYPE,
     beskrivelse = "Start månedlig valutajustering, finn alle fagsaker",
     maxAntallFeil = 1,
     settTilManuellOppfølgning = true,
@@ -31,16 +31,20 @@ class MånedligValutajusteringFinnFagsakerTask(val behandlingService: Behandling
         val relevanteBehandlinger = behandlingService.hentSisteIverksatteEØSBehandlingFraLøpendeFagsaker().toSet().sorted()
         relevanteBehandlinger.forEach { behandlingid ->
             // check if behandling is eøs sekundærland
-            val ersekundærland = kompetanseService.hentKompetanser(BehandlingId(behandlingid)).any { kompetanse ->  kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND}
+            val ersekundærland = kompetanseService.hentKompetanser(BehandlingId(behandlingid)).any { kompetanse -> kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
             if (ersekundærland) {
-               lagMånedligValutajusteringTask(behandlingid, valutajusteringsMåned)
+                lagMånedligValutajusteringTask(behandlingid, valutajusteringsMåned)
             }
         }
     }
 
-    private fun lagMånedligValutajusteringTask(behandlingId: Long, valutajusteringsMåned: LocalDate) {
+    private fun lagMånedligValutajusteringTask(
+        behandlingId: Long,
+        valutajusteringsMåned: LocalDate,
+    ) {
         taskService.opprettMånedligValutajusteringTask(behandlingId, YearMonth.from(valutajusteringsMåned))
     }
+
     companion object {
         const val TASK_STEP_TYPE = "månedligvalutajuteringfinnfagsaker"
         private val logger = LoggerFactory.getLogger(MånedligValutajusteringFinnFagsakerTask::class.java)

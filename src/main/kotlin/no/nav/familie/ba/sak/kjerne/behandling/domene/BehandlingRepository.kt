@@ -69,7 +69,6 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     )
     fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Long>
 
-
     @Query(
         value = """SELECT DISTINCT ON (b.fk_fagsak_id) b.id
                     FROM behandling b
@@ -83,6 +82,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         nativeQuery = true,
     )
     fun finnSisteIverksatteEØSBehandlingFraLøpendeFagsaker(): List<Long>
+
     @Query(
         """select b from Behandling b
                            inner join TilkjentYtelse ty on b.id = ty.behandling.id

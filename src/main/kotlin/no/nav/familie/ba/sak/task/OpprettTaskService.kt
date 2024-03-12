@@ -186,10 +186,10 @@ class OpprettTaskService(
                 type = MånedligValutajusteringTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(MånedligValutajusteringTaskDto(behandlingid = behandlingId, måned = måned)),
                 properties =
-                Properties().apply {
-                    this["behandlingId"] = behandlingId.toString()
-                    this["måned"] = måned.toString()
-                },
+                    Properties().apply {
+                        this["behandlingId"] = behandlingId.toString()
+                        this["måned"] = måned.toString()
+                    },
             ),
         )
     }
