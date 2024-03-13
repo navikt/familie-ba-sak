@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
@@ -17,13 +18,18 @@ import java.time.YearMonth
 @Service
 @TaskStepBeskrivelse(
     taskStepType =
-    MånedligValutajusteringFinnFagsakerTask
-        .TASK_STEP_TYPE,
+        MånedligValutajusteringFinnFagsakerTask
+            .TASK_STEP_TYPE,
     beskrivelse = "Start månedlig valutajustering, finn alle fagsaker",
     maxAntallFeil = 1,
     settTilManuellOppfølgning = true,
 )
-class MånedligValutajusteringFinnFagsakerTask(val behandlingService: BehandlingHentOgPersisterService, val fagsakService: FagsakService, val kompetanseService: KompetanseService, val taskService: OpprettTaskService) : AsyncTaskStep {
+class MånedligValutajusteringFinnFagsakerTask(
+    val behandlingService: BehandlingHentOgPersisterService,
+    val fagsakService: FagsakService,
+    val kompetanseService: KompetanseService,
+    val taskRepository: TaskRepositoryWrapper,
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val valutajusteringsMåned =
             objectMapper.readValue(task.payload, LocalDate::class.java)
@@ -31,16 +37,31 @@ class MånedligValutajusteringFinnFagsakerTask(val behandlingService: Behandling
         val relevanteBehandlinger = behandlingService.hentSisteIverksatteEØSBehandlingFraLøpendeFagsaker().toSet().sorted()
         relevanteBehandlinger.forEach { behandlingid ->
             // check if behandling is eøs sekundærland
-            val ersekundærland = kompetanseService.hentKompetanser(BehandlingId(behandlingid)).any { kompetanse ->  kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND}
+            val ersekundærland = kompetanseService.hentKompetanser(BehandlingId(behandlingid)).any { kompetanse -> kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
+
             if (ersekundærland) {
-               lagMånedligValutajusteringTask(behandlingid, valutajusteringsMåned)
+                lagMånedligValutajusteringTask(behandlingid, valutajusteringsMåned)
             }
         }
     }
 
-    private fun lagMånedligValutajusteringTask(behandlingId: Long, valutajusteringsMåned: LocalDate) {
-        taskService.opprettMånedligValutajusteringTask(behandlingId, YearMonth.from(valutajusteringsMåned))
+    private fun lagMånedligValutajusteringTask(
+        behandlingId: Long,
+        valutajusteringsMåned: LocalDate,
+    ) {
+        taskRepository.save(
+            Task(
+                type = MånedligValutajusteringTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(MånedligValutajusteringTaskDto(behandlingid = behandlingId, måned = YearMonth.from(valutajusteringsMåned))),
+                properties =
+                    mapOf(
+                        "behandlingId" to behandlingId.toString(),
+                        "måned" to YearMonth.from(valutajusteringsMåned).toString(),
+                    ).toProperties(),
+            ),
+        )
     }
+
     companion object {
         const val TASK_STEP_TYPE = "månedligvalutajuteringfinnfagsaker"
         private val logger = LoggerFactory.getLogger(MånedligValutajusteringFinnFagsakerTask::class.java)
