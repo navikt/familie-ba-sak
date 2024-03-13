@@ -56,7 +56,7 @@ class MånedligValutajusteringFinnFagsakerTask(
     }
 
     companion object {
-        const val TASK_STEP_TYPE = "månedligvalutajusteringfinnfagsaker"
+        const val TASK_STEP_TYPE = "månedligValutajusteringFinnFagsaker"
         private val logger = LoggerFactory.getLogger(MånedligValutajusteringFinnFagsakerTask::class.java)
 
         fun lagTask(inneværendeMåned: YearMonth) =
