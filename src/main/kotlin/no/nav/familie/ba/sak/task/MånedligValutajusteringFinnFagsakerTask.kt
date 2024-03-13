@@ -50,24 +50,10 @@ class MånedligValutajusteringFinnFagsakerTask(
                 erSekundærlandIMåned(kompetanserPåBehandling, data.måned)
 
             if (erSekundærland) {
-                taskRepository.save(lagMånedligValutajusteringTask(behandlingid, data.måned))
+                taskRepository.save(MånedligValutajusteringTask.lagTask(behandlingid, data.måned))
             }
         }
     }
-
-    private fun lagMånedligValutajusteringTask(
-        behandlingId: Long,
-        valutajusteringsMåned: YearMonth,
-    ): Task =
-        Task(
-            type = MånedligValutajusteringTask.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(MånedligValutajusteringTaskDto(behandlingid = behandlingId, måned = valutajusteringsMåned)),
-            properties =
-                mapOf(
-                    "behandlingId" to behandlingId.toString(),
-                    "måned" to valutajusteringsMåned.toString(),
-                ).toProperties(),
-        )
 
     companion object {
         const val TASK_STEP_TYPE = "månedligvalutajuteringfinnfagsaker"

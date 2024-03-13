@@ -25,13 +25,27 @@ class MånedligValutajusteringTask() : AsyncTaskStep {
         // autovedtakMånedligValutajusteringService.utførMånedligValutajustering(taskdto)
     }
 
+    data class MånedligValutajusteringTaskDto(
+        val behandlingid: Long,
+        val måned: YearMonth,
+    )
+
     companion object {
         const val TASK_STEP_TYPE = "månedligvalutajutering"
         private val logger = LoggerFactory.getLogger(MånedligValutajusteringTask::class.java)
+
+        fun lagTask(
+            behandlingId: Long,
+            valutajusteringsMåned: YearMonth,
+        ): Task =
+            Task(
+                type = MånedligValutajusteringTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(MånedligValutajusteringTaskDto(behandlingid = behandlingId, måned = valutajusteringsMåned)),
+                properties =
+                    mapOf(
+                        "behandlingId" to behandlingId.toString(),
+                        "måned" to valutajusteringsMåned.toString(),
+                    ).toProperties(),
+            )
     }
 }
-
-data class MånedligValutajusteringTaskDto(
-    val behandlingid: Long,
-    val måned: YearMonth,
-)
