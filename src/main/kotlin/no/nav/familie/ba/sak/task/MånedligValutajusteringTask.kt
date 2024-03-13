@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -18,7 +17,7 @@ import java.time.YearMonth
     maxAntallFeil = 1,
     settTilManuellOppfølgning = true,
 )
-class MånedligValutajusteringTask(private val autovedtakMånedligValutajusteringService: AutovedtakMånedligValutajusteringService) : AsyncTaskStep {
+class MånedligValutajusteringTask() : AsyncTaskStep {
     override fun doTask(task: Task) {
         val taskdto = objectMapper.readValue(task.payload, MånedligValutajusteringTaskDto::class.java)
         logger.info("Starter Task månedlig valutajustering for $taskdto")

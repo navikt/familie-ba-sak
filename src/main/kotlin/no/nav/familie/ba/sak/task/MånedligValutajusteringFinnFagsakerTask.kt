@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -42,10 +43,9 @@ class MånedligValutajusteringFinnFagsakerTask(
         val relevanteBehandlinger = behandlingService.hentSisteIverksatteEØSBehandlingFraLøpendeFagsaker().toSet().sorted()
         relevanteBehandlinger.forEach { behandlingid ->
             // check if behandling is eøs sekundærland
+            val kompetanserPåBehandling = kompetanseService.hentKompetanser(BehandlingId(behandlingid))
             val erSekundærland =
-                kompetanseService.hentKompetanser(BehandlingId(behandlingid))
-                    .filter { (it.fom ?: TIDENES_MORGEN.toYearMonth()).isSameOrBefore(data.måned) && (it.tom ?: TIDENES_ENDE.toYearMonth()).isSameOrAfter(data.måned) }
-                    .any { kompetanse -> kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
+                erBehandlingSekundærlandIMåned(kompetanserPåBehandling, data.måned)
 
             if (erSekundærland) {
                 taskRepository.save(lagMånedligValutajusteringTask(behandlingid, data.måned))
@@ -80,5 +80,11 @@ class MånedligValutajusteringFinnFagsakerTask(
                 type = MånedligValutajusteringFinnFagsakerTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(MånedligValutajusteringFinnFagsakerTaskDto(inneværendeMåned)),
             )
+
+        fun erBehandlingSekundærlandIMåned(
+            kompetanser: Collection<Kompetanse>,
+            yearMonth: YearMonth,
+        ) = kompetanser.filter { (it.fom ?: TIDENES_MORGEN.toYearMonth()).isSameOrBefore(yearMonth) && (it.tom ?: TIDENES_ENDE.toYearMonth()).isSameOrAfter(yearMonth) }
+            .any { kompetanse -> kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
     }
 }
