@@ -35,8 +35,9 @@ class MånedligValutajusteringFinnFagsakerTask(
     val taskRepository: TaskRepositoryWrapper,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val data =
-            objectMapper.readValue(task.payload, MånedligValutajusteringFinnFagsakerTaskDto::class.java)
+        val data = objectMapper.readValue(task.payload, MånedligValutajusteringFinnFagsakerTaskDto::class.java)
+
+        logger.info("Starter månedlig valutajustering for ${data.måned}")
 
         val relevanteBehandlinger = behandlingService.hentSisteIverksatteEØSBehandlingFraLøpendeFagsaker().toSet().sorted()
         relevanteBehandlinger.forEach { behandlingid ->
@@ -47,7 +48,7 @@ class MånedligValutajusteringFinnFagsakerTask(
                     .any { kompetanse -> kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
 
             if (ersekundærland) {
-                lagMånedligValutajusteringTask(behandlingid, data.måned)
+                taskRepository.save(lagMånedligValutajusteringTask(behandlingid, data.måned))
             }
         }
     }
@@ -55,19 +56,16 @@ class MånedligValutajusteringFinnFagsakerTask(
     private fun lagMånedligValutajusteringTask(
         behandlingId: Long,
         valutajusteringsMåned: YearMonth,
-    ) {
-        taskRepository.save(
-            Task(
-                type = MånedligValutajusteringTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(MånedligValutajusteringTaskDto(behandlingid = behandlingId, måned = valutajusteringsMåned)),
-                properties =
-                    mapOf(
-                        "behandlingId" to behandlingId.toString(),
-                        "måned" to valutajusteringsMåned.toString(),
-                    ).toProperties(),
-            ),
+    ): Task =
+        Task(
+            type = MånedligValutajusteringTask.TASK_STEP_TYPE,
+            payload = objectMapper.writeValueAsString(MånedligValutajusteringTaskDto(behandlingid = behandlingId, måned = valutajusteringsMåned)),
+            properties =
+                mapOf(
+                    "behandlingId" to behandlingId.toString(),
+                    "måned" to valutajusteringsMåned.toString(),
+                ).toProperties(),
         )
-    }
 
     data class MånedligValutajusteringFinnFagsakerTaskDto(
         val måned: YearMonth,

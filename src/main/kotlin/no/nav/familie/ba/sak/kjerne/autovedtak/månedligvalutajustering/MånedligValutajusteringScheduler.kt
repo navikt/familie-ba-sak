@@ -33,11 +33,10 @@ class MånedligValutajusteringScheduler(
         }
 
         if (leaderClientService.isLeader()) {
-            logger.info("Kjører månedlig valutajustering for $inneværendeMåned")
+            logger.info("Kjører scheduled månedlig valutajustering for $inneværendeMåned")
             taskRepository.save(
                 MånedligValutajusteringFinnFagsakerTask.lagTask(inneværendeMåned),
             )
         }
-        logger.info("Kjører månedlig valutajustering for $inneværendeMåned")
     }
 }
