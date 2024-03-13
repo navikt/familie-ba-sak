@@ -31,7 +31,7 @@ class MånedligValutajusteringTask() : AsyncTaskStep {
     )
 
     companion object {
-        const val TASK_STEP_TYPE = "månedligvalutajutering"
+        const val TASK_STEP_TYPE = "månedligValutajustering"
         private val logger = LoggerFactory.getLogger(MånedligValutajusteringTask::class.java)
 
         fun lagTask(
