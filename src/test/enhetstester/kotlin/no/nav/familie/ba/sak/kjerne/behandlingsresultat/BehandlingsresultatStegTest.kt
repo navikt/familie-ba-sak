@@ -29,6 +29,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagUtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -83,6 +87,10 @@ class BehandlingsresultatStegTest {
 
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
 
+    private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository = mockk()
+
+    private val valutakursRepository: ValutakursRepository = mockk()
+
     @BeforeEach
     fun init() {
         behandlingsresultatSteg =
@@ -98,6 +106,8 @@ class BehandlingsresultatStegTest {
                 beregningService,
                 andelerTilkjentYtelseOgEndreteUtbetalingerService,
                 andelTilkjentYtelseRepository,
+                utenlandskPeriodebeløpRepository,
+                valutakursRepository,
             )
 
         behandling =
@@ -163,6 +173,27 @@ class BehandlingsresultatStegTest {
             "Du har fått behandlingsresultatet Avslått, endret og opphørt. " +
                 "Dette er ikke støttet på migreringsbehandlinger. " +
                 "Meld sak i Porten om du er uenig i resultatet.",
+            exception.message,
+        )
+    }
+
+    @Test
+    fun `skal kaste exception dersom det finnes utenlandsperiodebeløp eller valutakurser som ikke er fylt ut`() {
+        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.FORTSATT_INNVILGET
+
+        every {
+            behandlingService.oppdaterBehandlingsresultat(
+                any(),
+                any(),
+            )
+        } returns behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
+
+        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } returns listOf(lagUtenlandskPeriodebeløp())
+        every { valutakursRepository.finnFraBehandlingId(any()) } returns listOf(lagValutakurs())
+
+        val exception = assertThrows<FunksjonellFeil> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
+        assertEquals(
+            "Kan ikke fullføre behandlingsresultat-steg før utenlandsk periodebeløp og valutakurs er fylt ut for alle barn og perioder",
             exception.message,
         )
     }

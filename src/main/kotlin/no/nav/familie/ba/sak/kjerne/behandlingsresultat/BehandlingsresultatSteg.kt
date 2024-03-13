@@ -23,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -51,6 +53,8 @@ class BehandlingsresultatSteg(
     private val beregningService: BeregningService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
+    private val valutakursRepository: ValutakursRepository,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -76,11 +80,10 @@ class BehandlingsresultatSteg(
             søkerOgBarn = søkerOgBarn,
         )
 
-        val endreteUtbetalingerMedAndeler =
-            andelerTilkjentYtelseOgEndreteUtbetalingerService
-                .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
-
         if (behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
+            val endreteUtbetalingerMedAndeler =
+                andelerTilkjentYtelseOgEndreteUtbetalingerService
+                    .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
             endreteUtbetalingerMedAndeler.validerEndredeUtbetalingsandeler(tilkjentYtelse, vilkårService.hentVilkårsvurdering(behandling.id))
         }
 
@@ -107,6 +110,8 @@ class BehandlingsresultatSteg(
             }
 
         validerBehandlingsresultatErGyldigForÅrsak(behandlingMedOppdatertBehandlingsresultat)
+
+        validerAtUtenlandskPeriodeBeløpOgValutakursErUtfylt(behandling = behandling)
 
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
             behandlingService.nullstillEndringstidspunkt(behandling.id)
@@ -212,6 +217,15 @@ class BehandlingsresultatSteg(
             andelerFraForrigeBehandling = andelerFraForrigeBehandling,
             andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
         )
+    }
+
+    private fun validerAtUtenlandskPeriodeBeløpOgValutakursErUtfylt(behandling: Behandling) {
+        val utenlandskePeriodeBeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandling.id)
+        val valutakurser by lazy { valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id) }
+
+        if (utenlandskePeriodeBeløp.any { !it.erObligatoriskeFelterSatt() } || valutakurser.any { !it.erObligatoriskeFelterSatt() }) {
+            throw FunksjonellFeil("Kan ikke fullføre behandlingsresultat-steg før utenlandsk periodebeløp og valutakurs er fylt ut for alle barn og perioder")
+        }
     }
 
     companion object {
