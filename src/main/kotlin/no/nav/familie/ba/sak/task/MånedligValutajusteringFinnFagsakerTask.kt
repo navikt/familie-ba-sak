@@ -22,9 +22,7 @@ import java.time.YearMonth
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType =
-        MånedligValutajusteringFinnFagsakerTask
-            .TASK_STEP_TYPE,
+    taskStepType = MånedligValutajusteringFinnFagsakerTask.TASK_STEP_TYPE,
     beskrivelse = "Start månedlig valutajustering, finn alle fagsaker",
     maxAntallFeil = 1,
     settTilManuellOppfølgning = true,
