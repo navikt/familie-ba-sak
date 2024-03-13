@@ -131,9 +131,11 @@ class SnikeIKøenIntegrationTest(
     }
 
     @Test
-    fun `automatisk behandling forsøker å rekjøre og avbrytes med manuell oppgave etter 72 timer med åpen behandling på besluttersteget`() {
+    fun `automatisk behandling forsøker å rekjøre og avbrytes med manuell oppgave etter 7 dager med åpen behandling på besluttersteget`() {
         val fagsak = kjørFørstegangsbehandling().fagsak
         val åpenBehandling = kjørRevurderingTilSteg(StegType.SEND_TIL_BESLUTTER, fagsak.id)
+
+        val tid6DagerSiden = LocalDateTime.now().minusDays(6)
 
         assertThrows<RekjørSenereException> {
             autovedtakStegService.kjørBehandlingOmregning(
@@ -144,10 +146,9 @@ class SnikeIKøenIntegrationTest(
                     standardbegrunnelse = Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
                     fagsakId = åpenBehandling.fagsak.id,
                 ),
+                taskOpprettetTid = tid6DagerSiden,
             )
         }
-
-        val tid72TimerSiden = LocalDateTime.now().minusHours(72)
 
         autovedtakStegService.kjørBehandlingOmregning(
             åpenBehandling.fagsak.aktør,
@@ -157,7 +158,7 @@ class SnikeIKøenIntegrationTest(
                 standardbegrunnelse = Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
                 fagsakId = åpenBehandling.fagsak.id,
             ),
-            taskOpprettetTid = tid72TimerSiden,
+            taskOpprettetTid = tid6DagerSiden.minusDays(1),
         )
 
         val opprettedeTasks = mutableListOf<Task>()

@@ -19,9 +19,11 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.error.RekjørSenereException
+import no.nav.familie.util.VirkedagerProvider
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -213,10 +215,10 @@ class AutovedtakStegService(
                 }
             }
             BehandlingStatus.FATTER_VEDTAK -> {
-                if (taskOpprettetTid.until(LocalDateTime.now(), ChronoUnit.HOURS) < 72) {
+                if (taskOpprettetTid.until(LocalDateTime.now(), ChronoUnit.DAYS) < 7) {
                     throw RekjørSenereException(
-                        årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen om 24 timer",
-                        triggerTid = LocalDateTime.now().plusHours(24),
+                        årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen neste virkedag",
+                        triggerTid = VirkedagerProvider.nesteVirkedag(LocalDate.now()).atTime(12, 0),
                     )
                 }
             }

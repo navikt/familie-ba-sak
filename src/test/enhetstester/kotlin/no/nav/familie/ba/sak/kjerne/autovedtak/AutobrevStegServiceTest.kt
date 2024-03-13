@@ -63,7 +63,7 @@ class AutobrevStegServiceTest {
     }
 
     @Test
-    fun `Skal stoppe autovedtak og opprette oppgave etter 72 timer ved åpen behandling med status Fatter vedtak`() {
+    fun `Skal stoppe autovedtak og opprette oppgave etter 7 dager ved åpen behandling med status Fatter vedtak`() {
         val aktør = randomAktør()
         val fagsak = defaultFagsak(aktør)
         val behandling =
@@ -80,14 +80,14 @@ class AutobrevStegServiceTest {
             autovedtakStegService.kjørBehandlingSmåbarnstillegg(
                 mottakersAktør = aktør,
                 aktør = aktør,
-                taskOpprettetTid = LocalDateTime.now().minusHours(71),
+                taskOpprettetTid = LocalDateTime.now().minusDays(6),
             )
         }
 
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = aktør,
             aktør = aktør,
-            taskOpprettetTid = LocalDateTime.now().minusHours(72),
+            taskOpprettetTid = LocalDateTime.now().minusDays(7),
         )
 
         verify(exactly = 1) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) }
