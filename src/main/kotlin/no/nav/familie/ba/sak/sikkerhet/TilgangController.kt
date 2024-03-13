@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.TilgangDTO
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -41,4 +42,9 @@ class TilgangController(
     }
 }
 
-class TilgangRequestDTO(val brukerIdent: String)
+class TilgangRequestDTO(val brukerIdent: String) {
+    // Bruker init til å validere personidenten
+    init {
+        Fødselsnummer(brukerIdent)
+    }
+}

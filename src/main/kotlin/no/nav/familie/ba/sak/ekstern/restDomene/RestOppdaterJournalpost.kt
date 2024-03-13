@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.erAlfanummerisk
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Bruker
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.BrukerIdType
@@ -55,4 +57,9 @@ data class RestOppdaterJournalpost(
 data class NavnOgIdent(
     val navn: String,
     val id: String,
-)
+) {
+    // Bruker init til å validere personidenten
+    init {
+        if (!id.erAlfanummerisk()) throw FunksjonellFeil("Ugyldig ident")
+    }
+}

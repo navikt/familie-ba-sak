@@ -90,8 +90,8 @@ class TilbakekrevingServiceTest(
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                søkerFnr = "09121079074",
-                barnasIdenter = listOf("09121079074"),
+                søkerFnr = ClientMocks.barnFnr[0],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
@@ -121,8 +121,8 @@ class TilbakekrevingServiceTest(
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                søkerFnr = "10031000033",
-                barnasIdenter = listOf("10031000033"),
+                søkerFnr = ClientMocks.barnFnr[0],
+                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,

@@ -79,7 +79,8 @@ class JournalføringController(
         @PathVariable journalpostId: String,
         @PathVariable oppgaveId: String,
         @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
-        @RequestBody @Valid
+        @RequestBody
+        @Valid
         request: RestJournalføring,
     ): ResponseEntity<Ressurs<String>> {
         tilgangService.verifiserHarTilgangTilHandling(

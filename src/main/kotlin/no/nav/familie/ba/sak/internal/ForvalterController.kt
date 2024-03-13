@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.internal
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import jakarta.validation.Valid
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
@@ -152,6 +154,9 @@ class ForvalterController(
         @RequestParam valuta: String,
         @RequestParam dato: LocalDate,
     ): ResponseEntity<BigDecimal> {
+        if (!valuta.matches(Regex("[A-Z]{3}"))) {
+            throw Feil("Valutakode må ha store bokstaver og være tre bokstaver lang")
+        }
         return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
     }
 
@@ -213,6 +218,7 @@ class ForvalterController(
                     "identen ikke er merget av folketrygden.",
         )
         @RequestBody
+        @Valid
         patchMergetIdentDto: PatchMergetIdentDto,
     ): ResponseEntity<String> {
         opprettTaskService.opprettTaskForÅPatcheMergetIdent(patchMergetIdentDto)

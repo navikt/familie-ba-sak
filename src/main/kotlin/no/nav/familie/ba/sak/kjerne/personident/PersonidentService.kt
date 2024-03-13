@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.saner
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
@@ -98,7 +99,7 @@ class PersonidentService(
             try {
                 personidentRepository.findByFødselsnummerOrNull(ident)
             } catch (e: Exception) {
-                secureLogger.info("Feil ved henting av ident=$ident, lagre=$lagre", e)
+                secureLogger.info("Feil ved henting av ident=${ident.saner()}, lagre=$lagre", e)
                 throw e
             }
         if (personident != null) {

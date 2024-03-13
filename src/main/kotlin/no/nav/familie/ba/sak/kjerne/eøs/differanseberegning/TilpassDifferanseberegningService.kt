@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -112,7 +111,6 @@ class TilpassDifferanseberegningSøkersYtelserService(
                 barna = persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
                 kompetanser = kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id),
                 personResultater = vilkårsvurderingRepository.findByBehandlingAndAktiv(tilkjentYtelse.behandling.id)!!.personResultater,
-                skalBrukeUtvidedeRegler = unleashService.isEnabled(FeatureToggleConfig.BRUK_UTVIDEDE_DIFFERANSEBEREGNINGSREGLER, mapOf("fagsakId" to tilkjentYtelse.behandling.fagsak.id.toString())),
             )
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }

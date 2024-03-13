@@ -1,5 +1,9 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Pattern
+import no.nav.familie.ba.sak.common.PERSONIDENT_IKKE_GYLDIG_FEILMELDING
+import no.nav.familie.ba.sak.common.PERSONIDENT_REGEX
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
@@ -24,7 +28,9 @@ class InfotrygdController(
 ) {
     @PostMapping(path = ["/hent-infotrygdsaker-for-soker"])
     fun hentInfotrygdsakerForSøker(
-        @RequestBody personIdent: Personident,
+        @Valid
+        @RequestBody
+        personIdent: Personident,
     ): ResponseEntity<Ressurs<RestInfotrygdsaker>> {
         val aktør = personidentService.hentAktør(personIdent.ident)
         val infotrygdsaker =
@@ -36,7 +42,9 @@ class InfotrygdController(
 
     @PostMapping(path = ["/hent-infotrygdstonader-for-soker"])
     fun hentInfotrygdstønaderForSøker(
-        @RequestBody personIdent: Personident,
+        @Valid
+        @RequestBody
+        personIdent: Personident,
     ): ResponseEntity<Ressurs<RestInfotrygdstønader>> {
         val aktør = personidentService.hentAktør(personIdent.ident)
         val infotrygdstønader =
@@ -48,14 +56,19 @@ class InfotrygdController(
 
     @PostMapping(path = ["/har-lopende-sak"])
     fun harLøpendeSak(
-        @RequestBody personIdent: Personident,
+        @Valid
+        @RequestBody
+        personIdent: Personident,
     ): ResponseEntity<Ressurs<RestLøpendeSak>> {
         val harLøpendeSak = infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(listOf(personIdent.ident))
         return ResponseEntity.ok(Ressurs.success(RestLøpendeSak(harLøpendeSak)))
     }
 }
 
-class Personident(val ident: String)
+class Personident(
+    @field:Pattern(regexp = PERSONIDENT_REGEX, message = PERSONIDENT_IKKE_GYLDIG_FEILMELDING)
+    val ident: String,
+)
 
 class RestInfotrygdsaker(
     val saker: List<Sak> = emptyList(),

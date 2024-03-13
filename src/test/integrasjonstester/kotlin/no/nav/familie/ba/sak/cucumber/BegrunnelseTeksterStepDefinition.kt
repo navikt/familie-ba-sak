@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegr
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -31,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -67,7 +70,7 @@ class BegrunnelseTeksterStepDefinition {
     var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
     var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
-    var overgangsstønader = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
+    var overgangsstønader = mutableMapOf<Long, List<InternPeriodeOvergangsstønad>>()
     var dagensDato: LocalDate = LocalDate.now()
 
     var gjeldendeBehandlingId: Long? = null
@@ -211,7 +214,7 @@ class BegrunnelseTeksterStepDefinition {
                 persongrunnlag = persongrunnlag,
                 tidligereBehandlinger = behandlingTilForrigeBehandling,
                 dagensDato = dagensDato,
-            )
+            ).toMutableMap()
     }
 
     /**
@@ -473,6 +476,45 @@ class BegrunnelseTeksterStepDefinition {
         assertThat(beregnetTilkjentYtelse)
             .usingRecursiveComparison().ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*kildeBehandlingId", ".*tilkjentYtelse")
             .isEqualTo(forventedeAndeler)
+    }
+
+    /**
+     * Mulige verdier: | AktørId | Dødsfalldato |
+     */
+    @Og("med dødsfall")
+    fun `med dødsfall`(
+        dataTable: DataTable,
+    ) {
+        val aktørTilDødsfall: Map<String, LocalDate> =
+            dataTable.asMaps().map { rad ->
+                val aktørId = parseValgfriString(VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.AKTØR_ID, rad) ?: error("AktørId må være satt")
+                val dødsfallDato = parseValgfriDato(VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.DØDSFALLDATO, rad) ?: error("Dødsfallsdato må være satt")
+
+                aktørId to dødsfallDato
+            }.toMap()
+
+        aktørTilDødsfall.forEach { (aktørId, dødsfallDato) ->
+            persongrunnlag.values.flatMap { it.personer }.filter { it.aktør.aktørId == aktørId }.forEach {
+                it.dødsfall =
+                    lagDødsfall(
+                        person = it,
+                        dødsfallDato = dødsfallDato,
+                    )
+            }
+        }
+    }
+
+    /**
+     * | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Behandlingsstatus | Behandlingssteg | Underkategori |
+     */
+    @Så("forvent disse behandlingene")
+    fun `med andeler tilkjent ytelse`(
+        dataTable: DataTable,
+    ) {
+        val forventedeBehandlinger = lagBehandlinger(dataTable, fagsaker)
+        forventedeBehandlinger.forEach {
+            assertThat(behandlinger[it.id].toString()).isEqualTo(it.toString())
+        }
     }
 }
 

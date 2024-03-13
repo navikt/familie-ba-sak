@@ -7,7 +7,6 @@ import io.mockk.slot
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.guttenBarnesenFødselsdato
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.tilddMMyy
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -147,7 +146,6 @@ class ClientMocks {
             mockPersonopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any())
         } returns "NO"
 
-        val ukjentId = "43125678910"
         val ukjentAktør = tilAktør(ukjentId)
 
         every {
@@ -458,7 +456,7 @@ class ClientMocks {
                 guttenBarnesenFødselsdato,
                 LocalDate.now().withDayOfMonth(18).minusYears(2),
             )
-        val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMyy() + "50033", barnFødselsdatoer[1].tilddMMyy() + "50033")
+        val barnFnr = arrayOf(randomFnr(), randomFnr())
         const val BARN_DET_IKKE_GIS_TILGANG_TIL_FNR = "12345678912"
         const val INTEGRASJONER_FNR = "10000111111"
         val bostedsadresse =
@@ -638,6 +636,7 @@ class ClientMocks {
                         adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
                     ),
             )
+        val ukjentId = randomFnr()
     }
 }
 

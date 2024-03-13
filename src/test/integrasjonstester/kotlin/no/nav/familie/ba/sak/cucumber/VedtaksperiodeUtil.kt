@@ -34,6 +34,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -53,6 +55,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -97,33 +100,7 @@ fun lagVedtak(
     fagsaker: MutableMap<Long, Fagsak>,
 ) {
     behandlinger.putAll(
-        dataTable.asMaps().map { rad ->
-            val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
-            val fagsakId = parseValgfriLong(Domenebegrep.FAGSAK_ID, rad)
-            val fagsak =
-                fagsaker.getOrDefault(fagsakId, defaultFagsak()).also {
-                    if (it.id !in fagsaker.keys) {
-                        fagsaker[it.id] = it
-                    }
-                }
-
-            val behandlingÅrsak = parseValgfriEnum<BehandlingÅrsak>(Domenebegrep.BEHANDLINGSÅRSAK, rad)
-            val behandlingResultat = parseValgfriEnum<Behandlingsresultat>(Domenebegrep.BEHANDLINGSRESULTAT, rad)
-            val skalBehandlesAutomatisk = parseValgfriBoolean(Domenebegrep.SKAL_BEHANLDES_AUTOMATISK, rad) ?: false
-            val behandlingKategori =
-                parseValgfriEnum<BehandlingKategori>(Domenebegrep.BEHANDLINGSKATEGORI, rad)
-                    ?: BehandlingKategori.NASJONAL
-            val status = parseValgfriEnum<BehandlingStatus>(Domenebegrep.BEHANDLINGSSTATUS, rad)
-
-            lagBehandling(
-                fagsak = fagsak,
-                årsak = behandlingÅrsak ?: BehandlingÅrsak.SØKNAD,
-                resultat = behandlingResultat ?: Behandlingsresultat.IKKE_VURDERT,
-                skalBehandlesAutomatisk = skalBehandlesAutomatisk,
-                behandlingKategori = behandlingKategori,
-                status = status ?: BehandlingStatus.UTREDES,
-            ).copy(id = behandlingId)
-        }.associateBy { it.id },
+        lagBehandlinger(dataTable, fagsaker).associateBy { it.id },
     )
     behandlingTilForrigeBehandling.putAll(
         dataTable.asMaps().associate { rad ->
@@ -135,6 +112,44 @@ fun lagVedtak(
             .map { no.nav.familie.ba.sak.common.lagVedtak(behandlinger[it.key] ?: error("Finner ikke behandling")) },
     )
 }
+
+fun lagBehandlinger(
+    dataTable: DataTable,
+    fagsaker: MutableMap<Long, Fagsak>,
+): List<Behandling> =
+    dataTable.asMaps().map { rad ->
+        val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+        val fagsakId = parseValgfriLong(Domenebegrep.FAGSAK_ID, rad)
+        val fagsak =
+            fagsaker.getOrDefault(fagsakId, defaultFagsak()).also {
+                if (it.id !in fagsaker.keys) {
+                    fagsaker[it.id] = it
+                }
+            }
+
+        val behandlingÅrsak = parseValgfriEnum<BehandlingÅrsak>(Domenebegrep.BEHANDLINGSÅRSAK, rad)
+        val behandlingResultat = parseValgfriEnum<Behandlingsresultat>(Domenebegrep.BEHANDLINGSRESULTAT, rad)
+        val skalBehandlesAutomatisk = parseValgfriBoolean(Domenebegrep.SKAL_BEHANLDES_AUTOMATISK, rad) ?: false
+        val behandlingKategori =
+            parseValgfriEnum<BehandlingKategori>(Domenebegrep.BEHANDLINGSKATEGORI, rad)
+                ?: BehandlingKategori.NASJONAL
+        val status = parseValgfriEnum<BehandlingStatus>(Domenebegrep.BEHANDLINGSSTATUS, rad)
+        val behandlingstype = parseValgfriEnum<BehandlingType>(Domenebegrep.BEHANDLINGSTYPE, rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING
+        val behandlingssteg = parseValgfriEnum<StegType>(Domenebegrep.BEHANDLINGSSTEG, rad) ?: StegType.REGISTRERE_PERSONGRUNNLAG
+        val underkategori = parseValgfriEnum<BehandlingUnderkategori>(Domenebegrep.UNDERKATEGORI, rad) ?: BehandlingUnderkategori.ORDINÆR
+
+        lagBehandling(
+            fagsak = fagsak,
+            årsak = behandlingÅrsak ?: BehandlingÅrsak.SØKNAD,
+            resultat = behandlingResultat ?: Behandlingsresultat.IKKE_VURDERT,
+            skalBehandlesAutomatisk = skalBehandlesAutomatisk,
+            behandlingKategori = behandlingKategori,
+            status = status ?: BehandlingStatus.UTREDES,
+            behandlingType = behandlingstype,
+            førsteSteg = behandlingssteg,
+            underkategori = underkategori,
+        ).copy(id = behandlingId)
+    }
 
 fun lagVilkårsvurdering(
     persongrunnlagForBehandling: PersonopplysningGrunnlag,

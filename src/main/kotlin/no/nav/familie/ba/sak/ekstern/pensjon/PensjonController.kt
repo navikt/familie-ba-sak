@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import jakarta.validation.Valid
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -75,6 +76,7 @@ class PensjonController(private val pensjonService: PensjonService) {
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun hentBarnetrygd(
+        @Valid
         @RequestBody
         request: BarnetrygdTilPensjonRequest,
     ): ResponseEntity<BarnetrygdTilPensjonResponse> {

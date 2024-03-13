@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.Pattern
+import no.nav.familie.ba.sak.common.PERSONIDENT_IKKE_GYLDIG_FEILMELDING
+import no.nav.familie.ba.sak.common.PERSONIDENT_REGEX
 import java.time.LocalDate
 import java.time.YearMonth
 
 data class BarnetrygdTilPensjonRequest(
+    @field:Pattern(regexp = PERSONIDENT_REGEX, message = PERSONIDENT_IKKE_GYLDIG_FEILMELDING)
     val ident: String,
     @Schema(implementation = String::class, example = "2020-12-01")
     val fraDato: LocalDate,

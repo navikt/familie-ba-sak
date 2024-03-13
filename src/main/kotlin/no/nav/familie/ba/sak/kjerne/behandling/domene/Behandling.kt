@@ -194,7 +194,7 @@ data class Behandling(
             skalBehandlesAutomatisk && erMigrering() && !erManuellMigreringForEndreMigreringsdato() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() -> true
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
-            skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID
+            skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == Behandlingsresultat.FORTSATT_INNVILGET
             -> true
             else -> false
         }
@@ -367,6 +367,7 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     MIGRERING("Migrering"),
     ENDRE_MIGRERINGSDATO("Endre migreringsdato"),
     HELMANUELL_MIGRERING("Manuell migrering"),
+    MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
     ;
 
     fun erOmregningsårsak(): Boolean =
