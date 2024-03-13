@@ -8,7 +8,7 @@ import java.time.YearMonth
 
 class MånedligValutajusteringFinnFagsakerTaskTest {
     @Test
-    fun `erBehandlingSekundærlandIMåned skal bli true om vi har sekundærland i justeringsmåned`() {
+    fun `erSekundærlandIMåned skal bli true om vi har sekundærland i justeringsmåned`() {
         val justeringsmåned = YearMonth.now()
 
         val kompetanser =
@@ -20,13 +20,13 @@ class MånedligValutajusteringFinnFagsakerTaskTest {
                 ),
             )
 
-        val erBehandlingSekundærlandIMåned = MånedligValutajusteringFinnFagsakerTask.erBehandlingSekundærlandIMåned(kompetanser, justeringsmåned)
+        val erSekundærlandIMåned = MånedligValutajusteringFinnFagsakerTask.erSekundærlandIMåned(kompetanser, justeringsmåned)
 
-        assertThat(erBehandlingSekundærlandIMåned).isTrue()
+        assertThat(erSekundærlandIMåned).isTrue()
     }
 
     @Test
-    fun `erBehandlingSekundærlandIMåned skal bli false om vi ikke har sekundærland i justeringsmåned`() {
+    fun `erSekundærlandIMåned skal bli false om vi ikke har sekundærland i justeringsmåned`() {
         val justeringsmåned = YearMonth.now()
 
         val kompetanser =
@@ -38,8 +38,8 @@ class MånedligValutajusteringFinnFagsakerTaskTest {
                 ),
             )
 
-        val erBehandlingSekundærlandIMåned = MånedligValutajusteringFinnFagsakerTask.erBehandlingSekundærlandIMåned(kompetanser, justeringsmåned)
+        val erSekundærlandIMåned = MånedligValutajusteringFinnFagsakerTask.erSekundærlandIMåned(kompetanser, justeringsmåned)
 
-        assertThat(erBehandlingSekundærlandIMåned).isFalse()
+        assertThat(erSekundærlandIMåned).isFalse()
     }
 }

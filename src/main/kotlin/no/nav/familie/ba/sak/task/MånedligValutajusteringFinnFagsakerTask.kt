@@ -45,7 +45,7 @@ class MånedligValutajusteringFinnFagsakerTask(
             // check if behandling is eøs sekundærland
             val kompetanserPåBehandling = kompetanseService.hentKompetanser(BehandlingId(behandlingid))
             val erSekundærland =
-                erBehandlingSekundærlandIMåned(kompetanserPåBehandling, data.måned)
+                erSekundærlandIMåned(kompetanserPåBehandling, data.måned)
 
             if (erSekundærland) {
                 taskRepository.save(lagMånedligValutajusteringTask(behandlingid, data.måned))
@@ -81,7 +81,7 @@ class MånedligValutajusteringFinnFagsakerTask(
                 payload = objectMapper.writeValueAsString(MånedligValutajusteringFinnFagsakerTaskDto(inneværendeMåned)),
             )
 
-        fun erBehandlingSekundærlandIMåned(
+        fun erSekundærlandIMåned(
             kompetanser: Collection<Kompetanse>,
             yearMonth: YearMonth,
         ) = kompetanser.filter { (it.fom ?: TIDENES_MORGEN.toYearMonth()).isSameOrBefore(yearMonth) && (it.tom ?: TIDENES_ENDE.toYearMonth()).isSameOrAfter(yearMonth) }
