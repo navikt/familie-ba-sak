@@ -124,6 +124,7 @@ class FagsakController(
     fun søkFagsak(
         @RequestBody søkParam: RestSøkParam,
     ): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
+        søkParam.valider()
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} søker fagsak")
 
         val fagsakDeltagere = fagsakService.hentFagsakDeltager(søkParam.personIdent)
@@ -193,6 +194,7 @@ class FagsakController(
     fun oppgiFagsakdeltagere(
         @RequestBody restSøkParam: RestSøkParam,
     ): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
+        restSøkParam.valider()
         return Result.runCatching {
             val aktør = personidentService.hentAktør(restSøkParam.personIdent)
             val barnsAktørId = personidentService.hentAktørIder(restSøkParam.barnasIdenter)
