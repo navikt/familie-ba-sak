@@ -4,7 +4,7 @@ class FeatureToggleConfig {
     companion object {
         // Release
         const val ENDRET_EØS_REGELVERKFILTER_FOR_BARN = "familie-ba-sak.endret-eos-regelverkfilter-for-barn"
-        const val KAN_KJØRE_AUTOMATISK_VALUTTAJUSTERING = "familie-ba-sak.automatisk-valutajustering"
+        const val KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING = "familie-ba-sak.automatisk-valutajustering"
 
         // Operasjonelle
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
