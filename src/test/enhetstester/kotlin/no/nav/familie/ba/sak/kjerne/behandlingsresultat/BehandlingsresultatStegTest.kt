@@ -182,7 +182,7 @@ class BehandlingsresultatStegTest {
     }
 
     @Test
-    fun `skal kaste exception dersom det finnes utenlandsperiodebeløp som ikke er fylt ut`() {
+    fun `skal kaste exception dersom det finnes utenlandskperiodebeløp som ikke er fylt ut`() {
         every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.FORTSATT_INNVILGET
 
         every {
