@@ -77,6 +77,7 @@ class MånedligValutajusteringFinnFagsakerTask(
             Task(
                 type = MånedligValutajusteringFinnFagsakerTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(MånedligValutajusteringFinnFagsakerTaskDto(inneværendeMåned)),
+                mapOf("måned" to inneværendeMåned.toString()).toProperties(),
             )
 
         fun erSekundærlandIMåned(
