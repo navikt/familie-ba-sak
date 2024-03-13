@@ -11,12 +11,12 @@ data class RestSøkParam(
     val personIdent: String,
     val barnasIdenter: List<String> = emptyList(),
 ) {
-    // Bruker init til å validere personidenten
-    init {
+    fun valider() {
         try {
             Fødselsnummer(personIdent)
+            barnasIdenter.forEach { Fødselsnummer(it) }
         } catch (e: IllegalStateException) {
-            throw FunksjonellFeil("Ugyldig personident")
+            throw FunksjonellFeil("Ugyldig fødsels- eller d-nummer")
         }
     }
 }
