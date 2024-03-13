@@ -42,12 +42,12 @@ class MånedligValutajusteringFinnFagsakerTask(
         val relevanteBehandlinger = behandlingService.hentSisteIverksatteEØSBehandlingFraLøpendeFagsaker().toSet().sorted()
         relevanteBehandlinger.forEach { behandlingid ->
             // check if behandling is eøs sekundærland
-            val ersekundærland =
+            val erSekundærland =
                 kompetanseService.hentKompetanser(BehandlingId(behandlingid))
                     .filter { (it.fom ?: TIDENES_MORGEN.toYearMonth()).isSameOrBefore(data.måned) && (it.tom ?: TIDENES_ENDE.toYearMonth()).isSameOrAfter(data.måned) }
                     .any { kompetanse -> kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
 
-            if (ersekundærland) {
+            if (erSekundærland) {
                 taskRepository.save(lagMånedligValutajusteringTask(behandlingid, data.måned))
             }
         }
