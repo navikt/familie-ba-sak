@@ -75,8 +75,7 @@ fun beregnDifferanse(
 fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     barna: List<Person>,
     kompetanser: Collection<Kompetanse>,
-    personResultater: Set<PersonResultat> = emptySet(),
-    skalBrukeUtvidedeRegler: Boolean = false,
+    personResultater: Set<PersonResultat>,
 ): List<AndelTilkjentYtelse> {
     // Ta bort eventuell eksisterende differanseberegning, slik at kalkulertUtbetalingsbeløp er nasjonal sats
     // Men behold funksjonelle splitter som er påført tidligere ved å beholde fom og tom på andelene
@@ -95,14 +94,9 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     // Finn alle andelene frem til barna er 18 år. Det vil i praksis være ALLE andelene
     // Bruk bare andelene som kvalifiserer for differanseberegning mot søkers ytelser
     val barnasRelevanteAndelerInntil18År =
-        when {
-            skalBrukeUtvidedeRegler ->
-                barnasAndelerTidslinjer
-                    .filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
-                    .kunReneSekundærlandsperioder(kompetanser)
-
-            else -> barnasAndelerTidslinjer.kunReneSekundærlandsperioder(kompetanser)
-        }
+        barnasAndelerTidslinjer
+            .filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
+            .kunReneSekundærlandsperioder(kompetanser)
 
     // Lag tidslinjer for hvert barn som inneholder underskuddet fra differanseberegningen på ordinær barnetrygd.
     // Resultatet er tidslinjer med underskuddet som positivt beløp der det inntreffer
@@ -140,15 +134,10 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     // Bruk bare andelene som kvalifiserer for differanseberegning mot søkers ytelser
     // Må ta utgangspunkt i alle andeler for være sikker på at vi vurderer sekundærlandsperioder bare når barna er inntil 3 år
     val barnasRelevanteAndelerInntil3ÅrTidslinjer =
-        when {
-            skalBrukeUtvidedeRegler ->
-                barnasAndelerTidslinjer
-                    .kunAndelerTilOgMed3År(barna)
-                    .filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
-                    .kunReneSekundærlandsperioder(kompetanser)
-
-            else -> barnasAndelerTidslinjer.kunAndelerTilOgMed3År(barna).kunReneSekundærlandsperioder(kompetanser)
-        }
+        barnasAndelerTidslinjer
+            .kunAndelerTilOgMed3År(barna)
+            .filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
+            .kunReneSekundærlandsperioder(kompetanser)
 
     // Vi finner hvor mye hvert barn skal ha som andel av småbarnstillegget på hvert tidspunkt.
     // Det tilsvarer småbarnstillegget på et gitt tidspunkt delt på antall relevante barn under 3 år som har ytelse på det tidspunktet
