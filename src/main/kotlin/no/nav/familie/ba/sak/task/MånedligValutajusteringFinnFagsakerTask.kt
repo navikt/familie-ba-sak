@@ -33,6 +33,10 @@ class MånedligValutajusteringFinnFagsakerTask(
     val kompetanseService: KompetanseService,
     val taskRepository: TaskRepositoryWrapper,
 ) : AsyncTaskStep {
+    data class MånedligValutajusteringFinnFagsakerTaskDto(
+        val måned: YearMonth,
+    )
+
     override fun doTask(task: Task) {
         val data = objectMapper.readValue(task.payload, MånedligValutajusteringFinnFagsakerTaskDto::class.java)
 
@@ -64,10 +68,6 @@ class MånedligValutajusteringFinnFagsakerTask(
                     "måned" to valutajusteringsMåned.toString(),
                 ).toProperties(),
         )
-
-    data class MånedligValutajusteringFinnFagsakerTaskDto(
-        val måned: YearMonth,
-    )
 
     companion object {
         const val TASK_STEP_TYPE = "månedligvalutajuteringfinnfagsaker"
