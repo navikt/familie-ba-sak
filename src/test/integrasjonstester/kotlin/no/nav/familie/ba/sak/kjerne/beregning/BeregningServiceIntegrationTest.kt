@@ -54,6 +54,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -652,6 +653,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
     }
 
     @Test
+    @Transactional
     fun `genererTilkjentYtelseFraVilkårsvurdering - skal trigge differanseberegning`() {
         val søker = personidentService.hentOgLagreAktør(randomFnr(), true)
         val barn = personidentService.hentOgLagreAktør(randomFnr(), true)
