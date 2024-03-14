@@ -197,7 +197,7 @@ class BehandlingsresultatStegTest {
 
         val exception = assertThrows<FunksjonellFeil> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
         assertEquals(
-            "Kan ikke fullføre behandlingsresultat-steg før utenlandsk periodebeløp og valutakurs er fylt ut for alle barn og perioder",
+            "Kan ikke fullføre behandlingsresultat-steg før utbetalt i det andre landet og valutakurs er fylt ut for alle barn og perioder",
             exception.message,
         )
     }
@@ -218,7 +218,7 @@ class BehandlingsresultatStegTest {
 
         val exception = assertThrows<FunksjonellFeil> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
         assertEquals(
-            "Kan ikke fullføre behandlingsresultat-steg før utenlandsk periodebeløp og valutakurs er fylt ut for alle barn og perioder",
+            "Kan ikke fullføre behandlingsresultat-steg før utbetalt i det andre landet og valutakurs er fylt ut for alle barn og perioder",
             exception.message,
         )
     }
