@@ -659,7 +659,15 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val barn = personidentService.hentOgLagreAktør(randomFnr(), true)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktivFødselsnummer())
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(behandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS, skalBehandlesAutomatisk = true))
+        val behandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                behandling =
+                    lagBehandling(
+                        fagsak = fagsak,
+                        behandlingKategori = BehandlingKategori.EØS,
+                        skalBehandlesAutomatisk = true,
+                    ),
+            )
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -673,17 +681,61 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             Vilkårsvurdering(id = 0, behandling = behandling, aktiv = true).also {
                 it.personResultater =
                     setOf(
-                        lagPersonResultat(vilkårsvurdering = it, person = personopplysningGrunnlag.søker, resultat = Resultat.OPPFYLT, periodeFom = LocalDate.now().minusMonths(4), periodeTom = LocalDate.now(), lagFullstendigVilkårResultat = true, personType = PersonType.SØKER),
-                        lagPersonResultat(vilkårsvurdering = it, person = personopplysningGrunnlag.barna.first(), resultat = Resultat.OPPFYLT, periodeFom = LocalDate.now().minusMonths(4), periodeTom = LocalDate.now(), lagFullstendigVilkårResultat = true, personType = PersonType.BARN),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            person = personopplysningGrunnlag.søker,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.now().minusMonths(4),
+                            periodeTom = LocalDate.now(),
+                            lagFullstendigVilkårResultat = true,
+                            personType = PersonType.SØKER,
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            person = personopplysningGrunnlag.barna.first(),
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.now().minusMonths(4),
+                            periodeTom = LocalDate.now(),
+                            lagFullstendigVilkårResultat = true,
+                            personType = PersonType.BARN,
+                        ),
                     )
             }
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
-        val kompetanse = lagKompetanse(behandlingId = behandling.id, fom = LocalDate.now().minusMonths(4).toYearMonth(), barnAktører = setOf(barn), søkersAktivitet = KompetanseAktivitet.ARBEIDER, annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER, annenForeldersAktivitetsland = "Sverige", søkersAktivitetsland = "Norge", barnetsBostedsland = "Norge", kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND)
-        val utenlandskPeriodebeløp = lagUtenlandskPeriodebeløp(behandlingId = behandling.id, fom = LocalDate.now().minusMonths(4).toYearMonth(), barnAktører = setOf(barn), beløp = BigDecimal.valueOf(1000), intervall = Intervall.MÅNEDLIG, valutakode = "SEK", utbetalingsland = "Sverige")
-        val valutakurs = lagValutakurs(behandlingId = behandling.id, fom = LocalDate.now().minusMonths(4).toYearMonth(), barnAktører = setOf(barn), valutakursdato = LocalDate.now(), valutakode = "SEK", kurs = BigDecimal.valueOf(1.1))
+        val kompetanseNorgeErSekundærland =
+            lagKompetanse(
+                behandlingId = behandling.id,
+                fom = LocalDate.now().minusMonths(4).toYearMonth(),
+                barnAktører = setOf(barn),
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
+                annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER,
+                annenForeldersAktivitetsland = "Sverige",
+                søkersAktivitetsland = "Norge",
+                barnetsBostedsland = "Norge",
+                kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
+            )
+        val utenlandskPeriodebeløp =
+            lagUtenlandskPeriodebeløp(
+                behandlingId = behandling.id,
+                fom = LocalDate.now().minusMonths(4).toYearMonth(),
+                barnAktører = setOf(barn),
+                beløp = BigDecimal.valueOf(1000),
+                intervall = Intervall.MÅNEDLIG,
+                valutakode = "SEK",
+                utbetalingsland = "Sverige",
+            )
+        val valutakurs =
+            lagValutakurs(
+                behandlingId = behandling.id,
+                fom = LocalDate.now().minusMonths(4).toYearMonth(),
+                barnAktører = setOf(barn),
+                valutakursdato = LocalDate.now(),
+                valutakode = "SEK",
+                kurs = BigDecimal.valueOf(1.1),
+            )
 
-        kompetanseRepository.save(kompetanse)
+        kompetanseRepository.save(kompetanseNorgeErSekundærland)
         utenlandskPeriodebeløpRepository.save(utenlandskPeriodebeløp)
         valutakursRepository.save(valutakurs)
 
