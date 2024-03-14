@@ -224,7 +224,7 @@ class BehandlingsresultatSteg(
         val valutakurser by lazy { valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id) }
 
         if (utenlandskePeriodeBeløp.any { !it.erObligatoriskeFelterSatt() } || valutakurser.any { !it.erObligatoriskeFelterSatt() }) {
-            throw FunksjonellFeil("Kan ikke fullføre behandlingsresultat-steg før utenlandsk periodebeløp og valutakurs er fylt ut for alle barn og perioder")
+            throw FunksjonellFeil("Kan ikke fullføre behandlingsresultat-steg før utbetalt i det andre landet og valutakurs er fylt ut for alle barn og perioder")
         }
     }
 
