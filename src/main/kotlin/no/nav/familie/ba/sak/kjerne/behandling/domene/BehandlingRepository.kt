@@ -70,6 +70,20 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Long>
 
     @Query(
+        value = """SELECT DISTINCT ON (b.fk_fagsak_id) b.id
+                    FROM behandling b
+                           INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                           INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+                    WHERE f.status = 'LØPENDE'
+                      AND ty.utbetalingsoppdrag IS NOT NULL
+                      AND f.arkivert = false
+                      AND b.kategori = 'EØS'
+                    ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC""",
+        nativeQuery = true,
+    )
+    fun finnSisteIverksatteEØSBehandlingFraLøpendeFagsaker(): List<Long>
+
+    @Query(
         """select b from Behandling b
                            inner join TilkjentYtelse ty on b.id = ty.behandling.id
                         where b.fagsak.id = :fagsakId AND ty.utbetalingsoppdrag IS NOT NULL""",

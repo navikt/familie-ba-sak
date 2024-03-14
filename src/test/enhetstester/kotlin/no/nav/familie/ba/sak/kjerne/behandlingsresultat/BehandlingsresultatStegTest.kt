@@ -14,7 +14,9 @@ import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilPersonEnkel
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -29,6 +31,11 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagUtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -53,6 +60,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 
 class BehandlingsresultatStegTest {
@@ -83,6 +91,10 @@ class BehandlingsresultatStegTest {
 
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
 
+    private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository = mockk()
+
+    private val valutakursRepository: ValutakursRepository = mockk()
+
     @BeforeEach
     fun init() {
         behandlingsresultatSteg =
@@ -98,6 +110,8 @@ class BehandlingsresultatStegTest {
                 beregningService,
                 andelerTilkjentYtelseOgEndreteUtbetalingerService,
                 andelTilkjentYtelseRepository,
+                utenlandskPeriodebeløpRepository,
+                valutakursRepository,
             )
 
         behandling =
@@ -165,6 +179,73 @@ class BehandlingsresultatStegTest {
                 "Meld sak i Porten om du er uenig i resultatet.",
             exception.message,
         )
+    }
+
+    @Test
+    fun `skal kaste exception dersom det finnes utenlandskperiodebeløp som ikke er fylt ut`() {
+        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.FORTSATT_INNVILGET
+
+        every {
+            behandlingService.oppdaterBehandlingsresultat(
+                any(),
+                any(),
+            )
+        } returns behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
+
+        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } returns listOf(lagUtenlandskPeriodebeløp())
+        every { valutakursRepository.finnFraBehandlingId(any()) } returns listOf(lagValutakurs())
+
+        val exception = assertThrows<FunksjonellFeil> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
+        assertEquals(
+            "Kan ikke fullføre behandlingsresultat-steg før utbetalt i det andre landet og valutakurs er fylt ut for alle barn og perioder",
+            exception.message,
+        )
+    }
+
+    @Test
+    fun `skal kaste exception dersom det finnes valutakurser som ikke er fylt ut`() {
+        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.FORTSATT_INNVILGET
+
+        every {
+            behandlingService.oppdaterBehandlingsresultat(
+                any(),
+                any(),
+            )
+        } returns behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
+
+        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } returns listOf(lagUtenlandskPeriodebeløp(fom = LocalDate.now().toYearMonth(), beløp = BigDecimal.valueOf(100), intervall = Intervall.MÅNEDLIG, valutakode = "SEK", utbetalingsland = "S", barnAktører = setOf(randomAktør())))
+        every { valutakursRepository.finnFraBehandlingId(any()) } returns listOf(lagValutakurs())
+
+        val exception = assertThrows<FunksjonellFeil> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
+        assertEquals(
+            "Kan ikke fullføre behandlingsresultat-steg før utbetalt i det andre landet og valutakurs er fylt ut for alle barn og perioder",
+            exception.message,
+        )
+    }
+
+    @Test
+    fun `skal ikke kaste exception dersom upb og valutakurser er utfylt`() {
+        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.FORTSATT_INNVILGET
+
+        every {
+            behandlingService.oppdaterBehandlingsresultat(
+                any(),
+                any(),
+            )
+        } returns behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
+
+        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } returns listOf(lagUtenlandskPeriodebeløp(fom = LocalDate.now().toYearMonth(), beløp = BigDecimal.valueOf(100), intervall = Intervall.MÅNEDLIG, valutakode = "SEK", utbetalingsland = "S", barnAktører = setOf(randomAktør())))
+        every { valutakursRepository.finnFraBehandlingId(any()) } returns listOf(lagValutakurs(fom = LocalDate.now().toYearMonth(), valutakode = "SEK", valutakursdato = LocalDate.now(), kurs = BigDecimal.valueOf(1.2), barnAktører = setOf(randomAktør())))
+
+        every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(any()) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns lagBehandling()
+
+        every { beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(any(), any()) } returns true
+
+        every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns lagBehandling()
+
+        assertDoesNotThrow { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
     }
 
     @Test

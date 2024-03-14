@@ -259,6 +259,8 @@ fun mockAutovedtakSmåbarnstilleggService(
             beregningService = beregningService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            valutakursRepository = valutakursRepository,
         )
 
     val registrerPersongrunnlag =
