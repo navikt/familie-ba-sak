@@ -41,13 +41,25 @@ import no.nav.familie.ba.sak.kjerne.brev.DokumentGenereringService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterTilkjentYtelseService
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningSøkersYtelserService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilbakestillBehandlingFraKompetanseEndringService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilbakestillBehandlingFraValutakursEndringService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassUtenlandskePeriodebeløpTilKompetanserService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -101,7 +113,6 @@ class CucumberMock(
     val personopplysningerService = mockPersonopplysningerService(dataFraCucumber)
     val tilgangService = mockTilgangService()
     val vilkårsvurderingForNyBehandlingService = mockVilkårsvurderingForNyBehandlingService(dataFraCucumber)
-    val eøsSkjemaerForNyBehandlingService = mockEøsSkjemaerForNyBehandlingService()
     val vilkårService = mockVilkårService(dataFraCucumber)
     val tilbakestillBehandlingService = mockTilbakestillBehandlingService()
     val personopplysningGrunnlagRepository = mockPersonopplysningGrunnlagRepository(dataFraCucumber.persongrunnlag)
@@ -119,13 +130,12 @@ class CucumberMock(
     val tilpassKompetanserTilRegelverkService = mockTilpassKompetanserTilRegelverkService()
     val søknadGrunnlagService = mockSøknadGrunnlagService(dataFraCucumber)
     val endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService(dataFraCucumber)
-    val kompetanseService = mockKompetanseService(dataFraCucumber)
     val vedtakRepository = mockVedtakRepository(dataFraCucumber)
     val dokumentGenereringService = mockDokumentGenereringService()
     val vedtaksperiodeHentOgPersisterService = mockVedtaksperiodeHentOgPersisterService(dataFraCucumber)
     val kompetanseRepository = mockKompetanseRepository(dataFraCucumber)
-    val valutakursRepository = mockValutakursRepository()
-    val utenlandskPeriodebeløpRepository = mockUtenlandskPeriodebeløpRepository()
+    val valutakursRepository = mockValutakursRepository(dataFraCucumber)
+    val utenlandskPeriodebeløpRepository = mockUtenlandskPeriodebeløpRepository(dataFraCucumber)
     val endretUtbetalingAndelRepository = mockEndretUtbetalingAndelRepository(dataFraCucumber)
     val simuleringService = mockSimuleringService()
     val totrinnskontrollService = mockTotrinnskontrollService()
@@ -199,19 +209,6 @@ class CucumberMock(
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
         )
 
-    val behandlingsresultatService =
-        BehandlingsresultatService(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            søknadGrunnlagService = søknadGrunnlagService,
-            personidentService = personidentService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
-            kompetanseService = kompetanseService,
-            localDateProvider = MockedDateProvider(dataFraCucumber.dagensDato),
-        )
-
     val vedtakService =
         VedtakService(
             vedtakRepository = vedtakRepository,
@@ -259,6 +256,67 @@ class CucumberMock(
             vilkårsvurderingService = vilkårsvurderingService,
         )
 
+    val tilbakestillBehandlingTilBehandlingsresultatService =
+        TilbakestillBehandlingTilBehandlingsresultatService(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingService = behandlingService,
+            vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
+            vedtakRepository = vedtakRepository,
+            tilbakekrevingService = tilbakekrevingService,
+        )
+
+    val tilpassDifferanseberegningEtterValutakursService = TilpassDifferanseberegningEtterValutakursService(utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository, tilkjentYtelseRepository = tilkjentYtelseRepository, barnasDifferanseberegningEndretAbonnenter = listOf(tilpassDifferanseberegningSøkersYtelserService))
+    val tilbakestillBehandlingFraValutakursEndringService = TilbakestillBehandlingFraValutakursEndringService(tilbakestillBehandlingTilBehandlingsresultatService = tilbakestillBehandlingTilBehandlingsresultatService)
+
+    val valutakursAbonnenter = listOf(tilpassDifferanseberegningEtterValutakursService, tilbakestillBehandlingFraValutakursEndringService)
+
+    val tilpassValutakurserTilUtenlandskePeriodebeløpService = TilpassValutakurserTilUtenlandskePeriodebeløpService(valutakursRepository = valutakursRepository, utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository, endringsabonnenter = valutakursAbonnenter)
+
+    val tilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService = TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService(tilbakestillBehandlingTilBehandlingsresultatService = tilbakestillBehandlingTilBehandlingsresultatService)
+
+    val tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService = TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(valutakursRepository = valutakursRepository, tilkjentYtelseRepository = tilkjentYtelseRepository, barnasDifferanseberegningEndretAbonnenter = listOf(tilpassDifferanseberegningSøkersYtelserService))
+
+    val utenlandskPeriodebeløpEndretAbonnenter =
+        listOf(
+            tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService,
+            tilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService,
+            tilpassValutakurserTilUtenlandskePeriodebeløpService,
+        )
+
+    val utenlandskPeriodebeløpService =
+        UtenlandskPeriodebeløpService(
+            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            endringsabonnenter = utenlandskPeriodebeløpEndretAbonnenter,
+        )
+
+    val tilbakestillBehandlingFraKompetanseEndringService = TilbakestillBehandlingFraKompetanseEndringService(tilbakestillBehandlingTilBehandlingsresultatService)
+
+    val tilpassUtenlandskePeriodebeløpTilKompetanserService =
+        TilpassUtenlandskePeriodebeløpTilKompetanserService(
+            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            endringsabonnenter = utenlandskPeriodebeløpEndretAbonnenter,
+            kompetanseRepository = kompetanseRepository,
+        )
+
+    val kompetanseService = KompetanseService(kompetanseRepository, endringsabonnenter = listOf(tilpassUtenlandskePeriodebeløpTilKompetanserService, tilbakestillBehandlingFraKompetanseEndringService))
+
+    val valutakursService = ValutakursService(valutakursRepository = valutakursRepository, endringsabonnenter = valutakursAbonnenter)
+
+    val eøsSkjemaerForNyBehandlingService = EøsSkjemaerForNyBehandlingService(kompetanseService = kompetanseService, utenlandskPeriodebeløpService = utenlandskPeriodebeløpService, valutakursService = valutakursService)
+
+    val behandlingsresultatService =
+        BehandlingsresultatService(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            søknadGrunnlagService = søknadGrunnlagService,
+            personidentService = personidentService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
+            kompetanseService = kompetanseService,
+            localDateProvider = MockedDateProvider(dataFraCucumber.dagensDato),
+        )
+
     val behandlingsresultatSteg =
         BehandlingsresultatSteg(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -301,14 +359,6 @@ class CucumberMock(
             ),
         )
 
-    val tilbakestillBehandlingTilBehandlingsresultatService =
-        TilbakestillBehandlingTilBehandlingsresultatService(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            behandlingService = behandlingService,
-            vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
-            vedtakRepository = vedtakRepository,
-            tilbakekrevingService = tilbakekrevingService,
-        )
     val autovedtakService =
         AutovedtakService(
             stegService = stegService,
@@ -481,19 +531,48 @@ private fun mockEndretUtbetalingAndelRepository(dataFraCucumber: BegrunnelseTeks
     return endretUtbetalingAndelRepository
 }
 
-private fun mockUtenlandskPeriodebeløpRepository(): UtenlandskPeriodebeløpRepository {
+private fun mockUtenlandskPeriodebeløpRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): UtenlandskPeriodebeløpRepository {
     val utenlandskPeriodebeløpRepository = mockk<UtenlandskPeriodebeløpRepository>()
     every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } answers {
-        emptyList()
+        val behandlingId = firstArg<Long>()
+        dataFraCucumber.utenlandskPeriodebeløp[behandlingId] ?: emptyList()
+    }
+    every { utenlandskPeriodebeløpRepository.deleteAll(any<Iterable<UtenlandskPeriodebeløp>>()) } answers {
+        val utenlandskPeriodebeløp = firstArg<Iterable<UtenlandskPeriodebeløp>>()
+        utenlandskPeriodebeløp.forEach {
+            dataFraCucumber.utenlandskPeriodebeløp[it.behandlingId] = dataFraCucumber.utenlandskPeriodebeløp[it.behandlingId]?.filter { utenlandskPeriodebeløp -> utenlandskPeriodebeløp != it } ?: emptyList()
+        }
+    }
+    every { utenlandskPeriodebeløpRepository.saveAll(any<Iterable<UtenlandskPeriodebeløp>>()) } answers {
+        val utenlandskPeriodebeløp = firstArg<Iterable<UtenlandskPeriodebeløp>>()
+        utenlandskPeriodebeløp.forEach {
+            dataFraCucumber.utenlandskPeriodebeløp[it.behandlingId] = (dataFraCucumber.utenlandskPeriodebeløp[it.behandlingId] ?: emptyList()) + it
+        }
+        utenlandskPeriodebeløp.toList()
     }
     return utenlandskPeriodebeløpRepository
 }
 
-private fun mockValutakursRepository(): ValutakursRepository {
+private fun mockValutakursRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): ValutakursRepository {
     val valutakursRepository = mockk<ValutakursRepository>()
     every { valutakursRepository.finnFraBehandlingId(any()) } answers {
-        emptyList()
+        val behandlingId = firstArg<Long>()
+        dataFraCucumber.valutakurs[behandlingId] ?: emptyList()
     }
+    every { valutakursRepository.deleteAll(any<Iterable<Valutakurs>>()) } answers {
+        val valutakurser = firstArg<Iterable<Valutakurs>>()
+        valutakurser.forEach {
+            dataFraCucumber.valutakurs[it.behandlingId] = dataFraCucumber.valutakurs[it.behandlingId]?.filter { valutakurs -> valutakurs != it } ?: emptyList()
+        }
+    }
+    every { valutakursRepository.saveAll(any<Iterable<Valutakurs>>()) } answers {
+        val valutakurser = firstArg<Iterable<Valutakurs>>()
+        valutakurser.forEach {
+            dataFraCucumber.valutakurs[it.behandlingId] = (dataFraCucumber.valutakurs[it.behandlingId] ?: emptyList()) + it
+        }
+        valutakurser.toList()
+    }
+
     return valutakursRepository
 }
 
@@ -502,6 +581,19 @@ private fun mockKompetanseRepository(dataFraCucumber: BegrunnelseTeksterStepDefi
     every { kompetanseRepository.finnFraBehandlingId(any()) } answers {
         val behandlingId = firstArg<Long>()
         dataFraCucumber.kompetanser[behandlingId] ?: emptyList()
+    }
+    every { kompetanseRepository.deleteAll(any<Iterable<Kompetanse>>()) } answers {
+        val kompetanser = firstArg<Iterable<Kompetanse>>()
+        kompetanser.forEach {
+            dataFraCucumber.kompetanser[it.behandlingId] = dataFraCucumber.kompetanser[it.behandlingId]?.filter { kompetanse -> kompetanse != it } ?: emptyList()
+        }
+    }
+    every { kompetanseRepository.saveAll(any<Iterable<Kompetanse>>()) } answers {
+        val kompetanser = firstArg<Iterable<Kompetanse>>()
+        kompetanser.forEach {
+            dataFraCucumber.kompetanser[it.behandlingId] = (dataFraCucumber.kompetanser[it.behandlingId] ?: emptyList()) + it
+        }
+        kompetanser.toMutableList()
     }
     return kompetanseRepository
 }
@@ -730,6 +822,11 @@ private fun mockTilkjentYtelseRepository(dataFraCucumber: BegrunnelseTeksterStep
     }
     every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just runs
     every { tilkjentYtelseRepository.save(any()) } answers {
+        val tilkjentYtelse = firstArg<TilkjentYtelse>()
+        dataFraCucumber.andelerTilkjentYtelse[tilkjentYtelse.behandling.id] = tilkjentYtelse.andelerTilkjentYtelse.toList()
+        tilkjentYtelse
+    }
+    every { tilkjentYtelseRepository.saveAndFlush(any()) } answers {
         val tilkjentYtelse = firstArg<TilkjentYtelse>()
         dataFraCucumber.andelerTilkjentYtelse[tilkjentYtelse.behandling.id] = tilkjentYtelse.andelerTilkjentYtelse.toList()
         tilkjentYtelse
