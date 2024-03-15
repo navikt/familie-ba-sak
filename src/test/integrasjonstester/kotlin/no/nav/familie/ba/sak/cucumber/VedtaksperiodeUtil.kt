@@ -52,6 +52,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
@@ -89,6 +90,7 @@ fun lagFagsaker(dataTable: DataTable) =
             id = parseLong(Domenebegrep.FAGSAK_ID, rad),
             type = parseValgfriEnum<FagsakType>(Domenebegrep.FAGSAK_TYPE, rad) ?: FagsakType.NORMAL,
             aktør = randomAktør(),
+            status = parseValgfriEnum<FagsakStatus>(Domenebegrep.STATUS, rad) ?: FagsakStatus.OPPRETTET,
         )
     }.associateBy { it.id }.toMutableMap()
 

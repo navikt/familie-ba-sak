@@ -8,13 +8,16 @@ import io.cucumber.java.no.Så
 import mockAutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilddMMyyyy
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
+import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
@@ -81,7 +84,7 @@ class BegrunnelseTeksterStepDefinition {
     var søknadstidspunkt: LocalDate? = null
 
     /**
-     * Mulige verdier: | FagsakId | Fagsaktype |
+     * Mulige verdier: | FagsakId | Fagsaktype | Status |
      */
     @Gitt("følgende fagsaker for begrunnelse")
     fun `følgende fagsaker for begrunnelse`(dataTable: DataTable) {
@@ -515,6 +518,22 @@ class BegrunnelseTeksterStepDefinition {
         forventedeBehandlinger.forEach {
             assertThat(behandlinger[it.id].toString()).isEqualTo(it.toString())
         }
+    }
+
+    @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av automatisk valutajustering")
+    fun `kjør automatisk valutajustering med behandlingsid på fagsak `(
+        nyBehandling: Long,
+        fagsakId: Long,
+    ) {
+        val fagsak = fagsaker[fagsakId]!!
+
+        val forrigeBehandling = behandlinger.values.filter { it.fagsak.id == fagsak.id && it.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.id } ?: error("Finner ikke forrige behandling")
+
+        mockAutovedtakMånedligValutajusteringService(
+            dataFraCucumber = this,
+            fagsak = fagsak,
+            nyBehanldingId = nyBehandling,
+        ).utførMånedligValutajustering(behandlingid = forrigeBehandling.id, måned = dagensDato.toYearMonth())
     }
 }
 

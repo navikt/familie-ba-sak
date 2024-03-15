@@ -40,11 +40,12 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.tilEndretUtbetalingAndelMed
 import no.nav.familie.ba.sak.kjerne.brev.DokumentGenereringService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterTilkjentYtelseService
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningSøkersYtelserService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
@@ -133,6 +134,7 @@ class CucumberMock(
     val arbeidsfordelingService = mockArbeidsfordelingService()
     val behandlingMetrikker = mockBehandlingMetrikker()
     val tilbakekrevingService = mockTilbakekrevingService()
+    val taskRepository = mockTaskRepositoryWrapper()
 
     val behandlingstemaService =
         BehandlingstemaService(
@@ -154,6 +156,23 @@ class CucumberMock(
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
         )
 
+    val tilpassDifferanseberegningSøkersYtelserService =
+        TilpassDifferanseberegningSøkersYtelserService(
+            persongrunnlagService = persongrunnlagService,
+            kompetanseRepository = kompetanseRepository,
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
+            vilkårsvurderingRepository = vilkårsvurderingRepository,
+            unleashService = mockk(),
+        )
+
+    val tilpassDifferanseberegningEtterTilkjentYtelseService =
+        TilpassDifferanseberegningEtterTilkjentYtelseService(
+            valutakursRepository = valutakursRepository,
+            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
+            barnasDifferanseberegningEndretAbonnenter = listOf(tilpassDifferanseberegningSøkersYtelserService),
+        )
+
     val beregningService =
         BeregningService(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
@@ -164,7 +183,7 @@ class CucumberMock(
             behandlingRepository = mockk(),
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             småbarnstilleggService = småbarnstilleggService,
-            tilkjentYtelseEndretAbonnenter = emptyList(),
+            tilkjentYtelseEndretAbonnenter = listOf(tilpassDifferanseberegningEtterTilkjentYtelseService),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
         )
 
@@ -236,7 +255,7 @@ class CucumberMock(
             arbeidsfordelingService = arbeidsfordelingService,
             infotrygdService = mockk<InfotrygdService>(),
             vedtaksperiodeService = vedtaksperiodeService,
-            taskRepository = mockk<TaskRepositoryWrapper>(),
+            taskRepository = taskRepository,
             vilkårsvurderingService = vilkårsvurderingService,
         )
 
@@ -380,6 +399,10 @@ private fun mockPersongrunnlagService(dataFraCucumber: BegrunnelseTeksterStepDef
         val behandlingsId = firstArg<Long>()
         dataFraCucumber.persongrunnlag[behandlingsId]!!
     }
+    every { persongrunnlagService.hentBarna(any<Long>()) } answers {
+        val behandlingsId = firstArg<Long>()
+        dataFraCucumber.persongrunnlag[behandlingsId]!!.barna
+    }
     return persongrunnlagService
 }
 
@@ -474,8 +497,8 @@ private fun mockValutakursRepository(): ValutakursRepository {
     return valutakursRepository
 }
 
-private fun mockKompetanseRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): PeriodeOgBarnSkjemaRepository<Kompetanse> {
-    val kompetanseRepository = mockk<PeriodeOgBarnSkjemaRepository<Kompetanse>>()
+private fun mockKompetanseRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): KompetanseRepository {
+    val kompetanseRepository = mockk<KompetanseRepository>()
     every { kompetanseRepository.finnFraBehandlingId(any()) } answers {
         val behandlingId = firstArg<Long>()
         dataFraCucumber.kompetanser[behandlingId] ?: emptyList()
@@ -800,6 +823,12 @@ private fun mockPersonopplysningGrunnlagRepository(behandlingIdTilPersongrunnlag
         behandlingIdTilPersongrunnlag[behandlingsId] ?: error("Fant ikke personopplysninggrunnlag for behandling $behandlingsId")
     }
     return personopplysningGrunnlagRepository
+}
+
+private fun mockTaskRepositoryWrapper(): TaskRepositoryWrapper {
+    val taskRepositoryWrapper = mockk<TaskRepositoryWrapper>()
+    every { taskRepositoryWrapper.save(any()) } answers { firstArg() }
+    return taskRepositoryWrapper
 }
 
 class MockedDateProvider(val mockedDate: LocalDate) : LocalDateProvider {
