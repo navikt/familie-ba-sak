@@ -57,8 +57,8 @@ Egenskap: Automatisk valutajustering
     Når vi lager automatisk behandling med id 2 på fagsak 1 på grunn av automatisk valutajustering
 
     Så forvent disse behandlingene
-      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus  | Behandlingstype | Behandlingssteg       | Underkategori |
-      | 2            | 1        | 1                   | FORTSATT_INNVILGET   | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | IVERKSETTER_VEDTAK | Revurdering     | IVERKSETT_MOT_OPPDRAG | ORDINÆR       |
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus  | Behandlingstype | Behandlingssteg         | Underkategori |
+      | 2            | 1        | 1                   | FORTSATT_INNVILGET  | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | IVERKSETTER_VEDTAK | Revurdering     | FERDIGSTILLE_BEHANDLING | ORDINÆR       |
 
     # Andelene må endres når vi faktisk oppdaterer valutakursen
     Så forvent følgende andeler tilkjent ytelse for behandling 2

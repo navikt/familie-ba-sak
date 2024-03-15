@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
@@ -18,16 +19,28 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagUtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
@@ -41,6 +54,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -99,6 +114,15 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     private lateinit var localDateProvider: LocalDateProvider
+
+    @Autowired
+    private lateinit var kompetanseRepository: KompetanseRepository
+
+    @Autowired
+    private lateinit var utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository
+
+    @Autowired
+    private lateinit var valutakursRepository: ValutakursRepository
 
     @BeforeEach
     fun førHverTest() {
@@ -626,6 +650,98 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
                 lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING),
             )
+    }
+
+    @Test
+    @Transactional
+    fun `genererTilkjentYtelseFraVilkårsvurdering - skal trigge differanseberegning`() {
+        val søker = personidentService.hentOgLagreAktør(randomFnr(), true)
+        val barn = personidentService.hentOgLagreAktør(randomFnr(), true)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktivFødselsnummer())
+        val behandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                behandling =
+                    lagBehandling(
+                        fagsak = fagsak,
+                        behandlingKategori = BehandlingKategori.EØS,
+                        skalBehandlesAutomatisk = true,
+                    ),
+            )
+
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                søker.aktivFødselsnummer(),
+                listOf(barn.aktivFødselsnummer()),
+            )
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        val vilkårsvurdering =
+            Vilkårsvurdering(id = 0, behandling = behandling, aktiv = true).also {
+                it.personResultater =
+                    setOf(
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            person = personopplysningGrunnlag.søker,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.now().minusMonths(4),
+                            periodeTom = LocalDate.now(),
+                            lagFullstendigVilkårResultat = true,
+                            personType = PersonType.SØKER,
+                        ),
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            person = personopplysningGrunnlag.barna.first(),
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.now().minusMonths(4),
+                            periodeTom = LocalDate.now(),
+                            lagFullstendigVilkårResultat = true,
+                            personType = PersonType.BARN,
+                        ),
+                    )
+            }
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
+
+        val kompetanseNorgeErSekundærland =
+            lagKompetanse(
+                behandlingId = behandling.id,
+                fom = LocalDate.now().minusMonths(4).toYearMonth(),
+                barnAktører = setOf(barn),
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
+                annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER,
+                annenForeldersAktivitetsland = "Sverige",
+                søkersAktivitetsland = "Norge",
+                barnetsBostedsland = "Norge",
+                kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
+            )
+        val utenlandskPeriodebeløp =
+            lagUtenlandskPeriodebeløp(
+                behandlingId = behandling.id,
+                fom = LocalDate.now().minusMonths(4).toYearMonth(),
+                barnAktører = setOf(barn),
+                beløp = BigDecimal.valueOf(1000),
+                intervall = Intervall.MÅNEDLIG,
+                valutakode = "SEK",
+                utbetalingsland = "Sverige",
+            )
+        val valutakurs =
+            lagValutakurs(
+                behandlingId = behandling.id,
+                fom = LocalDate.now().minusMonths(4).toYearMonth(),
+                barnAktører = setOf(barn),
+                valutakursdato = LocalDate.now(),
+                valutakode = "SEK",
+                kurs = BigDecimal.valueOf(1.1),
+            )
+
+        kompetanseRepository.save(kompetanseNorgeErSekundærland)
+        utenlandskPeriodebeløpRepository.save(utenlandskPeriodebeløp)
+        valutakursRepository.save(valutakurs)
+
+        val tilkjentYtelse = beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling = behandling, personopplysningGrunnlag = personopplysningGrunnlag)
+
+        assertThat(tilkjentYtelse.andelerTilkjentYtelse.any { it.differanseberegnetPeriodebeløp != null }).isEqualTo(true)
     }
 
     private fun avsluttOgLagreBehandling(behandling: Behandling) {
