@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -17,10 +19,13 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.error.RekjørSenereException
+import no.nav.familie.util.VirkedagerProvider
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 interface AutovedtakBehandlingService<Behandlingsdata : AutomatiskBehandlingData> {
     fun skalAutovedtakBehandles(behandlingsdata: Behandlingsdata): Boolean
@@ -67,6 +72,7 @@ class AutovedtakStegService(
     private val autovedtakFødselshendelseService: AutovedtakFødselshendelseService,
     private val autovedtakBrevService: AutovedtakBrevService,
     private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
+    private val snikeIKøenService: SnikeIKøenService,
 ) {
     private val antallAutovedtak: Map<Autovedtaktype, Counter> =
         Autovedtaktype.values().associateWith {
@@ -81,36 +87,43 @@ class AutovedtakStegService(
     fun kjørBehandlingFødselshendelse(
         mottakersAktør: Aktør,
         nyBehandlingHendelse: NyBehandlingHendelse,
+        førstegangKjørt: LocalDateTime = LocalDateTime.now(),
     ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = FødselshendelseData(nyBehandlingHendelse),
+            førstegangKjørt = førstegangKjørt,
         )
     }
 
     fun kjørBehandlingOmregning(
         mottakersAktør: Aktør,
         behandlingsdata: OmregningBrevData,
+        førstegangKjørt: LocalDateTime = LocalDateTime.now(),
     ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = behandlingsdata,
+            førstegangKjørt = førstegangKjørt,
         )
     }
 
     fun kjørBehandlingSmåbarnstillegg(
         mottakersAktør: Aktør,
         aktør: Aktør,
+        førstegangKjørt: LocalDateTime = LocalDateTime.now(),
     ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = SmåbarnstilleggData(aktør),
+            førstegangKjørt = førstegangKjørt,
         )
     }
 
     private fun kjørBehandling(
         automatiskBehandlingData: AutomatiskBehandlingData,
         mottakersAktør: Aktør,
+        førstegangKjørt: LocalDateTime,
     ): String {
         secureLoggAutovedtakBehandling(automatiskBehandlingData.type, mottakersAktør, BEHANDLING_STARTER)
         antallAutovedtak[automatiskBehandlingData.type]?.increment()
@@ -135,6 +148,7 @@ class AutovedtakStegService(
                 aktør = mottakersAktør,
                 autovedtaktype = automatiskBehandlingData.type,
                 fagsakId = hentFagsakIdFraBehandlingsdata(automatiskBehandlingData),
+                førstegangKjørt = førstegangKjørt,
             )
         ) {
             secureLoggAutovedtakBehandling(
@@ -175,6 +189,7 @@ class AutovedtakStegService(
         aktør: Aktør,
         autovedtaktype: Autovedtaktype,
         fagsakId: Long?,
+        førstegangKjørt: LocalDateTime,
     ): Boolean {
         val fagsak =
             if (fagsakId != null) {
@@ -185,26 +200,48 @@ class AutovedtakStegService(
         val åpenBehandling =
             fagsak?.let {
                 behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(it.id)
-            }
+            } ?: return false
 
-        return if (åpenBehandling == null) {
-            false
-        } else if (åpenBehandling.status == BehandlingStatus.UTREDES || åpenBehandling.status == BehandlingStatus.FATTER_VEDTAK || åpenBehandling.status == BehandlingStatus.SATT_PÅ_VENT) {
-            antallAutovedtakÅpenBehandling[autovedtaktype]?.increment()
-            oppgaveService.opprettOppgaveForManuellBehandling(
-                behandling = åpenBehandling,
-                begrunnelse = "${autovedtaktype.displayName}: Bruker har åpen behandling",
-                manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
-            )
-            true
-        } else if (åpenBehandling.status == BehandlingStatus.IVERKSETTER_VEDTAK || åpenBehandling.status == BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
-            throw RekjørSenereException(
-                årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen om 1 time",
-                triggerTid = LocalDateTime.now().plusHours(1),
-            )
-        } else {
-            throw Feil("Ikke håndtert feilsituasjon på $åpenBehandling")
+        when (åpenBehandling.status) {
+            BehandlingStatus.UTREDES,
+            BehandlingStatus.SATT_PÅ_VENT,
+            -> {
+                if (snikeIKøenService.kanSnikeForbi(åpenBehandling)) {
+                    snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
+                        åpenBehandling.id,
+                        årsak = autovedtaktype.tilMaskinellVentÅrsak(),
+                    )
+                    return false
+                }
+            }
+            BehandlingStatus.FATTER_VEDTAK -> {
+                if (førstegangKjørt.until(LocalDateTime.now(), ChronoUnit.DAYS) < 7) {
+                    throw RekjørSenereException(
+                        årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen neste virkedag",
+                        triggerTid = VirkedagerProvider.nesteVirkedag(LocalDate.now()).atTime(12, 0),
+                    )
+                }
+            }
+            BehandlingStatus.IVERKSETTER_VEDTAK,
+            BehandlingStatus.SATT_PÅ_MASKINELL_VENT,
+            -> {
+                throw RekjørSenereException(
+                    årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen om 1 time",
+                    triggerTid = LocalDateTime.now().plusHours(1),
+                )
+            }
+            else -> {
+                throw Feil("Ikke håndtert feilsituasjon på $åpenBehandling")
+            }
         }
+
+        antallAutovedtakÅpenBehandling[autovedtaktype]?.increment()
+        oppgaveService.opprettOppgaveForManuellBehandling(
+            behandling = åpenBehandling,
+            begrunnelse = "${autovedtaktype.displayName}: Bruker har åpen behandling",
+            manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
+        )
+        return true
     }
 
     private fun secureLoggAutovedtakBehandling(
@@ -220,3 +257,10 @@ class AutovedtakStegService(
         const val BEHANDLING_FERDIG = "Behandling ferdig"
     }
 }
+
+private fun Autovedtaktype.tilMaskinellVentÅrsak() =
+    when (this) {
+        Autovedtaktype.FØDSELSHENDELSE -> SettPåMaskinellVentÅrsak.FØDSELSHENDELSE
+        Autovedtaktype.OMREGNING_BREV -> SettPåMaskinellVentÅrsak.OMREGNING_6_ELLER_18_ÅR
+        Autovedtaktype.SMÅBARNSTILLEGG -> SettPåMaskinellVentÅrsak.SMÅBARNSTILLEGG
+    }

@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
@@ -24,7 +23,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 
 @Service
 class AutovedtakSatsendringRollbackService(
@@ -32,7 +30,6 @@ class AutovedtakSatsendringRollbackService(
     private val behandlingRepository: BehandlingRepository,
     private val autovedtakService: AutovedtakService,
     private val behandlingService: BehandlingService,
-    private val loggService: LoggService,
     private val snikeIKøenService: SnikeIKøenService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
@@ -111,34 +108,8 @@ class AutovedtakSatsendringRollbackService(
             status != BehandlingStatus.UTREDES && status != BehandlingStatus.SATT_PÅ_VENT ->
                 SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
 
-            kanSnikeIKøen(aktivOgÅpenBehandling) -> SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI
+            snikeIKøenService.kanSnikeForbi(aktivOgÅpenBehandling) -> SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI
             else -> SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT
         }
-    }
-
-    private fun kanSnikeIKøen(aktivOgÅpenBehandling: Behandling): Boolean {
-        val behandlingId = aktivOgÅpenBehandling.id
-        val loggSuffix = "endrer status på behandling til på vent"
-        if (aktivOgÅpenBehandling.status == BehandlingStatus.SATT_PÅ_VENT) {
-            AutovedtakSatsendringService.logger.info("Behandling=$behandlingId er satt på vent av saksbehandler, $loggSuffix")
-            return true
-        }
-        val sisteLogghendelse = loggService.hentLoggForBehandling(behandlingId).maxBy { it.opprettetTidspunkt }
-        val tid4TimerSiden = LocalDateTime.now().minusHours(4)
-        if (aktivOgÅpenBehandling.endretTidspunkt.isAfter(tid4TimerSiden)) {
-            AutovedtakSatsendringService.logger.info(
-                "Behandling=$behandlingId har endretTid=${aktivOgÅpenBehandling.endretTidspunkt} " +
-                    "kan ikke sette behandlingen på maskinell vent",
-            )
-            return false
-        }
-        if (sisteLogghendelse.opprettetTidspunkt.isAfter(tid4TimerSiden)) {
-            AutovedtakSatsendringService.logger.info(
-                "Behandling=$behandlingId siste logginslag er " +
-                    "type=${sisteLogghendelse.type} tid=${sisteLogghendelse.opprettetTidspunkt}, $loggSuffix",
-            )
-            return false
-        }
-        return true
     }
 }

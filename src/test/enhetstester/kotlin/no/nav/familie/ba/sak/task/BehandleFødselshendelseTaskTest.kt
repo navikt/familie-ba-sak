@@ -25,7 +25,7 @@ internal class BehandleFødselshendelseTaskTest {
     @Test
     fun `håndterer syntetisk fødselsnummer`() {
         val autovedtakStegService =
-            mockk<AutovedtakStegService>().apply { every { kjørBehandlingFødselshendelse(any(), any()) } returns "" }
+            mockk<AutovedtakStegService>().apply { every { kjørBehandlingFødselshendelse(any(), any(), any()) } returns "" }
         settOppBehandleFødselshendelseTask(autovedtakStegService).doTask(
             BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(
@@ -37,13 +37,13 @@ internal class BehandleFødselshendelseTaskTest {
                 ),
             ),
         )
-        verify { autovedtakStegService.kjørBehandlingFødselshendelse(any(), any()) }
+        verify { autovedtakStegService.kjørBehandlingFødselshendelse(any(), any(), any()) }
     }
 
     @Test
     fun `håndterer vanlig fødselsnummer`() {
         val autovedtakStegService =
-            mockk<AutovedtakStegService>().apply { every { kjørBehandlingFødselshendelse(any(), any()) } returns "" }
+            mockk<AutovedtakStegService>().apply { every { kjørBehandlingFødselshendelse(any(), any(), any()) } returns "" }
         settOppBehandleFødselshendelseTask(autovedtakStegService).doTask(
             BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(
@@ -55,7 +55,7 @@ internal class BehandleFødselshendelseTaskTest {
                 ),
             ),
         )
-        verify { autovedtakStegService.kjørBehandlingFødselshendelse(any(), any()) }
+        verify { autovedtakStegService.kjørBehandlingFødselshendelse(any(), any(), any()) }
     }
 
     @Test

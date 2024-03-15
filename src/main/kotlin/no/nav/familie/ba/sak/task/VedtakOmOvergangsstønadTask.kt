@@ -31,6 +31,7 @@ class VedtakOmOvergangsstønadTask(
             autovedtakStegService.kjørBehandlingSmåbarnstillegg(
                 mottakersAktør = aktør,
                 aktør = aktør,
+                førstegangKjørt = task.opprettetTid,
             )
         secureLogger.info("Håndterte vedtak om overgangsstønad for person $personIdent:\n$responseFraService")
     }

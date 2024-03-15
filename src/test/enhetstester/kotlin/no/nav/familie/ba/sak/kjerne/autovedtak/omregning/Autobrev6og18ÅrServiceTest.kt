@@ -155,7 +155,7 @@ internal class Autobrev6og18ÅrServiceTest {
         every { stegService.håndterNyBehandling(any()) } returns behandling
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
-        every { autovedtakStegService.kjørBehandlingOmregning(any(), any()) } returns ""
+        every { autovedtakStegService.kjørBehandlingOmregning(any(), any(), any()) } returns ""
 
         assertThat(
             autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO),
@@ -163,6 +163,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         verify(exactly = 1) {
             autovedtakStegService.kjørBehandlingOmregning(
+                any(),
                 any(),
                 any(),
             )
@@ -184,7 +185,7 @@ internal class Autobrev6og18ÅrServiceTest {
         every { stegService.håndterNyBehandling(any()) } returns behandling
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
-        every { autovedtakStegService.kjørBehandlingOmregning(any(), any()) } returns ""
+        every { autovedtakStegService.kjørBehandlingOmregning(any(), any(), any()) } returns ""
 
         assertThat(
             autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO),
@@ -192,6 +193,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         verify(exactly = 1) {
             autovedtakStegService.kjørBehandlingOmregning(
+                any(),
                 any(),
                 any(),
             )

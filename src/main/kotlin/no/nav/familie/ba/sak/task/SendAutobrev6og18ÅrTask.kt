@@ -31,7 +31,8 @@ class SendAutobrev6og18ÅrTask(
             throw Feil("Task for autobrev må kjøres innenfor måneden det skal sjekkes mot.")
         }
 
-        task.metadata["resultat"] = autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevDTO).name
+        task.metadata["resultat"] =
+            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevDTO, task.opprettetTid).name
     }
 
     companion object {
