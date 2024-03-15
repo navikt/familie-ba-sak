@@ -53,6 +53,7 @@ object VedtaksperiodeMedBegrunnelserParser {
         RESULTAT("Resultat"),
         VURDERES_ETTER("Vurderes etter"),
         BELØP("Beløp"),
+        DIFFERANSEBEREGNET_BELØP("Differanseberegnet beløp"),
         SATS("Sats"),
         ER_EKSPLISITT_AVSLAG("Er eksplisitt avslag"),
         ENDRINGSTIDSPUNKT("Endringstidspunkt"),
