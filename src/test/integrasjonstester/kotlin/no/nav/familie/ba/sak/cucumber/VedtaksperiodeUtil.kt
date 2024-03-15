@@ -46,12 +46,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.splittOgSlåSammen
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.konverterBeløpTilMånedlig
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
@@ -89,6 +91,7 @@ fun lagFagsaker(dataTable: DataTable) =
             id = parseLong(Domenebegrep.FAGSAK_ID, rad),
             type = parseValgfriEnum<FagsakType>(Domenebegrep.FAGSAK_TYPE, rad) ?: FagsakType.NORMAL,
             aktør = randomAktør(),
+            status = parseValgfriEnum<FagsakStatus>(Domenebegrep.STATUS, rad) ?: FagsakStatus.OPPRETTET,
         )
     }.associateBy { it.id }.toMutableMap()
 
@@ -330,6 +333,8 @@ fun lagUtenlandskperiodeBeløp(
         val aktørerForValutakurs = VedtaksperiodeMedBegrunnelserParser.parseAktørIdListe(rad)
         val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
 
+        val intervall = parseValgfriEnum<Intervall>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.INTERVALL, rad) ?: Intervall.MÅNEDLIG
+        val beløp = parseBigDecimal(VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.BELØP, rad)
         UtenlandskPeriodebeløp(
             fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
             tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
@@ -338,14 +343,15 @@ fun lagUtenlandskperiodeBeløp(
                     .filter { aktørerForValutakurs.contains(it.aktør.aktørId) }
                     .map { it.aktør }
                     .toSet(),
-            beløp = parseBigDecimal(VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.BELØP, rad),
+            beløp = beløp,
             valutakode =
                 parseValgfriString(
                     VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.VALUTA_KODE,
                     rad,
                 ),
-            intervall = parseValgfriEnum<Intervall>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.INTERVALL, rad),
+            intervall = intervall,
             utbetalingsland = parseValgfriString(VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.UTBETALINGSLAND, rad),
+            kalkulertMånedligBeløp = intervall.konverterBeløpTilMånedlig(beløp),
         ).also { it.behandlingId = behandlingId }
     }.groupBy { it.behandlingId }
         .toMutableMap()
@@ -429,6 +435,12 @@ fun lagAndelerTilkjentYtelse(
     val aktørId = VedtaksperiodeMedBegrunnelserParser.parseAktørId(rad)
     val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
     val beløp = parseInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad)
+    val differanseberegnetBeløp = parseValgfriInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.DIFFERANSEBEREGNET_BELØP, rad)
+    val sats =
+        parseValgfriInt(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.SATS,
+            rad,
+        ) ?: beløp
     lagAndelTilkjentYtelse(
         fom = parseDato(Domenebegrep.FRA_DATO, rad).toYearMonth(),
         tom = parseDato(Domenebegrep.TIL_DATO, rad).toYearMonth(),
@@ -445,11 +457,9 @@ fun lagAndelerTilkjentYtelse(
                 VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT,
                 rad,
             )?.toBigDecimal() ?: BigDecimal(100),
-        sats =
-            parseValgfriInt(
-                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.SATS,
-                rad,
-            ) ?: beløp,
+        sats = sats,
+        differanseberegnetPeriodebeløp = differanseberegnetBeløp,
+        nasjonaltPeriodebeløp = sats,
     )
 }.groupBy { it.behandlingId }
     .toMutableMap()

@@ -105,8 +105,8 @@ private fun lagPersonresultaterTekst(behandling: Behandling?) =
 fun hentTekstForFagsak(behandling: Behandling) =
     """
     Gitt følgende fagsaker for begrunnelse
-      | FagsakId | Fagsaktype |
-      | 1 | ${behandling.fagsak.type} |"""
+      | FagsakId | Fagsaktype | Fagsakstatus |
+      | 1 | ${behandling.fagsak.type} | ${behandling.fagsak.status} |"""
 
 fun hentTekstForBehandlinger(
     behandling: Behandling,
@@ -115,13 +115,13 @@ fun hentTekstForBehandlinger(
     """
 
     Gitt følgende behandling
-      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |${
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |${
         forrigeBehandling?.let {
             """ 
-      | ${it.id} | 1 |           | ${it.resultat} | ${it.opprettetÅrsak} | ${if (it.skalBehandlesAutomatisk) "Ja" else "Nei"} | ${it.kategori} |"""
+      | ${it.id} | 1 |           | ${it.resultat} | ${it.opprettetÅrsak} | ${if (it.skalBehandlesAutomatisk) "Ja" else "Nei"} | ${it.kategori} | ${it.status} |"""
         } ?: ""
     }
-      | ${behandling.id} | 1 | ${forrigeBehandling?.id ?: ""} |${behandling.resultat} | ${behandling.opprettetÅrsak} | ${if (behandling.skalBehandlesAutomatisk) "Ja" else "Nei"} | ${behandling.kategori} |"""
+      | ${behandling.id} | 1 | ${forrigeBehandling?.id ?: ""} |${behandling.resultat} | ${behandling.opprettetÅrsak} | ${if (behandling.skalBehandlesAutomatisk) "Ja" else "Nei"} | ${behandling.kategori} | ${behandling.status} |"""
 
 fun hentTekstForPersongrunnlag(
     persongrunnlag: PersonopplysningGrunnlag,

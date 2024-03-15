@@ -366,7 +366,9 @@ fun hentNesteSteg(
             }
         }
 
-        BehandlingÅrsak.SATSENDRING -> {
+        BehandlingÅrsak.SATSENDRING,
+        BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING,
+        -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
@@ -376,7 +378,7 @@ fun hentNesteSteg(
                     } else if (behandling.kategori == BehandlingKategori.EØS && endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING) {
                         FERDIGSTILLE_BEHANDLING
                     } else {
-                        throw Feil("Satsendringsbehandling har ingen endringer i utbetaling.")
+                        throw Feil("Behandlingen har ingen endringer i utbetaling.")
                     }
 
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
