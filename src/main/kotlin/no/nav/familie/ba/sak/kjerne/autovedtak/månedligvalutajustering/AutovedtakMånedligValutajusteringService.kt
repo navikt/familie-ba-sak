@@ -38,7 +38,7 @@ class AutovedtakMånedligValutajusteringService(
                 fagsakId = sisteVedtatteBehandling.fagsak.id,
             )
 
-        validerViKanUtføreMånedligValutajustering(behandling, sisteVedtatteBehandling)
+        validerAtViKanUtføreMånedligValutajustering(behandling, sisteVedtatteBehandling)
 
         // hvis siste vedtatte behandling er valutajustering og opprettet tidspunkt er denne måned hopp ut
         if (behandling.opprettetTidspunkt.toLocalDate().toYearMonth() == måned &&
@@ -95,7 +95,7 @@ class AutovedtakMånedligValutajusteringService(
     }
 
     companion object {
-        fun validerViKanUtføreMånedligValutajustering(
+        fun validerAtViKanUtføreMånedligValutajustering(
             behandling: Behandling,
             sisteVedtatteBehandling: Behandling,
         ) {
