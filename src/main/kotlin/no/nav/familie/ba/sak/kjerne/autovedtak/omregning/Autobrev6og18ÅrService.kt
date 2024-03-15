@@ -34,7 +34,7 @@ class Autobrev6og18ÅrService(
     @Transactional
     fun opprettOmregningsoppgaveForBarnIBrytingsalder(
         autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO,
-        taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
+        førstegangKjørt: LocalDateTime = LocalDateTime.now(),
     ): Autobrev6Og18Svar {
         logger.info("opprettOmregningsoppgaveForBarnIBrytingsalder for fagsak ${autobrev6og18ÅrDTO.fagsakId}")
 
@@ -114,7 +114,7 @@ class Autobrev6og18ÅrService(
                         ),
                     fagsakId = behandling.fagsak.id,
                 ),
-            taskOpprettetTid = taskOpprettetTid,
+            førstegangKjørt = førstegangKjørt,
         )
         return Autobrev6Og18Svar.OK
     }

@@ -87,43 +87,43 @@ class AutovedtakStegService(
     fun kjørBehandlingFødselshendelse(
         mottakersAktør: Aktør,
         nyBehandlingHendelse: NyBehandlingHendelse,
-        taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
+        førstegangKjørt: LocalDateTime = LocalDateTime.now(),
     ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = FødselshendelseData(nyBehandlingHendelse),
-            taskOpprettetTid = taskOpprettetTid,
+            førstegangKjørt = førstegangKjørt,
         )
     }
 
     fun kjørBehandlingOmregning(
         mottakersAktør: Aktør,
         behandlingsdata: OmregningBrevData,
-        taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
+        førstegangKjørt: LocalDateTime = LocalDateTime.now(),
     ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = behandlingsdata,
-            taskOpprettetTid = taskOpprettetTid,
+            førstegangKjørt = førstegangKjørt,
         )
     }
 
     fun kjørBehandlingSmåbarnstillegg(
         mottakersAktør: Aktør,
         aktør: Aktør,
-        taskOpprettetTid: LocalDateTime = LocalDateTime.now(),
+        førstegangKjørt: LocalDateTime = LocalDateTime.now(),
     ): String {
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = SmåbarnstilleggData(aktør),
-            taskOpprettetTid = taskOpprettetTid,
+            førstegangKjørt = førstegangKjørt,
         )
     }
 
     private fun kjørBehandling(
         automatiskBehandlingData: AutomatiskBehandlingData,
         mottakersAktør: Aktør,
-        taskOpprettetTid: LocalDateTime,
+        førstegangKjørt: LocalDateTime,
     ): String {
         secureLoggAutovedtakBehandling(automatiskBehandlingData.type, mottakersAktør, BEHANDLING_STARTER)
         antallAutovedtak[automatiskBehandlingData.type]?.increment()
@@ -148,7 +148,7 @@ class AutovedtakStegService(
                 aktør = mottakersAktør,
                 autovedtaktype = automatiskBehandlingData.type,
                 fagsakId = hentFagsakIdFraBehandlingsdata(automatiskBehandlingData),
-                taskOpprettetTid = taskOpprettetTid,
+                førstegangKjørt = førstegangKjørt,
             )
         ) {
             secureLoggAutovedtakBehandling(
@@ -189,7 +189,7 @@ class AutovedtakStegService(
         aktør: Aktør,
         autovedtaktype: Autovedtaktype,
         fagsakId: Long?,
-        taskOpprettetTid: LocalDateTime,
+        førstegangKjørt: LocalDateTime,
     ): Boolean {
         val fagsak =
             if (fagsakId != null) {
@@ -215,7 +215,7 @@ class AutovedtakStegService(
                 }
             }
             BehandlingStatus.FATTER_VEDTAK -> {
-                if (taskOpprettetTid.until(LocalDateTime.now(), ChronoUnit.DAYS) < 7) {
+                if (førstegangKjørt.until(LocalDateTime.now(), ChronoUnit.DAYS) < 7) {
                     throw RekjørSenereException(
                         årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen neste virkedag",
                         triggerTid = VirkedagerProvider.nesteVirkedag(LocalDate.now()).atTime(12, 0),

@@ -80,14 +80,14 @@ class AutobrevStegServiceTest {
             autovedtakStegService.kjørBehandlingSmåbarnstillegg(
                 mottakersAktør = aktør,
                 aktør = aktør,
-                taskOpprettetTid = LocalDateTime.now().minusDays(6),
+                førstegangKjørt = LocalDateTime.now().minusDays(6),
             )
         }
 
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = aktør,
             aktør = aktør,
-            taskOpprettetTid = LocalDateTime.now().minusDays(7),
+            førstegangKjørt = LocalDateTime.now().minusDays(7),
         )
 
         verify(exactly = 1) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) }

@@ -146,7 +146,7 @@ class SnikeIKøenIntegrationTest(
                     standardbegrunnelse = Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
                     fagsakId = åpenBehandling.fagsak.id,
                 ),
-                taskOpprettetTid = tid6DagerSiden,
+                førstegangKjørt = tid6DagerSiden,
             )
         }
 
@@ -158,7 +158,7 @@ class SnikeIKøenIntegrationTest(
                 standardbegrunnelse = Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
                 fagsakId = åpenBehandling.fagsak.id,
             ),
-            taskOpprettetTid = tid6DagerSiden.minusDays(1),
+            førstegangKjørt = tid6DagerSiden.minusDays(1),
         )
 
         val opprettedeTasks = mutableListOf<Task>()

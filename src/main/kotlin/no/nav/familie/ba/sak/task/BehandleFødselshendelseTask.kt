@@ -77,7 +77,7 @@ class BehandleFødselshendelseTask(
                                 nyBehandling.morsIdent,
                             ),
                         nyBehandlingHendelse = nyBehandling,
-                        taskOpprettetTid = task.opprettetTid,
+                        førstegangKjørt = task.opprettetTid,
                     )
                 }
 
