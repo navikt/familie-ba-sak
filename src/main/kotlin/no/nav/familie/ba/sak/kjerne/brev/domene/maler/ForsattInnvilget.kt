@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
-import org.apache.kafka.common.protocol.types.Field.Bool
 
 data class ForsattInnvilget(
     override val mal: Brevmal,
@@ -17,40 +16,40 @@ data class ForsattInnvilget(
         refusjonEosUavklart: RefusjonEøsUavklart? = null,
         duMåMeldeFraOmEndringer: Boolean = true,
         duMåMeldeFraOmEndringerEøsSelvstendigRett: Boolean = false,
-        informasjonOmUtbetaling: Boolean = false
+        informasjonOmUtbetaling: Boolean = false,
     ) :
         this(
             mal = mal,
             data =
-            ForsattInnvilgetData(
-                delmalData =
-                ForsattInnvilgetData.Delmaler(
-                    signaturVedtak =
-                    SignaturVedtak(
-                        enhet = vedtakFellesfelter.enhet,
-                        saksbehandler = vedtakFellesfelter.saksbehandler,
-                        beslutter = vedtakFellesfelter.beslutter,
-                    ),
-                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
-                    etterbetaling = etterbetaling,
-                    etterbetalingInstitusjon = etterbetalingInstitusjon,
-                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
-                    informasjonOmAarligKontroll = informasjonOmAarligKontroll,
-                    refusjonEosAvklart = refusjonEosAvklart,
-                    refusjonEosUavklart = refusjonEosUavklart,
-                    duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
-                    duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
-                    informasjonOmUtbetaling = informasjonOmUtbetaling,
+                ForsattInnvilgetData(
+                    delmalData =
+                        ForsattInnvilgetData.Delmaler(
+                            signaturVedtak =
+                                SignaturVedtak(
+                                    enhet = vedtakFellesfelter.enhet,
+                                    saksbehandler = vedtakFellesfelter.saksbehandler,
+                                    beslutter = vedtakFellesfelter.beslutter,
+                                ),
+                            hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                            etterbetaling = etterbetaling,
+                            etterbetalingInstitusjon = etterbetalingInstitusjon,
+                            korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
+                            informasjonOmAarligKontroll = informasjonOmAarligKontroll,
+                            refusjonEosAvklart = refusjonEosAvklart,
+                            refusjonEosUavklart = refusjonEosUavklart,
+                            duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
+                            duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
+                            informasjonOmUtbetaling = informasjonOmUtbetaling,
+                        ),
+                    flettefelter =
+                        FlettefelterForDokumentImpl(
+                            gjelder = flettefelt(vedtakFellesfelter.gjelder),
+                            navn = flettefelt(vedtakFellesfelter.søkerNavn),
+                            fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer),
+                            organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
+                        ),
+                    perioder = vedtakFellesfelter.perioder,
                 ),
-                flettefelter =
-                FlettefelterForDokumentImpl(
-                    gjelder = flettefelt(vedtakFellesfelter.gjelder),
-                    navn = flettefelt(vedtakFellesfelter.søkerNavn),
-                    fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer),
-                    organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
-                ),
-                perioder = vedtakFellesfelter.perioder,
-            ),
         )
 }
 
@@ -70,6 +69,6 @@ data class ForsattInnvilgetData(
         val refusjonEosUavklart: RefusjonEøsUavklart?,
         val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
         val duMaaMeldeFraOmEndringer: Boolean,
-        val informasjonOmUtbetaling: Boolean
+        val informasjonOmUtbetaling: Boolean,
     )
 }

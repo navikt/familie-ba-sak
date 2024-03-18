@@ -39,7 +39,7 @@ data class Førstegangsvedtak(
                             refusjonEosUavklart = refusjonEosUavklart,
                             duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
                             duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
-                            informasjonOmUtbetaling = informasjonOmUtbetaling
+                            informasjonOmUtbetaling = informasjonOmUtbetaling,
                         ),
                     perioder = vedtakFellesfelter.perioder,
                     flettefelter =

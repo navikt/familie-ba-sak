@@ -46,7 +46,7 @@ data class VedtakEndring(
                             refusjonEosUavklart = refusjonEosUavklart,
                             duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
                             duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
-                            informasjonOmUtbetaling = informasjonOmUtbetaling
+                            informasjonOmUtbetaling = informasjonOmUtbetaling,
                         ),
                     flettefelter =
                         FlettefelterForDokumentImpl(
@@ -80,6 +80,6 @@ data class EndringVedtakData(
         val refusjonEosUavklart: RefusjonEøsUavklart?,
         val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
         val duMaaMeldeFraOmEndringer: Boolean,
-        val informasjonOmUtbetaling: Boolean
+        val informasjonOmUtbetaling: Boolean,
     )
 }

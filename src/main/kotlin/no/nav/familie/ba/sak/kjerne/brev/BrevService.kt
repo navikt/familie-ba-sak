@@ -79,7 +79,7 @@ class BrevService(
     private val integrasjonClient: IntegrasjonClient,
     private val testVerktøyService: TestVerktøyService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val unleashService: UnleashNextMedContextService
+    private val unleashService: UnleashNextMedContextService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -136,7 +136,7 @@ class BrevService(
                     duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
                     duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
                     informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
-                    )
+                )
 
             Brevmal.VEDTAK_ENDRING_INSTITUSJON ->
                 VedtakEndring(
@@ -196,7 +196,7 @@ class BrevService(
                     refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
                     duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
                     duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
-                    informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling
+                    informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
                 )
 
             Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON ->
@@ -228,7 +228,7 @@ class BrevService(
     }
 
     fun sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling: Behandling): Boolean {
-        if (unleashService.isEnabled(FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING)) return false
+        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING)) return false
 
         val andelerIBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
         val andelerIBehandlingSomErDifferanseBeregnet = andelerIBehandling.filter { it.differanseberegnetPeriodebeløp != null }
