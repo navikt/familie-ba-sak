@@ -30,6 +30,8 @@ class BrevServiceTest {
             refusjonEøsRepository = mockk(),
             integrasjonClient = mockk(),
             testVerktøyService = mockk(),
+            andelTilkjentYtelseRepository = mockk(),
+            unleashService = mockk()
         )
 
     @BeforeEach

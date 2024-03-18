@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -13,6 +15,7 @@ import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
@@ -75,6 +78,8 @@ class BrevService(
     private val refusjonEøsRepository: RefusjonEøsRepository,
     private val integrasjonClient: IntegrasjonClient,
     private val testVerktøyService: TestVerktøyService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val unleashService: UnleashNextMedContextService
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -91,6 +96,10 @@ class BrevService(
             vedtaksperiodeService.skalMeldeFraOmEndringerEøsSelvstendigRett(vedtak)
         }
 
+        val skalInkludereInformasjonOmUtbetaling by lazy {
+            sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling)
+        }
+
         return when (brevmal) {
             Brevmal.VEDTAK_FØRSTEGANGSVEDTAK ->
                 Førstegangsvedtak(
@@ -101,6 +110,7 @@ class BrevService(
                     refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
                     duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
                     duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
+                    informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
                 )
 
             Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON ->
@@ -125,7 +135,8 @@ class BrevService(
                     refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
                     duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
                     duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
-                )
+                    informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
+                    )
 
             Brevmal.VEDTAK_ENDRING_INSTITUSJON ->
                 VedtakEndring(
@@ -185,6 +196,7 @@ class BrevService(
                     refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
                     duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
                     duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
+                    informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling
                 )
 
             Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON ->
@@ -213,6 +225,16 @@ class BrevService(
 
             else -> throw Feil("Forsøker å hente vedtaksbrevdata for brevmal ${brevmal.visningsTekst}")
         }
+    }
+
+    fun sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling: Behandling): Boolean {
+        if (unleashService.isEnabled(FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING)) return false
+
+        val andelerIBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        val andelerIBehandlingSomErDifferanseBeregnet = andelerIBehandling.filter { it.differanseberegnetPeriodebeløp != null }
+        val andelerIBehandlingSomErDifferanseBeregnetOgLøpende = andelerIBehandlingSomErDifferanseBeregnet.filter { it.erLøpende() }
+
+        return andelerIBehandlingSomErDifferanseBeregnetOgLøpende.isNotEmpty()
     }
 
     private fun beskrivPerioderMedUavklartRefusjonEøs(vedtak: Vedtak) =
