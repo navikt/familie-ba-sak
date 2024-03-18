@@ -25,5 +25,6 @@ fun mockAutovedtakMånedligValutajusteringService(
         autovedtakService = cucumberMock.autovedtakService,
         taskRepository = cucumberMock.taskRepository,
         behandlingService = cucumberMock.behandlingService,
+        snikeIKøenService = cucumberMock.snikeIKøenService,
     )
 }

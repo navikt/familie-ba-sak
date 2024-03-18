@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.datagenerator.settpåvent.lagSettPåVent
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -21,12 +22,14 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåba
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -106,6 +109,7 @@ class CucumberMock(
     forrigeBehandling: Behandling?,
     efSakRestClientMock: EfSakRestClient = mockEfSakRestClient(),
 ) {
+    // val snikeIKøenService = mockSnikeIKøenService()
     val persongrunnlagService = mockPersongrunnlagService(dataFraCucumber)
     val fagsakService = mockFagsakService(dataFraCucumber)
     val fagsakRepository = mockFagsakRepository(dataFraCucumber)
@@ -334,6 +338,14 @@ class CucumberMock(
             valutakursRepository = valutakursRepository,
         )
 
+    val snikeIKøenService =
+        SnikeIKøenService(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            påVentService = mockSettPåVentService(),
+            loggService = mockLoggService(),
+            tilbakestillBehandlingService = tilbakestillBehandlingService,
+        )
+
     val registrerPersongrunnlag =
         RegistrerPersongrunnlag(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -392,6 +404,12 @@ private fun mockOppgaveService(): OppgaveService {
     val oppgaveService = mockk<OppgaveService>()
     every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
     return oppgaveService
+}
+
+private fun mockSettPåVentService(): SettPåVentService {
+    val settPåVentService = mockk<SettPåVentService>()
+    every { settPåVentService.settBehandlingPåVent(any(), any(), any()) } returns lagSettPåVent()
+    return settPåVentService
 }
 
 private fun mockTilbakekrevingService(): TilbakekrevingService {
@@ -501,6 +519,12 @@ private fun mockFagsakService(dataFraCucumber: BegrunnelseTeksterStepDefinition)
         dataFraCucumber.fagsaker.values.single { it.aktør == aktør }
     }
     return fagsakService
+}
+
+private fun mockSnikeIKøenService(): SnikeIKøenService {
+    val snikeIKøenService = mockk<SnikeIKøenService>()
+    every { snikeIKøenService.kanSnikeForbi(any()) } answers { true }
+    return snikeIKøenService
 }
 
 private fun mockFagsakRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): FagsakRepository {
