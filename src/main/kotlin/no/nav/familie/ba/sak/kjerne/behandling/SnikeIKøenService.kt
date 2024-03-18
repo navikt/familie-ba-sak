@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -13,7 +12,7 @@ import java.time.LocalDateTime
 
 @Service
 class SnikeIKøenService(
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val påVentService: SettPåVentService,
     private val loggService: LoggService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
@@ -25,7 +24,7 @@ class SnikeIKøenService(
         behandlingId: Long,
         årsak: SettPåMaskinellVentÅrsak,
     ) {
-        val behandling = behandlingRepository.finnBehandling(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         if (!behandling.aktiv) {
             error("Behandling=$behandlingId er ikke aktiv")
         }
@@ -35,7 +34,7 @@ class SnikeIKøenService(
         }
         behandling.status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT
         behandling.aktiv = false
-        behandlingRepository.saveAndFlush(behandling)
+        behandlingHentOgPersisterService.lagreOgFlush(behandling)
         loggService.opprettSettPåMaskinellVent(behandling, årsak.årsak)
     }
 
@@ -50,7 +49,7 @@ class SnikeIKøenService(
         val fagsakId = behandlingSomFerdigstilles.fagsak.id
 
         val behandlingPåVent = finnBehandlingPåMaskinellVent(fagsakId) ?: return false
-        val aktivBehandling = behandlingRepository.findByFagsakAndAktiv(fagsakId)
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId)
 
         validerBehandlinger(aktivBehandling, behandlingPåVent)
 
@@ -89,7 +88,7 @@ class SnikeIKøenService(
     private fun finnBehandlingPåMaskinellVent(
         fagsakId: Long,
     ): Behandling? =
-        behandlingRepository.finnBehandlinger(fagsakId, BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
+        behandlingHentOgPersisterService.hentBehandlinger(fagsakId, BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
             .takeIf { it.isNotEmpty() }
             ?.let { it.singleOrNull() ?: error("Forventer kun en behandling på vent for fagsak=$fagsakId") }
 
@@ -106,14 +105,14 @@ class SnikeIKøenService(
 
         if (aktivBehandling != null) {
             aktivBehandling.aktiv = false
-            behandlingRepository.saveAndFlush(aktivBehandling)
+            behandlingHentOgPersisterService.lagreOgFlush(aktivBehandling)
         }
 
         behandlingPåVent.aktiv = true
         behandlingPåVent.aktivertTidspunkt = LocalDateTime.now()
         behandlingPåVent.status = utledStatusForBehandlingPåVent(behandlingPåVent)
 
-        behandlingRepository.saveAndFlush(behandlingPåVent)
+        behandlingHentOgPersisterService.lagreOgFlush(behandlingPåVent)
     }
 
     private fun validerBehandlinger(
