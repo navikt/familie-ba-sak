@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -17,6 +18,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringSevice
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
@@ -105,7 +107,9 @@ class CucumberMock(
     nyBehanldingId: Long,
     forrigeBehandling: Behandling?,
     efSakRestClientMock: EfSakRestClient = mockEfSakRestClient(),
+    ecbService: ECBService = mockk<ECBService>(),
 ) {
+    val mockedDateProvider = MockedDateProvider(dataFraCucumber.dagensDato)
     val persongrunnlagService = mockPersongrunnlagService(dataFraCucumber)
     val fagsakService = mockFagsakService(dataFraCucumber)
     val fagsakRepository = mockFagsakRepository(dataFraCucumber)
@@ -314,7 +318,7 @@ class CucumberMock(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             kompetanseService = kompetanseService,
-            localDateProvider = MockedDateProvider(dataFraCucumber.dagensDato),
+            localDateProvider = mockedDateProvider,
         )
 
     val behandlingsresultatSteg =
@@ -341,6 +345,8 @@ class CucumberMock(
             personopplysningGrunnlagForNyBehandlingService = personopplysningGrunnlagForNyBehandlingService,
             eøsSkjemaerForNyBehandlingService = eøsSkjemaerForNyBehandlingService,
         )
+
+    val månedligValutajusteringSevice = MånedligValutajusteringSevice(ecbService = ecbService, valutakursService = valutakursService)
 
     val stegService =
         spyk(
@@ -384,7 +390,7 @@ class CucumberMock(
             autovedtakService = autovedtakService,
             oppgaveService = oppgaveService,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
-            localDateProvider = MockedDateProvider(dataFraCucumber.dagensDato),
+            localDateProvider = mockedDateProvider,
         )
 }
 
@@ -821,6 +827,18 @@ private fun mockTilkjentYtelseRepository(dataFraCucumber: BegrunnelseTeksterStep
             opprettetDato = LocalDate.now(),
             endretDato = LocalDate.now(),
         )
+    }
+    every { tilkjentYtelseRepository.findByBehandlingOptional(any()) } answers {
+        val behandlingId = firstArg<Long>()
+        val andeler = dataFraCucumber.andelerTilkjentYtelse[behandlingId]
+        andeler?.let {
+            TilkjentYtelse(
+                behandling = dataFraCucumber.behandlinger[behandlingId]!!,
+                andelerTilkjentYtelse = andeler.toMutableSet(),
+                opprettetDato = LocalDate.now(),
+                endretDato = LocalDate.now(),
+            )
+        }
     }
     every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just runs
     every { tilkjentYtelseRepository.save(any()) } answers {
