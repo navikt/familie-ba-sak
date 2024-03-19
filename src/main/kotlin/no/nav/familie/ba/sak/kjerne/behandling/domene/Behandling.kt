@@ -252,6 +252,8 @@ data class Behandling(
 
     fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
 
+    fun erValutajustering() = this.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
+
     fun erManuellMigreringForEndreMigreringsdato() =
         erMigrering() &&
             opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO

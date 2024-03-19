@@ -1,12 +1,20 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import java.time.YearMonth
 
 object BehandlingsresultatValideringUtils {
     internal fun validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(
@@ -58,6 +66,30 @@ object BehandlingsresultatValideringUtils {
                 "Behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn.lowercase()} " +
                     "er ugyldig i kombinasjon med resultat '${resultat.displayName.lowercase()}'."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
+        }
+    }
+
+    fun validerIngenEndringTilbakeITid(
+        andelerDenneBehandlingen: List<AndelTilkjentYtelse>,
+        andelerForrigeBehandling: List<AndelTilkjentYtelse>,
+        nåMåned: YearMonth,
+    ) {
+        val forrigeMåned = nåMåned.minusMonths(1)
+        val andelerIFortidenTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType().beskjærTilOgMed(forrigeMåned.tilTidspunkt())
+        val andelerIFortidenForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType().beskjærTilOgMed(forrigeMåned.tilTidspunkt())
+
+        val erEndringTilbakeITidTidslinje =
+            andelerIFortidenTidslinje.outerJoin(andelerIFortidenForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->
+                nyAndel?.kalkulertUtbetalingsbeløp != gammelAndel?.kalkulertUtbetalingsbeløp
+            }
+
+        erEndringTilbakeITidTidslinje.forEach { t, u ->
+            u.perioder().forEach {
+                val erEndring = it.innhold == true
+                if (erEndring) {
+                    throw Feil("Det er endringer i andelene som går tilbake i tid. Gjelder andelene fra ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}.")
+                }
+            }
         }
     }
 }
