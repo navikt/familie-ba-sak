@@ -447,6 +447,10 @@ private fun mockVilkårService(dataFraCucumber: BegrunnelseTeksterStepDefinition
         val behandlingsId = firstArg<Long>()
         dataFraCucumber.vilkårsvurderinger[behandlingsId]!!
     }
+    every { vilkårService.hentVilkårsvurderingThrows(any()) } answers {
+        val behandlingsId = firstArg<Long>()
+        dataFraCucumber.vilkårsvurderinger[behandlingsId]!!
+    }
     return vilkårService
 }
 
