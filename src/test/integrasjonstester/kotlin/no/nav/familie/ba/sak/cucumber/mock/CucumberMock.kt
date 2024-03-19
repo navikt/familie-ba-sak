@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.spyk
 import no.nav.familie.ba.sak.common.LocalDateProvider
+import no.nav.familie.ba.sak.common.RealDateProvider
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -324,6 +325,7 @@ class CucumberMock(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             valutakursRepository = valutakursRepository,
+            localDateProvider = RealDateProvider(),
         )
 
     val registrerPersongrunnlag =
