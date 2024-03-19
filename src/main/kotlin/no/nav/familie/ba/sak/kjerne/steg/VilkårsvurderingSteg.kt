@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.LocalDateProvider
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringSevice
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -26,6 +29,8 @@ class VilkårsvurderingSteg(
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
+    private val månedligValutajusteringSevice: MånedligValutajusteringSevice,
+    private val localDateProvider: LocalDateProvider,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -75,6 +80,10 @@ class VilkårsvurderingSteg(
         }
 
         tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling)
+
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING) {
+            månedligValutajusteringSevice.oppdaterValutakurserForMåned(BehandlingId(behandling.id), localDateProvider.now().toYearMonth())
+        }
         beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
 
         if (!behandling.erSatsendring()) {

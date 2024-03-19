@@ -1,6 +1,7 @@
 ﻿package no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -25,12 +26,17 @@ class AutovedtakMånedligValutajusteringService(
     private val autovedtakService: AutovedtakService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingService: BehandlingService,
+    private val localDateProvider: LocalDateProvider,
 ) {
     @Transactional
     fun utførMånedligValutajustering(
         behandlingid: Long,
         måned: YearMonth,
     ) {
+        if (måned != localDateProvider.now().toYearMonth()) {
+            throw Feil("Prøver å utføre månedlig valutajustering for en annen måned enn nåværende måned.")
+        }
+
         val behandling = behandlingHentOgPersisterService.hent(behandlingid)
         val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) ?: error("Fant ikke siste vedtatte behandling for ${behandling.fagsak.id}")
         val aktivOgÅpenBehandling =
