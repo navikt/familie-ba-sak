@@ -201,18 +201,6 @@ class CucumberMock(
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
         )
 
-    val vilkårsvurderingSteg =
-        VilkårsvurderingSteg(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            behandlingstemaService = behandlingstemaService,
-            vilkårService = vilkårService,
-            beregningService = beregningService,
-            persongrunnlagService = persongrunnlagService,
-            tilbakestillBehandlingService = tilbakestillBehandlingService,
-            tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
-            vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
-        )
-
     val vedtakService =
         VedtakService(
             vedtakRepository = vedtakRepository,
@@ -347,6 +335,20 @@ class CucumberMock(
         )
 
     val månedligValutajusteringSevice = MånedligValutajusteringSevice(ecbService = ecbService, valutakursService = valutakursService)
+
+    val vilkårsvurderingSteg =
+        VilkårsvurderingSteg(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingstemaService = behandlingstemaService,
+            vilkårService = vilkårService,
+            beregningService = beregningService,
+            persongrunnlagService = persongrunnlagService,
+            tilbakestillBehandlingService = tilbakestillBehandlingService,
+            tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
+            vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
+            månedligValutajusteringSevice = månedligValutajusteringSevice,
+            localDateProvider = mockedDateProvider,
+        )
 
     val stegService =
         spyk(
