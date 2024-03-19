@@ -56,7 +56,6 @@ Egenskap: Automatisk valutajustering
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus  | Behandlingstype | Behandlingssteg       | Underkategori |
       | 2            | 1        | 1                   | ENDRET_UTBETALING   | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | IVERKSETTER_VEDTAK | Revurdering     | IVERKSETT_MOT_OPPDRAG | ORDINÆR       |
 
-    # Andelene må endres når vi faktisk oppdaterer valutakursen
     Så forvent følgende andeler tilkjent ytelse for behandling 2
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats | Differanseberegnet beløp |
       | 2       | 2            | 01.07.2023 | 29.02.2024 | 1566  | ORDINÆR_BARNETRYGD | 100     | 1766 | 1566                     |
