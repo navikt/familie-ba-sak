@@ -54,11 +54,13 @@ Egenskap: Automatisk valutajustering
       | AktørId | Fra dato   | Til dato | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 2       | 01.11.2019 |          | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | DK                    | DK                             | DK                  |
 
-    Når vi lager automatisk behandling med id 2 på fagsak 1 på grunn av automatisk valutajustering
+    Når vi lager automatisk behandling med id 2 på fagsak 1 på grunn av automatisk valutajustering og har følgende valutakurser
+      | Valuta kode | Valutakursdato | Kurs |
+      | DKK         | 29.02.2024     | 3    |
 
     Så forvent disse behandlingene
-      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus  | Behandlingstype | Behandlingssteg         | Underkategori |
-      | 2            | 1        | 1                   | FORTSATT_INNVILGET  | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | IVERKSETTER_VEDTAK | Revurdering     | FERDIGSTILLE_BEHANDLING | ORDINÆR       |
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus  | Behandlingstype | Behandlingssteg       | Underkategori |
+      | 2            | 1        | 1                   | ENDRET_UTBETALING   | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | IVERKSETTER_VEDTAK | Revurdering     | IVERKSETT_MOT_OPPDRAG | ORDINÆR       |
 
     # Andelene må endres når vi faktisk oppdaterer valutakursen
     Så forvent følgende andeler tilkjent ytelse for behandling 2
@@ -68,8 +70,9 @@ Egenskap: Automatisk valutajustering
       | 2       | 2            | 01.09.2021 | 31.12.2021 | 1454  | ORDINÆR_BARNETRYGD | 100     | 1654 | 1454                     |
       | 2       | 2            | 01.01.2022 | 28.02.2023 | 1476  | ORDINÆR_BARNETRYGD | 100     | 1676 | 1476                     |
       | 2       | 2            | 01.03.2023 | 30.06.2023 | 1523  | ORDINÆR_BARNETRYGD | 100     | 1723 | 1523                     |
-      | 2       | 2            | 01.07.2023 | 30.09.2025 | 1566  | ORDINÆR_BARNETRYGD | 100     | 1766 | 1566                     |
-      | 2       | 2            | 01.10.2025 | 30.09.2037 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1510 | 1310                     |
+      | 2       | 2            | 01.07.2023 | 29.02.2024 | 1566  | ORDINÆR_BARNETRYGD | 100     | 1766 | 1566                     |
+      | 2       | 2            | 01.03.2024 | 30.09.2025 | 1466  | ORDINÆR_BARNETRYGD | 100     | 1766 | 1466                     |
+      | 2       | 2            | 01.10.2025 | 30.09.2037 | 1210  | ORDINÆR_BARNETRYGD | 100     | 1510 | 1210                     |
 
 
 # Test på at vi ikke endrer tilbake i tid
