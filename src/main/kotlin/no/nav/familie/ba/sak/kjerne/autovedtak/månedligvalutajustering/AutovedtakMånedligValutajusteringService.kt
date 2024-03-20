@@ -60,7 +60,6 @@ class AutovedtakMånedligValutajusteringService(
             behandling.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
         ) {
             logger.info("Valutajustering er allerede gjort denne måneden for fagsak ${behandling.fagsak.id}. Hopper ut av valutajusteringen.")
-            logger.info("Behandling: $behandling")
             return
         }
 
