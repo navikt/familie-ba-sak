@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.validation.Valid
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
@@ -59,6 +60,7 @@ class ForvalterController(
     private val taskService: TaskService,
     private val satskjøringRepository: SatskjøringRepository,
     private val autovedtakMånedligValutajusteringService: AutovedtakMånedligValutajusteringService,
+    private val envService: EnvService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -310,7 +312,11 @@ class ForvalterController(
     fun justerValuta(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<Ressurs<String>> {
-        autovedtakMånedligValutajusteringService.utførMånedligValutajusteringPåFagsak(fagsakId = fagsakId, måned = YearMonth.now())
+        if (!envService.erProd()) {
+            autovedtakMånedligValutajusteringService.utførMånedligValutajusteringPåFagsak(fagsakId = fagsakId, måned = YearMonth.now())
+        } else {
+            throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
+        }
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 }
