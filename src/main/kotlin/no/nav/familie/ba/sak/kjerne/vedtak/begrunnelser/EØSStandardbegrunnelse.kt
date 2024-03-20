@@ -11,10 +11,6 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetPrimarlandBarnetBorINorge"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
-    INNVILGET_PRIMÆRLAND_BARNETRYGD_ALLEREDE_UTBETALT {
-        override val sanityApiNavn = "innvilgetPrimarlandBarnetrygdAlleredeUtbetalt"
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
-    },
     INNVILGET_PRIMÆRLAND_UK_BARNETRYGD_ALLEREDEUTBETALT {
         override val sanityApiNavn = "innvilgetPrimarlandUkBarnetrygdAlleredeUtbetalt"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
@@ -437,6 +433,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagSelvstendigRettForeldreneBorSammen"
+    },
+    AVSLAG_DELT_BOSTED_BEGGE_FORELDRE_IKKE_OMFATTET_NORSK_LOVVALG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagDeltBostedBeggeForeldreIkkeOmfattetNorskLovvalg"
     },
     FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD {
         override val sanityApiNavn = "fortsattInnvilgetPrimaerlandStandard"
