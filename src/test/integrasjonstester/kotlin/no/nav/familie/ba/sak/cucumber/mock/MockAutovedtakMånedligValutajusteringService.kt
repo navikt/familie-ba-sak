@@ -1,5 +1,6 @@
 ﻿package no.nav.familie.ba.sak.cucumber.mock
 
+import io.mockk.every
 import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -19,6 +20,8 @@ fun mockAutovedtakMånedligValutajusteringService(
             nyBehanldingId = nyBehanldingId,
             forrigeBehandling = forrigeBehandling,
         )
+
+    every { cucumberMock.snikeIKøenService.kanSnikeForbi(any()) } returns true
 
     return AutovedtakMånedligValutajusteringService(
         behandlingHentOgPersisterService = cucumberMock.behandlingHentOgPersisterService,

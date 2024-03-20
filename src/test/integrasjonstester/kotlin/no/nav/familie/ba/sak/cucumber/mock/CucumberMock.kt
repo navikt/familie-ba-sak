@@ -73,10 +73,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.logg.LoggType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.RegistrerPersongrunnlag
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
@@ -102,6 +105,7 @@ import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import no.nav.familie.prosessering.internal.TaskService
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class CucumberMock(
     dataFraCucumber: BegrunnelseTeksterStepDefinition,
@@ -339,11 +343,13 @@ class CucumberMock(
         )
 
     val snikeIKøenService =
-        SnikeIKøenService(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            påVentService = mockSettPåVentService(),
-            loggService = mockLoggService(),
-            tilbakestillBehandlingService = tilbakestillBehandlingService,
+        spyk(
+            SnikeIKøenService(
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                påVentService = mockSettPåVentService(),
+                loggService = mockLoggService(),
+                tilbakestillBehandlingService = tilbakestillBehandlingService,
+            ),
         )
 
     val registrerPersongrunnlag =
@@ -756,7 +762,19 @@ private fun mockLoggService(): LoggService {
     val loggService = mockk<LoggService>()
     every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any(), any()) } just runs
     every { loggService.opprettBehandlingLogg(any()) } just runs
+    every { loggService.opprettSettPåMaskinellVent(any(), any()) } just runs
     every { loggService.opprettVilkårsvurderingLogg(any(), any(), any()) } returns null
+    every { loggService.hentLoggForBehandling(any()) } answers {
+        val behandlingId = firstArg<Long>()
+        listOf(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.BEHANDLING_OPPRETTET,
+                rolle = BehandlerRolle.SYSTEM,
+                tekst = "",
+            ).copy(opprettetTidspunkt = LocalDateTime.now().minusDays(1)),
+        )
+    }
     return loggService
 }
 

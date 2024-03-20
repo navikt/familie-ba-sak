@@ -16,6 +16,7 @@ enum class Domenebegrep(override val nøkkel: String) : Domenenøkkel {
     FRA_DATO("Fra dato"),
     TIL_DATO("Til dato"),
     ENDRET_MIGRERINGSDATO("Endret migreringsdato"),
+    ENDRET_TIDSPUNKT("Endret tidspunkt"),
     BEHANDLINGSÅRSAK("Behandlingsårsak"),
     BEHANDLINGSRESULTAT("Behandlingsresultat"),
     SKAL_BEHANLDES_AUTOMATISK("Skal behandles automatisk"),
