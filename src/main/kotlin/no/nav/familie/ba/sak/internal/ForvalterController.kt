@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -57,6 +58,7 @@ class ForvalterController(
     private val opprettTaskService: OpprettTaskService,
     private val taskService: TaskService,
     private val satskjøringRepository: SatskjøringRepository,
+    private val autovedtakMånedligValutajusteringService: AutovedtakMånedligValutajusteringService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -300,6 +302,15 @@ class ForvalterController(
         @PathVariable maksAntallTasker: Int = Int.MAX_VALUE,
     ): ResponseEntity<Ressurs<String>> {
         taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask(maksAntallTasker))
+        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+    }
+
+    @PostMapping("/valutajustering/{fagsakId}/juster-valuta")
+    @Operation(summary = "Start valutajustering på fagsak for gjeldende måned")
+    fun justerValuta(
+        @PathVariable fagsakId: Long,
+    ): ResponseEntity<Ressurs<String>> {
+        autovedtakMånedligValutajusteringService.utførMånedligValutajusteringPåFagsak(fagsakId = fagsakId, måned = YearMonth.now())
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 }
