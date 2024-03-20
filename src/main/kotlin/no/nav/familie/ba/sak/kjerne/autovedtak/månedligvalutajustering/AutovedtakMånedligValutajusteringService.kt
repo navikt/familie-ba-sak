@@ -129,7 +129,7 @@ class AutovedtakMånedligValutajusteringService(
         if (erSekundærland) {
             utførMånedligValutajustering(behandlingid = sisteVedtatteBehandling.id, måned)
         } else {
-            logger.info("Site behandling er ikke sekundærland for måned=$måned")
+            logger.info("Siste behandling er ikke sekundærland for måned=$måned")
         }
     }
 
