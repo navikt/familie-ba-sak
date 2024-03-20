@@ -11,10 +11,6 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetPrimarlandBarnetBorINorge"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
-    INNVILGET_PRIMÆRLAND_BARNETRYGD_ALLEREDE_UTBETALT {
-        override val sanityApiNavn = "innvilgetPrimarlandBarnetrygdAlleredeUtbetalt"
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
-    },
     INNVILGET_PRIMÆRLAND_UK_BARNETRYGD_ALLEREDEUTBETALT {
         override val sanityApiNavn = "innvilgetPrimarlandUkBarnetrygdAlleredeUtbetalt"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
