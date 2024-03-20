@@ -1,6 +1,5 @@
 ﻿package no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
@@ -11,11 +10,9 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.UtfyltValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilIValutakurs
-import no.nav.familie.valutakurs.exception.IngenValutakursException
+import no.nav.familie.util.VirkedagerProvider
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -38,52 +35,23 @@ class MånedligValutajusteringSevice(
                 .filter { valutakurs -> valutakurs.periodeInneholder(valutajusteringMåned) }
 
         val sisteDagForrigeMåned = valutajusteringMåned.minusMonths(1).atEndOfMonth()
+        val sisteVirkedagForrigeMåned = VirkedagerProvider.senesteVirkedagFørEllerMed(sisteDagForrigeMåned)
 
         val nyeValutaKurser =
             valutakurserSomMåOppdateres.map { valutakurs ->
-                val (nyKurs, kursDato) =
-                    hentKursPåDagEllerTidligereVedRødDag(
-                        valutakode = valutakurs.valutakode,
-                        dag = sisteDagForrigeMåned,
-                    )
+                val nyKurs = ecbService.hentValutakurs(valutakurs.valutakode, sisteVirkedagForrigeMåned)
 
                 Valutakurs(
                     fom = valutajusteringMåned,
                     tom = valutakurs.tom,
                     barnAktører = valutakurs.barnAktører,
-                    valutakursdato = kursDato,
+                    valutakursdato = sisteVirkedagForrigeMåned,
                     valutakode = valutakurs.valutakode,
                     kurs = nyKurs,
                 )
             }
 
         nyeValutaKurser.forEach { valutakursService.oppdaterValutakurs(BehandlingId(behandlingId.id), it) }
-    }
-
-    data class KursOgKursdato(
-        val kurs: BigDecimal,
-        val kursdato: LocalDate,
-    )
-
-    fun hentKursPåDagEllerTidligereVedRødDag(
-        valutakode: String,
-        dag: LocalDate,
-        forsøk: Int = 0,
-    ): KursOgKursdato {
-        if (forsøk == 10) {
-            throw Feil("Klarte ikke å hente valutakurs for $valutakode etter å ha prøvd 10 forskjellige dager")
-        }
-
-        return try {
-            KursOgKursdato(ecbService.hentValutakurs(valutakode, dag), dag)
-        } catch (e: IngenValutakursException) {
-            val dagenFør = dag.minusDays(1)
-            hentKursPåDagEllerTidligereVedRødDag(
-                valutakode = valutakode,
-                dag = dagenFør,
-                forsøk = forsøk + 1,
-            )
-        }
     }
 }
 
