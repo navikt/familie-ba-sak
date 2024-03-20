@@ -1,5 +1,6 @@
 ﻿package no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
@@ -10,9 +11,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.UtfyltValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilIValutakurs
+import no.nav.familie.valutakurs.exception.IngenValutakursException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.DayOfWeek
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -35,17 +37,21 @@ class MånedligValutajusteringSevice(
                 .map { it.tilIValutakurs() }.filterIsInstance<UtfyltValutakurs>()
                 .filter { valutakurs -> valutakurs.periodeInneholder(valutajusteringMåned) }
 
-        val sisteVirkedagForrigeMåned = hentSisteVirkedagForrigeMåned(valutajusteringMåned)
+        val sisteDagForrigeMåned = valutajusteringMåned.minusMonths(1).atEndOfMonth()
 
         val nyeValutaKurser =
             valutakurserSomMåOppdateres.map { valutakurs ->
-                val nyKurs = ecbService.hentValutakurs(valutakurs.valutakode, sisteVirkedagForrigeMåned)
+                val (nyKurs, kursDato) =
+                    hentKursPåDagEllerTidligereVedRødDag(
+                        valutakode = valutakurs.valutakode,
+                        dag = sisteDagForrigeMåned,
+                    )
 
                 Valutakurs(
                     fom = valutajusteringMåned,
                     tom = valutakurs.tom,
                     barnAktører = valutakurs.barnAktører,
-                    valutakursdato = sisteVirkedagForrigeMåned,
+                    valutakursdato = kursDato,
                     valutakode = valutakurs.valutakode,
                     kurs = nyKurs,
                 )
@@ -53,22 +59,35 @@ class MånedligValutajusteringSevice(
 
         nyeValutaKurser.forEach { valutakursService.oppdaterValutakurs(BehandlingId(behandlingId.id), it) }
     }
+
+    data class KursOgKursdato(
+        val kurs: BigDecimal,
+        val kursdato: LocalDate,
+    )
+
+    fun hentKursPåDagEllerTidligereVedRødDag(
+        valutakode: String,
+        dag: LocalDate,
+        forsøk: Int = 0,
+    ): KursOgKursdato {
+        if (forsøk == 10) {
+            throw Feil("Klarte ikke å hente valutakurs for $valutakode etter å ha prøvd 10 forskjellige dager")
+        }
+
+        return try {
+            KursOgKursdato(ecbService.hentValutakurs(valutakode, dag), dag)
+        } catch (e: IngenValutakursException) {
+            val dagenFør = dag.minusDays(1)
+            hentKursPåDagEllerTidligereVedRødDag(
+                valutakode = valutakode,
+                dag = dagenFør,
+                forsøk = forsøk + 1,
+            )
+        }
+    }
 }
 
 private fun UtfyltValutakurs.periodeInneholder(
     valutajusteringMåned: YearMonth,
 ) = fom.isSameOrBefore(valutajusteringMåned) &&
     (tom ?: TIDENES_ENDE.toYearMonth()).isSameOrAfter(valutajusteringMåned)
-
-private fun hentSisteVirkedagForrigeMåned(valutajusteringMåned: YearMonth): LocalDate {
-    val sisteDagForrigeMåned = valutajusteringMåned.minusMonths(1).atEndOfMonth()
-
-    val sisteVirkedagForrigeMåned =
-        when (sisteDagForrigeMåned.dayOfWeek) {
-            DayOfWeek.SUNDAY -> sisteDagForrigeMåned.minusDays(2)
-            DayOfWeek.SATURDAY -> sisteDagForrigeMåned.minusDays(1)
-            else -> sisteDagForrigeMåned
-        }
-
-    return sisteVirkedagForrigeMåned
-}
