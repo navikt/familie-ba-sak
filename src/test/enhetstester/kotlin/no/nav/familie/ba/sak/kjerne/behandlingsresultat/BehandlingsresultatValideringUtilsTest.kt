@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
@@ -8,10 +10,12 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class BehandlingsresultatValideringUtilsTest {
     @Test
@@ -112,6 +116,101 @@ internal class BehandlingsresultatValideringUtilsTest {
             BehandlingsresultatValideringUtils.validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(
                 personResultater = setOf(barn1PersonResultat, barn2PersonResultat),
                 personerFremstiltKravFor = listOf(barn1.aktør, barn2.aktør),
+            )
+        }
+    }
+
+    @Test
+    fun `validerIngenEndringTilbakeITid - Skal kaste feil ved endring tilbake i tid`() {
+        val originalAndel =
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusMonths(12),
+                tom = YearMonth.now().minusMonths(6),
+                kalkulertUtbetalingsbeløp = 2000,
+            )
+        val andelMedLavereBeløp = originalAndel.copy(kalkulertUtbetalingsbeløp = 1000)
+        val andelSomAvsluttesTidligere = originalAndel.copy(stønadTom = originalAndel.stønadTom.minusMonths(3))
+
+        val andelerForrigeBehandling = listOf(originalAndel)
+        val andelerDenneBehandlingenLavereBeløp = listOf(andelMedLavereBeløp)
+        val andelerDenneBehandlingenAvsluttesTidlig = listOf(andelSomAvsluttesTidligere)
+
+        assertThatExceptionOfType(Feil::class.java).isThrownBy {
+            BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid(
+                andelerDenneBehandlingen = andelerDenneBehandlingenAvsluttesTidlig,
+                andelerForrigeBehandling = andelerForrigeBehandling,
+                nåMåned = YearMonth.now(),
+            )
+        }
+
+        assertThatExceptionOfType(Feil::class.java).isThrownBy {
+            BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid(
+                andelerDenneBehandlingen = andelerDenneBehandlingenLavereBeløp,
+                andelerForrigeBehandling = andelerForrigeBehandling,
+                nåMåned = YearMonth.now(),
+            )
+        }
+    }
+
+    @Test
+    fun `validerIngenEndringTilbakeITid - Skal ikke kaste feil ved endring framover i tid`() {
+        val originalAndel =
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusMonths(12),
+                tom = YearMonth.now().plusMonths(6),
+                kalkulertUtbetalingsbeløp = 2000,
+            )
+        val andelSomAvsluttesTidligere = originalAndel.copy(stønadTom = originalAndel.stønadTom.minusMonths(3))
+        val andelMedLavereBeløpIFramtiden = originalAndel.copy(stønadFom = andelSomAvsluttesTidligere.stønadTom.plusMonths(1), kalkulertUtbetalingsbeløp = 1000)
+
+        val andelerForrigeBehandling = listOf(originalAndel)
+        val andelerDenneBehandlingenLavereBeløpIFramtiden = listOf(andelSomAvsluttesTidligere, andelMedLavereBeløpIFramtiden)
+        val andelerDenneBehandlingenSomAvsluttesTidligere = listOf(andelSomAvsluttesTidligere)
+
+        assertDoesNotThrow {
+            BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid(
+                andelerDenneBehandlingen = andelerDenneBehandlingenSomAvsluttesTidligere,
+                andelerForrigeBehandling = andelerForrigeBehandling,
+                nåMåned = YearMonth.now(),
+            )
+        }
+
+        assertDoesNotThrow {
+            BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid(
+                andelerDenneBehandlingen = andelerDenneBehandlingenLavereBeløpIFramtiden,
+                andelerForrigeBehandling = andelerForrigeBehandling,
+                nåMåned = YearMonth.now(),
+            )
+        }
+    }
+
+    @Test
+    fun `validerSatsErUendret - Skal kaste feil dersom sats endrer seg`() {
+        val originalAndel =
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusMonths(12),
+                tom = YearMonth.now().plusMonths(6),
+                sats = 2000,
+            )
+
+        val andelMedAnnenSats =
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusMonths(12),
+                tom = YearMonth.now().plusMonths(6),
+                sats = 2000,
+            )
+
+        assertThatExceptionOfType(Feil::class.java).isThrownBy {
+            BehandlingsresultatValideringUtils.validerSatsErUendret(
+                andelerForrigeBehandling = listOf(originalAndel),
+                andelerDenneBehandlingen = listOf(andelMedAnnenSats),
+            )
+        }
+
+        assertDoesNotThrow {
+            BehandlingsresultatValideringUtils.validerSatsErUendret(
+                andelerForrigeBehandling = listOf(originalAndel),
+                andelerDenneBehandlingen = listOf(originalAndel),
             )
         }
     }

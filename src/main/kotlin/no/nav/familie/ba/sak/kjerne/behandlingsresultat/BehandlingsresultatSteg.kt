@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -55,12 +56,13 @@ class BehandlingsresultatSteg(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val valutakursRepository: ValutakursRepository,
+    private val localDateProvider: LocalDateProvider,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
         stegService: StegService?,
     ) {
-        if (!behandling.erSatsendring() && behandling.skalBehandlesAutomatisk) return
+        if (!behandling.erSatsendring() && !behandling.erValutajustering() && behandling.skalBehandlesAutomatisk) return
 
         val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
         if (behandling.type != BehandlingType.TEKNISK_ENDRING && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
@@ -70,6 +72,7 @@ class BehandlingsresultatSteg(
         }
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        val andelerForrigeBehandling by lazy { beregningService.hentAndelerFraForrigeIverksattebehandling(behandling) }
 
         if (behandling.erSatsendring()) {
             validerSatsendring(tilkjentYtelse)
@@ -85,6 +88,18 @@ class BehandlingsresultatSteg(
                 andelerTilkjentYtelseOgEndreteUtbetalingerService
                     .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
             endreteUtbetalingerMedAndeler.validerEndredeUtbetalingsandeler(tilkjentYtelse, vilkårService.hentVilkårsvurdering(behandling.id))
+        }
+
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING) {
+            BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid(
+                andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse.toList(),
+                andelerForrigeBehandling = andelerForrigeBehandling.toList(),
+                nåMåned = localDateProvider.now().toYearMonth(),
+            )
+            BehandlingsresultatValideringUtils.validerSatsErUendret(
+                andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse.toList(),
+                andelerForrigeBehandling = andelerForrigeBehandling.toList(),
+            )
         }
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {

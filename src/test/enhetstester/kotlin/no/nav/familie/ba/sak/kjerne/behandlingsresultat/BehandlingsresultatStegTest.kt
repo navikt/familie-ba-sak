@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.RealDateProvider
 import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
@@ -99,19 +100,20 @@ class BehandlingsresultatStegTest {
     fun init() {
         behandlingsresultatSteg =
             BehandlingsresultatSteg(
-                behandlingHentOgPersisterService,
-                behandlingService,
-                simuleringService,
-                vedtakService,
-                vedtaksperiodeService,
-                mockBehandlingsresultatService,
-                vilkårService,
-                persongrunnlagService,
-                beregningService,
-                andelerTilkjentYtelseOgEndreteUtbetalingerService,
-                andelTilkjentYtelseRepository,
-                utenlandskPeriodebeløpRepository,
-                valutakursRepository,
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                behandlingService = behandlingService,
+                simuleringService = simuleringService,
+                vedtakService = vedtakService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                behandlingsresultatService = mockBehandlingsresultatService,
+                vilkårService = vilkårService,
+                persongrunnlagService = persongrunnlagService,
+                beregningService = beregningService,
+                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+                andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+                utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+                valutakursRepository = valutakursRepository,
+                localDateProvider = RealDateProvider(),
             )
 
         behandling =

@@ -42,12 +42,13 @@ class MånedligValutajusteringFinnFagsakerTask(
 
         logger.info("Starter månedlig valutajustering for ${data.måned}")
 
-        val relevanteBehandlinger = behandlingService.hentSisteIverksatteEØSBehandlingFraLøpendeFagsaker().toSet().sorted()
-        relevanteBehandlinger.forEach { behandlingid ->
+        val sisteEøsBehanldingerIFagsakerMedEøsBehandlinger = behandlingService.hentSisteIverksatteEØSBehandlingFraLøpendeFagsaker().toSet().sorted()
+
+        // Hardkoder denne til å kun ta 10 behanldinger i første omgang slik at vi er helt sikre på at vi ikke kjører på alle behandlinger mens vi tester.
+        sisteEøsBehanldingerIFagsakerMedEøsBehandlinger.take(10).forEach { behandlingid ->
             // check if behandling is eøs sekundærland
             val kompetanserPåBehandling = kompetanseService.hentKompetanser(BehandlingId(behandlingid))
-            val erSekundærland =
-                erSekundærlandIMåned(kompetanserPåBehandling, data.måned)
+            val erSekundærland = erSekundærlandIMåned(kompetanserPåBehandling, data.måned)
 
             if (erSekundærland) {
                 taskRepository.save(MånedligValutajusteringTask.lagTask(behandlingid, data.måned))

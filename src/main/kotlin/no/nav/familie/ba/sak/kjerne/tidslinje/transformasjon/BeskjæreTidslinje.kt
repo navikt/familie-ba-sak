@@ -89,3 +89,23 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærFraOgMed(
         this.tidsrom().isEmpty() -> TomTidslinje()
         else -> beskjær(fraOgMed, this.tilOgMed()!!)
     }
+
+/**
+ * Extension-metode for å beskjære tom dato på en tidslinje
+ * Etter beskjæringen vil tidslinjen maksimalt strekke seg fra eksisterende fraOgMed og til innsendt [tilOgMed]
+ */
+fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærTilOgMed(
+    tilOgMed: Tidspunkt<T>,
+): Tidslinje<I, T> =
+    when {
+        this.tidsrom().isEmpty() -> TomTidslinje()
+        else -> beskjær(this.fraOgMed()!!, tilOgMed)
+    }
+
+/**
+ * Extension-metode for å beskjære tom dato på et map av tidslinjer
+ * Etter beskjæringen vil tidslinjen maksimalt strekke seg fra eksisterende fraOgMed og til innsendt [tilOgMed]
+ */
+fun <K, V, T : Tidsenhet> Map<K, Tidslinje<V, T>>.beskjærTilOgMed(
+    tilOgMed: Tidspunkt<T>,
+): Map<K, Tidslinje<V, T>> = this.mapValues { (_, tidslinje) -> tidslinje.beskjærTilOgMed(tilOgMed) }
