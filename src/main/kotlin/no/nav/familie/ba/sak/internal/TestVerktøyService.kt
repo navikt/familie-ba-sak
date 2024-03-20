@@ -4,14 +4,18 @@ import no.nav.familie.ba.sak.internal.vedtak.begrunnelser.lagGyldigeBegrunnelser
 import no.nav.familie.ba.sak.internal.vedtak.vedtaksperioder.lagVedtaksperioderTest
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -28,6 +32,7 @@ class TestVerktøyService(
 ) {
     @Transactional
     fun oppdaterVilkårUtenFomTilFødselsdato(behandlingId: Long) {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val vilkårsvurdering = vilkårService.hentVilkårsvurdering(behandlingId)
 
         val persongrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
@@ -35,10 +40,18 @@ class TestVerktøyService(
         vilkårsvurdering?.personResultater?.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
                 if (vilkårResultat.resultat == Resultat.IKKE_VURDERT) {
+                    val person = persongrunnlag?.personer?.find { it.aktør == personResultat.aktør }
                     vilkårResultat.periodeFom =
-                        persongrunnlag?.personer?.find { it.aktør == personResultat.aktør }?.fødselsdato
+                        person?.fødselsdato
                     vilkårResultat.resultat = Resultat.OPPFYLT
                     vilkårResultat.begrunnelse = "Opprettet automatisk fra \"Fyll ut vilkårsvurdering\"-knappen"
+
+                    if (behandling.kategori == BehandlingKategori.EØS && vilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET) {
+                        vilkårResultat.utdypendeVilkårsvurderinger = if (person?.type == PersonType.SØKER) listOf(UtdypendeVilkårsvurdering.OMFATTET_AV_NORSK_LOVGIVNING) else listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE)
+                    }
+                    if (behandling.kategori == BehandlingKategori.EØS && vilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER) {
+                        vilkårResultat.utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE_MED_SØKER)
+                    }
                 }
             }
         }
