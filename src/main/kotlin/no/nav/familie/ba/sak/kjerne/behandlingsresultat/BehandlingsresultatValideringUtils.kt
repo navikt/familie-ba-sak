@@ -78,13 +78,13 @@ object BehandlingsresultatValideringUtils {
         val andelerIFortidenTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType().beskjærTilOgMed(forrigeMåned.tilTidspunkt())
         val andelerIFortidenForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType().beskjærTilOgMed(forrigeMåned.tilTidspunkt())
 
-        val erEndringTilbakeITidTidslinje =
+        val erEndringTilbakeITidTidslinjer =
             andelerIFortidenTidslinje.outerJoin(andelerIFortidenForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->
                 nyAndel?.kalkulertUtbetalingsbeløp != gammelAndel?.kalkulertUtbetalingsbeløp
             }
 
-        erEndringTilbakeITidTidslinje.forEach { t, u ->
-            u.perioder().forEach {
+        erEndringTilbakeITidTidslinjer.forEach { _, erEndringTilbakeITidTidslinje ->
+            erEndringTilbakeITidTidslinje.perioder().forEach {
                 val erEndring = it.innhold == true
                 if (erEndring) {
                     throw Feil("Det er endringer i andelene som går tilbake i tid. Gjelder andelene fra ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}.")
