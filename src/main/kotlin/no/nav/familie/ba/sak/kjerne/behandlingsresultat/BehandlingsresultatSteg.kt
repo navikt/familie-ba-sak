@@ -96,6 +96,10 @@ class BehandlingsresultatSteg(
                 andelerForrigeBehandling = andelerForrigeBehandling.toList(),
                 nåMåned = localDateProvider.now().toYearMonth(),
             )
+            BehandlingsresultatValideringUtils.validerSatsErUendret(
+                andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse.toList(),
+                andelerForrigeBehandling = andelerForrigeBehandling.toList(),
+            )
         }
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {

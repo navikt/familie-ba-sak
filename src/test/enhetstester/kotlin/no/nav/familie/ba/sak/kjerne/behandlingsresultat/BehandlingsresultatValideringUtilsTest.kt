@@ -183,4 +183,35 @@ internal class BehandlingsresultatValideringUtilsTest {
             )
         }
     }
+
+    @Test
+    fun `validerSatsErUendret - Skal kaste feil dersom sats endrer seg`() {
+        val originalAndel =
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusMonths(12),
+                tom = YearMonth.now().plusMonths(6),
+                sats = 2000,
+            )
+
+        val andelMedAnnenSats =
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusMonths(12),
+                tom = YearMonth.now().plusMonths(6),
+                sats = 2000,
+            )
+
+        assertThatExceptionOfType(Feil::class.java).isThrownBy {
+            BehandlingsresultatValideringUtils.validerSatsErUendret(
+                andelerForrigeBehandling = listOf(originalAndel),
+                andelerDenneBehandlingen = listOf(andelMedAnnenSats),
+            )
+        }
+
+        assertDoesNotThrow {
+            BehandlingsresultatValideringUtils.validerSatsErUendret(
+                andelerForrigeBehandling = listOf(originalAndel),
+                andelerDenneBehandlingen = listOf(originalAndel),
+            )
+        }
+    }
 }

@@ -92,4 +92,26 @@ object BehandlingsresultatValideringUtils {
             }
         }
     }
+
+    fun validerSatsErUendret(
+        andelerDenneBehandlingen: List<AndelTilkjentYtelse>,
+        andelerForrigeBehandling: List<AndelTilkjentYtelse>,
+    ) {
+        val andelerIFortidenTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType()
+        val andelerIFortidenForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType()
+
+        val erEndringISatsTidslinjer =
+            andelerIFortidenTidslinje.outerJoin(andelerIFortidenForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->
+                nyAndel?.sats != gammelAndel?.sats
+            }
+
+        erEndringISatsTidslinjer.forEach { _, erEndringISatsTidslinje ->
+            erEndringISatsTidslinje.perioder().forEach {
+                val erEndring = it.innhold == true
+                if (erEndring) {
+                    throw Feil("Det er endringer i andelene som går tilbake i tid. Gjelder andelene fra ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}.")
+                }
+            }
+        }
+    }
 }
