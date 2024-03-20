@@ -16,6 +16,7 @@ data class ForsattInnvilget(
         refusjonEosUavklart: RefusjonEøsUavklart? = null,
         duMåMeldeFraOmEndringer: Boolean = true,
         duMåMeldeFraOmEndringerEøsSelvstendigRett: Boolean = false,
+        informasjonOmUtbetaling: Boolean = false,
     ) :
         this(
             mal = mal,
@@ -38,6 +39,7 @@ data class ForsattInnvilget(
                             refusjonEosUavklart = refusjonEosUavklart,
                             duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
                             duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
+                            informasjonOmUtbetaling = informasjonOmUtbetaling,
                         ),
                     flettefelter =
                         FlettefelterForDokumentImpl(
@@ -67,5 +69,6 @@ data class ForsattInnvilgetData(
         val refusjonEosUavklart: RefusjonEøsUavklart?,
         val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
         val duMaaMeldeFraOmEndringer: Boolean,
+        val informasjonOmUtbetaling: Boolean,
     )
 }

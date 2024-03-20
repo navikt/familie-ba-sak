@@ -16,6 +16,7 @@ data class Førstegangsvedtak(
         refusjonEosUavklart: RefusjonEøsUavklart? = null,
         duMåMeldeFraOmEndringer: Boolean = true,
         duMåMeldeFraOmEndringerEøsSelvstendigRett: Boolean = false,
+        informasjonOmUtbetaling: Boolean = false,
     ) :
         this(
             mal = mal,
@@ -38,6 +39,7 @@ data class Førstegangsvedtak(
                             refusjonEosUavklart = refusjonEosUavklart,
                             duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
                             duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
+                            informasjonOmUtbetaling = informasjonOmUtbetaling,
                         ),
                     perioder = vedtakFellesfelter.perioder,
                     flettefelter =
@@ -67,5 +69,6 @@ data class FørstegangsvedtakData(
         val refusjonEosUavklart: RefusjonEøsUavklart?,
         val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
         val duMaaMeldeFraOmEndringer: Boolean,
+        val informasjonOmUtbetaling: Boolean,
     )
 }
