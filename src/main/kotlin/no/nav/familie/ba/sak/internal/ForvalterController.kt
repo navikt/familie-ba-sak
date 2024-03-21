@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -66,6 +68,7 @@ class ForvalterController(
     private val envService: EnvService,
     private val månedligValutajusteringScheduler: MånedligValutajusteringScheduler,
     private val fagsakService: FagsakService,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -317,10 +320,12 @@ class ForvalterController(
     fun justerValuta(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
-        if (envService.erDev()) {
+        val erPersonMedTilgangTilÅStarteValutajustering = unleashNextMedContextService.isEnabled(FeatureToggleConfig.KAN_STARTE_VALUTAJUSTERING)
+
+        if (erPersonMedTilgangTilÅStarteValutajustering) {
             autovedtakMånedligValutajusteringService.utførMånedligValutajusteringPåFagsak(fagsakId = fagsakId, måned = YearMonth.now())
         } else {
-            throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
+            throw Feil("Du har ikke tilgang til å kjøre valutajustering")
         }
 
         val fagsak = fagsakService.hentRestMinimalFagsak(fagsakId)
