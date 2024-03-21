@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -145,6 +146,7 @@ class SnikeIKøenServiceTest(
     fun `reaktivering skal tilbakestille behandling på vent`() {
         val behandling1 =
             opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false).let {
+                leggTilSteg(it, StegType.VILKÅRSVURDERING, BehandlingStegStatus.UTFØRT)
                 leggTilSteg(it, StegType.VURDER_TILBAKEKREVING)
                 behandlingRepository.saveAndFlush(it)
             }
@@ -161,6 +163,41 @@ class SnikeIKøenServiceTest(
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
 
         assertThat(vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtak.id)).isEmpty()
+    }
+
+    @Test
+    fun `reaktivering skal tilbakestille til vilkårsvurdering kun dersom steget er lagt til på behandlingen`() {
+        val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
+        val initielStegTilstand = StegType.REGISTRERE_SØKNAD
+
+        leggTilSteg(behandling1, initielStegTilstand)
+        behandlingRepository.saveAndFlush(behandling1)
+
+        val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
+        lagUtbetalingsoppdragOgAvslutt(behandling2)
+
+        snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
+
+        val oppdatertBehandling = behandlingRepository.finnBehandling(behandling1.id)
+
+        assertThat(oppdatertBehandling.steg).isEqualTo(initielStegTilstand)
+
+        leggTilSteg(oppdatertBehandling, StegType.VILKÅRSVURDERING, BehandlingStegStatus.UTFØRT)
+        leggTilSteg(oppdatertBehandling, StegType.BEHANDLINGSRESULTAT)
+        settBehandlingTilPåMaskinellVent(oppdatertBehandling)
+
+        snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
+
+        val oppdatertStegTilstand = behandlingRepository.finnBehandling(behandling1.id).behandlingStegTilstand.last()
+
+        assertThat(oppdatertStegTilstand.behandlingSteg).isEqualTo(StegType.VILKÅRSVURDERING)
+        assertThat(oppdatertStegTilstand.behandlingStegStatus).isEqualTo(BehandlingStegStatus.IKKE_UTFØRT)
+    }
+
+    private fun settBehandlingTilPåMaskinellVent(oppdatertBehandling: Behandling) {
+        oppdatertBehandling.aktiv = false
+        oppdatertBehandling.status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT
+        behandlingRepository.saveAndFlush(oppdatertBehandling)
     }
 
     @Test
@@ -270,8 +307,13 @@ class SnikeIKøenServiceTest(
     private fun leggTilSteg(
         behandling: Behandling,
         stegType: StegType,
+        behandlingStegStatus: BehandlingStegStatus = BehandlingStegStatus.IKKE_UTFØRT,
     ) {
-        val stegTilstand = BehandlingStegTilstand(behandling = behandling, behandlingSteg = stegType)
+        val stegTilstand = BehandlingStegTilstand(
+            behandling = behandling,
+            behandlingSteg = stegType,
+            behandlingStegStatus = behandlingStegStatus
+        )
         behandling.behandlingStegTilstand.add(stegTilstand)
     }
 
