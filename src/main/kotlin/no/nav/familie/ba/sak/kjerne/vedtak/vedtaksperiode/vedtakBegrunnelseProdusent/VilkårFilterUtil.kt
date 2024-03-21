@@ -41,30 +41,17 @@ fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
 fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResultatForVedtaksperiode): Boolean {
     return when (vilkårResultat.vilkårType) {
         Vilkår.UNDER_18_ÅR -> true
-        Vilkår.BOR_MED_SØKER ->
-            vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.borMedSokerTriggere) ||
-                vilkårResultat.utdypendeVilkårsvurderinger.harMinstEnTriggerFra(this.borMedSokerTriggere)
-        Vilkår.GIFT_PARTNERSKAP -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.giftPartnerskapTriggere)
-        Vilkår.BOSATT_I_RIKET -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.bosattIRiketTriggere)
-        Vilkår.LOVLIG_OPPHOLD -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.lovligOppholdTriggere)
+        Vilkår.BOR_MED_SØKER -> vilkårResultat.utdypendeVilkårsvurderinger.harMinstEnTriggerFra(this.borMedSokerTriggere)
+        Vilkår.GIFT_PARTNERSKAP -> vilkårResultat.utdypendeVilkårsvurderinger.harMinstEnTriggerFra(this.giftPartnerskapTriggere)
+        Vilkår.BOSATT_I_RIKET -> vilkårResultat.utdypendeVilkårsvurderinger.harMinstEnTriggerFra(this.bosattIRiketTriggere)
+        Vilkår.LOVLIG_OPPHOLD -> vilkårResultat.utdypendeVilkårsvurderinger.harMinstEnTriggerFra(this.lovligOppholdTriggere)
         // Håndteres i `erGjeldendeForSmåbarnstillegg`
         Vilkår.UTVIDET_BARNETRYGD -> UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG !in this.utvidetBarnetrygdTriggere
     }
 }
 
-private fun List<UtdypendeVilkårsvurdering>.erLik(
-    utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>,
-): Boolean {
-    val altErLikt =
-        utdypendeVilkårsvurderingFraSanityBegrunnelse.all {
-            it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = this)
-        }
-
-    return utdypendeVilkårsvurderingFraSanityBegrunnelse.isEmpty() || altErLikt
-}
-
 private fun List<UtdypendeVilkårsvurdering>.harMinstEnTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean {
-    return utdypendeVilkårsvurderingFraSanityBegrunnelse.any {
+    return utdypendeVilkårsvurderingFraSanityBegrunnelse.isEmpty() || utdypendeVilkårsvurderingFraSanityBegrunnelse.any {
         it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = this)
     }
 }
