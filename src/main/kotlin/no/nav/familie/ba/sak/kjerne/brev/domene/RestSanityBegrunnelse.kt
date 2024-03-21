@@ -155,7 +155,7 @@ enum class VilkårTrigger {
     FAST_BOSTED
 }
 
-fun VilkårTrigger.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat: Set<UtdypendeVilkårsvurdering>): Boolean {
+fun VilkårTrigger.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat: List<UtdypendeVilkårsvurdering>): Boolean {
     return when (this) {
         VilkårTrigger.VURDERING_ANNET_GRUNNLAG -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG)
         VilkårTrigger.MEDLEMSKAP -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP)

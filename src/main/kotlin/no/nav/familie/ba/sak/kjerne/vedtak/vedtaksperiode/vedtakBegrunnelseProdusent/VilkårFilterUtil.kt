@@ -52,22 +52,19 @@ fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResult
     }
 }
 
-private fun Collection<UtdypendeVilkårsvurdering>.erLik(
+private fun List<UtdypendeVilkårsvurdering>.erLik(
     utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>,
 ): Boolean {
-    val utdypendeVilkårPåVilkårResultat = this.toSet()
-
     val altErLikt = utdypendeVilkårsvurderingFraSanityBegrunnelse.all {
-        it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = utdypendeVilkårPåVilkårResultat)
+        it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = this)
     }
 
     return utdypendeVilkårsvurderingFraSanityBegrunnelse.isEmpty() || altErLikt
 }
 
-private fun Collection<UtdypendeVilkårsvurdering>.harMinstEttTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean {
-    val utdypendeVilkårPåVilkårResultat = this.toSet()
+private fun List<UtdypendeVilkårsvurdering>.harMinstEttTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean {
     return utdypendeVilkårsvurderingFraSanityBegrunnelse.any {
-        it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = utdypendeVilkårPåVilkårResultat)
+        it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = this)
     }
 }
 
