@@ -323,7 +323,7 @@ class ForvalterController(
     }
 
     @PostMapping("/start-valutajustering-scheduler")
-    @Operation(summary = "Start alle valutajusteringer for gjeldende måned")
+    @Operation(summary = "Start valutajustering for alle sekundærlandsaker i gjeldende måned")
     fun lagMånedligValuttajusteringTask(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<Ressurs<String>> {
