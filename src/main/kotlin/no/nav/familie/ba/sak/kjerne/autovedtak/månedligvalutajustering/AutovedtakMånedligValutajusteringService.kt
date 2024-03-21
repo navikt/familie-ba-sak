@@ -2,8 +2,8 @@
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.MånedligValutaJusteringFeil
 import no.nav.familie.ba.sak.common.LocalDateProvider
+import no.nav.familie.ba.sak.common.MånedligValutaJusteringFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -74,7 +74,7 @@ class AutovedtakMånedligValutajusteringService(
             if (snikeIKøenService.kanSnikeForbi(aktivOgÅpenBehandling)) {
                 snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
                     aktivOgÅpenBehandling.id,
-                    SettPåMaskinellVentÅrsak.SATSENDRING,
+                    SettPåMaskinellVentÅrsak.MÅNEDLIG_VALUTAJUSTERING,
                 )
             } else {
                 månedligvalutajusteringIgnorertÅpenBehandling.increment()
@@ -120,7 +120,6 @@ class AutovedtakMånedligValutajusteringService(
 
                 else -> throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} ved månedlig valutajustering for fagsak=${behandling.fagsak.id}")
             }
-
         taskRepository.save(task)
     }
 
