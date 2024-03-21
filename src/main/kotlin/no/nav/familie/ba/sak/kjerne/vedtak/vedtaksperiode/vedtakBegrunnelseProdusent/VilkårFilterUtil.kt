@@ -43,7 +43,7 @@ fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResult
         Vilkår.UNDER_18_ÅR -> true
         Vilkår.BOR_MED_SØKER ->
             vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.borMedSokerTriggere) ||
-                vilkårResultat.utdypendeVilkårsvurderinger.harMinstEttTriggerFra(this.borMedSokerTriggere)
+                vilkårResultat.utdypendeVilkårsvurderinger.harMinstEnTriggerFra(this.borMedSokerTriggere)
         Vilkår.GIFT_PARTNERSKAP -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.giftPartnerskapTriggere)
         Vilkår.BOSATT_I_RIKET -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.bosattIRiketTriggere)
         Vilkår.LOVLIG_OPPHOLD -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.lovligOppholdTriggere)
@@ -62,7 +62,7 @@ private fun List<UtdypendeVilkårsvurdering>.erLik(
     return utdypendeVilkårsvurderingFraSanityBegrunnelse.isEmpty() || altErLikt
 }
 
-private fun List<UtdypendeVilkårsvurdering>.harMinstEttTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean {
+private fun List<UtdypendeVilkårsvurdering>.harMinstEnTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean {
     return utdypendeVilkårsvurderingFraSanityBegrunnelse.any {
         it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = this)
     }
