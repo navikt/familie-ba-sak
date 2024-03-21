@@ -152,7 +152,7 @@ enum class VilkårTrigger {
     MEDLEMSKAP,
     DELT_BOSTED,
     DELT_BOSTED_SKAL_IKKE_DELES,
-    FAST_BOSTED
+    FAST_BOSTED,
 }
 
 fun VilkårTrigger.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat: List<UtdypendeVilkårsvurdering>): Boolean {

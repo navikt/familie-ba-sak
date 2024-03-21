@@ -55,9 +55,10 @@ fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResult
 private fun List<UtdypendeVilkårsvurdering>.erLik(
     utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>,
 ): Boolean {
-    val altErLikt = utdypendeVilkårsvurderingFraSanityBegrunnelse.all {
-        it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = this)
-    }
+    val altErLikt =
+        utdypendeVilkårsvurderingFraSanityBegrunnelse.all {
+            it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = this)
+        }
 
     return utdypendeVilkårsvurderingFraSanityBegrunnelse.isEmpty() || altErLikt
 }
