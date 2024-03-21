@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.validation.Valid
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
@@ -11,6 +12,8 @@ import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
+import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -57,6 +60,9 @@ class ForvalterController(
     private val opprettTaskService: OpprettTaskService,
     private val taskService: TaskService,
     private val satskjøringRepository: SatskjøringRepository,
+    private val autovedtakMånedligValutajusteringService: AutovedtakMånedligValutajusteringService,
+    private val envService: EnvService,
+    private val månedligValutajusteringScheduler: MånedligValutajusteringScheduler,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -300,6 +306,32 @@ class ForvalterController(
         @PathVariable maksAntallTasker: Int = Int.MAX_VALUE,
     ): ResponseEntity<Ressurs<String>> {
         taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask(maksAntallTasker))
+        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+    }
+
+    @PostMapping("/valutajustering/{fagsakId}/juster-valuta")
+    @Operation(summary = "Start valutajustering på fagsak for gjeldende måned")
+    fun justerValuta(
+        @PathVariable fagsakId: Long,
+    ): ResponseEntity<Ressurs<String>> {
+        if (!envService.erProd()) {
+            autovedtakMånedligValutajusteringService.utførMånedligValutajusteringPåFagsak(fagsakId = fagsakId, måned = YearMonth.now())
+        } else {
+            throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
+        }
+        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+    }
+
+    @PostMapping("/start-valutajustering-scheduler")
+    @Operation(summary = "Start valutajustering for alle sekundærlandsaker i gjeldende måned")
+    fun lagMånedligValuttajusteringTask(
+        @PathVariable fagsakId: Long,
+    ): ResponseEntity<Ressurs<String>> {
+        if (!envService.erProd()) {
+            månedligValutajusteringScheduler.lagMånedligValuttajusteringTask()
+        } else {
+            throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
+        }
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 }

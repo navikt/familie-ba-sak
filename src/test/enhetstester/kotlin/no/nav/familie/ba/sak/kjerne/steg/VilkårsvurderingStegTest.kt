@@ -6,6 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import junit.framework.TestCase.assertTrue
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.RealDateProvider
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
@@ -49,14 +50,16 @@ class VilkårsvurderingStegTest {
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg =
         VilkårsvurderingSteg(
-            behandlingHentOgPersisterService,
-            behandlingstemaService,
-            vilkårService,
-            beregningService,
-            persongrunnlagService,
-            tilbakestillBehandlingService,
-            tilpassKompetanserTilRegelverkService,
-            vilkårsvurderingForNyBehandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingstemaService = behandlingstemaService,
+            vilkårService = vilkårService,
+            beregningService = beregningService,
+            persongrunnlagService = persongrunnlagService,
+            tilbakestillBehandlingService = tilbakestillBehandlingService,
+            tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
+            vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
+            månedligValutajusteringSevice = mockk(),
+            localDateProvider = RealDateProvider(),
         )
 
     val behandling =

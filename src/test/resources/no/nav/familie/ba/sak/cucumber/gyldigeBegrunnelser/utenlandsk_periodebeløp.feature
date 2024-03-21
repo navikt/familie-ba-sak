@@ -75,8 +75,8 @@ Egenskap: Gyldige begrunnelser for utenlandsk periodebeløp
       | 2       | 01.11.2019 |          | NORGE_ER_SEKUNDÆRLAND | 2            | ARBEIDER         | I_ARBEID                  | NO                    | PL                             | PL                  |
 
     Og med utenlandsk periodebeløp for begrunnelse
-      | AktørId | Fra dato   | Til dato | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
-      | 2       | 01.01.2022 |          | 2            | 500   | PLN         | ÅRLIG     | NO              |
+      | AktørId | Fra måned | Til måned | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
+      | 2       | 01.2022   |           | 2            | 500   | PLN         | ÅRLIG     | NO              |
 
     Når vedtaksperiodene genereres for behandling 2
 

@@ -22,9 +22,9 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20240214140223_83c31de</prosessering.version>
-        <felles.version>3.20240227112134_a79201c</felles.version>
+        <felles.version>3.20240320161838_b9c4bdb</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20240313150947_5947def</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20240320115313_5db97db</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20240208132236_bce5777</utbetalingsgenerator.version>
@@ -159,7 +159,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.2</version>
+            <version>42.7.3</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>

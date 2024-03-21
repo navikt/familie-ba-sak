@@ -5,6 +5,7 @@ import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
+import lagSvarFraEcbMock
 import mockAutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilddMMyyyy
@@ -12,9 +13,9 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
-import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -490,7 +491,7 @@ class BegrunnelseTeksterStepDefinition {
     ) {
         val aktørTilDødsfall: Map<String, LocalDate> =
             dataTable.asMaps().map { rad ->
-                val aktørId = parseValgfriString(VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.AKTØR_ID, rad) ?: error("AktørId må være satt")
+                val aktørId = parseAktørId(rad)
                 val dødsfallDato = parseValgfriDato(VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.DØDSFALLDATO, rad) ?: error("Dødsfallsdato må være satt")
 
                 aktørId to dødsfallDato
@@ -520,19 +521,26 @@ class BegrunnelseTeksterStepDefinition {
         }
     }
 
-    @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av automatisk valutajustering")
+    /**
+     * | Valuta kode | Valutakursdato | Kurs |
+     */
+    @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av automatisk valutajustering og har følgende valutakurser")
     fun `kjør automatisk valutajustering med behandlingsid på fagsak `(
         nyBehandling: Long,
         fagsakId: Long,
+        dataTable: DataTable,
     ) {
         val fagsak = fagsaker[fagsakId]!!
 
         val forrigeBehandling = behandlinger.values.filter { it.fagsak.id == fagsak.id && it.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.id } ?: error("Finner ikke forrige behandling")
 
+        val svarFraEcbMock = lagSvarFraEcbMock(dataTable)
+
         mockAutovedtakMånedligValutajusteringService(
             dataFraCucumber = this,
             fagsak = fagsak,
             nyBehanldingId = nyBehandling,
+            svarFraEcbMock = svarFraEcbMock,
         ).utførMånedligValutajustering(behandlingid = forrigeBehandling.id, måned = dagensDato.toYearMonth())
     }
 }

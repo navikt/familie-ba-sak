@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriStringList
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriÅrMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -340,8 +341,8 @@ fun lagUtenlandskperiodeBeløp(
         val intervall = parseValgfriEnum<Intervall>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.INTERVALL, rad) ?: Intervall.MÅNEDLIG
         val beløp = parseBigDecimal(VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.BELØP, rad)
         UtenlandskPeriodebeløp(
-            fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
-            tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
+            fom = parseValgfriÅrMåned(Domenebegrep.FRA_MÅNED, rad),
+            tom = parseValgfriÅrMåned(Domenebegrep.TIL_MÅNED, rad),
             barnAktører =
                 personopplysningGrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer
                     .filter { aktørerForValutakurs.contains(it.aktør.aktørId) }

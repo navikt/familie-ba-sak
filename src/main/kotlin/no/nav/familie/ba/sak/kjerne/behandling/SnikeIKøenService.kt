@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -54,7 +55,9 @@ class SnikeIKøenService(
         validerBehandlinger(aktivBehandling, behandlingPåVent)
 
         aktiverBehandlingPåVent(aktivBehandling, behandlingPåVent, behandlingSomFerdigstilles)
-        tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(behandlingPåVent)
+        if (behandlingPåVent.harVærtPåVilkårsvurderingSteg()) {
+            tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(behandlingPåVent)
+        }
         loggService.opprettTattAvMaskinellVent(behandlingPåVent)
         return true
     }
@@ -136,6 +139,9 @@ class SnikeIKøenService(
             ?.let { BehandlingStatus.SATT_PÅ_VENT }
             ?: BehandlingStatus.UTREDES
 }
+
+private fun Behandling.harVærtPåVilkårsvurderingSteg() =
+    behandlingStegTilstand.any { it.behandlingSteg == StegType.VILKÅRSVURDERING }
 
 enum class SettPåMaskinellVentÅrsak(val årsak: String) {
     SATSENDRING("Satsendring"),
