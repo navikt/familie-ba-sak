@@ -309,11 +309,12 @@ class SnikeIKøenServiceTest(
         stegType: StegType,
         behandlingStegStatus: BehandlingStegStatus = BehandlingStegStatus.IKKE_UTFØRT,
     ) {
-        val stegTilstand = BehandlingStegTilstand(
-            behandling = behandling,
-            behandlingSteg = stegType,
-            behandlingStegStatus = behandlingStegStatus
-        )
+        val stegTilstand =
+            BehandlingStegTilstand(
+                behandling = behandling,
+                behandlingSteg = stegType,
+                behandlingStegStatus = behandlingStegStatus,
+            )
         behandling.behandlingStegTilstand.add(stegTilstand)
     }
 
