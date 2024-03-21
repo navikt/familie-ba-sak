@@ -56,7 +56,7 @@ class SnikeIKøenService(
         validerBehandlinger(aktivBehandling, behandlingPåVent)
 
         aktiverBehandlingPåVent(aktivBehandling, behandlingPåVent, behandlingSomFerdigstilles)
-        if (behandlingPåVent.harVærtTilstandForVilkårsvurdering()) {
+        if (behandlingPåVent.harVærtPåVilkårsvurderingSteg()) {
             tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(behandlingPåVent)
         }
         loggService.opprettTattAvMaskinellVent(behandlingPåVent)
@@ -141,7 +141,7 @@ class SnikeIKøenService(
             ?: BehandlingStatus.UTREDES
 }
 
-private fun Behandling.harVærtTilstandForVilkårsvurdering() =
+private fun Behandling.harVærtPåVilkårsvurderingSteg() =
     behandlingStegTilstand.any { it.behandlingSteg == StegType.VILKÅRSVURDERING }
 
 enum class SettPåMaskinellVentÅrsak(val årsak: String) {
