@@ -326,7 +326,7 @@ class ForvalterController(
     @Operation(summary = "Start valutajustering for alle sekundærlandsaker i gjeldende måned")
     fun lagMånedligValuttajusteringTask(): ResponseEntity<Ressurs<String>> {
         if (!envService.erProd()) {
-            månedligValutajusteringScheduler.lagMånedligValuttajusteringTask()
+            månedligValutajusteringScheduler.lagMånedligValutajusteringTask()
         } else {
             throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
         }
