@@ -8,6 +8,9 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
@@ -16,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.Autovedt
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
@@ -63,6 +67,8 @@ class ForvalterController(
     private val autovedtakMånedligValutajusteringService: AutovedtakMånedligValutajusteringService,
     private val envService: EnvService,
     private val månedligValutajusteringScheduler: MånedligValutajusteringScheduler,
+    private val fagsakService: FagsakService,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -313,22 +319,24 @@ class ForvalterController(
     @Operation(summary = "Start valutajustering på fagsak for gjeldende måned")
     fun justerValuta(
         @PathVariable fagsakId: Long,
-    ): ResponseEntity<Ressurs<String>> {
-        if (!envService.erProd()) {
+    ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
+        val erPersonMedTilgangTilÅStarteValutajustering = unleashNextMedContextService.isEnabled(FeatureToggleConfig.KAN_STARTE_VALUTAJUSTERING)
+
+        if (erPersonMedTilgangTilÅStarteValutajustering) {
             autovedtakMånedligValutajusteringService.utførMånedligValutajusteringPåFagsak(fagsakId = fagsakId, måned = YearMonth.now())
         } else {
-            throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
+            throw Feil("Du har ikke tilgang til å kjøre valutajustering")
         }
-        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+
+        val fagsak = fagsakService.hentRestMinimalFagsak(fagsakId)
+        return ResponseEntity.ok(fagsak)
     }
 
     @PostMapping("/start-valutajustering-scheduler")
     @Operation(summary = "Start valutajustering for alle sekundærlandsaker i gjeldende måned")
-    fun lagMånedligValuttajusteringTask(
-        @PathVariable fagsakId: Long,
-    ): ResponseEntity<Ressurs<String>> {
-        if (!envService.erProd()) {
-            månedligValutajusteringScheduler.lagMånedligValuttajusteringTask()
+    fun lagMånedligValuttajusteringTask(): ResponseEntity<Ressurs<String>> {
+        if (envService.erDev()) {
+            månedligValutajusteringScheduler.lagMånedligValutajusteringTask()
         } else {
             throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
         }
