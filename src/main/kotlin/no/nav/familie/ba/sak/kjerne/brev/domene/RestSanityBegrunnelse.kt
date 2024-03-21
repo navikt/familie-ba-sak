@@ -152,17 +152,19 @@ enum class VilkårTrigger {
     MEDLEMSKAP,
     DELT_BOSTED,
     DELT_BOSTED_SKAL_IKKE_DELES,
+    FAST_BOSTED,
 }
 
-fun List<VilkårTrigger>.tilUtdypendeVilkårsvurderinger() =
-    this.map {
-        when (it) {
-            VilkårTrigger.VURDERING_ANNET_GRUNNLAG -> UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
-            VilkårTrigger.MEDLEMSKAP -> UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
-            VilkårTrigger.DELT_BOSTED -> UtdypendeVilkårsvurdering.DELT_BOSTED
-            VilkårTrigger.DELT_BOSTED_SKAL_IKKE_DELES -> UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
-        }
+fun VilkårTrigger.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat: List<UtdypendeVilkårsvurdering>): Boolean {
+    return when (this) {
+        VilkårTrigger.VURDERING_ANNET_GRUNNLAG -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG)
+        VilkårTrigger.MEDLEMSKAP -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP)
+        VilkårTrigger.DELT_BOSTED -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
+        VilkårTrigger.DELT_BOSTED_SKAL_IKKE_DELES -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
+
+        VilkårTrigger.FAST_BOSTED -> !utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && !utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
     }
+}
 
 enum class SanityPeriodeResultat {
     INNVILGET_ELLER_ØKNING,

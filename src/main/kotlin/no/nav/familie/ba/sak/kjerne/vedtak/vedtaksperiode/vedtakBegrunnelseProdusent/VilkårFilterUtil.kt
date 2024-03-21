@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilUtdypendeVilkårsvurderinger
+import no.nav.familie.ba.sak.kjerne.brev.domene.stemmerMedVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -41,33 +41,20 @@ fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
 fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResultatForVedtaksperiode): Boolean {
     return when (vilkårResultat.vilkårType) {
         Vilkår.UNDER_18_ÅR -> true
-        Vilkår.BOR_MED_SØKER ->
-            vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.borMedSokerTriggere) ||
-                vilkårResultat.utdypendeVilkårsvurderinger.harMinstEttTriggerFra(this.borMedSokerTriggere)
-        Vilkår.GIFT_PARTNERSKAP -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.giftPartnerskapTriggere)
-        Vilkår.BOSATT_I_RIKET -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.bosattIRiketTriggere)
-        Vilkår.LOVLIG_OPPHOLD -> vilkårResultat.utdypendeVilkårsvurderinger.erLik(this.lovligOppholdTriggere)
+        Vilkår.BOR_MED_SØKER -> vilkårResultat.utdypendeVilkårsvurderinger.harMinstEnTriggerFra(this.borMedSokerTriggere)
+        Vilkår.GIFT_PARTNERSKAP -> vilkårResultat.utdypendeVilkårsvurderinger.harMinstEnTriggerFra(this.giftPartnerskapTriggere)
+        Vilkår.BOSATT_I_RIKET -> vilkårResultat.utdypendeVilkårsvurderinger.harMinstEnTriggerFra(this.bosattIRiketTriggere)
+        Vilkår.LOVLIG_OPPHOLD -> vilkårResultat.utdypendeVilkårsvurderinger.harMinstEnTriggerFra(this.lovligOppholdTriggere)
         // Håndteres i `erGjeldendeForSmåbarnstillegg`
         Vilkår.UTVIDET_BARNETRYGD -> UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG !in this.utvidetBarnetrygdTriggere
     }
 }
 
-private fun Collection<UtdypendeVilkårsvurdering>.erLik(
-    utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>?,
-): Boolean {
-    val utdypendeVilkårPåVilkårResultat = this.toSet()
-    val utdypendeVilkårPåSanityBegrunnelse: Set<UtdypendeVilkårsvurdering> =
-        utdypendeVilkårsvurderingFraSanityBegrunnelse?.tilUtdypendeVilkårsvurderinger()?.toSet() ?: emptySet()
-
-    return utdypendeVilkårPåSanityBegrunnelse.isEmpty() || utdypendeVilkårPåVilkårResultat == utdypendeVilkårPåSanityBegrunnelse
-}
-
-private fun Collection<UtdypendeVilkårsvurdering>.harMinstEttTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean {
-    val utdypendeVilkårPåVilkårResultat = this.toSet()
-    val utdypendeVilkårTriggerePåSanityBegrunnelse: Set<UtdypendeVilkårsvurdering> =
-        utdypendeVilkårsvurderingFraSanityBegrunnelse.tilUtdypendeVilkårsvurderinger().toSet()
-
-    return utdypendeVilkårPåVilkårResultat.any { utdypendeVilkårTriggerePåSanityBegrunnelse.contains(it) }
+private fun List<UtdypendeVilkårsvurdering>.harMinstEnTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean {
+    return utdypendeVilkårsvurderingFraSanityBegrunnelse.isEmpty() ||
+        utdypendeVilkårsvurderingFraSanityBegrunnelse.any {
+            it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = this)
+        }
 }
 
 private fun finnUtgjørendeVilkår(
