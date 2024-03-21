@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
+import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -61,6 +62,7 @@ class ForvalterController(
     private val satskjøringRepository: SatskjøringRepository,
     private val autovedtakMånedligValutajusteringService: AutovedtakMånedligValutajusteringService,
     private val envService: EnvService,
+    private val månedligValutajusteringScheduler: MånedligValutajusteringScheduler,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -314,6 +316,19 @@ class ForvalterController(
     ): ResponseEntity<Ressurs<String>> {
         if (!envService.erProd()) {
             autovedtakMånedligValutajusteringService.utførMånedligValutajusteringPåFagsak(fagsakId = fagsakId, måned = YearMonth.now())
+        } else {
+            throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
+        }
+        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+    }
+
+    @PostMapping("/start-valutajustering-scheduler")
+    @Operation(summary = "Start valutajustering for alle sekundærlandsaker i gjeldende måned")
+    fun lagMånedligValuttajusteringTask(
+        @PathVariable fagsakId: Long,
+    ): ResponseEntity<Ressurs<String>> {
+        if (!envService.erProd()) {
+            månedligValutajusteringScheduler.lagMånedligValuttajusteringTask()
         } else {
             throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
         }
