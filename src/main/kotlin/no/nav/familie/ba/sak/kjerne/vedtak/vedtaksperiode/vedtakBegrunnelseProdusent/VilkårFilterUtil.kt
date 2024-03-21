@@ -51,9 +51,10 @@ fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResult
 }
 
 private fun List<UtdypendeVilkårsvurdering>.harMinstEnTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean {
-    return utdypendeVilkårsvurderingFraSanityBegrunnelse.isEmpty() || utdypendeVilkårsvurderingFraSanityBegrunnelse.any {
-        it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = this)
-    }
+    return utdypendeVilkårsvurderingFraSanityBegrunnelse.isEmpty() ||
+        utdypendeVilkårsvurderingFraSanityBegrunnelse.any {
+            it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = this)
+        }
 }
 
 private fun finnUtgjørendeVilkår(
