@@ -314,7 +314,7 @@ class ForvalterController(
     fun justerValuta(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<Ressurs<String>> {
-        if (!envService.erProd()) {
+        if (envService.erDev()) {
             autovedtakMånedligValutajusteringService.utførMånedligValutajusteringPåFagsak(fagsakId = fagsakId, måned = YearMonth.now())
         } else {
             throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
@@ -325,7 +325,7 @@ class ForvalterController(
     @PostMapping("/start-valutajustering-scheduler")
     @Operation(summary = "Start valutajustering for alle sekundærlandsaker i gjeldende måned")
     fun lagMånedligValuttajusteringTask(): ResponseEntity<Ressurs<String>> {
-        if (!envService.erProd()) {
+        if (envService.erDev()) {
             månedligValutajusteringScheduler.lagMånedligValutajusteringTask()
         } else {
             throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
