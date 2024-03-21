@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilUtdypendeVilkårsvurderinger
+import no.nav.familie.ba.sak.kjerne.brev.domene.stemmerMedVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -53,21 +53,22 @@ fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResult
 }
 
 private fun Collection<UtdypendeVilkårsvurdering>.erLik(
-    utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>?,
+    utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>,
 ): Boolean {
     val utdypendeVilkårPåVilkårResultat = this.toSet()
-    val utdypendeVilkårPåSanityBegrunnelse: Set<UtdypendeVilkårsvurdering> =
-        utdypendeVilkårsvurderingFraSanityBegrunnelse?.tilUtdypendeVilkårsvurderinger()?.toSet() ?: emptySet()
 
-    return utdypendeVilkårPåSanityBegrunnelse.isEmpty() || utdypendeVilkårPåVilkårResultat == utdypendeVilkårPåSanityBegrunnelse
+    val altErLikt = utdypendeVilkårsvurderingFraSanityBegrunnelse.all {
+        it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = utdypendeVilkårPåVilkårResultat)
+    }
+
+    return utdypendeVilkårsvurderingFraSanityBegrunnelse.isEmpty() || altErLikt
 }
 
 private fun Collection<UtdypendeVilkårsvurdering>.harMinstEttTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean {
     val utdypendeVilkårPåVilkårResultat = this.toSet()
-    val utdypendeVilkårTriggerePåSanityBegrunnelse: Set<UtdypendeVilkårsvurdering> =
-        utdypendeVilkårsvurderingFraSanityBegrunnelse.tilUtdypendeVilkårsvurderinger().toSet()
-
-    return utdypendeVilkårPåVilkårResultat.any { utdypendeVilkårTriggerePåSanityBegrunnelse.contains(it) }
+    return utdypendeVilkårsvurderingFraSanityBegrunnelse.any {
+        it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = utdypendeVilkårPåVilkårResultat)
+    }
 }
 
 private fun finnUtgjørendeVilkår(
