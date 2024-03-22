@@ -262,7 +262,7 @@ fun lagAndelTilkjentYtelse(
     prosent: BigDecimal = BigDecimal(100),
     kildeBehandlingId: Long? = behandling.id,
     differanseberegnetPeriodebeløp: Int? = null,
-    id: Long = 0,
+    id: Long = Random.nextLong(),
     sats: Int = sats(ytelseType),
     kalkulertUtbetalingsbeløp: Int? = null,
     nasjonaltPeriodebeløp: Int = beløp,
