@@ -227,9 +227,10 @@ fun IVedtakBegrunnelse.hentSanityBegrunnelse(grunnlag: GrunnlagForBegrunnelse) =
 
 private fun hentPersonerMedUtbetalingIPeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
     begrunnelsesGrunnlagPerPerson.filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
+        val endretUtbetalingAndelIPeriode = begrunnelseGrunnlagForPersonIPeriode.dennePerioden.endretUtbetalingAndel
         // Det regnes som utbetaling dersom utbetalingsbeløp er større enn null, eller dersom det er delt bosted eller differanseberegning som er årsaken til andel med 0kr utbetaling
         begrunnelseGrunnlagForPersonIPeriode.dennePerioden.andeler.toList().any { it.kalkulertUtbetalingsbeløp > 0 || (it.differanseberegnetPeriodebeløp != null && it.differanseberegnetPeriodebeløp < 0) } ||
-            (begrunnelseGrunnlagForPersonIPeriode.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED && begrunnelseGrunnlagForPersonIPeriode.dennePerioden.endretUtbetalingAndel?.prosent == BigDecimal.ZERO)
+            (endretUtbetalingAndelIPeriode?.årsak == Årsak.DELT_BOSTED && endretUtbetalingAndelIPeriode.prosent == BigDecimal.ZERO)
     }.keys
 
 private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentPersonerMedAvslagIPeriode() =
