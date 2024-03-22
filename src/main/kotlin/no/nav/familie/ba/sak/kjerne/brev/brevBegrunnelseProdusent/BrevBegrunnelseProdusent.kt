@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -226,7 +227,9 @@ fun IVedtakBegrunnelse.hentSanityBegrunnelse(grunnlag: GrunnlagForBegrunnelse) =
 
 private fun hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
     begrunnelsesGrunnlagPerPerson.filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
-        begrunnelseGrunnlagForPersonIPeriode.dennePerioden.andeler.toList().isNotEmpty()
+        // Det regnes som utbetaling dersom utbetalingsbeløp er større enn null, eller dersom det er delt bosted eller differanseberegning som er årsaken til andel med 0kr utbetaling
+        begrunnelseGrunnlagForPersonIPeriode.dennePerioden.andeler.toList().any { it.kalkulertUtbetalingsbeløp > 0 || (it.differanseberegnetPeriodebeløp != null && it.differanseberegnetPeriodebeløp < 0) } ||
+            begrunnelseGrunnlagForPersonIPeriode.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
     }.keys
 
 private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentPersonerMedAvslagIPeriode() =
