@@ -225,7 +225,7 @@ fun IVedtakBegrunnelse.hentSanityBegrunnelse(grunnlag: GrunnlagForBegrunnelse) =
         is Standardbegrunnelse -> grunnlag.sanityBegrunnelser[this]
     } ?: throw Feil("Fant ikke tilsvarende sanitybegrunnelse for $this")
 
-private fun hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
+private fun hentPersonerMedUtbetalingIPeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
     begrunnelsesGrunnlagPerPerson.filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
         // Det regnes som utbetaling dersom utbetalingsbeløp er større enn null, eller dersom det er delt bosted eller differanseberegning som er årsaken til andel med 0kr utbetaling
         begrunnelseGrunnlagForPersonIPeriode.dennePerioden.andeler.toList().any { it.kalkulertUtbetalingsbeløp > 0 || (it.differanseberegnetPeriodebeløp != null && it.differanseberegnetPeriodebeløp < 0) } ||
@@ -259,7 +259,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
 ): List<LocalDate> {
     val barnPåBegrunnelse = personerIBegrunnelse.filter { it.type == PersonType.BARN }
     val barnMedUtbetaling =
-        hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
+        hentPersonerMedUtbetalingIPeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
     val uregistrerteBarnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn
 
     val barnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
