@@ -19,9 +19,9 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.LANDKODER
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
@@ -72,7 +72,7 @@ class BegrunnelseTeksterStepDefinition {
     var valutakurs = mutableMapOf<Long, List<Valutakurs>>()
     var utenlandskPeriodebeløp = mutableMapOf<Long, List<UtenlandskPeriodebeløp>>()
     var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
-    var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
+    var tilkjenteYtelser = mutableMapOf<Long, TilkjentYtelse>()
     var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
     var overgangsstønader = mutableMapOf<Long, List<InternPeriodeOvergangsstønad>>()
     var dagensDato: LocalDate = LocalDate.now()
@@ -204,7 +204,7 @@ class BegrunnelseTeksterStepDefinition {
      */
     @Og("med andeler tilkjent ytelse for begrunnelse")
     fun `med andeler tilkjent ytelse for begrunnelse`(dataTable: DataTable) {
-        andelerTilkjentYtelse = lagAndelerTilkjentYtelse(dataTable, behandlinger, persongrunnlag)
+        tilkjenteYtelser = lagTilkjentYtelse(dataTable, behandlinger, persongrunnlag)
     }
 
     /**
@@ -268,7 +268,7 @@ class BegrunnelseTeksterStepDefinition {
                 it.tilUtvidetVedtaksperiodeMedBegrunnelser(
                     personopplysningGrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
                     andelerTilkjentYtelse =
-                        andelerTilkjentYtelse[behandlingId]?.map {
+                        tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.map {
                             AndelTilkjentYtelseMedEndreteUtbetalinger(
                                 it,
                                 endredeUtbetalinger[behandlingId] ?: emptySet(),
@@ -298,7 +298,7 @@ class BegrunnelseTeksterStepDefinition {
                 behandling = vedtak.behandling,
                 kompetanser = kompetanser[behandlingId] ?: emptyList(),
                 endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
-                andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
+                andelerTilkjentYtelse = tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList(),
                 perioderOvergangsstønad = overgangsstønader[behandlingId] ?: emptyList(),
                 uregistrerteBarn = emptyList(),
                 utenlandskPeriodebeløp = utenlandskPeriodebeløp[behandlingId] ?: emptyList(),
@@ -315,7 +315,7 @@ class BegrunnelseTeksterStepDefinition {
                     behandling = forrigeVedtak.behandling,
                     kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                     endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
-                    andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
+                    andelerTilkjentYtelse = tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList(),
                     perioderOvergangsstønad = overgangsstønader[forrigeBehandlingId] ?: emptyList(),
                     uregistrerteBarn = emptyList(),
                     utenlandskPeriodebeløp = utenlandskPeriodebeløp[forrigeBehandlingId] ?: emptyList(),
@@ -470,11 +470,11 @@ class BegrunnelseTeksterStepDefinition {
         dataTable: DataTable,
     ) {
         val beregnetTilkjentYtelse =
-            andelerTilkjentYtelse[behandlingId]!!
+            tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList()!!
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         val forventedeAndeler =
-            lagAndelerTilkjentYtelse(dataTable, behandlinger, persongrunnlag)[behandlingId]!!
+            lagTilkjentYtelse(dataTable, behandlinger, persongrunnlag)[behandlingId]!!.andelerTilkjentYtelse
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         assertThat(beregnetTilkjentYtelse)

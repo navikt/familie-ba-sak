@@ -928,12 +928,12 @@ private fun mockAndelTilkjentYtelseRepository(dataFraCucumber: BegrunnelseTekste
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } answers {
         val behandlingId = firstArg<Long>()
-        dataFraCucumber.andelerTilkjentYtelse[behandlingId] ?: emptyList()
+        dataFraCucumber.tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList()
     }
     every { andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(any()) } answers {
         val fagsakId = firstArg<Long>()
         val behandlingId = dataFraCucumber.behandlinger.filter { it.value.fagsak.id == fagsakId }.filter { it.value.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.value.id }?.key
-        dataFraCucumber.andelerTilkjentYtelse[behandlingId] ?: emptyList()
+        dataFraCucumber.tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList()
     }
     return andelTilkjentYtelseRepository
 }
@@ -942,7 +942,7 @@ private fun mockAndelerTilkjentYtelseOgEndreteUtbetalingerService(dataFraCucumbe
     val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
     every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(any()) } answers {
         val behandlingId = firstArg<Long>()
-        val andelerTilkjentYtelse = dataFraCucumber.andelerTilkjentYtelse[behandlingId] ?: emptyList()
+        val andelerTilkjentYtelse = dataFraCucumber.tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList()
         val endredeUtbetalinger = dataFraCucumber.endredeUtbetalinger[behandlingId] ?: emptyList()
 
         andelerTilkjentYtelse.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(endredeUtbetalinger)
@@ -951,7 +951,7 @@ private fun mockAndelerTilkjentYtelseOgEndreteUtbetalingerService(dataFraCucumbe
         andelerTilkjentYtelseOgEndreteUtbetalingerService.finnEndreteUtbetalingerMedAndelerTilkjentYtelse(any())
     } answers {
         val behandlingId = firstArg<Long>()
-        val andelerTilkjentYtelse = dataFraCucumber.andelerTilkjentYtelse[behandlingId] ?: emptyList()
+        val andelerTilkjentYtelse = dataFraCucumber.tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList()
         val endredeUtbetalinger = dataFraCucumber.endredeUtbetalinger[behandlingId] ?: emptyList()
 
         endredeUtbetalinger.tilEndretUtbetalingAndelMedAndelerTilkjentYtelse(andelerTilkjentYtelse)
@@ -980,48 +980,26 @@ private fun mockTilkjentYtelseRepository(dataFraCucumber: BegrunnelseTeksterStep
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     every { tilkjentYtelseRepository.findByBehandling(any()) } answers {
         val behandlingId = firstArg<Long>()
-        val andeler = dataFraCucumber.andelerTilkjentYtelse[behandlingId]
-        TilkjentYtelse(
-            behandling = dataFraCucumber.behandlinger[behandlingId]!!,
-            andelerTilkjentYtelse = andeler!!.toMutableSet(),
-            opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now(),
-        )
+        dataFraCucumber.tilkjenteYtelser[behandlingId]!!
     }
     every { tilkjentYtelseRepository.findByBehandlingOptional(any()) } answers {
         val behandlingId = firstArg<Long>()
-        val andeler = dataFraCucumber.andelerTilkjentYtelse[behandlingId]
-        andeler?.let {
-            TilkjentYtelse(
-                behandling = dataFraCucumber.behandlinger[behandlingId]!!,
-                andelerTilkjentYtelse = andeler.toMutableSet(),
-                opprettetDato = LocalDate.now(),
-                endretDato = LocalDate.now(),
-            )
-        }
+        dataFraCucumber.tilkjenteYtelser[behandlingId]!!
     }
     every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just runs
     every { tilkjentYtelseRepository.save(any()) } answers {
         val tilkjentYtelse = firstArg<TilkjentYtelse>()
-        dataFraCucumber.andelerTilkjentYtelse[tilkjentYtelse.behandling.id] = tilkjentYtelse.andelerTilkjentYtelse.toList().map { it.copy(id = Random.nextLong()) }
+        dataFraCucumber.tilkjenteYtelser[tilkjentYtelse.behandling.id] = tilkjentYtelse
         tilkjentYtelse
     }
     every { tilkjentYtelseRepository.saveAndFlush(any()) } answers {
         val tilkjentYtelse = firstArg<TilkjentYtelse>()
-        dataFraCucumber.andelerTilkjentYtelse[tilkjentYtelse.behandling.id] = tilkjentYtelse.andelerTilkjentYtelse.toList().map { it.copy(id = Random.nextLong()) }
+        dataFraCucumber.tilkjenteYtelser[tilkjentYtelse.behandling.id] = tilkjentYtelse
         tilkjentYtelse
     }
     every { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(any()) } answers {
         val behandlingId = firstArg<Long>()
-        val andeler = dataFraCucumber.andelerTilkjentYtelse[behandlingId]
-        andeler?.let {
-            TilkjentYtelse(
-                behandling = dataFraCucumber.behandlinger[behandlingId]!!,
-                andelerTilkjentYtelse = andeler.toMutableSet(),
-                opprettetDato = LocalDate.now(),
-                endretDato = LocalDate.now(),
-            )
-        }
+        dataFraCucumber.tilkjenteYtelser[behandlingId]
     }
     return tilkjentYtelseRepository
 }

@@ -39,8 +39,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.splittOgSlåSammen
@@ -432,7 +432,7 @@ fun lagPersonGrunnlag(dataTable: DataTable): Map<Long, PersonopplysningGrunnlag>
         }.associateBy { it.behandlingId }
 }
 
-fun lagAndelerTilkjentYtelse(
+fun lagTilkjentYtelse(
     dataTable: DataTable,
     behandlinger: MutableMap<Long, Behandling>,
     personGrunnlag: Map<Long, PersonopplysningGrunnlag>,
@@ -466,8 +466,16 @@ fun lagAndelerTilkjentYtelse(
         differanseberegnetPeriodebeløp = differanseberegnetBeløp,
         nasjonaltPeriodebeløp = sats,
     )
-}.groupBy { it.behandlingId }
-    .toMutableMap()
+}.groupBy {
+    it.behandlingId
+}.mapValues { (behandlingId, andeler) ->
+    TilkjentYtelse(
+        behandling = behandlinger.finnBehandling(behandlingId),
+        andelerTilkjentYtelse = andeler.toMutableSet(),
+        opprettetDato = LocalDate.now(),
+        endretDato = LocalDate.now(),
+    )
+}.toMutableMap()
 
 fun lagOvergangsstønad(
     dataTable: DataTable,
@@ -508,7 +516,7 @@ fun lagVedtaksPerioder(
     utenlandskPeriodebeløp: Map<Long, List<UtenlandskPeriodebeløp>>,
     valutakurs: Map<Long, List<Valutakurs>>,
     endredeUtbetalinger: Map<Long, List<EndretUtbetalingAndel>>,
-    andelerTilkjentYtelse: Map<Long, List<AndelTilkjentYtelse>>,
+    tilkjenteYtelser: Map<Long, TilkjentYtelse>,
     overstyrteEndringstidspunkt: Map<Long, LocalDate?>,
     overgangsstønad: Map<Long, List<InternPeriodeOvergangsstønad>?>,
     uregistrerteBarn: List<BarnMedOpplysninger>,
@@ -526,7 +534,7 @@ fun lagVedtaksPerioder(
             behandling = vedtak.behandling,
             kompetanser = kompetanser[behandlingId] ?: emptyList(),
             endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
-            andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
+            andelerTilkjentYtelse = tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList(),
             perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
             uregistrerteBarn = uregistrerteBarn,
             utenlandskPeriodebeløp = utenlandskPeriodebeløp[behandlingId] ?: emptyList(),
@@ -546,7 +554,7 @@ fun lagVedtaksPerioder(
                 behandling = forrigeVedtak.behandling,
                 kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                 endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
-                andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
+                andelerTilkjentYtelse = tilkjenteYtelser[forrigeBehandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList(),
                 perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
                 uregistrerteBarn = emptyList(),
                 utenlandskPeriodebeløp = utenlandskPeriodebeløp[forrigeBehandlingId] ?: emptyList(),
