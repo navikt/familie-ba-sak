@@ -62,7 +62,6 @@ Egenskap: Automatisk valutajustering
       | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD   |                              | 17.02.1990 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 01.06.2023 | 30.09.2025 | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
-
       | 2       | UNDER_18_ÅR      |                              | 29.10.2019 | 28.10.2037 | OPPFYLT  | Nei                  |                      |                  |
       | 2       | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 29.10.2019 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 2       | BOR_MED_SØKER    | BARN_BOR_I_NORGE_MED_SØKER   | 29.10.2019 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
@@ -81,5 +80,6 @@ Egenskap: Automatisk valutajustering
       | DKK         | 29.02.2024     | 3    |
 
     Så forvent disse behandlingene
-      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus  | Behandlingstype | Behandlingssteg       | Underkategori |
-      | 3            | 1        | 1                   | ENDRET_UTBETALING   | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | IVERKSETTER_VEDTAK | Revurdering     | IVERKSETT_MOT_OPPDRAG | ORDINÆR       |
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus     | Behandlingstype       | Behandlingssteg           | Underkategori |
+      | 3            | 1        | 1                   | ENDRET_UTBETALING   | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | IVERKSETTER_VEDTAK    | Revurdering           | IVERKSETT_MOT_OPPDRAG     | ORDINÆR       |
+      | 2            | 1        | 1                   | INNVILGET           | SØKNAD                   | Nei                       | EØS                | SATT_PÅ_MASKINELL_VENT| FØRSTEGANGSBEHANDLING | REGISTRERE_PERSONGRUNNLAG | ORDINÆR       |
