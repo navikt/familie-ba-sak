@@ -11,6 +11,7 @@ class FeatureToggleConfig {
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
         const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
         const val HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD = "familie-ba-sak.hent-identer-til-psys-fra-infotrygd"
+        const val KAN_STARTE_VALUTAJUSTERING = "familie-ba-sak.kan-starte-valutajustering"
 
         // satsendring
         // Oppretter satsendring-tasker for de som ikke har fått ny task
