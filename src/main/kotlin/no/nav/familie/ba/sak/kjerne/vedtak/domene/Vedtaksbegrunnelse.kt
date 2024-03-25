@@ -13,9 +13,11 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.støtterFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
@@ -50,11 +52,12 @@ class Vedtaksbegrunnelse(
     }
 }
 
-fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() =
+fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse(sanityBegrunnelser: List<SanityBegrunnelse>) =
     RestVedtaksbegrunnelse(
         standardbegrunnelse = this.standardbegrunnelse.enumnavnTilString(),
         vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
         vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse.enumnavnTilString(),
+        støtterFritekst = this.standardbegrunnelse.støtterFritekst(sanityBegrunnelser),
     )
 
 enum class Begrunnelsetype {

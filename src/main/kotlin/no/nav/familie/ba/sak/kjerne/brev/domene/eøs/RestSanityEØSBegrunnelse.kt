@@ -27,6 +27,7 @@ data class RestSanityEØSBegrunnelse(
     val hjemlerEOSForordningen883: List<String>?,
     val hjemlerEOSForordningen987: List<String>?,
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>?,
+    val stotterFritekst: Boolean?,
     val eosVilkaar: List<String>? = null,
     val ovrigeTriggere: List<String>? = emptyList(),
     @Deprecated("Skal bruke periodeResultatForPerson i stedet")
