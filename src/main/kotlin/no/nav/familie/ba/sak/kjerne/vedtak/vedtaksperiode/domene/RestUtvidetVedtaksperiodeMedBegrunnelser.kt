@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene
 
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -16,13 +18,16 @@ data class RestUtvidetVedtaksperiodeMedBegrunnelser(
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
 )
 
-fun UtvidetVedtaksperiodeMedBegrunnelser.tilRestUtvidetVedtaksperiodeMedBegrunnelser(): RestUtvidetVedtaksperiodeMedBegrunnelser {
+fun UtvidetVedtaksperiodeMedBegrunnelser.tilRestUtvidetVedtaksperiodeMedBegrunnelser(
+    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
+): RestUtvidetVedtaksperiodeMedBegrunnelser {
     return RestUtvidetVedtaksperiodeMedBegrunnelser(
         id = this.id,
         fom = this.fom,
         tom = this.tom,
         type = this.type,
-        begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() } + this.eøsBegrunnelser.map { it.tilRestVedtaksbegrunnelse() },
+        begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse(sanityBegrunnelser) } + this.eøsBegrunnelser.map { it.tilRestVedtaksbegrunnelse(sanityEØSBegrunnelser) },
         fritekster = this.fritekster,
         utbetalingsperiodeDetaljer = this.utbetalingsperiodeDetaljer,
         gyldigeBegrunnelser = this.gyldigeBegrunnelser.map { it.enumnavnTilString() },
