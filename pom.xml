@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.3</version>
+        <version>3.2.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -24,7 +24,7 @@
         <prosessering.version>2.20240214140223_83c31de</prosessering.version>
         <felles.version>3.20240320161838_b9c4bdb</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20240320115313_5db97db</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20240322142416_c108f69</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20240208132236_bce5777</utbetalingsgenerator.version>
@@ -48,7 +48,6 @@
         <testcontainers.postgresql.version>1.19.7</testcontainers.postgresql.version>
         <unleash.version>9.2.0</unleash.version>
         <maven.model.version>3.9.6</maven.model.version>
-        <jackson.module.kotlin.version>2.17.0</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <fpsak-tidslinje.version>2.7.1</fpsak-tidslinje.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
@@ -134,7 +133,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
-            <version>${jackson.module.kotlin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
