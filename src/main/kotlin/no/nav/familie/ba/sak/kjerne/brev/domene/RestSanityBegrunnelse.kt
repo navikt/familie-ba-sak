@@ -41,6 +41,7 @@ data class RestSanityBegrunnelse(
     val regelverk: String?,
     val brevPeriodeType: String?,
     val begrunnelseTypeForPerson: String?,
+    val slaattAvIProduksjon: Boolean?,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
         if (apiNavn == null || apiNavn !in Standardbegrunnelse.entries.map { it.sanityApiNavn }) return null
@@ -98,6 +99,7 @@ data class RestSanityBegrunnelse(
             tema = (regelverk).finnEnumverdi<Tema>(apiNavn),
             periodeType = (brevPeriodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
             begrunnelseTypeForPerson = begrunnelseTypeForPerson.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
+            slåttAvIProduksjon = slaattAvIProduksjon ?: false,
         )
     }
 }
