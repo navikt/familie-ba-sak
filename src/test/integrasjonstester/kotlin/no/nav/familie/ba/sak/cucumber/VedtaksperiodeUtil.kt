@@ -141,8 +141,10 @@ fun lagBehandlinger(
         val behandlingstype = parseValgfriEnum<BehandlingType>(Domenebegrep.BEHANDLINGSTYPE, rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING
         val behandlingssteg = parseValgfriEnum<StegType>(Domenebegrep.BEHANDLINGSSTEG, rad) ?: StegType.REGISTRERE_PERSONGRUNNLAG
         val underkategori = parseValgfriEnum<BehandlingUnderkategori>(Domenebegrep.UNDERKATEGORI, rad) ?: BehandlingUnderkategori.ORDINÆR
+        val endretTidspunkt = parseValgfriDato(Domenebegrep.ENDRET_TIDSPUNKT, rad) ?: LocalDate.now()
 
         lagBehandling(
+            endretTidspunkt = endretTidspunkt.atStartOfDay(),
             fagsak = fagsak,
             årsak = behandlingÅrsak ?: BehandlingÅrsak.SØKNAD,
             resultat = behandlingResultat ?: Behandlingsresultat.IKKE_VURDERT,
@@ -152,7 +154,9 @@ fun lagBehandlinger(
             behandlingType = behandlingstype,
             førsteSteg = behandlingssteg,
             underkategori = underkategori,
-        ).copy(id = behandlingId)
+        ).copy(id = behandlingId).also {
+            it.endretTidspunkt = endretTidspunkt.atStartOfDay()
+        }
     }
 
 fun lagVilkårsvurdering(

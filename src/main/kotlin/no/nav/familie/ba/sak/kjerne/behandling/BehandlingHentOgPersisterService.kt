@@ -119,6 +119,13 @@ class BehandlingHentOgPersisterService(
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
+    fun hentBehandlinger(
+        fagsakId: Long,
+        status: BehandlingStatus,
+    ): List<Behandling> {
+        return behandlingRepository.finnBehandlinger(fagsakId, status)
+    }
+
     fun hentFerdigstilteBehandlinger(fagsakId: Long): List<Behandling> =
         hentBehandlinger(fagsakId).filter { it.erVedtatt() }
 

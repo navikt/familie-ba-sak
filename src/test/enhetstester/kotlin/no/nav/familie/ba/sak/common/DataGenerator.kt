@@ -179,6 +179,7 @@ fun lagBehandling(
     status: BehandlingStatus = initStatus(),
     aktivertTid: LocalDateTime = LocalDateTime.now(),
     id: Long = nesteBehandlingId(),
+    endretTidspunkt: LocalDateTime = LocalDateTime.now(),
 ) =
     Behandling(
         id = id,
@@ -192,6 +193,7 @@ fun lagBehandling(
         status = status,
         aktivertTidspunkt = aktivertTid,
     ).also {
+        it.endretTidspunkt = endretTidspunkt
         it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
     }
 
@@ -260,7 +262,7 @@ fun lagAndelTilkjentYtelse(
     prosent: BigDecimal = BigDecimal(100),
     kildeBehandlingId: Long? = behandling.id,
     differanseberegnetPeriodebeløp: Int? = null,
-    id: Long = 0,
+    id: Long = Random.nextLong(),
     sats: Int = sats(ytelseType),
     kalkulertUtbetalingsbeløp: Int? = null,
     nasjonaltPeriodebeløp: Int = beløp,
