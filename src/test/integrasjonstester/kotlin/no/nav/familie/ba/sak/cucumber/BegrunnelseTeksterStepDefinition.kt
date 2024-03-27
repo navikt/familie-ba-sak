@@ -76,6 +76,7 @@ class BegrunnelseTeksterStepDefinition {
     var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
     var overgangsstønader = mutableMapOf<Long, List<InternPeriodeOvergangsstønad>>()
     var dagensDato: LocalDate = LocalDate.now()
+    val erProduksjon: Boolean = true
 
     var gjeldendeBehandlingId: Long? = null
 

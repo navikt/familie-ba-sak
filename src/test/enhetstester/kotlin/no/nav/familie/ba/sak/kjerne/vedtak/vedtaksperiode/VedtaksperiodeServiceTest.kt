@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
@@ -43,6 +44,7 @@ class VedtaksperiodeServiceTest {
     private val refusjonEøsRepository = mockk<RefusjonEøsRepository>()
     private val integrasjonClient = mockk<IntegrasjonClient>()
     private val kompetanseRepository = mockk<KompetanseRepository>()
+    private val envService = mockk<EnvService>()
 
     private val vedtaksperiodeService =
         spyk(
@@ -65,6 +67,7 @@ class VedtaksperiodeServiceTest {
                 integrasjonClient = integrasjonClient,
                 valutakursRepository = mockk(),
                 utenlandskPeriodebeløpRepository = mockk(),
+                envService = envService,
             ),
         )
 
