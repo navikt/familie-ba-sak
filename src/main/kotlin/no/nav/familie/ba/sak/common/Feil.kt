@@ -3,8 +3,11 @@ package no.nav.familie.ba.sak.common
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar
+import no.nav.familie.log.mdc.MDCConstants
+import org.slf4j.MDC
 import org.springframework.http.HttpStatus
 import java.time.LocalDateTime
+import java.util.UUID
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -14,7 +17,12 @@ open class Feil(
     open val httpStatus: HttpStatus = HttpStatus.OK,
     open val throwable: Throwable? = null,
     override val cause: Throwable? = throwable,
-) : RuntimeException(message)
+    open var callId: String? = null,
+) : RuntimeException(message) {
+    init {
+        callId = MDC.get(MDCConstants.MDC_CALL_ID)
+    }
+}
 
 open class FunksjonellFeil(
     open val melding: String,
@@ -22,7 +30,12 @@ open class FunksjonellFeil(
     open val httpStatus: HttpStatus = HttpStatus.OK,
     open val throwable: Throwable? = null,
     override val cause: Throwable? = throwable,
-) : RuntimeException(melding)
+    open var callId: String? = null,
+) : RuntimeException(melding) {
+    init {
+        callId = MDC.get(MDCConstants.MDC_CALL_ID) ?: UUID.randomUUID().toString()
+    }
+}
 
 class VilkårFeil(
     melding: String,

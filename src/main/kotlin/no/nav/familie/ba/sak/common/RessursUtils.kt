@@ -91,7 +91,7 @@ object RessursUtils {
         Sentry.captureException(feil)
         return ResponseEntity.status(feil.httpStatus).body(
             Ressurs.failure(
-                frontendFeilmelding = feil.frontendFeilmelding,
+                frontendFeilmelding = feil.frontendFeilmelding + "\nreferanse=${feil.callId}",
                 errorMessage = feil.message.toString(),
             ),
         )
@@ -105,7 +105,7 @@ object RessursUtils {
 
         return ResponseEntity.status(funksjonellFeil.httpStatus).body(
             Ressurs.funksjonellFeil(
-                frontendFeilmelding = funksjonellFeil.frontendFeilmelding,
+                frontendFeilmelding = funksjonellFeil.frontendFeilmelding + "\nreferanse=${funksjonellFeil.callId}",
                 melding = funksjonellFeil.melding,
             ),
         )
