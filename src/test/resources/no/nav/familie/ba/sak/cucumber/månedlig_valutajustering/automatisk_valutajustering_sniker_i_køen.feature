@@ -68,8 +68,6 @@ Egenskap: Automatisk valutajustering
       | 2       | LOVLIG_OPPHOLD   |                              | 29.10.2019 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 2       | GIFT_PARTNERSKAP |                              | 29.10.2019 |            | OPPFYLT  | Nei                  |                      |                  |
 
-
-
     Og med kompetanser for begrunnelse
       | AktørId | Fra dato   | Til dato | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 2       | 01.11.2019 |          | NORGE_ER_SEKUNDÆRLAND | 2            | ARBEIDER         | I_ARBEID                  | DK                    | DK                             | DK                  |
@@ -80,6 +78,6 @@ Egenskap: Automatisk valutajustering
       | DKK         | 29.02.2024     | 3    |
 
     Så forvent disse behandlingene
-      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus     | Behandlingstype       | Behandlingssteg           | Underkategori |
-      | 3            | 1        | 1                   | ENDRET_UTBETALING   | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | IVERKSETTER_VEDTAK    | Revurdering           | IVERKSETT_MOT_OPPDRAG     | ORDINÆR       |
-      | 2            | 1        | 1                   | INNVILGET           | SØKNAD                   | Nei                       | EØS                | SATT_PÅ_MASKINELL_VENT| FØRSTEGANGSBEHANDLING | REGISTRERE_PERSONGRUNNLAG | ORDINÆR       |
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus | Behandlingstype       | Behandlingssteg           | Underkategori |
+      | 3            | 1        | 1                   | ENDRET_UTBETALING   | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | AVSLUTTET         | Revurdering           | BEHANDLING_AVSLUTTET      | ORDINÆR       |
+      | 2            | 1        | 1                   | INNVILGET           | SØKNAD                   | Nei                       | EØS                 | UTREDES           | FØRSTEGANGSBEHANDLING | REGISTRERE_PERSONGRUNNLAG | ORDINÆR       |
