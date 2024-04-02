@@ -6,7 +6,6 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.spyk
 import no.nav.familie.ba.sak.common.LocalDateProvider
-import no.nav.familie.ba.sak.common.RealDateProvider
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -20,8 +19,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.lagUtbetalingsoppdrag
-import no.nav.familie.ba.sak.integrasjoner.økonomi.lagUtbetalingsperiode
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -43,6 +41,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -73,8 +72,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -89,8 +90,10 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.steg.FerdigstillBehandling
 import no.nav.familie.ba.sak.kjerne.steg.IverksettMotOppdrag
 import no.nav.familie.ba.sak.kjerne.steg.RegistrerPersongrunnlag
+import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdrag
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilBehandlingsresultatService
@@ -116,18 +119,22 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublis
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
-import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdrag
-import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
+import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.aop.framework.AopProxyUtils
 import org.springframework.core.annotation.AnnotationUtils
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.random.Random
+
+val logger: Logger = LoggerFactory.getLogger("CucumberMock")
 
 class CucumberMock(
     dataFraCucumber: BegrunnelseTeksterStepDefinition,
@@ -175,7 +182,7 @@ class CucumberMock(
     val arbeidsfordelingService = mockArbeidsfordelingService()
     val behandlingMetrikker = mockBehandlingMetrikker()
     val tilbakekrevingService = mockTilbakekrevingService()
-    val taskRepository = mockTaskRepositoryWrapper(this)
+    val taskRepository = MockTasker().mockTaskRepositoryWrapper(this)
 
     val behandlingstemaService =
         BehandlingstemaService(
@@ -351,7 +358,7 @@ class CucumberMock(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             valutakursRepository = valutakursRepository,
-            localDateProvider = RealDateProvider(),
+            localDateProvider = mockedDateProvider,
         )
     val tilkjentYtelseValideringService =
         TilkjentYtelseValideringService(
@@ -367,27 +374,17 @@ class CucumberMock(
             behandlingService = behandlingService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            utbetalingsoppdragGenerator = mockUtbetalingsgenerator(),
+            utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(),
         )
 
-    val økonomiService = mockØkonomiservice()
-
-    private fun mockØkonomiservice(): ØkonomiService {
-        val økonomiService =
-            spyk(
-                ØkonomiService(
-                    økonomiKlient = mockk(),
-                    behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-                    tilkjentYtelseValideringService = tilkjentYtelseValideringService,
-                    utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
-                    tilkjentYtelseRepository = tilkjentYtelseRepository,
-                ),
-            )
-
-        every { økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(any(), any(), any()) } returns mockk()
-
-        return økonomiService
-    }
+    val økonomiService =
+        ØkonomiService(
+            økonomiKlient = mockØkonomiKlient(),
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            tilkjentYtelseValideringService = tilkjentYtelseValideringService,
+            utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
+        )
 
     val håndterIverksettMotØkonomiSteg =
         IverksettMotOppdrag(
@@ -399,15 +396,12 @@ class CucumberMock(
             taskRepository = taskRepository,
         )
 
-    val statusfraOppdrag =
+    val statusFraOppdrag =
         StatusFraOppdrag(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            vedtakService = vedtakService,
             økonomiService = økonomiService,
-            tilkjentYtelseValideringService = tilkjentYtelseValideringService,
-            totrinnskontrollService = totrinnskontrollService,
             taskRepository = taskRepository,
         )
+
     val snikeIKøenService =
         spyk(
             SnikeIKøenService(
@@ -442,10 +436,21 @@ class CucumberMock(
             localDateProvider = mockedDateProvider,
         )
 
+    val ferdigstillBehandlingSteg =
+        FerdigstillBehandling(
+            fagsakService = fagsakService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            beregningService = beregningService,
+            behandlingService = behandlingService,
+            behandlingMetrikker = behandlingMetrikker,
+            loggService = loggService,
+            snikeIKøenService = snikeIKøenService,
+        )
+
     val stegService =
         spyk(
             StegService(
-                steg = listOf(registrerPersongrunnlag, vilkårsvurderingSteg, behandlingsresultatSteg, håndterIverksettMotØkonomiSteg),
+                steg = listOf(registrerPersongrunnlag, vilkårsvurderingSteg, behandlingsresultatSteg, håndterIverksettMotØkonomiSteg, statusFraOppdrag, ferdigstillBehandlingSteg),
                 fagsakService = fagsakService,
                 behandlingService = behandlingService,
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -502,6 +507,7 @@ private fun mockOppgaveService(): OppgaveService {
 private fun mockSettPåVentService(): SettPåVentService {
     val settPåVentService = mockk<SettPåVentService>()
     every { settPåVentService.settBehandlingPåVent(any(), any(), any()) } returns lagSettPåVent()
+    every { settPåVentService.finnAktivSettPåVentPåBehandling(any()) } returns null
     return settPåVentService
 }
 
@@ -514,6 +520,7 @@ private fun mockTilbakekrevingService(): TilbakekrevingService {
 private fun mockBehandlingMetrikker(): BehandlingMetrikker {
     val behandlingMetrikker = mockk<BehandlingMetrikker>()
     every { behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(any()) } just runs
+    every { behandlingMetrikker.oppdaterBehandlingMetrikker(any()) } just runs
     return behandlingMetrikker
 }
 
@@ -553,16 +560,6 @@ private fun mockVilkårService(dataFraCucumber: BegrunnelseTeksterStepDefinition
         dataFraCucumber.vilkårsvurderinger[behandlingsId]!!
     }
     return vilkårService
-}
-
-private fun mockUtbetalingsgenerator(): UtbetalingsoppdragGenerator {
-    val utbetalingsoppdragGenerator = mockk<UtbetalingsoppdragGenerator>()
-    val beregnetUtbetalingsoppdrag = mockk<BeregnetUtbetalingsoppdrag>()
-    val beregnetUtbetalingsoppdragLongId = mockk<BeregnetUtbetalingsoppdragLongId>()
-
-    every { utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(any(), any(), any(), any(), any(), any()) } returns BeregnetUtbetalingsoppdragLongId(lagUtbetalingsoppdrag(listOf(lagUtbetalingsperiode())), mockk())
-
-    return utbetalingsoppdragGenerator
 }
 
 private fun mockPersongrunnlagService(dataFraCucumber: BegrunnelseTeksterStepDefinition): PersongrunnlagService {
@@ -627,6 +624,13 @@ private fun mockFagsakService(dataFraCucumber: BegrunnelseTeksterStepDefinition)
     }
     every { fagsakService.hentFagsakerPåPerson(any()) } answers {
         listOf(dataFraCucumber.fagsaker.values.first())
+    }
+    every { fagsakService.oppdaterStatus(any(), any()) } answers {
+        val fagsak = firstArg<Fagsak>()
+        val nyStatus = secondArg<FagsakStatus>()
+
+        fagsak.status = nyStatus
+        fagsak
     }
     return fagsakService
 }
@@ -883,6 +887,8 @@ private fun mockLoggService(): LoggService {
     every { loggService.opprettBehandlingLogg(any()) } just runs
     every { loggService.opprettSettPåMaskinellVent(any(), any()) } just runs
     every { loggService.opprettVilkårsvurderingLogg(any(), any(), any()) } returns null
+    every { loggService.opprettFerdigstillBehandling(any()) } just runs
+    every { loggService.opprettTattAvMaskinellVent(any()) } just runs
     every { loggService.hentLoggForBehandling(any()) } answers {
         val behandlingId = firstArg<Long>()
         listOf(
@@ -933,9 +939,16 @@ private fun mockAndelTilkjentYtelseRepository(dataFraCucumber: BegrunnelseTekste
     every { andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(any()) } answers {
         val fagsakId = firstArg<Long>()
         val behandlingId = dataFraCucumber.behandlinger.filter { it.value.fagsak.id == fagsakId }.filter { it.value.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.value.id }?.key
-        dataFraCucumber.tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList()
+        val andelerPåBehandling = dataFraCucumber.tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse ?: emptyList()
+        andelerPåBehandling.tilSisteAndelPerAktørOgType()
     }
     return andelTilkjentYtelseRepository
+}
+
+fun Collection<AndelTilkjentYtelse>.tilSisteAndelPerAktørOgType(): List<AndelTilkjentYtelse> {
+    val andelerGruppertPåAktørOgType = groupBy { Pair(it.aktør, it.type) }
+    val sisteAndelPerAktørOgType = andelerGruppertPåAktørOgType.map { it.value.maxBy { it.stønadFom } }
+    return sisteAndelPerAktørOgType
 }
 
 private fun mockAndelerTilkjentYtelseOgEndreteUtbetalingerService(dataFraCucumber: BegrunnelseTeksterStepDefinition): AndelerTilkjentYtelseOgEndreteUtbetalingerService {
@@ -984,7 +997,7 @@ private fun mockTilkjentYtelseRepository(dataFraCucumber: BegrunnelseTeksterStep
     }
     every { tilkjentYtelseRepository.findByBehandlingOptional(any()) } answers {
         val behandlingId = firstArg<Long>()
-        dataFraCucumber.tilkjenteYtelser[behandlingId]!!
+        dataFraCucumber.tilkjenteYtelser[behandlingId]
     }
     every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just runs
     every { tilkjentYtelseRepository.save(any()) } answers {
@@ -994,8 +1007,10 @@ private fun mockTilkjentYtelseRepository(dataFraCucumber: BegrunnelseTeksterStep
     }
     every { tilkjentYtelseRepository.saveAndFlush(any()) } answers {
         val tilkjentYtelse = firstArg<TilkjentYtelse>()
-        dataFraCucumber.tilkjenteYtelser[tilkjentYtelse.behandling.id] = tilkjentYtelse
-        tilkjentYtelse
+
+        val tilkjentYtelseMedUnikIdPåAndeler = tilkjentYtelse.copy(andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.map { it.copy(id = Random.nextLong()) }.toMutableSet())
+        dataFraCucumber.tilkjenteYtelser[tilkjentYtelse.behandling.id] = tilkjentYtelseMedUnikIdPåAndeler
+        tilkjentYtelseMedUnikIdPåAndeler
     }
     every { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(any()) } answers {
         val behandlingId = firstArg<Long>()
@@ -1071,6 +1086,11 @@ private fun mockBehandlingHentOgPersisterService(
         val fagsakId = firstArg<Long>()
         dataFraCucumber.behandlinger.values.filter { it.fagsak.id == fagsakId }
     }
+    every { behandlingHentOgPersisterService.hentBehandlinger(any(), any()) } answers {
+        val fagsakId = firstArg<Long>()
+        val status = secondArg<BehandlingStatus>()
+        dataFraCucumber.behandlinger.values.filter { it.fagsak.id == fagsakId && it.status == status }
+    }
     return behandlingHentOgPersisterService
 }
 
@@ -1100,23 +1120,62 @@ private fun mockPersonopplysningGrunnlagRepository(behandlingIdTilPersongrunnlag
     return personopplysningGrunnlagRepository
 }
 
-private fun mockTaskRepositoryWrapper(cucumberMock: CucumberMock): TaskRepositoryWrapper {
-    val taskRepositoryWrapper = mockk<TaskRepositoryWrapper>()
-    every { taskRepositoryWrapper.save(any()) } answers {
-        val task = firstArg<Task>()
-        val tasktyype =
-            cucumberMock.taskservices.map { it }.map { asynctaskstep ->
-                val aClass = AopProxyUtils.ultimateTargetClass(asynctaskstep)
-                val annotation = AnnotationUtils.findAnnotation(aClass, TaskStepBeskrivelse::class.java)
-                requireNotNull(annotation) { "annotasjon mangler" }
-                annotation.taskStepType to asynctaskstep
-            }.toMap()
+private fun mockØkonomiKlient(): ØkonomiKlient {
+    val økonomiKlient = mockk<ØkonomiKlient>()
+    every { økonomiKlient.iverksettOppdrag(any()) } returns ""
+    every { økonomiKlient.hentStatus(any()) } returns OppdragStatus.KVITTERT_OK
+    return økonomiKlient
+}
 
-        tasktyype[task.type]?.doTask(task)
-        tasktyype[task.type]?.onCompletion(task)
-        task
+private class MockTasker() {
+    val tasker = mutableListOf<Pair<AsyncTaskStep, Task>>()
+
+    // Sørger for at taskene blir kjørt i riktig rekkefølge og at vi ikke starter på en ny task før den forrige er ferdig.
+    fun kjørTaskOmIkkeAnnenTaskKjører(
+        taskStep: AsyncTaskStep,
+        task: Task,
+    ) {
+        tasker.add(taskStep to task)
+        if (tasker.size == 1) {
+            kjørNesteTask()
+        }
     }
-    return taskRepositoryWrapper
+
+    fun kjørNesteTask() {
+        if (tasker.isNotEmpty()) {
+            val (taskStep, task) = tasker.first()
+            taskStep.doTask(task)
+            taskStep.onCompletion(task)
+            tasker.removeAt(0)
+            if (tasker.isNotEmpty()) {
+                kjørNesteTask()
+            }
+        }
+    }
+
+    fun mockTaskRepositoryWrapper(cucumberMock: CucumberMock): TaskRepositoryWrapper {
+        val taskRepositoryWrapper = mockk<TaskRepositoryWrapper>()
+        every { taskRepositoryWrapper.save(any()) } answers {
+            val task = firstArg<Task>()
+            val tasktyper =
+                cucumberMock.taskservices.map { it }.map { asynctaskstep ->
+                    val aClass = AopProxyUtils.ultimateTargetClass(asynctaskstep)
+                    val annotation = AnnotationUtils.findAnnotation(aClass, TaskStepBeskrivelse::class.java)
+                    requireNotNull(annotation) { "annotasjon mangler" }
+                    annotation.taskStepType to asynctaskstep
+                }.toMap()
+
+            val asyncTaskStep = tasktyper[task.type]
+            if (asyncTaskStep != null) {
+                kjørTaskOmIkkeAnnenTaskKjører(asyncTaskStep, task)
+            } else {
+                logger.warn("Fant ikke taskstep for tasktype ${task.type} i cucumberMock. Kjører ikke tasken.")
+            }
+
+            task
+        }
+        return taskRepositoryWrapper
+    }
 }
 
 class MockedDateProvider(val mockedDate: LocalDate) : LocalDateProvider {
