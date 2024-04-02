@@ -84,6 +84,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import java.math.BigDecimal
 import java.time.LocalDate
+import kotlin.random.Random
 
 fun Map<Long, Behandling>.finnBehandling(behandlingId: Long) =
     this[behandlingId] ?: error("Finner ikke behandling med id $behandlingId")
@@ -454,6 +455,7 @@ fun lagTilkjentYtelse(
         ) ?: beløp
 
     lagAndelTilkjentYtelse(
+        id = Random.nextLong(),
         fom = parseDato(Domenebegrep.FRA_DATO, rad).toYearMonth(),
         tom = parseDato(Domenebegrep.TIL_DATO, rad).toYearMonth(),
         behandling = behandlinger.finnBehandling(behandlingId),
