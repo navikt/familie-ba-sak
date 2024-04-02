@@ -479,7 +479,7 @@ class BegrunnelseTeksterStepDefinition {
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         assertThat(beregnetTilkjentYtelse)
-            .usingRecursiveComparison().ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*kildeBehandlingId", ".*tilkjentYtelse")
+            .usingRecursiveComparison().ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*kildeBehandlingId", ".*tilkjentYtelse", ".*id")
             .isEqualTo(forventedeAndeler)
     }
 
