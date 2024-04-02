@@ -316,7 +316,7 @@ class BegrunnelseTeksterStepDefinition {
                     behandling = forrigeVedtak.behandling,
                     kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                     endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
-                    andelerTilkjentYtelse = tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList(),
+                    andelerTilkjentYtelse = tilkjenteYtelser[forrigeBehandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList(),
                     perioderOvergangsstønad = overgangsstønader[forrigeBehandlingId] ?: emptyList(),
                     uregistrerteBarn = emptyList(),
                     utenlandskPeriodebeløp = utenlandskPeriodebeløp[forrigeBehandlingId] ?: emptyList(),
