@@ -483,7 +483,7 @@ fun lagTilkjentYtelse(
         endretDato = LocalDate.now(),
     ).also { tilkjentYtelse ->
         if (tilkjentYtelse.behandling.status == BehandlingStatus.AVSLUTTET) {
-            val vedtak = vedtaksliste.single { it.behandling.id == tilkjentYtelse.behandling.id }
+            val vedtak = vedtaksliste.single { it.behandling.id == tilkjentYtelse.behandling.id && it.aktiv }
             tilkjentYtelse.oppdaterMedUtbetalingsoppdrag(vedtak)
         }
     }
