@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
-import no.nav.familie.ba.sak.datagenerator.settpåvent.lagSettPåVent
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -36,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRe
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentRepository
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
@@ -405,11 +405,20 @@ class CucumberMock(
             taskRepository = taskRepository,
         )
 
+    val settPåVentService =
+        SettPåVentService(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            saksstatistikkEventPublisher = saksstatistikkEventPublisher,
+            settPåVentRepository = mockSettPåVentRepository(),
+            loggService = loggService,
+            oppgaveService = oppgaveService,
+        )
+
     val snikeIKøenService =
         spyk(
             SnikeIKøenService(
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-                påVentService = mockSettPåVentService(),
+                påVentService = settPåVentService,
                 loggService = mockLoggService(),
                 tilbakestillBehandlingService = tilbakestillBehandlingService,
             ),
@@ -507,11 +516,11 @@ private fun mockOppgaveService(): OppgaveService {
     return oppgaveService
 }
 
-private fun mockSettPåVentService(): SettPåVentService {
-    val settPåVentService = mockk<SettPåVentService>()
-    every { settPåVentService.settBehandlingPåVent(any(), any(), any()) } returns lagSettPåVent()
-    every { settPåVentService.finnAktivSettPåVentPåBehandling(any()) } returns null
-    return settPåVentService
+fun mockSettPåVentRepository(): SettPåVentRepository {
+    val settPåVentRepository = mockk<SettPåVentRepository>()
+
+    every { settPåVentRepository.findByBehandlingIdAndAktiv(any(), any()) } returns null
+    return settPåVentRepository
 }
 
 private fun mockTilbakekrevingService(): TilbakekrevingService {
