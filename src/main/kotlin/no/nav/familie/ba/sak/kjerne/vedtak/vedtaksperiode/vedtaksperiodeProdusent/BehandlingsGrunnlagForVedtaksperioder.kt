@@ -423,7 +423,7 @@ private fun lagGrunnlagForVilkårOgAndel(
         VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
             vilkårResultaterForVedtaksperiode =
                 vilkårResultater
-                    ?: error("vilkårResultatene burde alltid finnes om vi andeler."),
+                    ?: error("vilkårResultatene burde alltid finnes om vi har andeler."),
             person = person,
             andeler = andeler,
         )
