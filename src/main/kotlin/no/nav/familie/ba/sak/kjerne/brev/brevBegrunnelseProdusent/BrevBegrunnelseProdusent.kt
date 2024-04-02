@@ -236,11 +236,6 @@ private fun hentPersonerMedUtbetalingIPeriode(begrunnelsesGrunnlagPerPerson: Map
         erUtbetalingsbeløpStørreEnnNull || erNullPgaDifferanseberegning || erNullPgaDeltBosted
     }.keys
 
-private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentPersonerMedAvslagIPeriode() =
-    filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
-        !begrunnelseGrunnlagForPersonIPeriode.dennePerioden.eksplisitteAvslagForPerson.isNullOrEmpty()
-    }.keys
-
 private fun hentPersonerMedAndelIForrigePeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
     begrunnelsesGrunnlagPerPerson.filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
         !begrunnelseGrunnlagForPersonIPeriode.forrigePeriode?.andeler?.toList().isNullOrEmpty()
