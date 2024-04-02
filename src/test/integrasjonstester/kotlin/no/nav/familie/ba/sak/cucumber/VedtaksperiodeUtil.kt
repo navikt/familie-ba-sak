@@ -30,7 +30,11 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriStringList
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriÅrMåned
+import no.nav.familie.ba.sak.cucumber.mock.tilSisteAndelPerAktørOgType
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
+import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdaterAndelerMedPeriodeOffset
+import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdaterTilkjentYtelseMedUtbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -77,6 +81,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -436,6 +441,7 @@ fun lagTilkjentYtelse(
     dataTable: DataTable,
     behandlinger: MutableMap<Long, Behandling>,
     personGrunnlag: Map<Long, PersonopplysningGrunnlag>,
+    vedtaksliste: List<Vedtak>,
 ) = dataTable.asMaps().map { rad ->
     val aktørId = VedtaksperiodeMedBegrunnelserParser.parseAktørId(rad)
     val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
@@ -446,6 +452,7 @@ fun lagTilkjentYtelse(
             VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.SATS,
             rad,
         ) ?: beløp
+
     lagAndelTilkjentYtelse(
         fom = parseDato(Domenebegrep.FRA_DATO, rad).toYearMonth(),
         tom = parseDato(Domenebegrep.TIL_DATO, rad).toYearMonth(),
@@ -474,8 +481,35 @@ fun lagTilkjentYtelse(
         andelerTilkjentYtelse = andeler.toMutableSet(),
         opprettetDato = LocalDate.now(),
         endretDato = LocalDate.now(),
-    )
+    ).also { tilkjentYtelse ->
+        if (tilkjentYtelse.behandling.status == BehandlingStatus.AVSLUTTET) {
+            val vedtak = vedtaksliste.single { it.behandling.id == tilkjentYtelse.behandling.id }
+            tilkjentYtelse.oppdaterMedUtbetalingsoppdrag(vedtak)
+        }
+    }
 }.toMutableMap()
+
+private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
+    vedtak: Vedtak,
+) {
+    val beregnetUtbetalingsoppdrag =
+        UtbetalingsoppdragGenerator().lagUtbetalingsoppdrag(
+            "saksbehandlerId",
+            vedtak = vedtak,
+            forrigeTilkjentYtelse = null,
+            nyTilkjentYtelse = this,
+            sisteAndelPerKjede = andelerTilkjentYtelse.tilSisteAndelPerAktørOgType().associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) },
+            erSimulering = false,
+        )
+    oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
+        tilkjentYtelse = this,
+        utbetalingsoppdrag = beregnetUtbetalingsoppdrag.utbetalingsoppdrag,
+    )
+    oppdaterAndelerMedPeriodeOffset(
+        tilkjentYtelse = this,
+        andelerMedPeriodeId = beregnetUtbetalingsoppdrag.andeler,
+    )
+}
 
 fun lagOvergangsstønad(
     dataTable: DataTable,

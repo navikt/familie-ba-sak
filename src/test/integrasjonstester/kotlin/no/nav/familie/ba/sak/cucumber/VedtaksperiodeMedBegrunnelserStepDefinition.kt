@@ -138,7 +138,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
      */
     @Og("med andeler tilkjent ytelse")
     fun `med andeler tilkjent ytelse`(dataTable: DataTable) {
-        tilkjenteYtelser = lagTilkjentYtelse(dataTable, behandlinger, persongrunnlag)
+        tilkjenteYtelser = lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)
     }
 
     /**

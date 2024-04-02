@@ -204,7 +204,7 @@ class BegrunnelseTeksterStepDefinition {
      */
     @Og("med andeler tilkjent ytelse for begrunnelse")
     fun `med andeler tilkjent ytelse for begrunnelse`(dataTable: DataTable) {
-        tilkjenteYtelser = lagTilkjentYtelse(dataTable, behandlinger, persongrunnlag)
+        tilkjenteYtelser = lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)
     }
 
     /**
@@ -474,7 +474,7 @@ class BegrunnelseTeksterStepDefinition {
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         val forventedeAndeler =
-            lagTilkjentYtelse(dataTable, behandlinger, persongrunnlag)[behandlingId]!!.andelerTilkjentYtelse
+            lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)[behandlingId]!!.andelerTilkjentYtelse
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         assertThat(beregnetTilkjentYtelse)
