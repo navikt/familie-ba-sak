@@ -73,15 +73,16 @@ class SnikeIKøenService(
         val tid4TimerSiden = LocalDateTime.now().minusHours(4)
         if (aktivOgÅpenBehandling.endretTidspunkt.isAfter(tid4TimerSiden)) {
             logger.info(
-                "Behandling=$behandlingId har endretTid=${aktivOgÅpenBehandling.endretTidspunkt} " +
-                    "kan ikke sette behandlingen på maskinell vent",
+                "Behandling=$behandlingId har endretTid=${aktivOgÅpenBehandling.endretTidspunkt}. " +
+                    "Det er altså mindre enn 4 timer siden behandlingen var endret, og vi ønsker derfor ikke å sette behandlingen på maskinell vent",
             )
             return false
         }
         if (sisteLogghendelse.opprettetTidspunkt.isAfter(tid4TimerSiden)) {
             logger.info(
                 "Behandling=$behandlingId siste logginslag er " +
-                    "type=${sisteLogghendelse.type} tid=${sisteLogghendelse.opprettetTidspunkt}, $loggSuffix",
+                    "type=${sisteLogghendelse.type} tid=${sisteLogghendelse.opprettetTidspunkt}, $loggSuffix. " +
+                    "Det er altså mindre enn 4 timer siden siste logginslag, og vi ønsker derfor ikke å sette behandlingen på maskinell vent",
             )
             return false
         }
