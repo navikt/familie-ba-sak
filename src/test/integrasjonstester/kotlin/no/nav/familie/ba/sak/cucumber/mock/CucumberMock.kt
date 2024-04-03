@@ -419,7 +419,7 @@ class CucumberMock(
             SnikeIKøenService(
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                 påVentService = settPåVentService,
-                loggService = mockLoggService(),
+                loggService = loggService,
                 tilbakestillBehandlingService = tilbakestillBehandlingService,
             ),
         )
