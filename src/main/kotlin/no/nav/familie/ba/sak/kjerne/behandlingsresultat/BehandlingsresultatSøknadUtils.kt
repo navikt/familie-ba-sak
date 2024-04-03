@@ -118,7 +118,7 @@ object BehandlingsresultatSøknadUtils {
                                     )
                                     throw FunksjonellFeil(
                                         melding = "Andel er satt til 0 kr, men det skyldes verken differanseberegning eller endret utbetaling andel",
-                                        frontendFeilmelding = "Du må fylle ut en endret utbetalingsperiode for alle personene det gjelder"
+                                        frontendFeilmelding = "Du må fylle ut en endret utbetalingsperiode for alle personene det gjelder",
                                     )
                                 }
                             Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
