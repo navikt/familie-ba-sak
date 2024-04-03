@@ -496,7 +496,7 @@ private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
 ) {
     val beregnetUtbetalingsoppdrag =
         UtbetalingsoppdragGenerator().lagUtbetalingsoppdrag(
-            "saksbehandlerId",
+            saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
             forrigeTilkjentYtelse = null,
             nyTilkjentYtelse = this,
