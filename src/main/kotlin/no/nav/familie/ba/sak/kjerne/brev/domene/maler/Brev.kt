@@ -33,6 +33,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     ),
     INNHENTE_OPPLYSNINGER_INSTITUSJON(false, "innhenteOpplysningerInstitusjon", "Innhente opplysninger institusjon"),
     HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "Henlegge trukket søknad"),
+    HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON(false, "henleggeTrukketSoknadInstitusjon", "Henlegge trukket søknad institusjon"),
     VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "Varsel om revurdering"),
     VARSEL_OM_REVURDERING_INSTITUSJON(false, "varselOmRevurderingInstitusjon", "Varsel om revurdering institusjon"),
     VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14(
@@ -154,6 +155,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
 
             INFORMASJONSBREV_DELT_BOSTED,
             HENLEGGE_TRUKKET_SØKNAD,
+            HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON,
             SVARTIDSBREV,
             SVARTIDSBREV_INSTITUSJON,
             FORLENGET_SVARTIDSBREV,
@@ -197,6 +199,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_REVURDERING_SAMBOER -> Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING_SAMBOER
             INFORMASJONSBREV_DELT_BOSTED -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_DELT_BOSTED
             HENLEGGE_TRUKKET_SØKNAD -> Dokumenttype.BARNETRYGD_HENLEGGE_TRUKKET_SØKNAD
+            HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON -> Dokumenttype.BARNETRYGD_HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON
             SVARTIDSBREV -> Dokumenttype.BARNETRYGD_SVARTIDSBREV
             FORLENGET_SVARTIDSBREV -> Dokumenttype.BARNETRYGD_FORLENGET_SVARTIDSBREV
             INFORMASJONSBREV_FØDSEL_VERGEMÅL -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_VERGEMÅL
@@ -247,6 +250,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
                 INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED -> Distribusjonstype.VIKTIG
                 INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT -> Distribusjonstype.VIKTIG
                 HENLEGGE_TRUKKET_SØKNAD -> Distribusjonstype.ANNET
+                HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON -> Distribusjonstype.ANNET
                 VARSEL_OM_REVURDERING -> Distribusjonstype.VIKTIG
                 VARSEL_OM_REVURDERING_INSTITUSJON -> Distribusjonstype.VIKTIG
                 VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> Distribusjonstype.VIKTIG

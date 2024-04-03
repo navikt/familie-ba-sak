@@ -37,14 +37,19 @@ class HenleggBehandling(
         behandling: Behandling,
         data: RestHenleggBehandlingInfo,
     ): StegType {
+        val fagsak = behandling.fagsak
+
         if (data.årsak == HenleggÅrsak.SØKNAD_TRUKKET) {
+            val mottakerIdent = fagsak.institusjon?.orgNummer ?: fagsak.aktør.aktivFødselsnummer()
+            val brevmal = fagsak.institusjon?.let { Brevmal.HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON } ?: Brevmal.HENLEGGE_TRUKKET_SØKNAD
+
             dokumentService.sendManueltBrev(
                 behandling = behandling,
-                fagsakId = behandling.fagsak.id,
+                fagsakId = fagsak.id,
                 manueltBrevRequest =
                     ManueltBrevRequest(
-                        mottakerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-                        brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
+                        mottakerIdent = mottakerIdent,
+                        brevmal = brevmal,
                     ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService),
             )
         }
@@ -68,7 +73,7 @@ class HenleggBehandling(
         }
 
         oppgaverTekniskVedlikeholdPgaSatsendring.forEach {
-            logger.info("Teknisk opphør pga satsendring. Fjerner behandlesAvApplikasjon for oppgaveId=${it.gsakId} slik at saksbehandler kan lukke den fra Gosys. fagsakId=${behandling.fagsak.id}, behandlingId=${behandling.id}")
+            logger.info("Teknisk opphør pga satsendring. Fjerner behandlesAvApplikasjon for oppgaveId=${it.gsakId} slik at saksbehandler kan lukke den fra Gosys. fagsakId=${fagsak.id}, behandlingId=${behandling.id}")
             oppgaveService.fjernBehandlesAvApplikasjon(listOf(it.gsakId.toLong()))
         }
 
