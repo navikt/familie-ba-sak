@@ -22,7 +22,7 @@ Egenskap: Automatisk valutajustering
       | 2            | 2       | BARN       | 29.10.2019  |              |
 
 
-  Scenario: Skalkunne kjøre automatisk valutajustering og snike i køen
+  Scenario: Skal kunne kjøre automatisk valutajustering og snike i køen
     Og følgende dagens dato 13.03.2024
     Og lag personresultater for begrunnelse for behandling 1
 
