@@ -5,8 +5,8 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.spyk
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.LocalDateProvider
-import no.nav.familie.ba.sak.common.RealDateProvider
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -150,6 +150,7 @@ class CucumberMock(
     val behandlingMetrikker = mockBehandlingMetrikker()
     val tilbakekrevingService = mockTilbakekrevingService()
     val taskRepository = mockTaskRepositoryWrapper()
+    val envService = mockEnvService(dataFraCucumber)
 
     val behandlingstemaService =
         BehandlingstemaService(
@@ -228,6 +229,7 @@ class CucumberMock(
             integrasjonClient = mockk(),
             valutakursRepository = valutakursRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            envService = envService,
         )
 
     val behandlingService =
@@ -325,7 +327,7 @@ class CucumberMock(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             valutakursRepository = valutakursRepository,
-            localDateProvider = RealDateProvider(),
+            localDateProvider = mockedDateProvider,
         )
 
     val registrerPersongrunnlag =
@@ -933,6 +935,15 @@ private fun oppdaterEllerLagreBehandling(
 
     dataFraCucumber.behandlinger[behandling.id] = behandling
     return behandling
+}
+
+private fun mockEnvService(dataFraCucumber: BegrunnelseTeksterStepDefinition): EnvService {
+    val envService = mockk<EnvService>()
+    val erProduksjon = dataFraCucumber.erProduksjon
+
+    every { envService.erProd() } returns erProduksjon
+
+    return envService
 }
 
 private fun mockVedtaksperiodeService(): VedtaksperiodeService {
