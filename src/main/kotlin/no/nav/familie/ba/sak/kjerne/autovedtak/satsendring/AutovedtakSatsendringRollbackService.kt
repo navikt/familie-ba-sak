@@ -50,7 +50,7 @@ class AutovedtakSatsendringRollbackService(
         if (aktivOgÅpenBehandling != null) {
             val brukerHarÅpenBehandlingSvar = hentBrukerHarÅpenBehandlingSvar(aktivOgÅpenBehandling)
             if (brukerHarÅpenBehandlingSvar == SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI) {
-                snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
+                snikeIKøenService.settAktivBehandlingPåMaskinellVent(
                     aktivOgÅpenBehandling.id,
                     SettPåMaskinellVentÅrsak.SATSENDRING,
                 )

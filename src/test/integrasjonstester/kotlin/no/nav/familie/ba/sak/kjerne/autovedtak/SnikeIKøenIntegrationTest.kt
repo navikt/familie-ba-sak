@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService.Companion.BEHANDLING_FERDIG
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -236,7 +237,7 @@ class SnikeIKøenIntegrationTest(
 @TestConfiguration
 class SnikeIKøenServiceTestConfig(
     @Autowired
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired
     private val loggRepository: LoggRepository,
     @Autowired
@@ -251,7 +252,7 @@ class SnikeIKøenServiceTestConfig(
     @Primary
     fun snikeIKøenService() =
         object : SnikeIKøenService(
-            behandlingRepository,
+            behandlingHentOgPersisterService,
             påVentService,
             loggService,
             tilbakestillBehandlingService,

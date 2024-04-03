@@ -207,7 +207,7 @@ class AutovedtakStegService(
             BehandlingStatus.SATT_PÅ_VENT,
             -> {
                 if (snikeIKøenService.kanSnikeForbi(åpenBehandling)) {
-                    snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
+                    snikeIKøenService.settAktivBehandlingPåMaskinellVent(
                         åpenBehandling.id,
                         årsak = autovedtaktype.tilMaskinellVentÅrsak(),
                     )

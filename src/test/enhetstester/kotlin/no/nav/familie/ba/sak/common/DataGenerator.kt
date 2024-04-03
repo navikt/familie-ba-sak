@@ -179,6 +179,7 @@ fun lagBehandling(
     status: BehandlingStatus = initStatus(),
     aktivertTid: LocalDateTime = LocalDateTime.now(),
     id: Long = nesteBehandlingId(),
+    endretTidspunkt: LocalDateTime = LocalDateTime.now(),
 ) =
     Behandling(
         id = id,
@@ -192,6 +193,7 @@ fun lagBehandling(
         status = status,
         aktivertTidspunkt = aktivertTid,
     ).also {
+        it.endretTidspunkt = endretTidspunkt
         it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
     }
 
