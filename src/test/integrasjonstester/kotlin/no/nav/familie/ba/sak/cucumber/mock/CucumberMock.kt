@@ -5,7 +5,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.spyk
-import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilPersonEnkel
@@ -150,7 +149,6 @@ class CucumberMock(
     val behandlingMetrikker = mockBehandlingMetrikker()
     val tilbakekrevingService = mockTilbakekrevingService()
     val taskRepository = mockTaskRepositoryWrapper()
-    val envService = mockEnvService(dataFraCucumber)
 
     val behandlingstemaService =
         BehandlingstemaService(
@@ -229,7 +227,6 @@ class CucumberMock(
             integrasjonClient = mockk(),
             valutakursRepository = valutakursRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
-            envService = envService,
         )
 
     val behandlingService =
@@ -935,15 +932,6 @@ private fun oppdaterEllerLagreBehandling(
 
     dataFraCucumber.behandlinger[behandling.id] = behandling
     return behandling
-}
-
-private fun mockEnvService(dataFraCucumber: BegrunnelseTeksterStepDefinition): EnvService {
-    val envService = mockk<EnvService>()
-    val erProduksjon = dataFraCucumber.erProduksjon
-
-    every { envService.erProd() } returns erProduksjon
-
-    return envService
 }
 
 private fun mockVedtaksperiodeService(): VedtaksperiodeService {
