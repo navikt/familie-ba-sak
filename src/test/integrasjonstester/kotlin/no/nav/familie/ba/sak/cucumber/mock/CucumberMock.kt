@@ -183,7 +183,6 @@ class CucumberMock(
     val behandlingMetrikker = mockBehandlingMetrikker()
     val tilbakekrevingService = mockTilbakekrevingService()
     val taskRepository = MockTasker().mockTaskRepositoryWrapper(this)
-    val envService = mockEnvService(dataFraCucumber)
 
     val behandlingstemaService =
         BehandlingstemaService(
