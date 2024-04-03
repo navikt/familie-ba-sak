@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import org.assertj.core.api.Assertions.assertThat
@@ -15,11 +16,16 @@ class SanityServiceTest {
     @MockK
     private lateinit var sanityKlient: SanityKlient
 
+    @MockK
+    private lateinit var envService: EnvService
+
     @InjectMockKs
     private lateinit var sanityService: SanityService
 
     @Test
     fun `hentSanityEØSBegrunnelser - skal ikke filtrere bort nye begrunnelser tilknyttet EØS praksisendring`() {
+        every { envService.erProd() } returns false
+
         every { sanityKlient.hentEØSBegrunnelser() } returns
             EØSStandardbegrunnelse.values().map {
                 SanityEØSBegrunnelse(
