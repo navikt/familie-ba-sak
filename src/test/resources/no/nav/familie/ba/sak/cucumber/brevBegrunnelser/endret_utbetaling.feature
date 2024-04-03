@@ -3,7 +3,7 @@
 
 Egenskap: Brevbegrunnelse ved endret utbeetaling
 
-  Bakgrunn:
+  Scenario: Skal gi to brevbegrunnelse når vi har delt bosted med flere avtaletidspunkt samme måned.
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
@@ -18,7 +18,6 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
       | 1            | 2       | BARN       | 15.06.2012  |
       | 1            | 3       | BARN       | 16.06.2016  |
 
-  Scenario: Skal gi to brevbegrunnelse når vi har delt bosted med flere avtaletidspunkt samme måned.
     Og følgende dagens dato 24.10.2023
     Og lag personresultater for begrunnelse for behandling 1
 
