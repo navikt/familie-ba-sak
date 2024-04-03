@@ -24,6 +24,8 @@ class SanityServiceTest {
 
     @Test
     fun `hentSanityEØSBegrunnelser - skal ikke filtrere bort nye begrunnelser tilknyttet EØS praksisendring`() {
+        every { envService.erProd() } returns false
+
         every { sanityKlient.hentEØSBegrunnelser() } returns
             EØSStandardbegrunnelse.values().map {
                 SanityEØSBegrunnelse(
