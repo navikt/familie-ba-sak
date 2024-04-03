@@ -61,8 +61,8 @@ class VilkårsvurderingService(
     }
 
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> =
-        standardbegrunnelserTilNedtrekksmenytekster(sanityService.hentSanityBegrunnelser()) +
-            eøsStandardbegrunnelserTilNedtrekksmenytekster(sanityService.hentSanityEØSBegrunnelser())
+        standardbegrunnelserTilNedtrekksmenytekster(sanityService.hentSanityBegrunnelser(filtrerPåMiljø = true)) +
+            eøsStandardbegrunnelserTilNedtrekksmenytekster(sanityService.hentSanityEØSBegrunnelser(filtrerPåMiljø = true))
 
     fun hentTidligsteVilkårsvurderingKnyttetTilMigrering(behandlingId: Long): YearMonth? {
         val vilkårsvurdering =

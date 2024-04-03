@@ -122,6 +122,7 @@ fun Iterable<VilkårResultatForVedtaksperiode>.erOppfyltForBarn(): Boolean =
 data class AndelForVedtaksperiode(
     val kalkulertUtbetalingsbeløp: Int,
     val nasjonaltPeriodebeløp: Int?,
+    val differanseberegnetPeriodebeløp: Int?,
     val type: YtelseType,
     val prosent: BigDecimal,
     val sats: Int,
@@ -129,6 +130,7 @@ data class AndelForVedtaksperiode(
     constructor(andelTilkjentYtelse: AndelTilkjentYtelse) : this(
         kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
         nasjonaltPeriodebeløp = andelTilkjentYtelse.nasjonaltPeriodebeløp,
+        differanseberegnetPeriodebeløp = andelTilkjentYtelse.differanseberegnetPeriodebeløp,
         type = andelTilkjentYtelse.type,
         prosent = andelTilkjentYtelse.prosent,
         sats = andelTilkjentYtelse.sats,

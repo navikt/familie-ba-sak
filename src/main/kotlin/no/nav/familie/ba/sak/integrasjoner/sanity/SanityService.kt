@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.sanity
 
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
@@ -13,13 +14,20 @@ import org.springframework.stereotype.Service
 @Service
 class SanityService(
     private val sanityKlient: SanityKlient,
+    private val envService: EnvService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Cacheable("sanityBegrunnelser", cacheManager = "shortCache")
-    fun hentSanityBegrunnelser(): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    fun hentSanityBegrunnelser(filtrerPåMiljø: Boolean = false): Map<Standardbegrunnelse, SanityBegrunnelse> {
         val enumPåApiNavn = Standardbegrunnelse.values().associateBy { it.sanityApiNavn }
-        val sanityBegrunnelser = sanityKlient.hentBegrunnelser()
+
+        val sanityBegrunnelser =
+            when (envService.erProd()) {
+                true -> sanityKlient.hentBegrunnelser().filter { !it.slåttAvIProduksjon }
+                false -> sanityKlient.hentBegrunnelser()
+            }
+
         logManglerSanityBegrunnelseForEnum(enumPåApiNavn, sanityBegrunnelser, "SanityBegrunnelse")
         return sanityBegrunnelser
             .mapNotNull {
@@ -34,10 +42,15 @@ class SanityService(
     }
 
     @Cacheable("sanityEØSBegrunnelser", cacheManager = "shortCache")
-    fun hentSanityEØSBegrunnelser(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
+    fun hentSanityEØSBegrunnelser(filtrerPåMiljø: Boolean = false): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
         val enumPåApiNavn = EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
 
-        val sanityEØSBegrunnelser = sanityKlient.hentEØSBegrunnelser()
+        val sanityEØSBegrunnelser =
+            when (envService.erProd()) {
+                true -> sanityKlient.hentEØSBegrunnelser().filter { !it.slåttAvIProduksjon }
+                false -> sanityKlient.hentEØSBegrunnelser()
+            }
+
         logManglerSanityBegrunnelseForEnum(enumPåApiNavn, sanityEØSBegrunnelser, "SanityEØSBegrunnelse")
         return sanityEØSBegrunnelser
             .mapNotNull {
