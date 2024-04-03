@@ -21,7 +21,7 @@ class SnikeIKøenService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
-    fun settAktivBehandlingTilPåMaskinellVent(
+    fun settAktivBehandlingPåMaskinellVent(
         behandlingId: Long,
         årsak: SettPåMaskinellVentÅrsak,
     ) {

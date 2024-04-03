@@ -72,7 +72,7 @@ class AutovedtakMånedligValutajusteringService(
 
         if (aktivOgÅpenBehandling != null) {
             if (snikeIKøenService.kanSnikeForbi(aktivOgÅpenBehandling)) {
-                snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
+                snikeIKøenService.settAktivBehandlingPåMaskinellVent(
                     aktivOgÅpenBehandling.id,
                     SettPåMaskinellVentÅrsak.MÅNEDLIG_VALUTAJUSTERING,
                 )
