@@ -7,16 +7,16 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 
 fun mockPersonidentService(
     dataFraCucumber: BegrunnelseTeksterStepDefinition,
-    småbarnstilleggBehandlingId: Long,
+    nyBehanldingId: Long,
 ): PersonidentService {
     val personidentService = mockk<PersonidentService>()
     every { personidentService.hentOgLagreAktør(any(), any()) } answers {
         val personIdent = firstArg<String>()
-        dataFraCucumber.persongrunnlag[småbarnstilleggBehandlingId]!!.personer.single { it.aktør.aktivFødselsnummer() == personIdent }.aktør
+        dataFraCucumber.persongrunnlag[nyBehanldingId]!!.personer.single { it.aktør.aktivFødselsnummer() == personIdent }.aktør
     }
     every { personidentService.hentAktør(any()) } answers {
         val personIdent = firstArg<String>()
-        dataFraCucumber.persongrunnlag[småbarnstilleggBehandlingId]!!.personer.single { it.aktør.aktivFødselsnummer() == personIdent }.aktør
+        dataFraCucumber.persongrunnlag[nyBehanldingId]!!.personer.single { it.aktør.aktivFødselsnummer() == personIdent }.aktør
     }
     return personidentService
 }
