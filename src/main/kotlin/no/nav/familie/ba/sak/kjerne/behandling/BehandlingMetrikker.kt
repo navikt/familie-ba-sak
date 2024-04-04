@@ -79,7 +79,7 @@ class BehandlingMetrikker(
             }
 
         try {
-            sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk  = false)
+            sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = false)
         } catch (exception: Exception) {
             logger.warn("Klarte ikke å bygge tellere for begrunnelser")
         }
