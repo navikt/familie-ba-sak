@@ -142,7 +142,7 @@ class VedtaksperiodeService(
 
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
-        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerPåMiljø = true)
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = true)
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             standardbegrunnelserFraFrontend.mapNotNull {
@@ -487,8 +487,8 @@ class VedtaksperiodeService(
         val behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder()
         val behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder()
 
-        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerPåMiljø = true)
-        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser(filtrerPåMiljø = true)
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = true)
+        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = true)
 
         return GrunnlagForBegrunnelse(
             behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,

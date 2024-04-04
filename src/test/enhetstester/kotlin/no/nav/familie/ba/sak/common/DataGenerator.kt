@@ -1267,7 +1267,7 @@ fun lagRestSanityBegrunnelse(
     regelverk: String? = null,
     brevPeriodeType: String? = null,
     begrunnelseTypeForPerson: String? = null,
-    slåttAvIProduksjon: Boolean? = false,
+    ikkeIBruk: Boolean? = false,
 ): RestSanityBegrunnelse =
     RestSanityBegrunnelse(
         apiNavn = apiNavn,
@@ -1289,7 +1289,7 @@ fun lagRestSanityBegrunnelse(
         regelverk = regelverk,
         brevPeriodeType = brevPeriodeType,
         begrunnelseTypeForPerson = begrunnelseTypeForPerson,
-        slaattAvIProduksjon = slåttAvIProduksjon,
+        ikkeIBruk = ikkeIBruk,
     )
 
 fun lagSanityBegrunnelse(

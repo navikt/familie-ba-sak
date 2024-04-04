@@ -60,7 +60,7 @@ class BehandlingMetrikker(
 
     fun hentBegrunnelserOgByggMetrikker() {
         try {
-            sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser(filtrerPåMiljø = false)
+            sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = false)
         } catch (exception: Exception) {
             logger.warn("Kunne ikke hente EØS-begrunnelser fra sanity-api", exception)
         }
@@ -79,7 +79,7 @@ class BehandlingMetrikker(
             }
 
         try {
-            sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerPåMiljø = false)
+            sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk  = false)
         } catch (exception: Exception) {
             logger.warn("Klarte ikke å bygge tellere for begrunnelser")
         }
