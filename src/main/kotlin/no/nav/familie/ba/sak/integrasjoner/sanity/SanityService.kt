@@ -15,7 +15,7 @@ class SanityService(private val sanityKlient: SanityKlient) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Cacheable("sanityBegrunnelser", cacheManager = "shortCache")
-    fun hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk: Boolean = false): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    fun hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk: Boolean = true): Map<Standardbegrunnelse, SanityBegrunnelse> {
         val enumPåApiNavn = Standardbegrunnelse.values().associateBy { it.sanityApiNavn }
 
         val sanityBegrunnelser = sanityKlient.hentBegrunnelser()
@@ -41,14 +41,10 @@ class SanityService(private val sanityKlient: SanityKlient) {
     }
 
     @Cacheable("sanityEØSBegrunnelser", cacheManager = "shortCache")
-    fun hentSanityEØSBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk: Boolean = false): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
+    fun hentSanityEØSBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk: Boolean = true): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
         val enumPåApiNavn = EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
 
-        val sanityEØSBegrunnelser =
-            when (filtrerBortBegrunnelserSomIkkeErIBruk) {
-                true -> sanityKlient.hentEØSBegrunnelser().filter { !it.ikkeIBruk }
-                false -> sanityKlient.hentEØSBegrunnelser()
-            }
+        val sanityEØSBegrunnelser = sanityKlient.hentEØSBegrunnelser()
 
         logManglerSanityBegrunnelseForEnum(enumPåApiNavn, sanityEØSBegrunnelser, "SanityEØSBegrunnelse")
 

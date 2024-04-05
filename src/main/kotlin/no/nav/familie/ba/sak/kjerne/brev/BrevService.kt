@@ -399,8 +399,8 @@ class BrevService(
 
         return hentHjemmeltekst(
             vedtaksperioder = vedtaksperioder,
-            standardbegrunnelseTilSanityBegrunnelse = sanityService.hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = true),
-            eøsStandardbegrunnelseTilSanityBegrunnelse = sanityService.hentSanityEØSBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = true),
+            standardbegrunnelseTilSanityBegrunnelse = sanityService.hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = false),
+            eøsStandardbegrunnelseTilSanityBegrunnelse = sanityService.hentSanityEØSBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = false),
             opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev,
             målform = målform,
             vedtakKorrigertHjemmelSkalMedIBrev = vedtakKorrigertHjemmelSkalMedIBrev,
