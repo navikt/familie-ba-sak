@@ -116,7 +116,10 @@ object BehandlingsresultatSøknadUtils {
                                             "\nNåværende andeler: $nåværendeAndelerForPerson" +
                                             "\nEndret utbetaling andeler: $endretUtbetalingAndelerForPerson",
                                     )
-                                    throw Feil("Andel er satt til 0 kr, men det skyldes verken differanseberegning eller endret utbetaling andel")
+                                    throw FunksjonellFeil(
+                                        melding = "Andel er satt til 0 kr, men det skyldes verken differanseberegning eller endret utbetaling andel",
+                                        frontendFeilmelding = "Du må fylle ut en endret utbetalingsperiode for alle personene det gjelder",
+                                    )
                                 }
                             Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
                             Årsak.ALLEREDE_UTBETALT,
@@ -171,6 +174,7 @@ object BehandlingsresultatSøknadUtils {
                     ),
                 )
             -> Søknadsresultat.DELVIS_INNVILGET
+
             else -> throw Feil("Klarer ikke kombinere søknadsresultater: $this")
         }
     }
