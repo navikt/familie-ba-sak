@@ -122,8 +122,8 @@ private fun hentTekstForVilkårresultater(
     return """
         
     Og legg til nye vilkårresultater for behandling $behandlingId
-      | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter |""" +
-        tilVilkårResultatRader(personResultater)
+      | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter |
+      """ + tilVilkårResultatRader(personResultater)
 }
 
 private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
