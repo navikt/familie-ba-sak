@@ -25,6 +25,7 @@ sealed interface ISanityBegrunnelse {
     val periodeType: BrevPeriodeType?
     val begrunnelseTypeForPerson: VedtakBegrunnelseType? // TODO: Fjern når migrering av ny felter er ferdig
     val øvrigeTriggere: List<ØvrigTrigger>
+    val støtterFritekst: Boolean
     val slåttAvIProduksjon: Boolean
 
     val gjelderEtterEndretUtbetaling
@@ -59,6 +60,7 @@ data class SanityBegrunnelse(
     override val periodeType: BrevPeriodeType? = null,
     override val begrunnelseTypeForPerson: VedtakBegrunnelseType? = null,
     override val øvrigeTriggere: List<ØvrigTrigger> = emptyList(),
+    override val støtterFritekst: Boolean = false,
     override val slåttAvIProduksjon: Boolean = false,
     val rolle: List<VilkårRolle> = emptyList(),
     val hjemler: List<String> = emptyList(),
@@ -102,6 +104,7 @@ data class SanityEØSBegrunnelse(
     override val begrunnelseTypeForPerson: VedtakBegrunnelseType? = null,
     override val valgbarhet: Valgbarhet?,
     override val øvrigeTriggere: List<ØvrigTrigger> = emptyList(),
+    override val støtterFritekst: Boolean = false,
     override val slåttAvIProduksjon: Boolean = false,
     val annenForeldersAktivitet: List<KompetanseAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
