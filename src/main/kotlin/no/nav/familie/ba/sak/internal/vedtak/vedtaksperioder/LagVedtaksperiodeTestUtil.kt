@@ -150,7 +150,7 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
                     "| ${vilkårResultatRad.resultat} " +
                     "| ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"}" +
                     "| ${vilkårResultatRad.standardbegrunnelser.joinToString(",")}" +
-                    "| ${vilkårResultatRad.vurderesEtter}" +
+                    "| ${vilkårResultatRad.vurderesEtter ?: ""}" +
                     "| \n"
             }
     } ?: ""
