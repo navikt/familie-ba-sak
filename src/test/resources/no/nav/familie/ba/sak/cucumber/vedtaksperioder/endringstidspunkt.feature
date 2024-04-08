@@ -238,3 +238,59 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | Fra dato   | Til dato | Vedtaksperiodetype |
       | 01.06.2035 |          | OPPHØR             |
       |            |          | AVSLAG             |
+
+  Scenario: Skal oppdage endring dersom det er lagt inn en splitt i vilkårene innenfor en måned
+    Gitt følgende fagsaker
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende vedtak
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat          | Behandlingsårsak |
+      | 1            | 1        |                     | ENDRET_UTBETALING            | SATSENDRING      |
+      | 2            | 1        | 1                   | ENDRET_OG_FORTSATT_INNVILGET | SØKNAD           |
+
+    Og følgende persongrunnlag
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 22.11.1964  |
+      | 1            | 2       | BARN       | 07.12.2011  |
+      | 2            | 1       | SØKER      | 22.11.1964  |
+      | 2            | 2       | BARN       | 07.12.2011  |
+
+    Og dagens dato er 08.04.2024
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
+
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET               |                  | 15.01.2024 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 1       | UTVIDET_BARNETRYGD                          |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      |                  |
+
+      | 2       | GIFT_PARTNERSKAP                            |                  | 07.12.2011 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | UNDER_18_ÅR                                 |                  | 07.12.2011 | 06.12.2029 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD,BOR_MED_SØKER |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+
+    Og legg til nye vilkårresultater for behandling 2
+      | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET               |                  | 15.01.2024 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 1       | UTVIDET_BARNETRYGD                          |                  | 01.02.2022 | 06.03.2024 | OPPFYLT  | Nei                  |                      |                  |
+      | 1       | UTVIDET_BARNETRYGD                          |                  | 13.03.2024 |            | OPPFYLT  | Nei                  |                      |                  |
+
+      | 2       | GIFT_PARTNERSKAP                            |                  | 07.12.2011 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | UNDER_18_ÅR                                 |                  | 07.12.2011 | 06.12.2029 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOSATT_I_RIKET,BOR_MED_SØKER,LOVLIG_OPPHOLD |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+
+    Og med andeler tilkjent ytelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 1       | 1            | 01.02.2024 | 30.11.2029 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 2       | 1            | 01.02.2024 | 30.11.2029 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
+      | 1       | 2            | 01.02.2024 | 30.11.2029 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 2       | 2            | 01.02.2024 | 30.11.2029 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
+
+    Når vedtaksperioder med begrunnelser genereres for behandling 2
+
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar |
+      | 01.04.2024 | 31.11.2029 | UTBETALING         |           |
+      | 01.12.2029 |            | OPPHØR             |           |
