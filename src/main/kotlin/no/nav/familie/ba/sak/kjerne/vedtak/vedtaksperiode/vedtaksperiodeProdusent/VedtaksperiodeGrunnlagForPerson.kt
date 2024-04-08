@@ -107,8 +107,8 @@ data class VilkårResultatForVedtaksperiode(
     )
 }
 
-fun List<VilkårResultatForVedtaksperiode>.erLikUtenFomOgTom(other: List<VilkårResultatForVedtaksperiode>): Boolean {
-    return this.map { it.copy(fom = null, tom = null) }.toSet() == other.map { it.copy(fom = null, tom = null) }.toSet()
+fun List<VilkårResultatForVedtaksperiode>.erLikUtenomTom(other: List<VilkårResultatForVedtaksperiode>): Boolean {
+    return this.map { it.copy(tom = null) }.toSet() == other.map { it.copy(tom = null) }.toSet()
 }
 
 fun Iterable<VilkårResultatForVedtaksperiode>.erOppfyltForBarn(): Boolean =

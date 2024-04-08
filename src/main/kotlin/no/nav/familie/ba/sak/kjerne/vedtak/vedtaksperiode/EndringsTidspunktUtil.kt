@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPersonVilkårInnvilget
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.erLikUtenFomOgTom
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.erLikUtenomTom
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import java.time.LocalDate
 
@@ -84,7 +84,7 @@ private fun loggEndringstidspunktOgEndringer(
     when (grunnlagIPeriodeMedEndring) {
         is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> {
             if (grunnlagIPeriodeMedEndringForrigeBehanlding is VedtaksperiodeGrunnlagForPersonVilkårInnvilget) {
-                if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
+                if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenomTom(
                         grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode,
                     )
                 ) {
@@ -109,7 +109,7 @@ private fun loggEndringstidspunktOgEndringer(
 
         is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
             if (grunnlagIPeriodeMedEndringForrigeBehanlding is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget) {
-                if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
+                if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenomTom(
                         grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode,
                     )
                 ) {
@@ -147,7 +147,7 @@ private fun VedtaksperiodeGrunnlagForPerson?.erLik(
     when (this) {
         is VedtaksperiodeGrunnlagForPersonVilkårInnvilget ->
             grunnlagForVedtaksperiodeForrigeBehandling is VedtaksperiodeGrunnlagForPersonVilkårInnvilget &&
-                this.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
+                this.vilkårResultaterForVedtaksperiode.erLikUtenomTom(
                     grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode,
                 ) &&
                 this.kompetanse == grunnlagForVedtaksperiodeForrigeBehandling.kompetanse &&
