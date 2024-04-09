@@ -48,6 +48,8 @@ data class Valutakurs(
     val valutakode: String? = null,
     @Column(name = "kurs", nullable = false)
     val kurs: BigDecimal? = null,
+    @Column(name = "vurderingsform")
+    val vurderingsform: Vurderingsform?,
 ) : PeriodeOgBarnSkjemaEntitet<Valutakurs>() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "valutakurs_seq_generator")
@@ -88,11 +90,17 @@ data class Valutakurs(
             this.kurs != null &&
             this.valutakursdato != null &&
             this.valutakode != null &&
+            this.vurderingsform != null &&
             this.barnAktører.isNotEmpty()
 
     companion object {
-        val NULL = Valutakurs(null, null, emptySet())
+        val NULL = Valutakurs(fom = null, tom = null, barnAktører = emptySet(), vurderingsform = null)
     }
+}
+
+enum class Vurderingsform {
+    MANUELL,
+    AUTOMATISK,
 }
 
 sealed interface IValutakurs {
@@ -114,6 +122,7 @@ data class UtfyltValutakurs(
     val valutakursdato: LocalDate,
     val valutakode: String,
     val kurs: BigDecimal,
+    val vurderingsform: Vurderingsform,
 ) : IValutakurs
 
 fun Valutakurs.tilIValutakurs(): IValutakurs {
@@ -127,6 +136,7 @@ fun Valutakurs.tilIValutakurs(): IValutakurs {
             valutakursdato = this.valutakursdato!!,
             valutakode = this.valutakode!!,
             kurs = this.kurs!!,
+            vurderingsform = this.vurderingsform!!,
         )
     } else {
         TomValutakurs(

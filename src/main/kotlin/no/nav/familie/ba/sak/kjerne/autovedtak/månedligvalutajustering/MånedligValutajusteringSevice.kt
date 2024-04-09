@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.UtfyltValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilIValutakurs
 import no.nav.familie.util.VirkedagerProvider
 import org.slf4j.LoggerFactory
@@ -48,6 +49,7 @@ class MånedligValutajusteringSevice(
                     valutakursdato = sisteVirkedagForrigeMåned,
                     valutakode = valutakurs.valutakode,
                     kurs = nyKurs,
+                    vurderingsform = Vurderingsform.AUTOMATISK,
                 )
             }
 

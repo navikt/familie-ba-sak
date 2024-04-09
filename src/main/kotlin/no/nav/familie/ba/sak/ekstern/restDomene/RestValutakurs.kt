@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 
 import jakarta.validation.constraints.Pattern
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -31,6 +32,7 @@ fun RestValutakurs.tilValutakurs(barnAktører: List<Aktør>) =
         valutakursdato = this.valutakursdato,
         valutakode = this.valutakode,
         kurs = this.kurs,
+        vurderingsform = Vurderingsform.MANUELL,
     )
 
 fun Valutakurs.tilRestValutakurs() =
