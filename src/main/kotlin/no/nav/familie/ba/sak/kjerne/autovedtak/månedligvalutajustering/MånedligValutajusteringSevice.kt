@@ -34,8 +34,7 @@ class MånedligValutajusteringSevice(
                 .map { it.tilIValutakurs() }.filterIsInstance<UtfyltValutakurs>()
                 .filter { valutakurs -> valutakurs.periodeInneholder(valutajusteringMåned) }
 
-        val sisteDagForrigeMåned = valutajusteringMåned.minusMonths(1).atEndOfMonth()
-        val sisteVirkedagForrigeMåned = VirkedagerProvider.senesteVirkedagFørEllerMed(sisteDagForrigeMåned)
+        val sisteVirkedagForrigeMåned = valutajusteringMåned.minusMonths(1).tilSisteVirkedag()
 
         val nyeValutaKurser =
             valutakurserSomMåOppdateres.map { valutakurs ->
@@ -54,6 +53,8 @@ class MånedligValutajusteringSevice(
         nyeValutaKurser.forEach { valutakursService.oppdaterValutakurs(BehandlingId(behandlingId.id), it) }
     }
 }
+
+fun YearMonth.tilSisteVirkedag() = VirkedagerProvider.senesteVirkedagFørEllerMed(this.atEndOfMonth())
 
 private fun UtfyltValutakurs.periodeInneholder(
     valutajusteringMåned: YearMonth,
