@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.MånedligValutaJusteringFeil
 import no.nav.familie.ba.sak.common.PdlNotFoundException
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
@@ -109,6 +110,17 @@ class ApiExceptionHandler {
         logger.warn("Finner ikke personen i PDL")
         return ResponseEntity.ok()
             .body(Ressurs.failure(frontendFeilmelding = "Fant ikke person"))
+    }
+
+    @ExceptionHandler(MånedligValutaJusteringFeil::class)
+    fun handleMånedligValutaJusteringFeil(feil: MånedligValutaJusteringFeil): ResponseEntity<Ressurs<Nothing>> {
+        logger.warn("Klarte ikke å snike i kø")
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            Ressurs.funksjonellFeil(
+                frontendFeilmelding = feil.message,
+                melding = feil.message ?: "",
+            ),
+        )
     }
 
     @ExceptionHandler(ECBServiceException::class)
