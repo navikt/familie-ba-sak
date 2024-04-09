@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonne
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
@@ -48,6 +49,7 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
 @Service
 class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
     private val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
+    private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val barnasDifferanseberegningEndretAbonnenter: List<BarnasDifferanseberegningEndretAbonnent>,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
@@ -57,6 +59,9 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
     ) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
+
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunktet(behandlingId, utenlandskePeriodebeløp)
+
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
 
         val oppdaterteAndeler =

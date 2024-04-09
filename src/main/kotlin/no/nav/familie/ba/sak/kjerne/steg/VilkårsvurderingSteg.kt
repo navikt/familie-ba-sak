@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -31,6 +32,7 @@ class VilkårsvurderingSteg(
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
     private val månedligValutajusteringSevice: MånedligValutajusteringSevice,
     private val localDateProvider: LocalDateProvider,
+    private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -84,6 +86,8 @@ class VilkårsvurderingSteg(
         if (behandling.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING) {
             månedligValutajusteringSevice.oppdaterValutakurserForMåned(BehandlingId(behandling.id), localDateProvider.now().toYearMonth())
         }
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunktet(BehandlingId(behandling.id))
+
         beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
 
         if (!behandling.erSatsendring()) {
