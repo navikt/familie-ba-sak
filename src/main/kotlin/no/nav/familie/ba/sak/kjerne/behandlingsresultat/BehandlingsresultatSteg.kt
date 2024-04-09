@@ -171,7 +171,8 @@ class BehandlingsresultatSteg(
 
     override fun postValiderSteg(behandling: Behandling) {
         if (behandling.opprettetÅrsak.erOmregningsårsak() &&
-            behandling.resultat !in listOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT)) {
+            behandling.resultat !in listOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT)
+        ) {
             throw Feil("Behandling $behandling er omregningssak men er ikke uendret behandlingsresultat")
         }
     }
