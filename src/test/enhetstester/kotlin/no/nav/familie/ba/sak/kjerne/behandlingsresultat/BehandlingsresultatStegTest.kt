@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagUtenlandskPeriodeb
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -237,7 +238,7 @@ class BehandlingsresultatStegTest {
         } returns behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
 
         every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } returns listOf(lagUtenlandskPeriodebeløp(fom = LocalDate.now().toYearMonth(), beløp = BigDecimal.valueOf(100), intervall = Intervall.MÅNEDLIG, valutakode = "SEK", utbetalingsland = "S", barnAktører = setOf(randomAktør())))
-        every { valutakursRepository.finnFraBehandlingId(any()) } returns listOf(lagValutakurs(fom = LocalDate.now().toYearMonth(), valutakode = "SEK", valutakursdato = LocalDate.now(), kurs = BigDecimal.valueOf(1.2), barnAktører = setOf(randomAktør())))
+        every { valutakursRepository.finnFraBehandlingId(any()) } returns listOf(lagValutakurs(fom = LocalDate.now().toYearMonth(), valutakode = "SEK", valutakursdato = LocalDate.now(), kurs = BigDecimal.valueOf(1.2), barnAktører = setOf(randomAktør()), vurderingsform = Vurderingsform.MANUELL))
 
         every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(any()) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 
