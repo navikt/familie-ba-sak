@@ -117,8 +117,8 @@ class ApiExceptionHandler {
         logger.warn("Klarte ikke å snike i kø")
         return ResponseEntity.status(HttpStatus.OK).body(
             Ressurs.funksjonellFeil(
-                frontendFeilmelding = feil.message,
-                melding = feil.message ?: "",
+                frontendFeilmelding = feil.melding,
+                melding = feil.melding,
             ),
         )
     }
