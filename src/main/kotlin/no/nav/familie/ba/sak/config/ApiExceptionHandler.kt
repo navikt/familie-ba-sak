@@ -114,7 +114,6 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(MånedligValutaJusteringFeil::class)
     fun handleMånedligValutaJusteringFeil(feil: MånedligValutaJusteringFeil): ResponseEntity<Ressurs<Nothing>> {
-        logger.warn("Klarte ikke å snike i kø")
         return ResponseEntity.status(HttpStatus.OK).body(
             Ressurs.funksjonellFeil(
                 frontendFeilmelding = feil.melding,
