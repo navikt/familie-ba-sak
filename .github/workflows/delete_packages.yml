@@ -21,3 +21,4 @@ jobs:
           package-name: 'familie-ba-sak/familie-ba-sak'
           package-type: 'container'
           min-versions-to-keep: 1
+          token: ${{ secrets.PAT }}
