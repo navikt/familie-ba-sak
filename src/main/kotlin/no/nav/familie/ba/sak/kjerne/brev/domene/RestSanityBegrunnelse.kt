@@ -32,6 +32,7 @@ data class RestSanityBegrunnelse(
     val endringsaarsaker: List<String>? = emptyList(),
     val hjemler: List<String>? = emptyList(),
     val hjemlerFolketrygdloven: List<String>?,
+    val stotterFritekst: Boolean?,
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: String?,
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
@@ -82,6 +83,7 @@ data class RestSanityBegrunnelse(
                 } ?: emptyList(),
             hjemler = hjemler ?: emptyList(),
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
+            støtterFritekst = stotterFritekst ?: false,
             endretUtbetalingsperiodeDeltBostedUtbetalingTrigger =
                 endretUtbetalingsperiodeDeltBostedUtbetalingTrigger
                     .finnEnumverdiNullable<EndretUtbetalingsperiodeDeltBostedTriggere>(),

@@ -402,6 +402,9 @@ class VedtaksperiodeService(
     fun hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId: Long): List<RestUtvidetVedtaksperiodeMedBegrunnelser> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser().values.toList()
+        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser().values.toList()
+
         val vedtaksperioder =
             if (behandling.status != BehandlingStatus.AVSLUTTET) {
                 val utvidetVedtaksperiodeMedBegrunnelser =
@@ -411,7 +414,7 @@ class VedtaksperiodeService(
                     )
                 utvidetVedtaksperiodeMedBegrunnelser
                     .sorter()
-                    .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }
+                    .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser(sanityBegrunnelser, sanityEØSBegrunnelser) }
             } else {
                 emptyList()
             }
