@@ -11,7 +11,7 @@ import kotlin.contracts.contract
 open class Feil(
     message: String,
     open val frontendFeilmelding: String? = null,
-    open val httpStatus: HttpStatus = HttpStatus.OK,
+    open val httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
     open val throwable: Throwable? = null,
     override val cause: Throwable? = throwable,
 ) : RuntimeException(message)
@@ -19,7 +19,7 @@ open class Feil(
 open class FunksjonellFeil(
     open val melding: String,
     open val frontendFeilmelding: String? = melding,
-    open val httpStatus: HttpStatus = HttpStatus.OK,
+    open val httpStatus: HttpStatus = HttpStatus.BAD_REQUEST,
     open val throwable: Throwable? = null,
     override val cause: Throwable? = throwable,
 ) : RuntimeException(melding)
