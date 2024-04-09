@@ -42,7 +42,7 @@ data class RestSanityEØSBegrunnelse(
     val brevPeriodeType: String?,
     val begrunnelseTypeForPerson: String?,
     val valgbarhet: String?,
-    val slaattAvIProduksjon: Boolean?,
+    val ikkeIBruk: Boolean?,
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
@@ -85,7 +85,7 @@ data class RestSanityEØSBegrunnelse(
                     it.finnEnumverdi<ØvrigTrigger>(apiNavn)
                 } ?: emptyList(),
             begrunnelseTypeForPerson = begrunnelseTypeForPerson.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
-            slåttAvIProduksjon = slaattAvIProduksjon ?: false,
+            ikkeIBruk = ikkeIBruk ?: false,
         )
     }
 
