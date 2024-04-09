@@ -4,6 +4,8 @@ import jakarta.persistence.Column
 import jakarta.persistence.Convert
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -48,6 +50,7 @@ data class Valutakurs(
     val valutakode: String? = null,
     @Column(name = "kurs", nullable = false)
     val kurs: BigDecimal? = null,
+    @Enumerated(EnumType.STRING)
     @Column(name = "vurderingsform")
     val vurderingsform: Vurderingsform?,
 ) : PeriodeOgBarnSkjemaEntitet<Valutakurs>() {
