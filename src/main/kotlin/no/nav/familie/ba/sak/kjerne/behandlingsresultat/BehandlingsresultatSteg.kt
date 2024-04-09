@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder
@@ -169,8 +170,9 @@ class BehandlingsresultatSteg(
     }
 
     override fun postValiderSteg(behandling: Behandling) {
-        if (behandling.opprettetÅrsak.erOmregningsårsak() && behandling.resultat != FORTSATT_INNVILGET) {
-            throw Feil("Behandling $behandling er omregningssak men er ikke fortsatt innvilget.")
+        if (behandling.opprettetÅrsak.erOmregningsårsak() &&
+            behandling.resultat !in listOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT)) {
+            throw Feil("Behandling $behandling er omregningssak men er ikke uendret behandlingsresultat")
         }
     }
 
