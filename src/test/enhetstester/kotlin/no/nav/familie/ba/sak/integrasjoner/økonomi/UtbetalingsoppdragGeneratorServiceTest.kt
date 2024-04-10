@@ -11,9 +11,11 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -22,10 +24,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -42,6 +48,9 @@ class UtbetalingsoppdragGeneratorServiceTest {
 
     @MockK
     private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+
+    @MockK
+    private lateinit var endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService
 
     @InjectMockKs
     private lateinit var utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
@@ -102,11 +111,11 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 3,
             forventetAntallUtbetalingsperioder = 3,
             forventedeOffsets =
-                listOf(
-                    Pair(0L, null),
-                    Pair(1L, 0L),
-                    Pair(2L, 1L),
-                ),
+            listOf(
+                Pair(0L, null),
+                Pair(1L, 0L),
+                Pair(2L, 1L),
+            ),
         )
     }
 
@@ -185,9 +194,9 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 1,
             forventetAntallUtbetalingsperioder = 1,
             forventedeOffsets =
-                listOf(
-                    Pair(3L, 2L),
-                ),
+            listOf(
+                Pair(3L, 2L),
+            ),
         )
     }
 
@@ -259,13 +268,13 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 5,
             forventetAntallUtbetalingsperioder = 5,
             forventedeOffsets =
-                listOf(
-                    Pair(0L, null),
-                    Pair(1L, 0L),
-                    Pair(2L, 1L),
-                    Pair(3L, null),
-                    Pair(4L, 3L),
-                ),
+            listOf(
+                Pair(0L, null),
+                Pair(1L, 0L),
+                Pair(2L, 1L),
+                Pair(3L, null),
+                Pair(4L, 3L),
+            ),
         )
     }
 
@@ -367,10 +376,10 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 2,
             forventetAntallUtbetalingsperioder = 2,
             forventedeOffsets =
-                listOf(
-                    Pair(5L, 2L),
-                    Pair(6L, 4L),
-                ),
+            listOf(
+                Pair(5L, 2L),
+                Pair(6L, 4L),
+            ),
         )
     }
 
@@ -456,10 +465,10 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 2,
             forventetAntallUtbetalingsperioder = 3,
             forventedeOffsets =
-                listOf(
-                    Pair(3L, 2L),
-                    Pair(4L, null),
-                ),
+            listOf(
+                Pair(3L, 2L),
+                Pair(4L, null),
+            ),
         )
     }
 
@@ -543,10 +552,10 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 2,
             forventetAntallUtbetalingsperioder = 3,
             forventedeOffsets =
-                listOf(
-                    Pair(3L, 2L),
-                    Pair(4L, null),
-                ),
+            listOf(
+                Pair(3L, 2L),
+                Pair(4L, null),
+            ),
         )
     }
 
@@ -618,11 +627,126 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 2,
             forventetAntallUtbetalingsperioder = 2,
             forventedeOffsets =
-                listOf(
-                    Pair(0L, null),
-                    Pair(1L, null),
-                ),
+            listOf(
+                Pair(0L, null),
+                Pair(1L, null),
+            ),
         )
+    }
+
+    @Test
+    fun `genererUtbetalingsoppdrag - stønadTom settes til tidspunkt for endret utbetaling dersom årsaken er ENDRE_MOTTAKER`() {
+        val vedtak = lagVedtak()
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(vedtak.behandling)
+        val nåDato = YearMonth.now()
+        val barn = tilfeldigPerson(fødselsdato = nåDato.toLocalDate().minusYears(16))
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            mutableSetOf(
+                lagAndelTilkjentYtelse(
+                    id = 2,
+                    fom = nåDato.minusYears(5),
+                    tom = nåDato.minusMonths(4),
+                    beløp = 350,
+                    person = barn,
+                ),
+                lagAndelTilkjentYtelse(
+                    id = 3,
+                    fom = nåDato.minusMonths(3),
+                    tom = nåDato.plusYears(2).minusMonths(1),
+                    beløp = 0,
+                    person = barn,
+                ),
+            ),
+        )
+
+        val endretUtbetaling = listOf(
+            lagEndretUtbetalingAndel(
+                behandlingId = tilkjentYtelse.behandling.id,
+                person = barn,
+                fom = nåDato.minusMonths(3),
+                tom = nåDato.plusYears(2).minusMonths(1),
+                prosent = BigDecimal.ZERO,
+                årsak = Årsak.ENDRE_MOTTAKER
+            )
+        )
+
+        val tilkjentYtelseSlot = slot<TilkjentYtelse>()
+        setUpMocks(
+            behandling = vedtak.behandling,
+            tilkjentYtelse = tilkjentYtelse,
+            tilkjentYtelseSlot = tilkjentYtelseSlot,
+            endretUtbetalingAndeler = endretUtbetaling,
+        )
+
+        utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            vedtak = vedtak,
+            saksbehandlerId = "abc123",
+        )
+
+        verify(exactly = 1) { tilkjentYtelseRepository.save(any()) }
+
+        assertThat(tilkjentYtelseSlot.captured.stønadTom).isEqualTo(nåDato.minusMonths(4))
+    }
+
+    @Test
+    fun `genererUtbetalingsoppdrag - stønadTom settes ikke til tidspunkt for endret utbetaling dersom det kommer utbetalinger igjen etter endret utbetaling`() {
+        val vedtak = lagVedtak()
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(vedtak.behandling)
+        val nåDato = YearMonth.now()
+        val barn = tilfeldigPerson(fødselsdato = nåDato.toLocalDate().minusYears(16))
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            mutableSetOf(
+                lagAndelTilkjentYtelse(
+                    id = 2,
+                    fom = nåDato.minusYears(5),
+                    tom = nåDato.minusMonths(4),
+                    beløp = 350,
+                    person = barn,
+                ),
+                lagAndelTilkjentYtelse(
+                    id = 3,
+                    fom = nåDato.minusMonths(3),
+                    tom = nåDato.minusMonths(1),
+                    beløp = 0,
+                    person = barn,
+                ),
+                lagAndelTilkjentYtelse(
+                    id = 4,
+                    fom = nåDato,
+                    tom = nåDato.plusYears(2).minusMonths(1),
+                    beløp = 350,
+                    person = barn,
+                ),
+            ),
+        )
+
+        val endretUtbetaling = listOf(
+            lagEndretUtbetalingAndel(
+                behandlingId = tilkjentYtelse.behandling.id,
+                person = barn,
+                fom = nåDato.minusMonths(3),
+                tom = nåDato.minusMonths(1),
+                prosent = BigDecimal.ZERO,
+                årsak = Årsak.ENDRE_MOTTAKER
+            )
+        )
+
+        val tilkjentYtelseSlot = slot<TilkjentYtelse>()
+        setUpMocks(
+            behandling = vedtak.behandling,
+            tilkjentYtelse = tilkjentYtelse,
+            tilkjentYtelseSlot = tilkjentYtelseSlot,
+            endretUtbetalingAndeler = endretUtbetaling,
+        )
+
+        utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            vedtak = vedtak,
+            saksbehandlerId = "abc123",
+        )
+
+        verify(exactly = 1) { tilkjentYtelseRepository.save(any()) }
+
+        assertThat(tilkjentYtelseSlot.captured.stønadTom).isEqualTo(nåDato.plusYears(2).minusMonths(1))
     }
 
     private fun validerBeregnetUtbetalingsoppdragOgAndeler(
@@ -672,6 +796,7 @@ class UtbetalingsoppdragGeneratorServiceTest {
         tilkjentYtelseSlot: CapturingSlot<TilkjentYtelse>,
         forrigeTilkjentYtelse: TilkjentYtelse? = null,
         migreringsdato: LocalDate? = null,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
     ) {
         if (forrigeTilkjentYtelse == null) {
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns null
@@ -694,5 +819,7 @@ class UtbetalingsoppdragGeneratorServiceTest {
         every { behandlingService.hentMigreringsdatoPåFagsak(behandling.fagsak.id) } returns migreringsdato
 
         every { tilkjentYtelseRepository.save(capture(tilkjentYtelseSlot)) } returns mockk()
+
+        every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(any()) } returns endretUtbetalingAndeler
     }
 }

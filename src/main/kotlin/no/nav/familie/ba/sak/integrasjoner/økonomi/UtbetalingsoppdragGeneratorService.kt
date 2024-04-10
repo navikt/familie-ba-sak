@@ -6,10 +6,16 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
@@ -26,6 +32,7 @@ class UtbetalingsoppdragGeneratorService(
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
 ) {
     @Transactional
@@ -137,13 +144,44 @@ class UtbetalingsoppdragGeneratorService(
         utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
     ) {
         val opphør = utledOpphør(utbetalingsoppdrag, tilkjentYtelse.behandling)
+        val stønadTom = utledStønadTom(tilkjentYtelse)
+
 
         tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-        tilkjentYtelse.stønadTom = tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
+        tilkjentYtelse.stønadTom = stønadTom
         tilkjentYtelse.stønadFom =
             if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
         tilkjentYtelse.endretDato = LocalDate.now()
         tilkjentYtelse.opphørFom = opphør.opphørsdato?.toYearMonth()
+    }
+
+    private fun utledStønadTom(tilkjentYtelse: TilkjentYtelse): YearMonth {
+        val endretUtbetalingAndel = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(tilkjentYtelse.behandling.id)
+        val endretUtbetalingTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndel)
+
+        val andelTilkjentYtelseTidslinjerPerType = tilkjentYtelse.andelerTilkjentYtelse
+            .groupBy { it.aktør to it.type }
+            .values.map { AndelTilkjentYtelseTidslinje(it) }
+        val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjerPerType.kombiner { it.toList() }
+
+        val stønadTom = andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingTidslinje) { andelTilkjentYtelser, endretUtbetaling ->
+            val kalkulertUtbetalingsbeløp = andelTilkjentYtelser?.maxOfOrNull { it.kalkulertUtbetalingsbeløp } ?: return@kombinerMed null
+            val periodeTom = andelTilkjentYtelser.minOf { it.stønadTom }
+
+            val endringsperiodeÅrsak = endretUtbetaling?.årsak ?: return@kombinerMed periodeTom
+
+            when (endringsperiodeÅrsak) {
+                Årsak.ALLEREDE_UTBETALT,
+                Årsak.ENDRE_MOTTAKER,
+                Årsak.ETTERBETALING_3ÅR,
+                ->
+                    // Vi ønsker å filtrere bort andeler som har 0 i kalkulertUtbetalingsbeløp
+                    if (kalkulertUtbetalingsbeløp == 0) null else periodeTom
+
+                Årsak.DELT_BOSTED -> periodeTom
+            }
+        }.perioder().map { it.innhold }.filterNotNull().max()
+        return stønadTom
     }
 
     private fun oppdaterAndelerMedPeriodeOffset(
