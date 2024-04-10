@@ -377,6 +377,24 @@ class BehandlingsresultatStegTest {
     }
 
     @Test
+    fun `postValiderSteg - skal validere at behandlingsresultat ved omregning er uendret`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.OMREGNING_18ÅR)
+
+        for (resultat in endretBehandlingsresultat()) {
+            behandling.resultat = resultat
+            assertThrows<Feil> {
+                behandlingsresultatSteg.postValiderSteg(behandling)
+            }
+        }
+        for (resultat in uendretBehandlingsresultat()) {
+            behandling.resultat = resultat
+            assertDoesNotThrow {
+                behandlingsresultatSteg.postValiderSteg(behandling)
+            }
+        }
+    }
+
+    @Test
     fun `preValiderSteg - skal validere andeler ved satsendring og kaste feil når endringene i andeler er relatert til noe annet enn endring i sats`() {
         val søker = lagPerson()
         val barn = lagPerson()
@@ -567,4 +585,18 @@ class BehandlingsresultatStegTest {
             }
         }
     }
+
+    private fun endretBehandlingsresultat() =
+        listOf(
+            Behandlingsresultat.ENDRET_UTBETALING,
+            Behandlingsresultat.ENDRET_UTEN_UTBETALING,
+            Behandlingsresultat.ENDRET_OG_OPPHØRT,
+            Behandlingsresultat.OPPHØRT,
+        )
+
+    private fun uendretBehandlingsresultat() =
+        listOf(
+            Behandlingsresultat.FORTSATT_INNVILGET,
+            Behandlingsresultat.FORTSATT_OPPHØRT,
+        )
 }
