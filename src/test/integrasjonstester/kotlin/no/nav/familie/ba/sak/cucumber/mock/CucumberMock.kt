@@ -220,7 +220,13 @@ class CucumberMock(
 
     val tilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService = TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService(tilbakestillBehandlingTilBehandlingsresultatService = tilbakestillBehandlingTilBehandlingsresultatService)
 
-    val tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService = TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(valutakursRepository = valutakursRepository, tilkjentYtelseRepository = tilkjentYtelseRepository, barnasDifferanseberegningEndretAbonnenter = listOf(tilpassDifferanseberegningSøkersYtelserService))
+    val tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService =
+        TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
+            valutakursRepository = valutakursRepository,
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
+            barnasDifferanseberegningEndretAbonnenter = listOf(tilpassDifferanseberegningSøkersYtelserService),
+            automatiskOppdaterValutakursService = mockk(),
+        )
 
     val utenlandskPeriodebeløpEndretAbonnenter =
         listOf(
@@ -363,6 +369,7 @@ class CucumberMock(
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringSevice = månedligValutajusteringSevice,
             localDateProvider = mockedDateProvider,
+            automatiskOppdaterValutakursService = mockk(),
         )
 
     val ferdigstillBehandlingSteg =

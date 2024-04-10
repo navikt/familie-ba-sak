@@ -60,6 +60,7 @@ class VilkårsvurderingStegTest {
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringSevice = mockk(),
             localDateProvider = RealDateProvider(),
+            automatiskOppdaterValutakursService = mockk(),
         )
 
     val behandling =
