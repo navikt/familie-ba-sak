@@ -134,6 +134,36 @@ internal class ValutakursServiceTest {
         val faktiskeValutakurser = valutakursService.hentValutakurser(behandlingId)
         assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)
     }
+
+    @Test
+    fun `skal kunne oppdatere valutakurs sin vurderingsform fra manuel til automatisk`() {
+        val behandlingId = BehandlingId(10L)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+
+        ValutakursBuilder(jan(2020), behandlingId)
+            .medKurs("44>", "EUR", barn1)
+            .medVurderingsform(Vurderingsform.MANUELL)
+            .lagreTil(valutakursRepository)
+
+        val oppdatertKompetanse =
+            ValutakursBuilder(jan(2020), behandlingId)
+                .medKurs(" 3>", "EUR", barn1)
+                .medVurderingsform(Vurderingsform.AUTOMATISK).bygg().single()
+        valutakursService.oppdaterValutakurs(behandlingId, oppdatertKompetanse)
+
+        val forventedeValutakurser =
+            ValutakursBuilder(jan(2020), behandlingId)
+                .medKurs("4", "EUR", barn1)
+                .medVurderingsform(Vurderingsform.MANUELL)
+                .bygg() +
+                ValutakursBuilder(jan(2020), behandlingId)
+                    .medKurs(" 3>", "EUR", barn1)
+                    .medVurderingsform(Vurderingsform.AUTOMATISK)
+                    .bygg()
+
+        val faktiskeValutakurser = valutakursService.hentValutakurser(behandlingId)
+        assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)
+    }
 }
 
 fun valutakurs(
