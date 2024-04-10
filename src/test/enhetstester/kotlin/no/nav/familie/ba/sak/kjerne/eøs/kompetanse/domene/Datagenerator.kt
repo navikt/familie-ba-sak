@@ -42,7 +42,7 @@ fun lagValutakurs(
     valutakursdato: LocalDate? = null,
     valutakode: String? = null,
     kurs: BigDecimal? = null,
-    vurderingsform: Vurderingsform? = null,
+    vurderingsform: Vurderingsform = Vurderingsform.IKKE_VURDERT,
 ) = Valutakurs(
     fom = fom,
     tom = tom,

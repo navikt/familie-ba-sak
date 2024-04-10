@@ -52,7 +52,7 @@ data class Valutakurs(
     val kurs: BigDecimal? = null,
     @Enumerated(EnumType.STRING)
     @Column(name = "vurderingsform")
-    val vurderingsform: Vurderingsform?,
+    val vurderingsform: Vurderingsform,
 ) : PeriodeOgBarnSkjemaEntitet<Valutakurs>() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "valutakurs_seq_generator")
@@ -71,18 +71,21 @@ data class Valutakurs(
         copy(
             valutakursdato = null,
             kurs = null,
+            vurderingsform = Vurderingsform.IKKE_VURDERT,
         )
 
     override fun kopier(
         fom: YearMonth?,
         tom: YearMonth?,
         barnAktører: Set<Aktør>,
-    ) =
-        copy(
+    ): Valutakurs {
+        return copy(
             fom = fom,
             tom = tom,
             barnAktører = barnAktører,
+            vurderingsform = if (fom == null || barnAktører.isEmpty()) Vurderingsform.IKKE_VURDERT else this.vurderingsform,
         )
+    }
 
     fun erObligatoriskeFelterSatt() =
         fom != null &&
@@ -92,18 +95,18 @@ data class Valutakurs(
         this.valutakode != null &&
             this.kurs != null &&
             this.valutakursdato != null &&
-            this.valutakode != null &&
-            this.vurderingsform != null &&
-            this.barnAktører.isNotEmpty()
+            this.barnAktører.isNotEmpty() &&
+            this.vurderingsform != Vurderingsform.IKKE_VURDERT
 
     companion object {
-        val NULL = Valutakurs(fom = null, tom = null, barnAktører = emptySet(), vurderingsform = null)
+        val NULL = Valutakurs(fom = null, tom = null, barnAktører = emptySet(), vurderingsform = Vurderingsform.IKKE_VURDERT)
     }
 }
 
 enum class Vurderingsform {
     MANUELL,
     AUTOMATISK,
+    IKKE_VURDERT,
 }
 
 sealed interface IValutakurs {
@@ -139,7 +142,7 @@ fun Valutakurs.tilIValutakurs(): IValutakurs {
             valutakursdato = this.valutakursdato!!,
             valutakode = this.valutakode!!,
             kurs = this.kurs!!,
-            vurderingsform = this.vurderingsform!!,
+            vurderingsform = this.vurderingsform,
         )
     } else {
         TomValutakurs(
