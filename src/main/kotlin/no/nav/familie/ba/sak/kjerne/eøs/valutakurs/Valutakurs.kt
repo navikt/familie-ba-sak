@@ -83,7 +83,6 @@ data class Valutakurs(
             fom = fom,
             tom = tom,
             barnAktører = barnAktører,
-            vurderingsform = if (fom == null || barnAktører.isEmpty()) Vurderingsform.IKKE_VURDERT else this.vurderingsform,
         )
     }
 
