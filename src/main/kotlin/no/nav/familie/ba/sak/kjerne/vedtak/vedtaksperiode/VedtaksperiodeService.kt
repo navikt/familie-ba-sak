@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingIkkeErAvsluttet
 import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
-import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
@@ -25,8 +24,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndre
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -90,7 +87,6 @@ class VedtaksperiodeService(
     private val integrasjonClient: IntegrasjonClient,
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
-    private val envService: EnvService,
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -146,7 +142,7 @@ class VedtaksperiodeService(
 
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
-        val sanityBegrunnelser = hentSanityBegrunnelserFiltrertPåMiljø()
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = true)
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             standardbegrunnelserFraFrontend.mapNotNull {
@@ -406,6 +402,9 @@ class VedtaksperiodeService(
     fun hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId: Long): List<RestUtvidetVedtaksperiodeMedBegrunnelser> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser().values.toList()
+        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser().values.toList()
+
         val vedtaksperioder =
             if (behandling.status != BehandlingStatus.AVSLUTTET) {
                 val utvidetVedtaksperiodeMedBegrunnelser =
@@ -415,7 +414,7 @@ class VedtaksperiodeService(
                     )
                 utvidetVedtaksperiodeMedBegrunnelser
                     .sorter()
-                    .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }
+                    .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser(sanityBegrunnelser, sanityEØSBegrunnelser) }
             } else {
                 emptyList()
             }
@@ -491,8 +490,8 @@ class VedtaksperiodeService(
         val behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder()
         val behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder()
 
-        val sanityBegrunnelser = hentSanityBegrunnelserFiltrertPåMiljø()
-        val sanityEØSBegrunnelser = hentSanityEøsBegrunnelserFiltrertPåMiljø()
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = true)
+        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = true)
 
         return GrunnlagForBegrunnelse(
             behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
@@ -501,24 +500,6 @@ class VedtaksperiodeService(
             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             nåDato = LocalDate.now(),
         )
-    }
-
-    private fun hentSanityEøsBegrunnelserFiltrertPåMiljø(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
-        val sanityEøsBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
-
-        return when (envService.erProd()) {
-            true -> sanityEøsBegrunnelser.filter { !it.value.slåttAvIProduksjon }
-            false -> sanityEøsBegrunnelser
-        }
-    }
-
-    private fun hentSanityBegrunnelserFiltrertPåMiljø(): Map<Standardbegrunnelse, SanityBegrunnelse> {
-        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
-
-        return when (envService.erProd()) {
-            true -> sanityBegrunnelser.filter { !it.value.slåttAvIProduksjon }
-            false -> sanityBegrunnelser
-        }
     }
 
     fun oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(

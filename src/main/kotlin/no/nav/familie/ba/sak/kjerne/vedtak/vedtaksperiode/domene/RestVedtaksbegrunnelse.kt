@@ -6,4 +6,5 @@ data class RestVedtaksbegrunnelse(
     val standardbegrunnelse: String,
     val vedtakBegrunnelseSpesifikasjon: String,
     val vedtakBegrunnelseType: VedtakBegrunnelseType,
+    val støtterFritekst: Boolean,
 )

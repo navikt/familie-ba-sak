@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPersonVilkårInnvilget
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.erLikUtenFomOgTom
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.erLikUtenomTom
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import java.time.LocalDate
 
@@ -25,18 +25,13 @@ fun utledEndringstidspunkt(
 ): LocalDate {
     val grunnlagTidslinjePerPerson =
         behandlingsGrunnlagForVedtaksperioder.copy(
-            personResultater =
-                behandlingsGrunnlagForVedtaksperioder
-                    .personResultater.beholdKunOppfylteVilkårResultater(),
-        ).utledGrunnlagTidslinjePerPerson()
-            .mapValues { it.value.vedtaksperiodeGrunnlagForPerson }
+            personResultater = behandlingsGrunnlagForVedtaksperioder.personResultater.beholdKunOppfylteVilkårResultater(),
+        ).utledGrunnlagTidslinjePerPerson().mapValues { it.value.vedtaksperiodeGrunnlagForPerson }
+
     val grunnlagTidslinjePerPersonForrigeBehandling =
         behandlingsGrunnlagForVedtaksperioderForrigeBehandling?.copy(
-            personResultater =
-                behandlingsGrunnlagForVedtaksperioderForrigeBehandling
-                    .personResultater.beholdKunOppfylteVilkårResultater(),
-        )?.utledGrunnlagTidslinjePerPerson()
-            ?.mapValues { it.value.vedtaksperiodeGrunnlagForPerson } ?: emptyMap()
+            personResultater = behandlingsGrunnlagForVedtaksperioderForrigeBehandling.personResultater.beholdKunOppfylteVilkårResultater(),
+        )?.utledGrunnlagTidslinjePerPerson()?.mapValues { it.value.vedtaksperiodeGrunnlagForPerson } ?: emptyMap()
 
     val erPeriodeLikSammePeriodeIForrigeBehandlingTidslinjer =
         grunnlagTidslinjePerPerson.outerJoin(grunnlagTidslinjePerPersonForrigeBehandling) { grunnlagForVedtaksperiode, grunnlagForVedtaksperiodeForrigeBehandling ->
@@ -84,7 +79,7 @@ private fun loggEndringstidspunktOgEndringer(
     when (grunnlagIPeriodeMedEndring) {
         is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> {
             if (grunnlagIPeriodeMedEndringForrigeBehanlding is VedtaksperiodeGrunnlagForPersonVilkårInnvilget) {
-                if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
+                if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenomTom(
                         grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode,
                     )
                 ) {
@@ -109,7 +104,7 @@ private fun loggEndringstidspunktOgEndringer(
 
         is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
             if (grunnlagIPeriodeMedEndringForrigeBehanlding is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget) {
-                if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
+                if (!grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.erLikUtenomTom(
                         grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode,
                     )
                 ) {
@@ -130,16 +125,15 @@ private fun loggEndringstidspunktOgEndringer(
 }
 
 private fun Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<Boolean, Måned>>.finnTidligsteForskjell() =
-    this
-        .map { (aktørOgRolleForVedtaksgrunnlag, erPeriodeLikTidslinje) ->
-            val førsteEndringForAktør =
-                erPeriodeLikTidslinje.perioder()
-                    .filter { it.innhold == false }
-                    .minOfOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid().førsteDagIInneværendeMåned() }
-                    ?: TIDENES_ENDE
+    this.map { (aktørOgRolleForVedtaksgrunnlag, erPeriodeLikTidslinje) ->
+        val førsteEndringForAktør =
+            erPeriodeLikTidslinje.perioder()
+                .filter { it.innhold == false }
+                .minOfOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid().førsteDagIInneværendeMåned() }
+                ?: TIDENES_ENDE
 
-            aktørOgRolleForVedtaksgrunnlag to førsteEndringForAktør
-        }.minByOrNull { it.second }
+        aktørOgRolleForVedtaksgrunnlag to førsteEndringForAktør
+    }.minByOrNull { it.second }
 
 private fun VedtaksperiodeGrunnlagForPerson?.erLik(
     grunnlagForVedtaksperiodeForrigeBehandling: VedtaksperiodeGrunnlagForPerson?,
@@ -147,7 +141,7 @@ private fun VedtaksperiodeGrunnlagForPerson?.erLik(
     when (this) {
         is VedtaksperiodeGrunnlagForPersonVilkårInnvilget ->
             grunnlagForVedtaksperiodeForrigeBehandling is VedtaksperiodeGrunnlagForPersonVilkårInnvilget &&
-                this.vilkårResultaterForVedtaksperiode.erLikUtenFomOgTom(
+                this.vilkårResultaterForVedtaksperiode.erLikUtenomTom(
                     grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode,
                 ) &&
                 this.kompetanse == grunnlagForVedtaksperiodeForrigeBehandling.kompetanse &&

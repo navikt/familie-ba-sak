@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
@@ -76,6 +77,7 @@ class UtbetalingsoppdragGeneratorService(
         oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
             tilkjentYtelse = tilkjentYtelse,
             utbetalingsoppdrag = beregnetUtbetalingsoppdrag.utbetalingsoppdrag,
+            endretUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(tilkjentYtelse.behandling.id)
         )
         oppdaterAndelerMedPeriodeOffset(
             tilkjentYtelse = tilkjentYtelse,
@@ -118,91 +120,90 @@ class UtbetalingsoppdragGeneratorService(
             null
         }
     }
-
-    private fun utledOpphør(
-        utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
-        behandling: Behandling,
-    ): Opphør {
-        val erRentOpphør =
-            utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() && utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
-        var opphørsdato: LocalDate? = null
-        if (erRentOpphør) {
-            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.minOf { it.opphør!!.opphørDatoFom }
-        }
-
-        if (behandling.type == BehandlingType.REVURDERING) {
-            val opphørPåRevurdering = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
-            if (opphørPåRevurdering.isNotEmpty()) {
-                opphørsdato = opphørPåRevurdering.maxOfOrNull { it.opphør!!.opphørDatoFom }
-            }
-        }
-        return Opphør(erRentOpphør = erRentOpphør, opphørsdato = opphørsdato)
-    }
-
-    private fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
-        tilkjentYtelse: TilkjentYtelse,
-        utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
-    ) {
-        val opphør = utledOpphør(utbetalingsoppdrag, tilkjentYtelse.behandling)
-        val stønadTom = utledStønadTom(tilkjentYtelse)
-
-
-        tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-        tilkjentYtelse.stønadTom = stønadTom
-        tilkjentYtelse.stønadFom =
-            if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
-        tilkjentYtelse.endretDato = LocalDate.now()
-        tilkjentYtelse.opphørFom = opphør.opphørsdato?.toYearMonth()
-    }
-
-    private fun utledStønadTom(tilkjentYtelse: TilkjentYtelse): YearMonth {
-        val endretUtbetalingAndel = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(tilkjentYtelse.behandling.id)
-        val endretUtbetalingTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndel)
-
-        val andelTilkjentYtelseTidslinjerPerType = tilkjentYtelse.andelerTilkjentYtelse
-            .groupBy { it.aktør to it.type }
-            .values.map { AndelTilkjentYtelseTidslinje(it) }
-        val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjerPerType.kombiner { it.toList() }
-
-        val stønadTom = andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingTidslinje) { andelTilkjentYtelser, endretUtbetaling ->
-            val kalkulertUtbetalingsbeløp = andelTilkjentYtelser?.maxOfOrNull { it.kalkulertUtbetalingsbeløp } ?: return@kombinerMed null
-            val periodeTom = andelTilkjentYtelser.minOf { it.stønadTom }
-
-            val endringsperiodeÅrsak = endretUtbetaling?.årsak ?: return@kombinerMed periodeTom
-
-            when (endringsperiodeÅrsak) {
-                Årsak.ALLEREDE_UTBETALT,
-                Årsak.ENDRE_MOTTAKER,
-                Årsak.ETTERBETALING_3ÅR,
-                ->
-                    // Vi ønsker å filtrere bort andeler som har 0 i kalkulertUtbetalingsbeløp
-                    if (kalkulertUtbetalingsbeløp == 0) null else periodeTom
-
-                Årsak.DELT_BOSTED -> periodeTom
-            }
-        }.perioder().map { it.innhold }.filterNotNull().max()
-        return stønadTom
-    }
-
-    private fun oppdaterAndelerMedPeriodeOffset(
-        tilkjentYtelse: TilkjentYtelse,
-        andelerMedPeriodeId: List<AndelMedPeriodeIdLongId>,
-    ) {
-        val andelerPåId = andelerMedPeriodeId.associateBy { it.id }
-        val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
-        val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
-        if (andelerMedPeriodeId.size != andelerSomSkalSendesTilOppdrag.size) {
-            error("Antallet andeler med oppdatert periodeOffset, forrigePeriodeOffset og kildeBehandlingId fra ny generator skal være likt antallet andeler med kalkulertUtbetalingsbeløp != 0. Generator gir ${andelerMedPeriodeId.size} andeler men det er ${andelerSomSkalSendesTilOppdrag.size} andeler med kalkulertUtbetalingsbeløp != 0")
-        }
-        andelerSomSkalSendesTilOppdrag.forEach { andel ->
-            val andelMedOffset =
-                andelerPåId[andel.id]
-                    ?: error("Feil ved oppdaterig av offset på andeler. Finner ikke andel med id ${andel.id} blandt andelene med oppdatert offset fra ny generator. Ny generator returnerer andeler med ider [${andelerPåId.values.map { it.id }}]")
-            andel.periodeOffset = andelMedOffset.periodeId
-            andel.forrigePeriodeOffset = andelMedOffset.forrigePeriodeId
-            andel.kildeBehandlingId = andelMedOffset.kildeBehandlingId
-        }
-    }
-
-    data class Opphør(val erRentOpphør: Boolean, val opphørsdato: LocalDate?)
 }
+
+private fun utledOpphør(
+    utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
+    behandling: Behandling,
+): Opphør {
+    val erRentOpphør =
+        utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() && utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
+    var opphørsdato: LocalDate? = null
+    if (erRentOpphør) {
+        opphørsdato = utbetalingsoppdrag.utbetalingsperiode.minOf { it.opphør!!.opphørDatoFom }
+    }
+    if (behandling.type == BehandlingType.REVURDERING) {
+        val opphørPåRevurdering = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
+        if (opphørPåRevurdering.isNotEmpty()) {
+            opphørsdato = opphørPåRevurdering.maxOfOrNull { it.opphør!!.opphørDatoFom }
+        }
+    }
+    return Opphør(erRentOpphør = erRentOpphør, opphørsdato = opphørsdato)
+}
+
+private fun utledStønadTom(tilkjentYtelse: TilkjentYtelse, endretUtbetalingAndeler: List<EndretUtbetalingAndel>): YearMonth {
+    val endretUtbetalingTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndeler)
+
+    val andelTilkjentYtelseTidslinjerPerType = tilkjentYtelse.andelerTilkjentYtelse
+        .groupBy { it.aktør to it.type }
+        .values.map { AndelTilkjentYtelseTidslinje(it) }
+    val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjerPerType.kombiner { it.toList() }
+
+    val stønadTom = andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingTidslinje) { andelTilkjentYtelser, endretUtbetaling ->
+        val kalkulertUtbetalingsbeløp = andelTilkjentYtelser?.maxOfOrNull { it.kalkulertUtbetalingsbeløp } ?: return@kombinerMed null
+        val periodeTom = andelTilkjentYtelser.minOf { it.stønadTom }
+
+        val endringsperiodeÅrsak = endretUtbetaling?.årsak ?: return@kombinerMed periodeTom
+
+        when (endringsperiodeÅrsak) {
+            Årsak.ALLEREDE_UTBETALT,
+            Årsak.ENDRE_MOTTAKER,
+            Årsak.ETTERBETALING_3ÅR,
+            ->
+                // Vi ønsker å filtrere bort andeler som har 0 i kalkulertUtbetalingsbeløp
+                if (kalkulertUtbetalingsbeløp == 0) null else periodeTom
+
+            Årsak.DELT_BOSTED -> periodeTom
+        }
+    }.perioder().map { it.innhold }.filterNotNull().max()
+    return stønadTom
+}
+
+private fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
+    tilkjentYtelse: TilkjentYtelse,
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+    utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
+) {
+    val opphør = utledOpphør(utbetalingsoppdrag, tilkjentYtelse.behandling)
+    val stønadTom = utledStønadTom(tilkjentYtelse, endretUtbetalingAndeler)
+
+
+    tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
+    tilkjentYtelse.stønadTom = stønadTom
+    tilkjentYtelse.stønadFom =
+        if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
+    tilkjentYtelse.endretDato = LocalDate.now()
+    tilkjentYtelse.opphørFom = opphør.opphørsdato?.toYearMonth()
+}
+
+fun oppdaterAndelerMedPeriodeOffset(
+    tilkjentYtelse: TilkjentYtelse,
+    andelerMedPeriodeId: List<AndelMedPeriodeIdLongId>,
+) {
+    val andelerPåId = andelerMedPeriodeId.associateBy { it.id }
+    val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
+    val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
+    if (andelerMedPeriodeId.size != andelerSomSkalSendesTilOppdrag.size) {
+        error("Antallet andeler med oppdatert periodeOffset, forrigePeriodeOffset og kildeBehandlingId fra ny generator skal være likt antallet andeler med kalkulertUtbetalingsbeløp != 0. Generator gir ${andelerMedPeriodeId.size} andeler men det er ${andelerSomSkalSendesTilOppdrag.size} andeler med kalkulertUtbetalingsbeløp != 0")
+    }
+    andelerSomSkalSendesTilOppdrag.forEach { andel ->
+        val andelMedOffset =
+            andelerPåId[andel.id]
+                ?: error("Feil ved oppdaterig av offset på andeler. Finner ikke andel med id ${andel.id} blandt andelene med oppdatert offset fra ny generator. Ny generator returnerer andeler med ider [${andelerPåId.values.map { it.id }}]")
+        andel.periodeOffset = andelMedOffset.periodeId
+        andel.forrigePeriodeOffset = andelMedOffset.forrigePeriodeId
+        andel.kildeBehandlingId = andelMedOffset.kildeBehandlingId
+    }
+}
+
+data class Opphør(val erRentOpphør: Boolean, val opphørsdato: LocalDate?)

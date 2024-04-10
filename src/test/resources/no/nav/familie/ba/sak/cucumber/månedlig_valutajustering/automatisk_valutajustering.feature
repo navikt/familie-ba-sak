@@ -54,8 +54,8 @@ Egenskap: Automatisk valutajustering
       | DKK         | 29.02.2024     | 3    |
 
     Så forvent disse behandlingene
-      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus  | Behandlingstype | Behandlingssteg       | Underkategori |
-      | 2            | 1        | 1                   | ENDRET_UTBETALING   | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | IVERKSETTER_VEDTAK | Revurdering     | IVERKSETT_MOT_OPPDRAG | ORDINÆR       |
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus | Behandlingstype | Behandlingssteg      | Underkategori |
+      | 2            | 1        | 1                   | ENDRET_UTBETALING   | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | AVSLUTTET         | Revurdering     | BEHANDLING_AVSLUTTET | ORDINÆR       |
 
     Så forvent følgende andeler tilkjent ytelse for behandling 2
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats | Differanseberegnet beløp |
@@ -78,8 +78,8 @@ Egenskap: Automatisk valutajustering
       | DKK         | 29.02.2024     | 3    |
 
     Så forvent disse behandlingene
-      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus  | Behandlingstype | Behandlingssteg       | Underkategori |
-      | 2            | 1        | 1                   | ENDRET_UTBETALING   | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | IVERKSETTER_VEDTAK | Revurdering     | IVERKSETT_MOT_OPPDRAG | ORDINÆR       |
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus | Behandlingstype | Behandlingssteg      | Underkategori |
+      | 2            | 1        | 1                   | ENDRET_UTBETALING   | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | AVSLUTTET         | Revurdering     | BEHANDLING_AVSLUTTET | ORDINÆR       |
 
     Så forvent følgende andeler tilkjent ytelse for behandling 2
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats | Differanseberegnet beløp |

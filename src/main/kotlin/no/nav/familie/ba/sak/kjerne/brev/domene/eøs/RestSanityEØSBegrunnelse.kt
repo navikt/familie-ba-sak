@@ -27,6 +27,7 @@ data class RestSanityEØSBegrunnelse(
     val hjemlerEOSForordningen883: List<String>?,
     val hjemlerEOSForordningen987: List<String>?,
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>?,
+    val stotterFritekst: Boolean?,
     val eosVilkaar: List<String>? = null,
     val ovrigeTriggere: List<String>? = emptyList(),
     @Deprecated("Skal bruke periodeResultatForPerson i stedet")
@@ -41,7 +42,7 @@ data class RestSanityEØSBegrunnelse(
     val brevPeriodeType: String?,
     val begrunnelseTypeForPerson: String?,
     val valgbarhet: String?,
-    val slaattAvIProduksjon: Boolean?,
+    val ikkeIBruk: Boolean?,
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
@@ -84,7 +85,7 @@ data class RestSanityEØSBegrunnelse(
                     it.finnEnumverdi<ØvrigTrigger>(apiNavn)
                 } ?: emptyList(),
             begrunnelseTypeForPerson = begrunnelseTypeForPerson.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
-            slåttAvIProduksjon = slaattAvIProduksjon ?: false,
+            ikkeIBruk = ikkeIBruk ?: false,
         )
     }
 

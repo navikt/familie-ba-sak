@@ -179,6 +179,7 @@ fun lagBehandling(
     status: BehandlingStatus = initStatus(),
     aktivertTid: LocalDateTime = LocalDateTime.now(),
     id: Long = nesteBehandlingId(),
+    endretTidspunkt: LocalDateTime = LocalDateTime.now(),
 ) =
     Behandling(
         id = id,
@@ -192,6 +193,7 @@ fun lagBehandling(
         status = status,
         aktivertTidspunkt = aktivertTid,
     ).also {
+        it.endretTidspunkt = endretTidspunkt
         it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
     }
 
@@ -1265,7 +1267,8 @@ fun lagRestSanityBegrunnelse(
     regelverk: String? = null,
     brevPeriodeType: String? = null,
     begrunnelseTypeForPerson: String? = null,
-    slåttAvIProduksjon: Boolean? = false,
+    ikkeIBruk: Boolean? = false,
+    stotterFritekst: Boolean? = false,
 ): RestSanityBegrunnelse =
     RestSanityBegrunnelse(
         apiNavn = apiNavn,
@@ -1287,7 +1290,8 @@ fun lagRestSanityBegrunnelse(
         regelverk = regelverk,
         brevPeriodeType = brevPeriodeType,
         begrunnelseTypeForPerson = begrunnelseTypeForPerson,
-        slaattAvIProduksjon = slåttAvIProduksjon,
+        ikkeIBruk = ikkeIBruk,
+        stotterFritekst = stotterFritekst,
     )
 
 fun lagSanityBegrunnelse(

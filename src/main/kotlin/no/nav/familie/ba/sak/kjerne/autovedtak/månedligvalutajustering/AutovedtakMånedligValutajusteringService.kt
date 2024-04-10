@@ -1,12 +1,16 @@
 ﻿package no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.LocalDateProvider
+import no.nav.familie.ba.sak.common.MånedligValutaJusteringFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -28,11 +32,14 @@ import java.time.YearMonth
 class AutovedtakMånedligValutajusteringService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val autovedtakService: AutovedtakService,
+    private val snikeIKøenService: SnikeIKøenService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingService: BehandlingService,
     private val localDateProvider: LocalDateProvider,
     private val kompetanseService: KompetanseService,
 ) {
+    private val månedligvalutajusteringIgnorertÅpenBehandling = Metrics.counter("valutajustering.ignorert.aapenbehandling")
+
     val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
@@ -64,8 +71,15 @@ class AutovedtakMånedligValutajusteringService(
         }
 
         if (aktivOgÅpenBehandling != null) {
-            // todo: legg til støtte for å sette på maskinell vent/snike i køen
-            throw Feil("Ikke lagt til støtte for å sette på maskinell vent")
+            if (snikeIKøenService.kanSnikeForbi(aktivOgÅpenBehandling)) {
+                snikeIKøenService.settAktivBehandlingPåMaskinellVent(
+                    aktivOgÅpenBehandling.id,
+                    SettPåMaskinellVentÅrsak.MÅNEDLIG_VALUTAJUSTERING,
+                )
+            } else {
+                månedligvalutajusteringIgnorertÅpenBehandling.increment()
+                throw MånedligValutaJusteringFeil(melding = "Kan ikke utføre månedlig valutajustering for fagsak=${behandling.fagsak.id} fordi det er en åpen behandling vi ikke klarer å snike forbi")
+            }
         }
 
         val søkerAktør = sisteVedtatteBehandling.fagsak.aktør
@@ -106,7 +120,6 @@ class AutovedtakMånedligValutajusteringService(
 
                 else -> throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} ved månedlig valutajustering for fagsak=${behandling.fagsak.id}")
             }
-
         taskRepository.save(task)
     }
 
