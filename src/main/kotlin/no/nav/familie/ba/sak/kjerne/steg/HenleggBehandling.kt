@@ -31,7 +31,7 @@ class HenleggBehandling(
     private val oppgaveService: OppgaveService,
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val organisasjonService: OrganisasjonService
+    private val organisasjonService: OrganisasjonService,
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
     private val logger = LoggerFactory.getLogger(HenleggBehandling::class.java)
 
