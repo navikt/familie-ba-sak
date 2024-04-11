@@ -174,10 +174,10 @@ private fun utledStønadTom(
     return stønadTom
 }
 
-private fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
+fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
     tilkjentYtelse: TilkjentYtelse,
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
 ) {
     val opphør = utledOpphør(utbetalingsoppdrag, tilkjentYtelse.behandling)
     val stønadTom = utledStønadTom(tilkjentYtelse, endretUtbetalingAndeler)
