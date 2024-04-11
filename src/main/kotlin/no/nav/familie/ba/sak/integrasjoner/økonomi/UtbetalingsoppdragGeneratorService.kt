@@ -144,7 +144,9 @@ private fun utledOpphør(
 private fun utledStønadTom(
     tilkjentYtelse: TilkjentYtelse,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-): YearMonth {
+): YearMonth? {
+    if (endretUtbetalingAndeler.isEmpty()) return tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
+
     val endretUtbetalingTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndeler)
 
     val andelTilkjentYtelseTidslinjerPerType =
@@ -153,7 +155,7 @@ private fun utledStønadTom(
             .values.map { AndelTilkjentYtelseTidslinje(it) }
     val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjerPerType.kombiner { it.toList() }
 
-    val stønadTom =
+    val stønadTomTidslinje =
         andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingTidslinje) { andelTilkjentYtelser, endretUtbetaling ->
             val kalkulertUtbetalingsbeløp = andelTilkjentYtelser?.maxOfOrNull { it.kalkulertUtbetalingsbeløp } ?: return@kombinerMed null
             val periodeTom = andelTilkjentYtelser.minOf { it.stønadTom }
@@ -170,8 +172,8 @@ private fun utledStønadTom(
 
                 Årsak.DELT_BOSTED -> periodeTom
             }
-        }.perioder().map { it.innhold }.filterNotNull().max()
-    return stønadTom
+        }
+    return stønadTomTidslinje.perioder().mapNotNull { it.innhold }.max()
 }
 
 fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
