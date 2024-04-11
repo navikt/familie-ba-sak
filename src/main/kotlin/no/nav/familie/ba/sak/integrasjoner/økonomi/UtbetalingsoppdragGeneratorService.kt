@@ -162,7 +162,7 @@ private fun utledStønadTom(
 fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
     tilkjentYtelse: TilkjentYtelse,
     utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
 ) {
     val opphør = utledOpphør(utbetalingsoppdrag, tilkjentYtelse.behandling)
 
