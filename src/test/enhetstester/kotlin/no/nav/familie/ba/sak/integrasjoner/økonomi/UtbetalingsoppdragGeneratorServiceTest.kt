@@ -111,11 +111,11 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 3,
             forventetAntallUtbetalingsperioder = 3,
             forventedeOffsets =
-            listOf(
-                Pair(0L, null),
-                Pair(1L, 0L),
-                Pair(2L, 1L),
-            ),
+                listOf(
+                    Pair(0L, null),
+                    Pair(1L, 0L),
+                    Pair(2L, 1L),
+                ),
         )
     }
 
@@ -194,9 +194,9 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 1,
             forventetAntallUtbetalingsperioder = 1,
             forventedeOffsets =
-            listOf(
-                Pair(3L, 2L),
-            ),
+                listOf(
+                    Pair(3L, 2L),
+                ),
         )
     }
 
@@ -268,13 +268,13 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 5,
             forventetAntallUtbetalingsperioder = 5,
             forventedeOffsets =
-            listOf(
-                Pair(0L, null),
-                Pair(1L, 0L),
-                Pair(2L, 1L),
-                Pair(3L, null),
-                Pair(4L, 3L),
-            ),
+                listOf(
+                    Pair(0L, null),
+                    Pair(1L, 0L),
+                    Pair(2L, 1L),
+                    Pair(3L, null),
+                    Pair(4L, 3L),
+                ),
         )
     }
 
@@ -376,10 +376,10 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 2,
             forventetAntallUtbetalingsperioder = 2,
             forventedeOffsets =
-            listOf(
-                Pair(5L, 2L),
-                Pair(6L, 4L),
-            ),
+                listOf(
+                    Pair(5L, 2L),
+                    Pair(6L, 4L),
+                ),
         )
     }
 
@@ -465,10 +465,10 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 2,
             forventetAntallUtbetalingsperioder = 3,
             forventedeOffsets =
-            listOf(
-                Pair(3L, 2L),
-                Pair(4L, null),
-            ),
+                listOf(
+                    Pair(3L, 2L),
+                    Pair(4L, null),
+                ),
         )
     }
 
@@ -552,10 +552,10 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 2,
             forventetAntallUtbetalingsperioder = 3,
             forventedeOffsets =
-            listOf(
-                Pair(3L, 2L),
-                Pair(4L, null),
-            ),
+                listOf(
+                    Pair(3L, 2L),
+                    Pair(4L, null),
+                ),
         )
     }
 
@@ -627,10 +627,10 @@ class UtbetalingsoppdragGeneratorServiceTest {
             forventetAntallAndeler = 2,
             forventetAntallUtbetalingsperioder = 2,
             forventedeOffsets =
-            listOf(
-                Pair(0L, null),
-                Pair(1L, null),
-            ),
+                listOf(
+                    Pair(0L, null),
+                    Pair(1L, null),
+                ),
         )
     }
 
@@ -659,16 +659,17 @@ class UtbetalingsoppdragGeneratorServiceTest {
             ),
         )
 
-        val endretUtbetaling = listOf(
-            lagEndretUtbetalingAndel(
-                behandlingId = tilkjentYtelse.behandling.id,
-                person = barn,
-                fom = nåDato.minusMonths(3),
-                tom = nåDato.plusYears(2).minusMonths(1),
-                prosent = BigDecimal.ZERO,
-                årsak = Årsak.ENDRE_MOTTAKER
+        val endretUtbetaling =
+            listOf(
+                lagEndretUtbetalingAndel(
+                    behandlingId = tilkjentYtelse.behandling.id,
+                    person = barn,
+                    fom = nåDato.minusMonths(3),
+                    tom = nåDato.plusYears(2).minusMonths(1),
+                    prosent = BigDecimal.ZERO,
+                    årsak = Årsak.ENDRE_MOTTAKER,
+                ),
             )
-        )
 
         val tilkjentYtelseSlot = slot<TilkjentYtelse>()
         setUpMocks(
@@ -720,16 +721,17 @@ class UtbetalingsoppdragGeneratorServiceTest {
             ),
         )
 
-        val endretUtbetaling = listOf(
-            lagEndretUtbetalingAndel(
-                behandlingId = tilkjentYtelse.behandling.id,
-                person = barn,
-                fom = nåDato.minusMonths(3),
-                tom = nåDato.minusMonths(1),
-                prosent = BigDecimal.ZERO,
-                årsak = Årsak.ENDRE_MOTTAKER
+        val endretUtbetaling =
+            listOf(
+                lagEndretUtbetalingAndel(
+                    behandlingId = tilkjentYtelse.behandling.id,
+                    person = barn,
+                    fom = nåDato.minusMonths(3),
+                    tom = nåDato.minusMonths(1),
+                    prosent = BigDecimal.ZERO,
+                    årsak = Årsak.ENDRE_MOTTAKER,
+                ),
             )
-        )
 
         val tilkjentYtelseSlot = slot<TilkjentYtelse>()
         setUpMocks(
@@ -796,7 +798,7 @@ class UtbetalingsoppdragGeneratorServiceTest {
         tilkjentYtelseSlot: CapturingSlot<TilkjentYtelse>,
         forrigeTilkjentYtelse: TilkjentYtelse? = null,
         migreringsdato: LocalDate? = null,
-        endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
     ) {
         if (forrigeTilkjentYtelse == null) {
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns null

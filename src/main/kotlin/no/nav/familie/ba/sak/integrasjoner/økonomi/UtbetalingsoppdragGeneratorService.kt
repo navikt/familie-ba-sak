@@ -77,7 +77,7 @@ class UtbetalingsoppdragGeneratorService(
         oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
             tilkjentYtelse = tilkjentYtelse,
             utbetalingsoppdrag = beregnetUtbetalingsoppdrag.utbetalingsoppdrag,
-            endretUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(tilkjentYtelse.behandling.id)
+            endretUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(tilkjentYtelse.behandling.id),
         )
         oppdaterAndelerMedPeriodeOffset(
             tilkjentYtelse = tilkjentYtelse,
@@ -141,31 +141,36 @@ private fun utledOpphør(
     return Opphør(erRentOpphør = erRentOpphør, opphørsdato = opphørsdato)
 }
 
-private fun utledStønadTom(tilkjentYtelse: TilkjentYtelse, endretUtbetalingAndeler: List<EndretUtbetalingAndel>): YearMonth {
+private fun utledStønadTom(
+    tilkjentYtelse: TilkjentYtelse,
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+): YearMonth {
     val endretUtbetalingTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndeler)
 
-    val andelTilkjentYtelseTidslinjerPerType = tilkjentYtelse.andelerTilkjentYtelse
-        .groupBy { it.aktør to it.type }
-        .values.map { AndelTilkjentYtelseTidslinje(it) }
+    val andelTilkjentYtelseTidslinjerPerType =
+        tilkjentYtelse.andelerTilkjentYtelse
+            .groupBy { it.aktør to it.type }
+            .values.map { AndelTilkjentYtelseTidslinje(it) }
     val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjerPerType.kombiner { it.toList() }
 
-    val stønadTom = andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingTidslinje) { andelTilkjentYtelser, endretUtbetaling ->
-        val kalkulertUtbetalingsbeløp = andelTilkjentYtelser?.maxOfOrNull { it.kalkulertUtbetalingsbeløp } ?: return@kombinerMed null
-        val periodeTom = andelTilkjentYtelser.minOf { it.stønadTom }
+    val stønadTom =
+        andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingTidslinje) { andelTilkjentYtelser, endretUtbetaling ->
+            val kalkulertUtbetalingsbeløp = andelTilkjentYtelser?.maxOfOrNull { it.kalkulertUtbetalingsbeløp } ?: return@kombinerMed null
+            val periodeTom = andelTilkjentYtelser.minOf { it.stønadTom }
 
-        val endringsperiodeÅrsak = endretUtbetaling?.årsak ?: return@kombinerMed periodeTom
+            val endringsperiodeÅrsak = endretUtbetaling?.årsak ?: return@kombinerMed periodeTom
 
-        when (endringsperiodeÅrsak) {
-            Årsak.ALLEREDE_UTBETALT,
-            Årsak.ENDRE_MOTTAKER,
-            Årsak.ETTERBETALING_3ÅR,
-            ->
-                // Vi ønsker å filtrere bort andeler som har 0 i kalkulertUtbetalingsbeløp
-                if (kalkulertUtbetalingsbeløp == 0) null else periodeTom
+            when (endringsperiodeÅrsak) {
+                Årsak.ALLEREDE_UTBETALT,
+                Årsak.ENDRE_MOTTAKER,
+                Årsak.ETTERBETALING_3ÅR,
+                ->
+                    // Vi ønsker å filtrere bort andeler som har 0 i kalkulertUtbetalingsbeløp
+                    if (kalkulertUtbetalingsbeløp == 0) null else periodeTom
 
-            Årsak.DELT_BOSTED -> periodeTom
-        }
-    }.perioder().map { it.innhold }.filterNotNull().max()
+                Årsak.DELT_BOSTED -> periodeTom
+            }
+        }.perioder().map { it.innhold }.filterNotNull().max()
     return stønadTom
 }
 
@@ -176,7 +181,6 @@ private fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
 ) {
     val opphør = utledOpphør(utbetalingsoppdrag, tilkjentYtelse.behandling)
     val stønadTom = utledStønadTom(tilkjentYtelse, endretUtbetalingAndeler)
-
 
     tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
     tilkjentYtelse.stønadTom = stønadTom
