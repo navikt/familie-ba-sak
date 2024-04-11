@@ -182,10 +182,9 @@ fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
 ) {
     val opphør = utledOpphør(utbetalingsoppdrag, tilkjentYtelse.behandling)
-    val stønadTom = utledStønadTom(tilkjentYtelse, endretUtbetalingAndeler)
 
     tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-    tilkjentYtelse.stønadTom = stønadTom
+    tilkjentYtelse.stønadTom = utledStønadTom(tilkjentYtelse, endretUtbetalingAndeler)
     tilkjentYtelse.stønadFom =
         if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
     tilkjentYtelse.endretDato = LocalDate.now()
