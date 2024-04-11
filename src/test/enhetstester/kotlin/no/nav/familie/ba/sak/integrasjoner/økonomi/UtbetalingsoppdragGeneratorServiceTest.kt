@@ -639,7 +639,8 @@ class UtbetalingsoppdragGeneratorServiceTest {
         val vedtak = lagVedtak()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(vedtak.behandling)
         val nåDato = YearMonth.now()
-        val barn = tilfeldigPerson(fødselsdato = nåDato.toLocalDate().minusYears(16))
+        val barn1 = tilfeldigPerson(fødselsdato = nåDato.toLocalDate().minusYears(16))
+        val barn2 = tilfeldigPerson(fødselsdato = nåDato.toLocalDate().minusYears(14))
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             mutableSetOf(
                 lagAndelTilkjentYtelse(
@@ -647,14 +648,30 @@ class UtbetalingsoppdragGeneratorServiceTest {
                     fom = nåDato.minusYears(5),
                     tom = nåDato.minusMonths(4),
                     beløp = 350,
-                    person = barn,
+                    person = barn1,
                 ),
                 lagAndelTilkjentYtelse(
                     id = 3,
                     fom = nåDato.minusMonths(3),
                     tom = nåDato.plusYears(2).minusMonths(1),
+                    prosent = BigDecimal.ZERO,
                     beløp = 0,
-                    person = barn,
+                    person = barn1,
+                ),
+                lagAndelTilkjentYtelse(
+                    id = 4,
+                    fom = nåDato.minusYears(3),
+                    tom = nåDato.minusMonths(4),
+                    beløp = 350,
+                    person = barn2,
+                ),
+                lagAndelTilkjentYtelse(
+                    id = 5,
+                    fom = nåDato.minusMonths(3),
+                    tom = nåDato.plusYears(4).minusMonths(1),
+                    prosent = BigDecimal.ZERO,
+                    beløp = 0,
+                    person = barn2,
                 ),
             ),
         )
@@ -663,9 +680,17 @@ class UtbetalingsoppdragGeneratorServiceTest {
             listOf(
                 lagEndretUtbetalingAndel(
                     behandlingId = tilkjentYtelse.behandling.id,
-                    person = barn,
+                    person = barn1,
                     fom = nåDato.minusMonths(3),
                     tom = nåDato.plusYears(2).minusMonths(1),
+                    prosent = BigDecimal.ZERO,
+                    årsak = Årsak.ENDRE_MOTTAKER,
+                ),
+                lagEndretUtbetalingAndel(
+                    behandlingId = tilkjentYtelse.behandling.id,
+                    person = barn2,
+                    fom = nåDato.minusMonths(3),
+                    tom = nåDato.plusYears(4).minusMonths(1),
                     prosent = BigDecimal.ZERO,
                     årsak = Årsak.ENDRE_MOTTAKER,
                 ),
@@ -709,6 +734,7 @@ class UtbetalingsoppdragGeneratorServiceTest {
                     fom = nåDato.minusMonths(3),
                     tom = nåDato.minusMonths(1),
                     beløp = 0,
+                    prosent = BigDecimal.ZERO,
                     person = barn,
                 ),
                 lagAndelTilkjentYtelse(

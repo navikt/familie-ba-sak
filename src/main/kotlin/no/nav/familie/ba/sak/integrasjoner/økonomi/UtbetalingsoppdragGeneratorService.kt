@@ -6,17 +6,14 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
-import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelerTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
@@ -24,6 +21,7 @@ import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -145,35 +143,20 @@ private fun utledStønadTom(
     tilkjentYtelse: TilkjentYtelse,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
 ): YearMonth? {
-    if (endretUtbetalingAndeler.isEmpty()) return tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
+    val andelerMedEndringer = tilkjentYtelse.andelerTilkjentYtelse.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(endretUtbetalingAndeler)
 
-    val endretUtbetalingTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndeler)
-
-    val andelTilkjentYtelseTidslinjerPerType =
-        tilkjentYtelse.andelerTilkjentYtelse
-            .groupBy { it.aktør to it.type }
-            .values.map { AndelTilkjentYtelseTidslinje(it) }
-    val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjerPerType.kombiner { it.toList() }
-
-    val stønadTomTidslinje =
-        andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingTidslinje) { andelTilkjentYtelser, endretUtbetaling ->
-            val kalkulertUtbetalingsbeløp = andelTilkjentYtelser?.maxOfOrNull { it.kalkulertUtbetalingsbeløp } ?: return@kombinerMed null
-            val periodeTom = andelTilkjentYtelser.minOf { it.stønadTom }
-
-            val endringsperiodeÅrsak = endretUtbetaling?.årsak ?: return@kombinerMed periodeTom
-
-            when (endringsperiodeÅrsak) {
-                Årsak.ALLEREDE_UTBETALT,
-                Årsak.ENDRE_MOTTAKER,
-                Årsak.ETTERBETALING_3ÅR,
-                ->
-                    // Vi ønsker å filtrere bort andeler som har 0 i kalkulertUtbetalingsbeløp
-                    if (kalkulertUtbetalingsbeløp == 0) null else periodeTom
-
-                Årsak.DELT_BOSTED -> periodeTom
+    return andelerMedEndringer.filterNot { it ->
+        val harEndringSomFørerTilOpphørVed0Prosent =
+            it.endreteUtbetalinger.any { endretUtbetaling ->
+                endretUtbetaling.årsak in
+                    listOf(
+                        Årsak.ALLEREDE_UTBETALT,
+                        Årsak.ENDRE_MOTTAKER,
+                        Årsak.ETTERBETALING_3ÅR,
+                    )
             }
-        }
-    return stønadTomTidslinje.perioder().mapNotNull { it.innhold }.max()
+        harEndringSomFørerTilOpphørVed0Prosent && it.prosent == BigDecimal.ZERO
+    }.maxOfOrNull { it.stønadTom }
 }
 
 fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
