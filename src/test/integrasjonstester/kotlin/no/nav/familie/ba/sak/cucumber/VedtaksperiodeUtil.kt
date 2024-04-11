@@ -57,6 +57,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -332,6 +334,7 @@ fun lagValutakurs(
                     rad,
                 ),
             kurs = parseBigDecimal(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.KURS, rad),
+            vurderingsform = parseValgfriEnum<Vurderingsform>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VURDERINGSFORM, rad) ?: Vurderingsform.MANUELL,
         ).also { it.behandlingId = behandlingId }
     }.groupBy { it.behandlingId }
         .toMutableMap()

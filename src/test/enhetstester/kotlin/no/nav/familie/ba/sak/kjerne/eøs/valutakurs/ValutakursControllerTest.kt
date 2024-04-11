@@ -46,7 +46,7 @@ class ValutakursControllerTest {
     private val barnId = "12345678910"
 
     private val restValutakurs: RestValutakurs =
-        RestValutakurs(1, YearMonth.of(2020, 1), null, listOf(barnId), null, null, null, UtfyltStatus.OK)
+        RestValutakurs(id = 1, fom = YearMonth.of(2020, 1), tom = null, barnIdenter = listOf(barnId), valutakursdato = null, valutakode = null, kurs = null, vurderingsform = null, status = UtfyltStatus.OK)
 
     @BeforeEach
     fun setup() {
