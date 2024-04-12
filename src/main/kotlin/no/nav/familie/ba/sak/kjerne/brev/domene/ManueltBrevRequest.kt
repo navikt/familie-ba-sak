@@ -114,15 +114,20 @@ fun ManueltBrevRequest.byggMottakerdata(
             Enhet(enhetId = behandlendeEnhetId, enhetNavn = behandlendeEnhetNavn)
         }
     return when {
-        erTilInstitusjon ->
+        erTilInstitusjon -> {
+            val fødselsnummerPåPerson = behandling.fagsak.aktør.aktivFødselsnummer()
+            val person = hentPerson(fødselsnummerPåPerson)
+
             this.copy(
                 enhet = enhet,
+                mottakerMålform = person.målform,
                 vedrørende =
                     object : Person {
-                        override val fødselsnummer = behandling.fagsak.aktør.aktivFødselsnummer()
-                        override val navn = hentPerson(fødselsnummer).navn
+                        override val fødselsnummer = fødselsnummerPåPerson
+                        override val navn = person.navn
                     },
             )
+        }
 
         else ->
             hentPerson(mottakerIdent).let { mottakerPerson ->
