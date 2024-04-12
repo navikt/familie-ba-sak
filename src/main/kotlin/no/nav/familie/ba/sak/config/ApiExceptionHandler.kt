@@ -75,14 +75,16 @@ class ApiExceptionHandler {
     fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ResponseEntity<Ressurs<Nothing>> {
         val mostSpecificCause = NestedExceptionUtils.getMostSpecificCause(e)
 
-        return if (mostSpecificCause is DateTimeParseException) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                Ressurs.failure(
-                    frontendFeilmelding = "Ugyldig datoformat ${mostSpecificCause.parsedString}",
-                ),
-            )
-        } else {
-            illegalState(mostSpecificCause.message.toString(), mostSpecificCause)
+        return when (mostSpecificCause) {
+            is DateTimeParseException -> {
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    Ressurs.failure(
+                        frontendFeilmelding = "Ugyldig datoformat ${mostSpecificCause.parsedString}",
+                    ),
+                )
+            }
+            is FunksjonellFeil -> funksjonellFeil(mostSpecificCause)
+            else -> illegalState(mostSpecificCause.message.toString(), mostSpecificCause)
         }
     }
 
