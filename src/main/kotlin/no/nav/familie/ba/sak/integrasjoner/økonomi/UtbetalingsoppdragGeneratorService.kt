@@ -145,18 +145,21 @@ private fun utledStønadTom(
 ): YearMonth? {
     val andelerMedEndringer = tilkjentYtelse.andelerTilkjentYtelse.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(endretUtbetalingAndeler)
 
-    return andelerMedEndringer.filterNot { it ->
-        val harEndringSomFørerTilOpphørVed0Prosent =
-            it.endreteUtbetalinger.any { endretUtbetaling ->
-                endretUtbetaling.årsak in
-                    listOf(
-                        Årsak.ALLEREDE_UTBETALT,
-                        Årsak.ENDRE_MOTTAKER,
-                        Årsak.ETTERBETALING_3ÅR,
-                    )
-            }
-        harEndringSomFørerTilOpphørVed0Prosent && it.prosent == BigDecimal.ZERO
-    }.maxOfOrNull { it.stønadTom }
+    val andelerMedRelevantUtbetaling =
+        andelerMedEndringer.filterNot { it ->
+            val harEndringSomFørerTilOpphørVed0Prosent =
+                it.endreteUtbetalinger.any { endretUtbetaling ->
+                    endretUtbetaling.årsak in
+                        listOf(
+                            Årsak.ALLEREDE_UTBETALT,
+                            Årsak.ENDRE_MOTTAKER,
+                            Årsak.ETTERBETALING_3ÅR,
+                        )
+                }
+            harEndringSomFørerTilOpphørVed0Prosent && it.prosent == BigDecimal.ZERO
+        }
+
+    return andelerMedRelevantUtbetaling.maxOfOrNull { it.stønadTom }
 }
 
 fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
