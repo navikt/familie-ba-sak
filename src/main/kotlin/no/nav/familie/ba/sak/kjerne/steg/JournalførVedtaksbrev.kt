@@ -81,7 +81,7 @@ class JournalførVedtaksbrev(
                 vedtak = vedtak,
                 journalførendeEnhet = behandlendeEnhet,
                 mottakerInfo = mottakerInfo,
-                tilManuellMottakerEllerVerge = mottakerInfo.navn != null && mottakerInfo.navn != brevmottakerService.hentMottakerNavn(søkersident)
+                tilManuellMottakerEllerVerge = mottakerInfo.navn != null && mottakerInfo.navn != brevmottakerService.hentMottakerNavn(søkersident),
                 // mottakersnavn fyller ut kun når manuell mottaker finnes
             ).also { journalposterTilDistribusjon[it] = mottakerInfo }
         }
