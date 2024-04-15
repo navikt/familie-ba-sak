@@ -9,9 +9,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
-import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -25,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.logg.LoggType
 import no.nav.familie.ba.sak.kjerne.verge.Verge
 import no.nav.familie.ba.sak.kjerne.verge.VergeRepository
-import no.nav.familie.ba.sak.kjerne.verge.VergeService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -33,7 +29,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class RegistrerInstitusjonOgVergeStegTest {
+class RegistrerInstitusjonStegTest {
     private val vergeRepositoryMock: VergeRepository = mockk()
     private val fagsakRepositoryMock: FagsakRepository = mockk()
     private val loggServiceMock: LoggService = mockk()
@@ -42,8 +38,7 @@ class RegistrerInstitusjonOgVergeStegTest {
     private val institusjonRepositoryMock: InstitusjonRepository = mockk()
 
     private lateinit var institusjonService: InstitusjonService
-    private lateinit var vergeService: VergeService
-    private lateinit var registrerInstitusjonOgVerge: RegistrerInstitusjonOgVerge
+    private lateinit var registrerInstitusjon: RegistrerInstitusjon
 
     @BeforeAll
     fun setUp() {
@@ -53,11 +48,9 @@ class RegistrerInstitusjonOgVergeStegTest {
                 samhandlerKlient = mockk(relaxed = true),
                 institusjonRepository = institusjonRepositoryMock,
             )
-        vergeService = VergeService(vergeRepositoryMock)
-        registrerInstitusjonOgVerge =
-            RegistrerInstitusjonOgVerge(
+        registrerInstitusjon =
+            RegistrerInstitusjon(
                 institusjonService,
-                vergeService,
                 loggServiceMock,
                 behandlingHentOgPersisterServiceMock,
                 fagsakServiceMock,
@@ -94,22 +87,14 @@ class RegistrerInstitusjonOgVergeStegTest {
                 tekst = "",
             )
         every { behandlingHentOgPersisterServiceMock.hent(any()) } returns behandling
-        val restRegistrerInstitusjonOgVerge =
-            RestRegistrerInstitusjonOgVerge(
-                vergeInfo =
-                    VergeInfo(
-                        "12345678910",
-                    ),
-                institusjonInfo = InstitusjonInfo("12345", "cool tsr"),
-            )
+        val institusjon = Institusjon(orgNummer = "12345", tssEksternId = "cool tsr")
 
-        registrerInstitusjonOgVerge.utførStegOgAngiNeste(
+        registrerInstitusjon.utførStegOgAngiNeste(
             behandling,
-            restRegistrerInstitusjonOgVerge,
+            institusjon,
         )
 
-        assertThat(fagsakSlot.captured.institusjon!!.orgNummer).isEqualTo(restRegistrerInstitusjonOgVerge.institusjonInfo!!.orgNummer)
-        assertThat(vergeSlot.captured.ident).isEqualTo(restRegistrerInstitusjonOgVerge.vergeInfo!!.ident)
+        assertThat(fagsakSlot.captured.institusjon!!.orgNummer).isEqualTo(institusjon.orgNummer)
         verify(exactly = 1) {
             loggServiceMock.opprettRegistrerVergeLogg(any())
         }
@@ -144,16 +129,12 @@ class RegistrerInstitusjonOgVergeStegTest {
                 tekst = "",
             )
         every { behandlingHentOgPersisterServiceMock.hent(any()) } returns behandling
-        val restRegistrerInstitusjonOgVerge =
-            RestRegistrerInstitusjonOgVerge(
-                vergeInfo = VergeInfo("12345678910"),
-                institusjonInfo = InstitusjonInfo("12345", "cool tsr"),
-            )
+        val institusjon = Institusjon(orgNummer = "12345", tssEksternId = "cool tsr")
 
         val nesteSteg =
-            registrerInstitusjonOgVerge.utførStegOgAngiNeste(
+            registrerInstitusjon.utførStegOgAngiNeste(
                 behandling,
-                restRegistrerInstitusjonOgVerge,
+                institusjon,
             )
 
         assertThat(nesteSteg).isEqualTo(StegType.REGISTRERE_SØKNAD)

@@ -6,8 +6,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
-import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
@@ -98,7 +97,7 @@ class TilbakekrevingServiceTest(
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
                 vedtaksperiodeService = vedtaksperiodeService,
-                institusjon = InstitusjonInfo(orgNummer = "998765432", tssEksternId = "8000000"),
+                institusjon = RestInstitusjon(orgNummer = "998765432", tssEksternId = "8000000"),
                 brevmalService = brevmalService,
             )
 
@@ -129,7 +128,6 @@ class TilbakekrevingServiceTest(
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
                 vedtaksperiodeService = vedtaksperiodeService,
-                verge = VergeInfo("04068203010"),
                 brevmalService = brevmalService,
             )
 
@@ -150,7 +148,7 @@ class TilbakekrevingServiceTest(
     @ParameterizedTest
     @ArgumentsSource(TestProvider::class)
     @Suppress("SENSELESS_COMPARISON")
-    fun `lagOpprettTilbakekrevingRequest sender brevmottakere i kall mot familie-tilbake`(arguments: Triple<VergeInfo, MottakerType, Vergetype>) {
+    fun `lagOpprettTilbakekrevingRequest sender brevmottakere i kall mot familie-tilbake`(arguments: Pair<MottakerType, Vergetype>) {
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
@@ -163,13 +161,12 @@ class TilbakekrevingServiceTest(
                 stegService = stegService,
                 vedtaksperiodeService = vedtaksperiodeService,
                 brevmalService = brevmalService,
-                verge = arguments.first,
             )
 
         val brevmottaker =
             BrevmottakerDb(
                 behandlingId = behandling.id,
-                type = arguments.second,
+                type = arguments.first,
                 navn = "Donald Duck",
                 adresselinje1 = "Andebyveien 1",
                 postnummer = "0000",
@@ -183,7 +180,7 @@ class TilbakekrevingServiceTest(
         val actualBrevmottaker = opprettTilbakekrevingRequest.manuelleBrevmottakere.first()
 
         assertBrevmottakerEquals(brevmottaker, actualBrevmottaker)
-        assertEquals(arguments.third, actualBrevmottaker.vergetype)
+        assertEquals(arguments.second, actualBrevmottaker.vergetype)
     }
 
     private fun assertBrevmottakerEquals(
@@ -201,10 +198,10 @@ class TilbakekrevingServiceTest(
     private class TestProvider : ArgumentsProvider {
         override fun provideArguments(context: ExtensionContext?): Stream<out Arguments> {
             return Stream.of(
-                Arguments.of(Triple(null, MottakerType.FULLMEKTIG, Vergetype.ANNEN_FULLMEKTIG)),
-                Arguments.of(Triple(null, MottakerType.VERGE, Vergetype.VERGE_FOR_VOKSEN)),
-                Arguments.of(Triple(VergeInfo("12345678910"), MottakerType.VERGE, Vergetype.VERGE_FOR_BARN)),
-                Arguments.of(Triple(null, MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE, null)),
+                Arguments.of(Pair(MottakerType.FULLMEKTIG, Vergetype.ANNEN_FULLMEKTIG)),
+                Arguments.of(Pair(MottakerType.VERGE, Vergetype.VERGE_FOR_VOKSEN)),
+                Arguments.of(Pair(MottakerType.VERGE, Vergetype.VERGE_FOR_BARN)),
+                Arguments.of(Pair(MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE, null)),
             )
         }
     }
