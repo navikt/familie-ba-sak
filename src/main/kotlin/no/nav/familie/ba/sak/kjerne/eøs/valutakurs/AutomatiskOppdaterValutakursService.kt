@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtfyltUtenlands
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilIUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
 
 @Service
@@ -22,6 +23,7 @@ class AutomatiskOppdaterValutakursService(
     private val ecbService: ECBService,
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
 ) {
+    @Transactional
     fun oppdaterValutakurserEtterEndringstidspunktet(
         behandlingId: BehandlingId,
     ) = oppdaterValutakurserEtterEndringstidspunktet(
@@ -29,6 +31,7 @@ class AutomatiskOppdaterValutakursService(
         utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id),
     )
 
+    @Transactional
     fun oppdaterValutakurserEtterEndringstidspunktet(
         behandlingId: BehandlingId,
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,

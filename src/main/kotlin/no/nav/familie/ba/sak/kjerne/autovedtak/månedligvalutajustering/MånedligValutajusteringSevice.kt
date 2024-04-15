@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilIValutakurs
 import no.nav.familie.util.VirkedagerProvider
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
 
 @Service
@@ -22,6 +23,7 @@ class MånedligValutajusteringSevice(
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
+    @Transactional
     fun oppdaterValutakurserForMåned(
         behandlingId: BehandlingId,
         valutajusteringMåned: YearMonth,
