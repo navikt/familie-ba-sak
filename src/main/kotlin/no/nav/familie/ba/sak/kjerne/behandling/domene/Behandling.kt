@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.SISTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.verge.Verge
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.Regelverk
 import org.hibernate.annotations.SortComparator
@@ -72,8 +71,6 @@ data class Behandling(
     @Column(name = "status", nullable = false)
     var status: BehandlingStatus = initStatus(),
     var overstyrtEndringstidspunkt: LocalDate? = null,
-    @OneToOne(mappedBy = "behandling", optional = true)
-    val verge: Verge? = null,
     @Column(name = "aktivert_tid", nullable = false)
     var aktivertTidspunkt: LocalDateTime = LocalDateTime.now(),
 ) : BaseEntitet() {

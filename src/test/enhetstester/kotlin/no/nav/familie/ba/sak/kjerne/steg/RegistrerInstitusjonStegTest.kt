@@ -17,11 +17,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonRepository
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
-import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.logg.LoggType
-import no.nav.familie.ba.sak.kjerne.verge.Verge
-import no.nav.familie.ba.sak.kjerne.verge.VergeRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -30,7 +26,6 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RegistrerInstitusjonStegTest {
-    private val vergeRepositoryMock: VergeRepository = mockk()
     private val fagsakRepositoryMock: FagsakRepository = mockk()
     private val loggServiceMock: LoggService = mockk()
     private val behandlingHentOgPersisterServiceMock: BehandlingHentOgPersisterService = mockk()
@@ -66,25 +61,13 @@ class RegistrerInstitusjonStegTest {
     fun `utførStegOgAngiNeste() skal lagre institusjon og verge`() {
         val behandling = lagBehandling(fagsak = defaultFagsak().copy(type = FagsakType.INSTITUSJON))
         val fagsakSlot = slot<Fagsak>()
-        val vergeSlot = slot<Verge>()
         every { fagsakRepositoryMock.finnFagsak(any()) } returns behandling.fagsak
         every { fagsakServiceMock.lagre(capture(fagsakSlot)) } returns behandling.fagsak
-        every { vergeRepositoryMock.findByBehandling(any()) } returns null
-        every { vergeRepositoryMock.save(capture(vergeSlot)) } returns Verge(1L, "", behandling)
-        every { loggServiceMock.opprettRegistrerVergeLogg(any()) } just runs
         every { loggServiceMock.opprettRegistrerInstitusjonLogg(any()) } just runs
         every { institusjonRepositoryMock.findByOrgNummer(any()) } returns
             Institusjon(
                 orgNummer = "12345",
                 tssEksternId = "cool tsr",
-            )
-        every { loggServiceMock.lagre(any()) } returns
-            Logg(
-                behandlingId = behandling.id,
-                type = LoggType.VERGE_REGISTRERT,
-                tittel = "tittel",
-                rolle = BehandlerRolle.SYSTEM,
-                tekst = "",
             )
         every { behandlingHentOgPersisterServiceMock.hent(any()) } returns behandling
         val institusjon = Institusjon(orgNummer = "12345", tssEksternId = "cool tsr")
@@ -95,9 +78,6 @@ class RegistrerInstitusjonStegTest {
         )
 
         assertThat(fagsakSlot.captured.institusjon!!.orgNummer).isEqualTo(institusjon.orgNummer)
-        verify(exactly = 1) {
-            loggServiceMock.opprettRegistrerVergeLogg(any())
-        }
         verify(exactly = 1) {
             loggServiceMock.opprettRegistrerInstitusjonLogg(any())
         }
@@ -115,19 +95,8 @@ class RegistrerInstitusjonStegTest {
             )
         every { fagsakRepositoryMock.finnFagsak(any()) } returns behandling.fagsak
         every { fagsakRepositoryMock.save(any()) } returns behandling.fagsak
-        every { vergeRepositoryMock.findByBehandling(any()) } returns null
-        every { vergeRepositoryMock.save(any()) } returns Verge(1L, "", behandling)
-        every { loggServiceMock.opprettRegistrerVergeLogg(any()) } just runs
         every { loggServiceMock.opprettRegistrerInstitusjonLogg(any()) } just runs
         every { institusjonRepositoryMock.findByOrgNummer("12345") } returns behandling.fagsak.institusjon
-        every { loggServiceMock.lagre(any()) } returns
-            Logg(
-                behandlingId = behandling.id,
-                type = LoggType.VERGE_REGISTRERT,
-                tittel = "tittel",
-                rolle = BehandlerRolle.SYSTEM,
-                tekst = "",
-            )
         every { behandlingHentOgPersisterServiceMock.hent(any()) } returns behandling
         val institusjon = Institusjon(orgNummer = "12345", tssEksternId = "cool tsr")
 

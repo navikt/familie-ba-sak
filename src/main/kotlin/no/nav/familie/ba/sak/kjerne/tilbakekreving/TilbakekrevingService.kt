@@ -47,8 +47,6 @@ class TilbakekrevingService(
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
-    private val personidentService: PersonidentService,
-    private val personopplysningerService: PersonopplysningerService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     fun validerRestTilbakekreving(
@@ -102,7 +100,6 @@ class TilbakekrevingService(
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
         val arbeidsfordeling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId)
         val institusjon = hentTilbakekrevingInstitusjon(vedtak.behandling.fagsak)
-        val verge = hentVerge(vedtak.behandling.verge?.ident)
 
         return tilbakekrevingKlient.hentForhåndsvisningVarselbrev(
             forhåndsvisVarselbrevRequest =
@@ -124,7 +121,6 @@ class TilbakekrevingService(
                     eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
                     ident = persongrunnlag.søker.aktør.aktivFødselsnummer(),
                     saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerNavn(),
-                    verge = verge,
                     institusjon = institusjon,
                 ),
         )
@@ -159,7 +155,6 @@ class TilbakekrevingService(
                 ?: throw Feil("Fant ikke tilbakekreving på behandling ${behandling.id}")
 
         val institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak)
-        val verge = hentVerge(behandling.verge?.ident)
 
         val manuelleBrevMottakere =
             brevmottakerRepository.finnBrevMottakereForBehandling(behandling.id).map { baSakBrevMottaker ->
@@ -208,7 +203,7 @@ class TilbakekrevingService(
                 ),
             revurderingsvedtaksdato = revurderingsvedtaksdato,
             // Verge er per nå ikke støttet i familie-ba-sak.
-            verge = verge,
+            verge = null,
             faktainfo = hentFaktainfoForTilbakekreving(behandling, tilbakekreving),
             institusjon = institusjon,
             manuelleBrevmottakere = manuelleBrevMottakere,
@@ -245,23 +240,6 @@ class TilbakekrevingService(
                 frontendFeilmelding = "Av tekniske årsaker så kan ikke behandling opprettes. Kontakt brukerstøtte for å rapportere feilen.",
             )
         }
-    }
-
-    private fun hentVerge(vergeIdent: String?): Verge? {
-        val verge: Verge? =
-            if (vergeIdent != null) {
-                val aktør = personidentService.hentAktør(vergeIdent)
-                personopplysningerService.hentPersoninfoNavnOgAdresse(aktør).let {
-                    Verge(
-                        vergetype = Vergetype.VERGE_FOR_BARN,
-                        navn = it.navn!!,
-                        personIdent = aktør.aktivFødselsnummer(),
-                    )
-                }
-            } else {
-                null
-            }
-        return verge
     }
 
     companion object {
