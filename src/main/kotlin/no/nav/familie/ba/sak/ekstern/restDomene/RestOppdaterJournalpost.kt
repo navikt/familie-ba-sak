@@ -63,7 +63,10 @@ data class NavnOgIdent(
     init {
         if (!id.erAlfanummeriskPlussKolon()) {
             secureLogger.info("Ugyldig ident: $id")
-            throw FunksjonellFeil("Ugyldig ident. Se securelog for mer informasjon.")
+            throw FunksjonellFeil(
+                melding = "Ugyldig ident. Se securelog for mer informasjon.",
+                frontendFeilmelding = "Ugyldig ident. Normalt et fødselsnummer eller organisasjonsnummer",
+            )
         }
     }
 }

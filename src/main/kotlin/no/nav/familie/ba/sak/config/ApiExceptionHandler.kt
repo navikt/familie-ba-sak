@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.MånedligValutaJusteringFeil
 import no.nav.familie.ba.sak.common.PdlNotFoundException
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
@@ -74,14 +75,16 @@ class ApiExceptionHandler {
     fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ResponseEntity<Ressurs<Nothing>> {
         val mostSpecificCause = NestedExceptionUtils.getMostSpecificCause(e)
 
-        return if (mostSpecificCause is DateTimeParseException) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                Ressurs.failure(
-                    frontendFeilmelding = "Ugyldig datoformat ${mostSpecificCause.parsedString}",
-                ),
-            )
-        } else {
-            illegalState(mostSpecificCause.message.toString(), mostSpecificCause)
+        return when (mostSpecificCause) {
+            is DateTimeParseException -> {
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    Ressurs.failure(
+                        frontendFeilmelding = "Ugyldig datoformat ${mostSpecificCause.parsedString}",
+                    ),
+                )
+            }
+            is FunksjonellFeil -> funksjonellFeil(mostSpecificCause)
+            else -> illegalState(mostSpecificCause.message.toString(), mostSpecificCause)
         }
     }
 
@@ -109,6 +112,16 @@ class ApiExceptionHandler {
         logger.warn("Finner ikke personen i PDL")
         return ResponseEntity.ok()
             .body(Ressurs.failure(frontendFeilmelding = "Fant ikke person"))
+    }
+
+    @ExceptionHandler(MånedligValutaJusteringFeil::class)
+    fun handleMånedligValutaJusteringFeil(feil: MånedligValutaJusteringFeil): ResponseEntity<Ressurs<Nothing>> {
+        return ResponseEntity.status(HttpStatus.OK).body(
+            Ressurs.funksjonellFeil(
+                frontendFeilmelding = feil.melding,
+                melding = feil.melding,
+            ),
+        )
     }
 
     @ExceptionHandler(ECBServiceException::class)
