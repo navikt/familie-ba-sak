@@ -145,6 +145,7 @@ private fun VedtaksperiodeGrunnlagForPerson?.erLik(
                     grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode,
                 ) &&
                 this.kompetanse == grunnlagForVedtaksperiodeForrigeBehandling.kompetanse &&
+                this.utenlandskPeriodebeløp == grunnlagForVedtaksperiodeForrigeBehandling.utenlandskPeriodebeløp &&
                 this.endretUtbetalingAndel == grunnlagForVedtaksperiodeForrigeBehandling.endretUtbetalingAndel &&
                 this.overgangsstønad == grunnlagForVedtaksperiodeForrigeBehandling.overgangsstønad &&
                 this.andeler.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.andeler.toSet()
