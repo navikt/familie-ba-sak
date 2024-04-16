@@ -46,7 +46,7 @@ class SendTilBeslutter(
             ekstraBarnLagtTilIBrev = emptyList(),
         )
         vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
-            ?.validerAtAlleAnndreVurderingerErVurdert()
+            ?.validerAtAndreVurderingerErVurdert()
 
         val behandlingsresultatSteg: BehandlingsresultatSteg =
             stegService?.hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
@@ -127,7 +127,7 @@ fun Behandling.validerMaksimaltEtStegIkkeUtført() {
     }
 }
 
-fun Vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert() {
+fun Vilkårsvurdering.validerAtAndreVurderingerErVurdert() {
     val andreVurderingerSomIkkeErVurdert =
         personResultater
             .flatMap { it.andreVurderinger }
