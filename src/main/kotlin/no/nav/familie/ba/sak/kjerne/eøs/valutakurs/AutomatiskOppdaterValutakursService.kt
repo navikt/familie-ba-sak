@@ -43,7 +43,7 @@ class AutomatiskOppdaterValutakursService(
                 .map { it.tilIUtenlandskPeriodebeløp() }
                 .filterIsInstance<UtfyltUtenlandskPeriodebeløp>()
                 .flatMap { utenlandskPeriodebeløp ->
-                    utenlandskPeriodebeløp.tilOppdaterteValutakurserEtter(endringsmåned)
+                    utenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(endringsmåned)
                 }
 
         automatiskGenererteValutakurser.forEach {
@@ -51,7 +51,7 @@ class AutomatiskOppdaterValutakursService(
         }
     }
 
-    private fun UtfyltUtenlandskPeriodebeløp.tilOppdaterteValutakurserEtter(
+    private fun UtfyltUtenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(
         endringsmåned: YearMonth,
     ): List<Valutakurs> {
         val start = maxOf(endringsmåned, fom)
@@ -67,6 +67,7 @@ class AutomatiskOppdaterValutakursService(
                 valutakursdato = sisteVirkedagForrigeMåned,
                 valutakode = valutakode,
                 kurs = ecbService.hentValutakurs(valutakode, sisteVirkedagForrigeMåned),
+                vurderingsform = Vurderingsform.AUTOMATISK,
             )
         }
     }
