@@ -61,6 +61,7 @@ class VilkårsvurderingStegTest {
             månedligValutajusteringSevice = mockk(),
             localDateProvider = RealDateProvider(),
             automatiskOppdaterValutakursService = mockk(),
+            unleashNextMedContextService = mockk(),
         )
 
     val behandling =
