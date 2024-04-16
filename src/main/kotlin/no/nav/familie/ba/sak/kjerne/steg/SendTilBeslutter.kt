@@ -128,19 +128,24 @@ fun Behandling.validerMaksimaltEtStegIkkeUtført() {
 }
 
 fun Vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert() {
-    val andreVurderingerSomIkkeErVurdert = personResultater
-        .flatMap { it.andreVurderinger }
-        .filter { it.resultat == Resultat.IKKE_VURDERT }
-        .map { it.type }
-        .toSet()
+    val andreVurderingerSomIkkeErVurdert =
+        personResultater
+            .flatMap { it.andreVurderinger }
+            .filter { it.resultat == Resultat.IKKE_VURDERT }
+            .map { it.type }
+            .toSet()
 
-    if (andreVurderingerSomIkkeErVurdert == setOf(AnnenVurderingType.OPPLYSNINGSPLIKT)) throw FunksjonellFeil(
-        melding = "Forsøker å ferdigstille uten å ha fylt ut opplysningsplikt-vilkåret",
-        frontendFeilmelding = "Du må vurdere vilkåret om opplysningsplikt før behandlingen kan sendes til beslutter.",
-    )
+    if (andreVurderingerSomIkkeErVurdert == setOf(AnnenVurderingType.OPPLYSNINGSPLIKT)) {
+        throw FunksjonellFeil(
+            melding = "Forsøker å ferdigstille uten å ha fylt ut opplysningsplikt-vilkåret",
+            frontendFeilmelding = "Du må vurdere vilkåret om opplysningsplikt før behandlingen kan sendes til beslutter.",
+        )
+    }
 
-    if (andreVurderingerSomIkkeErVurdert.isNotEmpty()) throw FunksjonellFeil(
-        melding = "Forsøker å ferdigstille uten å ha fylt ut påkrevde vurderinger",
-        frontendFeilmelding = "Andre vurderinger må tas stilling til før behandling kan sendes til beslutter.",
-    )
+    if (andreVurderingerSomIkkeErVurdert.isNotEmpty()) {
+        throw FunksjonellFeil(
+            melding = "Forsøker å ferdigstille uten å ha fylt ut påkrevde vurderinger",
+            frontendFeilmelding = "Andre vurderinger må tas stilling til før behandling kan sendes til beslutter.",
+        )
+    }
 }
