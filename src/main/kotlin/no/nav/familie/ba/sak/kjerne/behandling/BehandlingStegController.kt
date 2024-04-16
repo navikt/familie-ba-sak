@@ -207,10 +207,10 @@ class BehandlingStegController(
     @PostMapping(path = ["registrer-institusjon"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun registerInstitusjon(
         @PathVariable behandlingId: Long,
-        @RequestBody institusjonInfo: RestRegistrerInstitusjon,
+        @RequestBody restInstitusjon: RestRegistrerInstitusjon,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val institusjon = institusjonInfo.tilInstitusjon()
+        val institusjon = restInstitusjon.tilInstitusjon()
 
         stegService.håndterRegistrerInstitusjon(behandling, institusjon)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
