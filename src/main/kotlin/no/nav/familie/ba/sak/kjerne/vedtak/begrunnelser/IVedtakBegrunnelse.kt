@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import jakarta.persistence.AttributeConverter
 import jakarta.persistence.Converter
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 
 sealed interface IVedtakBegrunnelse {
     val sanityApiNavn: String
@@ -31,6 +32,9 @@ sealed interface IVedtakBegrunnelse {
 
 fun IVedtakBegrunnelse.erAvslagUregistrerteBarnBegrunnelse() =
     this in setOf(Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN, EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN)
+
+fun IVedtakBegrunnelse.støtterFritekst(sanityBegrunnelser: List<ISanityBegrunnelse>) =
+    sanityBegrunnelser.first { it.apiNavn == this.sanityApiNavn }.støtterFritekst
 
 class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>(List::class.java) {
     override fun deserialize(

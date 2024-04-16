@@ -142,7 +142,7 @@ class VedtaksperiodeService(
 
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
-        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerPåMiljø = true)
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = true)
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             standardbegrunnelserFraFrontend.mapNotNull {
@@ -402,6 +402,9 @@ class VedtaksperiodeService(
     fun hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId: Long): List<RestUtvidetVedtaksperiodeMedBegrunnelser> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser().values.toList()
+        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser().values.toList()
+
         val vedtaksperioder =
             if (behandling.status != BehandlingStatus.AVSLUTTET) {
                 val utvidetVedtaksperiodeMedBegrunnelser =
@@ -411,7 +414,7 @@ class VedtaksperiodeService(
                     )
                 utvidetVedtaksperiodeMedBegrunnelser
                     .sorter()
-                    .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }
+                    .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser(sanityBegrunnelser, sanityEØSBegrunnelser) }
             } else {
                 emptyList()
             }
@@ -487,8 +490,8 @@ class VedtaksperiodeService(
         val behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder()
         val behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder()
 
-        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerPåMiljø = true)
-        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser(filtrerPåMiljø = true)
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = true)
+        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk = true)
 
         return GrunnlagForBegrunnelse(
             behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
+import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SATSENDRING
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -30,6 +31,7 @@ class HenleggBehandling(
     private val oppgaveService: OppgaveService,
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val organisasjonService: OrganisasjonService,
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
     private val logger = LoggerFactory.getLogger(HenleggBehandling::class.java)
 
@@ -37,14 +39,21 @@ class HenleggBehandling(
         behandling: Behandling,
         data: RestHenleggBehandlingInfo,
     ): StegType {
+        val fagsak = behandling.fagsak
+
         if (data.årsak == HenleggÅrsak.SØKNAD_TRUKKET) {
+            val mottakerIdent = fagsak.institusjon?.orgNummer ?: fagsak.aktør.aktivFødselsnummer()
+            val brevmal = fagsak.institusjon?.let { Brevmal.HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON } ?: Brevmal.HENLEGGE_TRUKKET_SØKNAD
+            val mottakerNavnVedInstitusjonsak = fagsak.institusjon?.let { organisasjonService.hentOrganisasjon(it.orgNummer).navn }
+
             dokumentService.sendManueltBrev(
                 behandling = behandling,
-                fagsakId = behandling.fagsak.id,
+                fagsakId = fagsak.id,
                 manueltBrevRequest =
                     ManueltBrevRequest(
-                        mottakerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-                        brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
+                        mottakerNavn = mottakerNavnVedInstitusjonsak ?: "",
+                        mottakerIdent = mottakerIdent,
+                        brevmal = brevmal,
                     ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService),
             )
         }
@@ -68,7 +77,7 @@ class HenleggBehandling(
         }
 
         oppgaverTekniskVedlikeholdPgaSatsendring.forEach {
-            logger.info("Teknisk opphør pga satsendring. Fjerner behandlesAvApplikasjon for oppgaveId=${it.gsakId} slik at saksbehandler kan lukke den fra Gosys. fagsakId=${behandling.fagsak.id}, behandlingId=${behandling.id}")
+            logger.info("Teknisk opphør pga satsendring. Fjerner behandlesAvApplikasjon for oppgaveId=${it.gsakId} slik at saksbehandler kan lukke den fra Gosys. fagsakId=${fagsak.id}, behandlingId=${behandling.id}")
             oppgaveService.fjernBehandlesAvApplikasjon(listOf(it.gsakId.toLong()))
         }
 

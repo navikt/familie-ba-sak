@@ -32,6 +32,7 @@ data class RestSanityBegrunnelse(
     val endringsaarsaker: List<String>? = emptyList(),
     val hjemler: List<String>? = emptyList(),
     val hjemlerFolketrygdloven: List<String>?,
+    val stotterFritekst: Boolean?,
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: String?,
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
@@ -41,7 +42,7 @@ data class RestSanityBegrunnelse(
     val regelverk: String?,
     val brevPeriodeType: String?,
     val begrunnelseTypeForPerson: String?,
-    val slaattAvIProduksjon: Boolean?,
+    val ikkeIBruk: Boolean?,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
         if (apiNavn == null || apiNavn !in Standardbegrunnelse.entries.map { it.sanityApiNavn }) return null
@@ -82,6 +83,7 @@ data class RestSanityBegrunnelse(
                 } ?: emptyList(),
             hjemler = hjemler ?: emptyList(),
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
+            støtterFritekst = stotterFritekst ?: false,
             endretUtbetalingsperiodeDeltBostedUtbetalingTrigger =
                 endretUtbetalingsperiodeDeltBostedUtbetalingTrigger
                     .finnEnumverdiNullable<EndretUtbetalingsperiodeDeltBostedTriggere>(),
@@ -99,7 +101,7 @@ data class RestSanityBegrunnelse(
             tema = (regelverk).finnEnumverdi<Tema>(apiNavn),
             periodeType = (brevPeriodeType).finnEnumverdi<BrevPeriodeType>(apiNavn),
             begrunnelseTypeForPerson = begrunnelseTypeForPerson.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
-            slåttAvIProduksjon = slaattAvIProduksjon ?: false,
+            ikkeIBruk = ikkeIBruk ?: false,
         )
     }
 }
