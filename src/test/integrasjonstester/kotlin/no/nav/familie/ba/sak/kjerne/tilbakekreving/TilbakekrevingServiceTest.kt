@@ -118,7 +118,7 @@ class TilbakekrevingServiceTest(
     @ParameterizedTest
     @ArgumentsSource(TestProvider::class)
     @Suppress("SENSELESS_COMPARISON")
-    fun `lagOpprettTilbakekrevingRequest sender brevmottakere i kall mot familie-tilbake`(arguments: Pair <MottakerType, Vergetype>) {
+    fun `lagOpprettTilbakekrevingRequest sender brevmottakere i kall mot familie-tilbake`(arguments: Pair<MottakerType, Vergetype>) {
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
@@ -168,9 +168,9 @@ class TilbakekrevingServiceTest(
     private class TestProvider : ArgumentsProvider {
         override fun provideArguments(context: ExtensionContext?): Stream<out Arguments> {
             return Stream.of(
-                Arguments.of(Pair( MottakerType.FULLMEKTIG, Vergetype.ANNEN_FULLMEKTIG)),
-                Arguments.of(Pair( MottakerType.VERGE, Vergetype.VERGE_FOR_VOKSEN)),
-                Arguments.of(Pair( MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE, null)),
+                Arguments.of(Pair(MottakerType.FULLMEKTIG, Vergetype.ANNEN_FULLMEKTIG)),
+                Arguments.of(Pair(MottakerType.VERGE, Vergetype.VERGE_FOR_VOKSEN)),
+                Arguments.of(Pair(MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE, null)),
             )
         }
     }
