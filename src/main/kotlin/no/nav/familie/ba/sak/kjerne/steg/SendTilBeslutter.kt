@@ -132,6 +132,7 @@ fun Vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert() {
         .flatMap { it.andreVurderinger }
         .filter { it.resultat == Resultat.IKKE_VURDERT }
         .map { it.type }
+        .toSet()
 
     if (andreVurderingerSomIkkeErVurdert == setOf(AnnenVurderingType.OPPLYSNINGSPLIKT)) throw FunksjonellFeil(
         melding = "Forsøker å ferdigstille uten å ha fylt ut opplysningsplikt-vilkåret",
