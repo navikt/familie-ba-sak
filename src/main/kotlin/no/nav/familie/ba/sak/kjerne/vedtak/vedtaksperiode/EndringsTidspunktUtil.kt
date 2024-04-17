@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AktørOgRolleBegrunnelseGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget
@@ -22,6 +23,7 @@ import java.time.LocalDate
 fun utledEndringstidspunkt(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
     behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
+    erVedtaksperiodeGrunnlagForPersonLik: VedtaksperiodeGrunnlagForPerson?.(VedtaksperiodeGrunnlagForPerson?) -> Boolean = VedtaksperiodeGrunnlagForPerson?::erLik,
 ): LocalDate {
     val grunnlagTidslinjePerPerson =
         behandlingsGrunnlagForVedtaksperioder.copy(
@@ -35,7 +37,7 @@ fun utledEndringstidspunkt(
 
     val erPeriodeLikSammePeriodeIForrigeBehandlingTidslinjer =
         grunnlagTidslinjePerPerson.outerJoin(grunnlagTidslinjePerPersonForrigeBehandling) { grunnlagForVedtaksperiode, grunnlagForVedtaksperiodeForrigeBehandling ->
-            grunnlagForVedtaksperiode.erLik(grunnlagForVedtaksperiodeForrigeBehandling)
+            grunnlagForVedtaksperiode.erVedtaksperiodeGrunnlagForPersonLik(grunnlagForVedtaksperiodeForrigeBehandling)
         }
 
     val (aktørMedFørsteEndring, datoTidligsteForskjell) =
@@ -50,6 +52,17 @@ fun utledEndringstidspunkt(
 
     return datoTidligsteForskjell
 }
+
+fun utledEndringstidspunktFørValutakurser(
+    behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
+    behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
+): LocalDate =
+    utledEndringstidspunkt(
+        behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
+        behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
+    ) { vedtaksperiodeGrunnlagForPerson ->
+        this.erLik(vedtaksperiodeGrunnlagForPerson, erAndelerLike = Iterable<AndelForVedtaksperiode>::erLikFørDifferanseberegning)
+    }
 
 private fun Set<PersonResultat>.beholdKunOppfylteVilkårResultater(): Set<PersonResultat> =
     map {
@@ -137,6 +150,11 @@ private fun Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<Boolean, Måned>>.fi
 
 private fun VedtaksperiodeGrunnlagForPerson?.erLik(
     grunnlagForVedtaksperiodeForrigeBehandling: VedtaksperiodeGrunnlagForPerson?,
+): Boolean = this.erLik(grunnlagForVedtaksperiodeForrigeBehandling)
+
+private fun VedtaksperiodeGrunnlagForPerson?.erLik(
+    grunnlagForVedtaksperiodeForrigeBehandling: VedtaksperiodeGrunnlagForPerson?,
+    erAndelerLike: Iterable<AndelForVedtaksperiode>.(Iterable<AndelForVedtaksperiode>) -> Boolean = Iterable<AndelForVedtaksperiode>::erLik,
 ): Boolean =
     when (this) {
         is VedtaksperiodeGrunnlagForPersonVilkårInnvilget ->
@@ -148,7 +166,7 @@ private fun VedtaksperiodeGrunnlagForPerson?.erLik(
                 this.utenlandskPeriodebeløp == grunnlagForVedtaksperiodeForrigeBehandling.utenlandskPeriodebeløp &&
                 this.endretUtbetalingAndel == grunnlagForVedtaksperiodeForrigeBehandling.endretUtbetalingAndel &&
                 this.overgangsstønad == grunnlagForVedtaksperiodeForrigeBehandling.overgangsstønad &&
-                this.andeler.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.andeler.toSet()
+                andeler.erAndelerLike(grunnlagForVedtaksperiodeForrigeBehandling.andeler)
 
         is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
             grunnlagForVedtaksperiodeForrigeBehandling is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget &&
@@ -156,3 +174,8 @@ private fun VedtaksperiodeGrunnlagForPerson?.erLik(
 
         null -> grunnlagForVedtaksperiodeForrigeBehandling == null
     }
+
+private fun Iterable<AndelForVedtaksperiode>.erLik(andreAndeler: Iterable<AndelForVedtaksperiode>) = this.toSet() == andreAndeler.toSet()
+
+private fun Iterable<AndelForVedtaksperiode>.erLikFørDifferanseberegning(andreAndeler: Iterable<AndelForVedtaksperiode>) =
+    this.map { it.nasjonaltPeriodebeløp ?: it.kalkulertUtbetalingsbeløp }.toSet() == andreAndeler.map { it.nasjonaltPeriodebeløp ?: it.kalkulertUtbetalingsbeløp }.toSet()

@@ -24,20 +24,34 @@ class AutomatiskOppdaterValutakursService(
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
 ) {
     @Transactional
-    fun oppdaterValutakurserEtterEndringstidspunktet(
+    fun oppdaterValutakurserEtterEndringsmånedUtenomEndringIValutakurser(
         behandlingId: BehandlingId,
-    ) = oppdaterValutakurserEtterEndringstidspunktet(
+    ) {
+        val endringsmånedUavhengigAvValutakurser = vedtaksperiodeService.finnEndringstidspunktForBehandlingFørValutakurser(behandlingId.id).toYearMonth()
+
+        oppdaterValutakurserEtterEndringsmåned(
+            behandlingId = behandlingId,
+            utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id),
+            endringsmåned = endringsmånedUavhengigAvValutakurser,
+        )
+    }
+
+    @Transactional
+    fun oppdaterValutakurserEtterEndringsmåned(
+        behandlingId: BehandlingId,
+        utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>? = null,
+    ) = oppdaterValutakurserEtterEndringsmåned(
         behandlingId = behandlingId,
-        utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id),
+        utenlandskePeriodebeløp = utenlandskePeriodebeløp ?: utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id),
+        endringsmåned = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id).toYearMonth(),
     )
 
     @Transactional
-    fun oppdaterValutakurserEtterEndringstidspunktet(
+    private fun oppdaterValutakurserEtterEndringsmåned(
         behandlingId: BehandlingId,
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
+        endringsmåned: YearMonth,
     ) {
-        val endringsmåned = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id).toYearMonth()
-
         val automatiskGenererteValutakurser =
             utenlandskePeriodebeløp
                 .map { it.tilIUtenlandskPeriodebeløp() }

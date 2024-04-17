@@ -64,7 +64,7 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
 
         if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING)) {
-            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunktet(behandlingId, utenlandskePeriodebeløp)
+            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringsmåned(behandlingId, utenlandskePeriodebeløp)
         }
 
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)

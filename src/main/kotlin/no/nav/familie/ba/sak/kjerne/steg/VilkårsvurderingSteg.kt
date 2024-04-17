@@ -8,11 +8,15 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.Månedli
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -36,6 +40,9 @@ class VilkårsvurderingSteg(
     private val localDateProvider: LocalDateProvider,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
     private val unleashNextMedContextService: UnleashNextMedContextService,
+    private val valutakursService: ValutakursService,
+    private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
+    private val tilpassValutakurserTilUtenlandskePeriodebeløpService: TilpassValutakurserTilUtenlandskePeriodebeløpService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -91,8 +98,21 @@ class VilkårsvurderingSteg(
         if (behandling.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING) {
             månedligValutajusteringSevice.oppdaterValutakurserForMåned(BehandlingId(behandling.id), localDateProvider.now().toYearMonth())
         }
-        if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING)) {
-            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunktet(BehandlingId(behandling.id))
+
+        if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING) && behandling.type == BehandlingType.REVURDERING) {
+            val forrigeBehandlingVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+
+            // Resetter valutaen til slik den var i forrige behandling
+            valutakursService.kopierOgErstattValutakurser(
+                fraBehandlingId = BehandlingId(forrigeBehandlingVedtatt!!.id),
+                tilBehandlingId = BehandlingId(behandling.id),
+            )
+
+            // Tilpasser valutaen til potensielle endringer i utenlandske periodebeløp fra denne behandlingen
+            tilpassValutakurserTilUtenlandskePeriodebeløpService.tilpassValutakursTilUtenlandskPeriodebeløp(BehandlingId(behandling.id))
+
+            // Oppdaterer valutakursene etter endringstidspunktet, sett bort i fra valutakursene
+            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringsmånedUtenomEndringIValutakurser(BehandlingId(behandling.id))
         }
 
         if (!behandling.erSatsendring()) {
