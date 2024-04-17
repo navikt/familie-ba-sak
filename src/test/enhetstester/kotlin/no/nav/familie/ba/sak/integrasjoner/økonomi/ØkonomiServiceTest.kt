@@ -5,7 +5,6 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.just
-import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -55,7 +54,6 @@ internal class ØkonomiServiceTest {
             "123abc",
         )
 
-        verify(exactly = 0) { beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(any(), any()) }
         verify(exactly = 1) {
             utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 vedtak = any(),
@@ -93,12 +91,6 @@ internal class ØkonomiServiceTest {
                 erSimulering = any(),
             )
         } returns BeregnetUtbetalingsoppdragLongId(utbetalingsoppdrag = utbetalingsoppdrag, andeler = emptyList())
-        every {
-            beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
-                any(),
-                any(),
-            )
-        } returns mockk()
         every { tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(any()) } just runs
         every { økonomiKlient.iverksettOppdrag(any()) } returns ""
     }
