@@ -98,7 +98,7 @@ class UtbetalingsoppdragGenerator {
 }
 
 abstract class AndelTilkjentYtelseForUtbetalingsoppdrag(private val andelTilkjentYtelse: AndelTilkjentYtelse) {
-    val behandlingId: Long? = andelTilkjentYtelse.behandlingId
+    val behandlingId: Long = andelTilkjentYtelse.behandlingId
     val tilkjentYtelse: TilkjentYtelse = andelTilkjentYtelse.tilkjentYtelse
     val kalkulertUtbetalingsbeløp: Int = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
     val stønadFom: YearMonth = andelTilkjentYtelse.stønadFom
@@ -121,54 +121,6 @@ abstract class AndelTilkjentYtelseForUtbetalingsoppdrag(private val andelTilkjen
         return andelTilkjentYtelse.hashCode()
     }
 }
-
-interface AndelTilkjentYtelseForUtbetalingsoppdragFactory {
-    fun pakkInnForUtbetaling(andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>): List<AndelTilkjentYtelseForUtbetalingsoppdrag>
-}
-
-class AndelTilkjentYtelseForSimuleringFactory : AndelTilkjentYtelseForUtbetalingsoppdragFactory {
-    override fun pakkInnForUtbetaling(andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>): List<AndelTilkjentYtelseForUtbetalingsoppdrag> =
-        andelerTilkjentYtelse.map { AndelTilkjentYtelseForSimulering(it) }
-
-    private class AndelTilkjentYtelseForSimulering(
-        andelTilkjentYtelse: AndelTilkjentYtelse,
-    ) : AndelTilkjentYtelseForUtbetalingsoppdrag(andelTilkjentYtelse) {
-        override var periodeOffset: Long? = andelTilkjentYtelse.periodeOffset
-        override var forrigePeriodeOffset: Long? = andelTilkjentYtelse.forrigePeriodeOffset
-        override var kildeBehandlingId: Long? = andelTilkjentYtelse.kildeBehandlingId
-    }
-}
-
-class AndelTilkjentYtelseForIverksettingFactory : AndelTilkjentYtelseForUtbetalingsoppdragFactory {
-    override fun pakkInnForUtbetaling(andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>): List<AndelTilkjentYtelseForUtbetalingsoppdrag> =
-        andelerTilkjentYtelse.map { AndelTilkjentYtelseForIverksetting(it) }
-
-    private class AndelTilkjentYtelseForIverksetting(
-        private val andelTilkjentYtelse: AndelTilkjentYtelse,
-    ) : AndelTilkjentYtelseForUtbetalingsoppdrag(andelTilkjentYtelse) {
-        override var periodeOffset: Long?
-            get() = andelTilkjentYtelse.periodeOffset
-            set(value) {
-                andelTilkjentYtelse.periodeOffset = value
-            }
-
-        override var forrigePeriodeOffset: Long?
-            get() = andelTilkjentYtelse.forrigePeriodeOffset
-            set(value) {
-                andelTilkjentYtelse.forrigePeriodeOffset = value
-            }
-
-        override var kildeBehandlingId: Long?
-            get() = andelTilkjentYtelse.kildeBehandlingId
-            set(value) {
-                andelTilkjentYtelse.kildeBehandlingId = value
-            }
-    }
-}
-
-fun Collection<AndelTilkjentYtelse>.pakkInnForUtbetaling(
-    andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
-) = andelTilkjentYtelseForUtbetalingsoppdragFactory.pakkInnForUtbetaling(this)
 
 enum class YtelsetypeBA(
     override val klassifisering: String,

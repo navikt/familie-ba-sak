@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
@@ -17,16 +16,11 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
-import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
@@ -39,10 +33,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -51,41 +43,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-
-private const val UTBETALINGSOPPDRAG = """
-    {
-      "kodeEndring": "NY",
-      "fagSystem": "BA",
-      "saksnummer": "100",
-      "aktoer": "123456",
-      "saksbehandlerId": "Z994212",
-      "avstemmingTidspunkt": "2024-01-04T13:41:32.190821",
-      "utbetalingsperiode": [
-        {
-          "erEndringPåEksisterendePeriode": false,
-          "opphør": null,
-          "periodeId": 0,
-          "forrigePeriodeId": null,
-          "datoForVedtak": "2024-01-04",
-          "klassifisering": "BATR",
-          "vedtakdatoFom": "2018-02-01",
-          "vedtakdatoTom": "2019-02-28",
-          "sats": 970,
-          "satsType": "MND",
-          "utbetalesTil": "123456",
-          "behandlingId": 1000,
-          "utbetalingsgrad": null
-        }
-      ]
-    }
-    """
 
 class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
     @Autowired
@@ -111,9 +74,6 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     private lateinit var aktørIdRepository: AktørIdRepository
-
-    @Autowired
-    private lateinit var localDateProvider: LocalDateProvider
 
     @Autowired
     private lateinit var kompetanseRepository: KompetanseRepository
@@ -348,310 +308,6 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         Assertions.assertEquals(1, andelBarn2.filter { it.kalkulertUtbetalingsbeløp == 1676 }.size)
     }
 
-    @Nested
-    inner class HentSisteAndelPerIdent {
-        val søker = tilfeldigPerson()
-        val barn1 = tilfeldigPerson()
-        val barn2 = tilfeldigPerson()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
-        val aktørSøker = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
-        val aktørBarn1 = personidentService.hentOgLagreAktør(barn1.aktør.aktivFødselsnummer(), true)
-        val aktørBarn2 = personidentService.hentOgLagreAktør(barn2.aktør.aktivFødselsnummer(), true)
-
-        lateinit var førsteBehandling: Behandling
-
-        @BeforeEach
-        fun setUp() {
-            førsteBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        }
-
-        @Test
-        fun `ingen andeler`() {
-            assertThat(hentSisteAndelPerIdent()).isEmpty()
-        }
-
-        @Test
-        fun `uten utbetalingsoppdrag`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = null)) {
-                val andeler =
-                    listOf(
-                        lagAndel(
-                            tilkjentYtelse = this,
-                            aktør = aktørBarn1,
-                            person = barn1,
-                            fom = YearMonth.of(2020, 1),
-                            tom = YearMonth.of(2020, 2),
-                            offset = 0,
-                        ),
-                    )
-                andelerTilkjentYtelse.addAll(andeler)
-                tilkjentYtelseRepository.saveAndFlush(this)
-            }
-            avsluttOgLagreBehandling(førsteBehandling)
-            val sisteAndelPerIdent = hentSisteAndelPerIdent()
-            assertThat(sisteAndelPerIdent).isEmpty()
-        }
-
-        @Test
-        fun `behandling er ikke avsluttet`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "")) {
-                val andeler =
-                    listOf(
-                        lagAndel(
-                            tilkjentYtelse = this,
-                            aktør = aktørBarn1,
-                            person = barn1,
-                            fom = YearMonth.of(2020, 1),
-                            tom = YearMonth.of(2020, 2),
-                            offset = 0,
-                        ),
-                    )
-                andelerTilkjentYtelse.addAll(andeler)
-                tilkjentYtelseRepository.saveAndFlush(this)
-            }
-            val sisteAndelPerIdent = hentSisteAndelPerIdent()
-            assertThat(sisteAndelPerIdent).isEmpty()
-        }
-
-        @Test
-        fun `gitt fagsak har ikke noen andeler`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
-                val andeler =
-                    listOf(
-                        lagAndel(
-                            tilkjentYtelse = this,
-                            aktør = aktørBarn1,
-                            person = barn1,
-                            fom = YearMonth.of(2020, 1),
-                            tom = YearMonth.of(2020, 2),
-                            offset = 0,
-                        ),
-                    )
-                andelerTilkjentYtelse.addAll(andeler)
-                tilkjentYtelseRepository.saveAndFlush(this)
-            }
-            avsluttOgLagreBehandling(førsteBehandling)
-            assertThat(beregningService.hentSisteAndelPerIdent(fagsak.id + 1)).isEmpty()
-        }
-
-        @Test
-        fun `2 ulike personer med samme type`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
-                val andeler =
-                    listOf(
-                        lagAndel(
-                            tilkjentYtelse = this,
-                            aktør = aktørBarn1,
-                            person = barn1,
-                            fom = YearMonth.of(2020, 1),
-                            tom = YearMonth.of(2020, 2),
-                            offset = 0,
-                        ),
-                        lagAndel(
-                            tilkjentYtelse = this,
-                            aktør = aktørBarn2,
-                            person = barn2,
-                            fom = YearMonth.of(2020, 3),
-                            tom = YearMonth.of(2020, 5),
-                            offset = 1,
-                        ),
-                    )
-                andelerTilkjentYtelse.addAll(andeler)
-                tilkjentYtelseRepository.saveAndFlush(this)
-            }
-            avsluttOgLagreBehandling(førsteBehandling)
-            val sisteAndelPerIdent = hentSisteAndelPerIdent()
-            assertThat(sisteAndelPerIdent).hasSize(2)
-            with(sisteAndelPerIdent[IdentOgYtelse(barn1.aktør.aktivFødselsnummer(), YtelseType.SMÅBARNSTILLEGG)]!!) {
-                assertThat(periodeOffset).isEqualTo(0L)
-                assertThat(forrigePeriodeOffset).isNull()
-                assertThat(stønadFom).isEqualTo(YearMonth.of(2020, 1))
-                assertThat(stønadTom).isEqualTo(YearMonth.of(2020, 2))
-            }
-            with(sisteAndelPerIdent[IdentOgYtelse(barn2.aktør.aktivFødselsnummer(), YtelseType.SMÅBARNSTILLEGG)]!!) {
-                assertThat(periodeOffset).isEqualTo(1L)
-                assertThat(forrigePeriodeOffset).isNull()
-                assertThat(stønadFom).isEqualTo(YearMonth.of(2020, 3))
-                assertThat(stønadTom).isEqualTo(YearMonth.of(2020, 5))
-            }
-        }
-
-        @Test
-        fun `førstegångsbehandling med flere andeler per person`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
-                val andeler =
-                    listOf(
-                        lagAndel(
-                            tilkjentYtelse = this,
-                            fom = YearMonth.of(2020, 1),
-                            tom = YearMonth.of(2020, 2),
-                            offset = 0,
-                        ),
-                        lagAndel(
-                            tilkjentYtelse = this,
-                            fom = YearMonth.of(2020, 3),
-                            tom = YearMonth.of(2020, 5),
-                            offset = 1,
-                            forrigeOffset = 0,
-                        ),
-                        lagAndel(
-                            tilkjentYtelse = this,
-                            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                            fom = YearMonth.of(2020, 3),
-                            tom = YearMonth.of(2020, 3),
-                            offset = 2,
-                            forrigeOffset = null,
-                        ),
-                    )
-                andelerTilkjentYtelse.addAll(andeler)
-                tilkjentYtelseRepository.saveAndFlush(this)
-            }
-            avsluttOgLagreBehandling(førsteBehandling)
-            val sisteAndelPerIdent = hentSisteAndelPerIdent()
-            assertThat(sisteAndelPerIdent).hasSize(2)
-            val fødselsnummer = aktørSøker.aktivFødselsnummer()
-            with(sisteAndelPerIdent[IdentOgYtelse(fødselsnummer, YtelseType.SMÅBARNSTILLEGG)]!!) {
-                assertThat(periodeOffset).isEqualTo(1L)
-                assertThat(forrigePeriodeOffset).isEqualTo(0L)
-                assertThat(stønadFom).isEqualTo(YearMonth.of(2020, 3))
-                assertThat(stønadTom).isEqualTo(YearMonth.of(2020, 5))
-            }
-            with(sisteAndelPerIdent[IdentOgYtelse(fødselsnummer, YtelseType.UTVIDET_BARNETRYGD)]!!) {
-                assertThat(periodeOffset).isEqualTo(2L)
-                assertThat(forrigePeriodeOffset).isNull()
-                assertThat(stønadFom).isEqualTo(YearMonth.of(2020, 3))
-                assertThat(stønadTom).isEqualTo(YearMonth.of(2020, 3))
-            }
-        }
-
-        @Test
-        fun `siste andelen kommer fra revurderingen`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
-                val andeler =
-                    listOf(
-                        lagAndel(
-                            tilkjentYtelse = this,
-                            fom = YearMonth.of(2020, 1),
-                            tom = YearMonth.of(2020, 2),
-                            offset = 0,
-                        ),
-                    )
-                andelerTilkjentYtelse.addAll(andeler)
-                tilkjentYtelseRepository.saveAndFlush(this)
-            }
-            avsluttOgLagreBehandling(førsteBehandling)
-            val revurdering = lagRevurdering()
-            with(lagInitiellTilkjentYtelse(revurdering, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
-                val andeler =
-                    listOf(
-                        lagAndel(
-                            tilkjentYtelse = this,
-                            fom = YearMonth.of(2020, 1),
-                            tom = YearMonth.of(2020, 3),
-                            offset = 1,
-                            forrigeOffset = 0,
-                        ),
-                    )
-                andelerTilkjentYtelse.addAll(andeler)
-                tilkjentYtelseRepository.saveAndFlush(this)
-            }
-            avsluttOgLagreBehandling(revurdering)
-            val sisteAndelPerIdent = hentSisteAndelPerIdent()
-            assertThat(sisteAndelPerIdent).hasSize(1)
-            val fødselsnummer = aktørSøker.aktivFødselsnummer()
-            with(sisteAndelPerIdent[IdentOgYtelse(fødselsnummer, YtelseType.SMÅBARNSTILLEGG)]!!) {
-                assertThat(periodeOffset).isEqualTo(1L)
-                assertThat(forrigePeriodeOffset).isEqualTo(0L)
-                assertThat(stønadFom).isEqualTo(YearMonth.of(2020, 1))
-                assertThat(stønadTom).isEqualTo(YearMonth.of(2020, 3))
-                assertThat(kildeBehandlingId).isEqualTo(revurdering.id)
-            }
-        }
-
-        @Test
-        fun `en revurdering opphører en andel, sånn at siste andelen finnes i en tidligere behandling`() {
-            with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
-                val andeler =
-                    listOf(
-                        lagAndel(
-                            tilkjentYtelse = this,
-                            fom = YearMonth.of(2020, 1),
-                            tom = YearMonth.of(2020, 3),
-                            offset = 0,
-                        ),
-                        lagAndel(
-                            tilkjentYtelse = this,
-                            fom = YearMonth.of(2020, 4),
-                            tom = YearMonth.of(2020, 5),
-                            offset = 1,
-                            forrigeOffset = 0,
-                        ),
-                    )
-                andelerTilkjentYtelse.addAll(andeler)
-                tilkjentYtelseRepository.saveAndFlush(this)
-            }
-            avsluttOgLagreBehandling(førsteBehandling)
-            val revurdering = lagRevurdering()
-            with(lagInitiellTilkjentYtelse(revurdering, utbetalingsoppdrag = UTBETALINGSOPPDRAG)) {
-                val andeler =
-                    listOf(
-                        lagAndel(
-                            tilkjentYtelse = this,
-                            fom = YearMonth.of(2020, 1),
-                            tom = YearMonth.of(2020, 3),
-                            offset = 0,
-                        ),
-                    )
-                andelerTilkjentYtelse.addAll(andeler)
-                tilkjentYtelseRepository.saveAndFlush(this)
-            }
-            avsluttOgLagreBehandling(revurdering)
-            val sisteAndelPerIdent = hentSisteAndelPerIdent()
-            assertThat(sisteAndelPerIdent).hasSize(1)
-            val fødselsnummer = aktørSøker.aktivFødselsnummer()
-            with(sisteAndelPerIdent[IdentOgYtelse(fødselsnummer, YtelseType.SMÅBARNSTILLEGG)]!!) {
-                assertThat(periodeOffset).isEqualTo(1L)
-                assertThat(forrigePeriodeOffset).isEqualTo(0L)
-                assertThat(stønadFom).isEqualTo(YearMonth.of(2020, 4))
-                assertThat(stønadTom).isEqualTo(YearMonth.of(2020, 5))
-                assertThat(kildeBehandlingId).isEqualTo(førsteBehandling.id)
-            }
-        }
-
-        fun hentSisteAndelPerIdent(): Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag> {
-            return beregningService.hentSisteAndelPerIdent(fagsak.id)
-        }
-
-        fun lagAndel(
-            tilkjentYtelse: TilkjentYtelse,
-            ytelseType: YtelseType = YtelseType.SMÅBARNSTILLEGG,
-            person: Person? = null,
-            aktør: Aktør? = null,
-            fom: YearMonth,
-            tom: YearMonth,
-            offset: Long,
-            forrigeOffset: Long? = null,
-        ): AndelTilkjentYtelse =
-            lagAndelTilkjentYtelse(
-                fom,
-                tom,
-                ytelseType,
-                1345,
-                tilkjentYtelse.behandling,
-                person = person ?: søker,
-                aktør = aktør ?: aktørSøker,
-                tilkjentYtelse = tilkjentYtelse,
-                periodeIdOffset = offset,
-                forrigeperiodeIdOffset = forrigeOffset,
-            )
-
-        private fun lagRevurdering() =
-            behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING),
-            )
-    }
-
     @Test
     @Transactional
     fun `genererTilkjentYtelseFraVilkårsvurdering - skal trigge differanseberegning`() {
@@ -742,11 +398,6 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val tilkjentYtelse = beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling = behandling, personopplysningGrunnlag = personopplysningGrunnlag)
 
         assertThat(tilkjentYtelse.andelerTilkjentYtelse.any { it.differanseberegnetPeriodebeløp != null }).isEqualTo(true)
-    }
-
-    private fun avsluttOgLagreBehandling(behandling: Behandling) {
-        behandling.status = BehandlingStatus.AVSLUTTET
-        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, BehandlingStatus.AVSLUTTET)
     }
 
     private fun opprettTilkjentYtelse(behandling: Behandling) {
