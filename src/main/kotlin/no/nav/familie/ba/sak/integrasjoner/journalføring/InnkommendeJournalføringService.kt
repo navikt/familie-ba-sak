@@ -207,7 +207,7 @@ class InnkommendeJournalføringService(
             behandlinger = behandlinger,
         )
 
-        journalføringMetrikk.tellManuellJournalføringsmetrikker(journalpost, request, behandlinger)
+        journalføringMetrikk.tellManuellJournalføringsmetrikker(request, behandlinger)
         return sak.fagsakId ?: ""
     }
 

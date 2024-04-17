@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.springframework.stereotype.Component
 
 @Component
@@ -13,7 +12,7 @@ class JournalføringMetrikk {
     private val antallGenerellSak: Counter = Metrics.counter("journalfoering.behandling", "behandlingstype", "Fagsak")
 
     private val antallTilBehandling =
-        BehandlingType.values().associateWith {
+        BehandlingType.entries.associateWith {
             Metrics.counter("journalfoering.behandling", "behandlingstype", it.visningsnavn)
         }
 
@@ -43,7 +42,6 @@ class JournalføringMetrikk {
         Metrics.counter("journalfoering.journalpost", "tittel", "Fritekst")
 
     fun tellManuellJournalføringsmetrikker(
-        journalpost: Journalpost?,
         oppdatert: RestJournalføring,
         behandlinger: List<Behandling>,
     ) {
