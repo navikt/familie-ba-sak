@@ -25,7 +25,6 @@ import no.nav.familie.unleash.UnleashService
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.slf4j.LoggerFactory
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -187,7 +186,6 @@ class PensjonService(
         )
     }
 
-    @Cacheable("pensjon_testident", cacheManager = "dailyCache")
     fun tilfeldigUttrekkInfotrygdBaQ(
         år: Int,
     ): String? {
