@@ -88,7 +88,7 @@ class BeslutteVedtakTest {
             )
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
-        every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any(), any()) } just runs
+        every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any()) } just runs
         every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns randomVilkårsvurdering
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
@@ -208,7 +208,7 @@ class BeslutteVedtakTest {
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
-        verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true, emptyList()) }
+        verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true) }
     }
 
     @Test
