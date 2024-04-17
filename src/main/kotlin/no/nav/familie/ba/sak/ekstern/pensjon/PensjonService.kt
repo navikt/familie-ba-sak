@@ -103,7 +103,7 @@ class PensjonService(
         fraDato: LocalDate,
         barnFnr: List<String>?,
     ): Pair<BarnetrygdTilPensjon, List<BarnetrygdTilPensjon>> {
-        val personidenter = if (envService.erPreprod()) testidenter(aktør, fraDato) else aktør.personidenter.map { it.fødselsnummer }
+        val personidenter = if (envService.erPreprod()) testidenter(fraDato) else aktør.personidenter.map { it.fødselsnummer }
 
         val allePerioderTilhørendeAktør = mutableListOf<BarnetrygdPeriode>()
         val barnetrygdFraRelaterteSaker = mutableListOf<BarnetrygdTilPensjon>()
@@ -178,19 +178,17 @@ class PensjonService(
     }
 
     private fun testidenter(
-        aktør: Aktør,
         fraDato: LocalDate,
     ) = if (unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
         emptyList()
     } else {
         listOfNotNull(
-            tilfeldigUttrekkInfotrygdBaQ(aktør.aktivFødselsnummer(), fraDato.year),
+            tilfeldigUttrekkInfotrygdBaQ(fraDato.year),
         )
     }
 
     @Cacheable("pensjon_testident", cacheManager = "dailyCache")
     fun tilfeldigUttrekkInfotrygdBaQ(
-        forIdent: String,
         år: Int,
     ): String? {
         require(envService.erPreprod())
