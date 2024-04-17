@@ -69,14 +69,15 @@ class AutomatiskOppdaterValutakursService(
         endringsmåned: YearMonth,
     ): List<Valutakurs> {
         val start = maxOf(endringsmåned, fom)
-        val slutt = tom ?: localDateProvider.now().toYearMonth()
+        val denneMåneden = localDateProvider.now().toYearMonth()
+        val slutt = tom ?: denneMåneden
 
         return start.rangeTo(slutt).map { måned ->
             val sisteVirkedagForrigeMåned = måned.minusMonths(1).tilSisteVirkedag()
 
             Valutakurs(
                 fom = måned,
-                tom = if (måned == slutt) null else måned,
+                tom = if (måned == denneMåneden && tom == null) null else måned,
                 barnAktører = barnAktører,
                 valutakursdato = sisteVirkedagForrigeMåned,
                 valutakode = valutakode,
