@@ -12,8 +12,10 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode
 import org.junit.jupiter.api.Test
@@ -33,7 +35,13 @@ internal class ØkonomiServiceTest {
     private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
 
     @MockK
+    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
+    @MockK
     private lateinit var utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService
+
+    @MockK
+    private lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 
     @InjectMockKs
     private lateinit var økonomiService: ØkonomiService
