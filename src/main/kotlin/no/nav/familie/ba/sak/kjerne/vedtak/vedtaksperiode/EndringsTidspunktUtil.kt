@@ -150,7 +150,7 @@ private fun Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<Boolean, Måned>>.fi
 
 private fun VedtaksperiodeGrunnlagForPerson?.erLik(
     grunnlagForVedtaksperiodeForrigeBehandling: VedtaksperiodeGrunnlagForPerson?,
-): Boolean = this.erLik(grunnlagForVedtaksperiodeForrigeBehandling)
+): Boolean = this.erLik(grunnlagForVedtaksperiodeForrigeBehandling, erAndelerLike = Iterable<AndelForVedtaksperiode>::erLik)
 
 private fun VedtaksperiodeGrunnlagForPerson?.erLik(
     grunnlagForVedtaksperiodeForrigeBehandling: VedtaksperiodeGrunnlagForPerson?,
