@@ -2,10 +2,8 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
@@ -94,31 +92,6 @@ class UtbetalingsoppdragGenerator {
                 fagsak.aktør.aktivFødselsnummer()
             }
         }
-    }
-}
-
-abstract class AndelTilkjentYtelseForUtbetalingsoppdrag(private val andelTilkjentYtelse: AndelTilkjentYtelse) {
-    val behandlingId: Long = andelTilkjentYtelse.behandlingId
-    val tilkjentYtelse: TilkjentYtelse = andelTilkjentYtelse.tilkjentYtelse
-    val kalkulertUtbetalingsbeløp: Int = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
-    val stønadFom: YearMonth = andelTilkjentYtelse.stønadFom
-    val stønadTom: YearMonth = andelTilkjentYtelse.stønadTom
-    val aktør: Aktør = andelTilkjentYtelse.aktør
-    val type: YtelseType = andelTilkjentYtelse.type
-    abstract var periodeOffset: Long?
-    abstract var forrigePeriodeOffset: Long?
-    abstract var kildeBehandlingId: Long?
-
-    override fun equals(other: Any?): Boolean {
-        return if (other is AndelTilkjentYtelseForUtbetalingsoppdrag) {
-            this.andelTilkjentYtelse.equals(other.andelTilkjentYtelse)
-        } else {
-            false
-        }
-    }
-
-    override fun hashCode(): Int {
-        return andelTilkjentYtelse.hashCode()
     }
 }
 
