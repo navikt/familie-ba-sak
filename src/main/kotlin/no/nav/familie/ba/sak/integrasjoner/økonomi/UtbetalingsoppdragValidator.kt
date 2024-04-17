@@ -18,16 +18,6 @@ fun Utbetalingsoppdrag.validerNullutbetaling(
     }
 }
 
-fun Utbetalingsoppdrag.validerOpphørsoppdrag() {
-    if (this.harLøpendeUtbetaling()) {
-        error("Generert utbetalingsoppdrag for opphør inneholder oppdragsperioder med løpende utbetaling.")
-    }
-
-    if (this.utbetalingsperiode.isNotEmpty() && this.utbetalingsperiode.none { it.opphør != null }) {
-        error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
-    }
-}
-
 private fun kanHaNullutbetaling(
     behandlingskategori: BehandlingKategori,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
