@@ -60,9 +60,10 @@ class AutomatiskOppdaterValutakursService(
                     utenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(endringsmåned)
                 }
 
-        automatiskGenererteValutakurser.forEach {
-            valutakursService.oppdaterValutakurs(BehandlingId(behandlingId.id), it)
-        }
+        valutakursService.oppdaterValutakurser(
+            behandlingId = BehandlingId(behandlingId.id),
+            valutakurser = automatiskGenererteValutakurser,
+        )
     }
 
     private fun UtfyltUtenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(
