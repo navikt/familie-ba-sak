@@ -85,7 +85,6 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         unmockkObject(SatsTidspunkt)
     }
 
-
     @Test
     fun `Skal lagre andelerTilkjentYtelse med kobling til TilkjentYtelse`() {
         val søkerFnr = randomFnr()
