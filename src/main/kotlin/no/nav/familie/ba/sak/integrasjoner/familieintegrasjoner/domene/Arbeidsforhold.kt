@@ -36,6 +36,7 @@ enum class ArbeidsgiverType {
 
 class ArbeidsforholdRequest(
     val personIdent: String,
-    @Suppress("UNUSED") // Trengs i requesten, så overser klaging på at den aldri blir brukt
+    // Trengs i requesten, så overser klaging på at den aldri blir brukt
+    @Suppress("UNUSED")
     val ansettelsesperiodeFom: LocalDate,
 )
