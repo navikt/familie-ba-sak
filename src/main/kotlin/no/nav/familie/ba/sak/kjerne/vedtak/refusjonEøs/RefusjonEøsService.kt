@@ -42,7 +42,6 @@ class RefusjonEøsService(
     @Transactional
     fun fjernRefusjonEøsPeriode(
         id: Long,
-        behandlingId: Long,
     ) {
         loggService.loggRefusjonEøsPeriodeFjernet(
             refusjonEøs = hentRefusjonEøs(id),
