@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_STARTE_VALUTAJUSTERING
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -9,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonne
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
@@ -48,8 +51,10 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
 @Service
 class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
     private val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
+    private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val barnasDifferanseberegningEndretAbonnenter: List<BarnasDifferanseberegningEndretAbonnent>,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     @Transactional
     override fun skjemaerEndret(
@@ -57,6 +62,11 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
     ) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
+
+        if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING)) {
+            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringsmåned(behandlingId, utenlandskePeriodebeløp)
+        }
+
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
 
         val oppdaterteAndeler =

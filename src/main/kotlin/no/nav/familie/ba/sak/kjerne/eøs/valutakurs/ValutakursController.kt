@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_STARTE_VALUTAJUSTERING
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
@@ -32,6 +34,8 @@ class ValutakursController(
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val ecbService: ECBService,
+    private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterValutakurs(
@@ -55,7 +59,9 @@ class ValutakursController(
             }
 
         valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), valutaKurs)
-
+        if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING)) {
+            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringsmåned(BehandlingId(behandlingId))
+        }
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
@@ -72,6 +78,10 @@ class ValutakursController(
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
         valutakursService.slettValutakurs(BehandlingId(behandlingId), valutakursId)
+
+        if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING)) {
+            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringsmåned(BehandlingId(behandlingId))
+        }
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

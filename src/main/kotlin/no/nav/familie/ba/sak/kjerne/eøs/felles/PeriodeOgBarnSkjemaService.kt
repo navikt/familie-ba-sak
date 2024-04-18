@@ -33,6 +33,25 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         )
     }
 
+    fun endreSkjemaer(
+        behandlingId: BehandlingId,
+        oppdateringer: List<S>,
+    ) {
+        val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
+
+        val oppdaterteKompetanser =
+            oppdateringer.fold(gjeldendeSkjemaer) { gjeldendeSkjemaerAcc, oppdatering ->
+                val justertOppdatering = oppdatering.somInversOppdateringEllersNull(gjeldendeSkjemaer) ?: oppdatering
+                oppdaterSkjemaerRekursivt(gjeldendeSkjemaerAcc, justertOppdatering)
+            }
+
+        lagreDifferanseOgVarsleAbonnenter(
+            behandlingId,
+            gjeldendeSkjemaer,
+            oppdaterteKompetanser.medBehandlingId(behandlingId),
+        )
+    }
+
     fun slettSkjema(
         behandlingId: BehandlingId,
         skjemaId: Long,
