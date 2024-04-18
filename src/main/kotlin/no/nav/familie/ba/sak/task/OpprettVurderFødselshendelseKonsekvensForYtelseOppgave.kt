@@ -24,7 +24,7 @@ class OpprettVurderFødselshendelseKonsekvensForYtelseOppgave(
         val opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO = objectMapper.readValue(task.payload, OpprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO::class.java)
         task.metadata["oppgaveId"] =
             oppgaveService.opprettOppgaveForFødselshendelse(
-                ident = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.ident,
+                aktørId = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.ident,
                 oppgavetype = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.oppgavetype,
                 fristForFerdigstillelse = LocalDate.now(),
                 beskrivelse = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.beskrivelse,
