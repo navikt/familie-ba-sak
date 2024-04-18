@@ -15,7 +15,6 @@ data class Opphørsperiode(
     override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR,
 ) : Vedtaksperiode
 
-
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilKombinertTidslinjePerAktørOgType(): Tidslinje<Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>, Måned> {
     val andelTilkjentYtelsePerPersonOgType = groupBy { Pair(it.aktør, it.type) }
 
