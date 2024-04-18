@@ -536,6 +536,7 @@ class BehandlingsresultatStegTest {
         } returns emptyList()
     }
 
+    @Test
     fun `skal gå rett fra behandlingsresultat til iverksetting for alle fødselshendelser`() {
         val fødselshendelseBehandling =
             behandling.copy(
@@ -564,6 +565,8 @@ class BehandlingsresultatStegTest {
         every { vedtakService.hentAktivForBehandlingThrows(fødselshendelseBehandling.id) } returns vedtak
         every { vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak) } just runs
         every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(fødselshendelseBehandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(fødselshendelseBehandling.id) } returns emptyList()
+        every { valutakursRepository.finnFraBehandlingId(fødselshendelseBehandling.id) } returns emptyList()
 
         assertEquals(
             behandlingsresultatSteg.utførStegOgAngiNeste(fødselshendelseBehandling, ""),
