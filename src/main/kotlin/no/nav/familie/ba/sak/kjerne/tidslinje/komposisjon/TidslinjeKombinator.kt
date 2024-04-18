@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 
 /**
@@ -113,27 +112,6 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
             .map { it.verdi }
             .let { listeKombinator(it) }
             .tilVerdi()
-    }
-
-/**
- * Extension-metode for å kombinere to tidslinjer
- * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
- * fra minste <fraOgMed()> til største <tilOgMed()> fra begge tidslinjene
- * Tidsenhet (T) må være av samme type
- * Hver av tidslinjene kan ha ulik innholdstype, hhv V og H
- * Kombintor-funksjonen tar inn tidspunktet og (nullable) av V og H og returnerer (nullable) R
- * Resultatet er en tidslinje med tidsenhet T og innhold R
- */
-fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.tidspunktKombinerMed(
-    høyreTidslinje: Tidslinje<H, T>,
-    kombinator: (Tidspunkt<T>, V?, H?) -> R?,
-): Tidslinje<R, T> =
-    tidsrom(this, høyreTidslinje).tidslinjeFraTidspunkt { tidspunkt ->
-        kombinator(
-            tidspunkt,
-            this.innholdForTidspunkt(tidspunkt).innhold,
-            høyreTidslinje.innholdForTidspunkt(tidspunkt).innhold,
-        ).tilInnhold()
     }
 
 /**

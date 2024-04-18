@@ -262,9 +262,6 @@ data class Behandling(
 
     fun erManuellMigrering() = erManuellMigreringForEndreMigreringsdato() || erHelmanuellMigrering()
 
-    fun erAutomatiskEøsMigrering() =
-        erMigrering() && opprettetÅrsak == BehandlingÅrsak.MIGRERING && kategori == BehandlingKategori.EØS
-
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
     fun erTekniskBehandling() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR || erTekniskEndring()
@@ -420,9 +417,9 @@ enum class BehandlingKategori(val visningsnavn: String, val nivå: Int) {
 
 fun List<BehandlingKategori>.finnHøyesteKategori(): BehandlingKategori? = this.maxByOrNull { it.nivå }
 
-enum class BehandlingUnderkategori(val visningsnavn: String, val nivå: Int) {
-    UTVIDET("Utvidet", 2),
-    ORDINÆR("Ordinær", 1),
+enum class BehandlingUnderkategori(val visningsnavn: String) {
+    UTVIDET("Utvidet"),
+    ORDINÆR("Ordinær"),
 }
 
 fun initStatus(): BehandlingStatus {

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.sikkerhet
 
-import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
 
 @Service
@@ -19,7 +18,6 @@ class TilgangService(
     private val persongrunnlagService: PersongrunnlagService,
     private val rolleConfig: RolleConfig,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
-    private val cacheManager: CacheManager,
     private val auditLogger: AuditLogger,
 ) {
     /**
@@ -152,24 +150,5 @@ class TilgangService(
 
     fun validerKanRedigereBehandling(behandlingId: Long) {
         validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
-    }
-
-    /**
-     * Sjekker cache om tilgangen finnes siden tidligere, hvis ikke hentes verdiet med [hentVerdi]
-     * Resultatet caches sammen med identen for saksbehandleren på gitt [cacheName]
-     * @param cacheName navnet på cachen
-     * @param verdi verdiet som man ønsket å hente cache for, eks behandlingId, eller personIdent
-     */
-    private fun <T> harSaksbehandlerTilgang(
-        cacheName: String,
-        verdi: T,
-        hentVerdi: () -> Boolean,
-    ): Boolean {
-        if (SikkerhetContext.erSystemKontekst()) return true
-
-        val cache = cacheManager.getCache(cacheName) ?: error("Finner ikke cache=$cacheName")
-        return cache.get(Pair(verdi, SikkerhetContext.hentSaksbehandler())) {
-            hentVerdi()
-        } ?: error("Finner ikke verdi fra cache=$cacheName")
     }
 }

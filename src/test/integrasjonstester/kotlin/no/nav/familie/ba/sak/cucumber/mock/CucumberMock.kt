@@ -132,7 +132,6 @@ class CucumberMock(
             kompetanseRepository = kompetanseRepository,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
-            unleashService = mockk(),
         )
 
     val tilpassDifferanseberegningEtterTilkjentYtelseService =

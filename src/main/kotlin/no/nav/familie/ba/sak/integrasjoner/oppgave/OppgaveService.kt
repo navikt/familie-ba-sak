@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåB
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.AktørId
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
@@ -134,14 +133,14 @@ class OppgaveService(
     }
 
     fun opprettOppgaveForFødselshendelse(
-        ident: AktørId,
+        aktørId: String,
         oppgavetype: Oppgavetype,
         fristForFerdigstillelse: LocalDate,
         beskrivelse: String,
     ): String {
         val opprettOppgave =
             OpprettOppgaveRequest(
-                ident = OppgaveIdentV2(ident = ident, gruppe = IdentGruppe.AKTOERID),
+                ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
                 tema = Tema.BAR,
                 oppgavetype = oppgavetype,
                 fristFerdigstillelse = fristForFerdigstillelse,
@@ -294,7 +293,7 @@ class OppgaveService(
                 oppgaveErAvsluttet -> {}
                 else -> {
                     val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)
-                    val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist?.toString())
+                    val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
                     integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
                 }
             }

@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -61,9 +60,6 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     private lateinit var personidentService: PersonidentService
-
-    @Autowired
-    private lateinit var aktørIdRepository: AktørIdRepository
 
     @Autowired
     private lateinit var kompetanseRepository: KompetanseRepository
