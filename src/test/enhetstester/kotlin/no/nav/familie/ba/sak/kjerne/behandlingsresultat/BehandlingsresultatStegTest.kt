@@ -280,6 +280,44 @@ class BehandlingsresultatStegTest {
     }
 
     @Test
+    fun `skal gå rett fra behandlingsresultat til iverksetting for alle fødselshendelser`() {
+        val fødselshendelseBehandling =
+            behandling.copy(
+                skalBehandlesAutomatisk = true,
+                opprettetÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            )
+        val vedtak =
+            lagVedtak(
+                fødselshendelseBehandling,
+            )
+        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.INNVILGET_OG_ENDRET
+        every { behandlingService.nullstillEndringstidspunkt(fødselshendelseBehandling.id) } just runs
+        every {
+            behandlingService.oppdaterBehandlingsresultat(
+                any(),
+                any(),
+            )
+        } returns fødselshendelseBehandling.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
+        every {
+            behandlingService.oppdaterStatusPåBehandling(
+                fødselshendelseBehandling.id,
+                BehandlingStatus.IVERKSETTER_VEDTAK,
+            )
+        } returns fødselshendelseBehandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)
+        every { vedtakService.hentAktivForBehandlingThrows(fødselshendelseBehandling.id) } returns vedtak
+        every { vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak) } just runs
+        every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(fødselshendelseBehandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(fødselshendelseBehandling.id) } returns emptyList()
+        every { valutakursRepository.finnFraBehandlingId(fødselshendelseBehandling.id) } returns emptyList()
+
+        assertEquals(
+            behandlingsresultatSteg.utførStegOgAngiNeste(fødselshendelseBehandling, ""),
+            StegType.IVERKSETT_MOT_OPPDRAG,
+        )
+    }
+
+    @Test
     fun `preValiderSteg - skal validere andeler ved satsendring og ikke kaste feil når endringene i andeler kun er relatert til endring i sats`() {
         val søker = lagPerson()
         val barn = lagPerson(type = PersonType.BARN)
@@ -534,44 +572,6 @@ class BehandlingsresultatStegTest {
             beregningService
                 .hentAndelerFraForrigeIverksattebehandling(behandling)
         } returns emptyList()
-    }
-
-    @Test
-    fun `skal gå rett fra behandlingsresultat til iverksetting for alle fødselshendelser`() {
-        val fødselshendelseBehandling =
-            behandling.copy(
-                skalBehandlesAutomatisk = true,
-                opprettetÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            )
-        val vedtak =
-            lagVedtak(
-                fødselshendelseBehandling,
-            )
-        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.INNVILGET_OG_ENDRET
-        every { behandlingService.nullstillEndringstidspunkt(fødselshendelseBehandling.id) } just runs
-        every {
-            behandlingService.oppdaterBehandlingsresultat(
-                any(),
-                any(),
-            )
-        } returns fødselshendelseBehandling.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
-        every {
-            behandlingService.oppdaterStatusPåBehandling(
-                fødselshendelseBehandling.id,
-                BehandlingStatus.IVERKSETTER_VEDTAK,
-            )
-        } returns fødselshendelseBehandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)
-        every { vedtakService.hentAktivForBehandlingThrows(fødselshendelseBehandling.id) } returns vedtak
-        every { vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak) } just runs
-        every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(fødselshendelseBehandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
-        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(fødselshendelseBehandling.id) } returns emptyList()
-        every { valutakursRepository.finnFraBehandlingId(fødselshendelseBehandling.id) } returns emptyList()
-
-        assertEquals(
-            behandlingsresultatSteg.utførStegOgAngiNeste(fødselshendelseBehandling, ""),
-            StegType.IVERKSETT_MOT_OPPDRAG,
-        )
     }
 
     fun String.tilBoolskTidslinje(startdato: YearMonth): Tidslinje<Boolean, Måned> {
