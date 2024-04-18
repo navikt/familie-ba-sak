@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
-import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.AktørId
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.OpprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -35,7 +35,7 @@ class OpprettVurderFødselshendelseKonsekvensForYtelseOppgave(
         const val TASK_STEP_TYPE = "opprettVurderFødselshendelseKonsekvensForYtelseOppgave"
 
         fun opprettTask(
-            ident: AktørId,
+            aktør: Aktør,
             oppgavetype: Oppgavetype,
             beskrivelse: String,
         ): Task {
@@ -44,7 +44,7 @@ class OpprettVurderFødselshendelseKonsekvensForYtelseOppgave(
                 payload =
                     objectMapper.writeValueAsString(
                         OpprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO(
-                            ident,
+                            aktør.aktørId,
                             oppgavetype,
                             beskrivelse,
                         ),

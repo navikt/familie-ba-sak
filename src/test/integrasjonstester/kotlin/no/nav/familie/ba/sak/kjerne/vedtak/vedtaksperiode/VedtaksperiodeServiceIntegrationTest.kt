@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.filtrerLikEllerEtterEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -38,7 +37,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -656,55 +654,5 @@ class VedtaksperiodeServiceIntegrationTest(
         assertEquals(LocalDate.of(2021, 4, 30), redusertePerioder.first().tom)
         assertEquals(LocalDate.of(2021, 6, 1), redusertePerioder.last().fom)
         assertEquals(LocalDate.of(2021, 7, 31), redusertePerioder.last().tom)
-    }
-
-    @Test
-    fun `generere vedtaksperioder basert på manuelt overstyrt endringstidspunkt`() {
-        val vedtak = lagVedtak()
-        val avslagsperioder =
-            listOf(
-                lagVedtaksperiodeMedBegrunnelser(
-                    vedtak,
-                    LocalDate.of(2021, 1, 1),
-                    LocalDate.of(2021, 4, 30),
-                    Vedtaksperiodetype.AVSLAG,
-                ),
-            )
-        val utbetalingsperioder =
-            listOf(
-                lagVedtaksperiodeMedBegrunnelser(
-                    vedtak,
-                    LocalDate.of(2021, 1, 1),
-                    LocalDate.of(2021, 2, 28),
-                    Vedtaksperiodetype.UTBETALING,
-                ),
-                lagVedtaksperiodeMedBegrunnelser(
-                    vedtak,
-                    LocalDate.of(2021, 3, 1),
-                    LocalDate.of(2021, 7, 31),
-                    Vedtaksperiodetype.UTBETALING,
-                ),
-            )
-        val vedtaksperioder =
-            utbetalingsperioder.filtrerLikEllerEtterEndringstidspunkt(
-                endringstidspunkt = LocalDate.of(2021, 3, 1),
-            ) + avslagsperioder
-
-        assertNotNull(vedtaksperioder)
-        assertEquals(2, vedtaksperioder.size)
-        assertTrue {
-            vedtaksperioder.any {
-                it.fom == LocalDate.of(2021, 1, 1) &&
-                    it.tom == LocalDate.of(2021, 4, 30) &&
-                    it.type == Vedtaksperiodetype.AVSLAG
-            }
-        }
-        assertTrue {
-            vedtaksperioder.any {
-                it.fom == LocalDate.of(2021, 3, 1) &&
-                    it.tom == LocalDate.of(2021, 7, 31) &&
-                    it.type == Vedtaksperiodetype.UTBETALING
-            }
-        }
     }
 }
