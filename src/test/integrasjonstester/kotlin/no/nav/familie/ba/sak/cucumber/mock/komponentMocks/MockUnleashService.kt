@@ -2,10 +2,10 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.unleash.UnleashService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 
-fun mockUnleashService(): UnleashService {
-    val unleashService = mockk<UnleashService>()
-    every { unleashService.isEnabled(any()) } returns true
-    return unleashService
+fun mockUnleashNextMedContextService(): UnleashNextMedContextService {
+    val unleashNextMedContextService = mockk<UnleashNextMedContextService>()
+    every { unleashNextMedContextService.isEnabled(any()) } returns true
+    return unleashNextMedContextService
 }

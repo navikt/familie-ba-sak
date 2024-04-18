@@ -4,6 +4,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -36,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassUtenlandskePe
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.steg.FerdigstillBehandling
 import no.nav.familie.ba.sak.kjerne.steg.IverksettMotOppdrag
@@ -102,6 +104,7 @@ class CucumberMock(
     val behandlingMetrikker = mockBehandlingMetrikker()
     val tilbakekrevingService = mockTilbakekrevingService()
     val taskRepository = MockTasker().mockTaskRepositoryWrapper(this)
+    val unleashNextMedContextService = mockUnleashNextMedContextService()
 
     val behandlingstemaService =
         BehandlingstemaService(
@@ -219,13 +222,26 @@ class CucumberMock(
 
     val tilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService = TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService(tilbakestillBehandlingTilBehandlingsresultatService = tilbakestillBehandlingTilBehandlingsresultatService)
 
+    val valutakursService = ValutakursService(valutakursRepository = valutakursRepository, endringsabonnenter = valutakursAbonnenter)
+
+    val automatiskOppdaterValutakursService =
+        AutomatiskOppdaterValutakursService(
+            valutakursService = valutakursService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            localDateProvider = mockedDateProvider,
+            ecbService = ecbService,
+            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
+        )
+
     val tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService =
         TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
             valutakursRepository = valutakursRepository,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             barnasDifferanseberegningEndretAbonnenter = listOf(tilpassDifferanseberegningSøkersYtelserService),
-            automatiskOppdaterValutakursService = mockk(),
-            unleashNextMedContextService = mockk(),
+            automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val utenlandskPeriodebeløpEndretAbonnenter =
@@ -251,8 +267,6 @@ class CucumberMock(
         )
 
     val kompetanseService = KompetanseService(kompetanseRepository, endringsabonnenter = listOf(tilpassUtenlandskePeriodebeløpTilKompetanserService, tilbakestillBehandlingFraKompetanseEndringService))
-
-    val valutakursService = ValutakursService(valutakursRepository = valutakursRepository, endringsabonnenter = valutakursAbonnenter)
 
     val eøsSkjemaerForNyBehandlingService = EøsSkjemaerForNyBehandlingService(kompetanseService = kompetanseService, utenlandskPeriodebeløpService = utenlandskPeriodebeløpService, valutakursService = valutakursService)
 
@@ -369,8 +383,8 @@ class CucumberMock(
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringSevice = månedligValutajusteringSevice,
             localDateProvider = mockedDateProvider,
-            automatiskOppdaterValutakursService = mockk(),
-            unleashNextMedContextService = mockk(),
+            automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+            unleashNextMedContextService = unleashNextMedContextService,
             valutakursService = mockk(),
             utenlandskPeriodebeløpService = mockk(),
             tilpassValutakurserTilUtenlandskePeriodebeløpService = mockk(),
