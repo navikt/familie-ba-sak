@@ -132,15 +132,6 @@ data class AndelTilkjentYtelse(
             "forrigePeriodeOffset = $forrigePeriodeOffset, kildeBehandlingId = $kildeBehandlingId, nasjonaltPeriodebeløp = $nasjonaltPeriodebeløp, differanseberegnetBeløp = $differanseberegnetPeriodebeløp)"
     }
 
-    fun overlapperMed(andelFraAnnenBehandling: AndelTilkjentYtelse): Boolean {
-        return this.type == andelFraAnnenBehandling.type &&
-            this.overlapperPeriode(andelFraAnnenBehandling.periode)
-    }
-
-    fun overlapperPeriode(måndePeriode: MånedPeriode): Boolean =
-        this.stønadFom <= måndePeriode.tom &&
-            this.stønadTom >= måndePeriode.fom
-
     fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
 
     fun erUtvidet() = this.type == YtelseType.UTVIDET_BARNETRYGD
@@ -152,8 +143,6 @@ data class AndelTilkjentYtelse(
     fun erLøpende(): Boolean = this.stønadTom > YearMonth.now()
 
     fun erDeltBosted() = this.prosent == BigDecimal(50)
-
-    fun erEøs(personResultater: Set<PersonResultat>) = vurdertEtter(personResultater) == Regelverk.EØS_FORORDNINGEN
 
     fun vurdertEtter(personResultater: Set<PersonResultat>): Regelverk {
         val relevanteVilkårsResultaer = finnRelevanteVilkårsresulaterForRegelverk(personResultater)
@@ -217,15 +206,6 @@ enum class YtelseType(val klassifisering: String) {
     SMÅBARNSTILLEGG("BATRSMA"),
     ;
 
-    fun erKnyttetTilSøker() = this == SMÅBARNSTILLEGG || this == UTVIDET_BARNETRYGD
-
-    fun hentSatsTyper(): List<SatsType> =
-        when (this) {
-            ORDINÆR_BARNETRYGD -> listOf(SatsType.ORBA, SatsType.TILLEGG_ORBA)
-            UTVIDET_BARNETRYGD -> listOf(SatsType.UTVIDET_BARNETRYGD)
-            SMÅBARNSTILLEGG -> listOf(SatsType.SMA)
-        }
-
     fun tilYtelseType(): YtelsetypeBA =
         when (this) {
             ORDINÆR_BARNETRYGD -> YtelsetypeBA.ORDINÆR_BARNETRYGD
@@ -255,17 +235,6 @@ private fun regelverkavhenigeVilkår(): List<Vilkår> {
         Vilkår.BOR_MED_SØKER,
         Vilkår.BOSATT_I_RIKET,
         Vilkår.LOVLIG_OPPHOLD,
-    )
-}
-
-fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentAndelerForSegment(
-    vertikaltSegmentForVedtaksperiode: LocalDateSegment<Int>,
-) = this.filter {
-    vertikaltSegmentForVedtaksperiode.localDateInterval.overlaps(
-        LocalDateInterval(
-            it.stønadFom.førsteDagIInneværendeMåned(),
-            it.stønadTom.sisteDagIInneværendeMåned(),
-        ),
     )
 }
 
