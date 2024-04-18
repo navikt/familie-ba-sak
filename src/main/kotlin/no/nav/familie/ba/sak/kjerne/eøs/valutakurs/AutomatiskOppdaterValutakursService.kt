@@ -85,8 +85,7 @@ class AutomatiskOppdaterValutakursService(
         val denneMåneden = localDateProvider.now().toYearMonth()
         val slutt = tom ?: denneMåneden
 
-        if (endringsmåned.isAfter(denneMåneden)) return emptyList()
-        if (this.tom != null && endringsmåned.isAfter(this.tom)) return emptyList()
+        if (endringsmåned.isAfter(slutt)) return emptyList()
 
         return start.rangeTo(slutt).map { måned ->
             val sisteVirkedagForrigeMåned = måned.minusMonths(1).tilSisteVirkedag()
