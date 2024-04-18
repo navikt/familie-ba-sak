@@ -36,7 +36,6 @@ fun validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser: Vedtaksp
     }
 }
 
-
 // Håpet er at denne skal kaste feil på sikt, men enn så lenge blir det for strengt. Logger for å se behovet.
 fun List<UtvidetVedtaksperiodeMedBegrunnelser>.validerPerioderInneholderBegrunnelser(
     behandlingId: Long,
