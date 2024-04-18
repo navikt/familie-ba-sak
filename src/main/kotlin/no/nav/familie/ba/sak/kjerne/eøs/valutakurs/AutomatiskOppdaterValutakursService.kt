@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtfyltUtenlandskPeriodebeløp
-import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilIUtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.filtrerErUtfylt
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -70,8 +70,7 @@ class AutomatiskOppdaterValutakursService(
     ) {
         val automatiskGenererteValutakurser =
             utenlandskePeriodebeløp
-                .map { it.tilIUtenlandskPeriodebeløp() }
-                .filterIsInstance<UtfyltUtenlandskPeriodebeløp>()
+                .filtrerErUtfylt()
                 .flatMap { utenlandskPeriodebeløp ->
                     utenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(endringsmåned)
                 }
