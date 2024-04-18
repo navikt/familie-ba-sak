@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -36,42 +34,3 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilTidslinje(): Tidslinje<An
             innhold = it,
         )
     }.tilTidslinje()
-
-fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>): List<Opphørsperiode> {
-    if (alleOpphørsperioder.isEmpty()) return emptyList()
-
-    val sortertOpphørsperioder = alleOpphørsperioder.sortedBy { it.periodeFom }
-
-    return sortertOpphørsperioder.fold(
-        mutableListOf(
-            sortertOpphørsperioder.first(),
-        ),
-    ) { acc: MutableList<Opphørsperiode>, nesteOpphørsperiode: Opphørsperiode ->
-        val forrigeOpphørsperiode = acc.last()
-        when {
-            nesteOpphørsperiode.periodeFom.isSameOrBefore(forrigeOpphørsperiode.periodeTom ?: TIDENES_ENDE) -> {
-                acc[acc.lastIndex] =
-                    forrigeOpphørsperiode.copy(
-                        periodeTom =
-                            maxOfOpphørsperiodeTom(
-                                forrigeOpphørsperiode.periodeTom,
-                                nesteOpphørsperiode.periodeTom,
-                            ),
-                    )
-            }
-
-            else -> {
-                acc.add(nesteOpphørsperiode)
-            }
-        }
-
-        acc
-    }
-}
-
-private fun maxOfOpphørsperiodeTom(
-    a: LocalDate?,
-    b: LocalDate?,
-): LocalDate? {
-    return if (a != null && b != null) maxOf(a, b) else null
-}
