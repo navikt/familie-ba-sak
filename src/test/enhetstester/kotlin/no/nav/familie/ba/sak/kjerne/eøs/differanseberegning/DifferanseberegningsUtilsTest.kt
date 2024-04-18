@@ -14,12 +14,9 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.MathContext
-import java.math.RoundingMode
 import java.time.YearMonth
 
 class DifferanseberegningsUtilsTest {
-    val utbetalingsbeløpNorge = 2000
-
     @Test
     fun `Skal multiplisere valutabeløp med valutakurs`() {
         val valutabeløp = 1200.i("EUR")
@@ -164,6 +161,3 @@ fun Valutabeløp.somUtenlandskPeriodebeløp(intervall: Intervall): UtenlandskPer
         intervall = intervall,
         kalkulertMånedligBeløp = intervall.konverterBeløpTilMånedlig(this.beløp),
     )
-
-fun Valutabeløp.rundNed(presisjon: Int) =
-    Valutabeløp(this.beløp.round(MathContext(presisjon, RoundingMode.DOWN)), this.valutakode)
