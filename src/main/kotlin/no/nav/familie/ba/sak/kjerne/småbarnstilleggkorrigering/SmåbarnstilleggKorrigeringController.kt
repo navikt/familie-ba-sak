@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.småbarnstilleggkorrigering
 
 import io.swagger.v3.oas.annotations.media.Schema
-import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
+import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
