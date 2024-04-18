@@ -3,15 +3,12 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.config.testSanityKlient
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class VedtaksperiodeUtilTest {
-    private val sanityEØSBegrunnelser = testSanityKlient.hentEØSBegrunnelserMap()
-
     @Test
     fun `Skal ikke endre på utbetalingsperioder hvis det ikke finnes reduksjonsperioder`() {
         val vedtak = lagVedtak()

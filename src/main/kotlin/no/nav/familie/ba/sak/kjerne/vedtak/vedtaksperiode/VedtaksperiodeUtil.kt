@@ -2,9 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.erDagenFør
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
@@ -14,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentUtbetalingsperiodeDetaljer
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 
@@ -65,19 +61,6 @@ fun validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser: Vedtaksp
         )
     }
 }
-
-/**
- * Brukes for opphør som har egen logikk dersom det er første periode.
- */
-fun erFørsteVedtaksperiodePåFagsak(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    periodeFom: LocalDate?,
-): Boolean =
-    !andelerTilkjentYtelse.any {
-        it.stønadFom.isBefore(
-            periodeFom?.toYearMonth() ?: TIDENES_MORGEN.toYearMonth(),
-        )
-    }
 
 fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
@@ -157,8 +140,3 @@ private fun utledTom(
     gammeltSegment: LocalDateSegment<Int>,
     overlappendePeriode: LocalDateSegment<Int>,
 ) = if (gammeltSegment.tom > overlappendePeriode.tom) overlappendePeriode.tom else gammeltSegment.tom
-
-fun ytelseErFraForrigePeriode(
-    ytelse: AndelTilkjentYtelseMedEndreteUtbetalinger,
-    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
-) = ytelse.stønadTom.sisteDagIInneværendeMåned().erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom)

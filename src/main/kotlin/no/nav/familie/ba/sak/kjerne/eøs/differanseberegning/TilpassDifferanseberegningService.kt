@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -103,7 +102,6 @@ class TilpassDifferanseberegningSøkersYtelserService(
     private val kompetanseRepository: KompetanseRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val unleashService: UnleashService,
 ) : BarnasDifferanseberegningEndretAbonnent {
     override fun barnasDifferanseberegningEndret(tilkjentYtelse: TilkjentYtelse) {
         val oppdaterteAndeler =
