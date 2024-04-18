@@ -2,7 +2,7 @@
 
 import io.mockk.mockk
 import io.mockk.spyk
-import no.nav.familie.ba.sak.common.LocalDateProvider
+import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
@@ -52,7 +52,6 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 val logger: Logger = LoggerFactory.getLogger("CucumberMock")
 
@@ -372,6 +371,9 @@ class CucumberMock(
             localDateProvider = mockedDateProvider,
             automatiskOppdaterValutakursService = mockk(),
             unleashNextMedContextService = mockk(),
+            valutakursService = mockk(),
+            utenlandskPeriodebeløpService = mockk(),
+            tilpassValutakurserTilUtenlandskePeriodebeløpService = mockk(),
         )
 
     val ferdigstillBehandlingSteg =
@@ -434,8 +436,4 @@ class CucumberMock(
     val statusFraOppdragTask = StatusFraOppdragTask(stegService, behandlingHentOgPersisterService, personidentService, taskRepository)
 
     val taskservices = listOf(iverksettMotOppdragTask, ferdigstillBehandlingTask, statusFraOppdragTask)
-}
-
-class MockedDateProvider(val mockedDate: LocalDate) : LocalDateProvider {
-    override fun now(): LocalDate = this.mockedDate
 }
