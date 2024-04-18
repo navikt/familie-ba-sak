@@ -99,7 +99,7 @@ class VilkårsvurderingSteg(
             månedligValutajusteringSevice.oppdaterValutakurserForMåned(BehandlingId(behandling.id), localDateProvider.now().toYearMonth())
         }
 
-        if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING) && behandling.type == BehandlingType.REVURDERING) {
+        if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING) && behandling.type == BehandlingType.REVURDERING && behandling.skalBehandlesAutomatisk == false) {
             automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringsmåned(BehandlingId(behandling.id))
         }
 
