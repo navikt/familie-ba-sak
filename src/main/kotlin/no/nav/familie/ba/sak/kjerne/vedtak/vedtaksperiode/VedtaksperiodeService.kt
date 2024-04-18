@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
@@ -554,51 +553,6 @@ class VedtaksperiodeService(
                 .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
         return andelerTilkjentYtelse.mapTilUtbetalingsperioder(personopplysningGrunnlag = personopplysningGrunnlag)
-    }
-
-    fun hentOpphørsperioder(
-        behandling: Behandling,
-        endringstidspunkt: LocalDate = TIDENES_MORGEN,
-    ): List<Opphørsperiode> {
-        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) return emptyList()
-
-        val sisteVedtattBehandling: Behandling? =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
-
-        val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
-            if (sisteVedtattBehandling != null) {
-                persongrunnlagService.hentAktiv(behandlingId = sisteVedtattBehandling.id)
-            } else {
-                null
-            }
-        val forrigeAndelerMedEndringer =
-            if (sisteVedtattBehandling != null) {
-                andelerTilkjentYtelseOgEndreteUtbetalingerService
-                    .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteVedtattBehandling.id)
-            } else {
-                emptyList()
-            }
-
-        val personopplysningGrunnlag =
-            persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-                ?: return emptyList()
-
-        val andelerTilkjentYtelse =
-            andelerTilkjentYtelseOgEndreteUtbetalingerService
-                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
-
-        val alleOpphørsperioder =
-            mapTilOpphørsperioder(
-                forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
-                forrigeAndelerTilkjentYtelse = forrigeAndelerMedEndringer,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-            )
-
-        val (perioderFørEndringstidspunkt, fraEndringstidspunktOgUtover) =
-            alleOpphørsperioder.partition { it.periodeFom.isBefore(endringstidspunkt) }
-
-        return perioderFørEndringstidspunkt + slåSammenOpphørsperioder(fraEndringstidspunktOgUtover)
     }
 
     fun skalHaÅrligKontroll(vedtak: Vedtak): Boolean {
