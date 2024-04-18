@@ -69,7 +69,6 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
-import kotlin.random.Random
 
 class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
     @Autowired
@@ -405,7 +404,6 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         val arbeidsforhold =
             listOf(
                 Arbeidsforhold(
-                    navArbeidsforholdId = Random.nextLong(),
                     arbeidstaker = Arbeidstaker("Person", fnr),
                     arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "998877665"),
                     ansettelsesperiode = Ansettelsesperiode(Periode(fom = LocalDate.now().minusYears(1))),
