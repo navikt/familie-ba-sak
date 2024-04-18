@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
@@ -51,25 +48,6 @@ data class UtbetalingsperiodeDetalj(
         endringsårsak = andel.endreteUtbetalinger.singleOrNull()?.årsak,
         prosent = andel.prosent,
     )
-}
-
-fun List<UtbetalingsperiodeDetalj>.totaltUtbetalt(): Int =
-    this.sumOf { it.utbetaltPerMnd }
-
-fun hentUtbetalingsperiodeForVedtaksperiode(
-    utbetalingsperioder: List<Utbetalingsperiode>,
-    fom: LocalDate?,
-): Utbetalingsperiode {
-    if (utbetalingsperioder.isEmpty()) {
-        throw Feil("Det finnes ingen utbetalingsperioder ved utledning av utbetalingsperiode.")
-    }
-    val fomDato = fom?.toYearMonth() ?: inneværendeMåned()
-
-    val sorterteUtbetalingsperioder = utbetalingsperioder.sortedBy { it.periodeFom }
-
-    return sorterteUtbetalingsperioder.lastOrNull { it.periodeFom.toYearMonth() <= fomDato }
-        ?: sorterteUtbetalingsperioder.firstOrNull()
-        ?: throw Feil("Finner ikke gjeldende utbetalingsperiode ved fortsatt innvilget")
 }
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
