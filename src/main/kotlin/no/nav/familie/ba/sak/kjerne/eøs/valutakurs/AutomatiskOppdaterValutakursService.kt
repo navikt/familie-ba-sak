@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.common.rangeTo
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.tilSisteVirkedag
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
@@ -22,11 +24,25 @@ class AutomatiskOppdaterValutakursService(
     private val localDateProvider: LocalDateProvider,
     private val ecbService: ECBService,
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val tilpassValutakurserTilUtenlandskePeriodebeløpService: TilpassValutakurserTilUtenlandskePeriodebeløpService,
 ) {
     @Transactional
-    fun oppdaterValutakurserEtterEndringsmånedUtenomEndringIValutakurser(
+    fun resettValutakurserOgLagValutakurserEtterEndringsmåned(
         behandlingId: BehandlingId,
     ) {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId.id)
+        val forrigeBehandlingVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+
+        // Resetter valutaen til slik den var i forrige behandling
+        valutakursService.kopierOgErstattValutakurser(
+            fraBehandlingId = BehandlingId(forrigeBehandlingVedtatt!!.id),
+            tilBehandlingId = behandlingId,
+        )
+
+        // Tilpasser valutaen til potensielle endringer i utenlandske periodebeløp fra denne behandlingen
+        tilpassValutakurserTilUtenlandskePeriodebeløpService.tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId)
+
         val endringsmånedUavhengigAvValutakurser = vedtaksperiodeService.finnEndringstidspunktForBehandlingFørValutakurser(behandlingId.id).toYearMonth()
 
         oppdaterValutakurserEtterEndringsmåned(

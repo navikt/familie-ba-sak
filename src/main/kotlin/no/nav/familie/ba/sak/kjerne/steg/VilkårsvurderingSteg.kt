@@ -100,19 +100,7 @@ class VilkårsvurderingSteg(
         }
 
         if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING) && behandling.type == BehandlingType.REVURDERING) {
-            val forrigeBehandlingVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-
-            // Resetter valutaen til slik den var i forrige behandling
-            valutakursService.kopierOgErstattValutakurser(
-                fraBehandlingId = BehandlingId(forrigeBehandlingVedtatt!!.id),
-                tilBehandlingId = BehandlingId(behandling.id),
-            )
-
-            // Tilpasser valutaen til potensielle endringer i utenlandske periodebeløp fra denne behandlingen
-            tilpassValutakurserTilUtenlandskePeriodebeløpService.tilpassValutakursTilUtenlandskPeriodebeløp(BehandlingId(behandling.id))
-
-            // Oppdaterer valutakursene etter endringstidspunktet, sett bort i fra valutakursene
-            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringsmånedUtenomEndringIValutakurser(BehandlingId(behandling.id))
+            automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringsmåned(BehandlingId(behandling.id))
         }
 
         if (!behandling.erSatsendring()) {
