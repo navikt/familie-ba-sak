@@ -2,10 +2,8 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
@@ -96,79 +94,6 @@ class UtbetalingsoppdragGenerator {
         }
     }
 }
-
-abstract class AndelTilkjentYtelseForUtbetalingsoppdrag(private val andelTilkjentYtelse: AndelTilkjentYtelse) {
-    val behandlingId: Long? = andelTilkjentYtelse.behandlingId
-    val tilkjentYtelse: TilkjentYtelse = andelTilkjentYtelse.tilkjentYtelse
-    val kalkulertUtbetalingsbeløp: Int = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
-    val stønadFom: YearMonth = andelTilkjentYtelse.stønadFom
-    val stønadTom: YearMonth = andelTilkjentYtelse.stønadTom
-    val aktør: Aktør = andelTilkjentYtelse.aktør
-    val type: YtelseType = andelTilkjentYtelse.type
-    abstract var periodeOffset: Long?
-    abstract var forrigePeriodeOffset: Long?
-    abstract var kildeBehandlingId: Long?
-
-    override fun equals(other: Any?): Boolean {
-        return if (other is AndelTilkjentYtelseForUtbetalingsoppdrag) {
-            this.andelTilkjentYtelse.equals(other.andelTilkjentYtelse)
-        } else {
-            false
-        }
-    }
-
-    override fun hashCode(): Int {
-        return andelTilkjentYtelse.hashCode()
-    }
-}
-
-interface AndelTilkjentYtelseForUtbetalingsoppdragFactory {
-    fun pakkInnForUtbetaling(andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>): List<AndelTilkjentYtelseForUtbetalingsoppdrag>
-}
-
-class AndelTilkjentYtelseForSimuleringFactory : AndelTilkjentYtelseForUtbetalingsoppdragFactory {
-    override fun pakkInnForUtbetaling(andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>): List<AndelTilkjentYtelseForUtbetalingsoppdrag> =
-        andelerTilkjentYtelse.map { AndelTilkjentYtelseForSimulering(it) }
-
-    private class AndelTilkjentYtelseForSimulering(
-        andelTilkjentYtelse: AndelTilkjentYtelse,
-    ) : AndelTilkjentYtelseForUtbetalingsoppdrag(andelTilkjentYtelse) {
-        override var periodeOffset: Long? = andelTilkjentYtelse.periodeOffset
-        override var forrigePeriodeOffset: Long? = andelTilkjentYtelse.forrigePeriodeOffset
-        override var kildeBehandlingId: Long? = andelTilkjentYtelse.kildeBehandlingId
-    }
-}
-
-class AndelTilkjentYtelseForIverksettingFactory : AndelTilkjentYtelseForUtbetalingsoppdragFactory {
-    override fun pakkInnForUtbetaling(andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>): List<AndelTilkjentYtelseForUtbetalingsoppdrag> =
-        andelerTilkjentYtelse.map { AndelTilkjentYtelseForIverksetting(it) }
-
-    private class AndelTilkjentYtelseForIverksetting(
-        private val andelTilkjentYtelse: AndelTilkjentYtelse,
-    ) : AndelTilkjentYtelseForUtbetalingsoppdrag(andelTilkjentYtelse) {
-        override var periodeOffset: Long?
-            get() = andelTilkjentYtelse.periodeOffset
-            set(value) {
-                andelTilkjentYtelse.periodeOffset = value
-            }
-
-        override var forrigePeriodeOffset: Long?
-            get() = andelTilkjentYtelse.forrigePeriodeOffset
-            set(value) {
-                andelTilkjentYtelse.forrigePeriodeOffset = value
-            }
-
-        override var kildeBehandlingId: Long?
-            get() = andelTilkjentYtelse.kildeBehandlingId
-            set(value) {
-                andelTilkjentYtelse.kildeBehandlingId = value
-            }
-    }
-}
-
-fun Collection<AndelTilkjentYtelse>.pakkInnForUtbetaling(
-    andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
-) = andelTilkjentYtelseForUtbetalingsoppdragFactory.pakkInnForUtbetaling(this)
 
 enum class YtelsetypeBA(
     override val klassifisering: String,
