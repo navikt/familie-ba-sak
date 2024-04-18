@@ -3,15 +3,8 @@ package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene
 import java.time.LocalDate
 
 class Arbeidsforhold(
-    val arbeidstaker: Arbeidstaker? = null,
     val arbeidsgiver: Arbeidsgiver? = null,
-    val type: String? = null,
     val ansettelsesperiode: Ansettelsesperiode? = null,
-)
-
-class Arbeidstaker(
-    val type: String? = null,
-    val offentligIdent: String? = null,
 )
 
 class Arbeidsgiver(
