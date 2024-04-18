@@ -417,9 +417,9 @@ enum class BehandlingKategori(val visningsnavn: String, val nivå: Int) {
 
 fun List<BehandlingKategori>.finnHøyesteKategori(): BehandlingKategori? = this.maxByOrNull { it.nivå }
 
-enum class BehandlingUnderkategori(val visningsnavn: String, val nivå: Int) {
-    UTVIDET("Utvidet", 2),
-    ORDINÆR("Ordinær", 1),
+enum class BehandlingUnderkategori(val visningsnavn: String) {
+    UTVIDET("Utvidet"),
+    ORDINÆR("Ordinær"),
 }
 
 fun initStatus(): BehandlingStatus {
