@@ -7,13 +7,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import java.time.LocalDate
-
-data class Opphørsperiode(
-    override val periodeFom: LocalDate,
-    override val periodeTom: LocalDate?,
-    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR,
-) : Vedtaksperiode
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilKombinertTidslinjePerAktørOgType(): Tidslinje<Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>, Måned> {
     val andelTilkjentYtelsePerPersonOgType = groupBy { Pair(it.aktør, it.type) }
