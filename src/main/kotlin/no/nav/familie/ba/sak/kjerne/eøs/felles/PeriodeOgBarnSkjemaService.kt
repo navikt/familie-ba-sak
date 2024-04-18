@@ -40,9 +40,9 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
 
         val oppdaterteKompetanser =
-            oppdateringer.fold(gjeldendeSkjemaer) { acc, oppdatering ->
+            oppdateringer.fold(gjeldendeSkjemaer) { gjeldendeSkjemaerAcc, oppdatering ->
                 val justertOppdatering = oppdatering.somInversOppdateringEllersNull(gjeldendeSkjemaer) ?: oppdatering
-                oppdaterSkjemaerRekursivt(acc, justertOppdatering)
+                oppdaterSkjemaerRekursivt(gjeldendeSkjemaerAcc, justertOppdatering)
             }
 
         lagreDifferanseOgVarsleAbonnenter(
