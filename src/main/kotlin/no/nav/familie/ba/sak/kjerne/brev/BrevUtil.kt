@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -22,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 
 fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
     val behandlingÅrsak = behandling.opprettetÅrsak
@@ -252,14 +252,12 @@ private fun hentOrdinæreHjemler(
 }
 
 fun hentVirkningstidspunkt(
-    opphørsperioder: List<Opphørsperiode>,
+    opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
     behandlingId: Long,
-) = (
-    opphørsperioder
-        .maxOfOrNull { it.periodeFom }
-        ?.tilMånedÅr()
-        ?: throw Feil("Fant ikke opphørdato ved generering av dødsfallbrev på behandling $behandlingId")
-)
+) = opphørsperioder
+    .maxOfOrNull { it.fom ?: TIDENES_MORGEN }
+    ?.tilMånedÅr()
+    ?: throw Feil("Fant ikke opphørdato ved generering av dødsfallbrev på behandling $behandlingId")
 
 fun hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev: Boolean): List<String> {
     return if (vedtakKorrigertHjemmelSkalMedIBrev) listOf("35") else emptyList()
