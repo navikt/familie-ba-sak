@@ -20,12 +20,6 @@ enum class BrevPeriodeType(val apiNavn: String) {
 
     @Deprecated("Skal renames til FORTSATT_INNVILGET når det gamle implementasjonen er fjernet")
     FORTSATT_INNVILGET_NY("fortsattInnvilgetNy"),
-
-    @Deprecated("Kun UTBETALING, INGEN_UTBETALING, INGEN_UTBETALING_UTEN_PERIODE, FORTSATT_INNVILGET skal brukes")
-    INNVILGELSE("innvilgelse"),
-
-    @Deprecated("Kun UTBETALING, INGEN_UTBETALING, INGEN_UTBETALING_UTEN_PERIODE, FORTSATT_INNVILGET skal brukes")
-    AVSLAG("avslag"),
 }
 
 data class VedtakFellesfelter(
