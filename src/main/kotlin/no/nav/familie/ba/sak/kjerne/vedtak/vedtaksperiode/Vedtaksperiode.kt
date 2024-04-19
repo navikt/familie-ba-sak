@@ -8,8 +8,6 @@ import java.time.LocalDate
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "vedtaksperiodetype")
 @JsonSubTypes(
     JsonSubTypes.Type(value = Utbetalingsperiode::class, name = "UTBETALING"),
-    JsonSubTypes.Type(value = Avslagsperiode::class, name = "AVSLAG"),
-    JsonSubTypes.Type(value = Opphørsperiode::class, name = "OPPHØR"),
 )
 interface Vedtaksperiode {
     val periodeFom: LocalDate?
