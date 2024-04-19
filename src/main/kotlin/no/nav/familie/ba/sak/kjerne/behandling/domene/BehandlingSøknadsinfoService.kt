@@ -55,14 +55,14 @@ class BehandlingSøknadsinfoService(
             fom = fom,
             tom = tom,
             ordinærBarnetrygd =
-            RestAntallSøknader(
+                RestAntallSøknader(
                     totalt = antallOrdinære,
                     papirsøknader = antallOrdinære - antallOrdinæreDigitale,
                     digitaleSøknader = antallOrdinæreDigitale,
                     digitaliseringsgrad = antallOrdinæreDigitale / antallOrdinære.toFloat(),
                 ),
             utvidetBarnetrygd =
-            RestAntallSøknader(
+                RestAntallSøknader(
                     totalt = antallUtvidet,
                     papirsøknader = antallUtvidet - antallUtvidetDigitale,
                     digitaleSøknader = antallUtvidetDigitale,
