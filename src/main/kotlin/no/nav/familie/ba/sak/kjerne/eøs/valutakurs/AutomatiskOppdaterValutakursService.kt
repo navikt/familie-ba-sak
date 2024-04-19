@@ -48,12 +48,12 @@ class AutomatiskOppdaterValutakursService(
         // Tilpasser valutaen til potensielle endringer i utenlandske periodebeløp fra denne behandlingen
         tilpassValutakurserTilUtenlandskePeriodebeløpService.tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId)
 
-        val endringstidspunktFørValutakurser = vedtaksperiodeService.finnEndringstidspunktForBehandlingFørValutakurser(behandlingId.id).toYearMonth()
+        val endringstidspunktUtenValutakursendringer = vedtaksperiodeService.finnEndringstidspunktForBehandlingUtenValutakursendringer(behandlingId.id).toYearMonth()
 
         oppdaterValutakurserEtterEndringstidspunkt(
             behandling = behandling,
             utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id),
-            endringstidspunkt = endringstidspunktFørValutakurser,
+            endringstidspunkt = endringstidspunktUtenValutakursendringer,
         )
     }
 
