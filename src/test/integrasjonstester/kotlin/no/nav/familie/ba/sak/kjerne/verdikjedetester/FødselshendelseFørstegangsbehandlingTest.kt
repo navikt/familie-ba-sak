@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
@@ -99,7 +98,7 @@ class FødselshendelseFørstegangsbehandlingTest(
 
         assertEquals(
             1654,
-            desember2021Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt(),
+            desember2021Vedtaksperiode?.utbetalingsperiodeDetaljer?.sumOf { it.utbetaltPerMnd },
         )
         assertEquals(
             Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
@@ -108,7 +107,7 @@ class FødselshendelseFørstegangsbehandlingTest(
 
         assertEquals(
             1676,
-            januar2022Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt(),
+            januar2022Vedtaksperiode?.utbetalingsperiodeDetaljer?.sumOf { it.utbetaltPerMnd },
         )
         assertEquals(
             Standardbegrunnelse.INNVILGET_SATSENDRING,

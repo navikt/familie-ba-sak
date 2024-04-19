@@ -1,18 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
-import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerSisteDagIPerioden
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -53,25 +48,6 @@ data class UtbetalingsperiodeDetalj(
     )
 }
 
-fun List<UtbetalingsperiodeDetalj>.totaltUtbetalt(): Int =
-    this.sumOf { it.utbetaltPerMnd }
-
-fun hentUtbetalingsperiodeForVedtaksperiode(
-    utbetalingsperioder: List<Utbetalingsperiode>,
-    fom: LocalDate?,
-): Utbetalingsperiode {
-    if (utbetalingsperioder.isEmpty()) {
-        throw Feil("Det finnes ingen utbetalingsperioder ved utledning av utbetalingsperiode.")
-    }
-    val fomDato = fom?.toYearMonth() ?: inneværendeMåned()
-
-    val sorterteUtbetalingsperioder = utbetalingsperioder.sortedBy { it.periodeFom }
-
-    return sorterteUtbetalingsperioder.lastOrNull { it.periodeFom.toYearMonth() <= fomDato }
-        ?: sorterteUtbetalingsperioder.firstOrNull()
-        ?: throw Feil("Finner ikke gjeldende utbetalingsperiode ved fortsatt innvilget")
-}
-
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
 ): List<Utbetalingsperiode> {
@@ -95,16 +71,6 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
             }
 
     return utbetalingsPerioder
-}
-
-internal fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.utledSegmenter(): List<LocalDateSegment<Int>> {
-    // Dersom listen er tom så returnerer vi tom liste fordi at reduceren i
-    // beregnUtbetalingsperioderUtenKlassifisering ikke takler tomme lister
-    if (this.isEmpty()) return emptyList()
-
-    val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(this.toSet())
-    return utbetalingsPerioder.toSegments()
-        .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
 }
 
 fun Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperiodeDetaljer(
