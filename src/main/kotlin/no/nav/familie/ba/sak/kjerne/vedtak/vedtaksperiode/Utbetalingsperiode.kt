@@ -16,14 +16,14 @@ import java.time.LocalDate
  */
 
 data class Utbetalingsperiode(
-    override val periodeFom: LocalDate,
-    override val periodeTom: LocalDate,
-    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+    val periodeFom: LocalDate,
+    val periodeTom: LocalDate,
+    val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
     val ytelseTyper: List<YtelseType>,
     val antallBarn: Int,
     val utbetaltPerMnd: Int,
-) : Vedtaksperiode
+)
 
 data class UtbetalingsperiodeDetalj(
     val person: RestPerson,
