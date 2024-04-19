@@ -213,7 +213,7 @@ fun hentBrevPeriodeType(
     erUtbetalingEllerDeltBostedIPeriode: Boolean,
 ): BrevPeriodeType =
     when (vedtaksperiodetype) {
-        Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET_NY
+        Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET
         Vedtaksperiodetype.UTBETALING ->
             when {
                 erUtbetalingEllerDeltBostedIPeriode -> BrevPeriodeType.UTBETALING

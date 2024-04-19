@@ -384,9 +384,6 @@ class CucumberMock(
             localDateProvider = mockedDateProvider,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             unleashNextMedContextService = unleashNextMedContextService,
-            valutakursService = mockk(),
-            utenlandskPeriodebeløpService = mockk(),
-            tilpassValutakurserTilUtenlandskePeriodebeløpService = mockk(),
         )
 
     val ferdigstillBehandlingSteg =
