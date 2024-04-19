@@ -91,13 +91,13 @@ class AutomatiskOppdaterValutakursServiceTest {
 
         automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringsmåned(behandlingId)
 
-        val uberørteValutakurser =
+        val forventetUberørteValutakurser =
             ValutakursBuilder(jan(2020), behandlingId)
                 .medKurs("1111", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.MANUELL)
                 .bygg()
 
-        val oppdaterteValutakurser =
+        val forventetOppdaterteValutakurser =
             ValutakursBuilder(jan(2020), behandlingId)
                 .medKurs("    45678", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.AUTOMATISK)
@@ -109,7 +109,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             .ignoringFields("valutakursdato")
             .ignoringFields("endretTidspunkt")
             .ignoringFields("opprettetTidspunkt")
-            .isEqualTo(uberørteValutakurser + oppdaterteValutakurser)
+            .isEqualTo(forventetUberørteValutakurser + forventetOppdaterteValutakurser)
     }
 
     @Test
@@ -139,13 +139,13 @@ class AutomatiskOppdaterValutakursServiceTest {
 
         automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringsmåned(behandlingId)
 
-        val uberørteValutakurser =
+        val forventetUberørteValutakurser =
             ValutakursBuilder(jan(2020), behandlingId)
                 .medKurs("1111", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.MANUELL)
                 .bygg()
 
-        val oppdaterteValutakurser =
+        val forventetOppdaterteValutakurser =
             ValutakursBuilder(jan(2020), behandlingId)
                 .medKurs("    4567", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.AUTOMATISK)
@@ -157,7 +157,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             .ignoringFields("valutakursdato")
             .ignoringFields("endretTidspunkt")
             .ignoringFields("opprettetTidspunkt")
-            .isEqualTo(uberørteValutakurser + oppdaterteValutakurser)
+            .isEqualTo(forventetUberørteValutakurser + forventetOppdaterteValutakurser)
     }
 
     @Test
