@@ -21,7 +21,7 @@ class VurderTilbakekrevingStegTest {
     private val simuleringService: SimuleringService = mockk()
 
     private val vurderTilbakekrevingSteg: VurderTilbakekrevingSteg =
-        VurderTilbakekrevingSteg(tilbakekrevingService = tilbakekrevingService, simuleringService = simuleringService)
+        VurderTilbakekrevingSteg(tilbakekrevingService = tilbakekrevingService, simuleringService = simuleringService, valutakursService = mockk())
 
     private val behandling: Behandling =
         lagBehandling(
