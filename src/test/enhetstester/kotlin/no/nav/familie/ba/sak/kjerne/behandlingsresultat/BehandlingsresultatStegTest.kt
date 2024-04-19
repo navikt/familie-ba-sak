@@ -115,6 +115,7 @@ class BehandlingsresultatStegTest {
                 utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
                 valutakursRepository = valutakursRepository,
                 localDateProvider = RealDateProvider(),
+                valutakursService = mockk(),
             )
 
         behandling =

@@ -299,6 +299,7 @@ class CucumberMock(
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             valutakursRepository = valutakursRepository,
             localDateProvider = mockedDateProvider,
+            valutakursService = valutakursService,
         )
     val tilkjentYtelseValideringService =
         TilkjentYtelseValideringService(

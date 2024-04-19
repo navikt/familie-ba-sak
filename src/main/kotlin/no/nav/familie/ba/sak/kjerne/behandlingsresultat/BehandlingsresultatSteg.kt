@@ -25,8 +25,10 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -41,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import validerIngenAutomatiskeValutakurserFørEtterSisteManuellePostering
 
 @Service
 class BehandlingsresultatSteg(
@@ -58,6 +61,7 @@ class BehandlingsresultatSteg(
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val valutakursRepository: ValutakursRepository,
     private val localDateProvider: LocalDateProvider,
+    private val valutakursService: ValutakursService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -175,6 +179,11 @@ class BehandlingsresultatSteg(
         ) {
             throw Feil("Behandling $behandling er omregningssak men er ikke uendret behandlingsresultat")
         }
+
+        val valutakurser = valutakursService.hentValutakurser(BehandlingId(behandling.id))
+        val økonomiSimuleringMottaker = simuleringService.hentSimuleringPåBehandling(behandling.id)
+
+        validerIngenAutomatiskeValutakurserFørEtterSisteManuellePostering(valutakurser, økonomiSimuleringMottaker)
     }
 
     override fun stegType(): StegType {
