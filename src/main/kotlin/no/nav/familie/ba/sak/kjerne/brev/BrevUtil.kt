@@ -251,7 +251,7 @@ private fun hentOrdinæreHjemler(
     return sorterteHjemler
 }
 
-fun hentVirkningstidspunkt(
+fun hentVirkningstidspunktForDødsfallbrev(
     opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
     behandlingId: Long,
 ) = opphørsperioder
