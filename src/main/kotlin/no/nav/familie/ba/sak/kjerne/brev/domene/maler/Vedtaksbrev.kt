@@ -55,12 +55,6 @@ enum class BrevPeriodeType(val apiNavn: String) {
     FORTSATT_INNVILGET_INSTITUSJON("fortsattInnvilgetInstitusjon"),
 }
 
-enum class EndretUtbetalingBrevPeriodeType(val apiNavn: String) {
-    ENDRET_UTBETALINGSPERIODE("endretUtbetalingsperiode"),
-    ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING("endretUtbetalingsperiodeDelvisUtbetaling"),
-    ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING("endretUtbetalingsperiodeIngenUtbetaling"),
-}
-
 data class VedtakFellesfelter(
     val enhet: String,
     val saksbehandler: String,
