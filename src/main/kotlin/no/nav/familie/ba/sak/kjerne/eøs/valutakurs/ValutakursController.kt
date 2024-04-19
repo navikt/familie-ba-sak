@@ -60,7 +60,7 @@ class ValutakursController(
 
         valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), valutaKurs)
         if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING)) {
-            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringsmåned(BehandlingId(behandlingId))
+            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
         }
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -80,7 +80,7 @@ class ValutakursController(
         valutakursService.slettValutakurs(BehandlingId(behandlingId), valutakursId)
 
         if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING)) {
-            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringsmåned(BehandlingId(behandlingId))
+            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
         }
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))

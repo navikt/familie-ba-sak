@@ -77,7 +77,7 @@ class AutomatiskOppdaterValutakursServiceTest {
     }
 
     @Test
-    fun `oppdaterValutakurserEtterEndringsmåned skal automatisk hente valutakurser hver måned etter endringstidspunktet`() {
+    fun `oppdaterValutakurserEtterEndringstidspunkt skal automatisk hente valutakurser hver måned etter endringstidspunktet`() {
         UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
             .medBeløp("777777777", "EUR", "N", barn1, barn2, barn3)
             .lagreTil(utenlandskPeriodebeløpRepository)
@@ -89,7 +89,7 @@ class AutomatiskOppdaterValutakursServiceTest {
 
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2020, 5, 15)
 
-        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringsmåned(behandlingId)
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId)
 
         val forventetUberørteValutakurser =
             ValutakursBuilder(jan(2020), behandlingId)
@@ -113,7 +113,7 @@ class AutomatiskOppdaterValutakursServiceTest {
     }
 
     @Test
-    fun `resettValutakurserOgLagValutakurserEtterEndringsmåned skal resette valutakursene før endringstidspunktet til forrige behandling`() {
+    fun `resettValutakurserOgLagValutakurserEtterEndringstidspunkt skal resette valutakursene før endringstidspunktet til forrige behandling`() {
         every { behandlingHentOgPersisterService.hent(any()) } answers { lagBehandling(id = firstArg()) }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
 
@@ -137,7 +137,7 @@ class AutomatiskOppdaterValutakursServiceTest {
 
         every { vedtaksperiodeService.finnEndringstidspunktForBehandlingFørValutakurser(behandlingId.id) } returns LocalDate.of(2020, 5, 15)
 
-        automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringsmåned(behandlingId)
+        automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringstidspunkt(behandlingId)
 
         val forventetUberørteValutakurser =
             ValutakursBuilder(jan(2020), behandlingId)
@@ -161,7 +161,7 @@ class AutomatiskOppdaterValutakursServiceTest {
     }
 
     @Test
-    fun `oppdaterValutakurserEtterEndringsmåned skal skal kun lage automatiske valutakurser etter siste manuelle postering`() {
+    fun `oppdaterValutakurserEtterEndringstidspunkt skal skal kun lage automatiske valutakurser etter siste manuelle postering`() {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2020, 2, 15)
         val tomDatoSisteManuellePostering = LocalDate.of(2020, 4, 30)
         every { simuleringService.oppdaterSimuleringPåBehandlingVedBehov(any()) } returns
@@ -187,7 +187,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             .medVurderingsform(Vurderingsform.MANUELL)
             .lagreTil(valutakursRepository)
 
-        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringsmåned(behandlingId)
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId)
 
         val forventetUberørteValutakurser =
             ValutakursBuilder(jan(2020), behandlingId)

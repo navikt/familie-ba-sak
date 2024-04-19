@@ -33,7 +33,7 @@ class AutomatiskOppdaterValutakursService(
     private val simuleringService: SimuleringService,
 ) {
     @Transactional
-    fun resettValutakurserOgLagValutakurserEtterEndringsmåned(
+    fun resettValutakurserOgLagValutakurserEtterEndringstidspunkt(
         behandlingId: BehandlingId,
     ) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId.id)
@@ -48,30 +48,30 @@ class AutomatiskOppdaterValutakursService(
         // Tilpasser valutaen til potensielle endringer i utenlandske periodebeløp fra denne behandlingen
         tilpassValutakurserTilUtenlandskePeriodebeløpService.tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId)
 
-        val endringsmånedFørValutakurser = vedtaksperiodeService.finnEndringstidspunktForBehandlingFørValutakurser(behandlingId.id).toYearMonth()
+        val endringstidspunktFørValutakurser = vedtaksperiodeService.finnEndringstidspunktForBehandlingFørValutakurser(behandlingId.id).toYearMonth()
 
-        oppdaterValutakurserEtterEndringsmåned(
+        oppdaterValutakurserEtterEndringstidspunkt(
             behandling = behandling,
             utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id),
-            endringsmåned = endringsmånedFørValutakurser,
+            endringstidspunkt = endringstidspunktFørValutakurser,
         )
     }
 
     @Transactional
-    fun oppdaterValutakurserEtterEndringsmåned(
+    fun oppdaterValutakurserEtterEndringstidspunkt(
         behandlingId: BehandlingId,
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>? = null,
-    ) = oppdaterValutakurserEtterEndringsmåned(
+    ) = oppdaterValutakurserEtterEndringstidspunkt(
         behandling = behandlingHentOgPersisterService.hent(behandlingId.id),
         utenlandskePeriodebeløp = utenlandskePeriodebeløp ?: utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id),
-        endringsmåned = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id).toYearMonth(),
+        endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id).toYearMonth(),
     )
 
     @Transactional
-    private fun oppdaterValutakurserEtterEndringsmåned(
+    private fun oppdaterValutakurserEtterEndringstidspunkt(
         behandling: Behandling,
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
-        endringsmåned: YearMonth,
+        endringstidspunkt: YearMonth,
     ) {
         val simuleringMottakere = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId = behandling.id)
         val datoSisteManuellePostering = simuleringMottakere.finnDatoSisteManuellePostering() ?: TIDENES_MORGEN
@@ -81,20 +81,20 @@ class AutomatiskOppdaterValutakursService(
             utenlandskePeriodebeløp
                 .filtrerErUtfylt()
                 .flatMap { utenlandskPeriodebeløp ->
-                    utenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(maxOf(månedEtterSisteManuellePostering, endringsmåned))
+                    utenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(maxOf(månedEtterSisteManuellePostering, endringstidspunkt))
                 }
 
         valutakursService.oppdaterValutakurser(BehandlingId(behandling.id), automatiskGenererteValutakurser)
     }
 
     private fun UtfyltUtenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(
-        endringsmåned: YearMonth,
+        endringstidspunkt: YearMonth,
     ): List<Valutakurs> {
-        val start = maxOf(endringsmåned, fom)
+        val start = maxOf(endringstidspunkt, fom)
         val denneMåneden = localDateProvider.now().toYearMonth()
         val slutt = tom ?: denneMåneden
 
-        if (endringsmåned.isAfter(slutt)) return emptyList()
+        if (endringstidspunkt.isAfter(slutt)) return emptyList()
 
         return start.rangeTo(slutt).map { måned ->
             val sisteVirkedagForrigeMåned = måned.minusMonths(1).tilSisteVirkedag()
