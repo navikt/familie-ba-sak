@@ -232,6 +232,7 @@ class CucumberMock(
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
+            simuleringService = simuleringService,
         )
 
     val tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService =
@@ -298,6 +299,7 @@ class CucumberMock(
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             valutakursRepository = valutakursRepository,
             localDateProvider = mockedDateProvider,
+            valutakursService = valutakursService,
         )
     val tilkjentYtelseValideringService =
         TilkjentYtelseValideringService(

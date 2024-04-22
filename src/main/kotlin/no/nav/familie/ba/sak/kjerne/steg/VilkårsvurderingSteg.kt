@@ -94,7 +94,7 @@ class VilkårsvurderingSteg(
         }
 
         if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING) && behandling.type == BehandlingType.REVURDERING && behandling.skalBehandlesAutomatisk == false) {
-            automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringsmåned(BehandlingId(behandling.id))
+            automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringstidspunkt(BehandlingId(behandling.id))
         }
 
         if (!behandling.erSatsendring()) {

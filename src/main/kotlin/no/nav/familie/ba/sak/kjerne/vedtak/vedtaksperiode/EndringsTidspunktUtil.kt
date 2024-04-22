@@ -53,7 +53,7 @@ fun utledEndringstidspunkt(
     return datoTidligsteForskjell
 }
 
-fun utledEndringstidspunktFørValutakurser(
+fun utledEndringstidspunktUtenValutakursendringer(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
     behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
 ): LocalDate =
@@ -61,7 +61,7 @@ fun utledEndringstidspunktFørValutakurser(
         behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
         behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
     ) { vedtaksperiodeGrunnlagForPerson ->
-        this.erLik(vedtaksperiodeGrunnlagForPerson, erAndelerLike = Iterable<AndelForVedtaksperiode>::erLikFørDifferanseberegning)
+        this.erLik(vedtaksperiodeGrunnlagForPerson, erAndelerLike = Iterable<AndelForVedtaksperiode>::erLikUtenDifferanseberegning)
     }
 
 private fun Set<PersonResultat>.beholdKunOppfylteVilkårResultater(): Set<PersonResultat> =
@@ -177,5 +177,5 @@ private fun VedtaksperiodeGrunnlagForPerson?.erLik(
 
 private fun Iterable<AndelForVedtaksperiode>.erLik(andreAndeler: Iterable<AndelForVedtaksperiode>) = this.toSet() == andreAndeler.toSet()
 
-private fun Iterable<AndelForVedtaksperiode>.erLikFørDifferanseberegning(andreAndeler: Iterable<AndelForVedtaksperiode>) =
+private fun Iterable<AndelForVedtaksperiode>.erLikUtenDifferanseberegning(andreAndeler: Iterable<AndelForVedtaksperiode>) =
     this.map { it.nasjonaltPeriodebeløp ?: it.kalkulertUtbetalingsbeløp }.toSet() == andreAndeler.map { it.nasjonaltPeriodebeløp ?: it.kalkulertUtbetalingsbeløp }.toSet()

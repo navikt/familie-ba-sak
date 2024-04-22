@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagUtenlandskPeriodeb
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -67,61 +68,50 @@ import java.time.YearMonth
 
 class BehandlingsresultatStegTest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
-
     private val behandlingService: BehandlingService = mockk()
-
     private val simuleringService: SimuleringService = mockk()
-
     private val vedtakService: VedtakService = mockk()
-
     private val vedtaksperiodeService: VedtaksperiodeService = mockk()
-
     private val mockBehandlingsresultatService: BehandlingsresultatService = mockk()
-
     private val vilkårService: VilkårService = mockk()
-
     private val persongrunnlagService: PersongrunnlagService = mockk()
-
     private val beregningService: BeregningService = mockk()
-
-    private lateinit var behandlingsresultatSteg: BehandlingsresultatSteg
-
-    private lateinit var behandling: Behandling
-
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService =
-        mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
-
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
-
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository = mockk()
-
     private val valutakursRepository: ValutakursRepository = mockk()
+    private val valutakursService = mockk<ValutakursService>()
+
+    private val behandlingsresultatSteg: BehandlingsresultatSteg =
+        BehandlingsresultatSteg(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingService = behandlingService,
+            simuleringService = simuleringService,
+            vedtakService = vedtakService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            behandlingsresultatService = mockBehandlingsresultatService,
+            vilkårService = vilkårService,
+            persongrunnlagService = persongrunnlagService,
+            beregningService = beregningService,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            valutakursRepository = valutakursRepository,
+            localDateProvider = RealDateProvider(),
+            valutakursService = valutakursService,
+        )
+
+    private val behandling =
+        lagBehandling(
+            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+        )
 
     @BeforeEach
     fun init() {
-        behandlingsresultatSteg =
-            BehandlingsresultatSteg(
-                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-                behandlingService = behandlingService,
-                simuleringService = simuleringService,
-                vedtakService = vedtakService,
-                vedtaksperiodeService = vedtaksperiodeService,
-                behandlingsresultatService = mockBehandlingsresultatService,
-                vilkårService = vilkårService,
-                persongrunnlagService = persongrunnlagService,
-                beregningService = beregningService,
-                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-                andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-                utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
-                valutakursRepository = valutakursRepository,
-                localDateProvider = RealDateProvider(),
-            )
-
-        behandling =
-            lagBehandling(
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-            )
+        every { simuleringService.oppdaterSimuleringPåBehandling(any()) } returns emptyList()
+        every { simuleringService.hentSimuleringPåBehandling(any()) } returns emptyList()
+        every { valutakursService.hentValutakurser(any()) } returns emptyList()
     }
 
     @Test
