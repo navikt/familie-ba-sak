@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 @TaskStepBeskrivelse(
     taskStepType = OppdaterStønadTomPåTilkjentYtelseTask.TASK_STEP_TYPE,
     beskrivelse = "Oppdaterer tilkjentYtelse.stønadTom for siste iverksatte behandling på gitt fagsak.",
-    maxAntallFeil = 3,
+    maxAntallFeil = 1,
 )
 open class OppdaterStønadTomPåTilkjentYtelseTask(
     private val behandlingRepository: BehandlingRepository,
