@@ -58,7 +58,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -510,6 +509,7 @@ private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
         tilkjentYtelse = this,
         utbetalingsoppdrag = beregnetUtbetalingsoppdrag.utbetalingsoppdrag,
         endretUtbetalingAndeler = emptyList(),
+        erStønadTomTogglePå = true,
     )
     oppdaterAndelerMedPeriodeOffset(
         tilkjentYtelse = this,

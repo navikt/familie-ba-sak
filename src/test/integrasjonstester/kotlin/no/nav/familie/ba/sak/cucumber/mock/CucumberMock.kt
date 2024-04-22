@@ -4,6 +4,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.mock.komponent_mocks.mockUnleashService
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -102,6 +103,7 @@ class CucumberMock(
     val arbeidsfordelingService = mockArbeidsfordelingService()
     val behandlingMetrikker = mockBehandlingMetrikker()
     val tilbakekrevingService = mockTilbakekrevingService()
+    val unleashService = mockUnleashService()
     val taskRepository = MockTasker().mockTaskRepositoryWrapper(this)
 
     val behandlingstemaService =
@@ -296,6 +298,7 @@ class CucumberMock(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(),
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
+            unleashService = unleashService,
         )
 
     val økonomiService =
