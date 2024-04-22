@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toLocalDate
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -48,6 +49,9 @@ class UtbetalingsoppdragGeneratorServiceTest {
 
     @MockK
     private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+
+    @MockK
+    private lateinit var unleashNextMedContextService: UnleashNextMedContextService
 
     @MockK
     private lateinit var endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService
@@ -849,5 +853,7 @@ class UtbetalingsoppdragGeneratorServiceTest {
         every { tilkjentYtelseRepository.save(capture(tilkjentYtelseSlot)) } returns mockk()
 
         every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(any()) } returns endretUtbetalingAndeler
+
+        every { unleashNextMedContextService.isEnabled(any()) } returns true
     }
 }
