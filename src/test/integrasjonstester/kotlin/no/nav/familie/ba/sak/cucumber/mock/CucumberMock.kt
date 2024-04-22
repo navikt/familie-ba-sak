@@ -316,6 +316,8 @@ class CucumberMock(
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(),
+            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
+            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val økonomiService =

@@ -1,4 +1,4 @@
-﻿package no.nav.familie.ba.sak.cucumber.mock.komponentMocks
+package no.nav.familie.ba.sak.cucumber.mock.komponentMocks
 
 import io.mockk.every
 import io.mockk.mockk
