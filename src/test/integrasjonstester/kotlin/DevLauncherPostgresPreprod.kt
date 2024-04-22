@@ -21,7 +21,7 @@ fun main(args: Array<String>) {
         springBuilder.initializers(DbContainerInitializer())
     }
 
-    if (!args.contains("--manuellMiljø")) {
+    if (!args.contains("--manuellMiljø") && System.getProperty("AZURE_APP_CLIENT_ID") == null) {
         settClientIdOgSecret()
     }
 

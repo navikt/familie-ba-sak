@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBaseFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -98,6 +98,7 @@ class BeregningServiceTest {
     @BeforeEach
     fun setUp() {
         val fagsakService = mockk<FagsakService>()
+        val fagsak = defaultFagsak()
 
         beregningService =
             BeregningService(
@@ -113,9 +114,20 @@ class BeregningServiceTest {
             )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
+
         every { fagsakService.hentRestFagsak(any()) } answers {
             Ressurs.success(
-                defaultFagsak().tilRestBaseFagsak(false, emptyList(), null, null)
+                RestBaseFagsak(
+                    opprettetTidspunkt = fagsak.opprettetTidspunkt,
+                    id = fagsak.id,
+                    søkerFødselsnummer = fagsak.aktør.aktivFødselsnummer(),
+                    status = fagsak.status,
+                    underBehandling = false,
+                    løpendeKategori = null,
+                    løpendeUnderkategori = null,
+                    gjeldendeUtbetalingsperioder = emptyList(),
+                    fagsakType = fagsak.type,
+                )
                     .tilRestFagsak(emptyList(), emptyList()),
             )
         }

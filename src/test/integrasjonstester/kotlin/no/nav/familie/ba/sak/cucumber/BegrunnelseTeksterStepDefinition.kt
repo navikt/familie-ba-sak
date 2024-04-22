@@ -76,7 +76,6 @@ class BegrunnelseTeksterStepDefinition {
     var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
     var overgangsstønader = mutableMapOf<Long, List<InternPeriodeOvergangsstønad>>()
     var dagensDato: LocalDate = LocalDate.now()
-    val erProduksjon: Boolean = true
 
     var gjeldendeBehandlingId: Long? = null
 
@@ -151,7 +150,7 @@ class BegrunnelseTeksterStepDefinition {
         dataTable: DataTable,
     ) {
         val vilkårResultaterPerPerson =
-            dataTable.asMaps().groupBy { VedtaksperiodeMedBegrunnelserParser.parseAktørId(it) }
+            dataTable.asMaps().groupBy { parseAktørId(it) }
         val personResultatForBehandling =
             vilkårsvurderinger[behandlingId]?.personResultater
                 ?: error("Finner ikke personresultater for behandling med id $behandlingId")

@@ -35,7 +35,7 @@ class UtbetalingsoppdragGeneratorService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
-    private val unleashService: UnleashNextMedContextService,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -79,7 +79,7 @@ class UtbetalingsoppdragGeneratorService(
             tilkjentYtelse = tilkjentYtelse,
             utbetalingsoppdrag = beregnetUtbetalingsoppdrag.utbetalingsoppdrag,
             endretUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(tilkjentYtelse.behandling.id),
-            erStønadTomTogglePå = unleashService.isEnabled(TILKJENT_YTELSE_STONAD_TOM),
+            erStønadTomTogglePå = unleashNextMedContextService.isEnabled(TILKJENT_YTELSE_STONAD_TOM),
         )
         oppdaterAndelerMedPeriodeOffset(
             tilkjentYtelse = tilkjentYtelse,

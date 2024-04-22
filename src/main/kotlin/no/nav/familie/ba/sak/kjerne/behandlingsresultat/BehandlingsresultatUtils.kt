@@ -2,16 +2,9 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.fpsak.tidsserie.LocalDateSegment
-import no.nav.fpsak.tidsserie.LocalDateTimeline
-import no.nav.fpsak.tidsserie.StandardCombinators
 
 object BehandlingsresultatUtils {
     internal fun skalUtledeSøknadsresultatForBehandling(behandling: Behandling): Boolean {
@@ -87,34 +80,4 @@ object BehandlingsresultatUtils {
             )
         }
     }
-}
-
-fun hentUtbetalingstidslinjeForSøker(andeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): LocalDateTimeline<Int> {
-    val utvidetTidslinje =
-        LocalDateTimeline(
-            andeler.filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
-                .map {
-                    LocalDateSegment(
-                        it.stønadFom.førsteDagIInneværendeMåned(),
-                        it.stønadTom.sisteDagIInneværendeMåned(),
-                        it.kalkulertUtbetalingsbeløp,
-                    )
-                },
-        )
-    val småbarnstilleggAndeler =
-        LocalDateTimeline(
-            andeler.filter { it.type == YtelseType.SMÅBARNSTILLEGG }.map {
-                LocalDateSegment(
-                    it.stønadFom.førsteDagIInneværendeMåned(),
-                    it.stønadTom.sisteDagIInneværendeMåned(),
-                    it.kalkulertUtbetalingsbeløp,
-                )
-            },
-        )
-
-    return utvidetTidslinje.combine(
-        småbarnstilleggAndeler,
-        StandardCombinators::sum,
-        LocalDateTimeline.JoinStyle.CROSS_JOIN,
-    )
 }

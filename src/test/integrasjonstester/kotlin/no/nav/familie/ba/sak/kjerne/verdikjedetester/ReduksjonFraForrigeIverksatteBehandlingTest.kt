@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
-import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -46,7 +45,6 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     @Autowired private val stegService: StegService,
     @Autowired private val efSakRestClient: EfSakRestClient,
     @Autowired private val brevmalService: BrevmalService,
-    @Autowired private val testVerktøyService: TestVerktøyService,
 ) : AbstractVerdikjedetest() {
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
 
@@ -74,7 +72,6 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
             fullførBehandlingMedOvergangsstønad(
                 fagsak = fagsak,
                 personScenario = personScenario,
-                barnFødselsdato = barnFødselsdato,
                 overgangsstønadPerioder =
                     listOf(
                         EksternPeriode(
@@ -99,7 +96,6 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
             fullførRevurderingUtenOvergangstonad(
                 fagsak = fagsak,
                 personScenario = personScenario,
-                barnFødselsdato = barnFødselsdato,
             )
 
         val perioderBehandling2 =
@@ -141,7 +137,6 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     fun fullførBehandlingMedOvergangsstønad(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate,
         overgangsstønadPerioder: List<EksternPeriode>,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
@@ -192,7 +187,6 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     fun fullførRevurderingUtenOvergangstonad(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate,
     ): Behandling {
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG

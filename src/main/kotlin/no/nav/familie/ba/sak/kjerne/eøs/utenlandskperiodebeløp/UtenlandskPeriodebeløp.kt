@@ -155,3 +155,5 @@ fun List<UtfyltUtenlandskPeriodebeløp>.tilTidslinje() =
             innhold = it,
         )
     }.tilTidslinje()
+
+fun Collection<UtenlandskPeriodebeløp>.filtrerErUtfylt() = this.map { it.tilIUtenlandskPeriodebeløp() }.filterIsInstance<UtfyltUtenlandskPeriodebeløp>()

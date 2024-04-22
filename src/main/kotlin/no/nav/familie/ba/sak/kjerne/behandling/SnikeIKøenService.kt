@@ -69,7 +69,6 @@ class SnikeIKøenService(
             logger.info("Behandling=$behandlingId er satt på vent av saksbehandler, $loggSuffix")
             return true
         }
-        val sisteLogghendelse = loggService.hentLoggForBehandling(behandlingId).maxBy { it.opprettetTidspunkt }
         val tid4TimerSiden = LocalDateTime.now().minusHours(4)
         if (aktivOgÅpenBehandling.endretTidspunkt.isAfter(tid4TimerSiden)) {
             logger.info(
@@ -78,6 +77,7 @@ class SnikeIKøenService(
             )
             return false
         }
+        val sisteLogghendelse = loggService.hentLoggForBehandling(behandlingId).maxBy { it.opprettetTidspunkt }
         if (sisteLogghendelse.opprettetTidspunkt.isAfter(tid4TimerSiden)) {
             logger.info(
                 "Behandling=$behandlingId siste logginslag er " +

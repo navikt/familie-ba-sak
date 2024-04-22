@@ -2,9 +2,9 @@
 
 import io.mockk.mockk
 import io.mockk.spyk
-import no.nav.familie.ba.sak.common.LocalDateProvider
+import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
-import no.nav.familie.ba.sak.cucumber.mock.komponent_mocks.mockUnleashService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassUtenlandskePe
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.steg.FerdigstillBehandling
 import no.nav.familie.ba.sak.kjerne.steg.IverksettMotOppdrag
@@ -53,7 +54,6 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 val logger: Logger = LoggerFactory.getLogger("CucumberMock")
 
@@ -103,8 +103,8 @@ class CucumberMock(
     val arbeidsfordelingService = mockArbeidsfordelingService()
     val behandlingMetrikker = mockBehandlingMetrikker()
     val tilbakekrevingService = mockTilbakekrevingService()
-    val unleashService = mockUnleashService()
     val taskRepository = MockTasker().mockTaskRepositoryWrapper(this)
+    val unleashNextMedContextService = mockUnleashNextMedContextService()
 
     val behandlingstemaService =
         BehandlingstemaService(
@@ -132,7 +132,6 @@ class CucumberMock(
             kompetanseRepository = kompetanseRepository,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
-            unleashService = mockk(),
         )
 
     val tilpassDifferanseberegningEtterTilkjentYtelseService =
@@ -222,7 +221,27 @@ class CucumberMock(
 
     val tilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService = TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService(tilbakestillBehandlingTilBehandlingsresultatService = tilbakestillBehandlingTilBehandlingsresultatService)
 
-    val tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService = TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(valutakursRepository = valutakursRepository, tilkjentYtelseRepository = tilkjentYtelseRepository, barnasDifferanseberegningEndretAbonnenter = listOf(tilpassDifferanseberegningSøkersYtelserService))
+    val valutakursService = ValutakursService(valutakursRepository = valutakursRepository, endringsabonnenter = valutakursAbonnenter)
+
+    val automatiskOppdaterValutakursService =
+        AutomatiskOppdaterValutakursService(
+            valutakursService = valutakursService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            localDateProvider = mockedDateProvider,
+            ecbService = ecbService,
+            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
+        )
+
+    val tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService =
+        TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
+            valutakursRepository = valutakursRepository,
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
+            barnasDifferanseberegningEndretAbonnenter = listOf(tilpassDifferanseberegningSøkersYtelserService),
+            automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+            unleashNextMedContextService = unleashNextMedContextService,
+        )
 
     val utenlandskPeriodebeløpEndretAbonnenter =
         listOf(
@@ -247,8 +266,6 @@ class CucumberMock(
         )
 
     val kompetanseService = KompetanseService(kompetanseRepository, endringsabonnenter = listOf(tilpassUtenlandskePeriodebeløpTilKompetanserService, tilbakestillBehandlingFraKompetanseEndringService))
-
-    val valutakursService = ValutakursService(valutakursRepository = valutakursRepository, endringsabonnenter = valutakursAbonnenter)
 
     val eøsSkjemaerForNyBehandlingService = EøsSkjemaerForNyBehandlingService(kompetanseService = kompetanseService, utenlandskPeriodebeløpService = utenlandskPeriodebeløpService, valutakursService = valutakursService)
 
@@ -298,7 +315,7 @@ class CucumberMock(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(),
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
-            unleashService = unleashService,
+            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val økonomiService =
@@ -367,6 +384,8 @@ class CucumberMock(
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringSevice = månedligValutajusteringSevice,
             localDateProvider = mockedDateProvider,
+            automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val ferdigstillBehandlingSteg =
@@ -429,8 +448,4 @@ class CucumberMock(
     val statusFraOppdragTask = StatusFraOppdragTask(stegService, behandlingHentOgPersisterService, personidentService, taskRepository)
 
     val taskservices = listOf(iverksettMotOppdragTask, ferdigstillBehandlingTask, statusFraOppdragTask)
-}
-
-class MockedDateProvider(val mockedDate: LocalDate) : LocalDateProvider {
-    override fun now(): LocalDate = this.mockedDate
 }

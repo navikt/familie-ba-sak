@@ -3,14 +3,12 @@ package no.nav.familie.ba.sak.cucumber.domeneparser
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
-import no.nav.familie.ba.sak.integrasjoner.økonomi.YtelsetypeBA
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
-import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.assertj.core.api.Assertions.assertThat
 import java.time.LocalDate
@@ -75,22 +73,6 @@ object OppdragParser {
         }
     }
 
-    fun mapForventetBeståendeAndeler(dataTable: DataTable): List<AndelDataLongId> {
-        return dataTable.asMaps().map { rad ->
-            AndelDataLongId(
-                id = parseLong(Domenebegrep.ID, rad),
-                fom = parseÅrMåned(Domenebegrep.FRA_DATO, rad),
-                tom = parseÅrMåned(Domenebegrep.TIL_DATO, rad),
-                beløp = parseInt(DomenebegrepTilkjentYtelse.BELØP, rad),
-                personIdent = lagFødselsnummer("1"),
-                type = YtelsetypeBA.ORDINÆR_BARNETRYGD,
-                periodeId = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, rad),
-                forrigePeriodeId = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, rad),
-                kildeBehandlingId = parseValgfriLong(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, rad),
-            )
-        }
-    }
-
     private fun mapForventetUtbetalingsperiode(it: Map<String, String>) =
         ForventetUtbetalingsperiode(
             erEndringPåEksisterendePeriode = parseBoolean(DomenebegrepUtbetalingsoppdrag.ER_ENDRING, it),
@@ -145,10 +127,6 @@ object OppdragParser {
     }
 
     private fun lagFødselsnummer(id: String) = id.padStart(11, '0')
-}
-
-enum class DomenebegrepBehandlingsinformasjon(override val nøkkel: String) : Domenenøkkel {
-    ENDRET_MIGRERINGSDATO("Endret migreringsdato"),
 }
 
 enum class DomenebegrepTilkjentYtelse(override val nøkkel: String) : Domenenøkkel {
