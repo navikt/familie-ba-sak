@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service
     beskrivelse = "Oppdaterer tilkjentYtelse.stønadTom for siste iverksatte behandling på gitt fagsak.",
     maxAntallFeil = 1,
 )
-open class OppdaterStønadTomPåTilkjentYtelseTask(
+class OppdaterStønadTomPåTilkjentYtelseTask(
     private val behandlingRepository: BehandlingRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
