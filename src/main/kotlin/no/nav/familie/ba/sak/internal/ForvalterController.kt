@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.Månedli
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatusScheduler
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
@@ -73,7 +72,6 @@ class ForvalterController(
     private val fagsakService: FagsakService,
     private val unleashNextMedContextService: UnleashNextMedContextService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val fagsakStatusScheduler: FagsakStatusScheduler,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -355,13 +353,6 @@ class ForvalterController(
         @RequestBody fagsakListe: List<Long>,
     ): ResponseEntity<Ressurs<String>> {
         fagsakListe.forEach { taskRepository.save(opprettStønadTomTask(it)) }
-        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
-    }
-
-    @PostMapping("/kjør-oppdater-løpende-flagg-task")
-    @Operation(summary = "Kjører oppdaterLøpendeFlagg-tasken slik at man oppdaterer tasker som er løpende til avsluttet ved behov.")
-    fun kjørOppdaterLøpendeFlaggTask(): ResponseEntity<Ressurs<String>> {
-        fagsakStatusScheduler.oppdaterFagsakStatuser()
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 }
