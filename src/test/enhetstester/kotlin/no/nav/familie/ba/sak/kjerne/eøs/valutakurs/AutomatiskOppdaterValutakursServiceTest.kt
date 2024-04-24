@@ -53,6 +53,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
             simuleringService = simuleringService,
+            vurderingsstrategiForValutakurserRepository = mockk(),
         )
 
     val forrigeBehandlingId = BehandlingId(9L)
