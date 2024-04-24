@@ -122,7 +122,7 @@ class ValutakursController(
         return restValutakurs.valutakode != null && restValutakurs.valutakursdato != null && (eksisterendeValutakurs.valutakursdato != restValutakurs.valutakursdato || eksisterendeValutakurs.valutakode != restValutakurs.valutakode)
     }
 
-    @PutMapping(path = ["behandling/{behandlingId}/endre-vurderingsstrategi-til/{vurderingsstrategiForValutakurser}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(path = ["behandlinger/{behandlingId}/endre-vurderingsstrategi-til/{vurderingsstrategiForValutakurser}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     private fun endreVurderingsstrategiForValutakurser(
         @PathVariable behandlingId: Long,
         @PathVariable vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser,
