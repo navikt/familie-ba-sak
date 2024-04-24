@@ -31,6 +31,7 @@ class AutomatiskOppdaterValutakursService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilpassValutakurserTilUtenlandskePeriodebeløpService: TilpassValutakurserTilUtenlandskePeriodebeløpService,
     private val simuleringService: SimuleringService,
+    private val vurderingsstrategiForValutakurserRepository: VurderingsstrategiForValutakurserRepository,
 ) {
     @Transactional
     fun resettValutakurserOgLagValutakurserEtterEndringstidspunkt(
@@ -73,6 +74,9 @@ class AutomatiskOppdaterValutakursService(
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
         endringstidspunkt: YearMonth,
     ) {
+        val vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)
+        if (vurderingsstrategiForValutakurser?.vurderingsstrategiForValutakurser == VurderingsstrategiForValutakurser.MANUELL) return
+
         val simuleringMottakere = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId = behandling.id)
         val datoSisteManuellePostering = simuleringMottakere.finnDatoSisteManuellePostering() ?: TIDENES_MORGEN
         val månedEtterSisteManuellePostering = datoSisteManuellePostering.toYearMonth().plusMonths(1)
@@ -109,6 +113,29 @@ class AutomatiskOppdaterValutakursService(
                 vurderingsform = Vurderingsform.AUTOMATISK,
             )
         }
+    }
+
+    @Transactional
+    fun endreVurderingsstrategiForValutakurser(
+        behanlingId: BehandlingId,
+        strategi: VurderingsstrategiForValutakurser,
+    ): VurderingsstrategiForValutakurserDB {
+        val vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behanlingId.id)
+        if (vurderingsstrategiForValutakurser != null) {
+            vurderingsstrategiForValutakurserRepository.delete(vurderingsstrategiForValutakurser)
+            vurderingsstrategiForValutakurserRepository.flush()
+        }
+
+        if (strategi == VurderingsstrategiForValutakurser.AUTOMATISK) {
+            resettValutakurserOgLagValutakurserEtterEndringstidspunkt(behanlingId)
+        }
+
+        return vurderingsstrategiForValutakurserRepository.save(
+            VurderingsstrategiForValutakurserDB(
+                behandlingId = behanlingId.id,
+                vurderingsstrategiForValutakurser = strategi,
+            ),
+        )
     }
 }
 
