@@ -9,7 +9,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
@@ -21,7 +20,8 @@ import java.util.UUID
     value = ["funksjonsbrytere.kafka.producer.enabled"],
     havingValue = "true",
     matchIfMissing = false,
-)class IdenthendelseV2Consumer(
+    )
+class IdenthendelseV2Consumer(
     val personidentService: PersonidentService,
 ) {
     @KafkaListener(
