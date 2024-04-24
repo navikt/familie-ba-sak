@@ -118,7 +118,7 @@ class AutomatiskOppdaterValutakursService(
     @Transactional
     fun endreVurderingsstrategiForValutakurser(
         behandlingId: BehandlingId,
-        strategi: VurderingsstrategiForValutakurser,
+        nyStrategi: VurderingsstrategiForValutakurser,
     ): VurderingsstrategiForValutakurserDB {
         val vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandlingId.id)
         if (vurderingsstrategiForValutakurser != null) {
@@ -126,14 +126,14 @@ class AutomatiskOppdaterValutakursService(
             vurderingsstrategiForValutakurserRepository.flush()
         }
 
-        if (strategi == VurderingsstrategiForValutakurser.AUTOMATISK) {
+        if (nyStrategi == VurderingsstrategiForValutakurser.AUTOMATISK) {
             resettValutakurserOgLagValutakurserEtterEndringstidspunkt(behandlingId)
         }
 
         return vurderingsstrategiForValutakurserRepository.save(
             VurderingsstrategiForValutakurserDB(
                 behandlingId = behandlingId.id,
-                vurderingsstrategiForValutakurser = strategi,
+                vurderingsstrategiForValutakurser = nyStrategi,
             ),
         )
     }
