@@ -7,5 +7,3 @@ CREATE TABLE IF NOT EXISTS vurderingsstrategi_for_valutakurser
 
 CREATE SEQUENCE IF NOT EXISTS vurderingsstrategi_for_valutakurser_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;
 CREATE UNIQUE INDEX IF NOT EXISTS vurderingsstrategi_for_valutakurser_fk_behandling_id_idx ON vurderingsstrategi_for_valutakurser (fk_behandling_id);
-ALTER TABLE behandling
-    ADD COLUMN vurderingsstrategi_for_valutakurser TEXT DEFAULT null;
