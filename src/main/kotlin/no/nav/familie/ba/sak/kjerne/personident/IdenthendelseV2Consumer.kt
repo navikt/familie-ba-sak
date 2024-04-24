@@ -20,7 +20,7 @@ import java.util.UUID
     value = ["funksjonsbrytere.kafka.producer.enabled"],
     havingValue = "true",
     matchIfMissing = false,
-    )
+)
 class IdenthendelseV2Consumer(
     val personidentService: PersonidentService,
 ) {
