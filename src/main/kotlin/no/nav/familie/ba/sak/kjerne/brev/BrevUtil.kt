@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -22,7 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
+import java.time.LocalDate
 
 fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
     val behandlingÅrsak = behandling.opprettetÅrsak
@@ -251,15 +253,20 @@ private fun hentOrdinæreHjemler(
     return sorterteHjemler
 }
 
-fun hentVirkningstidspunkt(
-    opphørsperioder: List<Opphørsperiode>,
+fun hentVirkningstidspunktForDødsfallbrev(
+    opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
     behandlingId: Long,
-) = (
-    opphørsperioder
-        .maxOfOrNull { it.periodeFom }
-        ?.tilMånedÅr()
-        ?: throw Feil("Fant ikke opphørdato ved generering av dødsfallbrev på behandling $behandlingId")
-)
+): String {
+    val virkningstidspunkt =
+        opphørsperioder
+            .maxOfOrNull { it.fom ?: TIDENES_MORGEN }
+
+    if (virkningstidspunkt == null) throw Feil("Fant ikke opphørdato ved generering av dødsfallbrev på behandling $behandlingId")
+    if (virkningstidspunkt > LocalDate.now().plusMonths(1).sisteDagIMåned()) {
+        throw Feil("Opphørsdato for dødsfallbrev på behandling $behandlingId er lenger frem i tid enn neste måned")
+    }
+    return virkningstidspunkt.tilMånedÅr()
+}
 
 fun hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev: Boolean): List<String> {
     return if (vedtakKorrigertHjemmelSkalMedIBrev) listOf("35") else emptyList()

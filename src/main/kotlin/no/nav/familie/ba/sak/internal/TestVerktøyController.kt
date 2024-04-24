@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -41,8 +40,6 @@ class TestVerktøyController(
     private val tilgangService: TilgangService,
     private val simuleringService: SimuleringService,
     private val opprettTaskService: OpprettTaskService,
-    private val taskService: TaskService,
-    private val startSatsendring: StartSatsendring,
     private val behandlingRepository: BehandlingRepository,
 ) {
     @GetMapping(path = ["/autobrev"])

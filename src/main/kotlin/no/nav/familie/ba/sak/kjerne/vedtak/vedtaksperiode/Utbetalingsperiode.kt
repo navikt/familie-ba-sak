@@ -1,18 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
-import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerSisteDagIPerioden
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -21,14 +20,14 @@ import java.time.LocalDate
  */
 
 data class Utbetalingsperiode(
-    override val periodeFom: LocalDate,
-    override val periodeTom: LocalDate,
-    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+    val periodeFom: LocalDate,
+    val periodeTom: LocalDate,
+    val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
     val ytelseTyper: List<YtelseType>,
     val antallBarn: Int,
     val utbetaltPerMnd: Int,
-) : Vedtaksperiode
+)
 
 data class UtbetalingsperiodeDetalj(
     val person: RestPerson,
@@ -51,25 +50,6 @@ data class UtbetalingsperiodeDetalj(
         endringsårsak = andel.endreteUtbetalinger.singleOrNull()?.årsak,
         prosent = andel.prosent,
     )
-}
-
-fun List<UtbetalingsperiodeDetalj>.totaltUtbetalt(): Int =
-    this.sumOf { it.utbetaltPerMnd }
-
-fun hentUtbetalingsperiodeForVedtaksperiode(
-    utbetalingsperioder: List<Utbetalingsperiode>,
-    fom: LocalDate?,
-): Utbetalingsperiode {
-    if (utbetalingsperioder.isEmpty()) {
-        throw Feil("Det finnes ingen utbetalingsperioder ved utledning av utbetalingsperiode.")
-    }
-    val fomDato = fom?.toYearMonth() ?: inneværendeMåned()
-
-    val sorterteUtbetalingsperioder = utbetalingsperioder.sortedBy { it.periodeFom }
-
-    return sorterteUtbetalingsperioder.lastOrNull { it.periodeFom.toYearMonth() <= fomDato }
-        ?: sorterteUtbetalingsperioder.firstOrNull()
-        ?: throw Feil("Finner ikke gjeldende utbetalingsperiode ved fortsatt innvilget")
 }
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
@@ -97,14 +77,13 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
     return utbetalingsPerioder
 }
 
-internal fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.utledSegmenter(): List<LocalDateSegment<Int>> {
-    // Dersom listen er tom så returnerer vi tom liste fordi at reduceren i
-    // beregnUtbetalingsperioderUtenKlassifisering ikke takler tomme lister
-    if (this.isEmpty()) return emptyList()
+private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilKombinertTidslinjePerAktørOgType(): Tidslinje<Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>, Måned> {
+    val andelTilkjentYtelsePerPersonOgType = groupBy { Pair(it.aktør, it.type) }
 
-    val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(this.toSet())
-    return utbetalingsPerioder.toSegments()
-        .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
+    val andelTilkjentYtelsePerPersonOgTypeTidslinjer =
+        andelTilkjentYtelsePerPersonOgType.values.map { AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(it) }
+
+    return andelTilkjentYtelsePerPersonOgTypeTidslinjer.kombiner { it.toList() }
 }
 
 fun Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperiodeDetaljer(

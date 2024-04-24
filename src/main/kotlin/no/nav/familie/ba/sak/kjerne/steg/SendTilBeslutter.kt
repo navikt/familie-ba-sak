@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -18,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.validerPerioderInneholderBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.FerdigstillLagVedtakOppgaver
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
@@ -29,7 +29,6 @@ import java.time.LocalDate
 class SendTilBeslutter(
     private val behandlingService: BehandlingService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val oppgaveService: OppgaveService,
     private val loggService: LoggService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vilkårsvurderingService: VilkårsvurderingService,
@@ -47,7 +46,7 @@ class SendTilBeslutter(
             ekstraBarnLagtTilIBrev = emptyList(),
         )
         vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
-            ?.validerAtAlleAnndreVurderingerErVurdert()
+            ?.validerAtAndreVurderingerErVurdert()
 
         val behandlingsresultatSteg: BehandlingsresultatSteg =
             stegService?.hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
@@ -128,13 +127,25 @@ fun Behandling.validerMaksimaltEtStegIkkeUtført() {
     }
 }
 
-fun Vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert() {
-    personResultater.flatMap { it.andreVurderinger }
-        .takeIf { it.any { annenVurdering -> annenVurdering.resultat == Resultat.IKKE_VURDERT } }
-        ?.let {
-            throw FunksjonellFeil(
-                melding = "Forsøker å ferdigstille uten å ha fylt ut påkrevde vurderinger",
-                frontendFeilmelding = "Andre vurderinger må tas stilling til før behandling kan sendes til beslutter.",
-            )
-        }
+fun Vilkårsvurdering.validerAtAndreVurderingerErVurdert() {
+    val andreVurderingerSomIkkeErVurdert =
+        personResultater
+            .flatMap { it.andreVurderinger }
+            .filter { it.resultat == Resultat.IKKE_VURDERT }
+            .map { it.type }
+            .toSet()
+
+    if (andreVurderingerSomIkkeErVurdert == setOf(AnnenVurderingType.OPPLYSNINGSPLIKT)) {
+        throw FunksjonellFeil(
+            melding = "Forsøker å ferdigstille uten å ha fylt ut opplysningsplikt-vilkåret",
+            frontendFeilmelding = "Du må vurdere vilkåret om opplysningsplikt før behandlingen kan sendes til beslutter.",
+        )
+    }
+
+    if (andreVurderingerSomIkkeErVurdert.isNotEmpty()) {
+        throw FunksjonellFeil(
+            melding = "Forsøker å ferdigstille uten å ha fylt ut påkrevde vurderinger",
+            frontendFeilmelding = "Andre vurderinger må tas stilling til før behandling kan sendes til beslutter.",
+        )
+    }
 }

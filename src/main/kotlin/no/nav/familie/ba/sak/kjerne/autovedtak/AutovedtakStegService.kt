@@ -204,7 +204,6 @@ class AutovedtakStegService(
 
         when (åpenBehandling.status) {
             BehandlingStatus.UTREDES,
-            BehandlingStatus.SATT_PÅ_VENT,
             -> {
                 if (snikeIKøenService.kanSnikeForbi(åpenBehandling)) {
                     snikeIKøenService.settAktivBehandlingPåMaskinellVent(

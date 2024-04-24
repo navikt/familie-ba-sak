@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.4</version>
+        <version>3.2.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -22,16 +22,16 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20240214140223_83c31de</prosessering.version>
-        <felles.version>3.20240322152837_a01cd9d</felles.version>
+        <felles.version>3.20240422125821_21d82d5</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20240410195617_6e9f1bf</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20240417075019_5dc3ebf</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20240208132236_bce5777</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
-        <cucumber.version>7.16.1</cucumber.version>
+        <cucumber.version>7.17.0</cucumber.version>
         <mockk.version>1.13.5</mockk.version>
-        <wiremock.version>3.5.2</wiremock.version>
+        <wiremock.version>3.5.3</wiremock.version>
         <token-validation-spring.version>4.1.4</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.5.0</springdoc.version>
@@ -58,7 +58,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.2.4</version>
+                <version>3.2.5</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -289,6 +289,10 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>valutakurs-klient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>metrikker</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.kontrakter</groupId>

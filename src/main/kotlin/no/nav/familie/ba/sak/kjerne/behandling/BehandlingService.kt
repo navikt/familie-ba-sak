@@ -30,7 +30,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
@@ -161,7 +160,6 @@ class BehandlingService(
     fun opprettOgInitierNyttVedtakForBehandling(
         behandling: Behandling,
         kopierVedtakBegrunnelser: Boolean = false,
-        begrunnelseVilkårPekere: List<OriginalOgKopiertVilkårResultat> = emptyList(),
     ) {
         behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
             ?: error("Forsøker å initiere vedtak på steg ${behandling.steg}")
@@ -331,5 +329,3 @@ class BehandlingService(
         private val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
 }
-
-typealias OriginalOgKopiertVilkårResultat = Pair<VilkårResultat?, VilkårResultat?>
