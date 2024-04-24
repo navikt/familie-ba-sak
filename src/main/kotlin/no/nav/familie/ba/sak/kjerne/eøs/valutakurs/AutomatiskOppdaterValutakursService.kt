@@ -117,22 +117,22 @@ class AutomatiskOppdaterValutakursService(
 
     @Transactional
     fun endreVurderingsstrategiForValutakurser(
-        behanlingId: BehandlingId,
+        behandlingId: BehandlingId,
         strategi: VurderingsstrategiForValutakurser,
     ): VurderingsstrategiForValutakurserDB {
-        val vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behanlingId.id)
+        val vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandlingId.id)
         if (vurderingsstrategiForValutakurser != null) {
             vurderingsstrategiForValutakurserRepository.delete(vurderingsstrategiForValutakurser)
             vurderingsstrategiForValutakurserRepository.flush()
         }
 
         if (strategi == VurderingsstrategiForValutakurser.AUTOMATISK) {
-            resettValutakurserOgLagValutakurserEtterEndringstidspunkt(behanlingId)
+            resettValutakurserOgLagValutakurserEtterEndringstidspunkt(behandlingId)
         }
 
         return vurderingsstrategiForValutakurserRepository.save(
             VurderingsstrategiForValutakurserDB(
-                behandlingId = behanlingId.id,
+                behandlingId = behandlingId.id,
                 vurderingsstrategiForValutakurser = strategi,
             ),
         )

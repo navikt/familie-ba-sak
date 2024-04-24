@@ -127,7 +127,7 @@ class ValutakursController(
         @PathVariable behandlingId: Long,
         @PathVariable vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        automatiskOppdaterValutakursService.endreVurderingsstrategiForValutakurser(behanlingId = BehandlingId(behandlingId), strategi = vurderingsstrategiForValutakurser)
+        automatiskOppdaterValutakursService.endreVurderingsstrategiForValutakurser(behandlingId = BehandlingId(behandlingId), strategi = vurderingsstrategiForValutakurser)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 }
