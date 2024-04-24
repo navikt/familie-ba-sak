@@ -143,7 +143,7 @@ private fun utledOpphør(
     return Opphør(erRentOpphør = erRentOpphør, opphørsdato = opphørsdato)
 }
 
-private fun utledStønadTom(
+fun utledStønadTom(
     tilkjentYtelse: TilkjentYtelse,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
 ): YearMonth? {
