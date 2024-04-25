@@ -33,7 +33,7 @@ class OppdaterStønadTomPåTilkjentYtelseTask(
 
         val behandling =
             behandlingRepository.finnBehandlinger(fagsakId)
-                .filter { it.status == BehandlingStatus.AVSLUTTET }
+                .filter { it.status == BehandlingStatus.AVSLUTTET && !it.erHenlagt() }
                 .sortedByDescending { it.aktivertTidspunkt }
                 .firstOrNull() ?: throw Feil("Finner ingen behandling på fagsak $fagsakId")
 
@@ -44,7 +44,7 @@ class OppdaterStønadTomPåTilkjentYtelseTask(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
-        val stønadTom = utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse.toList(), endredeUtbetalinger)
+        val stønadTom = utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse, endredeUtbetalinger)
         val gammelStønadTom = tilkjentYtelse.stønadTom
 
         if (stønadTom == gammelStønadTom) {

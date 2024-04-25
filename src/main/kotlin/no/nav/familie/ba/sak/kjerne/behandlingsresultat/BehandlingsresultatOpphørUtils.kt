@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import java.time.YearMonth
 
@@ -97,15 +96,10 @@ object BehandlingsresultatOpphørUtils {
             val kalkulertUtbetalingsbeløp = andelTilkjentYtelse?.kalkulertUtbetalingsbeløp ?: return@kombinerMed null
             val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak ?: return@kombinerMed andelTilkjentYtelse
 
-            when (endringsperiodeÅrsak) {
-                Årsak.ALLEREDE_UTBETALT,
-                Årsak.ENDRE_MOTTAKER,
-                Årsak.ETTERBETALING_3ÅR,
-                ->
-                    // Vi ønsker å filtrere bort andeler som har 0 i kalkulertUtbetalingsbeløp
-                    if (kalkulertUtbetalingsbeløp == 0) null else andelTilkjentYtelse
-
-                Årsak.DELT_BOSTED -> andelTilkjentYtelse
+            if (endringsperiodeÅrsak.førerTilOpphørVed0Prosent() && kalkulertUtbetalingsbeløp == 0) {
+                null
+            } else {
+                andelTilkjentYtelse
             }
         }.tilAndelTilkjentYtelse()
     }

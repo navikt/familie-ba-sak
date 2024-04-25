@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelerTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
@@ -143,7 +142,7 @@ private fun utledOpphør(
 }
 
 fun utledStønadTom(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: Set<AndelTilkjentYtelse>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
 ): YearMonth? {
     val andelerMedEndringer = andelerTilkjentYtelse.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(endretUtbetalingAndeler)
@@ -152,12 +151,7 @@ fun utledStønadTom(
         andelerMedEndringer.filterNot { andelTilkjentYtelseMedEndreteUtbetalinger ->
             val harEndringSomFørerTilOpphørVed0Prosent =
                 andelTilkjentYtelseMedEndreteUtbetalinger.endreteUtbetalinger.any { endretUtbetaling ->
-                    endretUtbetaling.årsak in
-                        listOf(
-                            Årsak.ALLEREDE_UTBETALT,
-                            Årsak.ENDRE_MOTTAKER,
-                            Årsak.ETTERBETALING_3ÅR,
-                        )
+                    endretUtbetaling.årsak?.førerTilOpphørVed0Prosent() ?: false
                 }
             harEndringSomFørerTilOpphørVed0Prosent && andelTilkjentYtelseMedEndreteUtbetalinger.prosent == BigDecimal.ZERO
         }
@@ -173,7 +167,7 @@ fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
     val opphør = utledOpphør(utbetalingsoppdrag, tilkjentYtelse.behandling)
 
     tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-    tilkjentYtelse.stønadTom = utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse.toList(), endretUtbetalingAndeler)
+    tilkjentYtelse.stønadTom = utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse, endretUtbetalingAndeler)
     tilkjentYtelse.stønadFom =
         if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
     tilkjentYtelse.endretDato = LocalDate.now()
