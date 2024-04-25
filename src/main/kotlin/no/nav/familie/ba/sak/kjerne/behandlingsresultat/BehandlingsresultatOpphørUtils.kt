@@ -1,13 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
-import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.tilAndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelerTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import java.math.BigDecimal
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.førerTilOpphørVed0Prosent
 import java.time.YearMonth
 
 internal enum class Opphørsresultat {
@@ -90,18 +87,14 @@ object BehandlingsresultatOpphørUtils {
         andelerPåPersonFiltrertPåType: List<AndelTilkjentYtelse>,
         endretAndelerPåPerson: List<EndretUtbetalingAndel>,
     ): List<AndelTilkjentYtelse> {
-        val andelTilkjentYtelseTidslinje = AndelTilkjentYtelseTidslinje(andelerPåPersonFiltrertPåType)
-        val endretUtbetalingAndelTidslinje = EndretUtbetalingAndelTidslinje(endretAndelerPåPerson)
+        val andelerMedEndringer =
+            andelerPåPersonFiltrertPåType.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(endretAndelerPåPerson)
 
-        return andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingAndelTidslinje) { andelTilkjentYtelse, endretUtbetalingAndel ->
-            andelTilkjentYtelse ?: return@kombinerMed null
-            val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak ?: return@kombinerMed andelTilkjentYtelse
-
-            if (endringsperiodeÅrsak.førerTilOpphørVed0Prosent() && andelTilkjentYtelse.prosent == BigDecimal(0)) {
-                null
-            } else {
-                andelTilkjentYtelse
+        val andelerMedRelevantUtbetaling =
+            andelerMedEndringer.filterNot { andelTilkjentYtelseMedEndreteUtbetalinger ->
+                andelTilkjentYtelseMedEndreteUtbetalinger.endreteUtbetalinger.any { it.førerTilOpphørVed0Prosent() }
             }
-        }.tilAndelTilkjentYtelse()
+
+        return andelerMedRelevantUtbetaling.map { it.andel }
     }
 }

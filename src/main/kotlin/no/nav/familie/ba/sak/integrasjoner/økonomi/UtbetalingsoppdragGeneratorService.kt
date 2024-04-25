@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelerTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.førerTilOpphørVed0Prosent
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
@@ -151,7 +152,7 @@ fun utledStønadTom(
         andelerMedEndringer.filterNot { andelTilkjentYtelseMedEndreteUtbetalinger ->
             val harEndringSomFørerTilOpphørVed0Prosent =
                 andelTilkjentYtelseMedEndreteUtbetalinger.endreteUtbetalinger.any { endretUtbetaling ->
-                    endretUtbetaling.årsak?.førerTilOpphørVed0Prosent() ?: false
+                    endretUtbetaling.førerTilOpphørVed0Prosent()
                 }
             harEndringSomFørerTilOpphørVed0Prosent && andelTilkjentYtelseMedEndreteUtbetalinger.prosent == BigDecimal.ZERO
         }
