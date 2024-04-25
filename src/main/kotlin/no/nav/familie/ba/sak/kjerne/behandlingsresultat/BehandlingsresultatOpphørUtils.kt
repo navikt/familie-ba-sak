@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import java.math.BigDecimal
 import java.time.YearMonth
 
 internal enum class Opphørsresultat {
@@ -93,10 +94,10 @@ object BehandlingsresultatOpphørUtils {
         val endretUtbetalingAndelTidslinje = EndretUtbetalingAndelTidslinje(endretAndelerPåPerson)
 
         return andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingAndelTidslinje) { andelTilkjentYtelse, endretUtbetalingAndel ->
-            val kalkulertUtbetalingsbeløp = andelTilkjentYtelse?.kalkulertUtbetalingsbeløp ?: return@kombinerMed null
+            andelTilkjentYtelse ?: return@kombinerMed null
             val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak ?: return@kombinerMed andelTilkjentYtelse
 
-            if (endringsperiodeÅrsak.førerTilOpphørVed0Prosent() && kalkulertUtbetalingsbeløp == 0) {
+            if (endringsperiodeÅrsak.førerTilOpphørVed0Prosent() && andelTilkjentYtelse.prosent == BigDecimal(0)) {
                 null
             } else {
                 andelTilkjentYtelse

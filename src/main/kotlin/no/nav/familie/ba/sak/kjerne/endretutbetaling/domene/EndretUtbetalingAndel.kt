@@ -114,12 +114,14 @@ enum class Årsak(val visningsnavn: String) {
     ;
 
     fun førerTilOpphørVed0Prosent() =
-        this in
-            listOf(
-                ALLEREDE_UTBETALT,
-                ENDRE_MOTTAKER,
-                ETTERBETALING_3ÅR,
-            )
+        when (this) {
+            ALLEREDE_UTBETALT,
+            ENDRE_MOTTAKER,
+            ETTERBETALING_3ÅR,
+            -> false
+
+            DELT_BOSTED -> true
+        }
 }
 
 fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel() =
