@@ -23,7 +23,6 @@ import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -150,11 +149,9 @@ fun utledStønadTom(
 
     val andelerMedRelevantUtbetaling =
         andelerMedEndringer.filterNot { andelTilkjentYtelseMedEndreteUtbetalinger ->
-            val harEndringSomFørerTilOpphørVed0Prosent =
-                andelTilkjentYtelseMedEndreteUtbetalinger.endreteUtbetalinger.any { endretUtbetaling ->
-                    endretUtbetaling.førerTilOpphørVed0Prosent()
-                }
-            harEndringSomFørerTilOpphørVed0Prosent && andelTilkjentYtelseMedEndreteUtbetalinger.prosent == BigDecimal.ZERO
+            andelTilkjentYtelseMedEndreteUtbetalinger.endreteUtbetalinger.any { endretUtbetaling ->
+                endretUtbetaling.førerTilOpphørVed0Prosent()
+            }
         }
 
     return andelerMedRelevantUtbetaling.maxOfOrNull { it.stønadTom }
