@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 
 data class OpphørMedEndring(
     override val mal: Brevmal,
@@ -53,6 +54,7 @@ data class OpphørMedEndringData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokument,
     override val perioder: List<BrevPeriode>,
+    override val utbetalingerEøs: Map<String, UtbetalingMndEøs>? = null,
 ) : VedtaksbrevData {
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
