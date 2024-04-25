@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -144,15 +145,15 @@ private fun utledOpphør(
 }
 
 fun utledStønadTom(
-    tilkjentYtelse: TilkjentYtelse,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
 ): YearMonth? {
-    val andelerMedEndringer = tilkjentYtelse.andelerTilkjentYtelse.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(endretUtbetalingAndeler)
+    val andelerMedEndringer = andelerTilkjentYtelse.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(endretUtbetalingAndeler)
 
     val andelerMedRelevantUtbetaling =
-        andelerMedEndringer.filterNot { it ->
+        andelerMedEndringer.filterNot { andelTilkjentYtelseMedEndreteUtbetalinger ->
             val harEndringSomFørerTilOpphørVed0Prosent =
-                it.endreteUtbetalinger.any { endretUtbetaling ->
+                andelTilkjentYtelseMedEndreteUtbetalinger.endreteUtbetalinger.any { endretUtbetaling ->
                     endretUtbetaling.årsak in
                         listOf(
                             Årsak.ALLEREDE_UTBETALT,
@@ -160,7 +161,7 @@ fun utledStønadTom(
                             Årsak.ETTERBETALING_3ÅR,
                         )
                 }
-            harEndringSomFørerTilOpphørVed0Prosent && it.prosent == BigDecimal.ZERO
+            harEndringSomFørerTilOpphørVed0Prosent && andelTilkjentYtelseMedEndreteUtbetalinger.prosent == BigDecimal.ZERO
         }
 
     return andelerMedRelevantUtbetaling.maxOfOrNull { it.stønadTom }
@@ -177,7 +178,7 @@ fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
     tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
     tilkjentYtelse.stønadTom =
         if (erStønadTomTogglePå) {
-            utledStønadTom(tilkjentYtelse, endretUtbetalingAndeler)
+            utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse.toList(), endretUtbetalingAndeler)
         } else {
             tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
         }

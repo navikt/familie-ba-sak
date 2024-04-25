@@ -43,7 +43,7 @@ class OppdaterStønadTomPåTilkjentYtelseTask(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
-        val stønadTom = utledStønadTom(tilkjentYtelse, endredeUtbetalinger)
+        val stønadTom = utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse.toList(), endredeUtbetalinger)
         val gammelStønadTom = tilkjentYtelse.stønadTom
 
         if (stønadTom == gammelStønadTom) {
