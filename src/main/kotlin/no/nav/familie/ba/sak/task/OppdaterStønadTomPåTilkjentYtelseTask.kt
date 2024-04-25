@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utledStønadTom
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -31,8 +32,10 @@ class OppdaterStønadTomPåTilkjentYtelseTask(
         logger.info("Oppdaterer stønadTom for TilkjentYtelse på fagsak $fagsakId")
 
         val behandling =
-            behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
-                ?: throw Feil("Finner ingen behandling på fagsak $fagsakId")
+            behandlingRepository.finnBehandlinger(fagsakId)
+                .filter { it.status == BehandlingStatus.AVSLUTTET && !it.erHenlagt() }
+                .sortedByDescending { it.aktivertTidspunkt }
+                .firstOrNull() ?: throw Feil("Finner ingen behandling på fagsak $fagsakId")
 
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) {
             throw Feil("Prøvde å oppdatere stønadTom på en tilkjentYtelse på en fagsak som ikke er løpende. ")
@@ -41,7 +44,7 @@ class OppdaterStønadTomPåTilkjentYtelseTask(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
-        val stønadTom = utledStønadTom(tilkjentYtelse, endredeUtbetalinger)
+        val stønadTom = utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse, endredeUtbetalinger)
         val gammelStønadTom = tilkjentYtelse.stønadTom
 
         if (stønadTom == gammelStønadTom) {
