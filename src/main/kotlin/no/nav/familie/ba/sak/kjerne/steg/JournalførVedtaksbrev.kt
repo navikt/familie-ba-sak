@@ -48,7 +48,6 @@ class JournalførVedtaksbrev(
         val fagsakId = "${vedtak.behandling.fagsak.id}"
         val fagsak = fagsakRepository.finnFagsak(vedtak.behandling.fagsak.id)
         val søkersident = vedtak.behandling.fagsak.aktør.aktivFødselsnummer()
-        val institusjonVergeIdent = vedtak.behandling.verge?.ident
 
         if (fagsak == null || fagsak.type == FagsakType.INSTITUSJON && fagsak.institusjon == null) {
             error("Journalfør vedtaksbrev feil: fagsak er null eller institusjon fagsak har ikke institusjonsinformasjon")
@@ -73,9 +72,6 @@ class JournalførVedtaksbrev(
                 mottakere += MottakerInfo(søkersident, BrukerIdType.FNR, false)
             }
         }
-        if (institusjonVergeIdent != null) { // brukes kun i institusjon
-            mottakere += MottakerInfo(vedtak.behandling.verge.ident, BrukerIdType.FNR, true)
-        }
 
         val journalposterTilDistribusjon = mutableMapOf<String, MottakerInfo>()
         mottakere.forEach { mottakerInfo ->
@@ -85,12 +81,7 @@ class JournalførVedtaksbrev(
                 vedtak = vedtak,
                 journalførendeEnhet = behandlendeEnhet,
                 mottakerInfo = mottakerInfo,
-                tilManuellMottakerEllerVerge =
-                    if (institusjonVergeIdent != null) {
-                        mottakerInfo.erInstitusjonVerge
-                    } else {
-                        (mottakerInfo.navn != null && mottakerInfo.navn != brevmottakerService.hentMottakerNavn(søkersident))
-                    },
+                tilManuellMottakerEllerVerge = mottakerInfo.navn != null && mottakerInfo.navn != brevmottakerService.hentMottakerNavn(søkersident),
                 // mottakersnavn fyller ut kun når manuell mottaker finnes
             ).also { journalposterTilDistribusjon[it] = mottakerInfo }
         }
