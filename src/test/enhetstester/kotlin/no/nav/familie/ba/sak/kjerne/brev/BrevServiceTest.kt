@@ -40,6 +40,9 @@ class BrevServiceTest {
             integrasjonClient = mockk(),
             testVerktøyService = mockk(),
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            utenlandskPeriodebeløpRepository = mockk(),
+            valutakursRepository = mockk(),
+            kompetanseRepository = mockk(),
             unleashService = unleashService,
         )
 

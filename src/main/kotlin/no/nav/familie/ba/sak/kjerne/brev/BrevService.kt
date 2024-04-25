@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -16,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
@@ -40,9 +43,14 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Opphørt
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.RefusjonEøsAvklart
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.RefusjonEøsUavklart
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingstabellAutomatiskValutajustering
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -59,6 +67,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.stereotype.Service
+import tilLandNavn
 import java.math.BigDecimal
 
 @Service
@@ -79,6 +88,9 @@ class BrevService(
     private val integrasjonClient: IntegrasjonClient,
     private val testVerktøyService: TestVerktøyService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
+    private val kompetanseRepository: KompetanseRepository,
+    private val valutakursRepository: ValutakursRepository,
     private val unleashService: UnleashNextMedContextService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -111,6 +123,7 @@ class BrevService(
                     duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
                     duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
                     informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
+                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter),
                 )
 
             Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON ->
@@ -227,6 +240,28 @@ class BrevService(
         }
     }
 
+    private fun hentLandOgStartdatoForUtbetalingstabell(
+        vedtak: Vedtak,
+        vedtakFellesfelter: VedtakFellesfelter,
+    ): UtbetalingstabellAutomatiskValutajustering? {
+        return when (vedtakFellesfelter.utbetalingerEøs) {
+            null -> null
+            else -> {
+                val mndÅrFørsteEndring = hentSorterteVedtaksperioderMedBegrunnelser(vedtak).first().fom!!
+                val landkoder = integrasjonClient.hentLandkoderISO2()
+                val eøsLandMedUtbetalinger =
+                    kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id).filter { it.fom!! >= mndÅrFørsteEndring.toYearMonth() }.mapNotNull {
+                        if (it.erAnnenForelderOmfattetAvNorskLovgivning == true) {
+                            it.søkersAktivitetsland?.tilLandNavn(landkoder)?.navn
+                        } else {
+                            it.annenForeldersAktivitetsland?.tilLandNavn(landkoder)?.navn
+                        }
+                    }.toSet()
+                return UtbetalingstabellAutomatiskValutajustering(utbetalingerEosLand = eøsLandMedUtbetalinger.slåSammen(), utbetalingerEosMndAar = mndÅrFørsteEndring.tilMånedÅr())
+            }
+        }
+    }
+
     fun sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling: Behandling): Boolean {
         if (!unleashService.isEnabled(FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING)) return false
 
@@ -315,12 +350,14 @@ class BrevService(
             )
         }
 
+    private fun hentSorterteVedtaksperioderMedBegrunnelser(vedtak: Vedtak) =
+        vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+            .filter {
+                !(it.begrunnelser.isEmpty() && it.fritekster.isEmpty() && it.eøsBegrunnelser.isEmpty())
+            }.sortedBy { it.fom }
+
     fun lagVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
-        val vedtaksperioder =
-            vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-                .filter {
-                    !(it.begrunnelser.isEmpty() && it.fritekster.isEmpty() && it.eøsBegrunnelser.isEmpty())
-                }.sortedBy { it.fom }
+        val vedtaksperioder = hentSorterteVedtaksperioderMedBegrunnelser(vedtak)
 
         if (vedtaksperioder.isEmpty()) {
             throw FunksjonellFeil(
@@ -352,6 +389,8 @@ class BrevService(
                 }
             }
 
+        val utbetalingerEøs = hentUtbetalingerEøs(vedtak, vedtaksperioder)
+
         val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
         val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId)
 
@@ -379,6 +418,7 @@ class BrevService(
             organisasjonsnummer = organisasjonsnummer,
             gjelder = if (organisasjonsnummer != null) grunnlagOgSignaturData.grunnlag.søker.navn else null,
             korrigertVedtakData = korrigertVedtak?.let { KorrigertVedtakData(datoKorrigertVedtak = it.vedtaksdato.tilDagMånedÅr()) },
+            utbetalingerEøs = utbetalingerEøs,
         )
     }
 
@@ -442,6 +482,29 @@ class BrevService(
             saksbehandler = saksbehandler,
             beslutter = beslutter,
             enhet = enhet,
+        )
+    }
+
+    private fun hentUtbetalingerEøs(
+        vedtak: Vedtak,
+        vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
+    ): Map<String, UtbetalingMndEøs>? {
+        val behandlingId = vedtak.behandling.id
+        val andelerForVedtaksperioderPerAktørOgType = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId).tilTidslinjerPerAktørOgType()
+
+        val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId).toList()
+        val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId = behandlingId)
+
+        if (!skalHenteUtbetalingerEøs(vedtaksperioder, valutakurser)) {
+            return null
+        }
+
+        return hentUtbetalingerEøs(
+            vedtak = vedtak,
+            vedtaksperioder = vedtaksperioder,
+            andelerForVedtaksperioderPerAktørOgType = andelerForVedtaksperioderPerAktørOgType,
+            utenlandskePeriodebeløp = utenlandskePeriodebeløp,
+            valutakurser = valutakurser,
         )
     }
 

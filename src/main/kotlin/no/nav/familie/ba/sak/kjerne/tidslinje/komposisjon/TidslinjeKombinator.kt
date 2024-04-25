@@ -116,6 +116,15 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
     }
 
 /**
+ * Extension-metode for å kombinere liste av tidslinjer
+ * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
+ * fra minste <fraOgMed()> til største <tilOgMed()> fra alle tidslinjene
+ * Innhold (I) og tidsenhet (T) må være av samme type
+ * Resultatet er en tidslinje med tidsenhet T og innhold Iterable<I>
+ */
+fun <I, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(): Tidslinje<Iterable<I>, T> = this.kombiner { it }
+
+/**
  * Extension-metode for å kombinere to tidslinjer
  * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
  * fra minste <fraOgMed()> til største <tilOgMed()> fra begge tidslinjene
@@ -171,6 +180,7 @@ fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMedKunVerdi(
         when {
             innholdA.harVerdi && innholdB.harVerdi && innholdC.harVerdi ->
                 kombinator(innholdA.verdi, innholdB.verdi, innholdC.verdi).tilVerdi()
+
             else -> Innhold.utenInnhold()
         }
     }
