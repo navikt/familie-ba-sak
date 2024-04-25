@@ -33,8 +33,9 @@ class OppdaterStønadTomPåTilkjentYtelseTask(
 
         val behandling =
             behandlingRepository.finnBehandlinger(fagsakId)
-                .filter { it.status == BehandlingStatus.AVSLUTTET && it.aktiv }
-                .singleOrNull() ?: throw Feil("Finner ingen behandling på fagsak $fagsakId")
+                .filter { it.status == BehandlingStatus.AVSLUTTET }
+                .sortedByDescending { it.aktivertTidspunkt }
+                .firstOrNull() ?: throw Feil("Finner ingen behandling på fagsak $fagsakId")
 
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) {
             throw Feil("Prøvde å oppdatere stønadTom på en tilkjentYtelse på en fagsak som ikke er løpende. ")
