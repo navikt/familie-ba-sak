@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelerTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.førerTilOpphørVed0Prosent
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.førerTilOpphør
 import java.time.YearMonth
 
 internal enum class Opphørsresultat {
@@ -92,7 +92,7 @@ object BehandlingsresultatOpphørUtils {
 
         val andelerMedRelevantUtbetaling =
             andelerMedEndringer.filterNot { andelTilkjentYtelseMedEndreteUtbetalinger ->
-                andelTilkjentYtelseMedEndreteUtbetalinger.endreteUtbetalinger.any { it.førerTilOpphørVed0Prosent() }
+                andelTilkjentYtelseMedEndreteUtbetalinger.endreteUtbetalinger.any { it.førerTilOpphør() }
             }
 
         return andelerMedRelevantUtbetaling.map { it.andel }

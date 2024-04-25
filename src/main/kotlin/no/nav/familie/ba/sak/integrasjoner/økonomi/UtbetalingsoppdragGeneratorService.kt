@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelerTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.førerTilOpphørVed0Prosent
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.førerTilOpphør
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
@@ -150,7 +150,7 @@ fun utledStønadTom(
     val andelerMedRelevantUtbetaling =
         andelerMedEndringer.filterNot { andelTilkjentYtelseMedEndreteUtbetalinger ->
             andelTilkjentYtelseMedEndreteUtbetalinger.endreteUtbetalinger.any { endretUtbetaling ->
-                endretUtbetaling.førerTilOpphørVed0Prosent()
+                endretUtbetaling.førerTilOpphør()
             }
         }
 
