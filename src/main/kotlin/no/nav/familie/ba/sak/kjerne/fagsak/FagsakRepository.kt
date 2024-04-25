@@ -84,7 +84,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 
                 SELECT silp.fk_fagsak_id
                 FROM sisteiverksatte silp
-                WHERE  silp.stonad_tom < DATE_TRUNC('month', NOW())""",
+                WHERE  silp.stonad_tom < DATE_TRUNC('month', NOW()) OR silp.stonad_tom IS NULL""",
         nativeQuery = true,
     )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
