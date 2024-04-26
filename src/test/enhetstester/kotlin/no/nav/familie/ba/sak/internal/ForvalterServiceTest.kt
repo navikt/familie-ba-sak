@@ -5,6 +5,7 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
@@ -24,6 +25,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -43,6 +46,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import kotlin.random.Random
 
@@ -72,7 +77,7 @@ class ForvalterServiceTest {
     @MockK
     lateinit var behandlingService: BehandlingService
 
-    @MockK
+    @MockK(relaxed = true)
     lateinit var taskRepository: TaskRepositoryWrapper
 
     @MockK
@@ -330,6 +335,25 @@ class ForvalterServiceTest {
                     assertTrue(vilkårResultat.periodeFom?.isSameOrAfter(barn.fødselsdato) ?: false)
                 }
             }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Kjøretype::class)
+    fun `opprettTaskerForÅJournalføreOgSendeUtInformasjonsbrevOmValutajustering oppretter tasker kun når det ikke er dry run`(
+        kjøretype: Kjøretype,
+    ) {
+        every { behandlingHentOgPersisterService.hentSisteIverksatteEØSBehandlingFraLøpendeFagsaker() } returns listOf(1, 2)
+        every { kompetanseService.hentKompetanser(any()) } returns
+            listOf(Kompetanse(null, null, resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND))
+        every { behandlingHentOgPersisterService.hent(any()) } returns lagBehandling()
+
+        val erDryRun = kjøretype == Kjøretype.DRY_RUN
+        val impliserteSaker = forvalterService.opprettTaskerForÅJournalføreOgSendeUtInformasjonsbrevOmValutajustering(erDryRun)
+
+        verify(exactly = if (erDryRun) 0 else 2) {
+            taskRepository.save(any())
+        }
+        assertTrue(impliserteSaker.isNotEmpty())
     }
 
     private fun personTilPersonEnkel(barn: Person) =
