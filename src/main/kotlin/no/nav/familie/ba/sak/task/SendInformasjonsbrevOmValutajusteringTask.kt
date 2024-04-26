@@ -35,7 +35,7 @@ class SendInformasjonsbrevOmValutajusteringTask(
 
         dokumentService.sendManueltBrev(
             manueltBrevRequest = manueltBrevRequest,
-            fagsakId = task.metadata["fagsakId"] as Long,
+            fagsakId = (task.metadata["fagsakId"] as String).toLong(),
         )
     }
 
