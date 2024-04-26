@@ -42,7 +42,7 @@ data class RestJournalføring(
     val nyBehandlingstype: BehandlingType,
     val nyBehandlingsårsak: BehandlingÅrsak,
     val fagsakType: FagsakType,
-    val institusjon: InstitusjonInfo? = null,
+    val institusjon: RestInstitusjon? = null,
 ) {
     fun oppdaterMedDokumentOgSak(sak: Sak): OppdaterJournalpostRequest {
         return OppdaterJournalpostRequest(

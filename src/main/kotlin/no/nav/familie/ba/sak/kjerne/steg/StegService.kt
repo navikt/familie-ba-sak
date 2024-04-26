@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
@@ -38,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -454,15 +454,15 @@ class StegService(
     }
 
     @Transactional
-    fun håndterRegistrerVerge(
+    fun håndterRegistrerInstitusjon(
         behandling: Behandling,
-        vergeInfo: RestRegistrerInstitusjonOgVerge,
+        institusjon: Institusjon,
     ): Behandling {
-        val behandlingSteg: RegistrerInstitusjonOgVerge =
-            hentBehandlingSteg(StegType.REGISTRERE_INSTITUSJON_OG_VERGE) as RegistrerInstitusjonOgVerge
+        val behandlingSteg: RegistrerInstitusjon =
+            hentBehandlingSteg(StegType.REGISTRERE_INSTITUSJON) as RegistrerInstitusjon
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, vergeInfo)
+            behandlingSteg.utførStegOgAngiNeste(behandling, institusjon)
         }
     }
 
