@@ -233,6 +233,7 @@ class CucumberMock(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
             simuleringService = simuleringService,
+            mockk(),
         )
 
     val tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService =

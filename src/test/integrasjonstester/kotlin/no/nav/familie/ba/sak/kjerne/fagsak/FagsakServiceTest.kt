@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
@@ -707,7 +707,7 @@ class FagsakServiceTest(
         fagsakStatus: FagsakStatus,
         fagsakType: FagsakType = FagsakType.NORMAL,
     ): Fagsak {
-        val institusjon = InstitusjonInfo(orgNummer = "123456789", tssEksternId = "testid")
+        val institusjon = RestInstitusjon(orgNummer = "123456789", tssEksternId = "testid")
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fødselsnummer = personIdent, fagsakType = fagsakType, institusjon = if (fagsakType == FagsakType.INSTITUSJON) institusjon else null)
         return fagsakService.oppdaterStatus(fagsak, fagsakStatus)
     }

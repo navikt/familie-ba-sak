@@ -19,7 +19,7 @@ open class RestBaseFagsak(
     open val løpendeUnderkategori: BehandlingUnderkategori?,
     open val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     open val fagsakType: FagsakType = FagsakType.NORMAL,
-    open val institusjon: InstitusjonInfo? = null,
+    open val institusjon: RestInstitusjon? = null,
 )
 
 data class RestFagsak(
@@ -76,7 +76,7 @@ data class RestMinimalFagsak(
     val tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>,
     val migreringsdato: LocalDate? = null,
     override val fagsakType: FagsakType,
-    override val institusjon: InstitusjonInfo?,
+    override val institusjon: RestInstitusjon?,
 ) : RestBaseFagsak(
         opprettetTidspunkt = opprettetTidspunkt,
         id = id,

@@ -509,7 +509,6 @@ private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
         tilkjentYtelse = this,
         utbetalingsoppdrag = beregnetUtbetalingsoppdrag.utbetalingsoppdrag,
         endretUtbetalingAndeler = emptyList(),
-        erStønadTomTogglePå = true,
     )
     oppdaterAndelerMedPeriodeOffset(
         tilkjentYtelse = this,

@@ -25,12 +25,14 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatusScheduler
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
+import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.ba.sak.task.OppdaterStønadTomPåTilkjentYtelseTask.Companion.opprettStønadTomTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -377,7 +379,9 @@ class ForvalterController(
     @PostMapping("/kjør-oppdater-løpende-flagg-task")
     @Operation(summary = "Kjører oppdaterLøpendeFlagg-tasken slik at man oppdaterer tasker som er løpende til avsluttet ved behov.")
     fun kjørOppdaterLøpendeFlaggTask(): ResponseEntity<Ressurs<String>> {
-        fagsakStatusScheduler.oppdaterFagsakStatuser()
+        val oppdaterLøpendeFlaggTask = Task(type = OppdaterLøpendeFlagg.TASK_STEP_TYPE, payload = "")
+        taskRepository.save(oppdaterLøpendeFlaggTask)
+        logger.info("Opprettet oppdaterLøpendeFlaggTask")
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 }

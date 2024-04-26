@@ -42,6 +42,7 @@ class AutomatiskOppdaterValutakursServiceTest {
     val ecbService = mockk<ECBService>()
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     val simuleringService = mockk<SimuleringService>()
+    val vurderingsstrategiForValutakurserRepository = mockk<VurderingsstrategiForValutakurserRepository>()
 
     val automatiskOppdaterValutakursService =
         AutomatiskOppdaterValutakursService(
@@ -53,6 +54,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
             simuleringService = simuleringService,
+            vurderingsstrategiForValutakurserRepository = vurderingsstrategiForValutakurserRepository,
         )
 
     val forrigeBehandlingId = BehandlingId(9L)
@@ -72,6 +74,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             val dato = secondArg<LocalDate>()
             dato.month.value.toBigDecimal()
         }
+        every { vurderingsstrategiForValutakurserRepository.findByBehandlingId(any()) } returns null
         valutakursRepository.deleteAll()
         utenlandskPeriodebeløpRepository.deleteAll()
     }
@@ -213,5 +216,33 @@ class AutomatiskOppdaterValutakursServiceTest {
             .ignoringFields("endretTidspunkt")
             .ignoringFields("opprettetTidspunkt")
             .isEqualTo(forventetUberørteValutakurser + forventetOppdaterteValutakurser)
+    }
+
+    @Test
+    fun `oppdaterValutakurserEtterEndringstidspunkt skal ikke automatisk hente valutakurser om vurderingsstrategien er satt til manuell`() {
+        UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
+            .medBeløp("777777777", "EUR", "N", barn1, barn2, barn3)
+            .lagreTil(utenlandskPeriodebeløpRepository)
+
+        val manuelleValutakurserTidslinje =
+            ValutakursBuilder(jan(2020), behandlingId)
+                .medKurs("111111111", "EUR", barn1, barn2, barn3)
+                .medVurderingsform(Vurderingsform.MANUELL)
+
+        manuelleValutakurserTidslinje
+            .lagreTil(valutakursRepository)
+
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2020, 5, 15)
+        every { vurderingsstrategiForValutakurserRepository.findByBehandlingId(any()) } returns VurderingsstrategiForValutakurserDB(behandlingId = behandlingId.id, vurderingsstrategiForValutakurser = VurderingsstrategiForValutakurser.MANUELL)
+
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId)
+
+        assertThat(valutakursService.hentValutakurser(behandlingId))
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .ignoringFields("valutakursdato")
+            .ignoringFields("endretTidspunkt")
+            .ignoringFields("opprettetTidspunkt")
+            .isEqualTo(manuelleValutakurserTidslinje.bygg())
     }
 }

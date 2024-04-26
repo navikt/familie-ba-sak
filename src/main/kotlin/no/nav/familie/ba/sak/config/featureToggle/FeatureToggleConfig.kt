@@ -5,7 +5,6 @@ class FeatureToggleConfig {
         // Release
         const val ENDRET_EØS_REGELVERKFILTER_FOR_BARN = "familie-ba-sak.endret-eos-regelverkfilter-for-barn"
         const val KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING = "familie-ba-sak.automatisk-valutajustering"
-        const val TILKJENT_YTELSE_STONAD_TOM = "familie-ba-sak.tilkjent-ytelse-stonad-tom"
 
         // Operasjonelle
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"

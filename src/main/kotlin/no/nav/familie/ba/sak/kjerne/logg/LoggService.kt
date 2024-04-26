@@ -104,23 +104,6 @@ class LoggService(
         )
     }
 
-    fun opprettRegistrerVergeLogg(behandling: Behandling) {
-        val tittel = "Verge ble registrert"
-        lagre(
-            Logg(
-                behandlingId = behandling.id,
-                type = LoggType.VERGE_REGISTRERT,
-                tittel = tittel,
-                rolle =
-                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
-                        rolleConfig,
-                        BehandlerRolle.SAKSBEHANDLER,
-                    ),
-                tekst = "",
-            ),
-        )
-    }
-
     fun opprettRegistrertSøknadLogg(
         behandling: Behandling,
         søknadFinnesFraFør: Boolean,

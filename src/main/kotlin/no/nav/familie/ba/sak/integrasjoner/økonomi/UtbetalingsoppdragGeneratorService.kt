@@ -2,19 +2,19 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TILKJENT_YTELSE_STONAD_TOM
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelerTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.førerTilOpphør
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
@@ -23,7 +23,6 @@ import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -79,7 +78,6 @@ class UtbetalingsoppdragGeneratorService(
             tilkjentYtelse = tilkjentYtelse,
             utbetalingsoppdrag = beregnetUtbetalingsoppdrag.utbetalingsoppdrag,
             endretUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(tilkjentYtelse.behandling.id),
-            erStønadTomTogglePå = unleashNextMedContextService.isEnabled(TILKJENT_YTELSE_STONAD_TOM),
         )
         oppdaterAndelerMedPeriodeOffset(
             tilkjentYtelse = tilkjentYtelse,
@@ -144,23 +142,16 @@ private fun utledOpphør(
 }
 
 fun utledStønadTom(
-    tilkjentYtelse: TilkjentYtelse,
+    andelerTilkjentYtelse: Set<AndelTilkjentYtelse>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
 ): YearMonth? {
-    val andelerMedEndringer = tilkjentYtelse.andelerTilkjentYtelse.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(endretUtbetalingAndeler)
+    val andelerMedEndringer = andelerTilkjentYtelse.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(endretUtbetalingAndeler)
 
     val andelerMedRelevantUtbetaling =
-        andelerMedEndringer.filterNot { it ->
-            val harEndringSomFørerTilOpphørVed0Prosent =
-                it.endreteUtbetalinger.any { endretUtbetaling ->
-                    endretUtbetaling.årsak in
-                        listOf(
-                            Årsak.ALLEREDE_UTBETALT,
-                            Årsak.ENDRE_MOTTAKER,
-                            Årsak.ETTERBETALING_3ÅR,
-                        )
-                }
-            harEndringSomFørerTilOpphørVed0Prosent && it.prosent == BigDecimal.ZERO
+        andelerMedEndringer.filterNot { andelTilkjentYtelseMedEndreteUtbetalinger ->
+            andelTilkjentYtelseMedEndreteUtbetalinger.endreteUtbetalinger.any { endretUtbetaling ->
+                endretUtbetaling.førerTilOpphør()
+            }
         }
 
     return andelerMedRelevantUtbetaling.maxOfOrNull { it.stønadTom }
@@ -170,17 +161,11 @@ fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
     tilkjentYtelse: TilkjentYtelse,
     utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    erStønadTomTogglePå: Boolean,
 ) {
     val opphør = utledOpphør(utbetalingsoppdrag, tilkjentYtelse.behandling)
 
     tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-    tilkjentYtelse.stønadTom =
-        if (erStønadTomTogglePå) {
-            utledStønadTom(tilkjentYtelse, endretUtbetalingAndeler)
-        } else {
-            tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
-        }
+    tilkjentYtelse.stønadTom = utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse, endretUtbetalingAndeler)
     tilkjentYtelse.stønadFom =
         if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
     tilkjentYtelse.endretDato = LocalDate.now()

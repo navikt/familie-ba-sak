@@ -121,4 +121,13 @@ class ValutakursController(
     ): Boolean {
         return restValutakurs.valutakode != null && restValutakurs.valutakursdato != null && (eksisterendeValutakurs.valutakursdato != restValutakurs.valutakursdato || eksisterendeValutakurs.valutakode != restValutakurs.valutakode)
     }
+
+    @PutMapping(path = ["behandlinger/{behandlingId}/endre-vurderingsstrategi-til/{vurderingsstrategiForValutakurser}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    private fun endreVurderingsstrategiForValutakurser(
+        @PathVariable behandlingId: Long,
+        @PathVariable vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser,
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        automatiskOppdaterValutakursService.endreVurderingsstrategiForValutakurser(behandlingId = BehandlingId(behandlingId), nyStrategi = vurderingsstrategiForValutakurser)
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+    }
 }

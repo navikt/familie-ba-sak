@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
+import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
@@ -99,7 +99,7 @@ class InnkommendeJournalføringService(
         søknadMottattDato: LocalDate? = null,
         søknadsinfo: Søknadsinfo? = null,
         fagsakType: FagsakType = FagsakType.NORMAL,
-        institusjon: InstitusjonInfo? = null,
+        institusjon: RestInstitusjon? = null,
     ): Behandling {
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, type = fagsakType, institusjon = institusjon)
         return stegService.håndterNyBehandlingOgSendInfotrygdFeed(

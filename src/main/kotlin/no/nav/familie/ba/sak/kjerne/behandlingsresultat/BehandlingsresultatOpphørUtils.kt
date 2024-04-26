@@ -1,13 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
-import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.tilAndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelerTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.førerTilOpphør
 import java.time.YearMonth
 
 internal enum class Opphørsresultat {
@@ -90,23 +87,14 @@ object BehandlingsresultatOpphørUtils {
         andelerPåPersonFiltrertPåType: List<AndelTilkjentYtelse>,
         endretAndelerPåPerson: List<EndretUtbetalingAndel>,
     ): List<AndelTilkjentYtelse> {
-        val andelTilkjentYtelseTidslinje = AndelTilkjentYtelseTidslinje(andelerPåPersonFiltrertPåType)
-        val endretUtbetalingAndelTidslinje = EndretUtbetalingAndelTidslinje(endretAndelerPåPerson)
+        val andelerMedEndringer =
+            andelerPåPersonFiltrertPåType.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(endretAndelerPåPerson)
 
-        return andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingAndelTidslinje) { andelTilkjentYtelse, endretUtbetalingAndel ->
-            val kalkulertUtbetalingsbeløp = andelTilkjentYtelse?.kalkulertUtbetalingsbeløp ?: return@kombinerMed null
-            val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak ?: return@kombinerMed andelTilkjentYtelse
-
-            when (endringsperiodeÅrsak) {
-                Årsak.ALLEREDE_UTBETALT,
-                Årsak.ENDRE_MOTTAKER,
-                Årsak.ETTERBETALING_3ÅR,
-                ->
-                    // Vi ønsker å filtrere bort andeler som har 0 i kalkulertUtbetalingsbeløp
-                    if (kalkulertUtbetalingsbeløp == 0) null else andelTilkjentYtelse
-
-                Årsak.DELT_BOSTED -> andelTilkjentYtelse
+        val andelerMedRelevantUtbetaling =
+            andelerMedEndringer.filterNot { andelTilkjentYtelseMedEndreteUtbetalinger ->
+                andelTilkjentYtelseMedEndreteUtbetalinger.endreteUtbetalinger.any { it.førerTilOpphør() }
             }
-        }.tilAndelTilkjentYtelse()
+
+        return andelerMedRelevantUtbetaling.map { it.andel }
     }
 }

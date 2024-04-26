@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -302,7 +302,7 @@ class DokumentServiceIntegrationTest(
             fagsakService.hentEllerOpprettFagsakForPersonIdent(
                 fødselsnummer = fnr,
                 fagsakType = FagsakType.INSTITUSJON,
-                institusjon = InstitusjonInfo(orgNummer = orgNummer, tssEksternId = "8000000"),
+                institusjon = RestInstitusjon(orgNummer = orgNummer, tssEksternId = "8000000"),
             )
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
@@ -357,7 +357,7 @@ class DokumentServiceIntegrationTest(
             fagsakService.hentEllerOpprettFagsakForPersonIdent(
                 fødselsnummer = fnr,
                 fagsakType = FagsakType.INSTITUSJON,
-                institusjon = InstitusjonInfo(orgNummer = orgNummer, tssEksternId = "8000000"),
+                institusjon = RestInstitusjon(orgNummer = orgNummer, tssEksternId = "8000000"),
             )
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
@@ -403,7 +403,7 @@ class DokumentServiceIntegrationTest(
             fagsakService.hentEllerOpprettFagsakForPersonIdent(
                 fødselsnummer = fnr,
                 fagsakType = FagsakType.INSTITUSJON,
-                institusjon = InstitusjonInfo(orgNummer = orgNummer, tssEksternId = "8000000"),
+                institusjon = RestInstitusjon(orgNummer = orgNummer, tssEksternId = "8000000"),
             )
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
@@ -449,7 +449,7 @@ class DokumentServiceIntegrationTest(
             fagsakService.hentEllerOpprettFagsakForPersonIdent(
                 fødselsnummer = fnr,
                 fagsakType = FagsakType.INSTITUSJON,
-                institusjon = InstitusjonInfo(orgNummer = orgNummer, tssEksternId = "8000000"),
+                institusjon = RestInstitusjon(orgNummer = orgNummer, tssEksternId = "8000000"),
             )
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
