@@ -150,6 +150,7 @@ class BrevService(
                     duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
                     duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
                     informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
+                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter),
                 )
 
             Brevmal.VEDTAK_ENDRING_INSTITUSJON ->
@@ -183,6 +184,7 @@ class BrevService(
                     refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
                     refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
                     erKlage = behandling.erKlage(),
+                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter),
                 )
 
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON ->
@@ -211,6 +213,7 @@ class BrevService(
                     duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
                     duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
                     informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
+                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter),
                 )
 
             Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON ->
@@ -390,7 +393,7 @@ class BrevService(
                 }
             }
 
-        val utbetalingerEøs = hentUtbetalingerEøs(vedtak, vedtaksperioder)
+        val utbetalingerEøs = hentUtbetalingerEøs(vedtak)
 
         val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
         val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId)
@@ -488,21 +491,21 @@ class BrevService(
 
     private fun hentUtbetalingerEøs(
         vedtak: Vedtak,
-        vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
     ): Map<String, UtbetalingMndEøs>? {
         val behandlingId = vedtak.behandling.id
-        val andelerForVedtaksperioderPerAktørOgType = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId).tilTidslinjerPerAktørOgType()
-
-        val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId).toList()
+        val endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId = behandlingId)
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId = behandlingId)
 
-        if (!skalHenteUtbetalingerEøs(vedtaksperioder, valutakurser)) {
+        if (!skalHenteUtbetalingerEøs(endringstidspunkt = endringstidspunkt, valutakurser)) {
             return null
         }
 
+        val andelerForVedtaksperioderPerAktørOgType = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId).tilTidslinjerPerAktørOgType()
+        val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId).toList()
+
         return hentUtbetalingerEøs(
             vedtak = vedtak,
-            vedtaksperioder = vedtaksperioder,
+            endringstidspunkt = endringstidspunkt,
             andelerForVedtaksperioderPerAktørOgType = andelerForVedtaksperioderPerAktørOgType,
             utenlandskePeriodebeløp = utenlandskePeriodebeløp,
             valutakurser = valutakurser,

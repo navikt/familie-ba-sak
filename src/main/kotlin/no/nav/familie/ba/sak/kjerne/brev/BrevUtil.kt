@@ -44,14 +44,13 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.splitPerTidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilTidslinje
 import java.time.LocalDate
 
 fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
@@ -311,27 +310,27 @@ fun hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev: Boolean): L
 }
 
 fun skalHenteUtbetalingerEøs(
-    vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
+    endringstidspunkt: LocalDate,
     valutakurser: List<Valutakurs>,
 ): Boolean =
-    valutakurser.tilSeparateTidslinjerForBarna().mapValues { (_, tidslinje) -> tidslinje.beskjærEtter(vedtaksperioder.tilTidslinje()) }.isNotEmpty()
+    valutakurser.tilSeparateTidslinjerForBarna().mapValues { (_, valutakursTidslinjeForBarn) -> valutakursTidslinjeForBarn.beskjærFraOgMed(endringstidspunkt.tilMånedTidspunkt()) }.isNotEmpty()
 
 fun hentUtbetalingerEøs(
     vedtak: Vedtak,
-    vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
+    endringstidspunkt: LocalDate,
     andelerForVedtaksperioderPerAktørOgType: Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForVedtaksperioderTidslinje>,
     utenlandskePeriodebeløp: List<UtenlandskPeriodebeløp>,
     valutakurser: List<Valutakurs>,
 ): Map<String, UtbetalingMndEøs> {
-    // Ønsker kun andeler etter endringstidspunkt så beskjærer etter vedtaksperiode-tidslinja
-    val vedtaksperiodeTidslinje = vedtaksperioder.tilTidslinje()
+    // Ønsker kun andeler etter endringstidspunkt så beskjærer fra og med endringstidspunktet
     val andelerForVedtaksperioderPerAktørOgTypeAvgrensetTilVedtaksperioder =
-        andelerForVedtaksperioderPerAktørOgType.mapValues { (_, andelForVedtaksperiode) -> andelForVedtaksperiode.beskjærEtter(vedtaksperiodeTidslinje) }
+        andelerForVedtaksperioderPerAktørOgType.mapValues { (_, andelForVedtaksperiode) -> andelForVedtaksperiode.beskjærFraOgMed(endringstidspunkt.tilMånedTidspunkt()) }
 
     val utenlandskePeriodebeløpTidslinjerForBarna = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna().mapKeys { entry -> Pair(entry.key, YtelseType.ORDINÆR_BARNETRYGD) }
     val valutakursTidslinjerForBarna = valutakurser.tilSeparateTidslinjerForBarna().mapKeys { entry -> Pair(entry.key, YtelseType.ORDINÆR_BARNETRYGD) }
 
     return andelerForVedtaksperioderPerAktørOgTypeAvgrensetTilVedtaksperioder
+        // Kombinerer tidslinjene for andeler, utenlandskPeriodebeløp og valutakurser per aktørOgYtelse
         .outerJoin(utenlandskePeriodebeløpTidslinjerForBarna) { andelForVedtaksperiode, utenlandsPeriodebeløp ->
             when (andelForVedtaksperiode) {
                 null -> null
@@ -349,6 +348,8 @@ fun hentUtbetalingerEøs(
                 hentUtbetalingEøs(vedtak = vedtak, aktørOgYtelseType = aktørOgYtelseType, andelUpbOgValutakurs = andelerUpbOgValutakurs)
             }
         }
+        // Kombinerer verdiene til alle tidslinjene slik at vi får en liste av UtbetalingEøs per periode, samt sørger for at vi får en periode per mnd.
+        // Grupperer deretter på periodenes fom
         .values.kombiner().perioder().splitPerTidsenhet(LocalDate.now().tilMånedTidspunkt())
         .groupBy { utbetalingEøsPeriode -> utbetalingEøsPeriode.fraOgMed.tilYearMonth().tilMånedÅrMedium() }
         .mapValues { (_, utbetalingEøsPerioder) ->

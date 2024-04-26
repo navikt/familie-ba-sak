@@ -21,6 +21,7 @@ data class VedtakEndring(
         duMåMeldeFraOmEndringer: Boolean = true,
         duMåMeldeFraOmEndringerEøsSelvstendigRett: Boolean = false,
         informasjonOmUtbetaling: Boolean = false,
+        utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering? = null,
     ) :
         this(
             mal = mal,
@@ -48,6 +49,7 @@ data class VedtakEndring(
                             duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
                             duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
                             informasjonOmUtbetaling = informasjonOmUtbetaling,
+                            utbetalingstabellAutomatiskValutajustering = utbetalingstabellAutomatiskValutajustering,
                         ),
                     flettefelter =
                         FlettefelterForDokumentImpl(
@@ -57,6 +59,7 @@ data class VedtakEndring(
                             organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
                         ),
                     perioder = vedtakFellesfelter.perioder,
+                    utbetalingerEøs = vedtakFellesfelter.utbetalingerEøs,
                 ),
         )
 }
@@ -83,5 +86,6 @@ data class EndringVedtakData(
         val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
         val duMaaMeldeFraOmEndringer: Boolean,
         val informasjonOmUtbetaling: Boolean,
+        val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
     )
 }

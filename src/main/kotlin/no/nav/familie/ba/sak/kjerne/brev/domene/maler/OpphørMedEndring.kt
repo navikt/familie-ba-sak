@@ -16,6 +16,7 @@ data class OpphørMedEndring(
         refusjonEosAvklart: RefusjonEøsAvklart? = null,
         refusjonEosUavklart: RefusjonEøsUavklart? = null,
         erKlage: Boolean,
+        utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering? = null,
     ) :
         this(
             mal = mal,
@@ -37,6 +38,7 @@ data class OpphørMedEndring(
                             refusjonEosAvklart = refusjonEosAvklart,
                             refusjonEosUavklart = refusjonEosUavklart,
                             klage = erKlage,
+                            utbetalingstabellAutomatiskValutajustering = utbetalingstabellAutomatiskValutajustering,
                         ),
                     flettefelter =
                         FlettefelterForDokumentImpl(
@@ -46,6 +48,7 @@ data class OpphørMedEndring(
                             organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
                         ),
                     perioder = vedtakFellesfelter.perioder,
+                    utbetalingerEøs = vedtakFellesfelter.utbetalingerEøs,
                 ),
         )
 }
@@ -66,5 +69,6 @@ data class OpphørMedEndringData(
         val refusjonEosAvklart: RefusjonEøsAvklart?,
         val refusjonEosUavklart: RefusjonEøsUavklart?,
         val klage: Boolean,
+        val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
     )
 }

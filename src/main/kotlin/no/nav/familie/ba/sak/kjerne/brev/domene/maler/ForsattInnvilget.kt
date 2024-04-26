@@ -18,6 +18,7 @@ data class ForsattInnvilget(
         duMåMeldeFraOmEndringer: Boolean = true,
         duMåMeldeFraOmEndringerEøsSelvstendigRett: Boolean = false,
         informasjonOmUtbetaling: Boolean = false,
+        utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering? = null,
     ) :
         this(
             mal = mal,
@@ -41,6 +42,7 @@ data class ForsattInnvilget(
                             duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
                             duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
                             informasjonOmUtbetaling = informasjonOmUtbetaling,
+                            utbetalingstabellAutomatiskValutajustering = utbetalingstabellAutomatiskValutajustering,
                         ),
                     flettefelter =
                         FlettefelterForDokumentImpl(
@@ -50,6 +52,7 @@ data class ForsattInnvilget(
                             organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
                         ),
                     perioder = vedtakFellesfelter.perioder,
+                    utbetalingerEøs = vedtakFellesfelter.utbetalingerEøs,
                 ),
         )
 }
@@ -72,5 +75,6 @@ data class ForsattInnvilgetData(
         val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
         val duMaaMeldeFraOmEndringer: Boolean,
         val informasjonOmUtbetaling: Boolean,
+        val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
     )
 }
