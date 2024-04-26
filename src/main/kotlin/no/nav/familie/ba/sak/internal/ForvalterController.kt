@@ -348,6 +348,22 @@ class ForvalterController(
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 
+    @PostMapping("/kjor-send-informasjonsbrev-om-valutajustering")
+    @Operation(summary = "Send infobrev om valutajustering for alle løpende sekundærlandsaker")
+    fun sendInfobrevTilAlleMedLøpendeEøsSekundærlandUtbetaling(
+        @RequestBody kjøretype: Kjøretype = Kjøretype.DRY_RUN,
+    ): List<Long> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            handling = "sende informasjonsbrev om valutajustering til alle som har EØS-sak med løpende utbetaling som sekundærland",
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+        )
+
+        logger.info("Kaller kjor-send-informasjonsbrev-om-valutajustering med kjøretype=$kjøretype")
+
+        return forvalterService
+            .opprettTaskerForÅJournalføreOgSendeUtInformasjonsbrevOmValutajustering(erDryRun = kjøretype == Kjøretype.DRY_RUN)
+    }
+
     @PostMapping("/oppdater-stonad-tom-for-tilkjent-ytelse")
     @Operation(summary = "Oppdater tilkjent ytelse slik at saker som har feil stønad tom kan oppdateres til riktig.")
     @Transactional
@@ -364,4 +380,9 @@ class ForvalterController(
         fagsakStatusScheduler.oppdaterFagsakStatuser()
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
+}
+
+enum class Kjøretype {
+    DRY_RUN,
+    SEND_BREV,
 }

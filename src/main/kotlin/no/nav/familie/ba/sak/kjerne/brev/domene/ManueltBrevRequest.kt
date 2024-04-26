@@ -394,6 +394,15 @@ fun ManueltBrevRequest.tilBrev(
                 saksbehandlerNavn = saksbehandlerNavn,
             )
 
+        Brevmal.INFORMASJONSBREV_OM_VALUTAJUSTERING ->
+            EnkeltInformasjonsbrev(
+                navn = this.mottakerNavn,
+                fodselsnummer = this.mottakerIdent,
+                enhet = this.enhetNavn(),
+                mal = Brevmal.INFORMASJONSBREV_OM_VALUTAJUSTERING,
+                saksbehandlerNavn = saksbehandlerNavn,
+            )
+
         Brevmal.INFORMASJONSBREV_KAN_SØKE ->
             InformasjonsbrevKanSøke(
                 navn = this.mottakerNavn,

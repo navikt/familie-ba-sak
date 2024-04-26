@@ -27,6 +27,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -39,6 +41,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_Å
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.MånedligValutajusteringFinnFagsakerTask.Companion.erSekundærlandIMåned
+import no.nav.familie.ba.sak.task.SendInformasjonsbrevOmValutajusteringTask
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -67,6 +71,7 @@ class ForvalterService(
     private val infotrygdService: InfotrygdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val kompetanseService: KompetanseService,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -274,6 +279,26 @@ class ForvalterService(
         if (vilkårResultatAvSammeTypeFørFødselsdatoForPerson.size > 1) {
             throw Feil("Det finnes flere vilkårresultater som begynner før fødselsdato til person: $this")
         }
+    }
+
+    @Transactional
+    fun opprettTaskerForÅJournalføreOgSendeUtInformasjonsbrevOmValutajustering(erDryRun: Boolean): List<Long> {
+        val sisteIverksatteEØSBehandlingerFraLøpendeFagsakerMedSekundærland =
+            behandlingHentOgPersisterService.hentSisteIverksatteEØSBehandlingFraLøpendeFagsaker().toSet()
+                .filter {
+                    erSekundærlandIMåned(
+                        kompetanser = kompetanseService.hentKompetanser(BehandlingId(it)),
+                        yearMonth = YearMonth.now(),
+                    )
+                }.map { behandlingHentOgPersisterService.hent(it) }
+
+        if (!erDryRun) {
+            sisteIverksatteEØSBehandlingerFraLøpendeFagsakerMedSekundærland.forEach {
+                taskRepository.save(SendInformasjonsbrevOmValutajusteringTask.lagTask(it))
+            }
+        }
+
+        return sisteIverksatteEØSBehandlingerFraLøpendeFagsakerMedSekundærland.map { it.fagsak.id }
     }
 }
 
