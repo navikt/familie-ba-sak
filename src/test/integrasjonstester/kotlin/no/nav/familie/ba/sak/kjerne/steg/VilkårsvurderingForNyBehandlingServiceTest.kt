@@ -30,9 +30,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
-import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingServiceTest.Companion.validerKopiertVilkårsvurdering
@@ -48,7 +45,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import kotlin.reflect.full.declaredMemberProperties
 
@@ -77,8 +73,6 @@ class VilkårsvurderingForNyBehandlingServiceTest(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     @Autowired
     private val personRepository: PersonRepository,
-    @Autowired
-    private val aktørIdRepository: AktørIdRepository,
 ) : AbstractSpringIntegrationTest() {
     @BeforeAll
     fun init() {
@@ -1099,20 +1093,5 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         behandling.status = BehandlingStatus.AVSLUTTET
         behandling.leggTilBehandlingStegTilstand(StegType.BEHANDLING_AVSLUTTET)
         return behandlingHentOgPersisterService.lagreOgFlush(behandling)
-    }
-
-    private fun leggTilNyIdentPåAktør(
-        aktør: Aktør,
-        nyttFnr: String,
-    ): Aktør {
-        aktør.personidenter.filter { it.aktiv }.map {
-            it.aktiv = false
-            it.gjelderTil = LocalDateTime.now()
-        }
-        val oppdatertAktør = aktørIdRepository.saveAndFlush(aktør)
-        oppdatertAktør.personidenter.add(
-            Personident(fødselsnummer = nyttFnr, aktør = oppdatertAktør),
-        )
-        return aktørIdRepository.saveAndFlush(oppdatertAktør)
     }
 }

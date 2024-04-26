@@ -17,7 +17,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query(value = "SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND f.arkivert = false")
     fun finnBehandlinger(fagsakId: Long): List<Behandling>
 
-    @Query(value = "SELECT b FROM Behandling b WHERE b.fagsak.id = :fagsakId AND status = :status")
+    @Query(value = "SELECT b FROM Behandling b WHERE b.fagsak.id = :fagsakId AND b.status = :status")
     fun finnBehandlinger(
         fagsakId: Long,
         status: BehandlingStatus,
@@ -129,9 +129,6 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     )
     fun finnBehandlingerSomLiggerTilGodkjenning(fagsakId: Long): List<Behandling>
 
-    @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.status = 'AVSLUTTET' AND f.arkivert = false")
-    fun findByFagsakAndAvsluttet(fagsakId: Long): List<Behandling>
-
     @Lock(LockModeType.NONE)
     @Query("SELECT count(*) FROM Behandling b JOIN b.fagsak f WHERE NOT b.status = 'AVSLUTTET' AND f.arkivert = false")
     fun finnAntallBehandlingerIkkeAvsluttet(): Long
@@ -150,9 +147,6 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query("SELECT new kotlin.Pair(b.opprettetÅrsak, count(*)) from Behandling b group by b.opprettetÅrsak")
     fun finnAntallBehandlingerPerÅrsak(): List<Pair<BehandlingÅrsak, Long>>
-
-    @Query("SELECT b.id from Behandling b where b.opprettetÅrsak in (:opprettetÅrsak)")
-    fun finnBehandlingIdMedOpprettetÅrsak(opprettetÅrsak: List<BehandlingÅrsak>): List<Long>
 
     @Query(
         "SELECT new kotlin.Pair(b.id, p.fødselsnummer) from Behandling b " +

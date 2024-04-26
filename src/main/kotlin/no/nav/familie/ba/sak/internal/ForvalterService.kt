@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -92,7 +91,6 @@ class ForvalterService(
         økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
             vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId),
             saksbehandlerId = "VL",
-            andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory(),
         )
     }
 

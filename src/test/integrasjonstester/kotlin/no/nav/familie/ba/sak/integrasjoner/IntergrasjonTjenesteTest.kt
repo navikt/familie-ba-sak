@@ -31,7 +31,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgiver
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidstaker
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Skyggesak
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
@@ -69,7 +68,6 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
-import kotlin.random.Random
 
 class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
     @Autowired
@@ -405,8 +403,6 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         val arbeidsforhold =
             listOf(
                 Arbeidsforhold(
-                    navArbeidsforholdId = Random.nextLong(),
-                    arbeidstaker = Arbeidstaker("Person", fnr),
                     arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "998877665"),
                     ansettelsesperiode = Ansettelsesperiode(Periode(fom = LocalDate.now().minusYears(1))),
                 ),
@@ -427,7 +423,6 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         val response = integrasjonClient.hentArbeidsforhold(fnr, LocalDate.now())
 
         assertThat(response).hasSize(1)
-        assertThat(response.first().arbeidstaker?.offentligIdent).isEqualTo(fnr)
         assertThat(response.first().arbeidsgiver?.organisasjonsnummer).isEqualTo("998877665")
         assertThat(response.first().ansettelsesperiode?.periode?.fom).isEqualTo(LocalDate.now().minusYears(1))
     }

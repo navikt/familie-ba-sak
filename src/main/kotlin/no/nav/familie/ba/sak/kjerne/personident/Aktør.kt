@@ -66,5 +66,3 @@ data class Aktør(
         private val VALID = java.util.regex.Pattern.compile(VALID_REGEXP)
     }
 }
-
-val dummyAktør = Aktør("0000000000000")

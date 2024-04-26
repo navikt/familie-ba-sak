@@ -44,7 +44,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import java.time.YearMonth
@@ -118,10 +117,6 @@ data class VedtaksperiodeMedBegrunnelser(
     fun harFriteksterUtenStandardbegrunnelser(): Boolean {
         return (type == Vedtaksperiodetype.OPPHØR || type == Vedtaksperiodetype.AVSLAG) && fritekster.isNotEmpty() && begrunnelser.isEmpty() && eøsBegrunnelser.isEmpty()
     }
-
-    fun harFriteksterOgStandardbegrunnelser(): Boolean {
-        return fritekster.isNotEmpty() && begrunnelser.isNotEmpty()
-    }
 }
 
 fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(
@@ -169,7 +164,7 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
         Vedtaksperiodetype.ENDRET_UTBETALING,
         ->
             finnUtbetalingsperioderRelevantForVedtaksperiode(utbetalingsperiodeDetaljer)?.toList() ?: throw Feil(
-                "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}",
+                "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})}",
             )
 
         Vedtaksperiodetype.OPPHØR ->
@@ -232,7 +227,7 @@ fun hentBrevPeriodeType(
     erUtbetalingEllerDeltBostedIPeriode: Boolean,
 ): BrevPeriodeType =
     when (vedtaksperiodetype) {
-        Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET_NY
+        Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET
         Vedtaksperiodetype.UTBETALING ->
             when {
                 erUtbetalingEllerDeltBostedIPeriode -> BrevPeriodeType.UTBETALING

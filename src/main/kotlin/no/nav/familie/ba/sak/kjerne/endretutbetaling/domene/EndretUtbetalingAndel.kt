@@ -111,7 +111,17 @@ enum class Årsak(val visningsnavn: String) {
     ETTERBETALING_3ÅR("Etterbetaling 3 år"),
     ENDRE_MOTTAKER("Endre mottaker, begge foreldre rett"),
     ALLEREDE_UTBETALT("Allerede utbetalt"),
+    ;
+
+    fun førerTilOpphørVed0Prosent() =
+        when (this) {
+            ALLEREDE_UTBETALT, ENDRE_MOTTAKER, ETTERBETALING_3ÅR -> true
+            DELT_BOSTED -> false
+        }
 }
+
+fun EndretUtbetalingAndel.førerTilOpphør() =
+    this.prosent == BigDecimal.ZERO && this.årsak != null && this.årsak!!.førerTilOpphørVed0Prosent()
 
 fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel() =
     RestEndretUtbetalingAndel(

@@ -401,8 +401,6 @@ class ArbeidsfordelingIntegrationTest(
         )
 
     val søkerAktør = randomAktør()
-    val barnUtenDiskresjonskodetAktør = randomAktør()
-    val barnMedDiskjesjonskodeaktør = randomAktør()
 
     companion object {
         const val MANUELT_OVERSTYRT_ENHET = "1234"

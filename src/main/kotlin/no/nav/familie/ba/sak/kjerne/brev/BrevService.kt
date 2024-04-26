@@ -64,6 +64,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.stereotype.Service
@@ -318,8 +319,8 @@ class BrevService(
                                 // det slik, da uppercase kan oppleves som skrikende i et brev som skal være skånsomt
                                 navnAvdode = data.grunnlag.søker.navn.storForbokstavIAlleNavn(),
                                 virkningstidspunkt =
-                                    hentVirkningstidspunkt(
-                                        opphørsperioder = vedtaksperiodeService.hentOpphørsperioder(vedtak.behandling),
+                                    hentVirkningstidspunktForDødsfallbrev(
+                                        opphørsperioder = vedtaksperiodeService.finnVedtaksperioderForBehandling(vedtak).filter { it.type == Vedtaksperiodetype.OPPHØR },
                                         behandlingId = vedtak.behandling.id,
                                     ),
                             ),

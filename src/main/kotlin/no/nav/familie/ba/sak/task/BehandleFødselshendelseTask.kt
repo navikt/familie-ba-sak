@@ -89,7 +89,7 @@ class BehandleFødselshendelseTask(
             val aktør = personidentService.hentAktør(nyBehandling.morsIdent)
             taskRepositoryWrapper.save(
                 OpprettVurderFødselshendelseKonsekvensForYtelseOppgave.opprettTask(
-                    ident = aktør.aktørId,
+                    aktør = aktør,
                     oppgavetype = Oppgavetype.VurderLivshendelse,
                     beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
                 ),

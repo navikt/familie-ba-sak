@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -10,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.Tilbakekreving
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
@@ -30,7 +28,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.VERGE
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.kontrakter.felles.tilbakekreving.Verge
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.slf4j.LoggerFactory
@@ -47,8 +44,6 @@ class TilbakekrevingService(
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
-    private val personidentService: PersonidentService,
-    private val personopplysningerService: PersonopplysningerService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     fun validerRestTilbakekreving(
@@ -102,7 +97,6 @@ class TilbakekrevingService(
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
         val arbeidsfordeling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId)
         val institusjon = hentTilbakekrevingInstitusjon(vedtak.behandling.fagsak)
-        val verge = hentVerge(vedtak.behandling.verge?.ident)
 
         return tilbakekrevingKlient.hentForhåndsvisningVarselbrev(
             forhåndsvisVarselbrevRequest =
@@ -124,7 +118,6 @@ class TilbakekrevingService(
                     eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
                     ident = persongrunnlag.søker.aktør.aktivFødselsnummer(),
                     saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerNavn(),
-                    verge = verge,
                     institusjon = institusjon,
                 ),
         )
@@ -159,7 +152,6 @@ class TilbakekrevingService(
                 ?: throw Feil("Fant ikke tilbakekreving på behandling ${behandling.id}")
 
         val institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak)
-        val verge = hentVerge(behandling.verge?.ident)
 
         val manuelleBrevMottakere =
             brevmottakerRepository.finnBrevMottakereForBehandling(behandling.id).map { baSakBrevMottaker ->
@@ -208,7 +200,7 @@ class TilbakekrevingService(
                 ),
             revurderingsvedtaksdato = revurderingsvedtaksdato,
             // Verge er per nå ikke støttet i familie-ba-sak.
-            verge = verge,
+            verge = null,
             faktainfo = hentFaktainfoForTilbakekreving(behandling, tilbakekreving),
             institusjon = institusjon,
             manuelleBrevmottakere = manuelleBrevMottakere,
@@ -245,23 +237,6 @@ class TilbakekrevingService(
                 frontendFeilmelding = "Av tekniske årsaker så kan ikke behandling opprettes. Kontakt brukerstøtte for å rapportere feilen.",
             )
         }
-    }
-
-    private fun hentVerge(vergeIdent: String?): Verge? {
-        val verge: Verge? =
-            if (vergeIdent != null) {
-                val aktør = personidentService.hentAktør(vergeIdent)
-                personopplysningerService.hentPersoninfoNavnOgAdresse(aktør).let {
-                    Verge(
-                        vergetype = Vergetype.VERGE_FOR_BARN,
-                        navn = it.navn!!,
-                        personIdent = aktør.aktivFødselsnummer(),
-                    )
-                }
-            } else {
-                null
-            }
-        return verge
     }
 
     companion object {

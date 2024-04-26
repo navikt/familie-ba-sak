@@ -5,14 +5,12 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
-import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
@@ -714,13 +712,12 @@ fun kjørStegprosessForFGB(
     stegService: StegService,
     vedtaksperiodeService: VedtaksperiodeService,
     behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-    institusjon: InstitusjonInfo? = null,
-    verge: VergeInfo? = null,
+    institusjon: RestInstitusjon? = null,
     brevmalService: BrevmalService,
     behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
     vilkårInnvilgetFom: LocalDate? = null,
 ): Behandling {
-    val fagsakType = utledFagsaktype(institusjon, verge)
+    val fagsakType = utledFagsaktype(institusjon)
     val fagsak =
         fagsakService.hentEllerOpprettFagsakForPersonIdent(
             fødselsnummer = søkerFnr,
@@ -740,13 +737,6 @@ fun kjørStegprosessForFGB(
                 fagsakId = fagsak.id,
             ),
         )
-
-    if (verge != null) {
-        stegService.håndterRegistrerVerge(
-            behandling,
-            RestRegistrerInstitusjonOgVerge(vergeInfo = verge, institusjonInfo = null),
-        )
-    }
 
     val behandlingEtterPersongrunnlagSteg =
         stegService.håndterSøknad(
@@ -873,13 +863,10 @@ fun kjørStegprosessForFGB(
 }
 
 private fun utledFagsaktype(
-    institusjon: InstitusjonInfo?,
-    verge: VergeInfo?,
+    institusjon: RestInstitusjon?,
 ): FagsakType {
     return if (institusjon != null) {
         FagsakType.INSTITUSJON
-    } else if (verge != null) {
-        FagsakType.BARN_ENSLIG_MINDREÅRIG
     } else {
         FagsakType.NORMAL
     }

@@ -2,9 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erUnder6ÅrTidslinje
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isBetween
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.Sats
@@ -64,8 +62,6 @@ object SatsService {
         return gjeldendeSatsForPeriode.beløp
     }
 
-    fun finnSisteSatsendringsDato(): LocalDate = hentAllesatser().maxBy { it.gyldigFom }.gyldigFom
-
     fun finnSatsendring(startDato: LocalDate): List<Sats> =
         hentAllesatser()
             .filter { it.gyldigFom == startDato }
@@ -91,11 +87,6 @@ object SatsService {
         oppdatertBeløp: Int,
     ): LocalDate? = hentAllesatser().find { it.type == satstype && it.beløp == oppdatertBeløp }?.gyldigFom
 }
-
-fun fomErPåSatsendring(fom: LocalDate?): Boolean =
-    SatsService
-        .finnSatsendring(fom?.førsteDagIInneværendeMåned() ?: TIDENES_MORGEN)
-        .isNotEmpty()
 
 fun satstypeTidslinje(satsType: SatsType) =
     tidslinje {
