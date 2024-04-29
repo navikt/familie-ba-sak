@@ -204,7 +204,7 @@ class TilbakekrevingService(
             faktainfo = hentFaktainfoForTilbakekreving(behandling, tilbakekreving),
             institusjon = institusjon,
             manuelleBrevmottakere = manuelleBrevMottakere,
-            begrunnelseForTilbakekreving = tilbakekreving.begrunnelse
+            begrunnelseForTilbakekreving = tilbakekreving.begrunnelse,
         )
     }
 
