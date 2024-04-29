@@ -52,7 +52,7 @@ data class Førstegangsvedtak(
                             fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer),
                             organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
                         ),
-                    utbetalingerEøs = vedtakFellesfelter.utbetalingerEøs,
+                    utbetalingerPerMndEøs = vedtakFellesfelter.utbetalingerPerMndEøs,
                 ),
         )
 }
@@ -61,7 +61,7 @@ data class FørstegangsvedtakData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokument,
     override val perioder: List<BrevPeriode>,
-    override val utbetalingerEøs: Map<String, UtbetalingMndEøs>?,
+    override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?,
 ) : VedtaksbrevData {
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,

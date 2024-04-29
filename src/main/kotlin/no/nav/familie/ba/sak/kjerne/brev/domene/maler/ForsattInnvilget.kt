@@ -52,7 +52,7 @@ data class ForsattInnvilget(
                             organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
                         ),
                     perioder = vedtakFellesfelter.perioder,
-                    utbetalingerEøs = vedtakFellesfelter.utbetalingerEøs,
+                    utbetalingerPerMndEøs = vedtakFellesfelter.utbetalingerPerMndEøs,
                 ),
         )
 }
@@ -61,7 +61,7 @@ data class ForsattInnvilgetData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokument,
     override val perioder: List<BrevPeriode>,
-    override val utbetalingerEøs: Map<String, UtbetalingMndEøs>? = null,
+    override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
 ) : VedtaksbrevData {
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,

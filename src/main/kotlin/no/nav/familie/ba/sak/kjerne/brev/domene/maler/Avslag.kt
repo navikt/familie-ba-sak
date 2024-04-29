@@ -42,7 +42,7 @@ data class AvslagData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokumentImpl,
     override val perioder: List<BrevPeriode>,
-    override val utbetalingerEøs: Map<String, UtbetalingMndEøs>? = null,
+    override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
 ) : VedtaksbrevData {
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,

@@ -248,7 +248,7 @@ class BrevService(
         vedtak: Vedtak,
         vedtakFellesfelter: VedtakFellesfelter,
     ): UtbetalingstabellAutomatiskValutajustering? {
-        return when (vedtakFellesfelter.utbetalingerEøs) {
+        return when (vedtakFellesfelter.utbetalingerPerMndEøs) {
             null -> null
             else -> {
                 val mndÅrFørsteEndring = hentSorterteVedtaksperioderMedBegrunnelser(vedtak).first().fom!!
@@ -422,7 +422,7 @@ class BrevService(
             organisasjonsnummer = organisasjonsnummer,
             gjelder = if (organisasjonsnummer != null) grunnlagOgSignaturData.grunnlag.søker.navn else null,
             korrigertVedtakData = korrigertVedtak?.let { KorrigertVedtakData(datoKorrigertVedtak = it.vedtaksdato.tilDagMånedÅr()) },
-            utbetalingerEøs = utbetalingerEøs,
+            utbetalingerPerMndEøs = utbetalingerEøs,
         )
     }
 
