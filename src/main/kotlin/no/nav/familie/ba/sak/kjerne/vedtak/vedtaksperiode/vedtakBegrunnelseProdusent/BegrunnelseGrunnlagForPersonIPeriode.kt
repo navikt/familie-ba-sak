@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -7,16 +8,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedNullable
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilNesteMåned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifte
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.IEndretUtbetalingAndelForVedtaksperiode
@@ -143,14 +142,14 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
         }
 }
 
-private fun Collection<VilkårResultat>.hentForskjøvetEksplisittAvslagTidslinje(): Tidslinje<List<VilkårResultatForVedtaksperiode>, Måned> =
-    filter { it.erEksplisittAvslagPåSøknad == true }.groupBy { it.vilkårType }.map { (_, vilkårResultater) ->
-        vilkårResultater.tilTidslinje().perioder().map {
-            Periode(
-                it.fraOgMed.tilNesteMåned(),
-                it.tilOgMed.tilNesteMåned(),
-                it.innhold,
-            )
-        }.tilTidslinje()
+private fun Collection<VilkårResultat>.hentForskjøvetEksplisittAvslagTidslinje(): Tidslinje<List<VilkårResultatForVedtaksperiode>, Måned> = groupBy { it.vilkårType }.map { (_, vilkårResultater) ->
+    vilkårResultater.tilTidslinje().tilMånedFraMånedsskifte { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
+        when {
+            innholdSisteDagForrigeMåned?.resultat == Resultat.OPPFYLT && innholdFørsteDagDenneMåned?.resultat == Resultat.IKKE_OPPFYLT -> innholdFørsteDagDenneMåned
+            innholdSisteDagForrigeMåned?.resultat == Resultat.IKKE_OPPFYLT && innholdFørsteDagDenneMåned == null && innholdSisteDagForrigeMåned.periodeFom?.toYearMonth() == innholdSisteDagForrigeMåned.periodeTom?.toYearMonth() -> innholdSisteDagForrigeMåned
+            innholdSisteDagForrigeMåned?.resultat == Resultat.IKKE_OPPFYLT && innholdFørsteDagDenneMåned?.resultat == Resultat.IKKE_OPPFYLT -> innholdFørsteDagDenneMåned
+            else -> null
+        }
+    }
     }.map { tidslinje -> tidslinje.map { it?.let { VilkårResultatForVedtaksperiode(it) } } }
         .kombiner { it.toList() }
