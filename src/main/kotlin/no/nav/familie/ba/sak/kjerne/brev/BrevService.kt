@@ -504,7 +504,6 @@ class BrevService(
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId).toList()
 
         return hentUtbetalingerEøs(
-            vedtak = vedtak,
             endringstidspunkt = endringstidspunkt,
             andelerForVedtaksperioderPerAktørOgType = andelerForVedtaksperioderPerAktørOgType,
             utenlandskePeriodebeløp = utenlandskePeriodebeløp,

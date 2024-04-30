@@ -37,7 +37,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
@@ -46,7 +45,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
-import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
@@ -316,7 +314,6 @@ fun skalHenteUtbetalingerEøs(
     valutakurser.tilSeparateTidslinjerForBarna().mapValues { (_, valutakursTidslinjeForBarn) -> valutakursTidslinjeForBarn.beskjærFraOgMed(endringstidspunkt.tilMånedTidspunkt()) }.isNotEmpty()
 
 fun hentUtbetalingerEøs(
-    vedtak: Vedtak,
     endringstidspunkt: LocalDate,
     andelerForVedtaksperioderPerAktørOgType: Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForVedtaksperioderTidslinje>,
     utenlandskePeriodebeløp: List<UtenlandskPeriodebeløp>,
@@ -345,7 +342,7 @@ fun hentUtbetalingerEøs(
         }
         .mapValues { (aktørOgYtelseType, value) ->
             value.filtrerIkkeNull().mapIkkeNull { andelerUpbOgValutakurs ->
-                hentUtbetalingEøs(vedtak = vedtak, aktørOgYtelseType = aktørOgYtelseType, andelUpbOgValutakurs = andelerUpbOgValutakurs)
+                hentUtbetalingEøs(aktørOgYtelseType = aktørOgYtelseType, andelUpbOgValutakurs = andelerUpbOgValutakurs)
             }
         }
         // Kombinerer verdiene til alle tidslinjene slik at vi får en liste av UtbetalingEøs per periode, samt sørger for at vi får en periode per mnd.
@@ -361,28 +358,26 @@ fun hentUtbetalingerEøs(
 }
 
 private fun hentUtbetalingEøs(
-    vedtak: Vedtak,
     aktørOgYtelseType: Pair<Aktør, YtelseType>,
     andelUpbOgValutakurs: AndelUpbOgValutakurs,
 ): UtbetalingEøs {
-    val fnr = aktørOgYtelseType.first.aktivFødselsnummer()
     return UtbetalingEøs(
-        barnetrygd =
-            if (fnr != vedtak.behandling.fagsak.aktør.aktivFødselsnummer()) {
-                "Barn ${Identkonverterer.formaterIdent(fnr)}"
-            } else {
-                aktørOgYtelseType.second.toString()
-            },
+        fnr = aktørOgYtelseType.first.aktivFødselsnummer(),
+        ytelseType = aktørOgYtelseType.second,
         satsINorge = andelUpbOgValutakurs.andelForVedtaksperiode.sats,
         utbetaltFraAnnetLand =
             when (andelUpbOgValutakurs.utenlandskPeriodebeløp) {
                 null -> null
                 else ->
-                    UtbetaltFraAnnetLand(
-                        beløp = andelUpbOgValutakurs.utenlandskPeriodebeløp.tilKalkulertMånedligBeløp()?.toBigInteger()?.intValueExact(),
-                        valutakode = andelUpbOgValutakurs.utenlandskPeriodebeløp.valutakode,
-                        beløpINok = (andelUpbOgValutakurs.utenlandskPeriodebeløp.tilMånedligValutabeløp() * andelUpbOgValutakurs.valutakurs.tilKronerPerValutaenhet())?.toBigInteger()?.intValueExact(),
-                    )
+                    try {
+                        UtbetaltFraAnnetLand(
+                            beløp = andelUpbOgValutakurs.utenlandskPeriodebeløp.tilKalkulertMånedligBeløp()!!.toBigInteger().intValueExact(),
+                            valutakode = andelUpbOgValutakurs.utenlandskPeriodebeløp.valutakode!!,
+                            beløpINok = (andelUpbOgValutakurs.utenlandskPeriodebeløp.tilMånedligValutabeløp()!! * andelUpbOgValutakurs.valutakurs.tilKronerPerValutaenhet())!!.toBigInteger().intValueExact(),
+                        )
+                    } catch (exception: NullPointerException) {
+                        throw Feil("Kan ikke opprette UtbetaltFraAnnetLand for periode med utenlandsk periodebeløp da ett eller flere av de påkrevde feltene er null: kalkulertMånedligBeløp = ${andelUpbOgValutakurs.utenlandskPeriodebeløp.tilKalkulertMånedligBeløp()}, valutkode = ${andelUpbOgValutakurs.utenlandskPeriodebeløp.valutakode} valutakurs = ${andelUpbOgValutakurs.valutakurs.tilKronerPerValutaenhet()}")
+                    }
             },
         utbetaltFraNorge = andelUpbOgValutakurs.andelForVedtaksperiode.kalkulertUtbetalingsbeløp,
     )
