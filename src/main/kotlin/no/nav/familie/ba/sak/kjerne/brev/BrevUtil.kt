@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.erIkkeTom
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.splitPerTidsenhet
@@ -311,9 +312,9 @@ fun skalHenteUtbetalingerEøs(
     endringstidspunkt: LocalDate,
     valutakurser: List<Valutakurs>,
 ): Boolean =
-    valutakurser.tilSeparateTidslinjerForBarna().mapValues { (_, valutakursTidslinjeForBarn) -> valutakursTidslinjeForBarn.beskjærFraOgMed(endringstidspunkt.tilMånedTidspunkt()) }.isNotEmpty()
+    valutakurser.tilSeparateTidslinjerForBarna().mapValues { (_, valutakursTidslinjeForBarn) -> valutakursTidslinjeForBarn.beskjærFraOgMed(endringstidspunkt.tilMånedTidspunkt()) }.filterValues { it.erIkkeTom() }.isNotEmpty()
 
-fun hentUtbetalingerEøs(
+fun hentUtbetalingerPerMndEøs(
     endringstidspunkt: LocalDate,
     andelerForVedtaksperioderPerAktørOgType: Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForVedtaksperioderTidslinje>,
     utenlandskePeriodebeløp: List<UtenlandskPeriodebeløp>,

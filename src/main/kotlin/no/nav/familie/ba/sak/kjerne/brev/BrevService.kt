@@ -393,7 +393,7 @@ class BrevService(
                 }
             }
 
-        val utbetalingerEøs = hentUtbetalingerEøs(vedtak)
+        val utbetalingerPerMndEøs = hentUtbetalingerPerMndEøs(vedtak)
 
         val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
         val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId)
@@ -422,7 +422,7 @@ class BrevService(
             organisasjonsnummer = organisasjonsnummer,
             gjelder = if (organisasjonsnummer != null) grunnlagOgSignaturData.grunnlag.søker.navn else null,
             korrigertVedtakData = korrigertVedtak?.let { KorrigertVedtakData(datoKorrigertVedtak = it.vedtaksdato.tilDagMånedÅr()) },
-            utbetalingerPerMndEøs = utbetalingerEøs,
+            utbetalingerPerMndEøs = utbetalingerPerMndEøs,
         )
     }
 
@@ -489,7 +489,7 @@ class BrevService(
         )
     }
 
-    private fun hentUtbetalingerEøs(
+    private fun hentUtbetalingerPerMndEøs(
         vedtak: Vedtak,
     ): Map<String, UtbetalingMndEøs>? {
         val behandlingId = vedtak.behandling.id
@@ -503,7 +503,7 @@ class BrevService(
         val andelerForVedtaksperioderPerAktørOgType = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId).tilTidslinjerPerAktørOgType()
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId).toList()
 
-        return hentUtbetalingerEøs(
+        return hentUtbetalingerPerMndEøs(
             endringstidspunkt = endringstidspunkt,
             andelerForVedtaksperioderPerAktørOgType = andelerForVedtaksperioderPerAktørOgType,
             utenlandskePeriodebeløp = utenlandskePeriodebeløp,
