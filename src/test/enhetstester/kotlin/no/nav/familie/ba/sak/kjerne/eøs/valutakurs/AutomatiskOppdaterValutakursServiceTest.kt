@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
@@ -43,6 +44,7 @@ class AutomatiskOppdaterValutakursServiceTest {
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     val simuleringService = mockk<SimuleringService>()
     val vurderingsstrategiForValutakurserRepository = mockk<VurderingsstrategiForValutakurserRepository>()
+    val unleashNextMedContextService = mockk<UnleashNextMedContextService>()
 
     val automatiskOppdaterValutakursService =
         AutomatiskOppdaterValutakursService(
@@ -55,6 +57,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
             simuleringService = simuleringService,
             vurderingsstrategiForValutakurserRepository = vurderingsstrategiForValutakurserRepository,
+            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val forrigeBehandlingId = BehandlingId(9L)
@@ -75,6 +78,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             dato.month.value.toBigDecimal()
         }
         every { vurderingsstrategiForValutakurserRepository.findByBehandlingId(any()) } returns null
+        every { unleashNextMedContextService.isEnabled(any()) } returns true
         valutakursRepository.deleteAll()
         utenlandskPeriodebeløpRepository.deleteAll()
     }
