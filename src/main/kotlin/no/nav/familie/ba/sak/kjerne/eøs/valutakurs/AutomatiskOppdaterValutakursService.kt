@@ -45,11 +45,13 @@ class AutomatiskOppdaterValutakursService(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId.id)
         val forrigeBehandlingVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
-        // Resetter valutaen til slik den var i forrige behandling
-        valutakursService.kopierOgErstattValutakurser(
-            fraBehandlingId = BehandlingId(forrigeBehandlingVedtatt!!.id),
-            tilBehandlingId = behandlingId,
-        )
+        if (forrigeBehandlingVedtatt != null) {
+            // Resetter valutaen til slik den var i forrige behandling
+            valutakursService.kopierOgErstattValutakurser(
+                fraBehandlingId = BehandlingId(forrigeBehandlingVedtatt.id),
+                tilBehandlingId = behandlingId,
+            )
+        }
 
         // Tilpasser valutaen til potensielle endringer i utenlandske periodebeløp fra denne behandlingen
         tilpassValutakurserTilUtenlandskePeriodebeløpService.tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId)
