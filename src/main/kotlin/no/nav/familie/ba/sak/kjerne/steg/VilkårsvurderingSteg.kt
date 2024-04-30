@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_STARTE_VALUTAJUSTERING
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringSevice
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -93,7 +93,7 @@ class VilkårsvurderingSteg(
             månedligValutajusteringSevice.oppdaterValutakurserForMåned(BehandlingId(behandling.id), localDateProvider.now().toYearMonth())
         }
 
-        if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING) && behandling.type == BehandlingType.REVURDERING && behandling.skalBehandlesAutomatisk == false) {
+        if (unleashNextMedContextService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) && behandling.type == BehandlingType.REVURDERING && behandling.skalBehandlesAutomatisk == false) {
             automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringstidspunkt(BehandlingId(behandling.id))
         }
 

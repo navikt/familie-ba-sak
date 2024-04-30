@@ -1,9 +1,13 @@
 ﻿package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.rangeTo
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OVERSTYRE_AUTOMATISKE_VALUTAKURSER
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.tilSisteVirkedag
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -32,6 +36,7 @@ class AutomatiskOppdaterValutakursService(
     private val tilpassValutakurserTilUtenlandskePeriodebeløpService: TilpassValutakurserTilUtenlandskePeriodebeløpService,
     private val simuleringService: SimuleringService,
     private val vurderingsstrategiForValutakurserRepository: VurderingsstrategiForValutakurserRepository,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     @Transactional
     fun resettValutakurserOgLagValutakurserEtterEndringstidspunkt(
@@ -120,6 +125,12 @@ class AutomatiskOppdaterValutakursService(
         behandlingId: BehandlingId,
         nyStrategi: VurderingsstrategiForValutakurser,
     ): VurderingsstrategiForValutakurserDB {
+        if (!unleashNextMedContextService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) ||
+            !unleashNextMedContextService.isEnabled(KAN_OVERSTYRE_AUTOMATISKE_VALUTAKURSER)
+        ) {
+            throw Feil("Relevante toggler for å overstyre vurderingsstrategi for valutakurser er ikke satt.")
+        }
+
         val vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandlingId.id)
         if (vurderingsstrategiForValutakurser != null) {
             vurderingsstrategiForValutakurserRepository.delete(vurderingsstrategiForValutakurser)
