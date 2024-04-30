@@ -46,6 +46,7 @@ class BrevServiceTest {
     @BeforeEach
     fun setUp() {
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
+        every { unleashService.isEnabled(any()) } returns true
     }
 
     @Test
