@@ -697,6 +697,7 @@ class SmåbarnstilleggUtilsTest {
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusYears(2),
                     tom = YearMonth.now().minusMonths(10),
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ),
             )
 
@@ -706,6 +707,7 @@ class SmåbarnstilleggUtilsTest {
                     lagAndelTilkjentYtelse(
                         fom = YearMonth.now(),
                         tom = YearMonth.now().plusMonths(2),
+                        ytelseType = YtelseType.SMÅBARNSTILLEGG,
                     ),
                 )
 
@@ -730,6 +732,7 @@ class SmåbarnstilleggUtilsTest {
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusYears(2),
                     tom = YearMonth.now().minusMonths(10),
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ),
             )
 
@@ -738,10 +741,12 @@ class SmåbarnstilleggUtilsTest {
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusYears(2),
                     tom = YearMonth.now().minusMonths(5),
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now(),
                     tom = YearMonth.now().plusMonths(2),
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ),
             )
 
@@ -766,6 +771,7 @@ class SmåbarnstilleggUtilsTest {
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusYears(2),
                     tom = YearMonth.now().minusMonths(10),
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ),
             )
 
@@ -774,10 +780,12 @@ class SmåbarnstilleggUtilsTest {
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusYears(2),
                     tom = YearMonth.now().minusMonths(5),
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().plusMonths(2),
                     tom = YearMonth.now().plusMonths(4),
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ),
             )
 
@@ -802,6 +810,7 @@ class SmåbarnstilleggUtilsTest {
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusYears(2),
                     tom = YearMonth.now().minusMonths(10),
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ),
             )
 
