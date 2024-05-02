@@ -22,8 +22,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.fpsak.tidsserie.LocalDateTimeline
-import no.nav.fpsak.tidsserie.StandardCombinators
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -65,23 +63,6 @@ data class TilkjentYtelse(
     )
     val andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> = mutableSetOf(),
 )
-
-private fun kombinerAndeler(
-    lhs: LocalDateTimeline<List<AndelTilkjentYtelse>>,
-    rhs: LocalDateTimeline<AndelTilkjentYtelse>,
-): LocalDateTimeline<List<AndelTilkjentYtelse>> {
-    return lhs.combine(
-        rhs,
-        { datoIntervall, sammenlagt, neste ->
-            StandardCombinators.allValues(
-                datoIntervall,
-                sammenlagt,
-                neste,
-            )
-        },
-        LocalDateTimeline.JoinStyle.CROSS_JOIN,
-    )
-}
 
 fun TilkjentYtelse.tilTidslinjeMedAndeler(): Tidslinje<Iterable<AndelTilkjentYtelse>, Måned> = this.andelerTilkjentYtelse.tilTidslinjerPerPersonOgType().values.kombiner { it }
 
