@@ -46,12 +46,12 @@ fun hentGyldigEtterbetalingFom(kravDato: LocalDate) =
         .toYearMonth()
 
 fun hentSøkersAndeler(
-    andeler: List<AndelTilkjentYtelse>,
+    andeler: Iterable<AndelTilkjentYtelse>,
     søker: PersonEnkel,
 ) = andeler.filter { it.aktør == søker.aktør }
 
 fun hentBarnasAndeler(
-    andeler: List<AndelTilkjentYtelse>,
+    andeler: Iterable<AndelTilkjentYtelse>,
     barna: List<PersonEnkel>,
 ) =
     barna.map { barn ->
@@ -178,9 +178,9 @@ object TilkjentYtelseValidering {
 
         val fagsakType = tilkjentYtelse.behandling.fagsak.type
 
-        tidslinjeMedAndeler.toSegments().forEach {
-            val søkersAndeler = hentSøkersAndeler(it.value, søker)
-            val barnasAndeler = hentBarnasAndeler(it.value, barna)
+        tidslinjeMedAndeler.perioder().mapNotNull { it.innhold }.forEach {
+            val søkersAndeler = hentSøkersAndeler(it, søker)
+            val barnasAndeler = hentBarnasAndeler(it, barna)
 
             validerAtBeløpForPartStemmerMedSatser(person = søker, andeler = søkersAndeler, fagsakType = fagsakType)
 

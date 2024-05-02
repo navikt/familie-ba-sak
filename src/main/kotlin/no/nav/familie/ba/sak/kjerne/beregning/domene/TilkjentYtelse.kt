@@ -15,13 +15,13 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.YearMonthConverter
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 import java.time.LocalDate
@@ -83,35 +83,7 @@ private fun kombinerAndeler(
     )
 }
 
-fun lagTidslinjeMedOverlappendePerioderForAndeler(tidslinjer: List<LocalDateTimeline<AndelTilkjentYtelse>>): LocalDateTimeline<List<AndelTilkjentYtelse>> {
-    if (tidslinjer.isEmpty()) return LocalDateTimeline(emptyList())
-
-    val førsteSegment = tidslinjer.first().toSegments().first()
-    val initiellSammenlagt =
-        LocalDateTimeline(listOf(LocalDateSegment(førsteSegment.fom, førsteSegment.tom, listOf(førsteSegment.value))))
-    val resterende = tidslinjer.drop(1)
-
-    return resterende.fold(initiellSammenlagt) { sammenlagt, neste ->
-        kombinerAndeler(sammenlagt, neste)
-    }
-}
-
-fun TilkjentYtelse.tilTidslinjeMedAndeler(): LocalDateTimeline<List<AndelTilkjentYtelse>> {
-    val tidslinjer =
-        this.andelerTilkjentYtelse.map { andelTilkjentYtelse ->
-            LocalDateTimeline(
-                listOf(
-                    LocalDateSegment(
-                        andelTilkjentYtelse.stønadFom.førsteDagIInneværendeMåned(),
-                        andelTilkjentYtelse.stønadTom.sisteDagIInneværendeMåned(),
-                        andelTilkjentYtelse,
-                    ),
-                ),
-            )
-        }
-
-    return lagTidslinjeMedOverlappendePerioderForAndeler(tidslinjer)
-}
+fun TilkjentYtelse.tilTidslinjeMedAndeler(): Tidslinje<Iterable<AndelTilkjentYtelse>, Måned> = this.andelerTilkjentYtelse.tilTidslinjerPerPersonOgType().values.kombiner { it }
 
 fun TilkjentYtelse.utbetalingsoppdrag(): Utbetalingsoppdrag? =
     objectMapper.readValue(this.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
