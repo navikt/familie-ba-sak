@@ -1,29 +1,25 @@
 package no.nav.familie.ba.sak.config
 
-import io.mockk.mockk
-import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
-import no.nav.familie.ba.sak.config.featureToggle.miljø.erAktiv
 import no.nav.familie.unleash.UnleashService
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
-import org.springframework.core.env.Environment
+import org.springframework.stereotype.Service
 
-@TestConfiguration
-class UnleashServiceMockConfig(
-    private val unleashService: UnleashService,
-    private val environment: Environment,
-) {
-    @Bean
-    @Primary
-    fun mockUnleashService(): UnleashService {
-        if (environment.erAktiv(Profil.Integrasjonstest)) {
-            val mockUnleashService = mockk<UnleashService>(relaxed = true)
+@Service
+@Primary
+class MockUnleashService: UnleashService {
 
-            ClientMocks.clearUnleashServiceMocks(mockUnleashService)
-
-            return mockUnleashService
-        }
-        return unleashService
+    override fun isEnabled(toggleId: String): Boolean {
+        val mockUnleashServiceAnswer = System.getProperty("mockFeatureToggleAnswer")?.toBoolean() ?: true
+        return System.getProperty(toggleId)?.toBoolean() ?: mockUnleashServiceAnswer
     }
+
+    override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
+        return isEnabled(toggleId)
+    }
+
+    override fun isEnabled(toggleId: String, properties: Map<String, String>): Boolean {
+        return isEnabled(toggleId)
+    }
+
+    override fun destroy() {}
 }
