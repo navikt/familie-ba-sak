@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.konverterBeløpTilMånedlig
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -41,6 +42,7 @@ fun lagValutakurs(
     valutakursdato: LocalDate? = null,
     valutakode: String? = null,
     kurs: BigDecimal? = null,
+    vurderingsform: Vurderingsform = Vurderingsform.IKKE_VURDERT,
 ) = Valutakurs(
     fom = fom,
     tom = tom,
@@ -48,6 +50,7 @@ fun lagValutakurs(
     valutakursdato = valutakursdato,
     valutakode = valutakode,
     kurs = kurs,
+    vurderingsform = vurderingsform,
 ).also { it.behandlingId = behandlingId }
 
 fun lagUtenlandskPeriodebeløp(

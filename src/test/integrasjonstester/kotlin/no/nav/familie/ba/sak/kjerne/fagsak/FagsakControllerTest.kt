@@ -9,14 +9,12 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.Personident
@@ -46,8 +44,6 @@ class FagsakControllerTest(
     @Autowired
     private val behandlingService: BehandlingService,
     @Autowired
-    private val mockIntegrasjonClient: IntegrasjonClient,
-    @Autowired
     private val persongrunnlagService: PersongrunnlagService,
     @Autowired
     private val mockPersonidentService: PersonidentService,
@@ -59,8 +55,6 @@ class FagsakControllerTest(
     private val databaseCleanupService: DatabaseCleanupService,
     @Autowired
     private val skyggesakRepository: SkyggesakRepository,
-    @Autowired
-    private val institusjonService: InstitusjonService,
 ) : AbstractSpringIntegrationTest() {
     @BeforeEach
     fun init() {
@@ -239,7 +233,7 @@ class FagsakControllerTest(
             FagsakRequest(
                 personIdent = fnr,
                 fagsakType = FagsakType.INSTITUSJON,
-                institusjon = InstitusjonInfo("orgnr", "tss-id"),
+                institusjon = RestInstitusjon("orgnr", "tss-id"),
             ),
         )
         val fagsakerRessurs = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))

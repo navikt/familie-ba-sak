@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.VurderingsstrategiForValutakurser
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import java.time.LocalDate
@@ -39,10 +40,10 @@ data class RestUtvidetBehandling(
     val migreringsdato: LocalDate?,
     val valutakurser: List<RestValutakurs>,
     val utenlandskePeriodebeløp: List<RestUtenlandskPeriodebeløp>,
-    val verge: VergeInfo?,
     val korrigertEtterbetaling: RestKorrigertEtterbetaling?,
     val korrigertVedtak: RestKorrigertVedtak?,
     val feilutbetaltValuta: List<RestFeilutbetaltValuta>,
     val brevmottakere: List<RestBrevmottaker>,
     val refusjonEøs: List<RestRefusjonEøs>,
+    val vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser? = VurderingsstrategiForValutakurser.AUTOMATISK,
 )

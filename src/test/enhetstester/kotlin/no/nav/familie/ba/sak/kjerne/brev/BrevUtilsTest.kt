@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -710,20 +710,23 @@ internal class BrevUtilsTest {
 
         val opphørsperioder =
             listOf(
-                Opphørsperiode(
-                    periodeFom = LocalDate.now().minusYears(1),
-                    periodeTom = LocalDate.now().minusYears(1).plusMonths(2),
+                lagVedtaksperiodeMedBegrunnelser(
+                    fom = LocalDate.now().minusYears(1),
+                    tom = LocalDate.now().minusYears(1).plusMonths(2),
+                    type = Vedtaksperiodetype.OPPHØR,
                 ),
-                Opphørsperiode(
-                    periodeFom = LocalDate.now().minusMonths(5),
-                    periodeTom = LocalDate.now().minusMonths(4),
+                lagVedtaksperiodeMedBegrunnelser(
+                    fom = LocalDate.now().minusMonths(5),
+                    tom = LocalDate.now().minusMonths(4),
+                    type = Vedtaksperiodetype.OPPHØR,
                 ),
-                Opphørsperiode(
-                    periodeFom = sisteFom,
-                    periodeTom = LocalDate.now(),
+                lagVedtaksperiodeMedBegrunnelser(
+                    fom = sisteFom,
+                    tom = LocalDate.now(),
+                    type = Vedtaksperiodetype.OPPHØR,
                 ),
             )
 
-        Assertions.assertEquals(sisteFom.tilMånedÅr(), hentVirkningstidspunkt(opphørsperioder, 0L))
+        Assertions.assertEquals(sisteFom.tilMånedÅr(), hentVirkningstidspunktForDødsfallbrev(opphørsperioder, 0L))
     }
 }

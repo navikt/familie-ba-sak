@@ -72,7 +72,7 @@ class SendTilBeslutterTest {
             lagVilkårsvurdering(randomAktør(), lagBehandling(), Resultat.IKKE_VURDERT)
 
         assertThrows<FunksjonellFeil> {
-            vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert()
+            vilkårsvurdering.validerAtAndreVurderingerErVurdert()
         }
     }
 
@@ -81,6 +81,6 @@ class SendTilBeslutterTest {
         val vilkårsvurdering =
             lagVilkårsvurdering(randomAktør(), lagBehandling(), Resultat.IKKE_OPPFYLT)
 
-        vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert()
+        vilkårsvurdering.validerAtAndreVurderingerErVurdert()
     }
 }

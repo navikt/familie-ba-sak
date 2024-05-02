@@ -11,44 +11,59 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 @Service
-class SanityService(
-    private val sanityKlient: SanityKlient,
-) {
+class SanityService(private val sanityKlient: SanityKlient) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Cacheable("sanityBegrunnelser", cacheManager = "shortCache")
-    fun hentSanityBegrunnelser(): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    fun hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk: Boolean = false): Map<Standardbegrunnelse, SanityBegrunnelse> {
         val enumPåApiNavn = Standardbegrunnelse.values().associateBy { it.sanityApiNavn }
+
         val sanityBegrunnelser = sanityKlient.hentBegrunnelser()
+
         logManglerSanityBegrunnelseForEnum(enumPåApiNavn, sanityBegrunnelser, "SanityBegrunnelse")
-        return sanityBegrunnelser
-            .mapNotNull {
-                val begrunnelseEnum = enumPåApiNavn[it.apiNavn]
-                if (begrunnelseEnum == null) {
-                    logger.warn("Finner ikke Standardbegrunnelse for ${it.apiNavn}")
-                    null
-                } else {
-                    begrunnelseEnum to it
-                }
-            }.toMap()
+
+        val mapAvSanityBegrunnelser =
+            sanityBegrunnelser
+                .mapNotNull {
+                    val begrunnelseEnum = enumPåApiNavn[it.apiNavn]
+                    if (begrunnelseEnum == null) {
+                        logger.warn("Finner ikke Standardbegrunnelse for ${it.apiNavn}")
+                        null
+                    } else {
+                        begrunnelseEnum to it
+                    }
+                }.toMap()
+
+        return when (filtrerBortBegrunnelserSomIkkeErIBruk) {
+            true -> mapAvSanityBegrunnelser.filterValues { !it.ikkeIBruk }
+            false -> mapAvSanityBegrunnelser
+        }
     }
 
     @Cacheable("sanityEØSBegrunnelser", cacheManager = "shortCache")
-    fun hentSanityEØSBegrunnelser(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
+    fun hentSanityEØSBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk: Boolean = false): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
         val enumPåApiNavn = EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
 
         val sanityEØSBegrunnelser = sanityKlient.hentEØSBegrunnelser()
+
         logManglerSanityBegrunnelseForEnum(enumPåApiNavn, sanityEØSBegrunnelser, "SanityEØSBegrunnelse")
-        return sanityEØSBegrunnelser
-            .mapNotNull {
-                val begrunnelseEnum = enumPåApiNavn[it.apiNavn]
-                if (begrunnelseEnum == null) {
-                    logger.warn("Finner ikke EØSStandardbegrunnelse for ${it.apiNavn}")
-                    null
-                } else {
-                    begrunnelseEnum to it
-                }
-            }.toMap()
+
+        val mapAvSanityEøsBegrunnelser =
+            sanityEØSBegrunnelser
+                .mapNotNull {
+                    val begrunnelseEnum = enumPåApiNavn[it.apiNavn]
+                    if (begrunnelseEnum == null) {
+                        logger.warn("Finner ikke EØSStandardbegrunnelse for ${it.apiNavn}")
+                        null
+                    } else {
+                        begrunnelseEnum to it
+                    }
+                }.toMap()
+
+        return when (filtrerBortBegrunnelserSomIkkeErIBruk) {
+            true -> mapAvSanityEøsBegrunnelser.filterValues { !it.ikkeIBruk }
+            false -> mapAvSanityEøsBegrunnelser
+        }
     }
 
     private fun logManglerSanityBegrunnelseForEnum(

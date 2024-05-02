@@ -129,8 +129,6 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
 
     fun erAndelSomharNullutbetalingPgaDifferanseberegning() = andelTilkjentYtelse.erAndelSomharNullutbetalingPgaDifferanseberegning()
 
-    fun overlapperPeriode(månedPeriode: MånedPeriode) = andelTilkjentYtelse.overlapperPeriode(månedPeriode)
-
     fun slåSammenMed(naboAndel: AndelTilkjentYtelseMedEndreteUtbetalinger): AndelTilkjentYtelseMedEndreteUtbetalinger {
         // Skal allerede være sjekket at disse er naboer som kan slås sammen, bla. at de eventuelt har samme endringsperiode
         // Dermed skal en en enkel utvidelse med stønadTom fra naboen fungere
@@ -161,8 +159,6 @@ data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     private val andeler: List<AndelTilkjentYtelse>,
 ) {
     fun overlapperMed(månedPeriode: MånedPeriode) = endretUtbetalingAndel.overlapperMed(månedPeriode)
-
-    fun årsakErDeltBosted() = endretUtbetalingAndel.årsakErDeltBosted()
 
     val periode get() = endretUtbetalingAndel.periode
     val person get() = endretUtbetalingAndel.person

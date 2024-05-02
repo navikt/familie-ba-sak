@@ -144,7 +144,7 @@ internal class BehandleFødselshendelseTaskTest {
         )
         verify(exactly = 1) {
             OpprettVurderFødselshendelseKonsekvensForYtelseOppgave.opprettTask(
-                ident = randomAktør.aktørId,
+                aktør = randomAktør,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
             )

@@ -65,7 +65,6 @@ class AndelTilkjentYtelseOffsetTest(
             fullførBehandling(
                 fagsak = fagsak1,
                 personScenario = personScenario1,
-                barnFødselsdato = barnFødselsdato,
             )
 
         // Legger til småbarnstillegg på søker
@@ -114,7 +113,6 @@ class AndelTilkjentYtelseOffsetTest(
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns

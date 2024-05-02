@@ -1,13 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
-import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
-import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -26,11 +22,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
@@ -67,20 +60,11 @@ class BeregningService(
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
 
-    fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
-        tilkjentYtelseRepository.save(tilkjentYtelse)
-
     fun hentTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandling(behandlingId)
 
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
-
-    fun hentSisteAndelPerIdent(fagsakId: Long): Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag> {
-        return andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(fagsakId)
-            .groupBy { IdentOgYtelse(it.aktør.aktivFødselsnummer(), it.type) }
-            .mapValues { AndelTilkjentYtelseForSimuleringFactory().pakkInnForUtbetaling(it.value).single() }
-    }
 
     /**
      * Denne metoden henter alle relaterte behandlinger på en person.
@@ -230,14 +214,6 @@ class BeregningService(
         return oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
     }
 
-    fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
-        behandling: Behandling,
-        utbetalingsoppdrag: Utbetalingsoppdrag,
-    ): TilkjentYtelse {
-        val nyTilkjentYtelse = populerTilkjentYtelse(behandling, utbetalingsoppdrag)
-        return tilkjentYtelseRepository.save(nyTilkjentYtelse)
-    }
-
     fun kanAutomatiskIverksetteSmåbarnstilleggEndring(
         behandling: Behandling,
         sistIverksatteBehandling: Behandling?,
@@ -286,37 +262,6 @@ class BeregningService(
             ?.filter {
                 andelerTilkjentYtelse.any { aty -> aty.aktør == it }
             } ?: emptyList()
-    }
-
-    fun populerTilkjentYtelse(
-        behandling: Behandling,
-        utbetalingsoppdrag: Utbetalingsoppdrag,
-    ): TilkjentYtelse {
-        val erRentOpphør =
-            utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() && utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
-        var opphørsdato: LocalDate? = null
-        if (erRentOpphør) {
-            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.minOf { it.opphør!!.opphørDatoFom }
-        }
-
-        if (behandling.type == BehandlingType.REVURDERING) {
-            val opphørPåRevurdering = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
-            if (opphørPåRevurdering.isNotEmpty()) {
-                opphørsdato = opphørPåRevurdering.maxByOrNull { it.opphør!!.opphørDatoFom }!!.opphør!!.opphørDatoFom
-            }
-        }
-
-        val tilkjentYtelse =
-            tilkjentYtelseRepository.findByBehandling(behandling.id)
-
-        return tilkjentYtelse.apply {
-            this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-            this.stønadTom = tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
-            this.stønadFom =
-                if (erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
-            this.endretDato = LocalDate.now()
-            this.opphørFom = opphørsdato?.toYearMonth()
-        }
     }
 }
 

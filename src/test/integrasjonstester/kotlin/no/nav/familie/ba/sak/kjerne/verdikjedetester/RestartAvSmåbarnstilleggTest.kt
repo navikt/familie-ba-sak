@@ -78,7 +78,6 @@ class RestartAvSmåbarnstilleggTest(
         fullførBehandling(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
         )
 
         fullførRevurderingMedOvergangstonad(
@@ -113,7 +112,6 @@ class RestartAvSmåbarnstilleggTest(
         fullførBehandling(
             fagsak = fagsak2,
             personScenario = personScenario2,
-            barnFødselsdato = barnFødselsdato,
         )
         fullførRevurderingMedOvergangstonad(
             fagsak = fagsak2,
@@ -142,7 +140,6 @@ class RestartAvSmåbarnstilleggTest(
         fullførBehandling(
             fagsak = fagsak3,
             personScenario = personScenario3,
-            barnFødselsdato = barnFødselsdato,
         )
         fullførRevurderingMedOvergangstonad(
             fagsak = fagsak3,
@@ -193,7 +190,6 @@ class RestartAvSmåbarnstilleggTest(
         fullførBehandling(
             fagsak = fagsakMedSatsendringOgSmåbarnstilleggSomSkalRestartes,
             personScenario = personScenario,
-            barnFødselsdato = barnFødselsdato,
         )
         fullførRevurderingMedOvergangstonad(
             fagsak = fagsakMedSatsendringOgSmåbarnstilleggSomSkalRestartes,
@@ -246,7 +242,6 @@ class RestartAvSmåbarnstilleggTest(
         fullførBehandling(
             fagsak = fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes,
             personScenario = personScenario2,
-            barnFødselsdato = barnFødselsdato,
         )
         fullførRevurderingMedOvergangstonad(
             fagsak = fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes,
@@ -295,7 +290,6 @@ class RestartAvSmåbarnstilleggTest(
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns

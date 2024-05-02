@@ -4,6 +4,8 @@ import jakarta.persistence.Column
 import jakarta.persistence.Convert
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -48,6 +50,9 @@ data class Valutakurs(
     val valutakode: String? = null,
     @Column(name = "kurs", nullable = false)
     val kurs: BigDecimal? = null,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vurderingsform")
+    val vurderingsform: Vurderingsform,
 ) : PeriodeOgBarnSkjemaEntitet<Valutakurs>() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "valutakurs_seq_generator")
@@ -66,18 +71,18 @@ data class Valutakurs(
         copy(
             valutakursdato = null,
             kurs = null,
+            vurderingsform = Vurderingsform.IKKE_VURDERT,
         )
 
     override fun kopier(
         fom: YearMonth?,
         tom: YearMonth?,
         barnAktører: Set<Aktør>,
-    ) =
-        copy(
-            fom = fom,
-            tom = tom,
-            barnAktører = barnAktører,
-        )
+    ) = copy(
+        fom = fom,
+        tom = tom,
+        barnAktører = barnAktører,
+    )
 
     fun erObligatoriskeFelterSatt() =
         fom != null &&
@@ -87,12 +92,18 @@ data class Valutakurs(
         this.valutakode != null &&
             this.kurs != null &&
             this.valutakursdato != null &&
-            this.valutakode != null &&
-            this.barnAktører.isNotEmpty()
+            this.barnAktører.isNotEmpty() &&
+            this.vurderingsform != Vurderingsform.IKKE_VURDERT
 
     companion object {
-        val NULL = Valutakurs(null, null, emptySet())
+        val NULL = Valutakurs(fom = null, tom = null, barnAktører = emptySet(), vurderingsform = Vurderingsform.IKKE_VURDERT)
     }
+}
+
+enum class Vurderingsform {
+    MANUELL,
+    AUTOMATISK,
+    IKKE_VURDERT,
 }
 
 sealed interface IValutakurs {
@@ -114,6 +125,7 @@ data class UtfyltValutakurs(
     val valutakursdato: LocalDate,
     val valutakode: String,
     val kurs: BigDecimal,
+    val vurderingsform: Vurderingsform,
 ) : IValutakurs
 
 fun Valutakurs.tilIValutakurs(): IValutakurs {
@@ -127,6 +139,7 @@ fun Valutakurs.tilIValutakurs(): IValutakurs {
             valutakursdato = this.valutakursdato!!,
             valutakode = this.valutakode!!,
             kurs = this.kurs!!,
+            vurderingsform = this.vurderingsform,
         )
     } else {
         TomValutakurs(
@@ -144,3 +157,5 @@ fun List<UtfyltValutakurs>.tilTidslinje() =
             innhold = it,
         )
     }.tilTidslinje()
+
+fun Collection<Valutakurs>.filtrerErUtfylt() = this.map { it.tilIValutakurs() }.filterIsInstance<UtfyltValutakurs>()

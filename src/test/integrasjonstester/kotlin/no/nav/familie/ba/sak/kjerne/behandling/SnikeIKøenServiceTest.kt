@@ -273,7 +273,7 @@ class SnikeIKøenServiceTest(
     }
 
     private fun settAktivBehandlingTilPåMaskinellVent(behandling: Behandling) {
-        snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(behandling.id, SettPåMaskinellVentÅrsak.SATSENDRING)
+        snikeIKøenService.settAktivBehandlingPåMaskinellVent(behandling.id, SettPåMaskinellVentÅrsak.SATSENDRING)
     }
 
     private fun validerSisteBehandling(behandling: Behandling) {

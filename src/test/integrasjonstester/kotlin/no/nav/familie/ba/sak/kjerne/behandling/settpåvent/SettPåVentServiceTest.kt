@@ -302,7 +302,7 @@ class SettPåVentServiceTest(
             frist,
             SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
         )
-        snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(behandling.id, SettPåMaskinellVentÅrsak.SATSENDRING)
+        snikeIKøenService.settAktivBehandlingPåMaskinellVent(behandling.id, SettPåMaskinellVentÅrsak.SATSENDRING)
 
         val throwable =
             catchThrowable {

@@ -48,8 +48,6 @@ data class Innhold<I>(
     val verdi
         get() = innhold!!
 
-    fun <R> mapInnhold(mapper: (I?) -> R?): R? = if (this.harInnhold) mapper(innhold) else null
-
     fun <R> mapVerdi(mapper: (I) -> R): R? = if (this.harVerdi) mapper(verdi) else null
 }
 

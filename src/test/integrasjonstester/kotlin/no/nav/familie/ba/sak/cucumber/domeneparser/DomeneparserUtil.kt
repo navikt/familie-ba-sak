@@ -18,6 +18,7 @@ enum class Domenebegrep(override val nøkkel: String) : Domenenøkkel {
     FRA_MÅNED("Fra måned"),
     TIL_MÅNED("Til måned"),
     ENDRET_MIGRERINGSDATO("Endret migreringsdato"),
+    ENDRET_TIDSPUNKT("Endret tidspunkt"),
     BEHANDLINGSÅRSAK("Behandlingsårsak"),
     BEHANDLINGSRESULTAT("Behandlingsresultat"),
     SKAL_BEHANLDES_AUTOMATISK("Skal behandles automatisk"),

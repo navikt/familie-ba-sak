@@ -1,36 +1,14 @@
 package no.nav.familie.ba.sak.cucumber.domeneparser
 
-import no.nav.familie.ba.sak.common.nbLocale
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 val norskDatoFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-val norskDatoFormatterKort = DateTimeFormatter.ofPattern("dd.MM.yy", nbLocale)
 val norskÅrMånedFormatter = DateTimeFormatter.ofPattern("MM.yyyy")
 val isoDatoFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 val isoÅrMånedFormatter = DateTimeFormatter.ofPattern("yyyy-MM")
-
-fun parseValgfriDatoListe(
-    domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
-): List<LocalDate> {
-    val stringVerdier = parseValgfriString(domenebegrep, rad)?.split(",")?.map { it.trim() } ?: emptyList()
-    return stringVerdier.map {
-        parseDato(it)
-    }
-}
-
-fun parseDatoListe(
-    domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
-): List<LocalDate> {
-    val stringVerdier = parseString(domenebegrep, rad).split(",").map { it.trim() }
-    return stringVerdier.map {
-        parseDato(it)
-    }
-}
 
 fun parseDato(
     domenebegrep: Domenenøkkel,
@@ -74,41 +52,12 @@ fun parseValgfriString(
     return valgfriVerdi(domenebegrep.nøkkel, rad)
 }
 
-fun parseBooleanMedBooleanVerdi(
-    domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
-): Boolean {
-    val verdi = verdi(domenebegrep.nøkkel, rad)
-
-    return when (verdi) {
-        "true" -> true
-        else -> false
-    }
-}
-
-fun parseBooleanJaIsTrue(
-    domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
-): Boolean {
-    return when (valgfriVerdi(domenebegrep.nøkkel, rad)) {
-        "Ja" -> true
-        else -> false
-    }
-}
-
 fun parseBoolean(
     domenebegrep: Domenenøkkel,
     rad: Map<String, String>,
 ): Boolean {
     val verdi = verdi(domenebegrep.nøkkel, rad)
 
-    return when (verdi) {
-        "Ja" -> true
-        else -> false
-    }
-}
-
-fun parseBoolean(verdi: String): Boolean {
     return when (verdi) {
         "Ja" -> true
         else -> false
@@ -184,23 +133,6 @@ fun parseÅrMåned(verdi: String): YearMonth {
     }
 }
 
-fun parseValgfriÅrMånedEllerDato(
-    domenebegrep: Domenenøkkel,
-    rad: Map<String, String?>,
-): ÅrMånedEllerDato? {
-    val verdi = rad[domenebegrep.nøkkel]
-    if (verdi == null || verdi == "") {
-        return null
-    }
-    val dato =
-        when (verdi.toList().count { it == '.' || it == '-' }) {
-            2 -> parseDato(verdi)
-            1 -> parseÅrMåned(verdi)
-            else -> error("Er datoet=$verdi riktigt formatert? Trenger å være på norskt eller iso-format")
-        }
-    return ÅrMånedEllerDato(dato)
-}
-
 fun verdi(
     nøkkel: String,
     rad: Map<String, String>,
@@ -268,21 +200,6 @@ fun parseBigDecimal(
     return verdi.toBigDecimal()
 }
 
-fun parseDouble(
-    domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
-): Double {
-    val verdi = verdi(domenebegrep.nøkkel, rad)
-    return verdi.toDouble()
-}
-
-fun parseValgfriDouble(
-    domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
-): Double? {
-    return valgfriVerdi(domenebegrep.nøkkel, rad)?.toDouble() ?: return null
-}
-
 fun parseValgfriLong(
     domenebegrep: Domenenøkkel,
     rad: Map<String, String>,
@@ -296,18 +213,6 @@ fun parseValgfriInt(
     valgfriVerdi(domenebegrep.nøkkel, rad) ?: return null
 
     return parseInt(domenebegrep, rad)
-}
-
-fun parseValgfriIntRange(
-    domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
-): Pair<Int, Int>? {
-    val verdi = valgfriVerdi(domenebegrep.nøkkel, rad) ?: return null
-
-    return Pair(
-        Integer.parseInt(verdi.split("-").first()),
-        Integer.parseInt(verdi.split("-").last()),
-    )
 }
 
 inline fun <reified T : Enum<T>> parseValgfriEnum(

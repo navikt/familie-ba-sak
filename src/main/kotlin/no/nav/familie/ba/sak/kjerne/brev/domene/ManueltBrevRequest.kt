@@ -114,15 +114,20 @@ fun ManueltBrevRequest.byggMottakerdata(
             Enhet(enhetId = behandlendeEnhetId, enhetNavn = behandlendeEnhetNavn)
         }
     return when {
-        erTilInstitusjon ->
+        erTilInstitusjon -> {
+            val fødselsnummerPåPerson = behandling.fagsak.aktør.aktivFødselsnummer()
+            val person = hentPerson(fødselsnummerPåPerson)
+
             this.copy(
                 enhet = enhet,
+                mottakerMålform = person.målform,
                 vedrørende =
                     object : Person {
-                        override val fødselsnummer = behandling.fagsak.aktør.aktivFødselsnummer()
-                        override val navn = hentPerson(fødselsnummer).navn
+                        override val fødselsnummer = fødselsnummerPåPerson
+                        override val navn = person.navn
                     },
             )
+        }
 
         else ->
             hentPerson(mottakerIdent).let { mottakerPerson ->
@@ -221,6 +226,7 @@ fun ManueltBrevRequest.tilBrev(
 
         Brevmal.HENLEGGE_TRUKKET_SØKNAD ->
             HenleggeTrukketSøknadBrev(
+                mal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
                 data =
                     HenleggeTrukketSøknadData(
                         delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = signaturDelmal),
@@ -228,6 +234,21 @@ fun ManueltBrevRequest.tilBrev(
                             FlettefelterForDokumentImpl(
                                 navn = this.mottakerNavn,
                                 fodselsnummer = this.mottakerIdent,
+                            ),
+                    ),
+            )
+        Brevmal.HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON ->
+            HenleggeTrukketSøknadBrev(
+                mal = Brevmal.HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON,
+                data =
+                    HenleggeTrukketSøknadData(
+                        delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = signaturDelmal),
+                        flettefelter =
+                            FlettefelterForDokumentImpl(
+                                navn = this.mottakerNavn,
+                                organisasjonsnummer = mottakerIdent,
+                                gjelder = this.vedrørende?.navn,
+                                fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
                             ),
                     ),
             )

@@ -32,7 +32,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.util.sisteTilleggOrdinærSats
@@ -64,7 +63,6 @@ class FødselshendelseHenleggelseTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val utvidetBehandlingService: UtvidetBehandlingService,
     @Autowired private val brevmalService: BrevmalService,
-    @Autowired private val opprettOppgaveForManuellBehandlingTask: OpprettOppgaveTask,
 ) : AbstractVerdikjedetest() {
     @BeforeEach
     fun førHverTest() {
@@ -497,7 +495,7 @@ class FødselshendelseHenleggelseTest(
     @Test
     fun `Skal sende tredjelandsborgere fra Ukraina til manuel oppfølging (midlertidig regel for ukrainakonflikten)`() {
         val fødselsdato = "1993-01-12"
-        val barnFødselsdato = LocalDate.now()
+        val barnFødselsdato = now()
         val scenario =
             mockServerKlient().lagScenario(
                 RestScenario(

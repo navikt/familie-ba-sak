@@ -14,8 +14,8 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
@@ -41,7 +41,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var valutakurs = mutableMapOf<Long, List<Valutakurs>>()
     private var utenlandskPeriodebeløp = mutableMapOf<Long, List<UtenlandskPeriodebeløp>>()
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
-    private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
+    private var tilkjenteYtelser = mutableMapOf<Long, TilkjentYtelse>()
     private var overstyrteEndringstidspunkt = mapOf<Long, LocalDate>()
     private var overgangsstønad = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
     private var uregistrerteBarn = listOf<BarnMedOpplysninger>()
@@ -138,7 +138,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
      */
     @Og("med andeler tilkjent ytelse")
     fun `med andeler tilkjent ytelse`(dataTable: DataTable) {
-        andelerTilkjentYtelse = lagAndelerTilkjentYtelse(dataTable, behandlinger, persongrunnlag)
+        tilkjenteYtelser = lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)
     }
 
     /**
@@ -173,7 +173,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 vilkårsvurderinger = vilkårsvurderinger,
                 kompetanser = kompetanser,
                 endredeUtbetalinger = endredeUtbetalinger,
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                tilkjenteYtelser = tilkjenteYtelser,
                 overstyrteEndringstidspunkt = overstyrteEndringstidspunkt,
                 overgangsstønad = overgangsstønad,
                 uregistrerteBarn = uregistrerteBarn,

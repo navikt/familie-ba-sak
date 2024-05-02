@@ -44,7 +44,7 @@ class AutobrevStegServiceTest {
         val aktør = randomAktør()
         val fagsak = defaultFagsak(aktør)
         val behandling =
-            lagBehandling(fagsak).also {
+            lagBehandling(fagsak = fagsak).also {
                 it.status = BehandlingStatus.UTREDES
             }
 
@@ -67,7 +67,7 @@ class AutobrevStegServiceTest {
         val aktør = randomAktør()
         val fagsak = defaultFagsak(aktør)
         val behandling =
-            lagBehandling(fagsak).also {
+            lagBehandling(fagsak = fagsak).also {
                 it.status = BehandlingStatus.FATTER_VEDTAK
             }
 
@@ -98,7 +98,7 @@ class AutobrevStegServiceTest {
         val aktør = randomAktør()
         val fagsak = defaultFagsak(aktør)
         val behandling =
-            lagBehandling(fagsak).also {
+            lagBehandling(fagsak = fagsak).also {
                 it.status = BehandlingStatus.IVERKSETTER_VEDTAK
             }
 

@@ -7,6 +7,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.justRun
 import io.mockk.verify
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.UtfyltStatus
@@ -40,13 +41,19 @@ class ValutakursControllerTest {
     @MockK
     private lateinit var tilgangService: TilgangService
 
+    @MockK
+    private lateinit var automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService
+
+    @MockK
+    private lateinit var unleashNextMedContextService: UnleashNextMedContextService
+
     @InjectMockKs
     private lateinit var valutakursController: ValutakursController
 
     private val barnId = "12345678910"
 
     private val restValutakurs: RestValutakurs =
-        RestValutakurs(1, YearMonth.of(2020, 1), null, listOf(barnId), null, null, null, UtfyltStatus.OK)
+        RestValutakurs(id = 1, fom = YearMonth.of(2020, 1), tom = null, barnIdenter = listOf(barnId), valutakursdato = null, valutakode = null, kurs = null, vurderingsform = null, status = UtfyltStatus.OK)
 
     @BeforeEach
     fun setup() {

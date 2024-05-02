@@ -13,7 +13,9 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.støtterFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -44,10 +46,11 @@ class EØSBegrunnelse(
             begrunnelse = this.begrunnelse,
         )
 
-    fun tilRestVedtaksbegrunnelse() =
+    fun tilRestVedtaksbegrunnelse(sanityBegrunnelser: List<ISanityBegrunnelse>) =
         RestVedtaksbegrunnelse(
             standardbegrunnelse = this.begrunnelse.enumnavnTilString(),
             vedtakBegrunnelseType = this.begrunnelse.vedtakBegrunnelseType,
             vedtakBegrunnelseSpesifikasjon = this.begrunnelse.enumnavnTilString(),
+            støtterFritekst = this.begrunnelse.støtterFritekst(sanityBegrunnelser),
         )
 }

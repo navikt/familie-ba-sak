@@ -35,11 +35,14 @@ fun mockAutovedtakMånedligValutajusteringService(
             ecbService = ecbService,
         )
 
+    every { cucumberMock.snikeIKøenService.kanSnikeForbi(any()) } returns true
+
     return AutovedtakMånedligValutajusteringService(
         behandlingHentOgPersisterService = cucumberMock.behandlingHentOgPersisterService,
         autovedtakService = cucumberMock.autovedtakService,
         taskRepository = cucumberMock.taskRepository,
         behandlingService = cucumberMock.behandlingService,
+        snikeIKøenService = cucumberMock.snikeIKøenService,
         localDateProvider = cucumberMock.mockedDateProvider,
         kompetanseService = cucumberMock.kompetanseService,
     )

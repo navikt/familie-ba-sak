@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.4</version>
+        <version>3.2.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -22,20 +22,20 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20240214140223_83c31de</prosessering.version>
-        <felles.version>3.20240322152837_a01cd9d</felles.version>
+        <felles.version>3.20240422125821_21d82d5</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20240322142416_c108f69</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20240430083848_be12d55</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20240208132236_bce5777</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
-        <cucumber.version>7.16.1</cucumber.version>
+        <cucumber.version>7.17.0</cucumber.version>
         <mockk.version>1.13.10</mockk.version>
-        <wiremock.version>3.4.2</wiremock.version>
-        <token-validation-spring.version>4.1.3</token-validation-spring.version>
+        <wiremock.version>3.5.4</wiremock.version>
+        <token-validation-spring.version>4.1.4</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>2.4.0</springdoc.version>
-        <sentry.version>7.6.0</sentry.version>
+        <springdoc.version>2.5.0</springdoc.version>
+        <sentry.version>7.8.0</sentry.version>
         <kotlinx.version>1.8.0</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -51,6 +51,8 @@
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <fpsak-tidslinje.version>2.7.1</fpsak-tidslinje.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
+        <avro.version>1.11.3</avro.version>
+        <confluent.version>7.6.0</confluent.version>
     </properties>
 
     <dependencyManagement>
@@ -58,7 +60,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.2.4</version>
+                <version>3.2.5</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -68,6 +70,11 @@
                 <version>${felles.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>2.2.21</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
@@ -192,12 +199,23 @@
 
         <dependency>
             <groupId>io.sentry</groupId>
-            <artifactId>sentry-spring-boot-starter</artifactId>
+            <artifactId>sentry-spring-boot-starter-jakarta</artifactId>
         </dependency>
 
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-logback</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+            <version>${avro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+            <version>${confluent.version}</version>
         </dependency>
 
         <!-- swagger -->
@@ -289,6 +307,10 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>valutakurs-klient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>metrikker</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.kontrakter</groupId>
@@ -401,6 +423,10 @@
 
     <repositories>
         <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </repository>
+        <repository>
             <id>github</id>
             <url>https://maven.pkg.github.com/navikt/familie-felles</url>
         </repository>
@@ -464,6 +490,24 @@
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro-maven-plugin</artifactId>
+                <version>${avro.version}</version>
+
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>idl-protocol</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>src/main/resources/avro</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

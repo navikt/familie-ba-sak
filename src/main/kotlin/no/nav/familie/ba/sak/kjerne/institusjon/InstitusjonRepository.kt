@@ -6,6 +6,4 @@ import org.springframework.stereotype.Repository
 @Repository
 interface InstitusjonRepository : JpaRepository<Institusjon, Long> {
     fun findByOrgNummer(orgNummer: String): Institusjon?
-
-    fun findByTssEksternId(tssEksternId: String): Institusjon?
 }

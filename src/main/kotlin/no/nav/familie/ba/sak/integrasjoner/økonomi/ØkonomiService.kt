@@ -29,7 +29,6 @@ class ØkonomiService(
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
         vedtak: Vedtak,
         saksbehandlerId: String,
-        andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
 

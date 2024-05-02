@@ -94,8 +94,6 @@ fun LocalDate.førsteDagINesteMåned() = this.plusMonths(1).withDayOfMonth(1)
 
 fun LocalDate.førsteDagIInneværendeMåned() = this.withDayOfMonth(1)
 
-fun LocalDate.erSenereEnnInneværendeMåned(): Boolean = this.isAfter(now().sisteDagIMåned())
-
 fun LocalDate.erDagenFør(other: LocalDate?) = other != null && this.plusDays(1).equals(other)
 
 fun LocalDate.erFraInneværendeMåned(now: LocalDate = now()): Boolean {
@@ -173,12 +171,6 @@ fun Periode.tilMånedPeriode(): MånedPeriode = MånedPeriode(fom = this.fom.toY
 data class Periode(val fom: LocalDate, val tom: LocalDate)
 
 data class MånedPeriode(val fom: YearMonth, val tom: YearMonth)
-
-data class NullablePeriode(val fom: LocalDate?, val tom: LocalDate?) {
-    fun tilNullableMånedPeriode() = NullableMånedPeriode(fom?.toYearMonth(), tom?.toYearMonth())
-}
-
-data class NullableMånedPeriode(val fom: YearMonth?, val tom: YearMonth?)
 
 fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
     return (other.toPeriode().fom.monthValue - this.toPeriode().tom.monthValue <= 1) &&

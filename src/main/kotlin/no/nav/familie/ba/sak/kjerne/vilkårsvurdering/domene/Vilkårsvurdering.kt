@@ -41,8 +41,6 @@ data class Vilkårsvurdering(
         cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH],
     )
     var personResultater: Set<PersonResultat> = setOf(),
-    @Column(name = "ytelse_personer", columnDefinition = "text")
-    var ytelsePersoner: String? = null,
 ) : BaseEntitet() {
     override fun toString(): String {
         return "Vilkårsvurdering(id=$id, behandling=${behandling.id})"

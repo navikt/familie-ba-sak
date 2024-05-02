@@ -56,7 +56,6 @@ class TilgangServiceTest {
             persongrunnlagService = persongrunnlagService,
             fagsakService = fagsakService,
             rolleConfig = rolleConfig,
-            cacheManager = cacheManager,
             auditLogger = auditLogger,
         )
 

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 
 import jakarta.validation.constraints.Pattern
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -16,6 +17,7 @@ data class RestValutakurs(
     @field:Pattern(regexp = "[A-Z]{3}", message = "Valutakode må ha store bokstaver og være tre bokstaver lang")
     val valutakode: String?,
     val kurs: BigDecimal?,
+    val vurderingsform: Vurderingsform?,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
 ) : AbstractUtfyltStatus<RestValutakurs>() {
     override fun medUtfyltStatus(): RestValutakurs {
@@ -31,6 +33,7 @@ fun RestValutakurs.tilValutakurs(barnAktører: List<Aktør>) =
         valutakursdato = this.valutakursdato,
         valutakode = this.valutakode,
         kurs = this.kurs,
+        vurderingsform = Vurderingsform.MANUELL,
     )
 
 fun Valutakurs.tilRestValutakurs() =
@@ -42,4 +45,5 @@ fun Valutakurs.tilRestValutakurs() =
         valutakursdato = this.valutakursdato,
         valutakode = this.valutakode,
         kurs = this.kurs,
+        vurderingsform = this.vurderingsform,
     ).medUtfyltStatus()

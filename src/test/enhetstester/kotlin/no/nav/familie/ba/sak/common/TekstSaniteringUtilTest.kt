@@ -22,4 +22,13 @@ class TekstSaniteringUtilTest {
         assertThat(sanertTekst.erAlfanummerisk()).isTrue()
         assertThat(tomStreng.erAlfanummerisk()).isTrue()
     }
+
+    @Test
+    fun `erAlfanummeriskPlussKolon skal tillate tekst med kolon, mens erAlfanummerisk skal ikke tillate tekst med kolon`() {
+        assertThat("Tekst:MedKolon".erAlfanummeriskPlussKolon()).isTrue()
+        assertThat("TekstUtenKolon".erAlfanummeriskPlussKolon()).isTrue()
+        assertThat("TekstUtenKolon".erAlfanummerisk()).isTrue()
+        assertThat("Tekst:MedKolon".erAlfanummerisk()).isFalse()
+        assertThat("".erAlfanummeriskPlussKolon()).isTrue()
+    }
 }

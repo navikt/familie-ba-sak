@@ -52,7 +52,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
@@ -111,8 +110,6 @@ class BehandlingIntegrationTest(
     private val personidentService: PersonidentService,
     @Autowired
     private val taskRepository: TaskRepositoryWrapper,
-    @Autowired
-    private val vedtaksperiodeService: VedtaksperiodeService,
 ) : AbstractSpringIntegrationTest() {
     @BeforeEach
     fun truncate() {

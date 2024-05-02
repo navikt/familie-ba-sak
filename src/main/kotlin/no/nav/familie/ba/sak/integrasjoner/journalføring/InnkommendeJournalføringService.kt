@@ -3,10 +3,9 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
+import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
-import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
@@ -29,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
@@ -38,8 +36,6 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
 import no.nav.familie.kontrakter.felles.journalpost.Sak
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -75,37 +71,6 @@ class InnkommendeJournalføringService(
         )
     }
 
-    @Transactional
-    fun ferdigstill(
-        request: RestOppdaterJournalpost,
-        journalpostId: String,
-        behandlendeEnhet: String,
-        oppgaveId: String,
-    ): String {
-        val (sak, behandlinger) =
-            lagreJournalpostOgKnyttFagsakTilJournalpost(
-                request.tilknyttedeBehandlingIder,
-                journalpostId,
-            )
-
-        håndterLogiskeVedlegg(request, journalpostId)
-
-        oppdaterOgFerdigstill(
-            request = request.oppdaterMedDokumentOgSak(sak),
-            journalpostId = journalpostId,
-            behandlendeEnhet = behandlendeEnhet,
-            oppgaveId = oppgaveId,
-            behandlinger = behandlinger,
-        )
-
-        when (val aktivBehandling = behandlinger.find { it.aktiv }) {
-            null -> logger.info("Knytter til ${behandlinger.size} behandlinger som ikke er aktive")
-            else -> opprettOppgaveFor(aktivBehandling, request.navIdent)
-        }
-
-        return sak.fagsakId ?: ""
-    }
-
     private fun oppdaterLogiskeVedlegg(request: RestJournalføring) {
         request.dokumenter.forEach { dokument ->
             val fjernedeVedlegg =
@@ -134,7 +99,7 @@ class InnkommendeJournalføringService(
         søknadMottattDato: LocalDate? = null,
         søknadsinfo: Søknadsinfo? = null,
         fagsakType: FagsakType = FagsakType.NORMAL,
-        institusjon: InstitusjonInfo? = null,
+        institusjon: RestInstitusjon? = null,
     ): Behandling {
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, type = fagsakType, institusjon = institusjon)
         return stegService.håndterNyBehandlingOgSendInfotrygdFeed(
@@ -207,7 +172,7 @@ class InnkommendeJournalføringService(
             behandlinger = behandlinger,
         )
 
-        journalføringMetrikk.tellManuellJournalføringsmetrikker(journalpost, request, behandlinger)
+        journalføringMetrikk.tellManuellJournalføringsmetrikker(request, behandlinger)
         return sak.fagsakId ?: ""
     }
 
@@ -295,27 +260,6 @@ class InnkommendeJournalføringService(
         return Pair(sak, behandlinger)
     }
 
-    private fun håndterLogiskeVedlegg(
-        request: RestOppdaterJournalpost,
-        journalpostId: String,
-    ) {
-        val fjernedeVedlegg =
-            request.eksisterendeLogiskeVedlegg.partition { request.logiskeVedlegg.contains(it) }.second
-        val nyeVedlegg = request.logiskeVedlegg.partition { request.eksisterendeLogiskeVedlegg.contains(it) }.second
-
-        val dokumentInfoId =
-            request.dokumentInfoId.takeIf { it.isNotEmpty() }
-                ?: hentJournalpost(journalpostId).dokumenter?.first()?.dokumentInfoId
-                ?: error("Fant ikke dokumentInfoId på journalpost")
-
-        fjernedeVedlegg.forEach {
-            integrasjonClient.slettLogiskVedlegg(it.logiskVedleggId, dokumentInfoId)
-        }
-        nyeVedlegg.forEach {
-            integrasjonClient.leggTilLogiskVedlegg(LogiskVedleggRequest(it.tittel), dokumentInfoId)
-        }
-    }
-
     private fun oppdaterOgFerdigstill(
         request: OppdaterJournalpostRequest,
         journalpostId: String,
@@ -342,18 +286,6 @@ class InnkommendeJournalføringService(
                 }
             }
         }
-    }
-
-    private fun opprettOppgaveFor(
-        behandling: Behandling,
-        navIdent: String,
-    ) {
-        OpprettOppgaveTask.opprettTask(
-            behandlingId = behandling.id,
-            oppgavetype = Oppgavetype.BehandleSak,
-            fristForFerdigstillelse = LocalDate.now(),
-            tilordnetRessurs = navIdent,
-        )
     }
 
     private fun genererOgOpprettLogg(
@@ -406,7 +338,6 @@ class InnkommendeJournalføringService(
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(InnkommendeJournalføringService::class.java)
         const val NAV_NO = "NAV_NO"
     }
 }

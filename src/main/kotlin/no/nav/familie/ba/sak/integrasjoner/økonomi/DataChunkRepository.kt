@@ -14,6 +14,4 @@ interface DataChunkRepository : JpaRepository<DataChunk, Long> {
     ): DataChunk?
 
     fun findByTransaksjonsId(transaksjonsId: UUID): List<DataChunk>
-
-    fun findByErSendt(erSendt: Boolean): List<DataChunk>
 }

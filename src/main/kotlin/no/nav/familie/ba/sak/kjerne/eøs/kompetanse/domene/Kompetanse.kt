@@ -15,7 +15,6 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -94,13 +93,6 @@ data class Kompetanse(
             tom = tom,
             barnAktører = barnAktører,
         )
-
-    fun validerFelterErSatt() {
-        if (!erObligatoriskeFelterSatt()
-        ) {
-            throw Feil("Kompetanse mangler verdier")
-        }
-    }
 
     fun erObligatoriskeFelterSatt() =
         fom != null &&

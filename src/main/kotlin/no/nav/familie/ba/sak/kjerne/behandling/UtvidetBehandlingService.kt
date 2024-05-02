@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
@@ -27,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.VurderingsstrategiForValutakurserRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
@@ -64,6 +64,7 @@ class UtvidetBehandlingService(
     private val feilutbetaltValutaService: FeilutbetaltValutaService,
     private val brevmottakerService: BrevmottakerService,
     private val refusjonEøsService: RefusjonEøsService,
+    private val vurderingsstrategiForValutakurserRepository: VurderingsstrategiForValutakurserRepository,
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
@@ -142,7 +143,6 @@ class UtvidetBehandlingService(
             migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
             valutakurser = valutakurser.map { it.tilRestValutakurs() },
             utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilRestUtenlandskPeriodebeløp() },
-            verge = behandling.verge?.let { VergeInfo(it.ident) },
             korrigertEtterbetaling =
                 korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(behandlingId)
                     ?.tilRestKorrigertEtterbetaling(),
@@ -152,6 +152,7 @@ class UtvidetBehandlingService(
             feilutbetaltValuta = feilutbetaltValuta,
             brevmottakere = brevmottakere,
             refusjonEøs = refusjonEøs,
+            vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)?.vurderingsstrategiForValutakurser,
         )
     }
 }

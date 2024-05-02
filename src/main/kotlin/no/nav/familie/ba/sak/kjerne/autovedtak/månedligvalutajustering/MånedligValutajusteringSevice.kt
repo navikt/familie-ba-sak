@@ -9,10 +9,12 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.UtfyltValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilIValutakurs
 import no.nav.familie.util.VirkedagerProvider
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
 
 @Service
@@ -22,6 +24,7 @@ class MånedligValutajusteringSevice(
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
+    @Transactional
     fun oppdaterValutakurserForMåned(
         behandlingId: BehandlingId,
         valutajusteringMåned: YearMonth,
@@ -34,8 +37,7 @@ class MånedligValutajusteringSevice(
                 .map { it.tilIValutakurs() }.filterIsInstance<UtfyltValutakurs>()
                 .filter { valutakurs -> valutakurs.periodeInneholder(valutajusteringMåned) }
 
-        val sisteDagForrigeMåned = valutajusteringMåned.minusMonths(1).atEndOfMonth()
-        val sisteVirkedagForrigeMåned = VirkedagerProvider.senesteVirkedagFørEllerMed(sisteDagForrigeMåned)
+        val sisteVirkedagForrigeMåned = valutajusteringMåned.minusMonths(1).tilSisteVirkedag()
 
         val nyeValutaKurser =
             valutakurserSomMåOppdateres.map { valutakurs ->
@@ -48,12 +50,15 @@ class MånedligValutajusteringSevice(
                     valutakursdato = sisteVirkedagForrigeMåned,
                     valutakode = valutakurs.valutakode,
                     kurs = nyKurs,
+                    vurderingsform = Vurderingsform.AUTOMATISK,
                 )
             }
 
         nyeValutaKurser.forEach { valutakursService.oppdaterValutakurs(BehandlingId(behandlingId.id), it) }
     }
 }
+
+fun YearMonth.tilSisteVirkedag() = VirkedagerProvider.senesteVirkedagFørEllerMed(this.atEndOfMonth())
 
 private fun UtfyltValutakurs.periodeInneholder(
     valutajusteringMåned: YearMonth,

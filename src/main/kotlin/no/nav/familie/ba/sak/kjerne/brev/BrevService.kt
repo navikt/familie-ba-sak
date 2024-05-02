@@ -56,6 +56,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.stereotype.Service
@@ -228,7 +229,7 @@ class BrevService(
     }
 
     fun sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling: Behandling): Boolean {
-        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING)) return false
+        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) return false
 
         val andelerIBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
         val andelerIBehandlingSomErDifferanseBeregnet = andelerIBehandling.filter { it.differanseberegnetPeriodebeløp != null }
@@ -283,8 +284,8 @@ class BrevService(
                                 // det slik, da uppercase kan oppleves som skrikende i et brev som skal være skånsomt
                                 navnAvdode = data.grunnlag.søker.navn.storForbokstavIAlleNavn(),
                                 virkningstidspunkt =
-                                    hentVirkningstidspunkt(
-                                        opphørsperioder = vedtaksperiodeService.hentOpphørsperioder(vedtak.behandling),
+                                    hentVirkningstidspunktForDødsfallbrev(
+                                        opphørsperioder = vedtaksperiodeService.finnVedtaksperioderForBehandling(vedtak).filter { it.type == Vedtaksperiodetype.OPPHØR },
                                         behandlingId = vedtak.behandling.id,
                                     ),
                             ),

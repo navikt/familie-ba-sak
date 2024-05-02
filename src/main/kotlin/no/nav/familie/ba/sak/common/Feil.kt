@@ -34,6 +34,8 @@ class VilkårFeil(
 
 class SatsendringFeil(melding: String? = "", public val satsendringSvar: SatsendringSvar) : RuntimeException(melding)
 
+class MånedligValutaJusteringFeil(val melding: String) : RuntimeException(melding)
+
 class UtbetalingsikkerhetFeil(
     melding: String,
     override val frontendFeilmelding: String? = null,

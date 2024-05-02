@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserT
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.ValutakursBuilder
@@ -86,7 +87,7 @@ internal class ValutakursServiceTest {
         val lagretValutakurs =
             valutakursRepository.saveAll(
                 listOf(
-                    Valutakurs(
+                    lagValutakurs(
                         fom = YearMonth.now(),
                         tom = YearMonth.now(),
                         barnAktører = setOf(tilfeldigPerson().aktør),
@@ -129,6 +130,36 @@ internal class ValutakursServiceTest {
             ValutakursBuilder(jan(2020), behandlingId)
                 .medKurs("444$>", "EUR", barn1)
                 .bygg()
+
+        val faktiskeValutakurser = valutakursService.hentValutakurser(behandlingId)
+        assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)
+    }
+
+    @Test
+    fun `skal kunne oppdatere valutakurs sin vurderingsform fra manuel til automatisk`() {
+        val behandlingId = BehandlingId(10L)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+
+        ValutakursBuilder(jan(2020), behandlingId)
+            .medKurs("44>", "EUR", barn1)
+            .medVurderingsform(Vurderingsform.MANUELL)
+            .lagreTil(valutakursRepository)
+
+        val oppdatertKompetanse =
+            ValutakursBuilder(jan(2020), behandlingId)
+                .medKurs(" 3>", "EUR", barn1)
+                .medVurderingsform(Vurderingsform.AUTOMATISK).bygg().single()
+        valutakursService.oppdaterValutakurs(behandlingId, oppdatertKompetanse)
+
+        val forventedeValutakurser =
+            ValutakursBuilder(jan(2020), behandlingId)
+                .medKurs("4", "EUR", barn1)
+                .medVurderingsform(Vurderingsform.MANUELL)
+                .bygg() +
+                ValutakursBuilder(jan(2020), behandlingId)
+                    .medKurs(" 3>", "EUR", barn1)
+                    .medVurderingsform(Vurderingsform.AUTOMATISK)
+                    .bygg()
 
         val faktiskeValutakurser = valutakursService.hentValutakurser(behandlingId)
         assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)

@@ -38,20 +38,6 @@ class ØkonomiKlient(
         }
     }
 
-    fun iverksettOppdragPåNytt(
-        utbetalingsoppdrag: Utbetalingsoppdrag,
-        versjon: Int = 1,
-    ): String {
-        val uri = URI.create("$familieOppdragUri/oppdragPaaNytt/$versjon")
-        return kallEksternTjenesteRessurs(
-            tjeneste = "familie-oppdrag",
-            uri = uri,
-            formål = "Iverksetter mot oppdrag på nytt",
-        ) {
-            postForEntity(uri = uri, utbetalingsoppdrag)
-        }
-    }
-
     @Retryable(
         value = [Exception::class],
         maxAttempts = 3,

@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.task.dto
 
-import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.AktørId
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 
+typealias AktørId = String
+
 data class OpprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO(
-    val ident: AktørId,
+    val ident: AktørId, // Dette er aktørId (string) og ikke fnr
     val oppgavetype: Oppgavetype,
     val beskrivelse: String,
 )

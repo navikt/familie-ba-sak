@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.Autobrev6og18ÅrService
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -22,7 +21,6 @@ import java.time.LocalDate
 )
 class SendAutobrev6og18ÅrTask(
     private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
-    private val taskRepositoryWrapper: TaskRepositoryWrapper,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val autobrevDTO = objectMapper.readValue(task.payload, Autobrev6og18ÅrDTO::class.java)

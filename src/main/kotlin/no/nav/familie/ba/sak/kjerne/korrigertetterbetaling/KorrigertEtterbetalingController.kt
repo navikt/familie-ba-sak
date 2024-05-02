@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.korrigertetterbetaling
 
-import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
+import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestKorrigertEtterbetaling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling

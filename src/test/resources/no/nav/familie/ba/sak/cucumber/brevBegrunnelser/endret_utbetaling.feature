@@ -3,7 +3,7 @@
 
 Egenskap: Brevbegrunnelse ved endret utbeetaling
 
-  Bakgrunn:
+  Scenario: Skal gi to brevbegrunnelse når vi har delt bosted med flere avtaletidspunkt samme måned.
     Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
@@ -18,7 +18,6 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
       | 1            | 2       | BARN       | 15.06.2012  |
       | 1            | 3       | BARN       | 16.06.2016  |
 
-  Scenario: Skal gi to brevbegrunnelse når vi har delt bosted med flere avtaletidspunkt samme måned.
     Og følgende dagens dato 24.10.2023
     Og lag personresultater for begrunnelse for behandling 1
 
@@ -188,3 +187,99 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.12.2023 til 31.12.2023
       | Begrunnelse                                                         | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING_FØR_SOKNAD_NY | STANDARD | Nei           | 07.05.15 og 03.12.17 | 2           | november 2023                        | NB      | 2 620 | 06.12.23         |                         |                             |
+
+  Scenario: Skal ikke flette inn barn som ikke har utbetaling pga allerede utbetalt i begrunnelse som gjelder søker
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype | Fagsakstatus |
+      | 1        | NORMAL     | AVSLUTTET    |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
+      | 1            | 1        |                     | OPPHØRT             | NYE_OPPLYSNINGER | Nei                       | NASJONAL            | AVSLUTTET         |
+      | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER | Nei                       | NASJONAL            | UTREDES           |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
+      | 1            | 1       | SØKER      | 01.01.1990  |              |
+      | 1            | 2       | BARN       | 13.04.2021  |              |
+      | 2            | 1       | SØKER      | 01.01.1990  |              |
+      | 2            | 2       | BARN       | 13.04.2021  |              |
+      | 2            | 3       | BARN       | 22.12.2022  |              |
+
+    Og følgende dagens dato 22.03.2024
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | LOVLIG_OPPHOLD               |                  | 01.03.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 1       | BOSATT_I_RIKET               |                  | 01.03.2022 | 01.10.2022 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+      | 2       | UNDER_18_ÅR                  |                  | 13.04.2021 | 12.04.2039 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | GIFT_PARTNERSKAP             |                  | 13.04.2021 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOR_MED_SØKER,LOVLIG_OPPHOLD |                  | 01.03.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 2       | BOSATT_I_RIKET               |                  | 01.03.2022 | 01.10.2022 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+      | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET                              |                  | 01.03.2022 | 01.10.2022 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 1       | LOVLIG_OPPHOLD                              |                  | 01.03.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 1       | BOSATT_I_RIKET                              |                  | 22.09.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+      | 2       | GIFT_PARTNERSKAP                            |                  | 13.04.2021 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | UNDER_18_ÅR                                 |                  | 13.04.2021 | 12.04.2039 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOSATT_I_RIKET                              |                  | 01.03.2022 | 01.10.2022 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 2       | LOVLIG_OPPHOLD,BOR_MED_SØKER                |                  | 01.03.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 2       | BOSATT_I_RIKET                              |                  | 22.09.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+      | 3       | GIFT_PARTNERSKAP                            |                  | 22.12.2022 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | UNDER_18_ÅR                                 |                  | 22.12.2022 | 21.12.2040 | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | LOVLIG_OPPHOLD,BOSATT_I_RIKET,BOR_MED_SØKER |                  | 22.09.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.04.2022 | 31.10.2022 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+
+      | 2       | 2            | 01.04.2022 | 31.10.2022 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 2       | 2            | 01.10.2023 | 31.03.2027 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 2            | 01.04.2027 | 31.03.2039 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
+      | 3       | 2            | 01.10.2023 | 31.12.2023 | 0     | ORDINÆR_BARNETRYGD | 0       | 1766 |
+      | 3       | 2            | 01.01.2024 | 30.11.2028 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 3       | 2            | 01.12.2028 | 30.11.2040 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
+
+    Og med endrede utbetalinger for begrunnelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
+      | 3       | 2            | 01.10.2023 | 31.12.2023 | ALLEREDE_UTBETALT | 0       | 14.12.2023       |                             |
+
+    Når vedtaksperiodene genereres for behandling 2
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                        | Ugyldige begrunnelser |
+      | 01.10.2023 | 31.12.2023 | UTBETALING         |                                | INNVILGET_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                       |
+      | 01.01.2024 | 31.03.2027 | UTBETALING         |                                | ETTER_ENDRET_UTBETALING_ENDRE_MOTTAKER      |                       |
+      | 01.04.2027 | 30.11.2028 | UTBETALING         |                                |                                             |                       |
+      | 01.12.2028 | 31.03.2039 | UTBETALING         |                                |                                             |                       |
+      | 01.04.2039 | 30.11.2040 | UTBETALING         |                                |                                             |                       |
+      | 01.12.2040 |            | OPPHØR             |                                |                                             |                       |
+
+    Og når disse begrunnelsene er valgt for behandling 2
+      | Fra dato   | Til dato   | Standardbegrunnelser                        | Eøsbegrunnelser | Fritekster |
+      | 01.10.2023 | 31.12.2023 | INNVILGET_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                 |            |
+      | 01.01.2024 | 31.03.2027 | ETTER_ENDRET_UTBETALING_ENDRE_MOTTAKER      |                 |            |
+      | 01.04.2027 | 30.11.2028 |                                             |                 |            |
+      | 01.12.2028 | 31.03.2039 |                                             |                 |            |
+      | 01.04.2039 | 30.11.2040 |                                             |                 |            |
+      | 01.12.2040 |            |                                             |                 |            |
+
+    Så forvent følgende brevperioder for behandling 2
+      | Brevperiodetype | Fra dato     | Til dato          | Beløp | Antall barn med utbetaling | Barnas fødselsdager  | Du eller institusjonen |
+      | UTBETALING      | oktober 2023 | til desember 2023 | 1766  | 1                          | 13.04.21             | du                     |
+      | UTBETALING      | januar 2024  | til mars 2027     | 3532  | 2                          | 13.04.21 og 22.12.22 | du                     |
+
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.10.2023 til 31.12.2023
+      | Begrunnelse                                 | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp |
+      | INNVILGET_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER | STANDARD | Ja            | 13.04.21             | 1           | september 2023                       | NB      | 1 766 |
+
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.01.2024 til 31.03.2027
+      | Begrunnelse                            | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt |
+      | ETTER_ENDRET_UTBETALING_ENDRE_MOTTAKER | STANDARD | Nei           | 22.12.22             | 1           | desember 2023                        | NB      | 1 766 | 14.12.23         |

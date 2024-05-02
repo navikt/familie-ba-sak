@@ -76,6 +76,7 @@ object VedtaksperiodeMedBegrunnelserParser {
         VALUTAKURSDATO("Valutakursdato"),
         VALUTA_KODE("Valuta kode"),
         KURS("Kurs"),
+        VURDERINGSFORM("Vurderingsform"),
     }
 
     enum class DomenebegrepUtenlandskPeriodebeløp(override val nøkkel: String) : Domenenøkkel {

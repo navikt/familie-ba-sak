@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -50,8 +49,6 @@ class ØkonomiIntegrasjonTest(
     private val personidentService: PersonidentService,
     @Autowired
     private val vedtakService: VedtakService,
-    @Autowired
-    private val simuleringService: SimuleringService,
 ) : AbstractSpringIntegrationTest() {
     @Test
     @Tag("integration")
@@ -95,7 +92,6 @@ class ØkonomiIntegrasjonTest(
             økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
                 vedtak,
                 "ansvarligSaksbehandler",
-                AndelTilkjentYtelseForIverksettingFactory(),
             )
         }
     }
@@ -140,7 +136,6 @@ class ØkonomiIntegrasjonTest(
         økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
             vedtak,
             "ansvarligSaksbehandler",
-            AndelTilkjentYtelseForIverksettingFactory(),
         )
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
 

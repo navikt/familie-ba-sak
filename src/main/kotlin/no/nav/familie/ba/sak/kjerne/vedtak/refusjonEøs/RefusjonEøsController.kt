@@ -84,7 +84,7 @@ class RefusjonEøsController(
         )
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        refusjonEøsService.fjernRefusjonEøsPeriode(id = id, behandlingId = behandlingId)
+        refusjonEøsService.fjernRefusjonEøsPeriode(id = id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

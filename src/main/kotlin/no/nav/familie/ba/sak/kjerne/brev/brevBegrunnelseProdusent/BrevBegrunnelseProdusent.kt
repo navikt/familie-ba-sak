@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -224,14 +225,15 @@ fun IVedtakBegrunnelse.hentSanityBegrunnelse(grunnlag: GrunnlagForBegrunnelse) =
         is Standardbegrunnelse -> grunnlag.sanityBegrunnelser[this]
     } ?: throw Feil("Fant ikke tilsvarende sanitybegrunnelse for $this")
 
-private fun hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
+private fun hentPersonerMedUtbetalingIPeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
     begrunnelsesGrunnlagPerPerson.filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
-        begrunnelseGrunnlagForPersonIPeriode.dennePerioden.andeler.toList().isNotEmpty()
-    }.keys
+        val endretUtbetalingAndelIPeriode = begrunnelseGrunnlagForPersonIPeriode.dennePerioden.endretUtbetalingAndel
 
-private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentPersonerMedAvslagIPeriode() =
-    filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
-        !begrunnelseGrunnlagForPersonIPeriode.dennePerioden.eksplisitteAvslagForPerson.isNullOrEmpty()
+        val erUtbetalingsbeløpStørreEnnNull = begrunnelseGrunnlagForPersonIPeriode.dennePerioden.andeler.toList().any { it.kalkulertUtbetalingsbeløp > 0 }
+        val erNullPgaDifferanseberegning = begrunnelseGrunnlagForPersonIPeriode.dennePerioden.andeler.toList().any { it.differanseberegnetPeriodebeløp != null && it.differanseberegnetPeriodebeløp < 0 }
+        val erNullPgaDeltBosted = endretUtbetalingAndelIPeriode?.årsak == Årsak.DELT_BOSTED && endretUtbetalingAndelIPeriode.prosent == BigDecimal.ZERO
+
+        erUtbetalingsbeløpStørreEnnNull || erNullPgaDifferanseberegning || erNullPgaDeltBosted
     }.keys
 
 private fun hentPersonerMedAndelIForrigePeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
@@ -256,7 +258,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
 ): List<LocalDate> {
     val barnPåBegrunnelse = personerIBegrunnelse.filter { it.type == PersonType.BARN }
     val barnMedUtbetaling =
-        hentPersonerMedAndelIPeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
+        hentPersonerMedUtbetalingIPeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
     val uregistrerteBarnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn
 
     val barnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna

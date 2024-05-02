@@ -81,6 +81,9 @@ funksjonsbrytere:
     producer:
       enabled: true
 
+familie:
+  tellAPIEndepunkterIBruk: true
+
 management:
   endpoint:
     health:

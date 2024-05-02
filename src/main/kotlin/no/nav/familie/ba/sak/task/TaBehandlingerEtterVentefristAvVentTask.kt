@@ -29,6 +29,6 @@ class TaBehandlingerEtterVentefristAvVentTask(val settPåVentService: SettPåVen
 
     companion object {
         private val logger = LoggerFactory.getLogger(TaBehandlingerEtterVentefristAvVentTask::class.java)
-        const val TASK_STEP_TYPE = "taBehanldingerEtterVentefristenAvVent"
+        const val TASK_STEP_TYPE = "taBehandlingerEtterVentefristenAvVent"
     }
 }

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.RestTilbakekrevingsbehandling
@@ -20,26 +19,8 @@ open class RestBaseFagsak(
     open val løpendeUnderkategori: BehandlingUnderkategori?,
     open val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     open val fagsakType: FagsakType = FagsakType.NORMAL,
-    open val institusjon: InstitusjonInfo? = null,
+    open val institusjon: RestInstitusjon? = null,
 )
-
-fun Fagsak.tilRestBaseFagsak(
-    underBehandling: Boolean,
-    gjeldendeUtbetalingsperioder: List<Utbetalingsperiode> = emptyList(),
-    løpendeKategori: BehandlingKategori?,
-    løpendeUnderkategori: BehandlingUnderkategori?,
-): RestBaseFagsak =
-    RestBaseFagsak(
-        opprettetTidspunkt = this.opprettetTidspunkt,
-        id = this.id,
-        søkerFødselsnummer = this.aktør.aktivFødselsnummer(),
-        status = this.status,
-        underBehandling = underBehandling,
-        løpendeKategori = løpendeKategori,
-        løpendeUnderkategori = løpendeUnderkategori,
-        gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
-        fagsakType = this.type,
-    )
 
 data class RestFagsak(
     override val opprettetTidspunkt: LocalDateTime,
@@ -95,7 +76,7 @@ data class RestMinimalFagsak(
     val tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>,
     val migreringsdato: LocalDate? = null,
     override val fagsakType: FagsakType,
-    override val institusjon: InstitusjonInfo?,
+    override val institusjon: RestInstitusjon?,
 ) : RestBaseFagsak(
         opprettetTidspunkt = opprettetTidspunkt,
         id = id,

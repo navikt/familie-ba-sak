@@ -1,11 +1,10 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.Doedsfall
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonRelasjonerResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
@@ -105,13 +104,13 @@ class PdlRestClient(
         }
     }
 
-    private fun hentDødsfallDataFraListeMedDødsfall(doedsfall: List<Doedsfall>): DødsfallData? {
+    private fun hentDødsfallDataFraListeMedDødsfall(dødsfall: List<PdlDødsfallResponse>): DødsfallData? {
         val dødsdato =
-            doedsfall.filter { it.doedsdato != null }
+            dødsfall.filter { it.doedsdato != null }
                 .map { it.doedsdato }
                 .firstOrNull()
 
-        if (doedsfall.isEmpty() || dødsdato == null) {
+        if (dødsfall.isEmpty() || dødsdato == null) {
             return null
         }
         return DødsfallData(erDød = true, dødsdato = dødsdato)
@@ -206,33 +205,6 @@ class PdlRestClient(
                 it.person!!.bostedsadresse
             }
         return bostedsadresser.firstOrNull { bostedsadresse -> bostedsadresse.utenlandskAdresse != null }?.utenlandskAdresse
-    }
-
-    /**
-     * Til bruk for migrering. Vurder hentPerson som gir maskerte data for personer med adressebeskyttelse.
-     *
-     */
-    fun hentForelderBarnRelasjoner(aktør: Aktør): List<no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon> {
-        val pdlPersonRequest =
-            PdlPersonRequest(
-                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-                query = hentGraphqlQuery("hentperson-relasjoner"),
-            )
-        val pdlResponse: PdlBaseResponse<PdlHentPersonRelasjonerResponse> =
-            kallEksternTjeneste(
-                tjeneste = "pdl",
-                uri = pdlUri,
-                formål = "Hent forelder barn relasjoner",
-            ) {
-                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
-            }
-
-        return feilsjekkOgReturnerData(
-            ident = aktør.aktivFødselsnummer(),
-            pdlResponse = pdlResponse,
-        ) {
-            it.person!!.forelderBarnRelasjon
-        }
     }
 
     fun httpHeaders(): HttpHeaders {

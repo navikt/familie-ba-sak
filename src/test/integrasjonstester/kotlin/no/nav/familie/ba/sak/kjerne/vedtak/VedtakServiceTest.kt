@@ -16,12 +16,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -47,8 +43,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class VedtakServiceTest(
-    @Autowired
-    private val behandlingRepository: BehandlingRepository,
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired
@@ -84,17 +78,11 @@ class VedtakServiceTest(
     @Autowired
     private val infotrygdService: InfotrygdService,
     @Autowired
-    private val beregningService: BeregningService,
-    @Autowired
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired
     private val taskRepository: TaskRepositoryWrapper,
     @Autowired
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
-    @Autowired
-    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
-    @Autowired
-    private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
 ) : AbstractSpringIntegrationTest() {
     lateinit var behandlingService: BehandlingService
     lateinit var vilkårResultat1: VilkårResultat

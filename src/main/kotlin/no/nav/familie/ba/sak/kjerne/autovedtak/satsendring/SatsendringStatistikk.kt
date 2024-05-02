@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit
 class SatsendringStatistikk(
     private val fagsakRepository: FagsakRepository,
     private val satskjøringRepository: SatskjøringRepository,
-    private val startSatsendring: StartSatsendring,
 ) {
     val satsendringGauge =
         MultiGauge.builder("satsendring").register(Metrics.globalRegistry)

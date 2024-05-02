@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
@@ -20,14 +21,18 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.Månedli
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatusScheduler
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
+import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
+import no.nav.familie.ba.sak.task.OppdaterStønadTomPåTilkjentYtelseTask.Companion.opprettStønadTomTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -69,6 +74,8 @@ class ForvalterController(
     private val månedligValutajusteringScheduler: MånedligValutajusteringScheduler,
     private val fagsakService: FagsakService,
     private val unleashNextMedContextService: UnleashNextMedContextService,
+    private val taskRepository: TaskRepositoryWrapper,
+    private val fagsakStatusScheduler: FagsakStatusScheduler,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -320,7 +327,7 @@ class ForvalterController(
     fun justerValuta(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
-        val erPersonMedTilgangTilÅStarteValutajustering = unleashNextMedContextService.isEnabled(FeatureToggleConfig.KAN_STARTE_VALUTAJUSTERING)
+        val erPersonMedTilgangTilÅStarteValutajustering = unleashNextMedContextService.isEnabled(FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ENKELT_SAK)
 
         if (erPersonMedTilgangTilÅStarteValutajustering) {
             autovedtakMånedligValutajusteringService.utførMånedligValutajusteringPåFagsak(fagsakId = fagsakId, måned = YearMonth.now())
@@ -340,6 +347,25 @@ class ForvalterController(
         } else {
             throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
         }
+        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+    }
+
+    @PostMapping("/oppdater-stonad-tom-for-tilkjent-ytelse")
+    @Operation(summary = "Oppdater tilkjent ytelse slik at saker som har feil stønad tom kan oppdateres til riktig.")
+    @Transactional
+    fun oppdaterStonadTomForTilkjentYtelse(
+        @RequestBody fagsakListe: List<Long>,
+    ): ResponseEntity<Ressurs<String>> {
+        fagsakListe.forEach { taskRepository.save(opprettStønadTomTask(it)) }
+        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+    }
+
+    @PostMapping("/kjør-oppdater-løpende-flagg-task")
+    @Operation(summary = "Kjører oppdaterLøpendeFlagg-tasken slik at man oppdaterer tasker som er løpende til avsluttet ved behov.")
+    fun kjørOppdaterLøpendeFlaggTask(): ResponseEntity<Ressurs<String>> {
+        val oppdaterLøpendeFlaggTask = Task(type = OppdaterLøpendeFlagg.TASK_STEP_TYPE, payload = "")
+        taskRepository.save(oppdaterLøpendeFlaggTask)
+        logger.info("Opprettet oppdaterLøpendeFlaggTask")
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 }

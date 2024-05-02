@@ -37,6 +37,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagUtenlandskPeriodeb
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -66,61 +68,50 @@ import java.time.YearMonth
 
 class BehandlingsresultatStegTest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
-
     private val behandlingService: BehandlingService = mockk()
-
     private val simuleringService: SimuleringService = mockk()
-
     private val vedtakService: VedtakService = mockk()
-
     private val vedtaksperiodeService: VedtaksperiodeService = mockk()
-
     private val mockBehandlingsresultatService: BehandlingsresultatService = mockk()
-
     private val vilkårService: VilkårService = mockk()
-
     private val persongrunnlagService: PersongrunnlagService = mockk()
-
     private val beregningService: BeregningService = mockk()
-
-    private lateinit var behandlingsresultatSteg: BehandlingsresultatSteg
-
-    private lateinit var behandling: Behandling
-
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService =
-        mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
-
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
-
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository = mockk()
-
     private val valutakursRepository: ValutakursRepository = mockk()
+    private val valutakursService = mockk<ValutakursService>()
+
+    private val behandlingsresultatSteg: BehandlingsresultatSteg =
+        BehandlingsresultatSteg(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingService = behandlingService,
+            simuleringService = simuleringService,
+            vedtakService = vedtakService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            behandlingsresultatService = mockBehandlingsresultatService,
+            vilkårService = vilkårService,
+            persongrunnlagService = persongrunnlagService,
+            beregningService = beregningService,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            valutakursRepository = valutakursRepository,
+            localDateProvider = RealDateProvider(),
+            valutakursService = valutakursService,
+        )
+
+    private val behandling =
+        lagBehandling(
+            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+        )
 
     @BeforeEach
     fun init() {
-        behandlingsresultatSteg =
-            BehandlingsresultatSteg(
-                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-                behandlingService = behandlingService,
-                simuleringService = simuleringService,
-                vedtakService = vedtakService,
-                vedtaksperiodeService = vedtaksperiodeService,
-                behandlingsresultatService = mockBehandlingsresultatService,
-                vilkårService = vilkårService,
-                persongrunnlagService = persongrunnlagService,
-                beregningService = beregningService,
-                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-                andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-                utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
-                valutakursRepository = valutakursRepository,
-                localDateProvider = RealDateProvider(),
-            )
-
-        behandling =
-            lagBehandling(
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-            )
+        every { simuleringService.oppdaterSimuleringPåBehandling(any()) } returns emptyList()
+        every { simuleringService.hentSimuleringPåBehandling(any()) } returns emptyList()
+        every { valutakursService.hentValutakurser(any()) } returns emptyList()
     }
 
     @Test
@@ -237,7 +228,7 @@ class BehandlingsresultatStegTest {
         } returns behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
 
         every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } returns listOf(lagUtenlandskPeriodebeløp(fom = LocalDate.now().toYearMonth(), beløp = BigDecimal.valueOf(100), intervall = Intervall.MÅNEDLIG, valutakode = "SEK", utbetalingsland = "S", barnAktører = setOf(randomAktør())))
-        every { valutakursRepository.finnFraBehandlingId(any()) } returns listOf(lagValutakurs(fom = LocalDate.now().toYearMonth(), valutakode = "SEK", valutakursdato = LocalDate.now(), kurs = BigDecimal.valueOf(1.2), barnAktører = setOf(randomAktør())))
+        every { valutakursRepository.finnFraBehandlingId(any()) } returns listOf(lagValutakurs(fom = LocalDate.now().toYearMonth(), valutakode = "SEK", valutakursdato = LocalDate.now(), kurs = BigDecimal.valueOf(1.2), barnAktører = setOf(randomAktør()), vurderingsform = Vurderingsform.MANUELL))
 
         every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(any()) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 
@@ -276,6 +267,44 @@ class BehandlingsresultatStegTest {
         assertDoesNotThrow {
             endringTidslinje.kastFeilVedEndringEtter(treMånederEtterStartdato, lagBehandling())
         }
+    }
+
+    @Test
+    fun `skal gå rett fra behandlingsresultat til iverksetting for alle fødselshendelser`() {
+        val fødselshendelseBehandling =
+            behandling.copy(
+                skalBehandlesAutomatisk = true,
+                opprettetÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            )
+        val vedtak =
+            lagVedtak(
+                fødselshendelseBehandling,
+            )
+        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.INNVILGET_OG_ENDRET
+        every { behandlingService.nullstillEndringstidspunkt(fødselshendelseBehandling.id) } just runs
+        every {
+            behandlingService.oppdaterBehandlingsresultat(
+                any(),
+                any(),
+            )
+        } returns fødselshendelseBehandling.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
+        every {
+            behandlingService.oppdaterStatusPåBehandling(
+                fødselshendelseBehandling.id,
+                BehandlingStatus.IVERKSETTER_VEDTAK,
+            )
+        } returns fødselshendelseBehandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)
+        every { vedtakService.hentAktivForBehandlingThrows(fødselshendelseBehandling.id) } returns vedtak
+        every { vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak) } just runs
+        every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(fødselshendelseBehandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(fødselshendelseBehandling.id) } returns emptyList()
+        every { valutakursRepository.finnFraBehandlingId(fødselshendelseBehandling.id) } returns emptyList()
+
+        assertEquals(
+            behandlingsresultatSteg.utførStegOgAngiNeste(fødselshendelseBehandling, ""),
+            StegType.IVERKSETT_MOT_OPPDRAG,
+        )
     }
 
     @Test
@@ -374,6 +403,24 @@ class BehandlingsresultatStegTest {
         behandlingsresultatSteg.preValiderSteg(behandling)
 
         assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }.doesNotThrowAnyException()
+    }
+
+    @Test
+    fun `postValiderSteg - skal validere at behandlingsresultat ved omregning er uendret`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.OMREGNING_18ÅR)
+
+        for (resultat in endretBehandlingsresultat()) {
+            behandling.resultat = resultat
+            assertThrows<Feil> {
+                behandlingsresultatSteg.postValiderSteg(behandling)
+            }
+        }
+        for (resultat in uendretBehandlingsresultat()) {
+            behandling.resultat = resultat
+            assertDoesNotThrow {
+                behandlingsresultatSteg.postValiderSteg(behandling)
+            }
+        }
     }
 
     @Test
@@ -517,41 +564,6 @@ class BehandlingsresultatStegTest {
         } returns emptyList()
     }
 
-    fun `skal gå rett fra behandlingsresultat til iverksetting for alle fødselshendelser`() {
-        val fødselshendelseBehandling =
-            behandling.copy(
-                skalBehandlesAutomatisk = true,
-                opprettetÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            )
-        val vedtak =
-            lagVedtak(
-                fødselshendelseBehandling,
-            )
-        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.INNVILGET_OG_ENDRET
-        every { behandlingService.nullstillEndringstidspunkt(fødselshendelseBehandling.id) } just runs
-        every {
-            behandlingService.oppdaterBehandlingsresultat(
-                any(),
-                any(),
-            )
-        } returns fødselshendelseBehandling.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
-        every {
-            behandlingService.oppdaterStatusPåBehandling(
-                fødselshendelseBehandling.id,
-                BehandlingStatus.IVERKSETTER_VEDTAK,
-            )
-        } returns fødselshendelseBehandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)
-        every { vedtakService.hentAktivForBehandlingThrows(fødselshendelseBehandling.id) } returns vedtak
-        every { vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak) } just runs
-        every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(fødselshendelseBehandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
-
-        assertEquals(
-            behandlingsresultatSteg.utførStegOgAngiNeste(fødselshendelseBehandling, ""),
-            StegType.IVERKSETT_MOT_OPPDRAG,
-        )
-    }
-
     fun String.tilBoolskTidslinje(startdato: YearMonth): Tidslinje<Boolean, Måned> {
         return tidslinje {
             this.mapIndexed { index, it ->
@@ -567,4 +579,18 @@ class BehandlingsresultatStegTest {
             }
         }
     }
+
+    private fun endretBehandlingsresultat() =
+        listOf(
+            Behandlingsresultat.ENDRET_UTBETALING,
+            Behandlingsresultat.ENDRET_UTEN_UTBETALING,
+            Behandlingsresultat.ENDRET_OG_OPPHØRT,
+            Behandlingsresultat.OPPHØRT,
+        )
+
+    private fun uendretBehandlingsresultat() =
+        listOf(
+            Behandlingsresultat.FORTSATT_INNVILGET,
+            Behandlingsresultat.FORTSATT_OPPHØRT,
+        )
 }

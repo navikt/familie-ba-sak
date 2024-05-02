@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.felles.beregning
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjema
-import no.nav.familie.ba.sak.kjerne.eøs.felles.inneholder
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 
 /**
@@ -33,12 +32,3 @@ fun <T : PeriodeOgBarnSkjema<T>> T.trekkFra(skjema: T): Collection<T> {
 
     return listOfNotNull(skjemaForRestBarn, skjemaForForegåendePerioder, skjemaForEtterfølgendePerioder)
 }
-
-fun <T : PeriodeOgBarnSkjema<T>> Iterable<T>.trekkFra(skalFjernes: T) =
-    this.flatMap { skjema ->
-        if (skjema.inneholder(skalFjernes)) {
-            skjema.trekkFra(skalFjernes)
-        } else {
-            listOf(skjema)
-        }
-    }

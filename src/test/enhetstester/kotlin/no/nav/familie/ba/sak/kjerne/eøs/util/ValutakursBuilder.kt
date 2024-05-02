@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.util
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
@@ -30,4 +31,7 @@ class ValutakursBuilder(
                 else -> null
             }
         }
+
+    fun medVurderingsform(vurderingsform: Vurderingsform) =
+        medTransformasjon { utenlandskPeriodebeløp -> utenlandskPeriodebeløp.copy(vurderingsform = vurderingsform) }
 }

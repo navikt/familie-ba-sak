@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -62,7 +61,6 @@ class IverksettMotOppdrag(
         økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
             vedtak = vedtakService.hent(data.vedtaksId),
             saksbehandlerId = data.saksbehandlerId,
-            andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory(),
         )
         iverksattOppdrag.increment()
         val forrigeIverksatteBehandling =

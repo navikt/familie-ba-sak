@@ -29,6 +29,12 @@ class ValutakursService(
     ) =
         skjemaService.endreSkjemaer(behandlingId, valutakurs)
 
+    fun oppdaterValutakurser(
+        behandlingId: BehandlingId,
+        valutakurser: List<Valutakurs>,
+    ) =
+        skjemaService.endreSkjemaer(behandlingId = behandlingId, oppdateringer = valutakurser)
+
     fun slettValutakurs(
         behandlingId: BehandlingId,
         valutakursId: Long,

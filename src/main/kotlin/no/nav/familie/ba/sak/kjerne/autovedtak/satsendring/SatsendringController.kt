@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -34,8 +33,6 @@ class SatsendringController(
     private val opprettTaskService: OpprettTaskService,
     private val satsendringService: SatsendringService,
 ) {
-    private val logger = LoggerFactory.getLogger(SatsendringController::class.java)
-
     @GetMapping(path = ["/kjorsatsendring/{fagsakId}"])
     fun utførSatsendringITaskPåFagsak(
         @PathVariable fagsakId: Long,

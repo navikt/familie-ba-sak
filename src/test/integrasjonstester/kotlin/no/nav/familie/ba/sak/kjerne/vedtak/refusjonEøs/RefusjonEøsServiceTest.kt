@@ -79,7 +79,7 @@ class RefusjonEøsServiceTest(
             .also { Assertions.assertThat(it.size).isEqualTo(2) }
             .also { Assertions.assertThat(it[0].id).isEqualTo(id2) }
 
-        refusjonEøsService.fjernRefusjonEøsPeriode(id = id, behandlingId = behandling.id)
+        refusjonEøsService.fjernRefusjonEøsPeriode(id = id)
 
         refusjonEøsService.hentRefusjonEøsPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.size).isEqualTo(1) }

@@ -244,7 +244,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
         }
 
         private fun settPåMaskinellVent(behandling: Behandling) {
-            snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
+            snikeIKøenService.settAktivBehandlingPåMaskinellVent(
                 behandling.id,
                 SettPåMaskinellVentÅrsak.SATSENDRING,
             )

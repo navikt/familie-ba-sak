@@ -22,9 +22,6 @@ class KompetanseService(
     fun hentKompetanser(behandlingId: BehandlingId) =
         skjemaService.hentMedBehandlingId(behandlingId)
 
-    fun hentKompetanse(kompetanseId: Long) =
-        skjemaService.hentMedId(kompetanseId)
-
     @Transactional
     fun oppdaterKompetanse(
         behandlingId: BehandlingId,
