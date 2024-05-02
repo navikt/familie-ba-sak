@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_STARTE_VALUTAJUSTERING
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -62,7 +62,7 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
     ) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
 
-        if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING)) {
+        if (unleashNextMedContextService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) {
             automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId, utenlandskePeriodebeløp)
         }
 

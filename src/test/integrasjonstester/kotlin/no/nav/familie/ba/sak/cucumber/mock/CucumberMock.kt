@@ -234,6 +234,7 @@ class CucumberMock(
             tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
             simuleringService = simuleringService,
             mockk(),
+            unleashNextMedContextService,
         )
 
     val tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService =
