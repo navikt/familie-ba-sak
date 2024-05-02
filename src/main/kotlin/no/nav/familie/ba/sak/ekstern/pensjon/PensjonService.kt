@@ -236,29 +236,15 @@ class PensjonService(
         fraDato: LocalDate,
     ): List<BarnetrygdTilPensjon> {
         return distinct().groupBy { it.fagsakEiersIdent }.map { (fagsakEiersIdent, barnetrygdTilPensjon) ->
-            val perioderUtenOverlappMellomFagsystemene = mutableListOf<BarnetrygdPeriode>()
-
-            barnetrygdTilPensjon.flatMap { it.barnetrygdPerioder }.groupBy { it.personIdent }
-                .forEach { (_, perioderTilhørendePerson) ->
-                    val (baSakPerioder, opprinneligeInfotrygdPerioder) =
-                        perioderTilhørendePerson.partition { it.kildesystem == "BA" }
-
-                    val infotrygdperioderSomIkkeOverlapperBaPerioder =
+            val perioderUtenOverlappMellomFagsystemene =
+                barnetrygdTilPensjon.flatMap { it.barnetrygdPerioder }.groupBy { it.personIdent }
+                    .values
+                    .fold(emptyList<BarnetrygdPeriode>()) { acc, perioderTilhørendePerson ->
                         try {
-                            baSakPerioder.tilTidslinje()
-                                .kombinerMed(opprinneligeInfotrygdPerioder.tilTidslinje()) { periodeIBa, periodeIInfotrygd ->
-                                    periodeIInfotrygd.takeIf { periodeIBa == null }
-                                }
-                                .perioder()
-                                .mapNotNull {
-                                    it.innhold?.copy(
-                                        stønadFom = it.fraOgMed.tilYearMonth(),
-                                        stønadTom = it.tilOgMed.tilYearMonth(),
-                                    )
-                                }
+                            acc + perioderTilhørendePerson.fjernOverlappendeInfotrygdperioder()
                         } catch (e: Exception) {
                             logger.error("Klarte ikke kombinere BA og IT-perioder for fjerning av eventuelle overlapp")
-                            secureLogger.warn("Klarte ikke kombinere $baSakPerioder\n og \n$opprinneligeInfotrygdPerioder", e)
+                            secureLogger.warn("Klarte ikke kombinere ba-perioder og infotrygd-perioder", e)
 
                             throw EksternTjenesteFeilException(
                                 eksternTjenesteFeil = EksternTjenesteFeil("/api/ekstern/pensjon/hent-barnetrygd"),
@@ -267,16 +253,34 @@ class PensjonService(
                                 throwable = e,
                             )
                         }
-
-                    sjekkOgLoggOmDetFinnesOverlapp(baSakPerioder, opprinneligeInfotrygdPerioder, infotrygdperioderSomIkkeOverlapperBaPerioder)
-                    perioderUtenOverlappMellomFagsystemene.addAll(baSakPerioder + infotrygdperioderSomIkkeOverlapperBaPerioder)
-                }
+                    }
 
             BarnetrygdTilPensjon(
                 fagsakEiersIdent = fagsakEiersIdent,
                 barnetrygdPerioder = perioderUtenOverlappMellomFagsystemene,
             )
         }
+    }
+
+    private fun List<BarnetrygdPeriode>.fjernOverlappendeInfotrygdperioder(): List<BarnetrygdPeriode> {
+        val (baSakPerioder, opprinneligeInfotrygdPerioder) =
+            partition { it.kildesystem == "BA" }
+
+        val infotrygdperioderSomIkkeOverlapperBaPerioder =
+            baSakPerioder.tilTidslinje()
+                .kombinerMed(opprinneligeInfotrygdPerioder.tilTidslinje()) { periodeIBa, periodeIInfotrygd ->
+                    periodeIInfotrygd.takeIf { periodeIBa == null }
+                }
+                .perioder()
+                .mapNotNull {
+                    it.innhold?.copy(
+                        stønadFom = it.fraOgMed.tilYearMonth(),
+                        stønadTom = it.tilOgMed.tilYearMonth(),
+                    )
+                }
+
+        sjekkOgLoggOmDetFinnesOverlapp(baSakPerioder, opprinneligeInfotrygdPerioder, infotrygdperioderSomIkkeOverlapperBaPerioder)
+        return baSakPerioder + infotrygdperioderSomIkkeOverlapperBaPerioder
     }
 
     fun sjekkOgLoggOmDetFinnesOverlapp(
