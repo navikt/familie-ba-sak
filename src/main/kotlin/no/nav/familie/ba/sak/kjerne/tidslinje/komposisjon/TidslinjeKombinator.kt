@@ -114,6 +114,9 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
             .tilVerdi()
     }
 
+fun <I, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner() =
+    this.kombiner { it }
+
 /**
  * Extension-metode for å kombinere tre tidslinjer
  * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
