@@ -115,7 +115,7 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
     }
 
 fun <I, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner() =
-    this.kombiner { it }
+    this.kombiner { if (it.toList().isNotEmpty()) it else null }
 
 /**
  * Extension-metode for å kombinere tre tidslinjer
