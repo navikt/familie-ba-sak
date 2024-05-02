@@ -49,7 +49,6 @@
         <unleash.version>9.2.0</unleash.version>
         <maven.model.version>3.9.6</maven.model.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
-        <fpsak-tidslinje.version>2.7.1</fpsak-tidslinje.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.11.3</avro.version>
         <confluent.version>7.6.0</confluent.version>
@@ -326,11 +325,6 @@
             <groupId>no.nav.familie.eksterne.kontrakter</groupId>
             <artifactId>bisys</artifactId>
             <version>${eksterne-kontrakter-bisys.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.fpsak.tidsserie</groupId>
-            <artifactId>fpsak-tidsserie</artifactId>
-            <version>${fpsak-tidslinje.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.eksterne.kontrakter</groupId>
