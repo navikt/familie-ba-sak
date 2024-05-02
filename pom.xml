@@ -48,7 +48,6 @@
         <testcontainers.postgresql.version>1.19.7</testcontainers.postgresql.version>
         <unleash.version>9.2.0</unleash.version>
         <maven.model.version>3.9.6</maven.model.version>
-        <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <fpsak-tidslinje.version>2.7.1</fpsak-tidslinje.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.11.3</avro.version>
@@ -241,12 +240,6 @@
             <groupId>no.nav.security</groupId>
             <artifactId>token-client-core</artifactId>
             <version>${token-validation-spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.security</groupId>
-            <artifactId>token-validation-test-support</artifactId>
-            <version>${token-validation-test-support.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>no.nav.security</groupId>
