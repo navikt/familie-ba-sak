@@ -4,15 +4,18 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedTaskDto
-import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -43,12 +46,14 @@ class SendVedtakTilInfotrygdTask(
             andelerTilkjentYtelseOgEndreteUtbetalingerService
                 .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
 
-        return if (andelerMedEndringer.isNotEmpty()) {
-            val førsteUtbetalingsperiode =
-                beregnUtbetalingsperioderUtenKlassifisering(andelerMedEndringer)
-                    .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
-                    .first()
-            førsteUtbetalingsperiode.fom
+        val førsteUtbetalingsperiode =
+            andelerMedEndringer.map { it.andel }
+                .tilTidslinjerPerPersonOgType().values
+                .kombiner<AndelTilkjentYtelse, Iterable<AndelTilkjentYtelse>?, Måned> { it }.perioder()
+                .filterNot { it.innhold == null }.firstOrNull()
+
+        return if (førsteUtbetalingsperiode != null) {
+            førsteUtbetalingsperiode.fraOgMed.tilLocalDate()
         } else {
             error("Finner ikke første utbetalingsperiode")
         }
