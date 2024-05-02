@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak
 
+import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ApplicationConfig
@@ -37,6 +38,7 @@ import org.springframework.web.client.RestTemplate
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
+@MockKExtension.KeepMocks
 abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService
