@@ -147,12 +147,12 @@ private fun Collection<VilkårResultat>.hentForskjøvetEksplisittAvslagTidslinje
         val tidslinjeForVilkår =
             vilkårResultater.tilTidslinje().tilMånedFraMånedsskifte { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
                 when {
-                    innholdSisteDagForrigeMåned?.resultat == Resultat.OPPFYLT && innholdFørsteDagDenneMåned?.resultat == Resultat.IKKE_OPPFYLT -> innholdFørsteDagDenneMåned
-                    innholdSisteDagForrigeMåned?.resultat == Resultat.IKKE_OPPFYLT &&
+                    innholdSisteDagForrigeMåned?.erOppfylt() == true && innholdFørsteDagDenneMåned?.erEksplisittAvslagPåSøknad == true -> innholdFørsteDagDenneMåned
+                    innholdSisteDagForrigeMåned?.erEksplisittAvslagPåSøknad == true &&
                         innholdFørsteDagDenneMåned == null &&
                         innholdSisteDagForrigeMåned.periodeFom?.toYearMonth() == innholdSisteDagForrigeMåned.periodeTom?.toYearMonth() -> innholdSisteDagForrigeMåned
 
-                    innholdSisteDagForrigeMåned?.resultat == Resultat.IKKE_OPPFYLT && innholdFørsteDagDenneMåned?.resultat == Resultat.IKKE_OPPFYLT -> innholdFørsteDagDenneMåned
+                    innholdSisteDagForrigeMåned?.erEksplisittAvslagPåSøknad == true && innholdFørsteDagDenneMåned?.erEksplisittAvslagPåSøknad == true -> innholdFørsteDagDenneMåned
                     else -> null
                 }
             }
