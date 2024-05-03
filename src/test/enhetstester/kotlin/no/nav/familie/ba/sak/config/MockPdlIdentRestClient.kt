@@ -14,28 +14,32 @@ import java.net.URI
 @Profile("mock-ident-client")
 @Primary
 class MockPdlIdentRestClient(
-    restOperations: RestOperations
+    restOperations: RestOperations,
 ) : PdlIdentRestClient(URI("dummy_uri"), restOperations) {
-
-    override fun hentIdenter(personIdent: String, historikk: Boolean): List<IdentInformasjon> {
+    override fun hentIdenter(
+        personIdent: String,
+        historikk: Boolean,
+    ): List<IdentInformasjon> {
         return when {
-            historikk -> listOf(
-                IdentInformasjon(personIdent, historisk = false, gruppe = "FOLKEREGISTERIDENT"),
-                IdentInformasjon(randomFnr(), historisk = true, gruppe = "FOLKEREGISTERIDENT"),
-            )
+            historikk ->
+                listOf(
+                    IdentInformasjon(personIdent, historisk = false, gruppe = "FOLKEREGISTERIDENT"),
+                    IdentInformasjon(randomFnr(), historisk = true, gruppe = "FOLKEREGISTERIDENT"),
+                )
 
-            else -> listOf(
-                IdentInformasjon(
-                    ident = personIdent.substring(0, min(11, personIdent.length)),
-                    historisk = false,
-                    gruppe = "FOLKEREGISTERIDENT",
-                ),
-                IdentInformasjon(
-                    ident = personIdent.substring(0, min(11, personIdent.length)) + "00",
-                    historisk = false,
-                    gruppe = "AKTORID",
-                ),
-            )
+            else ->
+                listOf(
+                    IdentInformasjon(
+                        ident = personIdent.substring(0, min(11, personIdent.length)),
+                        historisk = false,
+                        gruppe = "FOLKEREGISTERIDENT",
+                    ),
+                    IdentInformasjon(
+                        ident = personIdent.substring(0, min(11, personIdent.length)) + "00",
+                        historisk = false,
+                        gruppe = "AKTORID",
+                    ),
+                )
         }
     }
 }
