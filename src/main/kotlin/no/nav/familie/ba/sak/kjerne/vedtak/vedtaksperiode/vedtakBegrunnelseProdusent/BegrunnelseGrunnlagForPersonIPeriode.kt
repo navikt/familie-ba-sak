@@ -142,14 +142,18 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
         }
 }
 
-private fun Collection<VilkårResultat>.hentForskjøvetEksplisittAvslagTidslinje(): Tidslinje<List<VilkårResultatForVedtaksperiode>, Måned> = groupBy { it.vilkårType }.map { (_, vilkårResultater) ->
-    vilkårResultater.tilTidslinje().tilMånedFraMånedsskifte { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
-        when {
-            innholdSisteDagForrigeMåned?.resultat == Resultat.OPPFYLT && innholdFørsteDagDenneMåned?.resultat == Resultat.IKKE_OPPFYLT -> innholdFørsteDagDenneMåned
-            innholdSisteDagForrigeMåned?.resultat == Resultat.IKKE_OPPFYLT && innholdFørsteDagDenneMåned == null && innholdSisteDagForrigeMåned.periodeFom?.toYearMonth() == innholdSisteDagForrigeMåned.periodeTom?.toYearMonth() -> innholdSisteDagForrigeMåned
-            innholdSisteDagForrigeMåned?.resultat == Resultat.IKKE_OPPFYLT && innholdFørsteDagDenneMåned?.resultat == Resultat.IKKE_OPPFYLT -> innholdFørsteDagDenneMåned
-            else -> null
+private fun Collection<VilkårResultat>.hentForskjøvetEksplisittAvslagTidslinje(): Tidslinje<List<VilkårResultatForVedtaksperiode>, Måned> =
+    groupBy { it.vilkårType }.map { (_, vilkårResultater) ->
+        vilkårResultater.tilTidslinje().tilMånedFraMånedsskifte { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
+            when {
+                innholdSisteDagForrigeMåned?.resultat == Resultat.OPPFYLT && innholdFørsteDagDenneMåned?.resultat == Resultat.IKKE_OPPFYLT -> innholdFørsteDagDenneMåned
+                innholdSisteDagForrigeMåned?.resultat == Resultat.IKKE_OPPFYLT &&
+                    innholdFørsteDagDenneMåned == null &&
+                    innholdSisteDagForrigeMåned.periodeFom?.toYearMonth() == innholdSisteDagForrigeMåned.periodeTom?.toYearMonth() -> innholdSisteDagForrigeMåned
+
+                innholdSisteDagForrigeMåned?.resultat == Resultat.IKKE_OPPFYLT && innholdFørsteDagDenneMåned?.resultat == Resultat.IKKE_OPPFYLT -> innholdFørsteDagDenneMåned
+                else -> null
+            }
         }
-    }
     }.map { tidslinje -> tidslinje.map { it?.let { VilkårResultatForVedtaksperiode(it) } } }
         .kombiner { it.toList() }
