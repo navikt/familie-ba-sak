@@ -492,6 +492,10 @@ class BrevService(
     private fun hentUtbetalingerPerMndEøs(
         vedtak: Vedtak,
     ): Map<String, UtbetalingMndEøs>? {
+        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) {
+            return null
+        }
+
         val behandlingId = vedtak.behandling.id
         val endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId = behandlingId)
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId = behandlingId)
