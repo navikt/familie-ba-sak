@@ -204,6 +204,7 @@ class AutovedtakStegService(
 
         when (åpenBehandling.status) {
             BehandlingStatus.UTREDES,
+            BehandlingStatus.SATT_PÅ_VENT,
             -> {
                 if (snikeIKøenService.kanSnikeForbi(åpenBehandling)) {
                     snikeIKøenService.settAktivBehandlingPåMaskinellVent(
@@ -213,6 +214,7 @@ class AutovedtakStegService(
                     return false
                 }
             }
+
             BehandlingStatus.FATTER_VEDTAK -> {
                 if (førstegangKjørt.until(LocalDateTime.now(), ChronoUnit.DAYS) < 7) {
                     throw RekjørSenereException(
@@ -221,6 +223,7 @@ class AutovedtakStegService(
                     )
                 }
             }
+
             BehandlingStatus.IVERKSETTER_VEDTAK,
             BehandlingStatus.SATT_PÅ_MASKINELL_VENT,
             -> {
@@ -229,6 +232,7 @@ class AutovedtakStegService(
                     triggerTid = LocalDateTime.now().plusHours(1),
                 )
             }
+
             else -> {
                 throw Feil("Ikke håndtert feilsituasjon på $åpenBehandling")
             }
