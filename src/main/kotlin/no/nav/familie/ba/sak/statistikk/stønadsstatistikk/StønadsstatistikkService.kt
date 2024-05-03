@@ -7,16 +7,19 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.filtrerGjeldendeNå
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.eksterne.kontrakter.BehandlingTypeV2
@@ -34,10 +37,9 @@ import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.familie.eksterne.kontrakter.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.eksterne.kontrakter.YtelseType.SMÅBARNSTILLEGG
 import no.nav.familie.eksterne.kontrakter.YtelseType.UTVIDET_BARNETRYGD
-import no.nav.fpsak.tidsserie.LocalDateInterval
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.ZoneId
 import java.util.UUID
 
@@ -80,7 +82,7 @@ class StønadsstatistikkService(
                     BehandlingUnderkategori.UTVIDET -> UnderkategoriV2.UTVIDET
                 },
             behandlingTypeV2 = BehandlingTypeV2.valueOf(behandling.type.name),
-            utbetalingsperioderV2 = hentUtbetalingsperioderV2(behandling, persongrunnlag),
+            utbetalingsperioderV2 = hentUtbetalingsperioderTilDatavarehus(behandling, persongrunnlag),
             funksjonellId = UUID.randomUUID().toString(),
             kompetanseperioder = hentKompetanse(BehandlingId(behandlingId)),
             behandlingÅrsakV2 = BehandlingÅrsakV2.valueOf(behandling.opprettetÅrsak.name),
@@ -117,37 +119,37 @@ class StønadsstatistikkService(
         return lagPersonDVHV2(søker)
     }
 
-    private fun hentUtbetalingsperioderV2(
+    private fun hentUtbetalingsperioderTilDatavarehus(
         behandling: Behandling,
         persongrunnlag: PersonopplysningGrunnlag,
     ): List<UtbetalingsperiodeDVHV2> {
-        val andelerTilkjentYtelse =
+        val andelerMedEndringer =
             andelerTilkjentYtelseOgEndreteUtbetalingerService
                 .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
-        if (andelerTilkjentYtelse.isEmpty()) return emptyList()
+        if (andelerMedEndringer.isEmpty()) return emptyList()
 
-        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
-
+        val utbetalingsPerioder =
+            andelerMedEndringer.map { it.andel }
+                .tilTidslinjerPerPersonOgType().values
+                .kombiner<AndelTilkjentYtelse, Iterable<AndelTilkjentYtelse>?, Måned> { it }
         val søkerOgBarn = persongrunnlag.søkerOgBarn
-        return utbetalingsPerioder.toSegments()
-            .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
-            .map { segment ->
-                val andelerForSegment =
-                    andelerTilkjentYtelse.filter {
-                        segment.localDateInterval.overlaps(
-                            LocalDateInterval(
-                                it.stønadFom.førsteDagIInneværendeMåned(),
-                                it.stønadTom.sisteDagIInneværendeMåned(),
-                            ),
-                        )
-                    }
-                mapTilUtbetalingsperiodeV2(
-                    segment,
-                    andelerForSegment,
-                    behandling,
-                    søkerOgBarn,
-                )
+
+        return utbetalingsPerioder.perioder()
+            .mapNotNull { periode ->
+                val andelerIPeriode = periode.innhold
+
+                if (andelerIPeriode != null) {
+                    mapTilUtbetalingsperiodeV2(
+                        fom = periode.fraOgMed.tilYearMonth().førsteDagIInneværendeMåned(),
+                        tom = periode.fraOgMed.tilYearMonth().sisteDagIInneværendeMåned(),
+                        andelerForSegment = andelerIPeriode,
+                        behandling = behandling,
+                        søkerOgBarn = søkerOgBarn,
+                    )
+                } else {
+                    null
+                }
             }
     }
 
@@ -163,16 +165,17 @@ class StønadsstatistikkService(
     }
 
     private fun mapTilUtbetalingsperiodeV2(
-        segment: LocalDateSegment<Int>,
-        andelerForSegment: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        fom: LocalDate,
+        tom: LocalDate,
+        andelerForSegment: Iterable<AndelTilkjentYtelse>,
         behandling: Behandling,
         søkerOgBarn: List<Person>,
     ): UtbetalingsperiodeDVHV2 {
         return UtbetalingsperiodeDVHV2(
             hjemmel = "Ikke implementert",
-            stønadFom = segment.fom,
-            stønadTom = segment.tom,
-            utbetaltPerMnd = segment.value,
+            stønadFom = fom,
+            stønadTom = tom,
+            utbetaltPerMnd = andelerForSegment.sumOf { it.kalkulertUtbetalingsbeløp },
             utbetalingsDetaljer =
                 andelerForSegment.filter { it.erAndelSomSkalSendesTilOppdrag() }.map { andel ->
                     val personForAndel =

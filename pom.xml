@@ -21,16 +21,16 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20240214140223_83c31de</prosessering.version>
+        <prosessering.version>2.20240426120029_490d299</prosessering.version>
         <felles.version>3.20240422125821_21d82d5</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20240430083848_be12d55</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
-        <utbetalingsgenerator.version>1.0_20240208132236_bce5777</utbetalingsgenerator.version>
+        <utbetalingsgenerator.version>1.0_20240426154435_ca351af</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
         <cucumber.version>7.17.0</cucumber.version>
-        <mockk.version>1.13.5</mockk.version>
+        <mockk.version>1.13.10</mockk.version>
         <wiremock.version>3.5.4</wiremock.version>
         <token-validation-spring.version>4.1.4</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
@@ -49,10 +49,9 @@
         <unleash.version>9.2.0</unleash.version>
         <maven.model.version>3.9.6</maven.model.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
-        <fpsak-tidslinje.version>2.7.1</fpsak-tidslinje.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.11.3</avro.version>
-        <confluent.version>7.6.0</confluent.version>
+        <confluent.version>7.6.1</confluent.version>
     </properties>
 
     <dependencyManagement>
@@ -326,11 +325,6 @@
             <groupId>no.nav.familie.eksterne.kontrakter</groupId>
             <artifactId>bisys</artifactId>
             <version>${eksterne-kontrakter-bisys.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.fpsak.tidsserie</groupId>
-            <artifactId>fpsak-tidsserie</artifactId>
-            <version>${fpsak-tidslinje.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.eksterne.kontrakter</groupId>

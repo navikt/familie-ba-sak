@@ -114,6 +114,9 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
             .tilVerdi()
     }
 
+fun <I, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner() =
+    this.kombiner { if (it.toList().isNotEmpty()) it else null }
+
 /**
  * Extension-metode for å kombinere liste av tidslinjer
  * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
