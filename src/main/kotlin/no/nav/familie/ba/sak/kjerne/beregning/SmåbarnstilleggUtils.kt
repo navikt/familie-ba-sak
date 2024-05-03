@@ -3,15 +3,14 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.erTilogMed3ÅrTidslinje
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønadTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.domene.splitFramtidigePerioderFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
@@ -32,8 +31,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
-import no.nav.fpsak.tidsserie.LocalDateSegment
-import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.springframework.http.HttpStatus
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -97,35 +94,19 @@ fun hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
     forrigeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
     nyeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
 ): Pair<List<MånedPeriode>, List<MånedPeriode>> {
-    val forrigeAndelerTidslinje =
-        LocalDateTimeline(
-            forrigeSmåbarnstilleggAndeler.map {
-                LocalDateSegment(
-                    it.stønadFom.førsteDagIInneværendeMåned(),
-                    it.stønadTom.sisteDagIInneværendeMåned(),
-                    it,
-                )
-            },
-        )
-    val andelerTidslinje =
-        LocalDateTimeline(
-            nyeSmåbarnstilleggAndeler.map {
-                LocalDateSegment(
-                    it.stønadFom.førsteDagIInneværendeMåned(),
-                    it.stønadTom.sisteDagIInneværendeMåned(),
-                    it,
-                )
-            },
-        )
+    val forrigeAndelerTidslinje = forrigeSmåbarnstilleggAndeler.tilTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
+    val andelerTidslinje = nyeSmåbarnstilleggAndeler.tilTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
 
-    val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
-    val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
+    val nyeSmåbarnstilleggPerioder =
+        forrigeAndelerTidslinje.kombinerMed(andelerTidslinje) { gammel, ny -> ny.takeIf { gammel == null } }
 
-    return Pair(
-        segmenterLagtTil.toSegments().map { MånedPeriode(fom = it.fom.toYearMonth(), tom = it.tom.toYearMonth()) },
-        segmenterFjernet.toSegments().map { MånedPeriode(fom = it.fom.toYearMonth(), tom = it.tom.toYearMonth()) },
-    )
+    val fjernedeSmåbarnstilleggPerioder =
+        forrigeAndelerTidslinje.kombinerMed(andelerTidslinje) { gammel, ny -> gammel.takeIf { ny == null } }
+
+    return Pair(nyeSmåbarnstilleggPerioder.tilMånedPerioder(), fjernedeSmåbarnstilleggPerioder.tilMånedPerioder())
 }
+
+private fun Tidslinje<AndelTilkjentYtelse, Måned>.tilMånedPerioder() = this.perioder().filter { it.innhold != null }.map { MånedPeriode(fom = it.fraOgMed.tilYearMonth(), tom = it.tilOgMed.tilYearMonth()) }
 
 fun kanAutomatiskIverksetteSmåbarnstillegg(
     innvilgedeMånedPerioder: List<MånedPeriode>,

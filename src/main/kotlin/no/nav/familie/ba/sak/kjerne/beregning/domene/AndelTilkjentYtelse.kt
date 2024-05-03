@@ -216,7 +216,7 @@ private fun regelverkavhenigeVilkår(): List<Vilkår> {
     )
 }
 
-fun List<AndelTilkjentYtelse>.tilTidslinjerPerPersonOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
+fun Collection<AndelTilkjentYtelse>.tilTidslinjerPerPersonOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         AndelTilkjentYtelseTidslinje(
             andelerTilkjentYtelsePåPerson,
