@@ -53,6 +53,31 @@ class AutobrevStegServiceTest {
         every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
         every { snikeIKøenService.kanSnikeForbi(any()) } returns false
+        every { autovedtakSmåbarnstilleggService.kjørBehandling(any()) }
+
+        autovedtakStegService.kjørBehandlingSmåbarnstillegg(
+            mottakersAktør = aktør,
+            aktør = aktør,
+        )
+
+        verify(exactly = 1) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `Skal stoppe autovedtak og opprette oppgave ved behandling som er satt på vent`() {
+        val aktør = randomAktør()
+        val fagsak = defaultFagsak(aktør)
+        val behandling =
+            lagBehandling(fagsak = fagsak).also {
+                it.status = BehandlingStatus.SATT_PÅ_VENT
+            }
+
+        every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(SmåbarnstilleggData(aktør)) } returns true
+        every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
+        every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
+        every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
+        every { snikeIKøenService.kanSnikeForbi(any()) } returns true
+        every { snikeIKøenService.settAktivBehandlingPåMaskinellVent(any(), any()) } returns Unit
 
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = aktør,
