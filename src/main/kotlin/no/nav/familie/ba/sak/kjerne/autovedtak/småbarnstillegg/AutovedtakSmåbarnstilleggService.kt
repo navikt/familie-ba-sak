@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.LocalDateProvider
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -11,10 +12,12 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SmåbarnstilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstilleggFeil
@@ -22,12 +25,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.erEndringIOvergangsstønadFramITid
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
@@ -48,6 +53,9 @@ class AutovedtakSmåbarnstilleggService(
     private val oppgaveService: OppgaveService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val localDateProvider: LocalDateProvider,
+    private val påVentService: SettPåVentService,
+    private val opprettTaskService: OpprettTaskService,
+    private val loggService: LoggService,
 ) : AutovedtakBehandlingService<SmåbarnstilleggData> {
     private val antallVedtakOmOvergangsstønad: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "antall")
@@ -209,17 +217,57 @@ class AutovedtakSmåbarnstilleggService(
         meldingIOppgave: String,
     ): String {
         metric.increment()
-        val omgjortBehandling =
-            autovedtakService.omgjørBehandlingTilManuellOgKjørSteg(
-                behandling = behandling,
-                steg = StegType.VILKÅRSVURDERING,
+
+        val behandlingPåMaskinellVent =
+            behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id, BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
+                .singleOrNull()
+
+        return if (behandlingPåMaskinellVent != null && påVentService.finnAktivSettPåVentPåBehandling(behandlingPåMaskinellVent.id) != null) {
+            behandlingPåMaskinellVent.status = BehandlingStatus.SATT_PÅ_VENT
+            behandlingHentOgPersisterService.lagreEllerOppdater(behandlingPåMaskinellVent)
+
+            henleggBehandlingOgOpprettOppgaveForBehandlingPåMaskinellVent(behandlingPåMaskinellVent, behandling, meldingIOppgave)
+        } else {
+            val omgjortBehandling =
+                autovedtakService.omgjørBehandlingTilManuellOgKjørSteg(
+                    behandling = behandling,
+                    steg = StegType.VILKÅRSVURDERING,
+                )
+
+            oppgaveService.opprettOppgaveForManuellBehandling(
+                behandling = omgjortBehandling,
+                begrunnelse = meldingIOppgave,
+                opprettLogginnslag = true,
+                manuellOppgaveType = ManuellOppgaveType.SMÅBARNSTILLEGG,
             )
-        return oppgaveService.opprettOppgaveForManuellBehandling(
-            behandling = omgjortBehandling,
+        }
+    }
+
+    private fun henleggBehandlingOgOpprettOppgaveForBehandlingPåMaskinellVent(
+        behandlingPåMaskinellVent: Behandling,
+        behandling: Behandling,
+        meldingIOppgave: String,
+    ): String {
+        opprettTaskService.opprettHenleggBehandlingTask(
+            behandlingId = behandling.id,
+            årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
             begrunnelse = meldingIOppgave,
-            opprettLogginnslag = true,
+        )
+
+        logger.info("Sender autovedtak til manuell behandling, se secureLogger for mer detaljer.")
+        secureLogger.info("Sender autovedtak til manuell behandling. Begrunnelse: $meldingIOppgave")
+        opprettTaskService.opprettOppgaveForManuellBehandlingTask(
+            behandlingId = behandlingPåMaskinellVent.id,
+            beskrivelse = meldingIOppgave,
             manuellOppgaveType = ManuellOppgaveType.SMÅBARNSTILLEGG,
         )
+
+        loggService.opprettAutovedtakTilManuellBehandling(
+            behandling = behandling,
+            tekst = meldingIOppgave,
+        )
+
+        return meldingIOppgave
     }
 
     companion object {
