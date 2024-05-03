@@ -37,5 +37,6 @@ data class InnhenteOpplysningerData(
 
     data class DelmalData(
         val signatur: SignaturDelmal,
+        val fritekstAvsnitt: FritekstAvsnitt?,
     )
 }
