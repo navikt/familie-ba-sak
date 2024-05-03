@@ -31,8 +31,9 @@ spec:
     enabled: true
     path: /internal/prometheus
   observability:
-    tracing:
+    autoInstrumentation:
       enabled: true
+      runtime: java
   gcp: # Database
     sqlInstances:
       - type: POSTGRES_15 # Read nais doc and https://github.com/navikt/familie/blob/master/doc/Google%20cloud/oppgrader-database.md on how to upgrade
@@ -130,16 +131,6 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
-    - name: OTEL_METRICS_EXPORTER
-      value: prometheus
-    - name: OTEL_LOGS_EXPORTER
-      value: none
-    - name: OTEL_TRACES_EXPORTER
-      value: otlp
-    - name: OTEL_EXPORTER_METRICS_ENABLED
-      value: "false"
-    - name: OTEL_METRICS_EXEMPLAR_FILTER
-      value: ALWAYS_ON
     - name: JAVA_OPTS
       value: "-XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError"
   kafka:
