@@ -293,11 +293,9 @@ fun ISanityBegrunnelse.erGjeldendeForFagsakType(
     true
 }
 
-internal fun ISanityBegrunnelse.begrunnelseGjelderReduksjonFraForrigeBehandling() =
-    ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT in this.øvrigeTriggere || ØvrigTrigger.REDUKSJON_FRA_FORRIGE_BEHANDLING in this.øvrigeTriggere
+internal fun ISanityBegrunnelse.begrunnelseGjelderReduksjonFraForrigeBehandling() = ØvrigTrigger.REDUKSJON_FRA_FORRIGE_BEHANDLING in this.øvrigeTriggere
 
-internal fun ISanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling() =
-    ØvrigTrigger.GJELDER_FØRSTE_PERIODE in this.øvrigeTriggere || ØvrigTrigger.OPPHØR_FRA_FORRIGE_BEHANDLING in this.øvrigeTriggere
+internal fun ISanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling() = ØvrigTrigger.OPPHØR_FRA_FORRIGE_BEHANDLING in this.øvrigeTriggere
 
 fun SanityBegrunnelse.erGjeldendeForRolle(
     person: Person,
