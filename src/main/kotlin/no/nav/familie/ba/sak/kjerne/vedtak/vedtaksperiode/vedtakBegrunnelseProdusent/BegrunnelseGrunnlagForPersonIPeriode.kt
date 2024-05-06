@@ -81,13 +81,14 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
     val forskjøvedeEksplisitteAvslagMedPerioder = forskjøvedeVilkårMedPeriode.map { tidslinje -> tidslinje.filtrer { it?.erEksplisittAvslagPåSøknad == true } }.kombiner { it.toList() }
     val eksplisitteAvslagUtenPeriode = vilkårResultaterForPerson.filter { it.erAvslagUtenPeriode() }.tilTidslinje().map { it?.let { VilkårResultatForVedtaksperiode(it) } }.tilMåned { it.first() }
 
-    val eksplisitteAvslagTidslinje = forskjøvedeEksplisitteAvslagMedPerioder.kombinerMed(eksplisitteAvslagUtenPeriode) { medPeriode, utenPeriode ->
-        when {
-            medPeriode == null -> listOfNotNull(utenPeriode)
-            utenPeriode == null -> medPeriode
-            else -> medPeriode + listOf(utenPeriode)
+    val eksplisitteAvslagTidslinje =
+        forskjøvedeEksplisitteAvslagMedPerioder.kombinerMed(eksplisitteAvslagUtenPeriode) { medPeriode, utenPeriode ->
+            when {
+                medPeriode == null -> listOfNotNull(utenPeriode)
+                utenPeriode == null -> medPeriode
+                else -> medPeriode + listOf(utenPeriode)
+            }
         }
-    }
 
     val kompetanseTidslinje =
         this.utfylteKompetanser.filtrerPåAktør(person.aktør)
