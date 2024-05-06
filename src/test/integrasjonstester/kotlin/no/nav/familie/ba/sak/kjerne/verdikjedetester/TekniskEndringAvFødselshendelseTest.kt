@@ -40,7 +40,7 @@ class TekniskEndringAvFødselshendelseTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Skal teknisk opphøre fødselshendelse`() {
-        this.settToggleMock(FeatureToggleConfig.TEKNISK_ENDRING, true)
+        System.setProperty(FeatureToggleConfig.TEKNISK_ENDRING, "true")
 
         val scenario =
             mockServerKlient().lagScenario(

@@ -61,17 +61,6 @@ class ClientMocks {
     }
 
     @Bean
-    @Profile("mock-ident-client")
-    @Primary
-    fun mockPdlIdentRestClient(): PdlIdentRestClient {
-        val mockPdlIdentRestClient = mockk<PdlIdentRestClient>(relaxed = false)
-
-        clearPdlIdentRestClient(mockPdlIdentRestClient)
-
-        return mockPdlIdentRestClient
-    }
-
-    @Bean
     @Primary
     @Profile("mock-pdl-test-søk")
     fun mockPDL(): PersonopplysningerService {
