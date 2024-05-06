@@ -76,12 +76,12 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
 
     val forskjøvedeVilkårMedPeriode = vilkårResultaterForPerson.filter { !it.erAvslagUtenPeriode() }.tilForskjøvedeVilkårTidslinjer(person.fødselsdato).map { tidslinje -> tidslinje.map { it?.let { VilkårResultatForVedtaksperiode(it) } } }
 
+    val forskjøvedeVilkår = forskjøvedeVilkårMedPeriode.map { tidslinje -> tidslinje.filtrer { it?.erEksplisittAvslagPåSøknad != true } }.kombiner { it }
+
+    val forskjøvedeEksplisitteAvslagMedPerioder = forskjøvedeVilkårMedPeriode.map { tidslinje -> tidslinje.filtrer { it?.erEksplisittAvslagPåSøknad == true } }.kombiner { it.toList() }
     val eksplisitteAvslagUtenPeriode = vilkårResultaterForPerson.filter { it.erAvslagUtenPeriode() }.tilTidslinje().map { it?.let { VilkårResultatForVedtaksperiode(it) } }.tilMåned { it.first() }
 
-    val forskjøvedeVilkår = forskjøvedeVilkårMedPeriode.map { tidslinje -> tidslinje.filtrer { it?.erEksplisittAvslagPåSøknad != true } }.kombiner { it }
-    val forskjøvedeEksplisitteAvslag = forskjøvedeVilkårMedPeriode.map { tidslinje -> tidslinje.filtrer { it?.erEksplisittAvslagPåSøknad == true } }.kombiner { it.toList() }
-
-    val eksplisitteAvslagForPerson = forskjøvedeEksplisitteAvslag.kombinerMed(eksplisitteAvslagUtenPeriode) { medPeriode, utenPeriode ->
+    val eksplisitteAvslagTidslinje = forskjøvedeEksplisitteAvslagMedPerioder.kombinerMed(eksplisitteAvslagUtenPeriode) { medPeriode, utenPeriode ->
         when {
             medPeriode == null -> listOfNotNull(utenPeriode)
             utenPeriode == null -> medPeriode
@@ -133,7 +133,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
             grunnlagForPerson?.copy(endretUtbetalingAndel = endretUtbetalingAndel)
         }.kombinerMedNullable(overgangsstønadTidslinje) { grunnlagForPerson, overgangsstønad ->
             grunnlagForPerson?.copy(overgangsstønad = overgangsstønad)
-        }.kombinerMedNullable(eksplisitteAvslagForPerson) { grunnlagForPerson, eksplisitteAvslag ->
+        }.kombinerMedNullable(eksplisitteAvslagTidslinje) { grunnlagForPerson, eksplisitteAvslag ->
             if (eksplisitteAvslag.isNullOrEmpty()) {
                 grunnlagForPerson
             } else {
