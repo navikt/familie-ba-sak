@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktør
+import no.nav.familie.ba.sak.common.randomBarnFnr
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
@@ -174,8 +174,9 @@ class FagsakControllerTest(
     fun `Skal oppgi det første barnet i listen som fagsakdeltaker`() {
         val personAktør = mockPersonidentService.hentOgLagreAktør(randomFnr(), true)
         val søkerFnr = randomFnr()
+        val barnaFnr = listOf(randomBarnFnr())
         val søkerAktør = mockPersonidentService.hentOgLagreAktør(søkerFnr, true)
-        val barnaAktør = mockPersonidentService.hentOgLagreAktørIder(ClientMocks.barnFnr.toList().subList(0, 1), true)
+        val barnaAktør = mockPersonidentService.hentOgLagreAktørIder(barnaFnr, true)
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
 
@@ -196,11 +197,11 @@ class FagsakControllerTest(
         fagsakController.oppgiFagsakdeltagere(
             RestSøkParam(
                 personAktør.aktivFødselsnummer(),
-                ClientMocks.barnFnr.toList(),
+                barnaFnr + randomFnr(),
             ),
         )
             .apply {
-                assertEquals(ClientMocks.barnFnr.toList().subList(0, 1), body!!.data!!.map { it.ident })
+                assertEquals(barnaFnr, body!!.data!!.map { it.ident })
                 assertEquals(listOf(FagsakDeltagerRolle.BARN), body!!.data!!.map { it.rolle })
             }
     }

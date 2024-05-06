@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.common.randomBarnFnr
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.simuleringMottakerMock
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -39,11 +40,12 @@ class SimuleringServiceTest(
 
     @Test
     fun `Skal verifisere at simulering blir lagert og oppdatert`() {
+        val barnFnr = leggTilPersonInfo(randomBarnFnr())
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
                 søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,

@@ -11,9 +11,8 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.ClientMocks.Companion.barnFnr
-import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -72,7 +71,9 @@ internal class StønadsstatistikkServiceTest(
             andelerTilkjentYtelseOgEndreteUtbetalingerService,
         )
     private val behandling = lagBehandling()
-    private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())
+    private val søkerFnr = "12345678910"
+    private val barnFnr = listOf(randomFnr(), randomFnr())
+    private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, barnFnr)
     private val barn1 = personopplysningGrunnlag.barna.first()
     private val barn2 = personopplysningGrunnlag.barna.last()
 
@@ -181,7 +182,7 @@ internal class StønadsstatistikkServiceTest(
 
         vedtak.utbetalingsperioderV2
             .flatMap { it.utbetalingsDetaljer.map { ud -> ud.person } }
-            .filter { it.personIdent != søkerFnr[0] }
+            .filter { it.personIdent != søkerFnr }
             .forEach {
                 assertEquals(0, it.delingsprosentYtelse)
             }

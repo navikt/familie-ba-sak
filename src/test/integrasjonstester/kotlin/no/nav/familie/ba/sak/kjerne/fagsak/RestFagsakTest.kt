@@ -5,10 +5,11 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
+import no.nav.familie.ba.sak.common.randomBarnFnr
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -62,7 +63,7 @@ class RestFagsakTest(
     @Test
     fun `Skal sjekke at gjeldende utbetalingsperioder kommer med i restfagsak`() {
         val søkerFnr = randomFnr()
-        val barnFnr = ClientMocks.barnFnr[0]
+        val barnFnr = leggTilPersonInfo(randomBarnFnr())
 
         val førstegangsbehandling =
             kjørStegprosessForFGB(
@@ -74,7 +75,7 @@ class RestFagsakTest(
                 persongrunnlagService = persongrunnlagService,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
-                vedtaksperiodeService,
+                vedtaksperiodeService = vedtaksperiodeService,
                 brevmalService = brevmalService,
             )
 

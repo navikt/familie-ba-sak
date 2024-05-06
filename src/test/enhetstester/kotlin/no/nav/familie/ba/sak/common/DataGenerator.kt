@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.common
 
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -118,7 +117,10 @@ import kotlin.random.Random
 
 val fødselsnummerGenerator = FoedselsnummerGenerator()
 
-fun randomFnr(): String = fødselsnummerGenerator.foedselsnummer().asString
+fun randomFnr(foedselsdato: LocalDate? = null): String = fødselsnummerGenerator.foedselsnummer(foedselsdato).asString
+
+fun randomBarnFnr(alder: Int? = null): String =
+    randomFnr((alder ?: (1..16).random()).årSiden.minusDays((1..364).random().toLong()))
 
 fun randomPersonident(
     aktør: Aktør,
@@ -703,8 +705,8 @@ fun lagVilkårsvurdering(
  */
 fun kjørStegprosessForFGB(
     tilSteg: StegType,
+    barnasIdenter: List<String>,
     søkerFnr: String = randomFnr(),
-    barnasIdenter: List<String> = listOf(ClientMocks.barnFnr[0]),
     fagsakService: FagsakService,
     vedtakService: VedtakService,
     persongrunnlagService: PersongrunnlagService,
@@ -1378,3 +1380,5 @@ fun ikkeOppfyltVilkår(vilkår: Vilkår) =
         vilkår = vilkår,
         regelverkResultat = RegelverkResultat.IKKE_OPPFYLT,
     )
+
+val Number.årSiden: LocalDate get() = LocalDate.now().minusYears(this.toLong())

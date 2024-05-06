@@ -9,13 +9,12 @@ import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -29,7 +28,7 @@ import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
-import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE.MOR
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
@@ -54,8 +53,6 @@ class ArbeidsfordelingIntegrationTest(
     private val personidentService: PersonidentService,
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired
-    private val mockPersonopplysningerService: PersonopplysningerService,
 ) : AbstractSpringIntegrationTest() {
     @BeforeEach
     fun init() {
@@ -63,9 +60,8 @@ class ArbeidsfordelingIntegrationTest(
 
         val now = now()
 
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(SØKER_FNR))
-        } returns
+        leggTilPersonInfo(
+            SØKER_FNR,
             PersonInfo(
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker",
@@ -73,23 +69,11 @@ class ArbeidsfordelingIntegrationTest(
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse),
-            )
+            ),
+        )
 
-        every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(tilAktør(SØKER_FNR))
-        } returns
-            PersonInfo(
-                fødselsdato = now.minusYears(20),
-                navn = "Mor Søker",
-                kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse),
-            )
-
-        every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(tilAktør(BARN_UTEN_DISKRESJONSKODE))
-        } returns
+        leggTilPersonInfo(
+            BARN_UTEN_DISKRESJONSKODE,
             PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
@@ -97,34 +81,12 @@ class ArbeidsfordelingIntegrationTest(
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse),
-            )
+            ),
+        )
+        leggTilRelasjonIPersonInfo(BARN_UTEN_DISKRESJONSKODE, SØKER_FNR, MOR)
 
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
-                tilAktør(
-                    BARN_UTEN_DISKRESJONSKODE,
-                ),
-            )
-        } returns
-            PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Gutt Barn",
-                kjønn = Kjønn.MANN,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
-                forelderBarnRelasjon =
-                    setOf(
-                        ForelderBarnRelasjon(
-                            aktør = tilAktør(SØKER_FNR),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR,
-                        ),
-                    ),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
-                bostedsadresser = mutableListOf(søkerBostedsadresse),
-            )
-
-        every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(tilAktør(BARN_MED_DISKRESJONSKODE))
-        } returns
+        leggTilPersonInfo(
+            BARN_MED_DISKRESJONSKODE,
             PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn fortrolig",
@@ -132,30 +94,9 @@ class ArbeidsfordelingIntegrationTest(
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
                 bostedsadresser = mutableListOf(søkerBostedsadresse),
-            )
-
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
-                tilAktør(
-                    BARN_MED_DISKRESJONSKODE,
-                ),
-            )
-        } returns
-            PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
-                navn = "Gutt Barn fortrolig",
-                kjønn = Kjønn.MANN,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
-                forelderBarnRelasjon =
-                    setOf(
-                        ForelderBarnRelasjon(
-                            aktør = tilAktør(SØKER_FNR),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR,
-                        ),
-                    ),
-                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
-                bostedsadresser = mutableListOf(søkerBostedsadresse),
-            )
+            ),
+        )
+        leggTilRelasjonIPersonInfo(BARN_MED_DISKRESJONSKODE, SØKER_FNR, MOR)
 
         every { integrasjonClient.hentBehandlendeEnhet(eq(SØKER_FNR)) } returns
             listOf(

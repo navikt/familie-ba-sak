@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -160,6 +159,6 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
 
     companion object {
         private val SØKER_FNR = randomFnr()
-        private val BARN_FNR = ClientMocks.barnFnr[0]
+        private val BARN_FNR = randomFnr()
     }
 }
