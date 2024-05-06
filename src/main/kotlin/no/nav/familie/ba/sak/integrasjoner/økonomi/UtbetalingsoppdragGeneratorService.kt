@@ -2,13 +2,19 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelerTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.førerTilOpphør
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
@@ -26,7 +32,9 @@ class UtbetalingsoppdragGeneratorService(
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -69,6 +77,7 @@ class UtbetalingsoppdragGeneratorService(
         oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
             tilkjentYtelse = tilkjentYtelse,
             utbetalingsoppdrag = beregnetUtbetalingsoppdrag.utbetalingsoppdrag,
+            endretUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(tilkjentYtelse.behandling.id),
         )
         oppdaterAndelerMedPeriodeOffset(
             tilkjentYtelse = tilkjentYtelse,
@@ -123,7 +132,6 @@ private fun utledOpphør(
     if (erRentOpphør) {
         opphørsdato = utbetalingsoppdrag.utbetalingsperiode.minOf { it.opphør!!.opphørDatoFom }
     }
-
     if (behandling.type == BehandlingType.REVURDERING) {
         val opphørPåRevurdering = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
         if (opphørPåRevurdering.isNotEmpty()) {
@@ -133,14 +141,31 @@ private fun utledOpphør(
     return Opphør(erRentOpphør = erRentOpphør, opphørsdato = opphørsdato)
 }
 
+fun utledStønadTom(
+    andelerTilkjentYtelse: Set<AndelTilkjentYtelse>,
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+): YearMonth? {
+    val andelerMedEndringer = andelerTilkjentYtelse.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(endretUtbetalingAndeler)
+
+    val andelerMedRelevantUtbetaling =
+        andelerMedEndringer.filterNot { andelTilkjentYtelseMedEndreteUtbetalinger ->
+            andelTilkjentYtelseMedEndreteUtbetalinger.endreteUtbetalinger.any { endretUtbetaling ->
+                endretUtbetaling.førerTilOpphør()
+            }
+        }
+
+    return andelerMedRelevantUtbetaling.maxOfOrNull { it.stønadTom }
+}
+
 fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
     tilkjentYtelse: TilkjentYtelse,
     utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
 ) {
     val opphør = utledOpphør(utbetalingsoppdrag, tilkjentYtelse.behandling)
 
     tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-    tilkjentYtelse.stønadTom = tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
+    tilkjentYtelse.stønadTom = utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse, endretUtbetalingAndeler)
     tilkjentYtelse.stønadFom =
         if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
     tilkjentYtelse.endretDato = LocalDate.now()

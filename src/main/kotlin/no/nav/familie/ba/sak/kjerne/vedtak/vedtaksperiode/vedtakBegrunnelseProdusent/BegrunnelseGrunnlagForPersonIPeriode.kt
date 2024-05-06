@@ -79,7 +79,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
             .filter { it.erEksplisittAvslagPåSøknad != true }
             .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
             .map { tidslinje -> tidslinje.map { it?.let { VilkårResultatForVedtaksperiode(it) } } }
-            .kombiner { it }
+            .kombiner()
 
     val eksplisitteAvslagForPerson = vilkårResultaterForPerson.hentForskjøvetEksplisittAvslagTidslinje()
 

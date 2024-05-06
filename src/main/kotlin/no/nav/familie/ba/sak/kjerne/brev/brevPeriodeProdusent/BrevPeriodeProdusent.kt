@@ -111,7 +111,6 @@ private fun VedtaksperiodeMedBegrunnelser.hentTomTekstForBrev(
         BrevPeriodeType.INGEN_UTBETALING -> if (this.type == Vedtaksperiodetype.AVSLAG) "til og med $tomDato " else ""
         BrevPeriodeType.INGEN_UTBETALING_UTEN_PERIODE -> ""
         BrevPeriodeType.FORTSATT_INNVILGET -> ""
-        BrevPeriodeType.FORTSATT_INNVILGET_NY -> ""
         else -> error("$brevPeriodeType skal ikke brukes")
     }
 }

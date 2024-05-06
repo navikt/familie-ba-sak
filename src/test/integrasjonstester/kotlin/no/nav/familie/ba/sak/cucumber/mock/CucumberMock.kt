@@ -232,6 +232,9 @@ class CucumberMock(
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
+            simuleringService = simuleringService,
+            mockk(),
+            unleashNextMedContextService,
         )
 
     val tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService =
@@ -298,6 +301,7 @@ class CucumberMock(
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             valutakursRepository = valutakursRepository,
             localDateProvider = mockedDateProvider,
+            valutakursService = valutakursService,
         )
     val tilkjentYtelseValideringService =
         TilkjentYtelseValideringService(
@@ -314,6 +318,8 @@ class CucumberMock(
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(),
+            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
+            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val økonomiService =
@@ -384,9 +390,6 @@ class CucumberMock(
             localDateProvider = mockedDateProvider,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             unleashNextMedContextService = unleashNextMedContextService,
-            valutakursService = mockk(),
-            utenlandskPeriodebeløpService = mockk(),
-            tilpassValutakurserTilUtenlandskePeriodebeløpService = mockk(),
         )
 
     val ferdigstillBehandlingSteg =

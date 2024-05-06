@@ -15,6 +15,7 @@ data class InnhenteOpplysningerOmBarn(
         enhet: String,
         dokumentliste: List<String>,
         saksbehandlerNavn: String,
+        fritekstAvsnitt: String? = null,
     ) : this(
         mal = mal,
         data =
@@ -26,6 +27,10 @@ data class InnhenteOpplysningerOmBarn(
                                 enhet = enhet,
                                 saksbehandlerNavn = saksbehandlerNavn,
                             ),
+                        fritekstAvsnitt =
+                            fritekstAvsnitt
+                                ?.takeIf { it.isNotBlank() }
+                                ?.let { FritekstAvsnitt(it) },
                     ),
                 flettefelter =
                     InnhenteOpplysningerOmBarnData.Flettefelter(
@@ -64,5 +69,6 @@ data class InnhenteOpplysningerOmBarnData(
 
     data class DelmalData(
         val signatur: SignaturDelmal,
+        val fritekstAvsnitt: FritekstAvsnitt?,
     )
 }

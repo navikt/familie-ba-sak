@@ -3,9 +3,7 @@ package no.nav.familie.ba.sak.ekstern.pensjon
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -20,10 +18,13 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
 import no.nav.familie.unleash.UnleashService
-import no.nav.fpsak.tidsserie.LocalDateSegment
-import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -194,6 +195,7 @@ class PensjonService(
             Random.nextBoolean() -> {
                 infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år).random()
             }
+
             else -> null
         }
     }
@@ -234,26 +236,15 @@ class PensjonService(
         fraDato: LocalDate,
     ): List<BarnetrygdTilPensjon> {
         return distinct().groupBy { it.fagsakEiersIdent }.map { (fagsakEiersIdent, barnetrygdTilPensjon) ->
-            val perioderUtenOverlappMellomFagsystemene = mutableListOf<BarnetrygdPeriode>()
-
-            barnetrygdTilPensjon.flatMap { it.barnetrygdPerioder }.groupBy { it.personIdent }
-                .forEach { (_, perioderTilhørendePerson) ->
-                    val (baSakPerioder, opprinneligeInfotrygdPerioder) =
-                        perioderTilhørendePerson.partition { it.kildesystem == "BA" }
-
-                    val infotrygdperioderMinusOverlappMedBA =
+            val perioderUtenOverlappMellomFagsystemene =
+                barnetrygdTilPensjon.flatMap { it.barnetrygdPerioder }.groupBy { it.personIdent }
+                    .values
+                    .fold(emptyList<BarnetrygdPeriode>()) { acc, perioderTilhørendePerson ->
                         try {
-                            baSakPerioder.tidslinje().crossJoin(opprinneligeInfotrygdPerioder.tidslinje()).toSegments().map {
-                                it.value.copy(
-                                    stønadFom = it.fom.toYearMonth(),
-                                    stønadTom = it.tom.toYearMonth(),
-                                )
-                            }.filter {
-                                it.kildesystem == "Infotrygd" && opprinneligeInfotrygdPerioder.fomDatoer().contains(it.stønadFom)
-                            }
+                            acc + perioderTilhørendePerson.fjernOverlappendeInfotrygdperioder()
                         } catch (e: Exception) {
                             logger.error("Klarte ikke kombinere BA og IT-perioder for fjerning av eventuelle overlapp")
-                            secureLogger.warn("Klarte ikke kombinere $baSakPerioder\n og \n$opprinneligeInfotrygdPerioder", e)
+                            secureLogger.warn("Klarte ikke kombinere ba-perioder og infotrygd-perioder", e)
 
                             throw EksternTjenesteFeilException(
                                 eksternTjenesteFeil = EksternTjenesteFeil("/api/ekstern/pensjon/hent-barnetrygd"),
@@ -262,16 +253,34 @@ class PensjonService(
                                 throwable = e,
                             )
                         }
-
-                    sjekkOgLoggOmDetFinnesOverlapp(baSakPerioder, opprinneligeInfotrygdPerioder, infotrygdperioderMinusOverlappMedBA)
-                    perioderUtenOverlappMellomFagsystemene.addAll(baSakPerioder + infotrygdperioderMinusOverlappMedBA)
-                }
+                    }
 
             BarnetrygdTilPensjon(
                 fagsakEiersIdent = fagsakEiersIdent,
                 barnetrygdPerioder = perioderUtenOverlappMellomFagsystemene,
             )
         }
+    }
+
+    private fun List<BarnetrygdPeriode>.fjernOverlappendeInfotrygdperioder(): List<BarnetrygdPeriode> {
+        val (baSakPerioder, opprinneligeInfotrygdPerioder) =
+            partition { it.kildesystem == "BA" }
+
+        val infotrygdperioderSomIkkeOverlapperBaPerioder =
+            baSakPerioder.tilTidslinje()
+                .kombinerMed(opprinneligeInfotrygdPerioder.tilTidslinje()) { periodeIBa, periodeIInfotrygd ->
+                    periodeIInfotrygd.takeIf { periodeIBa == null }
+                }
+                .perioder()
+                .mapNotNull {
+                    it.innhold?.copy(
+                        stønadFom = it.fraOgMed.tilYearMonth(),
+                        stønadTom = it.tilOgMed.tilYearMonth(),
+                    )
+                }
+
+        sjekkOgLoggOmDetFinnesOverlapp(baSakPerioder, opprinneligeInfotrygdPerioder, infotrygdperioderSomIkkeOverlapperBaPerioder)
+        return baSakPerioder + infotrygdperioderSomIkkeOverlapperBaPerioder
     }
 
     fun sjekkOgLoggOmDetFinnesOverlapp(
@@ -293,16 +302,14 @@ class PensjonService(
     }
 }
 
-private fun List<BarnetrygdPeriode>.tidslinje() =
-    LocalDateTimeline(
-        map {
-            LocalDateSegment(
-                it.stønadFom.førsteDagIInneværendeMåned(),
-                it.stønadTom.sisteDagIInneværendeMåned(),
-                it,
-            )
-        },
-    )
+private fun List<BarnetrygdPeriode>.tilTidslinje() =
+    this.map {
+        Periode(
+            fraOgMed = it.stønadFom.tilTidspunkt(),
+            tilOgMed = it.stønadTom.tilTidspunkt(),
+            innhold = it,
+        )
+    }.tilTidslinje()
 
 private fun List<BarnetrygdPeriode>.fomDatoer(): List<YearMonth> = map { it.stønadFom }
 
@@ -311,9 +318,11 @@ private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): Li
         barnetrygdPerioder.isEmpty() -> {
             listOfNotNull(other)
         }
+
         fagsakEiersIdent == other?.fagsakEiersIdent -> {
             listOf(copy(barnetrygdPerioder = barnetrygdPerioder + other.barnetrygdPerioder))
         }
+
         else -> {
             listOfNotNull(this, other)
         }

@@ -1,19 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import java.time.LocalDate
-
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "vedtaksperiodetype")
-@JsonSubTypes(
-    JsonSubTypes.Type(value = Utbetalingsperiode::class, name = "UTBETALING"),
-)
-interface Vedtaksperiode {
-    val periodeFom: LocalDate?
-    val periodeTom: LocalDate?
-    val vedtaksperiodetype: Vedtaksperiodetype
-}
 
 enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: Set<VedtakBegrunnelseType>) {
     UTBETALING(

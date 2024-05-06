@@ -157,3 +157,5 @@ fun List<UtfyltValutakurs>.tilTidslinje() =
             innhold = it,
         )
     }.tilTidslinje()
+
+fun Collection<Valutakurs>.filtrerErUtfylt() = this.map { it.tilIValutakurs() }.filterIsInstance<UtfyltValutakurs>()

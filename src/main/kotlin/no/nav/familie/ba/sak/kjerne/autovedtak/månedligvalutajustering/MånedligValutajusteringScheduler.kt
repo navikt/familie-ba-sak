@@ -27,8 +27,8 @@ class MånedligValutajusteringScheduler(
     @Transactional
     fun lagMånedligValutajusteringTask() {
         val inneværendeMåned = YearMonth.now()
-        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING)) {
-            logger.info("FeatureToggle ${FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING} er skrudd av. Avbryter månedlig valutajustering.")
+        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ALLE_SAKER)) {
+            logger.info("FeatureToggle ${FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ALLE_SAKER} er skrudd av. Avbryter månedlig valutajustering.")
             return
         }
 

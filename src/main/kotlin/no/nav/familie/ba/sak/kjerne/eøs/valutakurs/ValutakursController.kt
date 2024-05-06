@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_STARTE_VALUTAJUSTERING
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
@@ -59,8 +59,8 @@ class ValutakursController(
             }
 
         valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), valutaKurs)
-        if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING)) {
-            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringsmåned(BehandlingId(behandlingId))
+        if (unleashNextMedContextService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) {
+            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
         }
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -79,8 +79,8 @@ class ValutakursController(
 
         valutakursService.slettValutakurs(BehandlingId(behandlingId), valutakursId)
 
-        if (unleashNextMedContextService.isEnabled(KAN_STARTE_VALUTAJUSTERING)) {
-            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringsmåned(BehandlingId(behandlingId))
+        if (unleashNextMedContextService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) {
+            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
         }
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
@@ -120,5 +120,14 @@ class ValutakursController(
         eksisterendeValutakurs: Valutakurs,
     ): Boolean {
         return restValutakurs.valutakode != null && restValutakurs.valutakursdato != null && (eksisterendeValutakurs.valutakursdato != restValutakurs.valutakursdato || eksisterendeValutakurs.valutakode != restValutakurs.valutakode)
+    }
+
+    @PutMapping(path = ["behandlinger/{behandlingId}/endre-vurderingsstrategi-til/{vurderingsstrategiForValutakurser}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    private fun endreVurderingsstrategiForValutakurser(
+        @PathVariable behandlingId: Long,
+        @PathVariable vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser,
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        automatiskOppdaterValutakursService.endreVurderingsstrategiForValutakurser(behandlingId = BehandlingId(behandlingId), nyStrategi = vurderingsstrategiForValutakurser)
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 }

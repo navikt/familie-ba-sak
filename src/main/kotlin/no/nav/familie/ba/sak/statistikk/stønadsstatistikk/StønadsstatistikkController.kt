@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController
 class StønadsstatistikkController(
     private val stønadsstatistikkService: StønadsstatistikkService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     private val logger = LoggerFactory.getLogger(StønadsstatistikkController::class.java)
 
@@ -41,16 +39,6 @@ class StønadsstatistikkController(
             val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(it)
             val vedtakV2Task = PubliserVedtakV2Task.opprettTask(vedtakV2DVH.personV2.personIdent, it)
             taskRepository.save(vedtakV2Task)
-        }
-    }
-
-    private fun erIverksattBehandling(behandlingId: Long): Boolean {
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
-
-        return if (tilkjentYtelse != null) {
-            tilkjentYtelse.utbetalingsoppdrag != null
-        } else {
-            false
         }
     }
 }

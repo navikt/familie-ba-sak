@@ -42,9 +42,5 @@ fun <I, T : Tidsenhet> periodeAv(
     innhold: I,
 ): Periode<I, T> = Periode(fraOgMed, tilOgMed, innhold)
 
-fun <I, T : Tidsenhet> Tidspunkt<T>.tilPeriodeMedInnhold(innhold: I?) = Periode(this, this, innhold)
-
-fun <I, T : Tidsenhet> Tidspunkt<T>.tilPeriodeUtenInnhold() = tilPeriodeMedInnhold(null as I)
-
 fun <I, T : Tidsenhet, R> Collection<Periode<I, T>>.mapInnhold(mapper: (I?) -> R?): Collection<Periode<R, T>> =
     this.map { Periode(it.fraOgMed, it.tilOgMed, mapper(it.innhold)) }

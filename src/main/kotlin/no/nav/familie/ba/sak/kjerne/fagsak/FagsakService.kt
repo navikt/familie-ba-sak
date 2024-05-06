@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestMinimalFagsak
@@ -95,7 +95,7 @@ class FagsakService(
         personIdent: String,
         fraAutomatiskBehandling: Boolean = false,
         type: FagsakType = FagsakType.NORMAL,
-        institusjon: InstitusjonInfo? = null,
+        institusjon: RestInstitusjon? = null,
     ): Fagsak {
         val aktør = personidentService.hentOgLagreAktør(personIdent, true)
 
@@ -248,7 +248,7 @@ class FagsakService(
             fagsakType = fagsak.type,
             institusjon =
                 fagsak.institusjon?.let {
-                    InstitusjonInfo(
+                    RestInstitusjon(
                         orgNummer = it.orgNummer,
                         tssEksternId = it.tssEksternId,
                         navn = organisasjonService.hentOrganisasjon(it.orgNummer).navn,
@@ -262,7 +262,7 @@ class FagsakService(
         fødselsnummer: String,
         fraAutomatiskBehandling: Boolean = false,
         fagsakType: FagsakType = FagsakType.NORMAL,
-        institusjon: InstitusjonInfo? = null,
+        institusjon: RestInstitusjon? = null,
     ): Fagsak {
         return hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling, fagsakType, institusjon)
     }

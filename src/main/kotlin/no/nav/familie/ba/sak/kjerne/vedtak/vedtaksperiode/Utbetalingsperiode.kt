@@ -2,10 +2,14 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerSisteDagIPerioden
 import java.math.BigDecimal
@@ -16,14 +20,14 @@ import java.time.LocalDate
  */
 
 data class Utbetalingsperiode(
-    override val periodeFom: LocalDate,
-    override val periodeTom: LocalDate,
-    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+    val periodeFom: LocalDate,
+    val periodeTom: LocalDate,
+    val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
     val ytelseTyper: List<YtelseType>,
     val antallBarn: Int,
     val utbetaltPerMnd: Int,
-) : Vedtaksperiode
+)
 
 data class UtbetalingsperiodeDetalj(
     val person: RestPerson,
@@ -71,6 +75,15 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
             }
 
     return utbetalingsPerioder
+}
+
+private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilKombinertTidslinjePerAktørOgType(): Tidslinje<Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>, Måned> {
+    val andelTilkjentYtelsePerPersonOgType = groupBy { Pair(it.aktør, it.type) }
+
+    val andelTilkjentYtelsePerPersonOgTypeTidslinjer =
+        andelTilkjentYtelsePerPersonOgType.values.map { AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(it) }
+
+    return andelTilkjentYtelsePerPersonOgTypeTidslinjer.kombiner { it.toList() }
 }
 
 fun Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperiodeDetaljer(

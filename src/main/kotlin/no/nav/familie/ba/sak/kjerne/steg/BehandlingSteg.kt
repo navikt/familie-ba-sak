@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType.HENLEGG_BEHANDLING
 import no.nav.familie.ba.sak.kjerne.steg.StegType.IVERKSETT_MOT_FAMILIE_TILBAKE
 import no.nav.familie.ba.sak.kjerne.steg.StegType.IVERKSETT_MOT_OPPDRAG
 import no.nav.familie.ba.sak.kjerne.steg.StegType.JOURNALFØR_VEDTAKSBREV
-import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_INSTITUSJON_OG_VERGE
+import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_INSTITUSJON
 import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_PERSONGRUNNLAG
 import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_SØKNAD
 import no.nav.familie.ba.sak.kjerne.steg.StegType.SEND_TIL_BESLUTTER
@@ -86,7 +86,7 @@ enum class StegType(
                 BehandlingStatus.IVERKSETTER_VEDTAK,
             ),
     ),
-    REGISTRERE_INSTITUSJON_OG_VERGE(
+    REGISTRERE_INSTITUSJON(
         rekkefølge = 1,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES),
@@ -291,13 +291,13 @@ fun hentNesteSteg(
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> {
                     if (behandling.fagsak.type == FagsakType.INSTITUSJON) {
-                        REGISTRERE_INSTITUSJON_OG_VERGE
+                        REGISTRERE_INSTITUSJON
                     } else {
                         REGISTRERE_SØKNAD
                     }
                 }
 
-                REGISTRERE_INSTITUSJON_OG_VERGE -> REGISTRERE_SØKNAD
+                REGISTRERE_INSTITUSJON -> REGISTRERE_SØKNAD
                 REGISTRERE_SØKNAD -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
