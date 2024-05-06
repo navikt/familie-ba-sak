@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent
 
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -9,13 +8,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedNullable
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifte
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMåned
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.IEndretUtbetalingAndelForVedtaksperiode
@@ -31,7 +31,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.Companion.hentOrdinæreVilkårFor
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import java.math.BigDecimal
 
@@ -74,14 +73,21 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
 ): Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned> {
     val vilkårResultaterForPerson =
         this.personResultater.singleOrNull { it.aktør == person.aktør }?.vilkårResultater ?: emptyList()
-    val forskjøvedeVilkårResultaterForPerson =
-        vilkårResultaterForPerson
-            .filter { it.erEksplisittAvslagPåSøknad != true }
-            .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
-            .map { tidslinje -> tidslinje.map { it?.let { VilkårResultatForVedtaksperiode(it) } } }
-            .kombiner()
 
-    val eksplisitteAvslagForPerson = vilkårResultaterForPerson.hentForskjøvetEksplisittAvslagTidslinje()
+    val forskjøvedeVilkårMedPeriode = vilkårResultaterForPerson.filter { !it.erAvslagUtenPeriode() }.tilForskjøvedeVilkårTidslinjer(person.fødselsdato).map { tidslinje -> tidslinje.map { it?.let { VilkårResultatForVedtaksperiode(it) } } }
+
+    val eksplisitteAvslagUtenPeriode = vilkårResultaterForPerson.filter { it.erAvslagUtenPeriode() }.tilTidslinje().map { it?.let { VilkårResultatForVedtaksperiode(it) } }.tilMåned { it.first() }
+
+    val forskjøvedeVilkår = forskjøvedeVilkårMedPeriode.map { tidslinje -> tidslinje.filtrer { it?.erEksplisittAvslagPåSøknad != true } }.kombiner { it }
+    val forskjøvedeEksplisitteAvslag = forskjøvedeVilkårMedPeriode.map { tidslinje -> tidslinje.filtrer { it?.erEksplisittAvslagPåSøknad == true } }.kombiner { it.toList() }
+
+    val eksplisitteAvslagForPerson = forskjøvedeEksplisitteAvslag.kombinerMed(eksplisitteAvslagUtenPeriode) { medPeriode, utenPeriode ->
+        when {
+            medPeriode == null -> listOfNotNull(utenPeriode)
+            utenPeriode == null -> medPeriode
+            else -> medPeriode + listOf(utenPeriode)
+        }
+    }
 
     val kompetanseTidslinje =
         this.utfylteKompetanser.filtrerPåAktør(person.aktør)
@@ -106,7 +112,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
         this.perioderOvergangsstønad.filtrerPåAktør(person.aktør)
             .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(andelerTilkjentYtelseTidslinje.hentErUtbetalingSmåbarnstilleggTidslinje())
 
-    return forskjøvedeVilkårResultaterForPerson
+    return forskjøvedeVilkår
         .kombinerMed(
             andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForVedtaksPeriodeTidslinje(),
         ) { vilkårResultater, andeler ->
@@ -141,20 +147,3 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
             }
         }
 }
-
-private fun Collection<VilkårResultat>.hentForskjøvetEksplisittAvslagTidslinje(): Tidslinje<List<VilkårResultatForVedtaksperiode>, Måned> =
-    groupBy { it.vilkårType }.map { (_, vilkårResultater) ->
-        val tidslinjeForVilkår =
-            vilkårResultater.tilTidslinje().tilMånedFraMånedsskifte { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
-                when {
-                    innholdSisteDagForrigeMåned?.erOppfylt() == true && innholdFørsteDagDenneMåned?.erEksplisittAvslagPåSøknad == true -> innholdFørsteDagDenneMåned
-                    innholdSisteDagForrigeMåned?.erEksplisittAvslagPåSøknad == true &&
-                        innholdFørsteDagDenneMåned == null &&
-                        innholdSisteDagForrigeMåned.periodeFom?.toYearMonth() == innholdSisteDagForrigeMåned.periodeTom?.toYearMonth() -> innholdSisteDagForrigeMåned
-
-                    innholdSisteDagForrigeMåned?.erEksplisittAvslagPåSøknad == true && innholdFørsteDagDenneMåned?.erEksplisittAvslagPåSøknad == true -> innholdFørsteDagDenneMåned
-                    else -> null
-                }
-            }
-        tidslinjeForVilkår.map { it?.let { VilkårResultatForVedtaksperiode(it) } }
-    }.kombiner { it.toList() }
