@@ -30,8 +30,10 @@ import no.nav.familie.ba.sak.task.OppdaterStønadTomPåTilkjentYtelseTask.Compan
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
+import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentTask
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -366,6 +368,19 @@ class ForvalterController(
         val oppdaterLøpendeFlaggTask = Task(type = OppdaterLøpendeFlagg.TASK_STEP_TYPE, payload = "")
         taskRepository.save(oppdaterLøpendeFlaggTask)
         logger.info("Opprettet oppdaterLøpendeFlaggTask")
+        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+    }
+
+    @PostMapping("/henlegg-autovedtak-og-sett-behandling-tilbake-paa-vent")
+    @Operation(summary = "Henlegger autovedtak og setter behandling tilbake på vent.")
+    fun henleggAutovedtakOgSettBehandlingTilbakePåVent(
+        @RequestBody behandlingList: List<Long>,
+    ): ResponseEntity<Ressurs<String>> {
+        behandlingList.forEach { behandlingId ->
+            val hennleggAutovedtakTask = Task(type = HenleggAutovedtakOgSettBehandlingTilbakeTilVentTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(behandlingId))
+            taskRepository.save(hennleggAutovedtakTask)
+            logger.info("Opprettet oppdaterLøpendeFlaggTask")
+        }
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 }
