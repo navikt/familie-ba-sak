@@ -305,7 +305,7 @@ class VilkårsvurderingForskyvningUtilsTest {
     }
 
     @Test
-    fun `skal forskyve eksplisitt avslag når avslaget blir etterfulgt av en innvilget periode`() {
+    fun `skal ikke forskyve eksplisitt avslag når avslaget blir etterfulgt av en innvilget periode`() {
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
         val vilkårResultat =
@@ -335,7 +335,7 @@ class VilkårsvurderingForskyvningUtilsTest {
 
         val periode = forskjøvedeVilkår.single { it.innhold?.erEksplisittAvslagPåSøknad == true }
         Assertions.assertEquals(YearMonth.of(2023, 2), periode.fraOgMed.tilYearMonth())
-        Assertions.assertEquals(YearMonth.of(2023, 3), periode.tilOgMed.tilYearMonth())
+        Assertions.assertEquals(YearMonth.of(2023, 2), periode.tilOgMed.tilYearMonth())
     }
 
     @Test
