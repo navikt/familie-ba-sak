@@ -119,7 +119,8 @@ object VilkårsvurderingForskyvningUtils {
                 if (innholdFørsteDagDenneMåned != null && innholdSisteDagForrigeMåned != null) {
                     when {
                         vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() && innholdSisteDagForrigeMåned.erOppfylt() && innholdFørsteDagDenneMåned.erOppfylt() -> innholdSisteDagForrigeMåned
-                        innholdSisteDagForrigeMåned.resultat == Resultat.IKKE_OPPFYLT && innholdFørsteDagDenneMåned.erOppfylt() -> null
+                        innholdSisteDagForrigeMåned.erEksplisittAvslagInnenforSammeMåned() && innholdFørsteDagDenneMåned.erOppfylt() -> innholdSisteDagForrigeMåned
+                        innholdSisteDagForrigeMåned.erEksplisittAvslagPåSøknad == true && innholdFørsteDagDenneMåned.erOppfylt() -> null
                         else -> innholdFørsteDagDenneMåned
                     }
                 } else if (innholdFørsteDagDenneMåned == null && innholdSisteDagForrigeMåned.erEksplisittAvslagInnenforSammeMåned()
