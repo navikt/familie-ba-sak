@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
@@ -788,7 +788,7 @@ internal class BrevUtilsTest {
                 lagValutakurs(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn), valutakursdato = LocalDate.now(), valutakode = "SEK", kurs = BigDecimal.valueOf(1)),
             )
 
-        val utbetalingerPerMndEøs = hentUtbetalingerPerMndEøs(endringstidspunkt = endringstidspunkt, andelerForVedtaksperioderPerAktørOgType = andelerTilkjentYtelse.tilTidslinjerPerAktørOgType(), utenlandskePeriodebeløp = utenlandskePeriodebeløp, valutakurser = valutakurser)
+        val utbetalingerPerMndEøs = hentUtbetalingerPerMndEøs(endringstidspunkt = endringstidspunkt, andelerForVedtaksperioderPerAktørOgType = andelerTilkjentYtelse.tilTidslinjerPerPersonOgType(), utenlandskePeriodebeløp = utenlandskePeriodebeløp, valutakurser = valutakurser)
 
         // Skal inneholde de siste 8 månedene.
         assertThat(utbetalingerPerMndEøs.size).isEqualTo(8)
@@ -834,7 +834,7 @@ internal class BrevUtilsTest {
                 lagValutakurs(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(sekundærlandsbarn), valutakursdato = LocalDate.now(), valutakode = "SEK", kurs = BigDecimal.valueOf(1)),
             )
 
-        val utbetalingerPerMndEøs = hentUtbetalingerPerMndEøs(endringstidspunkt = endringstidspunkt, andelerForVedtaksperioderPerAktørOgType = andelerTilkjentYtelse.tilTidslinjerPerAktørOgType(), utenlandskePeriodebeløp = utenlandskePeriodebeløp, valutakurser = valutakurser)
+        val utbetalingerPerMndEøs = hentUtbetalingerPerMndEøs(endringstidspunkt = endringstidspunkt, andelerForVedtaksperioderPerAktørOgType = andelerTilkjentYtelse.tilTidslinjerPerPersonOgType(), utenlandskePeriodebeløp = utenlandskePeriodebeløp, valutakurser = valutakurser)
 
         // Skal inneholde de siste 8 månedene.
         assertThat(utbetalingerPerMndEøs.size).isEqualTo(5)
@@ -883,7 +883,7 @@ internal class BrevUtilsTest {
                 lagValutakurs(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(sekundærlandsbarn, sekundærlandsbarn2), valutakursdato = LocalDate.now(), valutakode = "SEK", kurs = BigDecimal.valueOf(1)),
             )
 
-        val utbetalingerPerMndEøs = hentUtbetalingerPerMndEøs(endringstidspunkt = endringstidspunkt, andelerForVedtaksperioderPerAktørOgType = andelerTilkjentYtelse.tilTidslinjerPerAktørOgType(), utenlandskePeriodebeløp = utenlandskePeriodebeløp, valutakurser = valutakurser)
+        val utbetalingerPerMndEøs = hentUtbetalingerPerMndEøs(endringstidspunkt = endringstidspunkt, andelerForVedtaksperioderPerAktørOgType = andelerTilkjentYtelse.tilTidslinjerPerPersonOgType(), utenlandskePeriodebeløp = utenlandskePeriodebeløp, valutakurser = valutakurser)
 
         // Skal inneholde de siste 8 månedene.
         assertThat(utbetalingerPerMndEøs.size).isEqualTo(5)
@@ -929,7 +929,7 @@ internal class BrevUtilsTest {
                 lagValutakurs(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(sekundærlandsbarn)),
             )
 
-        assertThrows<Feil> { hentUtbetalingerPerMndEøs(endringstidspunkt = endringstidspunkt, andelerForVedtaksperioderPerAktørOgType = andelerTilkjentYtelse.tilTidslinjerPerAktørOgType(), utenlandskePeriodebeløp = utenlandskePeriodebeløp, valutakurser = valutakurser) }
+        assertThrows<Feil> { hentUtbetalingerPerMndEøs(endringstidspunkt = endringstidspunkt, andelerForVedtaksperioderPerAktørOgType = andelerTilkjentYtelse.tilTidslinjerPerPersonOgType(), utenlandskePeriodebeløp = utenlandskePeriodebeløp, valutakurser = valutakurser) }
     }
 
     @Test
