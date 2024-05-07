@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs
 
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
@@ -11,7 +12,7 @@ data class AndelOgUpb(
 )
 
 data class AndelUpbOgValutakurs(
-    val andelForVedtaksperiode: AndelForVedtaksperiode,
+    val andelTilkjentYtelse: AndelTilkjentYtelse,
     val utenlandskPeriodebeløp: UtenlandskPeriodebeløp?,
     val valutakurs: Valutakurs?,
 )

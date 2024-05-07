@@ -46,13 +46,11 @@ fun <I, T : Tidsenhet> periodeAv(
 fun <I, T : Tidsenhet, R> Collection<Periode<I, T>>.mapInnhold(mapper: (I?) -> R?): Collection<Periode<R, T>> =
     this.map { Periode(it.fraOgMed, it.tilOgMed, mapper(it.innhold)) }
 
-fun <I, T : Tidsenhet> Collection<Periode<I, T>>.splitPerTidsenhet(fremTilTidspunkt: Tidspunkt<T>): Collection<Periode<I, T>> =
-    this.flatMap { periode ->
-        periode.fraOgMed.rangeTo(minOf(periode.tilOgMed, fremTilTidspunkt)).map {
-            Periode(
-                it,
-                it,
-                periode.innhold,
-            )
-        }
+fun <I, T : Tidsenhet> Periode<I, T>.splitPerTidsenhet(fremTilTidspunkt: Tidspunkt<T>): List<Periode<I, T>> =
+    this.fraOgMed.rangeTo(minOf(this.tilOgMed, fremTilTidspunkt)).map {
+        Periode(
+            it,
+            it,
+            this.innhold,
+        )
     }

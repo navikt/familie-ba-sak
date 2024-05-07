@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
@@ -49,6 +49,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilIKompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -248,21 +250,19 @@ class BrevService(
         vedtak: Vedtak,
         vedtakFellesfelter: VedtakFellesfelter,
     ): UtbetalingstabellAutomatiskValutajustering? {
-        return when (vedtakFellesfelter.utbetalingerPerMndEøs) {
-            null -> null
-            else -> {
-                val mndÅrFørsteEndring = hentSorterteVedtaksperioderMedBegrunnelser(vedtak).first().fom!!
-                val landkoder = integrasjonClient.hentLandkoderISO2()
-                val eøsLandMedUtbetalinger =
-                    kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id).filter { it.fom!! >= mndÅrFørsteEndring.toYearMonth() }.mapNotNull {
-                        if (it.erAnnenForelderOmfattetAvNorskLovgivning == true) {
-                            it.søkersAktivitetsland?.tilLandNavn(landkoder)?.navn
-                        } else {
-                            it.annenForeldersAktivitetsland?.tilLandNavn(landkoder)?.navn
-                        }
-                    }.toSet()
-                return UtbetalingstabellAutomatiskValutajustering(utbetalingerEosLand = eøsLandMedUtbetalinger.slåSammen(), utbetalingerEosMndAar = mndÅrFørsteEndring.tilMånedÅr())
-            }
+        return vedtakFellesfelter.utbetalingerPerMndEøs?.let {
+            val mndÅrFørsteEndring = hentSorterteVedtaksperioderMedBegrunnelser(vedtak).first().fom!!
+            val landkoder = integrasjonClient.hentLandkoderISO2()
+            val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id).map { it.tilIKompetanse() }.filterIsInstance<UtfyltKompetanse>()
+            val eøsLandMedUtbetalinger =
+                kompetanser.filter { it.fom >= mndÅrFørsteEndring.toYearMonth() }.map {
+                    if (it.erAnnenForelderOmfattetAvNorskLovgivning) {
+                        it.søkersAktivitetsland.tilLandNavn(landkoder).navn
+                    } else {
+                        it.annenForeldersAktivitetsland?.tilLandNavn(landkoder)?.navn ?: it.barnetsBostedsland.tilLandNavn(landkoder).navn
+                    }
+                }.toSet()
+            return UtbetalingstabellAutomatiskValutajustering(utbetalingerEosLand = eøsLandMedUtbetalinger.slåSammen(), utbetalingerEosMndAar = mndÅrFørsteEndring.tilMånedÅr())
         }
     }
 
@@ -356,14 +356,13 @@ class BrevService(
 
     private fun hentSorterteVedtaksperioderMedBegrunnelser(vedtak: Vedtak) =
         vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-            .filter {
-                !(it.begrunnelser.isEmpty() && it.fritekster.isEmpty() && it.eøsBegrunnelser.isEmpty())
-            }.sortedBy { it.fom }
+            .filter { it.erBegrunnet() }
+            .sortedBy { it.fom }
 
     fun lagVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
-        val vedtaksperioder = hentSorterteVedtaksperioderMedBegrunnelser(vedtak)
+        val sorterteVedtaksperioderMedBegrunnelser = hentSorterteVedtaksperioderMedBegrunnelser(vedtak)
 
-        if (vedtaksperioder.isEmpty()) {
+        if (sorterteVedtaksperioderMedBegrunnelser.isEmpty()) {
             throw FunksjonellFeil(
                 "Vedtaket mangler begrunnelser. Du må legge til begrunnelser for å generere vedtaksbrevet.",
             )
@@ -376,7 +375,7 @@ class BrevService(
 
         val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
         val brevperioder =
-            vedtaksperioder.mapNotNull { vedtaksperiode ->
+            sorterteVedtaksperioderMedBegrunnelser.mapNotNull { vedtaksperiode ->
                 try {
                     vedtaksperiode.lagBrevPeriode(
                         grunnlagForBegrunnelse = grunnlagForBegrunnelser,
@@ -401,8 +400,8 @@ class BrevService(
         val hjemler =
             hentHjemler(
                 behandlingId = behandlingId,
-                erFritekstIBrev = vedtaksperioder.any { it.fritekster.isNotEmpty() },
-                vedtaksperioder = vedtaksperioder,
+                erFritekstIBrev = sorterteVedtaksperioderMedBegrunnelser.any { it.fritekster.isNotEmpty() },
+                vedtaksperioder = sorterteVedtaksperioderMedBegrunnelser,
                 målform = personopplysningGrunnlag.søker.målform,
                 vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null,
                 refusjonEøsHjemmelSkalMedIBrev = refusjonEøs.isNotEmpty(),
@@ -504,7 +503,7 @@ class BrevService(
             return null
         }
 
-        val andelerForVedtaksperioderPerAktørOgType = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId).tilTidslinjerPerAktørOgType()
+        val andelerForVedtaksperioderPerAktørOgType = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId).tilTidslinjerPerPersonOgType()
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId).toList()
 
         return hentUtbetalingerPerMndEøs(

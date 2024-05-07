@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅrMedium
-import no.nav.familie.ba.sak.ekstern.restDomene.tilKalkulertMånedligBeløp
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET
@@ -17,27 +16,23 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVIL
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET_OG_ENDRET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET_OG_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForVedtaksperioderTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.AndelOgUpb
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.AndelUpbOgValutakurs
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingEøs
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøsOppsummering
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetaltFraAnnetLand
-import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPerValutaenhet
-import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilUtbetaltFraAnnetLand
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.erIkkeTom
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
@@ -171,23 +166,13 @@ private fun slåSammenHjemlerAvUlikeTyper(hjemler: List<String>) =
     when (hjemler.size) {
         0 -> throw FunksjonellFeil("Ingen hjemler var knyttet til begrunnelsen(e) som er valgt. Du må velge minst én begrunnelse som er knyttet til en hjemmel.")
         1 -> hjemler.single()
-        else -> slåSammenListeMedHjemler(hjemler)
+        else -> hjemler.slåSammen()
     }
-
-private fun slåSammenListeMedHjemler(hjemler: List<String>): String {
-    return hjemler.reduceIndexed { index, acc, s ->
-        when (index) {
-            0 -> acc + s
-            hjemler.size - 1 -> "$acc og $s"
-            else -> "$acc, $s"
-        }
-    }
-}
 
 fun Collection<String>.slåSammen(): String {
     return this.reduceIndexed { index, acc, s ->
         when (index) {
-            0 -> acc + s
+            0 -> s
             this.size - 1 -> "$acc og $s"
             else -> "$acc, $s"
         }
@@ -311,12 +296,16 @@ fun hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev: Boolean): L
 fun skalHenteUtbetalingerEøs(
     endringstidspunkt: LocalDate,
     valutakurser: List<Valutakurs>,
-): Boolean =
-    valutakurser.tilSeparateTidslinjerForBarna().mapValues { (_, valutakursTidslinjeForBarn) -> valutakursTidslinjeForBarn.beskjærFraOgMed(endringstidspunkt.tilMånedTidspunkt()) }.filterValues { it.erIkkeTom() }.isNotEmpty()
+): Boolean {
+    val valutakurserEtterEndringtidspunktet =
+        valutakurser.tilSeparateTidslinjerForBarna()
+            .mapValues { (_, valutakursTidslinjeForBarn) -> valutakursTidslinjeForBarn.beskjærFraOgMed(endringstidspunkt.tilMånedTidspunkt()) }
+    return valutakurserEtterEndringtidspunktet.any { it.value.erIkkeTom() }
+}
 
 fun hentUtbetalingerPerMndEøs(
     endringstidspunkt: LocalDate,
-    andelerForVedtaksperioderPerAktørOgType: Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForVedtaksperioderTidslinje>,
+    andelerForVedtaksperioderPerAktørOgType: Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje>,
     utenlandskePeriodebeløp: List<UtenlandskPeriodebeløp>,
     valutakurser: List<Valutakurs>,
 ): Map<String, UtbetalingMndEøs> {
@@ -329,33 +318,23 @@ fun hentUtbetalingerPerMndEøs(
 
     return andelerForVedtaksperioderPerAktørOgTypeAvgrensetTilVedtaksperioder
         // Kombinerer tidslinjene for andeler, utenlandskPeriodebeløp og valutakurser per aktørOgYtelse
-        .outerJoin(utenlandskePeriodebeløpTidslinjerForBarna) { andelForVedtaksperiode, utenlandsPeriodebeløp ->
-            when (andelForVedtaksperiode) {
-                null -> null
-                else -> AndelOgUpb(andelForVedtaksperiode = andelForVedtaksperiode, utenlandskPeriodebeløp = utenlandsPeriodebeløp)
-            }
-        }
-        .outerJoin(valutakursTidslinjerForBarna) { andelerOgUpb, valutakurs ->
-            when (andelerOgUpb) {
-                null -> null
-                else -> AndelUpbOgValutakurs(andelForVedtaksperiode = andelerOgUpb.andelForVedtaksperiode, utenlandskPeriodebeløp = andelerOgUpb.utenlandskPeriodebeløp, valutakurs = valutakurs)
-            }
-        }
-        .mapValues { (aktørOgYtelseType, value) ->
-            value.filtrerIkkeNull().mapIkkeNull { andelerUpbOgValutakurs ->
+        .outerJoin(utenlandskePeriodebeløpTidslinjerForBarna, valutakursTidslinjerForBarna) { andelForVedtaksperiode, utenlandsPeriodebeløp, valutakurs -> andelForVedtaksperiode?.let { AndelUpbOgValutakurs(andelTilkjentYtelse = andelForVedtaksperiode, utenlandskPeriodebeløp = utenlandsPeriodebeløp, valutakurs = valutakurs) } }
+        .map { (aktørOgYtelseType, andelUpbOgValutakursTidslinje) ->
+            andelUpbOgValutakursTidslinje.mapIkkeNull { andelerUpbOgValutakurs ->
                 hentUtbetalingEøs(aktørOgYtelseType = aktørOgYtelseType, andelUpbOgValutakurs = andelerUpbOgValutakurs)
             }
         }
         // Kombinerer verdiene til alle tidslinjene slik at vi får en liste av UtbetalingEøs per periode, samt sørger for at vi får en periode per mnd.
         // Grupperer deretter på periodenes fom
-        .values.kombiner().perioder().splitPerTidsenhet(LocalDate.now().tilMånedTidspunkt())
-        .groupBy { utbetalingEøsPeriode -> utbetalingEøsPeriode.fraOgMed.tilYearMonth().tilMånedÅrMedium() }
-        .mapValues { (_, utbetalingEøsPerioder) ->
-            utbetalingEøsPerioder.mapNotNull { it.innhold }.flatten()
+        .kombiner().perioder()
+        .flatMap { periode -> periode.splitPerTidsenhet(LocalDate.now().tilMånedTidspunkt()) }
+        .associate { periode ->
+            val utbetalingMndEøs = hentUtbetalingMndEøs(utbetalingerEøs = periode.innhold?.toList() ?: emptyList())
+            val fraOgMedDato = periode.fraOgMed.tilYearMonth().tilMånedÅrMedium()
+
+            fraOgMedDato to utbetalingMndEøs
         }
-        .mapValues { (_, utbetalingerEøs) ->
-            hentUtbetalingMndEøs(utbetalingerEøs = utbetalingerEøs)
-        }
+        .filter { it.value.utbetalinger.isNotEmpty() }
 }
 
 private fun hentUtbetalingEøs(
@@ -365,22 +344,9 @@ private fun hentUtbetalingEøs(
     return UtbetalingEøs(
         fnr = aktørOgYtelseType.first.aktivFødselsnummer(),
         ytelseType = aktørOgYtelseType.second,
-        satsINorge = andelUpbOgValutakurs.andelForVedtaksperiode.sats,
-        utbetaltFraAnnetLand =
-            when (andelUpbOgValutakurs.utenlandskPeriodebeløp) {
-                null -> null
-                else ->
-                    try {
-                        UtbetaltFraAnnetLand(
-                            beløp = andelUpbOgValutakurs.utenlandskPeriodebeløp.tilKalkulertMånedligBeløp()!!.toBigInteger().intValueExact(),
-                            valutakode = andelUpbOgValutakurs.utenlandskPeriodebeløp.valutakode!!,
-                            beløpINok = (andelUpbOgValutakurs.utenlandskPeriodebeløp.tilMånedligValutabeløp()!! * andelUpbOgValutakurs.valutakurs.tilKronerPerValutaenhet())!!.toBigInteger().intValueExact(),
-                        )
-                    } catch (exception: NullPointerException) {
-                        throw Feil("Kan ikke opprette UtbetaltFraAnnetLand for periode med utenlandsk periodebeløp da ett eller flere av de påkrevde feltene er null: kalkulertMånedligBeløp = ${andelUpbOgValutakurs.utenlandskPeriodebeløp.tilKalkulertMånedligBeløp()}, valutkode = ${andelUpbOgValutakurs.utenlandskPeriodebeløp.valutakode} valutakurs = ${andelUpbOgValutakurs.valutakurs.tilKronerPerValutaenhet()}")
-                    }
-            },
-        utbetaltFraNorge = andelUpbOgValutakurs.andelForVedtaksperiode.kalkulertUtbetalingsbeløp,
+        satsINorge = andelUpbOgValutakurs.andelTilkjentYtelse.sats,
+        utbetaltFraAnnetLand = andelUpbOgValutakurs.utenlandskPeriodebeløp?.tilUtbetaltFraAnnetLand(andelUpbOgValutakurs.valutakurs),
+        utbetaltFraNorge = andelUpbOgValutakurs.andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
     )
 }
 
@@ -391,12 +357,8 @@ private fun hentUtbetalingMndEøs(utbetalingerEøs: List<UtbetalingEøs>): Utbet
         oppsummering =
             UtbetalingMndEøsOppsummering(
                 summertSatsINorge = utbetalingerEøs.sumOf { utbetalingEøs -> utbetalingEøs.satsINorge },
-                summertUtbetaltFraAnnetLand =
-                    when (summertUtbetaltFraAnnetLand) {
-                        0 -> null
-                        else -> summertUtbetaltFraAnnetLand
-                    },
-                summertUtbetaltFraNorge = utbetalingerEøs.sumOf { utbetalingEøs -> utbetalingEøs.utbetaltFraNorge },
+                summertUtbetaltFraAnnetLand = summertUtbetaltFraAnnetLand.takeIf { it != 0 },
+                summertUtbetaltFraNorge = utbetalingerEøs.sumOf { it.utbetaltFraNorge },
             ),
     )
 }
