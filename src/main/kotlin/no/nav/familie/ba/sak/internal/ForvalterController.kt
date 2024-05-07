@@ -33,7 +33,6 @@ import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentTask
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -377,7 +376,7 @@ class ForvalterController(
         @RequestBody behandlingList: List<Long>,
     ): ResponseEntity<Ressurs<String>> {
         behandlingList.forEach { behandlingId ->
-            val hennleggAutovedtakTask = Task(type = HenleggAutovedtakOgSettBehandlingTilbakeTilVentTask.TASK_STEP_TYPE, payload = objectMapper.writeValueAsString(behandlingId))
+            val hennleggAutovedtakTask = HenleggAutovedtakOgSettBehandlingTilbakeTilVentTask.opprettTask(behandlingId)
             taskRepository.save(hennleggAutovedtakTask)
             logger.info("Opprettet oppdaterLøpendeFlaggTask")
         }

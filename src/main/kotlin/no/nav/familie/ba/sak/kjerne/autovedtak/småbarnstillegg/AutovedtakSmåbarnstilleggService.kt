@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.LocalDateProvider
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -69,7 +68,7 @@ class AutovedtakSmåbarnstilleggService(
         KLARER_IKKE_BEGRUNNE("Klarer ikke å begrunne"),
     }
 
-    private val antallVedtakOmOvergangsstønadTilManuellBehandling: Map<TilManuellBehandlingÅrsak, Counter> =
+    val antallVedtakOmOvergangsstønadTilManuellBehandling: Map<TilManuellBehandlingÅrsak, Counter> =
         TilManuellBehandlingÅrsak.values().associateWith {
             Metrics.counter(
                 "behandling",
@@ -211,7 +210,7 @@ class AutovedtakSmåbarnstilleggService(
         )
     }
 
-    private fun kanIkkeBehandleAutomatisk(
+    fun kanIkkeBehandleAutomatisk(
         behandling: Behandling,
         metric: Counter,
         meldingIOppgave: String,
@@ -222,51 +221,37 @@ class AutovedtakSmåbarnstilleggService(
             behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id, BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
                 .singleOrNull()
 
-        return if (behandlingPåMaskinellVent != null && påVentService.finnAktivSettPåVentPåBehandling(behandlingPåMaskinellVent.id) != null) {
-            behandlingPåMaskinellVent.status = BehandlingStatus.SATT_PÅ_VENT
-            behandlingHentOgPersisterService.lagreEllerOppdater(behandlingPåMaskinellVent)
+        val enesteÅpneBehandlingPåFagsak =
+            if (behandlingPåMaskinellVent != null) {
+                opprettTaskService.opprettHenleggBehandlingTask(
+                    behandlingId = behandling.id,
+                    årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
+                    begrunnelse = meldingIOppgave,
+                )
 
-            henleggBehandlingOgOpprettOppgaveForBehandlingPåMaskinellVent(behandlingPåMaskinellVent, behandling, meldingIOppgave)
-        } else {
-            val omgjortBehandling =
+                val erBehandlingTilMaskinellVentOgsåPåVent = påVentService.finnAktivSettPåVentPåBehandling(behandlingPåMaskinellVent.id) != null
+
+                behandlingPåMaskinellVent.status =
+                    if (erBehandlingTilMaskinellVentOgsåPåVent) {
+                        BehandlingStatus.SATT_PÅ_VENT
+                    } else {
+                        BehandlingStatus.UTREDES
+                    }
+
+                behandlingHentOgPersisterService.lagreEllerOppdater(behandlingPåMaskinellVent)
+            } else {
                 autovedtakService.omgjørBehandlingTilManuellOgKjørSteg(
                     behandling = behandling,
                     steg = StegType.VILKÅRSVURDERING,
                 )
+            }
 
-            oppgaveService.opprettOppgaveForManuellBehandling(
-                behandling = omgjortBehandling,
-                begrunnelse = meldingIOppgave,
-                opprettLogginnslag = true,
-                manuellOppgaveType = ManuellOppgaveType.SMÅBARNSTILLEGG,
-            )
-        }
-    }
-
-    private fun henleggBehandlingOgOpprettOppgaveForBehandlingPåMaskinellVent(
-        behandlingPåMaskinellVent: Behandling,
-        behandling: Behandling,
-        meldingIOppgave: String,
-    ): String {
-        opprettTaskService.opprettHenleggBehandlingTask(
-            behandlingId = behandling.id,
-            årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
+        oppgaveService.opprettOppgaveForManuellBehandling(
+            behandling = enesteÅpneBehandlingPåFagsak,
             begrunnelse = meldingIOppgave,
-        )
-
-        logger.info("Sender autovedtak til manuell behandling, se secureLogger for mer detaljer.")
-        secureLogger.info("Sender autovedtak til manuell behandling. Begrunnelse: $meldingIOppgave")
-        opprettTaskService.opprettOppgaveForManuellBehandlingTask(
-            behandlingId = behandlingPåMaskinellVent.id,
-            beskrivelse = meldingIOppgave,
+            opprettLogginnslag = true,
             manuellOppgaveType = ManuellOppgaveType.SMÅBARNSTILLEGG,
         )
-
-        loggService.opprettAutovedtakTilManuellBehandling(
-            behandling = behandling,
-            tekst = meldingIOppgave,
-        )
-
         return meldingIOppgave
     }
 
