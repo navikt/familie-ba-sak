@@ -424,6 +424,7 @@ fun ManueltBrevRequest.tilBrev(
                 varselÅrsaker = this.multiselectVerdier,
                 barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager(),
                 saksbehandlerNavn = saksbehandlerNavn,
+                fritekstAvsnitt = fritekstAvsnitt,
             )
 
         Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS ->
