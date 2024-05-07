@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
@@ -10,11 +12,14 @@ import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.datagenerator.settpåvent.lagSettPåVent
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
+import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -41,12 +46,22 @@ class AutovedtakSmåbarnstilleggServiceTest {
     private val taskService: TaskService = mockk<TaskService>()
     private val beregningService: BeregningService = mockk<BeregningService>()
     private val autovedtakService: AutovedtakService = mockk<AutovedtakService>()
-    private val oppgaveService: OppgaveService = mockk<OppgaveService>()
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService = mockk<VedtaksperiodeHentOgPersisterService>()
     private val localDateProvider: LocalDateProvider = mockk<LocalDateProvider>()
     private val påVentService: SettPåVentService = mockk<SettPåVentService>()
     private val opprettTaskService: OpprettTaskService = mockk<OpprettTaskService>()
     private val loggService: LoggService = mockk<LoggService>()
+
+    val oppgaveService =
+        OppgaveService(
+            oppgaveRepository = mockk<OppgaveRepository>(),
+            behandlingRepository = mockk<BehandlingRepository>(),
+            integrasjonClient = mockk<IntegrasjonClient>(),
+            arbeidsfordelingPåBehandlingRepository = mockk(),
+            opprettTaskService = opprettTaskService,
+            loggService = loggService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+        )
 
     val autovedtakSmåbarnstilleggService =
         AutovedtakSmåbarnstilleggService(
@@ -90,9 +105,9 @@ class AutovedtakSmåbarnstilleggServiceTest {
         val behandlingSlot = slot<Behandling>()
         every { behandlingHentOgPersisterService.lagreEllerOppdater(capture(behandlingSlot)) } returns forrigeBehandling.copy(status = BehandlingStatus.SATT_PÅ_VENT)
 
-        every { opprettTaskService.opprettHenleggBehandlingTask(any(), any(), any()) } returns Unit
-        every { opprettTaskService.opprettOppgaveForManuellBehandlingTask(any(), any(), any(), any()) } returns Unit
-        every { loggService.opprettAutovedtakTilManuellBehandling(any(), any()) } returns Unit
+        every { opprettTaskService.opprettHenleggBehandlingTask(any(), any(), any()) } just Runs
+        every { opprettTaskService.opprettOppgaveForManuellBehandlingTask(any(), any(), any(), any()) } just Runs
+        every { loggService.opprettAutovedtakTilManuellBehandling(any(), any()) } just Runs
 
         autovedtakSmåbarnstilleggService.kjørBehandling(behandlingsdata = behandlingsData)
 
