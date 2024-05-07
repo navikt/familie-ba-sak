@@ -214,7 +214,7 @@ fun ManueltBrevRequest.tilBrev(
 
         Brevmal.INNHENTE_OPPLYSNINGER,
         Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
-        -> {
+        ->
             InnhenteOpplysningerBrev(
                 mal = brevmal,
                 data =
@@ -234,7 +234,6 @@ fun ManueltBrevRequest.tilBrev(
                             ),
                     ),
             )
-        }
 
         Brevmal.HENLEGGE_TRUKKET_SØKNAD ->
             HenleggeTrukketSøknadBrev(
