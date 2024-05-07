@@ -210,6 +210,7 @@ class AutovedtakSmåbarnstilleggService(
         )
     }
 
+    @Transactional
     fun kanIkkeBehandleAutomatisk(
         behandling: Behandling,
         metric: Counter,

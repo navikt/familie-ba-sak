@@ -7,7 +7,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 @TaskStepBeskrivelse(
@@ -19,7 +18,6 @@ class HenleggAutovedtakOgSettBehandlingTilbakeTilVentTask(
     private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AsyncTaskStep {
-    @Transactional
     override fun doTask(task: Task) {
         val meldingIOppgave = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
         val behandlingId = objectMapper.readValue(task.payload, Long::class.java)
@@ -32,7 +30,7 @@ class HenleggAutovedtakOgSettBehandlingTilbakeTilVentTask(
     }
 
     companion object {
-        const val TASK_STEP_TYPE = "HenleggAutovedtakOgSettBehandlingTilbakeTilVentTask"
+        const val TASK_STEP_TYPE = "henleggAutovedtakOgSettBehandlingTilbakeTilVentTask"
 
         fun opprettTask(behandlingId: Long) =
             Task(
