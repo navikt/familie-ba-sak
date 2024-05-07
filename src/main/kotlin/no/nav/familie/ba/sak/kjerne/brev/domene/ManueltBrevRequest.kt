@@ -167,6 +167,11 @@ fun ManueltBrevRequest.tilBrev(
             saksbehandlerNavn = saksbehandlerNavn,
         )
 
+    val fritekstAvsnitt =
+        this.fritekstAvsnitt
+            ?.takeIf { it.isNotBlank() }
+            ?.let { FritekstAvsnitt(it) }
+
     return when (this.brevmal) {
         Brevmal.INFORMASJONSBREV_DELT_BOSTED ->
             InformasjonsbrevDeltBostedBrev(
@@ -209,7 +214,7 @@ fun ManueltBrevRequest.tilBrev(
 
         Brevmal.INNHENTE_OPPLYSNINGER,
         Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
-        ->
+        -> {
             InnhenteOpplysningerBrev(
                 mal = brevmal,
                 data =
@@ -217,10 +222,7 @@ fun ManueltBrevRequest.tilBrev(
                         delmalData =
                             InnhenteOpplysningerData.DelmalData(
                                 signatur = signaturDelmal,
-                                fritekstAvsnitt =
-                                    this.fritekstAvsnitt
-                                        ?.takeIf { it.isNotBlank() }
-                                        ?.let { FritekstAvsnitt(it) },
+                                fritekstAvsnitt = fritekstAvsnitt,
                             ),
                         flettefelter =
                             InnhenteOpplysningerData.Flettefelter(
@@ -232,6 +234,7 @@ fun ManueltBrevRequest.tilBrev(
                             ),
                     ),
             )
+        }
 
         Brevmal.HENLEGGE_TRUKKET_SØKNAD ->
             HenleggeTrukketSøknadBrev(
@@ -422,6 +425,7 @@ fun ManueltBrevRequest.tilBrev(
                 varselÅrsaker = this.multiselectVerdier,
                 barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager(),
                 saksbehandlerNavn = saksbehandlerNavn,
+                fritekstAvsnitt = fritekstAvsnitt,
             )
 
         Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS ->
