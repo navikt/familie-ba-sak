@@ -467,7 +467,7 @@ fun ManueltBrevRequest.tilBrev(
                 barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager(),
                 saksbehandlerNavn = saksbehandlerNavn,
                 fritekstAvsnitt = this.fritekstAvsnitt,
-                )
+            )
 
         Brevmal.INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT ->
             InnhenteOpplysningerOmBarn(
