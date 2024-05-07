@@ -4,12 +4,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
-
-data class AndelOgUpb(
-    val andelForVedtaksperiode: AndelForVedtaksperiode,
-    val utenlandskPeriodebeløp: UtenlandskPeriodebeløp?,
-)
 
 data class AndelUpbOgValutakurs(
     val andelTilkjentYtelse: AndelTilkjentYtelse,
