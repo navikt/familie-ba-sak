@@ -182,7 +182,7 @@ fun UtenlandskPeriodebeløp.tilUtbetaltFraAnnetLand(valutakurs: Valutakurs?): Ut
         return UtbetaltFraAnnetLand(
             beløp = utfyltUtenlandskPeriodebeløp.kalkulertMånedligBeløp.toBigInteger().intValueExact(),
             valutakode = utfyltUtenlandskPeriodebeløp.valutakode,
-            beløpINok = (utfyltUtenlandskPeriodebeløp.tilMånedligValutabeløp() * utfyltValutakurs.tilKronerPerValutaenhet()).toBigInteger().intValueExact(),
+            beløpINok = (utfyltUtenlandskPeriodebeløp.tilMånedligValutabeløp() * utfyltValutakurs.tilKronerPerValutaenhet())!!.toBigInteger().intValueExact(),
         )
     }
     throw Feil("Kan ikke opprette UtbetaltFraAnnetLand for periode med utenlandsk periodebeløp da ett eller flere av de påkrevde feltene er null: kalkulertMånedligBeløp = ${tilKalkulertMånedligBeløp()}, valutkode = $valutakode valutakurs = ${valutakurs.tilKronerPerValutaenhet()}")

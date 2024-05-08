@@ -27,14 +27,6 @@ operator fun Valutabeløp?.times(kronerPerValutaenhet: KronerPerValutaenhet?): B
     return this.beløp * kronerPerValutaenhet.kronerPerValutaenhet
 }
 
-operator fun Valutabeløp.times(kronerPerValutaenhet: KronerPerValutaenhet): BigDecimal {
-    if (this.valutakode != kronerPerValutaenhet.valutakode) {
-        throw Feil("Valutakoden til utenlandsk periodebeløp stemmer ikke overens med valutaen vi har hentet valutakurs for")
-    }
-
-    return this.beløp * kronerPerValutaenhet.kronerPerValutaenhet
-}
-
 fun UtenlandskPeriodebeløp?.tilMånedligValutabeløp(): Valutabeløp? {
     if (this?.kalkulertMånedligBeløp == null || this.valutakode == null) {
         return null
