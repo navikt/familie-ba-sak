@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.YearMonth
 
@@ -200,3 +201,11 @@ fun List<UtfyltKompetanse>.tilTidslinje() =
             innhold = it,
         )
     }.tilTidslinje()
+
+fun Collection<Kompetanse>.tilUtfylteKompetanserEtterEndringstidpunkt(endringstidspunkt: MånedTidspunkt) =
+    this.map { it.tilIKompetanse() }
+        .filterIsInstance<UtfyltKompetanse>()
+        .tilTidslinje()
+        .beskjærFraOgMed(endringstidspunkt)
+        .perioder()
+        .mapNotNull { it.innhold }

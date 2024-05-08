@@ -6,8 +6,6 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -49,8 +47,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilIKompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -60,6 +56,7 @@ import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalin
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -70,7 +67,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.stereotype.Service
-import tilLandNavn
 import java.math.BigDecimal
 
 @Service
@@ -249,22 +245,13 @@ class BrevService(
     private fun hentLandOgStartdatoForUtbetalingstabell(
         vedtak: Vedtak,
         vedtakFellesfelter: VedtakFellesfelter,
-    ): UtbetalingstabellAutomatiskValutajustering? {
-        return vedtakFellesfelter.utbetalingerPerMndEøs?.let {
-            val mndÅrFørsteEndring = hentSorterteVedtaksperioderMedBegrunnelser(vedtak).first().fom!!
+    ): UtbetalingstabellAutomatiskValutajustering? =
+        vedtakFellesfelter.utbetalingerPerMndEøs?.let {
+            val endringstidspunkt = hentSorterteVedtaksperioderMedBegrunnelser(vedtak).first().fom!!.tilMånedTidspunkt()
             val landkoder = integrasjonClient.hentLandkoderISO2()
-            val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id).map { it.tilIKompetanse() }.filterIsInstance<UtfyltKompetanse>()
-            val eøsLandMedUtbetalinger =
-                kompetanser.filter { it.fom >= mndÅrFørsteEndring.toYearMonth() }.map {
-                    if (it.erAnnenForelderOmfattetAvNorskLovgivning) {
-                        it.søkersAktivitetsland.tilLandNavn(landkoder).navn
-                    } else {
-                        it.annenForeldersAktivitetsland?.tilLandNavn(landkoder)?.navn ?: it.barnetsBostedsland.tilLandNavn(landkoder).navn
-                    }
-                }.toSet()
-            return UtbetalingstabellAutomatiskValutajustering(utbetalingerEosLand = eøsLandMedUtbetalinger.slåSammen(), utbetalingerEosMndAar = mndÅrFørsteEndring.tilMånedÅr())
+            val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id)
+            return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt, landkoder, kompetanser)
         }
-    }
 
     fun sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling: Behandling): Boolean {
         if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) return false

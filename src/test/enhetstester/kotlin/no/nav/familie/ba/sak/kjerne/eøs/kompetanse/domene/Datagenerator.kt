@@ -22,6 +22,7 @@ fun lagKompetanse(
     barnetsBostedsland: String? = null,
     kompetanseResultat: KompetanseResultat? = null,
     søkersAktivitetsland: String? = null,
+    erAnnenForelderOmfattetAvNorskLovgivning: Boolean? = null,
 ) = Kompetanse(
     fom = fom,
     tom = tom,
@@ -32,6 +33,7 @@ fun lagKompetanse(
     barnetsBostedsland = barnetsBostedsland,
     resultat = kompetanseResultat,
     søkersAktivitetsland = søkersAktivitetsland,
+    erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
 ).also { it.behandlingId = behandlingId }
 
 fun lagValutakurs(

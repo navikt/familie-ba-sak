@@ -20,9 +20,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
@@ -35,6 +39,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class BrevUtilsTest {
     @Test
@@ -961,6 +966,27 @@ internal class BrevUtilsTest {
             )
 
         assertThat(skalHenteUtbetalingerEøs(endringstidspunkt = endringstidspunkt, valutakurser = valutakurser)).isFalse
+    }
+
+    @Test
+    fun `hentLandOgStartdatoForUtbetalingstabell - skal finne alle kompetanser som gjelder etter endringstidspunktet`() {
+        val endringstidspunkt = LocalDate.now().tilMånedTidspunkt()
+
+        val kompetanser =
+            listOf(
+                lagKompetanse(fom = YearMonth.now().minusMonths(2), tom = YearMonth.now().plusMonths(2), søkersAktivitet = KompetanseAktivitet.ARBEIDER, søkersAktivitetsland = "NO", annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER, annenForeldersAktivitetsland = "SE", barnetsBostedsland = "SE", kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND, erAnnenForelderOmfattetAvNorskLovgivning = false, barnAktører = setOf(randomAktør())),
+                lagKompetanse(fom = YearMonth.now().plusMonths(3), søkersAktivitet = KompetanseAktivitet.ARBEIDER, søkersAktivitetsland = "NO", annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER, annenForeldersAktivitetsland = "DK", barnetsBostedsland = "DK", kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND, erAnnenForelderOmfattetAvNorskLovgivning = false, barnAktører = setOf(randomAktør())),
+            )
+
+        val landkoder =
+            mapOf(
+                "SE" to "Sverige",
+                "DK" to "Danmark",
+            )
+
+        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt = endringstidspunkt, landkoder = landkoder, kompetanser = kompetanser)
+        assertThat(utbetalingstabellAutomatiskValutajustering).isNotNull
+        assertThat(utbetalingstabellAutomatiskValutajustering.utbetalingerEosLand?.first()).isEqualTo("Sverige og Danmark")
     }
 }
 
