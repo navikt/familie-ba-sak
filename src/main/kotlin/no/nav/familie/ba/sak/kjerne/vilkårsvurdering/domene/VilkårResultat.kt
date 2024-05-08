@@ -179,7 +179,7 @@ class VilkårResultat(
         sistEndretIBehandlingId = personResultat!!.vilkårsvurdering.behandling.id
     }
 
-    fun erAvslagUtenPeriode() =
+    fun erEksplisittAvslagUtenPeriode() =
         this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
 
     fun harFremtidigTom() = this.periodeTom == null || this.periodeTom!!.isAfter(LocalDate.now().sisteDagIMåned())

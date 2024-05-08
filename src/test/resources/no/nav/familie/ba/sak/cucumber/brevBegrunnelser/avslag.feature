@@ -329,7 +329,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.02.2023 til 28.02.2023
       | Begrunnelse                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp |
-      | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE | STANDARD | Ja            | 09.01.12             | 0           | januar 2023                          | 0 |
+      | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE | STANDARD | Ja            | 09.01.12             | 0           | januar 2023                          | 0     |
 
 
   Scenario: Skal ikke forskyve eksplisitt avslag når det varer mer enn én måned
@@ -371,7 +371,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.02.2023 til 28.02.2023
       | Begrunnelse                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp |
-      | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE | STANDARD | Ja            | 09.01.12             | 0           | januar 2023                          | 0 |
+      | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE | STANDARD | Ja            | 09.01.12             | 0           | januar 2023                          | 0     |
 
 
   Scenario: Skal forskyve avslagsperioder når de etterfølges av innvilget periode
@@ -428,3 +428,59 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.02.2023 til 28.02.2023
       | Begrunnelse                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp |
       | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE | STANDARD | Ja            | 09.01.12             | 0           | januar 2023                          | 1 054 |
+
+  Scenario: Skal lage riktige vedtaksperioder ved to sammenhengende eksplisitte avslag-perioder
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype | Fagsakstatus |
+      | 1        | NORMAL     | OPPRETTET    |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
+      | 1            | 1        |                     | AVSLÅTT             | SØKNAD           | Nei                       | NASJONAL            | UTREDES           |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
+      | 1            | 1       | SØKER      | 08.03.1994  |              |
+      | 1            | 2       | BARN       | 21.01.2016  |              |
+
+    Og følgende dagens dato 30.04.2024
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår                        | Utdypende vilkår         | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser         | Vurderes etter   |
+      | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET |                          | 30.03.2023 |            | OPPFYLT      | Nei                  |                              | NASJONALE_REGLER |
+
+      | 2       | UNDER_18_ÅR                   |                          | 21.01.2016 | 20.01.2034 | OPPFYLT      | Nei                  |                              |                  |
+      | 2       | GIFT_PARTNERSKAP              |                          | 21.01.2016 |            | OPPFYLT      | Nei                  |                              |                  |
+      | 2       | BOR_MED_SØKER                 | VURDERING_ANNET_GRUNNLAG | 31.03.2023 | 01.10.2023 | IKKE_OPPFYLT | Ja                   | AVSLAG_FORELDRENE_BOR_SAMMEN | NASJONALE_REGLER |
+      | 2       | LOVLIG_OPPHOLD,BOSATT_I_RIKET |                          | 31.03.2023 |            | OPPFYLT      | Nei                  |                              | NASJONALE_REGLER |
+      | 2       | BOR_MED_SØKER                 |                          | 02.10.2023 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_BARN_HAR_FAST_BOSTED  | NASJONALE_REGLER |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
+
+
+    Når vedtaksperiodene genereres for behandling 1
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser         | Ugyldige begrunnelser |
+      | 01.04.2023 | 31.10.2023 | AVSLAG             |                                | AVSLAG_FORELDRENE_BOR_SAMMEN |                       |
+      | 01.11.2023 |            | AVSLAG             |                                | AVSLAG_BARN_HAR_FAST_BOSTED  |                       |
+
+    Og når disse begrunnelsene er valgt for behandling 1
+      | Fra dato   | Til dato   | Standardbegrunnelser         | Eøsbegrunnelser | Fritekster |
+      | 01.04.2023 | 31.10.2023 | AVSLAG_FORELDRENE_BOR_SAMMEN |                 |            |
+      | 01.11.2023 |            | AVSLAG_BARN_HAR_FAST_BOSTED  |                 |            |
+
+    Så forvent følgende brevperioder for behandling 1
+      | Brevperiodetype  | Fra dato      | Til dato                   | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
+      | INGEN_UTBETALING | april 2023    | "til og med oktober 2023 " | 0     | 0                          |                     | du                     |
+      | INGEN_UTBETALING | november 2023 |                            | 0     | 0                          |                     | du                     |
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.04.2023 til 31.10.2023
+      | Begrunnelse                  | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
+      | AVSLAG_FORELDRENE_BOR_SAMMEN | STANDARD | Nei           | 21.01.16             | 1           | mars 2023                            | NB      | 0     |                  |                         |                             |
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.11.2023 til -
+      | Begrunnelse                 | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
+      | AVSLAG_BARN_HAR_FAST_BOSTED | STANDARD | Nei           | 21.01.16             | 1           | oktober 2023                         | NB      | 0     |                  |                         |                             |

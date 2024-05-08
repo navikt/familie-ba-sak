@@ -111,7 +111,7 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 01.10.2022 | 31.12.2022 | AVSLAG             | Barn2 har avslag på BOR_MED_SØKER  |
 
 
-  Scenario: Skal lage opphørsperiode når det er overlapp i opphør og avslag på tvers av tvillinger der en har eksplisitt avslag
+  Scenario: Skal lage avslagsperiode og ekstra opphørsperiode når søker og barn 1 har eksplisitt avslag
 
     Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
@@ -153,14 +153,15 @@ Egenskap: Vedtaksperioder med mor og to barn
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
     Så forvent følgende vedtaksperioder med begrunnelser
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                           |
-      | 01.01.2017 | 31.12.2020 | Utbetaling         |                                                     |
-      | 01.01.2021 | 31.10.2021 | Avslag             | Søker har opphør som overlapper med avslag hos barn |
-      | 01.11.2021 | 30.11.2034 | Utbetaling         |                                                     |
-      | 01.12.2034 |            | Opphør             | Barn er over 18                                     |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                                                                             |
+      | 01.01.2017 | 31.12.2020 | Utbetaling         |                                                                                                       |
+      | 01.01.2021 | 31.09.2021 | Avslag             | Søker har opphør som overlapper med avslag hos barn                                                   |
+      | 01.10.2021 | 31.10.2021 | Opphør             | Fortsatt opphør for barn 5678, denne perioden skal ikke begrunnes (trenger egentlig ikke å genereres) |
+      | 01.11.2021 | 30.11.2034 | Utbetaling         |                                                                                                       |
+      | 01.12.2034 |            | Opphør             | Barn er over 18                                                                                       |
 
 
-  Scenario: Skal lage opphørsperiode når ett barn har eksplisitt avslag og det andre har ingen utbetaling i samme periode
+  Scenario: Skal lage separate opphør- og avslagsperioder når barn 1 har eksplisitt avslag og barn 2 har ingen utbetaling
 
     Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
@@ -195,8 +196,9 @@ Egenskap: Vedtaksperioder med mor og to barn
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
     Så forvent følgende vedtaksperioder med begrunnelser
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                             |
-      | 01.01.2017 | 31.12.2020 | Utbetaling         |                                                       |
-      | 01.01.2021 | 31.10.2021 | OPPHØR             | Barn 1 har avslag som overlapper med opphør hos barn2 |
-      | 01.11.2021 | 30.11.2034 | Utbetaling         |                                                       |
-      | 01.12.2034 |            | Opphør             | Barna er over 18                                      |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar         |
+      | 01.01.2017 | 31.12.2020 | Utbetaling         |                   |
+      | 01.01.2021 | 30.09.2021 | Avslag             | Barn 1 har avslag |
+      | 01.01.2021 | 31.10.2021 | Opphør             | Barn 2 har opphør |
+      | 01.11.2021 | 30.11.2034 | Utbetaling         |                   |
+      | 01.12.2034 |            | Opphør             | Barna er over 18  |

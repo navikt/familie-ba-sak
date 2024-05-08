@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 
 data class OpphørMedEndring(
     override val mal: Brevmal,
@@ -15,6 +16,7 @@ data class OpphørMedEndring(
         refusjonEosAvklart: RefusjonEøsAvklart? = null,
         refusjonEosUavklart: RefusjonEøsUavklart? = null,
         erKlage: Boolean,
+        utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering? = null,
     ) :
         this(
             mal = mal,
@@ -36,6 +38,7 @@ data class OpphørMedEndring(
                             refusjonEosAvklart = refusjonEosAvklart,
                             refusjonEosUavklart = refusjonEosUavklart,
                             klage = erKlage,
+                            utbetalingstabellAutomatiskValutajustering = utbetalingstabellAutomatiskValutajustering,
                         ),
                     flettefelter =
                         FlettefelterForDokumentImpl(
@@ -45,6 +48,7 @@ data class OpphørMedEndring(
                             organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
                         ),
                     perioder = vedtakFellesfelter.perioder,
+                    utbetalingerPerMndEøs = vedtakFellesfelter.utbetalingerPerMndEøs,
                 ),
         )
 }
@@ -53,6 +57,7 @@ data class OpphørMedEndringData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokument,
     override val perioder: List<BrevPeriode>,
+    override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
 ) : VedtaksbrevData {
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
@@ -64,5 +69,6 @@ data class OpphørMedEndringData(
         val refusjonEosAvklart: RefusjonEøsAvklart?,
         val refusjonEosUavklart: RefusjonEøsUavklart?,
         val klage: Boolean,
+        val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
     )
 }

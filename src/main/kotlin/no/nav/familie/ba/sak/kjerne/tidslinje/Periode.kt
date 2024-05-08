@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.TidspunktClosedRange
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -44,3 +45,12 @@ fun <I, T : Tidsenhet> periodeAv(
 
 fun <I, T : Tidsenhet, R> Collection<Periode<I, T>>.mapInnhold(mapper: (I?) -> R?): Collection<Periode<R, T>> =
     this.map { Periode(it.fraOgMed, it.tilOgMed, mapper(it.innhold)) }
+
+fun <I, T : Tidsenhet> Periode<I, T>.splitPerTidsenhet(fremTilTidspunkt: Tidspunkt<T>): List<Periode<I, T>> =
+    this.fraOgMed.rangeTo(minOf(this.tilOgMed, fremTilTidspunkt)).map {
+        Periode(
+            it,
+            it,
+            this.innhold,
+        )
+    }
