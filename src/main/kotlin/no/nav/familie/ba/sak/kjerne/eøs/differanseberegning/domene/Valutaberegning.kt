@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import java.math.BigDecimal
@@ -21,7 +20,7 @@ operator fun Valutabeløp?.times(kronerPerValutaenhet: KronerPerValutaenhet?): B
     }
 
     if (this.valutakode != kronerPerValutaenhet.valutakode) {
-        throw Feil("Valutakoden til utenlandsk periodebeløp stemmer ikke overens med valutaen vi har hentet valutakurs for")
+        return null
     }
 
     return this.beløp * kronerPerValutaenhet.kronerPerValutaenhet
