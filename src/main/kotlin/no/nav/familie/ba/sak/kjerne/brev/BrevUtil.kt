@@ -21,12 +21,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingstabellAutomatiskValutajustering
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.AndelUpbOgValutakurs
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingEøs
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøsOppsummering
-import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilUtfylteKompetanserEtterEndringstidpunkt
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilUtbetaltFraAnnetLand
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
@@ -37,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.erIkkeTom
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.splitPerTidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
@@ -45,6 +48,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import tilLandNavn
 import java.time.LocalDate
 
 fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
@@ -301,6 +305,29 @@ fun skalHenteUtbetalingerEøs(
         valutakurser.tilSeparateTidslinjerForBarna()
             .mapValues { (_, valutakursTidslinjeForBarn) -> valutakursTidslinjeForBarn.beskjærFraOgMed(endringstidspunkt.tilMånedTidspunkt()) }
     return valutakurserEtterEndringtidspunktet.any { it.value.erIkkeTom() }
+}
+
+fun hentLandOgStartdatoForUtbetalingstabell(
+    endringstidspunkt: MånedTidspunkt,
+    landkoder: Map<String, String>,
+    kompetanser: Collection<Kompetanse>,
+): UtbetalingstabellAutomatiskValutajustering {
+    val utfylteKompetanserEtterEndringstidspunkt =
+        kompetanser.tilUtfylteKompetanserEtterEndringstidpunkt(endringstidspunkt)
+
+    if (utfylteKompetanserEtterEndringstidspunkt.isEmpty()) {
+        throw Feil("Finner ingen kompetanser etter endringstidspunkt")
+    }
+
+    val eøsLandMedUtbetalinger =
+        utfylteKompetanserEtterEndringstidspunkt.map {
+            if (it.erAnnenForelderOmfattetAvNorskLovgivning) {
+                it.søkersAktivitetsland.tilLandNavn(landkoder).navn
+            } else {
+                it.annenForeldersAktivitetsland?.tilLandNavn(landkoder)?.navn ?: it.barnetsBostedsland.tilLandNavn(landkoder).navn
+            }
+        }.toSet()
+    return UtbetalingstabellAutomatiskValutajustering(utbetalingerEosLand = eøsLandMedUtbetalinger.slåSammen(), utbetalingerEosMndAar = endringstidspunkt.tilYearMonth().tilMånedÅr())
 }
 
 fun hentUtbetalingerPerMndEøs(
