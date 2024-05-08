@@ -16,6 +16,7 @@ import jakarta.persistence.ManyToMany
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.KronerPerValutaenhet
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
@@ -159,3 +160,6 @@ fun List<UtfyltValutakurs>.tilTidslinje() =
     }.tilTidslinje()
 
 fun Collection<Valutakurs>.filtrerErUtfylt() = this.map { it.tilIValutakurs() }.filterIsInstance<UtfyltValutakurs>()
+
+fun UtfyltValutakurs.tilKronerPerValutaenhet(): KronerPerValutaenhet =
+    KronerPerValutaenhet(this.kurs, this.valutakode)

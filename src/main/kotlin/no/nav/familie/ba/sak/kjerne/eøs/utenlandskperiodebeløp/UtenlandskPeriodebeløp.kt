@@ -20,11 +20,14 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKalkulertMånedligBeløp
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetaltFraAnnetLand
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Valutabeløp
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPerValutaenhet
-import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.UtfyltValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilIValutakurs
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilKronerPerValutaenhet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
@@ -104,7 +107,8 @@ data class UtenlandskPeriodebeløp(
             this.beløp != null &&
             this.intervall != null &&
             this.utbetalingsland != null &&
-            this.barnAktører.isNotEmpty()
+            this.barnAktører.isNotEmpty() &&
+            this.kalkulertMånedligBeløp != null
 
     companion object {
         val NULL = UtenlandskPeriodebeløp(null, null, emptySet())
@@ -131,6 +135,7 @@ data class UtfyltUtenlandskPeriodebeløp(
     val valutakode: String,
     val intervall: Intervall,
     val utbetalingsland: String,
+    val kalkulertMånedligBeløp: BigDecimal,
 ) : IUtenlandskPeriodebeløp
 
 fun UtenlandskPeriodebeløp.tilIUtenlandskPeriodebeløp(): IUtenlandskPeriodebeløp {
@@ -145,6 +150,7 @@ fun UtenlandskPeriodebeløp.tilIUtenlandskPeriodebeløp(): IUtenlandskPeriodebel
             valutakode = this.valutakode!!,
             intervall = this.intervall!!,
             utbetalingsland = this.utbetalingsland!!,
+            kalkulertMånedligBeløp = this.kalkulertMånedligBeløp!!,
         )
     } else {
         TomUtenlandskPeriodebeløp(
@@ -165,13 +171,19 @@ fun List<UtfyltUtenlandskPeriodebeløp>.tilTidslinje() =
 
 fun Collection<UtenlandskPeriodebeløp>.filtrerErUtfylt() = this.map { it.tilIUtenlandskPeriodebeløp() }.filterIsInstance<UtfyltUtenlandskPeriodebeløp>()
 
-fun UtenlandskPeriodebeløp.tilUtbetaltFraAnnetLand(valutakurs: Valutakurs?) =
-    try {
-        UtbetaltFraAnnetLand(
-            beløp = tilKalkulertMånedligBeløp()!!.toBigInteger().intValueExact(),
-            valutakode = valutakode!!,
-            beløpINok = (tilMånedligValutabeløp()!! * valutakurs.tilKronerPerValutaenhet())!!.toBigInteger().intValueExact(),
+fun UtfyltUtenlandskPeriodebeløp.tilMånedligValutabeløp(): Valutabeløp {
+    return Valutabeløp(this.kalkulertMånedligBeløp, this.valutakode)
+}
+
+fun UtenlandskPeriodebeløp.tilUtbetaltFraAnnetLand(valutakurs: Valutakurs?): UtbetaltFraAnnetLand {
+    val utfyltUtenlandskPeriodebeløp = this.tilIUtenlandskPeriodebeløp()
+    val utfyltValutakurs = valutakurs?.tilIValutakurs()
+    if (utfyltUtenlandskPeriodebeløp is UtfyltUtenlandskPeriodebeløp && utfyltValutakurs is UtfyltValutakurs) {
+        return UtbetaltFraAnnetLand(
+            beløp = utfyltUtenlandskPeriodebeløp.kalkulertMånedligBeløp.toBigInteger().intValueExact(),
+            valutakode = utfyltUtenlandskPeriodebeløp.valutakode,
+            beløpINok = (utfyltUtenlandskPeriodebeløp.tilMånedligValutabeløp() * utfyltValutakurs.tilKronerPerValutaenhet()).toBigInteger().intValueExact(),
         )
-    } catch (exception: NullPointerException) {
-        throw Feil("Kan ikke opprette UtbetaltFraAnnetLand for periode med utenlandsk periodebeløp da ett eller flere av de påkrevde feltene er null: kalkulertMånedligBeløp = ${tilKalkulertMånedligBeløp()}, valutkode = $valutakode valutakurs = ${valutakurs.tilKronerPerValutaenhet()}")
     }
+    throw Feil("Kan ikke opprette UtbetaltFraAnnetLand for periode med utenlandsk periodebeløp da ett eller flere av de påkrevde feltene er null: kalkulertMånedligBeløp = ${tilKalkulertMånedligBeløp()}, valutkode = $valutakode valutakurs = ${valutakurs.tilKronerPerValutaenhet()}")
+}
