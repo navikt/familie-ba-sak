@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 
 data class ForsattInnvilget(
     override val mal: Brevmal,
@@ -17,6 +18,7 @@ data class ForsattInnvilget(
         duMåMeldeFraOmEndringer: Boolean = true,
         duMåMeldeFraOmEndringerEøsSelvstendigRett: Boolean = false,
         informasjonOmUtbetaling: Boolean = false,
+        utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering? = null,
     ) :
         this(
             mal = mal,
@@ -40,6 +42,7 @@ data class ForsattInnvilget(
                             duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
                             duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
                             informasjonOmUtbetaling = informasjonOmUtbetaling,
+                            utbetalingstabellAutomatiskValutajustering = utbetalingstabellAutomatiskValutajustering,
                         ),
                     flettefelter =
                         FlettefelterForDokumentImpl(
@@ -49,6 +52,7 @@ data class ForsattInnvilget(
                             organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
                         ),
                     perioder = vedtakFellesfelter.perioder,
+                    utbetalingerPerMndEøs = vedtakFellesfelter.utbetalingerPerMndEøs,
                 ),
         )
 }
@@ -57,6 +61,7 @@ data class ForsattInnvilgetData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokument,
     override val perioder: List<BrevPeriode>,
+    override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
 ) : VedtaksbrevData {
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
@@ -70,5 +75,6 @@ data class ForsattInnvilgetData(
         val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
         val duMaaMeldeFraOmEndringer: Boolean,
         val informasjonOmUtbetaling: Boolean,
+        val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
     )
 }

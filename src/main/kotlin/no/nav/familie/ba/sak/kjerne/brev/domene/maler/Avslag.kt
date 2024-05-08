@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 
 data class Avslag(
     override val mal: Brevmal,
@@ -41,6 +42,7 @@ data class AvslagData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokumentImpl,
     override val perioder: List<BrevPeriode>,
+    override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
 ) : VedtaksbrevData {
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
