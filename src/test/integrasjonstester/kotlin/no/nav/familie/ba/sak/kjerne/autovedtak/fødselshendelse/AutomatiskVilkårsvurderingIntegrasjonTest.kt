@@ -1,11 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
-import io.mockk.every
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -26,7 +25,6 @@ import java.time.LocalDate
 
 class AutomatiskVilkårsvurderingIntegrasjonTest(
     @Autowired val stegService: StegService,
-    @Autowired val mockPersonopplysningerService: PersonopplysningerService,
     @Autowired val persongrunnlagService: PersongrunnlagService,
     @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired val databaseCleanupService: DatabaseCleanupService,
@@ -42,8 +40,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val barnFnr = randomFnr()
         val mockSøkerUtenHjem = genererAutomatiskTestperson(bostedsadresser = emptyList())
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns mockSøkerUtenHjem
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barnFnr)) } returns mockBarnAutomatiskBehandling
+        leggTilPersonInfo(søkerFnr, mockSøkerUtenHjem)
+        leggTilPersonInfo(barnFnr, mockBarnAutomatiskBehandling)
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår =
@@ -59,8 +57,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val barnFnr = randomFnr()
         val mockBarnGift = genererAutomatiskTestperson(sivilstander = listOf(Sivilstand(SIVILSTAND.GIFT)))
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns mockSøkerAutomatiskBehandling
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barnFnr)) } returns mockBarnGift
+        leggTilPersonInfo(søkerFnr, mockSøkerAutomatiskBehandling)
+        leggTilPersonInfo(barnFnr, mockBarnGift)
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår =
@@ -86,8 +84,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
                 ),
                 emptyList(),
             )
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barnFnr)) } returns barn
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns søker
+        leggTilPersonInfo(barnFnr, barn)
+        leggTilPersonInfo(søkerFnr, søker)
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår =
@@ -134,8 +132,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
                     ),
             )
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barnFnr)) } returns barn
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns søker
+        leggTilPersonInfo(barnFnr, barn)
+        leggTilPersonInfo(søkerFnr, søker)
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår =

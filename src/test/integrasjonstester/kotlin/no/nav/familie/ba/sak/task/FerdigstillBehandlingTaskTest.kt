@@ -2,10 +2,11 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomBarnFnr
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
@@ -91,7 +92,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     private fun kjørSteg(resultat: Resultat): Behandling {
         val aktørId = personidentService.hentAktør(fnr)
-        val fnrBarn = ClientMocks.barnFnr[0]
+        val fnrBarn = leggTilPersonInfo(randomBarnFnr())
 
         val behandling =
             kjørStegprosessForFGB(

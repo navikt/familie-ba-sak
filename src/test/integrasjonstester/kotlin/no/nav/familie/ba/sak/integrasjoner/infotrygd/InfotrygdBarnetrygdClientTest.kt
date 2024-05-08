@@ -6,8 +6,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import no.nav.familie.ba.sak.common.randomBarnFnr
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
@@ -30,6 +31,9 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
     val sakerURL = "/api/infotrygd/barnetrygd/saker"
     val stønaderURL = "/api/infotrygd/barnetrygd/stonad?historikk=false"
     val brevURL = "/api/infotrygd/barnetrygd/brev"
+
+    private val søkersIdenter = listOf(randomFnr(), randomFnr(), randomFnr())
+    private val barnasIdenter = listOf(randomBarnFnr(), randomBarnFnr())
 
     @Autowired
     @Qualifier("jwtBearer")
@@ -84,8 +88,6 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        val søkersIdenter = ClientMocks.søkerFnr.toList()
-        val barnasIdenter = ClientMocks.barnFnr.toList()
         val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
 
         val finnesIkkeHosInfotrygd = client.harLøpendeSakIInfotrygd(søkersIdenter, barnasIdenter)
@@ -136,7 +138,6 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        val søkersIdenter = ClientMocks.søkerFnr.toList()
         val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter, emptyList())
 
         val finnesIkkeHosInfotrygd = client.harLøpendeSakIInfotrygd(søkersIdenter, emptyList())
@@ -158,7 +159,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(post(løpendeBarnetrygdURL).willReturn(aResponse().withStatus(401)))
 
         assertThrows<HttpClientErrorException> {
-            client.harLøpendeSakIInfotrygd(ClientMocks.søkerFnr.toList(), ClientMocks.barnFnr.toList())
+            client.harLøpendeSakIInfotrygd(søkersIdenter, barnasIdenter)
         }
     }
 
@@ -169,8 +170,6 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
                 okJson(objectMapper.writeValueAsString(InfotrygdBarnetrygdClient.SendtBrevResponse(true, emptyList()))),
             ),
         )
-
-        val søkersIdenter = ClientMocks.søkerFnr.toList()
 
         val harNyligSendtBrev =
             client.harNyligSendtBrevFor(

@@ -6,10 +6,11 @@ import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomBarnFnr
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
@@ -89,6 +90,8 @@ class DokumentServiceIntegrationTest(
     @Autowired
     private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
+    val barnFnr = leggTilPersonInfo(randomBarnFnr())
+
     @BeforeEach
     fun setup() {
         databaseCleanupService.truncate()
@@ -100,7 +103,7 @@ class DokumentServiceIntegrationTest(
             kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
                 søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
@@ -136,7 +139,7 @@ class DokumentServiceIntegrationTest(
             kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
                 søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
@@ -176,7 +179,7 @@ class DokumentServiceIntegrationTest(
             kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
                 søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
@@ -236,7 +239,7 @@ class DokumentServiceIntegrationTest(
             kjørStegprosessForFGB(
                 tilSteg = StegType.BESLUTTE_VEDTAK,
                 søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,

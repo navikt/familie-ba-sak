@@ -5,11 +5,12 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
+import no.nav.familie.ba.sak.common.randomBarnFnr
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -56,9 +57,9 @@ class VedtaksperiodeServiceIntegrationTest(
     @Autowired
     private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
-    val søkerFnr = randomFnr()
-    val barnFnr = ClientMocks.barnFnr[0]
-    val barn2Fnr = ClientMocks.barnFnr[1]
+    val søkerFnr = MockPersonopplysningerService.leggTilPersonInfo(personIdent = randomFnr())
+    val barnFnr = MockPersonopplysningerService.leggTilPersonInfo(personIdent = randomBarnFnr(alder = 6))
+    val barn2Fnr = MockPersonopplysningerService.leggTilPersonInfo(personIdent = randomBarnFnr(alder = 2))
 
     @BeforeEach
     fun init() {

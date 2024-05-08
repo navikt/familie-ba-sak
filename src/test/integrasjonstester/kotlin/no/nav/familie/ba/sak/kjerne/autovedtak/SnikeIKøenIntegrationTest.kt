@@ -5,10 +5,12 @@ import no.nav.familie.ba.sak.common.guttenBarnesenFødselsdato
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.årSiden
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService.Companion.BEHANDLING_FERDIG
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
@@ -85,7 +87,7 @@ class SnikeIKøenIntegrationTest(
     private val loggRepository: LoggRepository,
 ) : AbstractSpringIntegrationTest() {
     val søkerFnr = randomFnr()
-    val barnFnr = ClientMocks.barnFnr[0]
+    val barnFnr = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = 6.årSiden.withDayOfMonth(10)))
 
     @BeforeEach
     fun init() {

@@ -6,12 +6,13 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
+import no.nav.familie.ba.sak.common.randomBarnFnr
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagBarnVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagSøkerVilkårResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
@@ -1251,8 +1252,10 @@ class VilkårServiceTest(
 
     @Test
     fun `skal sette vurderes etter basert på behandlingstema`() {
+        val barnFnr = leggTilPersonInfo(randomBarnFnr())
         val behandling =
             kjørStegprosessForFGB(
+                barnasIdenter = listOf(barnFnr),
                 tilSteg = StegType.BEHANDLINGSRESULTAT,
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
@@ -1285,7 +1288,7 @@ class VilkårServiceTest(
             }
         }
 
-        vilkårService.postVilkår(behandling.id, RestNyttVilkår(ClientMocks.barnFnr[0], Vilkår.BOR_MED_SØKER))
+        vilkårService.postVilkår(behandling.id, RestNyttVilkår(barnFnr, Vilkår.BOR_MED_SØKER))
 
         vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
         assertTrue {
