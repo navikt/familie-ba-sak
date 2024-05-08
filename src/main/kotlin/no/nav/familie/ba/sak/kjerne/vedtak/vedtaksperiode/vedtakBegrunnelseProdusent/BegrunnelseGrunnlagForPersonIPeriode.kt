@@ -75,7 +75,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
     val vilkårResultaterForPerson =
         this.personResultater.singleOrNull { it.aktør == person.aktør }?.vilkårResultater ?: emptyList()
 
-    val (generelleAvslag, vilkårResultaterMedPerioder) = vilkårResultaterForPerson.partition { it.erAvslagUtenPeriode() }
+    val (generelleAvslag, vilkårResultaterMedPerioder) = vilkårResultaterForPerson.partition { it.erEksplisittAvslagUtenPeriode() }
 
     val forskjøvedeVilkårMedPeriode = vilkårResultaterMedPerioder.tilForskjøvedeVilkårTidslinjer(person.fødselsdato).map { tidslinje -> tidslinje.map { it?.let { VilkårResultatForVedtaksperiode(it) } } }
 

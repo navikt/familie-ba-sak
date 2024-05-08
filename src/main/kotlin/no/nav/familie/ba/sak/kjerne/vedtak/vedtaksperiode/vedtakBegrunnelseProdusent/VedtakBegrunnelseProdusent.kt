@@ -221,7 +221,7 @@ private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
             behandlingsGrunnlagForVedtaksperioder
                 .personResultater.firstOrNull { it.aktør == person.aktør }?.vilkårResultater ?: emptyList()
 
-        val (generelleAvslag, vilkårResultaterUtenGenerelleAvslag) = vilkårResultaterForPerson.partition { it.erAvslagUtenPeriode() }
+        val (generelleAvslag, vilkårResultaterUtenGenerelleAvslag) = vilkårResultaterForPerson.partition { it.erEksplisittAvslagUtenPeriode() }
 
         val generelleAvslagsBegrunnelser =
             generelleAvslag.groupBy { it.vilkårType }.mapNotNull { (_, vilkårResultater) ->

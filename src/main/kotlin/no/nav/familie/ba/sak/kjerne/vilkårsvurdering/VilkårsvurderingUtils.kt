@@ -84,7 +84,7 @@ object VilkårsvurderingUtils {
         val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
 
         kopiAvVilkårResultater
-            .filter { !(it.erAvslagUtenPeriode() && it.id != restVilkårResultat.id) }
+            .filter { !(it.erEksplisittAvslagUtenPeriode() && it.id != restVilkårResultat.id) }
             .forEach {
                 tilpassVilkårForEndretVilkår(
                     personResultat = personResultat,
@@ -111,7 +111,7 @@ object VilkårsvurderingUtils {
                     "Du kan ikke legge til avslag uten datoer fordi det finnes oppfylt løpende periode på vilkåret.",
                 )
 
-            vilkårSomEndres.harFremtidigTom() && resultaterPåVilkår.any { it.erAvslagUtenPeriode() } ->
+            vilkårSomEndres.harFremtidigTom() && resultaterPåVilkår.any { it.erEksplisittAvslagUtenPeriode() } ->
                 throw FunksjonellFeil(
                     "Finnes avslag uten periode ved forsøk på å legge til løpende oppfylt",
                     "Du kan ikke legge til løpende periode fordi det er vurdert avslag uten datoer på vilkåret.",
@@ -347,7 +347,7 @@ fun standardbegrunnelserTilNedtrekksmenytekster(
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
 ) =
     Standardbegrunnelse
-        .values()
+        .entries
         .groupBy { it.vedtakBegrunnelseType }
         .mapValues { begrunnelseGruppe ->
             begrunnelseGruppe.value
@@ -361,7 +361,7 @@ fun standardbegrunnelserTilNedtrekksmenytekster(
 
 fun eøsStandardbegrunnelserTilNedtrekksmenytekster(
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
-) = EØSStandardbegrunnelse.values().groupBy { it.vedtakBegrunnelseType }
+) = EØSStandardbegrunnelse.entries.groupBy { it.vedtakBegrunnelseType }
     .mapValues { begrunnelseGruppe ->
         begrunnelseGruppe.value.flatMap { vedtakBegrunnelse ->
             eøsBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
