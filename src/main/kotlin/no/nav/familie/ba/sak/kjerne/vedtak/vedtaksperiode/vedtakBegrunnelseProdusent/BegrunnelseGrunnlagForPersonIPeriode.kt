@@ -7,13 +7,13 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedNullable
+import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilNesteMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
@@ -33,7 +33,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.Companion.hentOrdinæreVilkårFor
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import java.math.BigDecimal
 
 data class BegrunnelseGrunnlagForPersonIPeriode(
@@ -75,14 +74,15 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
 ): Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned> {
     val vilkårResultaterForPerson =
         this.personResultater.singleOrNull { it.aktør == person.aktør }?.vilkårResultater ?: emptyList()
-    val forskjøvedeVilkårResultaterForPerson =
-        vilkårResultaterForPerson
-            .filter { it.erEksplisittAvslagPåSøknad != true }
-            .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
-            .map { tidslinje -> tidslinje.map { it?.let { VilkårResultatForVedtaksperiode(it) } } }
-            .kombiner()
 
-    val eksplisitteAvslagForPerson = vilkårResultaterForPerson.hentForskjøvetEksplisittAvslagTidslinje()
+    val (generelleAvslag, vilkårResultaterMedPerioder) = vilkårResultaterForPerson.partition { it.erEksplisittAvslagUtenPeriode() }
+
+    val forskjøvedeVilkårMedPeriode = vilkårResultaterMedPerioder.tilForskjøvedeVilkårTidslinjer(person.fødselsdato).map { tidslinje -> tidslinje.map { it?.let { VilkårResultatForVedtaksperiode(it) } } }
+
+    val forskjøvedeVilkårTidslinje = forskjøvedeVilkårMedPeriode.map { tidslinje -> tidslinje.filtrer { it?.erEksplisittAvslagPåSøknad != true } }.kombiner { it }
+
+    val eksplisitteAvslagTidslinje =
+        lagTidslinjeForEksplisitteAvslag(forskjøvedeVilkårMedPeriode, generelleAvslag)
 
     val kompetanseTidslinje =
         this.utfylteKompetanser.filtrerPåAktør(person.aktør)
@@ -107,7 +107,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
         this.perioderOvergangsstønad.filtrerPåAktør(person.aktør)
             .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(andelerTilkjentYtelseTidslinje.hentErUtbetalingSmåbarnstilleggTidslinje())
 
-    return forskjøvedeVilkårResultaterForPerson
+    return forskjøvedeVilkårTidslinje
         .kombinerMed(
             andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForVedtaksPeriodeTidslinje(),
         ) { vilkårResultater, andeler ->
@@ -128,7 +128,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
             grunnlagForPerson?.copy(endretUtbetalingAndel = endretUtbetalingAndel)
         }.kombinerMedNullable(overgangsstønadTidslinje) { grunnlagForPerson, overgangsstønad ->
             grunnlagForPerson?.copy(overgangsstønad = overgangsstønad)
-        }.kombinerMedNullable(eksplisitteAvslagForPerson) { grunnlagForPerson, eksplisitteAvslag ->
+        }.kombinerMedNullable(eksplisitteAvslagTidslinje) { grunnlagForPerson, eksplisitteAvslag ->
             if (eksplisitteAvslag.isNullOrEmpty()) {
                 grunnlagForPerson
             } else {
@@ -143,14 +143,20 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
         }
 }
 
-private fun Collection<VilkårResultat>.hentForskjøvetEksplisittAvslagTidslinje(): Tidslinje<List<VilkårResultatForVedtaksperiode>, Måned> =
-    filter { it.erEksplisittAvslagPåSøknad == true }.groupBy { it.vilkårType }.map { (_, vilkårResultater) ->
-        vilkårResultater.tilTidslinje().perioder().map {
-            Periode(
-                it.fraOgMed.tilNesteMåned(),
-                it.tilOgMed.tilNesteMåned(),
-                it.innhold,
-            )
-        }.tilTidslinje()
-    }.map { tidslinje -> tidslinje.map { it?.let { VilkårResultatForVedtaksperiode(it) } } }
-        .kombiner { it.toList() }
+private fun lagTidslinjeForEksplisitteAvslag(
+    forskjøvedeVilkårMedPeriode: List<Tidslinje<VilkårResultatForVedtaksperiode, Måned>>,
+    generelleAvslag: List<VilkårResultat>,
+): Tidslinje<List<VilkårResultatForVedtaksperiode>, Måned> {
+    val forskjøvedeEksplisitteAvslagMedPerioder = forskjøvedeVilkårMedPeriode.map { tidslinje -> tidslinje.filtrer { it?.erEksplisittAvslagPåSøknad == true } }.kombiner { it.toList() }
+    val eksplisitteAvslagUtenPeriode = generelleAvslag.map { genereltAvslag -> listOf(månedPeriodeAv(null, null, genereltAvslag)).tilTidslinje().map { it?.let { VilkårResultatForVedtaksperiode(it) } } }.kombiner { it.toList() }
+
+    val eksplisitteAvslagTidslinje =
+        forskjøvedeEksplisitteAvslagMedPerioder.kombinerMed(eksplisitteAvslagUtenPeriode) { avslagMedPeriode, avslagUtenPeriode ->
+            when {
+                avslagMedPeriode == null -> avslagUtenPeriode
+                avslagUtenPeriode == null -> avslagMedPeriode
+                else -> avslagMedPeriode + avslagUtenPeriode
+            }
+        }
+    return eksplisitteAvslagTidslinje
+}

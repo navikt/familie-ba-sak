@@ -118,8 +118,9 @@ object VilkårsvurderingForskyvningUtils {
             .tilMånedFraMånedsskifte { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
                 if (innholdFørsteDagDenneMåned != null && innholdSisteDagForrigeMåned != null) {
                     when {
-                        vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
-                        !innholdSisteDagForrigeMåned.erOppfylt() -> innholdSisteDagForrigeMåned
+                        vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() && innholdSisteDagForrigeMåned.erOppfylt() && innholdFørsteDagDenneMåned.erOppfylt() -> innholdSisteDagForrigeMåned
+                        innholdSisteDagForrigeMåned.erEksplisittAvslagInnenforSammeMåned() && innholdFørsteDagDenneMåned.erOppfylt() -> innholdSisteDagForrigeMåned
+                        innholdSisteDagForrigeMåned.erEksplisittAvslagPåSøknad == true && innholdFørsteDagDenneMåned.erOppfylt() -> null
                         else -> innholdFørsteDagDenneMåned
                     }
                 } else if (innholdFørsteDagDenneMåned == null && innholdSisteDagForrigeMåned.erEksplisittAvslagInnenforSammeMåned()
