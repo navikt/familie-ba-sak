@@ -28,7 +28,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingM
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøsOppsummering
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilUtfylteKompetanserEtterEndringstidpunkt
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilUtfylteKompetanserEtterEndringstidpunktPerAktør
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilUtbetaltFraAnnetLand
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
@@ -313,14 +313,14 @@ fun hentLandOgStartdatoForUtbetalingstabell(
     kompetanser: Collection<Kompetanse>,
 ): UtbetalingstabellAutomatiskValutajustering {
     val utfylteKompetanserEtterEndringstidspunkt =
-        kompetanser.tilUtfylteKompetanserEtterEndringstidpunkt(endringstidspunkt)
+        kompetanser.tilUtfylteKompetanserEtterEndringstidpunktPerAktør(endringstidspunkt)
 
     if (utfylteKompetanserEtterEndringstidspunkt.isEmpty()) {
         throw Feil("Finner ingen kompetanser etter endringstidspunkt")
     }
 
     val eøsLandMedUtbetalinger =
-        utfylteKompetanserEtterEndringstidspunkt.map {
+        utfylteKompetanserEtterEndringstidspunkt.values.flatten().map {
             if (it.erAnnenForelderOmfattetAvNorskLovgivning) {
                 it.søkersAktivitetsland.tilLandNavn(landkoder).navn
             } else {
