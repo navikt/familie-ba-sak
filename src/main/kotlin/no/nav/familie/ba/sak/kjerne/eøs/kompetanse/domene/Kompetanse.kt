@@ -202,10 +202,14 @@ fun List<UtfyltKompetanse>.tilTidslinje() =
         )
     }.tilTidslinje()
 
-fun Collection<Kompetanse>.tilUtfylteKompetanserEtterEndringstidpunkt(endringstidspunkt: MånedTidspunkt) =
-    this.map { it.tilIKompetanse() }
-        .filterIsInstance<UtfyltKompetanse>()
-        .tilTidslinje()
-        .beskjærFraOgMed(endringstidspunkt)
-        .perioder()
-        .mapNotNull { it.innhold }
+fun Collection<Kompetanse>.tilUtfylteKompetanserEtterEndringstidpunktPerAktør(endringstidspunkt: MånedTidspunkt): Map<Aktør, List<UtfyltKompetanse>> {
+    val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
+
+    val utfylteKompetanser =
+        this.map { it.tilIKompetanse() }
+            .filterIsInstance<UtfyltKompetanse>()
+
+    return alleBarnAktørIder.associateWith { aktør ->
+        utfylteKompetanser.filter { it.barnAktører.contains(aktør) }.tilTidslinje().beskjærFraOgMed(endringstidspunkt).perioder().mapNotNull { it.innhold }
+    }
+}
