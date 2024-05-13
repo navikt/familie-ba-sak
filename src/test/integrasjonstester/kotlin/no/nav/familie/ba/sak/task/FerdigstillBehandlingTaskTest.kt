@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
@@ -49,6 +50,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     @Autowired
@@ -237,7 +239,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             )
 
         @Test
-        fun `skal henlegge behandling og opprette oppgave hvis vi ikke kan behandle automatisk`() {
+        fun `skal henlegge behandling hvis vi ikke kan behandle automatisk`() {
             val opprinneligÅpenBehandling = opprettBehandling(status = BehandlingStatus.UTREDES)
             settPåMaskinellVent(opprinneligÅpenBehandling)
 
@@ -247,9 +249,28 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             val automatiskBehandlingEtterHenleggelse = behandlingRepository.finnBehandling(automatiskBehandling.id)
             assertThat(automatiskBehandlingEtterHenleggelse.resultat).isEqualTo(Behandlingsresultat.HENLAGT_AUTOMATISK)
             assertThat(automatiskBehandlingEtterHenleggelse.aktiv).isFalse()
+
             val opprinneligBehandlingEtterHenleggelse = behandlingRepository.finnBehandling(opprinneligÅpenBehandling.id)
             assertThat(opprinneligBehandlingEtterHenleggelse.aktiv).isTrue()
             assertThat(opprinneligBehandlingEtterHenleggelse.status).isEqualTo(BehandlingStatus.UTREDES)
+        }
+
+        @Test
+        fun `skal henlegge behandling og sette behandling tilbake til på vent hvis den var på vent i utgangspunktet`() {
+            val opprinneligÅpenBehandling = opprettBehandling(status = BehandlingStatus.UTREDES)
+            settPåVentService.settBehandlingPåVent(opprinneligÅpenBehandling.id, LocalDate.now().plusMonths(1), SettPåVentÅrsak.AVVENTER_DOKUMENTASJON)
+            settPåMaskinellVent(opprinneligÅpenBehandling)
+
+            val automatiskBehandling = kjørSteg(Resultat.IKKE_OPPFYLT)
+            autovedtakSmåbarnstilleggService.kanIkkeBehandleAutomatisk(automatiskBehandling, Metrics.counter("test"), meldingIOppgave = "test")
+
+            val automatiskBehandlingEtterHenleggelse = behandlingRepository.finnBehandling(automatiskBehandling.id)
+            assertThat(automatiskBehandlingEtterHenleggelse.resultat).isEqualTo(Behandlingsresultat.HENLAGT_AUTOMATISK)
+            assertThat(automatiskBehandlingEtterHenleggelse.aktiv).isFalse()
+
+            val opprinneligBehandlingEtterHenleggelse = behandlingRepository.finnBehandling(opprinneligÅpenBehandling.id)
+            assertThat(opprinneligBehandlingEtterHenleggelse.aktiv).isTrue()
+            assertThat(opprinneligBehandlingEtterHenleggelse.status).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
         }
 
         @Test
