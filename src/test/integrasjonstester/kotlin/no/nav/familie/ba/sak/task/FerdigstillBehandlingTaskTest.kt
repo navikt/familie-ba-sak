@@ -248,7 +248,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             autovedtakSmåbarnstilleggService.kanIkkeBehandleAutomatisk(automatiskBehandling, Metrics.counter("test"), meldingIOppgave = "test")
 
             val automatiskBehandlingEtterHenleggelse = behandlingRepository.finnBehandling(automatiskBehandling.id)
-            assertThat(automatiskBehandlingEtterHenleggelse.resultat).isEqualTo(Behandlingsresultat.HENLAGT_AUTOMATISK)
+            assertThat(automatiskBehandlingEtterHenleggelse.resultat).isEqualTo(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE)
             assertThat(automatiskBehandlingEtterHenleggelse.aktiv).isFalse()
 
             val opprinneligBehandlingEtterHenleggelse = behandlingRepository.finnBehandling(opprinneligÅpenBehandling.id)
@@ -263,10 +263,11 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             settPåMaskinellVent(opprinneligÅpenBehandling)
 
             val automatiskBehandling = kjørSteg(Resultat.IKKE_OPPFYLT)
-            autovedtakSmåbarnstilleggService.kanIkkeBehandleAutomatisk(automatiskBehandling, Metrics.counter("test"), meldingIOppgave = "test")
+            val meldingIOppgave = autovedtakSmåbarnstilleggService.kanIkkeBehandleAutomatisk(automatiskBehandling, Metrics.counter("test"), meldingIOppgave = "test")
+            assertThat(meldingIOppgave).isEqualTo("test")
 
             val automatiskBehandlingEtterHenleggelse = behandlingRepository.finnBehandling(automatiskBehandling.id)
-            assertThat(automatiskBehandlingEtterHenleggelse.resultat).isEqualTo(Behandlingsresultat.HENLAGT_AUTOMATISK)
+            assertThat(automatiskBehandlingEtterHenleggelse.resultat).isEqualTo(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE)
             assertThat(automatiskBehandlingEtterHenleggelse.aktiv).isFalse()
 
             val opprinneligBehandlingEtterHenleggelse = behandlingRepository.finnBehandling(opprinneligÅpenBehandling.id)

@@ -170,7 +170,7 @@ class FødselshendelseHenleggelseTest(
                 brevmalService = brevmalService,
             )
 
-        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK, behandling?.resultat)
+        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         verify(exactly = 1) {
@@ -266,7 +266,7 @@ class FødselshendelseHenleggelseTest(
                 brevmalService = brevmalService,
             )
 
-        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK, behandling?.resultat)
+        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         verify(exactly = 1) {
@@ -313,7 +313,7 @@ class FødselshendelseHenleggelseTest(
                 brevmalService = brevmalService,
             )
 
-        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK, behandling?.resultat)
+        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         verify(exactly = 1) {
@@ -407,7 +407,7 @@ class FødselshendelseHenleggelseTest(
             )
 
         assertEquals(BehandlingUnderkategori.UTVIDET, revurdering?.underkategori)
-        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK, revurdering?.resultat)
+        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, revurdering?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
 
         verify(exactly = 1) {
@@ -480,7 +480,7 @@ class FødselshendelseHenleggelseTest(
             )
 
         assertEquals(BehandlingKategori.EØS, revurdering?.kategori)
-        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK, revurdering?.resultat)
+        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, revurdering?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
 
         verify(exactly = 1) {
@@ -547,7 +547,7 @@ class FødselshendelseHenleggelseTest(
                 brevmalService = brevmalService,
             )!!
 
-        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK, behandling.resultat)
+        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling.steg)
 
         verify(exactly = 1) {

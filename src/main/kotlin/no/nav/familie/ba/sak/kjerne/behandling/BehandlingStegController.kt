@@ -233,7 +233,7 @@ enum class HenleggÅrsak(val beskrivelse: String) {
         when (this) {
             FEILAKTIG_OPPRETTET -> Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
             SØKNAD_TRUKKET -> Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
-            AUTOMATISK_HENLAGT -> Behandlingsresultat.HENLAGT_AUTOMATISK
+            AUTOMATISK_HENLAGT -> Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
             TEKNISK_VEDLIKEHOLD -> Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
         }
 }

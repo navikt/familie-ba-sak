@@ -29,7 +29,7 @@ import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
-import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentTask
+import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
@@ -361,13 +361,14 @@ class ForvalterController(
 
     @PostMapping("/henlegg-autovedtak-og-sett-behandling-tilbake-paa-vent")
     @Operation(summary = "Henlegger autovedtak og setter behandling tilbake på vent.")
+    @Transactional
     fun henleggAutovedtakOgSettBehandlingTilbakePåVent(
         @RequestBody behandlingList: List<Long>,
     ): ResponseEntity<Ressurs<String>> {
         behandlingList.forEach { behandlingId ->
-            val hennleggAutovedtakTask = HenleggAutovedtakOgSettBehandlingTilbakeTilVentTask.opprettTask(behandlingId)
+            logger.info("Opprettet oppdaterLøpendeFlaggTask for behandlingId=$behandlingId")
+            val hennleggAutovedtakTask = HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask.opprettTask(behandlingId)
             taskRepository.save(hennleggAutovedtakTask)
-            logger.info("Opprettet oppdaterLøpendeFlaggTask")
         }
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }

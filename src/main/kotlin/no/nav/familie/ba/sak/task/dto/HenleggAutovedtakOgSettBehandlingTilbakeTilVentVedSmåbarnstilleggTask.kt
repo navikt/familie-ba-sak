@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = HenleggAutovedtakOgSettBehandlingTilbakeTilVentTask.TASK_STEP_TYPE,
+    taskStepType = HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask.TASK_STEP_TYPE,
     beskrivelse = "Henlegg autovedtak og sett behandling tilbake til vent",
     maxAntallFeil = 1,
 )
-class HenleggAutovedtakOgSettBehandlingTilbakeTilVentTask(
+class HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask(
     private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AsyncTaskStep {
