@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.task
 
+import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomBarnFnr
@@ -7,7 +9,11 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
@@ -20,6 +26,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -29,16 +39,19 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     @Autowired
@@ -82,6 +95,36 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     lateinit var snikeIKøenService: SnikeIKøenService
+
+    @Autowired
+    lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+
+    @Autowired
+    lateinit var småbarnstilleggService: SmåbarnstilleggService
+
+    @Autowired
+    lateinit var taskService: TaskService
+
+    @Autowired
+    lateinit var beregningService: BeregningService
+
+    @Autowired
+    lateinit var autovedtakService: AutovedtakService
+
+    @Autowired
+    lateinit var oppgaveService: OppgaveService
+
+    @Autowired
+    lateinit var vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService
+
+    @Autowired
+    lateinit var localDateProvider: LocalDateProvider
+
+    @Autowired
+    lateinit var settPåVentService: SettPåVentService
+
+    @Autowired
+    lateinit var opprettTaskService: OpprettTaskService
 
     private val fnr = randomFnr()
 
@@ -177,6 +220,61 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Nested
     inner class BehandlingPåMaskinellVent {
+        private val autovedtakSmåbarnstilleggService =
+            AutovedtakSmåbarnstilleggService(
+                behandlingService = behandlingService,
+                fagsakService = fagsakService,
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                vedtakService = vedtakService,
+                vedtaksperiodeService = vedtaksperiodeService,
+                småbarnstilleggService = småbarnstilleggService,
+                taskService = taskService,
+                beregningService = beregningService,
+                autovedtakService = autovedtakService,
+                oppgaveService = oppgaveService,
+                vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
+                localDateProvider = localDateProvider,
+                påVentService = settPåVentService,
+                opprettTaskService = opprettTaskService,
+                stegService = stegService,
+            )
+
+        @Test
+        fun `skal henlegge behandling hvis vi ikke kan behandle automatisk`() {
+            val opprinneligÅpenBehandling = opprettBehandling(status = BehandlingStatus.UTREDES)
+            settPåMaskinellVent(opprinneligÅpenBehandling)
+
+            val automatiskBehandling = kjørSteg(Resultat.IKKE_OPPFYLT)
+            autovedtakSmåbarnstilleggService.kanIkkeBehandleAutomatisk(automatiskBehandling, Metrics.counter("test"), meldingIOppgave = "test")
+
+            val automatiskBehandlingEtterHenleggelse = behandlingRepository.finnBehandling(automatiskBehandling.id)
+            assertThat(automatiskBehandlingEtterHenleggelse.resultat).isEqualTo(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE)
+            assertThat(automatiskBehandlingEtterHenleggelse.aktiv).isFalse()
+
+            val opprinneligBehandlingEtterHenleggelse = behandlingRepository.finnBehandling(opprinneligÅpenBehandling.id)
+            assertThat(opprinneligBehandlingEtterHenleggelse.aktiv).isTrue()
+            assertThat(opprinneligBehandlingEtterHenleggelse.status).isEqualTo(BehandlingStatus.UTREDES)
+        }
+
+        @Test
+        fun `skal henlegge behandling og sette behandling tilbake til på vent hvis den var på vent i utgangspunktet`() {
+            val opprinneligÅpenBehandling = opprettBehandling(status = BehandlingStatus.UTREDES)
+            settPåVentService.settBehandlingPåVent(opprinneligÅpenBehandling.id, LocalDate.now().plusMonths(1), SettPåVentÅrsak.AVVENTER_DOKUMENTASJON)
+            settPåMaskinellVent(opprinneligÅpenBehandling)
+
+            val automatiskBehandling = kjørSteg(Resultat.IKKE_OPPFYLT)
+            val meldingIOppgave = autovedtakSmåbarnstilleggService.kanIkkeBehandleAutomatisk(automatiskBehandling, Metrics.counter("test"), meldingIOppgave = "test")
+            assertThat(meldingIOppgave).isEqualTo("test")
+
+            val automatiskBehandlingEtterHenleggelse = behandlingRepository.finnBehandling(automatiskBehandling.id)
+            assertThat(automatiskBehandlingEtterHenleggelse.resultat).isEqualTo(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE)
+            assertThat(automatiskBehandlingEtterHenleggelse.aktiv).isFalse()
+
+            val opprinneligBehandlingEtterHenleggelse = behandlingRepository.finnBehandling(opprinneligÅpenBehandling.id)
+            assertThat(opprinneligBehandlingEtterHenleggelse.aktiv).isTrue()
+            assertThat(opprinneligBehandlingEtterHenleggelse.status).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
+        }
+
         @Test
         fun `skal reaktivere en behandling som er på maskinell vent`() {
             val behandling1 = opprettBehandling(status = BehandlingStatus.UTREDES)
