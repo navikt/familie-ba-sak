@@ -24,7 +24,7 @@ fun parseBrevPerioder(dataTable: DataTable): List<BrevPeriode> {
 
         BrevPeriode(
             fom = parseValgfriString(Domenebegrep.FRA_DATO, rad) ?: "",
-            tom = parseValgfriString(Domenebegrep.TIL_DATO, rad) ?: "",
+            tom = parseValgfriString(Domenebegrep.TIL_DATO, rad)?.removeSurrounding("\"") ?: "",
             beløp = beløp,
             // egen test for dette. Se `forvent følgende brevbegrunnelser for behandling i periode`()
             begrunnelser = emptyList<BrevBegrunnelse>(),

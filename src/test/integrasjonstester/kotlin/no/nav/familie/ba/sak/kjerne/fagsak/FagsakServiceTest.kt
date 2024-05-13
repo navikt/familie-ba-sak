@@ -8,11 +8,11 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -57,8 +57,6 @@ class FagsakServiceTest(
     private val personidentService: PersonidentService,
     @Autowired
     private val stegService: StegService,
-    @Autowired
-    private val mockPersonopplysningerService: PersonopplysningerService,
     @Autowired
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     @Autowired
@@ -106,19 +104,15 @@ class FagsakServiceTest(
         val barn3Fnr = randomFnr()
 
         val søker1Aktør = personidentService.hentAktør(søker1Fnr)
-        val søker2Aktør = personidentService.hentAktør(søker2Fnr)
         val søker3Aktør = personidentService.hentAktør(søker3Fnr)
-        val barn1Aktør = personidentService.hentAktør(barn1Fnr)
-        val barn2Aktør = personidentService.hentAktør(barn2Fnr)
-        val barn3Aktør = personidentService.hentAktør(barn3Fnr)
 
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn1Aktør))
-        } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "barn1")
+        leggTilPersonInfo(
+            barn1Fnr,
+            PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "barn1"),
+        )
 
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn2Aktør))
-        } returns
+        leggTilPersonInfo(
+            barn2Fnr,
             PersonInfo(
                 fødselsdato = LocalDate.of(2019, 5, 1),
                 kjønn = Kjønn.MANN,
@@ -138,35 +132,28 @@ class FagsakServiceTest(
                             LocalDate.of(1990, 1, 10),
                         ),
                     ),
-            )
+            ),
+        )
 
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Aktør))
-        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
+        leggTilPersonInfo(
+            søker1Fnr,
+            PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1"),
+        )
 
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker2Aktør))
-        } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2")
+        leggTilPersonInfo(
+            søker2Fnr,
+            PersonInfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2"),
+        )
 
-        every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(barn2Aktør))
-        } returns PersonInfo(fødselsdato = LocalDate.of(2019, 5, 1), kjønn = Kjønn.MANN, navn = "barn2")
+        leggTilPersonInfo(
+            barn3Fnr,
+            PersonInfo(fødselsdato = LocalDate.of(2017, 3, 1), kjønn = Kjønn.KVINNE, navn = "barn3"),
+        )
 
-        every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(barn3Aktør))
-        } returns PersonInfo(fødselsdato = LocalDate.of(2017, 3, 1), kjønn = Kjønn.KVINNE, navn = "barn3")
-
-        every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker1Aktør))
-        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
-
-        every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker2Aktør))
-        } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2")
-
-        every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker3Aktør))
-        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 1, 10), kjønn = Kjønn.KVINNE, navn = "søker3")
+        leggTilPersonInfo(
+            søker3Fnr,
+            PersonInfo(fødselsdato = LocalDate.of(1990, 1, 10), kjønn = Kjønn.KVINNE, navn = "søker3"),
+        )
 
         val fagsak0 =
             fagsakService.hentEllerOpprettFagsak(
@@ -280,13 +267,10 @@ class FagsakServiceTest(
         val søker1Fnr = randomFnr()
         val søker1Aktør = tilAktør(søker1Fnr)
 
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Aktør))
-        } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
-
-        every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker1Aktør))
-        } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
+        leggTilPersonInfo(
+            søker1Fnr,
+            PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1"),
+        )
 
         val fagsak =
             fagsakService.hentEllerOpprettFagsak(
@@ -321,13 +305,10 @@ class FagsakServiceTest(
         val søker1Fnr = randomFnr()
         val søker1Aktør = tilAktør(søker1Fnr)
 
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Aktør))
-        } returns PersonInfo(fødselsdato = LocalDate.of(1992, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
-
-        every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker1Aktør))
-        } returns PersonInfo(fødselsdato = LocalDate.of(1992, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
+        leggTilPersonInfo(
+            søker1Fnr,
+            PersonInfo(fødselsdato = LocalDate.of(1992, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1"),
+        )
 
         fagsakService.hentEllerOpprettFagsak(
             FagsakRequest(

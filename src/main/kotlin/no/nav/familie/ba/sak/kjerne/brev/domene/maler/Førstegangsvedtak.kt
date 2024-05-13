@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 
 data class Førstegangsvedtak(
     override val mal: Brevmal,
@@ -14,6 +15,7 @@ data class Førstegangsvedtak(
         informasjonOmAarligKontroll: Boolean = false,
         refusjonEosAvklart: RefusjonEøsAvklart? = null,
         refusjonEosUavklart: RefusjonEøsUavklart? = null,
+        utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering? = null,
         duMåMeldeFraOmEndringer: Boolean = true,
         duMåMeldeFraOmEndringerEøsSelvstendigRett: Boolean = false,
         informasjonOmUtbetaling: Boolean = false,
@@ -40,6 +42,7 @@ data class Førstegangsvedtak(
                             duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
                             duMaaMeldeFraOmEndringer = duMåMeldeFraOmEndringer,
                             informasjonOmUtbetaling = informasjonOmUtbetaling,
+                            utbetalingstabellAutomatiskValutajustering = utbetalingstabellAutomatiskValutajustering,
                         ),
                     perioder = vedtakFellesfelter.perioder,
                     flettefelter =
@@ -49,6 +52,7 @@ data class Førstegangsvedtak(
                             fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer),
                             organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
                         ),
+                    utbetalingerPerMndEøs = vedtakFellesfelter.utbetalingerPerMndEøs,
                 ),
         )
 }
@@ -57,6 +61,7 @@ data class FørstegangsvedtakData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokument,
     override val perioder: List<BrevPeriode>,
+    override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?,
 ) : VedtaksbrevData {
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
@@ -67,6 +72,7 @@ data class FørstegangsvedtakData(
         val informasjonOmAarligKontroll: Boolean,
         val refusjonEosAvklart: RefusjonEøsAvklart?,
         val refusjonEosUavklart: RefusjonEøsUavklart?,
+        val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
         val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
         val duMaaMeldeFraOmEndringer: Boolean,
         val informasjonOmUtbetaling: Boolean,

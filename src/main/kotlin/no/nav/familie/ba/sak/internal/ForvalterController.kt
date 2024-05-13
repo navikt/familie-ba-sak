@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
-import no.nav.familie.ba.sak.task.OppdaterStønadTomPåTilkjentYtelseTask.Companion.opprettStønadTomTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
@@ -348,16 +347,6 @@ class ForvalterController(
         } else {
             throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
         }
-        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
-    }
-
-    @PostMapping("/oppdater-stonad-tom-for-tilkjent-ytelse")
-    @Operation(summary = "Oppdater tilkjent ytelse slik at saker som har feil stønad tom kan oppdateres til riktig.")
-    @Transactional
-    fun oppdaterStonadTomForTilkjentYtelse(
-        @RequestBody fagsakListe: List<Long>,
-    ): ResponseEntity<Ressurs<String>> {
-        fagsakListe.forEach { taskRepository.save(opprettStønadTomTask(it)) }
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 

@@ -16,11 +16,10 @@ import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -39,7 +38,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -59,8 +57,6 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMell
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
-import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
@@ -98,8 +94,6 @@ class BehandlingIntegrationTest(
     private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired
     private val fagsakService: FagsakService,
-    @Autowired
-    private val mockPersonopplysningerService: PersonopplysningerService,
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
     @Autowired
@@ -563,67 +557,8 @@ class BehandlingIntegrationTest(
         val barn1Kommunenummer = "3233"
         val barn2BostedKommune = "Oslo"
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns
-            PersonInfo(
-                fødselsdato = LocalDate.of(1990, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Mor",
-                kjønn = Kjønn.KVINNE,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser =
-                    mutableListOf(
-                        Bostedsadresse(
-                            vegadresse =
-                                Vegadresse(
-                                    matrikkelId,
-                                    søkerHusnummer,
-                                    søkerHusbokstav,
-                                    søkerBruksenhetsnummer,
-                                    søkerAdressnavn,
-                                    søkerKommunenummer,
-                                    søkerTilleggsnavn,
-                                    søkerPostnummer,
-                                ),
-                        ),
-                    ),
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            )
-
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barn1Fnr)) } returns
-            PersonInfo(
-                fødselsdato = LocalDate.of(2009, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Gutt",
-                kjønn = Kjønn.MANN,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser =
-                    mutableListOf(
-                        Bostedsadresse(
-                            matrikkeladresse =
-                                Matrikkeladresse(
-                                    matrikkelId,
-                                    barn1Bruksenhetsnummer,
-                                    barn1Tilleggsnavn,
-                                    barn1Postnummer,
-                                    barn1Kommunenummer,
-                                ),
-                        ),
-                    ),
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            )
-
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barn2Fnr)) } returns
-            PersonInfo(
-                fødselsdato = LocalDate.of(2012, 1, 1),
-                adressebeskyttelseGradering = null,
-                navn = "Jente",
-                kjønn = Kjønn.KVINNE,
-                forelderBarnRelasjon = emptySet(),
-                bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            )
-
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns
+        leggTilPersonInfo(
+            søkerFnr,
             PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 bostedsadresser =
@@ -642,8 +577,11 @@ class BehandlingIntegrationTest(
                                 ),
                         ),
                     ),
-            )
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barn1Fnr)) } returns
+            ),
+        )
+
+        leggTilPersonInfo(
+            barn1Fnr,
             PersonInfo(
                 fødselsdato = LocalDate.of(2009, 1, 1),
                 bostedsadresser =
@@ -659,12 +597,16 @@ class BehandlingIntegrationTest(
                                 ),
                         ),
                     ),
-            )
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barn2Fnr)) } returns
+            ),
+        )
+
+        leggTilPersonInfo(
+            barn2Fnr,
             PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
-            )
+            ),
+        )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling =

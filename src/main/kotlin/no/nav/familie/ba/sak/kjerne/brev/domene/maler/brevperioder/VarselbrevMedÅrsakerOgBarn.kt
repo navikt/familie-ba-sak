@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Flettefelt
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.FlettefelterForDokument
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.FritekstAvsnitt
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturDelmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
 import java.time.LocalDate
@@ -22,6 +23,7 @@ data class VarselbrevMedÅrsakerOgBarn(
         varselÅrsaker: List<String>,
         barnasFødselsdager: String,
         saksbehandlerNavn: String,
+        fritekstAvsnitt: FritekstAvsnitt? = null,
     ) : this(
         mal = mal,
         data =
@@ -33,6 +35,7 @@ data class VarselbrevMedÅrsakerOgBarn(
                                 enhet = enhet,
                                 saksbehandlerNavn = saksbehandlerNavn,
                             ),
+                        fritekstAvsnitt = fritekstAvsnitt,
                     ),
                 flettefelter =
                     VarselbrevMedÅrsakerOgBarnData.Flettefelter(
@@ -71,5 +74,6 @@ data class VarselbrevMedÅrsakerOgBarnData(
 
     data class DelmalData(
         val signatur: SignaturDelmal,
+        val fritekstAvsnitt: FritekstAvsnitt?,
     )
 }

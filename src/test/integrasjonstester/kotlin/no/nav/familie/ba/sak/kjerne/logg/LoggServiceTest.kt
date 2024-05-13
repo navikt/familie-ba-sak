@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.logg
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -17,17 +17,21 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 class LoggServiceTest(
@@ -35,8 +39,6 @@ class LoggServiceTest(
     private val loggService: LoggService,
     @Autowired
     private val stegService: StegService,
-    @Autowired
-    private val mockPersonopplysningerService: PersonopplysningerService,
     @Autowired
     private val behandlingRepository: BehandlingRepository,
     @Autowired
@@ -91,7 +93,7 @@ class LoggServiceTest(
         val morsIdent = randomFnr()
         val barnetsIdent = "29422059278"
 
-        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, morsIdent, barnetsIdent)
+        mockHentPersoninfoForIdenter(morsIdent, barnetsIdent)
 
         val behandling =
             stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(
@@ -347,5 +349,26 @@ class LoggServiceTest(
         ).also {
             it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
         }.also { behandlingRepository.save(it) }
+    }
+
+    private fun mockHentPersoninfoForIdenter(
+        søkerFnr: String,
+        barnFnr: String,
+    ) {
+        MockPersonopplysningerService.leggTilPersonInfo(
+            personIdent = barnFnr,
+            egendefinertMock =
+                PersonInfo(
+                    fødselsdato = LocalDate.of(2018, 5, 1),
+                    kjønn = Kjønn.KVINNE,
+                    navn = "Barn Barnesen",
+                    sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
+                ),
+        )
+        MockPersonopplysningerService.leggTilPersonInfo(
+            personIdent = søkerFnr,
+            egendefinertMock =
+                PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen"),
+        )
     }
 }

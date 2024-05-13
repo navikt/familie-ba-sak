@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
-import io.mockk.every
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -9,7 +7,6 @@ import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -29,6 +26,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -54,8 +52,6 @@ class BehandlingServiceTest(
     private val behandlingRepository: BehandlingRepository,
     @Autowired
     private val stegService: StegService,
-    @Autowired
-    private val mockPersonopplysningerService: PersonopplysningerService,
 ) : AbstractSpringIntegrationTest() {
     @BeforeAll
     fun init() {
@@ -66,18 +62,13 @@ class BehandlingServiceTest(
     fun `Skal rulle tilbake behandling om noe feiler etter opprettelse`() {
         databaseCleanupService.truncate()
 
-        val feilmelding = "Feil ved henting av personinformasjon"
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(any()) } answers {
-            throw Feil(
-                feilmelding,
-            )
-        }
+        val forventetFeilmelding = "404 Fant ikke forespurte data på person."
 
-        val fnr = randomFnr()
+        val fnr = "00000000000"
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val error =
-            assertThrows<Feil> {
+            assertThrows<HttpClientErrorException> {
                 stegService.håndterNyBehandlingOgSendInfotrygdFeed(
                     nyOrdinærBehandling(
                         søkersIdent = fnr,
@@ -86,7 +77,7 @@ class BehandlingServiceTest(
                 )
             }
 
-        assertEquals(feilmelding, error.message)
+        assertEquals(forventetFeilmelding, error.message)
 
         val behandlinger = behandlingRepository.finnBehandlinger(fagsakId = fagsak.id)
         assertEquals(0, behandlinger.size)

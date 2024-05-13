@@ -221,12 +221,7 @@ private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
             behandlingsGrunnlagForVedtaksperioder
                 .personResultater.firstOrNull { it.aktør == person.aktør }?.vilkårResultater ?: emptyList()
 
-        val (generelleAvslag, vilkårResultaterUtenGenerelleAvslag) =
-            vilkårResultaterForPerson.partition {
-                it.erEksplisittAvslagPåSøknad == true &&
-                    it.periodeFom == null &&
-                    it.periodeTom == null
-            }
+        val (generelleAvslag, vilkårResultaterUtenGenerelleAvslag) = vilkårResultaterForPerson.partition { it.erEksplisittAvslagUtenPeriode() }
 
         val generelleAvslagsBegrunnelser =
             generelleAvslag.groupBy { it.vilkårType }.mapNotNull { (_, vilkårResultater) ->
@@ -293,11 +288,9 @@ fun ISanityBegrunnelse.erGjeldendeForFagsakType(
     true
 }
 
-internal fun ISanityBegrunnelse.begrunnelseGjelderReduksjonFraForrigeBehandling() =
-    ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT in this.øvrigeTriggere || ØvrigTrigger.REDUKSJON_FRA_FORRIGE_BEHANDLING in this.øvrigeTriggere
+internal fun ISanityBegrunnelse.begrunnelseGjelderReduksjonFraForrigeBehandling() = ØvrigTrigger.REDUKSJON_FRA_FORRIGE_BEHANDLING in this.øvrigeTriggere
 
-internal fun ISanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling() =
-    ØvrigTrigger.GJELDER_FØRSTE_PERIODE in this.øvrigeTriggere || ØvrigTrigger.OPPHØR_FRA_FORRIGE_BEHANDLING in this.øvrigeTriggere
+internal fun ISanityBegrunnelse.begrunnelseGjelderOpphørFraForrigeBehandling() = ØvrigTrigger.OPPHØR_FRA_FORRIGE_BEHANDLING in this.øvrigeTriggere
 
 fun SanityBegrunnelse.erGjeldendeForRolle(
     person: Person,

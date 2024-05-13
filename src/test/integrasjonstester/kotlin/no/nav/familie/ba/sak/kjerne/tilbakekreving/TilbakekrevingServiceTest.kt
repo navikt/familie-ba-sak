@@ -2,10 +2,11 @@ package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.opprettRestTilbakekreving
+import no.nav.familie.ba.sak.common.randomBarnFnr
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
@@ -48,6 +49,8 @@ class TilbakekrevingServiceTest(
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val brevmottakerRepository: BrevmottakerRepository,
 ) : AbstractSpringIntegrationTest() {
+    val barnFnr = leggTilPersonInfo(personIdent = randomBarnFnr())
+
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
@@ -60,7 +63,7 @@ class TilbakekrevingServiceTest(
             kjørStegprosessForFGB(
                 tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
                 søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
@@ -89,8 +92,8 @@ class TilbakekrevingServiceTest(
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                søkerFnr = ClientMocks.barnFnr[0],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                søkerFnr = barnFnr,
+                barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
@@ -123,7 +126,7 @@ class TilbakekrevingServiceTest(
             kjørStegprosessForFGB(
                 tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
                 søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+                barnasIdenter = listOf(barnFnr),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,

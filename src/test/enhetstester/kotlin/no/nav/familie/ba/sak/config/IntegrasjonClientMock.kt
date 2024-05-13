@@ -8,7 +8,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
-import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -63,6 +62,8 @@ class IntegrasjonClientMock {
     }
 
     companion object {
+        private val søkerFnr = "12345678910"
+
         fun clearIntegrasjonMocks(mockIntegrasjonClient: IntegrasjonClient) {
             /**
              * Mulig årsak til at appen må bruke dirties i testene.
@@ -77,18 +78,18 @@ class IntegrasjonClientMock {
 
             every { mockIntegrasjonClient.hentJournalpost(any()) } returns
                 lagTestJournalpost(
-                    søkerFnr[0],
+                    søkerFnr,
                     UUID.randomUUID().toString(),
                 )
 
             every { mockIntegrasjonClient.hentJournalposterForBruker(any()) } returns
                 listOf(
                     lagTestJournalpost(
-                        søkerFnr[0],
+                        søkerFnr,
                         UUID.randomUUID().toString(),
                     ),
                     lagTestJournalpost(
-                        søkerFnr[0],
+                        søkerFnr,
                         UUID.randomUUID().toString(),
                     ),
                 )

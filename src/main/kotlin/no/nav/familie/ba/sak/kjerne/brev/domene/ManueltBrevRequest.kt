@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EnkeltInformasjonsbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.FlettefelterForDokumentImpl
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForlengetSvartidsbrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.FritekstAvsnitt
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.HenleggeTrukketSøknadBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.HenleggeTrukketSøknadData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevDeltBostedBrev
@@ -81,6 +82,7 @@ data class ManueltBrevRequest(
     val vedrørende: Person? = null,
     val mottakerlandSed: List<String> = emptyList(),
     val manuelleBrevmottakere: List<ManuellBrevmottaker> = emptyList(),
+    val fritekstAvsnitt: String? = null,
 ) {
     override fun toString(): String {
         return "${ManueltBrevRequest::class}, $brevmal"
@@ -165,6 +167,11 @@ fun ManueltBrevRequest.tilBrev(
             saksbehandlerNavn = saksbehandlerNavn,
         )
 
+    val fritekstAvsnitt =
+        this.fritekstAvsnitt
+            ?.takeIf { it.isNotBlank() }
+            ?.let { FritekstAvsnitt(it) }
+
     return when (this.brevmal) {
         Brevmal.INFORMASJONSBREV_DELT_BOSTED ->
             InformasjonsbrevDeltBostedBrev(
@@ -212,7 +219,11 @@ fun ManueltBrevRequest.tilBrev(
                 mal = brevmal,
                 data =
                     InnhenteOpplysningerData(
-                        delmalData = InnhenteOpplysningerData.DelmalData(signatur = signaturDelmal),
+                        delmalData =
+                            InnhenteOpplysningerData.DelmalData(
+                                signatur = signaturDelmal,
+                                fritekstAvsnitt = fritekstAvsnitt,
+                            ),
                         flettefelter =
                             InnhenteOpplysningerData.Flettefelter(
                                 navn = this.mottakerNavn,
@@ -237,6 +248,7 @@ fun ManueltBrevRequest.tilBrev(
                             ),
                     ),
             )
+
         Brevmal.HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON ->
             HenleggeTrukketSøknadBrev(
                 mal = Brevmal.HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON,
@@ -412,6 +424,7 @@ fun ManueltBrevRequest.tilBrev(
                 varselÅrsaker = this.multiselectVerdier,
                 barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager(),
                 saksbehandlerNavn = saksbehandlerNavn,
+                fritekstAvsnitt = fritekstAvsnitt,
             )
 
         Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS ->
@@ -454,6 +467,7 @@ fun ManueltBrevRequest.tilBrev(
                 enhet = this.enhetNavn(),
                 barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager(),
                 saksbehandlerNavn = saksbehandlerNavn,
+                fritekstAvsnitt = this.fritekstAvsnitt,
             )
 
         Brevmal.INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT ->

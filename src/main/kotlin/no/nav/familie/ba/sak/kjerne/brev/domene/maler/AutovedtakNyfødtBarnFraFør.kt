@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 
 data class AutovedtakNyfødtBarnFraFør(
     override val mal: Brevmal = Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
@@ -36,6 +37,7 @@ data class AutovedtakNyfødtBarnFraFørData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokumentImpl,
     override val perioder: List<BrevPeriode>,
+    override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
 ) : VedtaksbrevData {
     data class Delmaler(
         val etterbetaling: Etterbetaling?,

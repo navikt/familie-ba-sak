@@ -2,10 +2,11 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.common.randomBarnFnr
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -135,7 +136,7 @@ class SøknadGrunnlagTest(
     @Test
     fun `Skal registrere søknad med uregistrerte barn og disse skal ikke komme med i persongrunnlaget`() {
         val søkerIdent = randomFnr()
-        val folkeregistrertBarn = ClientMocks.barnFnr[0]
+        val folkeregistrertBarn = randomFnr()
         val uregistrertBarn = randomFnr()
 
         val søkerAktør = personidentService.hentAktør(søkerIdent)
@@ -198,8 +199,8 @@ class SøknadGrunnlagTest(
     @Test
     fun `Skal tilbakestille behandling ved endring på søknadsregistrering`() {
         val søkerFnr = randomFnr()
-        val barn1Fnr = ClientMocks.barnFnr[0]
-        val barn2Fnr = ClientMocks.barnFnr[1]
+        val barn1Fnr = leggTilPersonInfo(randomBarnFnr(alder = 6))
+        val barn2Fnr = leggTilPersonInfo(randomBarnFnr(alder = 2))
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,

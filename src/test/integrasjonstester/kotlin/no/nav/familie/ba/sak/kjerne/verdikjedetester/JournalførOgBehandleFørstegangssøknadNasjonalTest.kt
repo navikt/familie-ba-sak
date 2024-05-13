@@ -242,7 +242,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
     @Test
     fun `Skal journalføre og behandle utvidet nasjonal sak`() {
-        settToggleMock(FeatureToggleConfig.TEKNISK_ENDRING, true)
+        System.setProperty(FeatureToggleConfig.TEKNISK_ENDRING, "true")
 
         val scenario =
             mockServerKlient().lagScenario(

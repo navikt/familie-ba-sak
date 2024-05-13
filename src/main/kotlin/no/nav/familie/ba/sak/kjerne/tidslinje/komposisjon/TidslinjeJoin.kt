@@ -18,6 +18,21 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.outerJoin(
     }
 }
 
+fun <K, A, B, C, R, T : Tidsenhet> Map<K, Tidslinje<A, T>>.outerJoin(
+    bTidslinjer: Map<K, Tidslinje<B, T>>,
+    cTidslinjer: Map<K, Tidslinje<C, T>>,
+    kombinator: (A?, B?, C?) -> R?,
+): Map<K, Tidslinje<R, T>> {
+    val aTidslinjer = this
+    val alleNøkler = aTidslinjer.keys + bTidslinjer.keys + cTidslinjer.keys
+    return alleNøkler.associateWith { nøkkel ->
+        val aTidslinje = aTidslinjer.getOrDefault(nøkkel, TomTidslinje())
+        val bTidslinje = bTidslinjer.getOrDefault(nøkkel, TomTidslinje())
+        val cTidslinje = cTidslinjer.getOrDefault(nøkkel, TomTidslinje())
+        aTidslinje.kombinerMed(bTidslinje, cTidslinje, kombinator)
+    }
+}
+
 fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.leftJoin(
     høyreTidslinjer: Map<K, Tidslinje<H, T>>,
     kombinator: (V?, H?) -> R?,

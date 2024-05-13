@@ -85,3 +85,21 @@ data class RefusjonEøsUavklart(
         flettefelt(perioderMedRefusjonEøsUavklart.toList()),
     )
 }
+
+data class UtbetalingstabellAutomatiskValutajustering(
+    val utbetalingerEosLand: Flettefelt,
+    val utbetalingerEosMndAar: Flettefelt,
+) {
+    constructor(utbetalingerEosLand: String, utbetalingerEosMndAar: String) : this(
+        utbetalingerEosLand = flettefelt(utbetalingerEosLand),
+        utbetalingerEosMndAar = flettefelt(utbetalingerEosMndAar),
+    )
+}
+
+data class FritekstAvsnitt(
+    val fritekstAvsnittTekst: Flettefelt,
+) {
+    constructor(fritekstAvsnittTekst: String) : this(
+        flettefelt(fritekstAvsnittTekst),
+    )
+}

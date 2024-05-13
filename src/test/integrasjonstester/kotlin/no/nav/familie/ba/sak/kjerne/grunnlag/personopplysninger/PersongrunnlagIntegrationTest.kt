@@ -1,12 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
-import io.mockk.every
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsbo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsboAdresse
@@ -39,8 +38,6 @@ class PersongrunnlagIntegrationTest(
     @Autowired
     private val personidentService: PersonidentService,
     @Autowired
-    private val mockPersonopplysningerService: PersonopplysningerService,
-    @Autowired
     private val fagsakService: FagsakService,
     @Autowired
     private val behandlingService: BehandlingService,
@@ -55,7 +52,8 @@ class PersongrunnlagIntegrationTest(
         val poststedsnavn = "Oslo"
         val postnummer = "1234"
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerAktør) } returns
+        leggTilPersonInfo(
+            søkerAktør.aktivFødselsnummer(),
             PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 adressebeskyttelseGradering = null,
@@ -74,9 +72,11 @@ class PersongrunnlagIntegrationTest(
                                 postnummer = postnummer,
                             ),
                     ),
-            )
+            ),
+        )
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns
+        leggTilPersonInfo(
+            barn1Aktør.aktivFødselsnummer(),
             PersonInfo(
                 fødselsdato = LocalDate.of(2009, 1, 1),
                 adressebeskyttelseGradering = null,
@@ -87,7 +87,8 @@ class PersongrunnlagIntegrationTest(
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
                 dødsfall = null,
                 kontaktinformasjonForDoedsbo = null,
-            )
+            ),
+        )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
         val behandling =
@@ -121,7 +122,8 @@ class PersongrunnlagIntegrationTest(
         val morAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
         val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr(), true)
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morAktør) } returns
+        leggTilPersonInfo(
+            morAktør.aktivFødselsnummer(),
             PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 adressebeskyttelseGradering = null,
@@ -141,9 +143,11 @@ class PersongrunnlagIntegrationTest(
                     ),
                 dødsfall = null,
                 kontaktinformasjonForDoedsbo = null,
-            )
+            ),
+        )
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns
+        leggTilPersonInfo(
+            barn1Aktør.aktivFødselsnummer(),
             PersonInfo(
                 fødselsdato = LocalDate.of(2009, 1, 1),
                 adressebeskyttelseGradering = null,
@@ -154,7 +158,8 @@ class PersongrunnlagIntegrationTest(
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
                 dødsfall = null,
                 kontaktinformasjonForDoedsbo = null,
-            )
+            ),
+        )
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
         val behandling =
             behandlingService.opprettBehandling(
@@ -185,7 +190,8 @@ class PersongrunnlagIntegrationTest(
         val morAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
         val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr(), true)
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morAktør) } returns
+        leggTilPersonInfo(
+            morAktør.aktivFødselsnummer(),
             PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 adressebeskyttelseGradering = null,
@@ -205,9 +211,11 @@ class PersongrunnlagIntegrationTest(
                     ),
                 dødsfall = null,
                 kontaktinformasjonForDoedsbo = null,
-            )
+            ),
+        )
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns
+        leggTilPersonInfo(
+            barn1Aktør.aktivFødselsnummer(),
             PersonInfo(
                 fødselsdato = LocalDate.of(2009, 1, 1),
                 adressebeskyttelseGradering = null,
@@ -218,7 +226,8 @@ class PersongrunnlagIntegrationTest(
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
                 dødsfall = null,
                 kontaktinformasjonForDoedsbo = null,
-            )
+            ),
+        )
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
         val behandling =
             behandlingService.opprettBehandling(
@@ -248,7 +257,8 @@ class PersongrunnlagIntegrationTest(
         val søkerAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
         val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr(), true)
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerAktør) } returns
+        leggTilPersonInfo(
+            søkerAktør.aktivFødselsnummer(),
             PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 adressebeskyttelseGradering = null,
@@ -257,9 +267,11 @@ class PersongrunnlagIntegrationTest(
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            )
+            ),
+        )
 
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns
+        leggTilPersonInfo(
+            barn1Aktør.aktivFødselsnummer(),
             PersonInfo(
                 fødselsdato = LocalDate.of(2009, 1, 1),
                 adressebeskyttelseGradering = null,
@@ -268,7 +280,8 @@ class PersongrunnlagIntegrationTest(
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
                 sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            )
+            ),
+        )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
         val behandling =
