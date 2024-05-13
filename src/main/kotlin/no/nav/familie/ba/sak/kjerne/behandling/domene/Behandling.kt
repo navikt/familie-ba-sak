@@ -156,7 +156,7 @@ data class Behandling(
     fun erHenlagt() =
         resultat == Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET ||
             resultat == Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET ||
-            resultat == Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE ||
+            resultat == Behandlingsresultat.HENLAGT_AUTOMATISK ||
             resultat == Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
 
     fun erVedtatt() = status == BehandlingStatus.AVSLUTTET && !erHenlagt()
@@ -330,7 +330,7 @@ enum class Behandlingsresultat(val displayName: String) {
     // Henlagt
     HENLAGT_FEILAKTIG_OPPRETTET(displayName = "Henlagt feilaktig opprettet"),
     HENLAGT_SØKNAD_TRUKKET(displayName = "Henlagt søknad trukket"),
-    HENLAGT_AUTOMATISK_FØDSELSHENDELSE(displayName = "Henlagt avslått i automatisk vilkårsvurdering"),
+    HENLAGT_AUTOMATISK(displayName = "Henlagt avslått i automatisk vilkårsvurdering"),
     HENLAGT_TEKNISK_VEDLIKEHOLD(displayName = "Henlagt teknisk vedlikehold"),
 
     IKKE_VURDERT(displayName = "Ikke vurdert"),
