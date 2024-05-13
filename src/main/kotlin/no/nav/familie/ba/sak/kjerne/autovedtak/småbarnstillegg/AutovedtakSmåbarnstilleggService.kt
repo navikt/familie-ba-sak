@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.SmåbarnstilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -24,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.erEndringIOvergangsstønadFramITid
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
@@ -53,8 +54,8 @@ class AutovedtakSmåbarnstilleggService(
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val localDateProvider: LocalDateProvider,
     private val påVentService: SettPåVentService,
+    private val stegService: StegService,
     private val opprettTaskService: OpprettTaskService,
-    private val loggService: LoggService,
 ) : AutovedtakBehandlingService<SmåbarnstilleggData> {
     private val antallVedtakOmOvergangsstønad: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "antall")
@@ -125,7 +126,7 @@ class AutovedtakSmåbarnstilleggService(
 
         if (behandlingEtterBehandlingsresultat.status != BehandlingStatus.IVERKSETTER_VEDTAK) {
             return kanIkkeBehandleAutomatisk(
-                behandling = behandlingEtterBehandlingsresultat,
+                automatiskBehandling = behandlingEtterBehandlingsresultat,
                 metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.NYE_UTBETALINGSPERIODER_FØRER_TIL_MANUELL_BEHANDLING]!!,
                 meldingIOppgave = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt",
             )
@@ -144,7 +145,7 @@ class AutovedtakSmåbarnstilleggService(
                     BehandlingStatus.UTREDES,
                 )
             return kanIkkeBehandleAutomatisk(
-                behandling = behandlingSomSkalManueltBehandles,
+                automatiskBehandling = behandlingSomSkalManueltBehandles,
                 metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.KLARER_IKKE_BEGRUNNE]!!,
                 meldingIOppgave = "Småbarnstillegg: klarer ikke bestemme vedtaksperiode som skal begrunnes, må behandles manuelt",
             )
@@ -212,48 +213,54 @@ class AutovedtakSmåbarnstilleggService(
 
     @Transactional
     fun kanIkkeBehandleAutomatisk(
-        behandling: Behandling,
+        automatiskBehandling: Behandling,
         metric: Counter,
         meldingIOppgave: String,
     ): String {
         metric.increment()
 
         val behandlingPåMaskinellVent =
-            behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id, BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
+            behandlingHentOgPersisterService.hentBehandlinger(automatiskBehandling.fagsak.id, BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
                 .singleOrNull()
 
-        val enesteÅpneBehandlingPåFagsak =
+        val manuellBehandlingId =
             if (behandlingPåMaskinellVent != null) {
-                opprettTaskService.opprettHenleggBehandlingTask(
-                    behandlingId = behandling.id,
-                    årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
-                    begrunnelse = meldingIOppgave,
+                stegService.håndterHenleggBehandling(
+                    behandling = automatiskBehandling,
+                    henleggBehandlingInfo =
+                        RestHenleggBehandlingInfo(
+                            årsak = HenleggÅrsak.AUTOMATISK_HENLAGT,
+                            begrunnelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt",
+                        ),
                 )
-
-                val erBehandlingTilMaskinellVentOgsåPåVent = påVentService.finnAktivSettPåVentPåBehandling(behandlingPåMaskinellVent.id) != null
-
-                behandlingPåMaskinellVent.status =
-                    if (erBehandlingTilMaskinellVentOgsåPåVent) {
-                        BehandlingStatus.SATT_PÅ_VENT
-                    } else {
-                        BehandlingStatus.UTREDES
-                    }
-
-                behandlingHentOgPersisterService.lagreEllerOppdater(behandlingPåMaskinellVent)
+                taBehandlingAvMaskinellVent(behandlingPåMaskinellVent.id).id
             } else {
                 autovedtakService.omgjørBehandlingTilManuellOgKjørSteg(
-                    behandling = behandling,
+                    behandling = automatiskBehandling,
                     steg = StegType.VILKÅRSVURDERING,
-                )
+                ).id
             }
 
         oppgaveService.opprettOppgaveForManuellBehandling(
-            behandling = enesteÅpneBehandlingPåFagsak,
+            behandlingId = manuellBehandlingId,
             begrunnelse = meldingIOppgave,
             opprettLogginnslag = true,
             manuellOppgaveType = ManuellOppgaveType.SMÅBARNSTILLEGG,
         )
         return meldingIOppgave
+    }
+
+    private fun taBehandlingAvMaskinellVent(behandlingPåMaskinellVentId: Long): Behandling {
+        val erBehandlingTilMaskinellVentOgsåPåVent = påVentService.finnAktivSettPåVentPåBehandling(behandlingPåMaskinellVentId) != null
+
+        val status =
+            if (erBehandlingTilMaskinellVentOgsåPåVent) {
+                BehandlingStatus.SATT_PÅ_VENT
+            } else {
+                BehandlingStatus.UTREDES
+            }
+
+        return behandlingService.oppdaterStatusPåBehandling(behandlingPåMaskinellVentId, status)
     }
 
     companion object {

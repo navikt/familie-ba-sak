@@ -240,7 +240,7 @@ class AutovedtakStegService(
 
         antallAutovedtakÅpenBehandling[autovedtaktype]?.increment()
         oppgaveService.opprettOppgaveForManuellBehandling(
-            behandling = åpenBehandling,
+            behandlingId = åpenBehandling.id,
             begrunnelse = "${autovedtaktype.displayName}: Bruker har åpen behandling",
             manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
         )

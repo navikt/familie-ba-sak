@@ -451,7 +451,7 @@ class CucumberMock(
             localDateProvider = mockedDateProvider,
             påVentService = mockPåVentService,
             opprettTaskService = opprettTaskService,
-            loggService = loggService,
+            stegService = stegService,
         )
     val iverksettMotOppdragTask = IverksettMotOppdragTask(stegService, behandlingHentOgPersisterService, personidentService, taskRepository)
     val ferdigstillBehandlingTask = FerdigstillBehandlingTask(stegService = stegService, behandlingHentOgPersisterService = behandlingHentOgPersisterService)

@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.erEndringIOvergangsstønadFramITid
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -51,6 +52,7 @@ class AutovedtakSmåbarnstilleggServiceTest {
     private val påVentService: SettPåVentService = mockk<SettPåVentService>()
     private val opprettTaskService: OpprettTaskService = mockk<OpprettTaskService>()
     private val loggService: LoggService = mockk<LoggService>()
+    private val stegService: StegService = mockk<StegService>()
 
     val oppgaveService =
         OppgaveService(
@@ -79,7 +81,7 @@ class AutovedtakSmåbarnstilleggServiceTest {
             localDateProvider = localDateProvider,
             påVentService = påVentService,
             opprettTaskService = opprettTaskService,
-            loggService = loggService,
+            stegService = stegService,
         )
 
     @Test

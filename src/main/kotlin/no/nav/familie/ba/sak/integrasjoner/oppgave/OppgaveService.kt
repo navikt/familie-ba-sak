@@ -109,7 +109,7 @@ class OppgaveService(
     }
 
     fun opprettOppgaveForManuellBehandling(
-        behandling: Behandling,
+        behandlingId: Long,
         begrunnelse: String = "",
         opprettLogginnslag: Boolean = false,
         manuellOppgaveType: ManuellOppgaveType,
@@ -117,14 +117,14 @@ class OppgaveService(
         logger.info("Sender autovedtak til manuell behandling, se secureLogger for mer detaljer.")
         secureLogger.info("Sender autovedtak til manuell behandling. Begrunnelse: $begrunnelse")
         opprettTaskService.opprettOppgaveForManuellBehandlingTask(
-            behandlingId = behandling.id,
+            behandlingId = behandlingId,
             beskrivelse = begrunnelse,
             manuellOppgaveType = manuellOppgaveType,
         )
 
         if (opprettLogginnslag) {
             loggService.opprettAutovedtakTilManuellBehandling(
-                behandling = behandling,
+                behandlingId = behandlingId,
                 tekst = begrunnelse,
             )
         }
