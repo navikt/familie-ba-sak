@@ -184,12 +184,12 @@ class LoggService(
     }
 
     fun opprettAutovedtakTilManuellBehandling(
-        behandling: Behandling,
+        behandlingId: Long,
         tekst: String,
     ) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandlingId,
                 type = LoggType.AUTOVEDTAK_TIL_MANUELL_BEHANDLING,
                 rolle =
                     SikkerhetContext.hentRolletilgangFraSikkerhetscontext(

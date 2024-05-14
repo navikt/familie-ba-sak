@@ -11,10 +11,13 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SmåbarnstilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstilleggFeil
@@ -22,12 +25,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.erEndringIOvergangsstønadFramITid
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
@@ -48,6 +53,9 @@ class AutovedtakSmåbarnstilleggService(
     private val oppgaveService: OppgaveService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val localDateProvider: LocalDateProvider,
+    private val påVentService: SettPåVentService,
+    private val stegService: StegService,
+    private val opprettTaskService: OpprettTaskService,
 ) : AutovedtakBehandlingService<SmåbarnstilleggData> {
     private val antallVedtakOmOvergangsstønad: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "antall")
@@ -61,7 +69,7 @@ class AutovedtakSmåbarnstilleggService(
         KLARER_IKKE_BEGRUNNE("Klarer ikke å begrunne"),
     }
 
-    private val antallVedtakOmOvergangsstønadTilManuellBehandling: Map<TilManuellBehandlingÅrsak, Counter> =
+    val antallVedtakOmOvergangsstønadTilManuellBehandling: Map<TilManuellBehandlingÅrsak, Counter> =
         TilManuellBehandlingÅrsak.values().associateWith {
             Metrics.counter(
                 "behandling",
@@ -118,7 +126,7 @@ class AutovedtakSmåbarnstilleggService(
 
         if (behandlingEtterBehandlingsresultat.status != BehandlingStatus.IVERKSETTER_VEDTAK) {
             return kanIkkeBehandleAutomatisk(
-                behandling = behandlingEtterBehandlingsresultat,
+                automatiskBehandling = behandlingEtterBehandlingsresultat,
                 metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.NYE_UTBETALINGSPERIODER_FØRER_TIL_MANUELL_BEHANDLING]!!,
                 meldingIOppgave = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt",
             )
@@ -137,7 +145,7 @@ class AutovedtakSmåbarnstilleggService(
                     BehandlingStatus.UTREDES,
                 )
             return kanIkkeBehandleAutomatisk(
-                behandling = behandlingSomSkalManueltBehandles,
+                automatiskBehandling = behandlingSomSkalManueltBehandles,
                 metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.KLARER_IKKE_BEGRUNNE]!!,
                 meldingIOppgave = "Småbarnstillegg: klarer ikke bestemme vedtaksperiode som skal begrunnes, må behandles manuelt",
             )
@@ -203,23 +211,56 @@ class AutovedtakSmåbarnstilleggService(
         )
     }
 
-    private fun kanIkkeBehandleAutomatisk(
-        behandling: Behandling,
+    @Transactional
+    fun kanIkkeBehandleAutomatisk(
+        automatiskBehandling: Behandling,
         metric: Counter,
         meldingIOppgave: String,
     ): String {
         metric.increment()
-        val omgjortBehandling =
-            autovedtakService.omgjørBehandlingTilManuellOgKjørSteg(
-                behandling = behandling,
-                steg = StegType.VILKÅRSVURDERING,
-            )
-        return oppgaveService.opprettOppgaveForManuellBehandling(
-            behandling = omgjortBehandling,
+
+        val behandlingPåMaskinellVent =
+            behandlingHentOgPersisterService.hentBehandlinger(automatiskBehandling.fagsak.id, BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
+                .singleOrNull()
+
+        val manuellBehandlingId =
+            if (behandlingPåMaskinellVent != null) {
+                stegService.håndterHenleggBehandling(
+                    behandling = automatiskBehandling,
+                    henleggBehandlingInfo =
+                        RestHenleggBehandlingInfo(
+                            årsak = HenleggÅrsak.AUTOMATISK_HENLAGT,
+                            begrunnelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt",
+                        ),
+                )
+                taBehandlingAvMaskinellVent(behandlingPåMaskinellVent.id).id
+            } else {
+                autovedtakService.omgjørBehandlingTilManuellOgKjørSteg(
+                    behandling = automatiskBehandling,
+                    steg = StegType.VILKÅRSVURDERING,
+                ).id
+            }
+
+        oppgaveService.opprettOppgaveForManuellBehandling(
+            behandlingId = manuellBehandlingId,
             begrunnelse = meldingIOppgave,
             opprettLogginnslag = true,
             manuellOppgaveType = ManuellOppgaveType.SMÅBARNSTILLEGG,
         )
+        return meldingIOppgave
+    }
+
+    private fun taBehandlingAvMaskinellVent(behandlingPåMaskinellVentId: Long): Behandling {
+        val erBehandlingTilMaskinellVentOgsåPåVent = påVentService.finnAktivSettPåVentPåBehandling(behandlingPåMaskinellVentId) != null
+
+        val status =
+            if (erBehandlingTilMaskinellVentOgsåPåVent) {
+                BehandlingStatus.SATT_PÅ_VENT
+            } else {
+                BehandlingStatus.UTREDES
+            }
+
+        return behandlingService.oppdaterStatusPåBehandling(behandlingPåMaskinellVentId, status)
     }
 
     companion object {

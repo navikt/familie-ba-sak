@@ -225,7 +225,7 @@ class RestHenleggBehandlingInfo(
 enum class HenleggÅrsak(val beskrivelse: String) {
     SØKNAD_TRUKKET("Søknad trukket"),
     FEILAKTIG_OPPRETTET("Behandling feilaktig opprettet"),
-    FØDSELSHENDELSE_UGYLDIG_UTFALL("Behandlingen er automatisk henlagt"),
+    AUTOMATISK_HENLAGT("Behandlingen er automatisk henlagt"),
     TEKNISK_VEDLIKEHOLD("Teknisk vedlikehold"),
     ;
 
@@ -233,7 +233,7 @@ enum class HenleggÅrsak(val beskrivelse: String) {
         when (this) {
             FEILAKTIG_OPPRETTET -> Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
             SØKNAD_TRUKKET -> Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
-            FØDSELSHENDELSE_UGYLDIG_UTFALL -> Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+            AUTOMATISK_HENLAGT -> Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
             TEKNISK_VEDLIKEHOLD -> Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
         }
 }

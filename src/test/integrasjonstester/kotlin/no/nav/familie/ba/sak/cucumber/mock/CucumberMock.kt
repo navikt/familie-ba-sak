@@ -51,6 +51,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -105,6 +106,8 @@ class CucumberMock(
     val tilbakekrevingService = mockTilbakekrevingService()
     val taskRepository = MockTasker().mockTaskRepositoryWrapper(this)
     val unleashNextMedContextService = mockUnleashNextMedContextService()
+    val mockPåVentService = mockk<SettPåVentService>()
+    val opprettTaskService = mockk<OpprettTaskService>()
 
     val behandlingstemaService =
         BehandlingstemaService(
@@ -446,6 +449,9 @@ class CucumberMock(
             oppgaveService = oppgaveService,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
             localDateProvider = mockedDateProvider,
+            påVentService = mockPåVentService,
+            opprettTaskService = opprettTaskService,
+            stegService = stegService,
         )
     val iverksettMotOppdragTask = IverksettMotOppdragTask(stegService, behandlingHentOgPersisterService, personidentService, taskRepository)
     val ferdigstillBehandlingTask = FerdigstillBehandlingTask(stegService = stegService, behandlingHentOgPersisterService = behandlingHentOgPersisterService)

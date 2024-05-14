@@ -241,13 +241,13 @@ class AutovedtakFødselshendelseService(
             behandling = behandling,
             henleggBehandlingInfo =
                 RestHenleggBehandlingInfo(
-                    årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
+                    årsak = HenleggÅrsak.AUTOMATISK_HENLAGT,
                     begrunnelse = begrunnelseForManuellOppgave,
                 ),
         )
 
         oppgaveService.opprettOppgaveForManuellBehandling(
-            behandling = behandling,
+            behandlingId = behandling.id,
             begrunnelse = "Fødselshendelse: $begrunnelseForManuellOppgave",
             manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
         )
