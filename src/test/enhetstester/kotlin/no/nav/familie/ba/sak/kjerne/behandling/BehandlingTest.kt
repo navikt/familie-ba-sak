@@ -23,16 +23,6 @@ class BehandlingTest {
     }
 
     @Test
-    fun `validerBehandling kaster feil hvis behandlingType er teknisk opphør`() {
-        val behandling =
-            lagBehandling(
-                behandlingType = BehandlingType.TEKNISK_OPPHØR,
-                årsak = BehandlingÅrsak.TEKNISK_OPPHØR,
-            )
-        assertThrows<RuntimeException> { behandling.validerBehandlingstype() }
-    }
-
-    @Test
     fun `validerBehandling kaster feil hvis man prøver å opprette revurdering uten andre vedtatte behandlinger`() {
         val behandling =
             lagBehandling(
@@ -58,36 +48,6 @@ class BehandlingTest {
                     ),
             )
         }
-    }
-
-    @Test
-    fun `erRentTekniskOpphør kastet feil hvis behandlingType og behandlingÅrsak ikke samsvarer ved teknisk opphør`() {
-        val behandling =
-            lagBehandling(
-                behandlingType = BehandlingType.TEKNISK_OPPHØR,
-                årsak = BehandlingÅrsak.SØKNAD,
-            )
-        assertThrows<RuntimeException> { behandling.erTekniskOpphør() }
-    }
-
-    @Test
-    fun `erRentTekniskOpphør gir true når teknisk opphør`() {
-        val behandling =
-            lagBehandling(
-                behandlingType = BehandlingType.TEKNISK_OPPHØR,
-                årsak = BehandlingÅrsak.TEKNISK_OPPHØR,
-            )
-        assertTrue(behandling.erTekniskOpphør())
-    }
-
-    @Test
-    fun `erRentTekniskOpphør gir false når ikke teknisk opphør`() {
-        val behandling =
-            lagBehandling(
-                behandlingType = BehandlingType.REVURDERING,
-                årsak = BehandlingÅrsak.SØKNAD,
-            )
-        assertFalse(behandling.erTekniskOpphør())
     }
 
     @Test
