@@ -82,7 +82,9 @@ funksjonsbrytere:
       enabled: true
 
 familie:
-  tellAPIEndepunkterIBruk: true
+  tellAPIEndepunkterIBruk:
+    enabled: true
+    ekskluder: /internal, /api/task, /api/forvalter, /api/skatt, /api/satsendring, /api/logg, /api/behandlinger, /api/konsistensavstemming, /api/klage, /api/feature, /api/bisys, /v3, /swagger-ui.html
 
 management:
   endpoint:
