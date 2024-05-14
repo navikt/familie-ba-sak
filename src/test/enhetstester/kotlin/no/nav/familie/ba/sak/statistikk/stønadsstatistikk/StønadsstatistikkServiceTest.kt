@@ -201,7 +201,6 @@ internal class StønadsstatistikkServiceTest(
     fun `Skal gi feil hvis det kommer en ny BehandlingÅrsak som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
         val behandlingsÅrsakIBASak =
             enumValues<BehandlingÅrsak>()
-                .filter { it != BehandlingÅrsak.TEKNISK_OPPHØR } // IKke i bruk lenger
                 .map { it.name }
         val behandlingsÅrsakFraEksternKontrakt =
             ikkeAvvikleteEnumverdier<BehandlingÅrsakV2>()

@@ -232,8 +232,6 @@ data class Behandling(
 
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
-    fun erTekniskBehandling() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR || erTekniskEndring()
-
     fun erKorrigereVedtak() = opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV
 
     fun kanLeggeTilOgFjerneUtvidetVilkår() =
@@ -323,7 +321,6 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     DØDSFALL_BRUKER("Dødsfall bruker"),
     NYE_OPPLYSNINGER("Nye opplysninger"),
     KLAGE("Klage"),
-    TEKNISK_OPPHØR("Teknisk opphør"), // Ikke lenger i bruk. Bruk heller teknisk endring
     TEKNISK_ENDRING("Teknisk endring"), // Brukes i tilfeller ved systemfeil og vi ønsker å iverksette mot OS på nytt
     KORREKSJON_VEDTAKSBREV("Korrigere vedtak med egen brevmal"),
     OMREGNING_6ÅR("Omregning 6 år"),

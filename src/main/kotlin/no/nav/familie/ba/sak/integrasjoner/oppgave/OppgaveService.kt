@@ -392,7 +392,7 @@ class OppgaveService(
         if (lagVedtakOppgaver.isEmpty() &&
             !behandling.skalBehandlesAutomatisk &&
             !behandling.erMigrering() &&
-            !behandling.erTekniskBehandling()
+            !behandling.erTekniskEndring()
         ) {
             throw Feil("Fant ingen oppgaver å avslutte ved sending til godkjenner på $behandling")
         }
