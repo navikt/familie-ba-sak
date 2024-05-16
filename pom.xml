@@ -24,7 +24,7 @@
         <prosessering.version>2.20240426120029_490d299</prosessering.version>
         <felles.version>3.20240514144635_7943d92</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20240513102917_e8e4e38</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20240515103524_00490ae</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20240426154435_ca351af</utbetalingsgenerator.version>
@@ -35,7 +35,7 @@
         <token-validation-spring.version>4.1.4</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.5.0</springdoc.version>
-        <sentry.version>7.8.0</sentry.version>
+        <sentry.version>7.9.0</sentry.version>
         <kotlinx.version>1.8.1</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -45,7 +45,7 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.19.7</testcontainers.postgresql.version>
+        <testcontainers.postgresql.version>1.19.8</testcontainers.postgresql.version>
         <unleash.version>9.2.2</unleash.version>
         <maven.model.version>3.9.6</maven.model.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
@@ -73,7 +73,7 @@
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>2.2.21</version>
+                <version>2.2.22</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
