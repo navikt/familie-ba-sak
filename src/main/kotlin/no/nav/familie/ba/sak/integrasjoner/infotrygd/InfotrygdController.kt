@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.PERSONIDENT_IKKE_GYLDIG_FEILMELDING
 import no.nav.familie.ba.sak.common.PERSONIDENT_REGEX
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
-import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -39,30 +38,6 @@ class InfotrygdController(
 
         return ResponseEntity.ok(Ressurs.success(infotrygdsaker))
     }
-
-    @PostMapping(path = ["/hent-infotrygdstonader-for-soker"])
-    fun hentInfotrygdstønaderForSøker(
-        @Valid
-        @RequestBody
-        personIdent: Personident,
-    ): ResponseEntity<Ressurs<RestInfotrygdstønader>> {
-        val aktør = personidentService.hentAktør(personIdent.ident)
-        val infotrygdstønader =
-            infotrygdService.hentMaskertRestInfotrygdstønaderVedManglendeTilgang(aktør)
-                ?: RestInfotrygdstønader(infotrygdService.hentInfotrygdstønaderForSøker(personIdent.ident).bruker)
-
-        return ResponseEntity.ok(Ressurs.success(infotrygdstønader))
-    }
-
-    @PostMapping(path = ["/har-lopende-sak"])
-    fun harLøpendeSak(
-        @Valid
-        @RequestBody
-        personIdent: Personident,
-    ): ResponseEntity<Ressurs<RestLøpendeSak>> {
-        val harLøpendeSak = infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(listOf(personIdent.ident))
-        return ResponseEntity.ok(Ressurs.success(RestLøpendeSak(harLøpendeSak)))
-    }
 }
 
 class Personident(
@@ -77,9 +52,6 @@ class RestInfotrygdsaker(
 )
 
 class RestInfotrygdstønader(
-    val stønader: List<Stønad> = emptyList(),
     val adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING? = null,
     val harTilgang: Boolean = true,
 )
-
-class RestLøpendeSak(val harLøpendeSak: Boolean)
