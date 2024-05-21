@@ -40,12 +40,12 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
                         oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje =
                             it.value
                                 .regelverkResultatTidslinje
-                                .map { it?.kombinertResultat?.resultat }
+                                .map { it?.resultat }
                                 .beskjærEtter(erUnder18årTidslinje)
                                 .tilRestTidslinje(),
                         regelverkTidslinje =
                             it.value.regelverkResultatTidslinje
-                                .map { it?.kombinertResultat?.regelverk }
+                                .map { it?.regelverk }
                                 .beskjærEtter(erUnder18årTidslinje)
                                 .tilRestTidslinje(),
                     )
