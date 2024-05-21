@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak
 
-import no.nav.familie.ba.sak.common.RessursUtils.forbidden
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOpprettSammensattKontrollsak
@@ -31,7 +31,8 @@ class SammensattKontrollsakController(
     val utvidetBehandlingService: UtvidetBehandlingService,
     val unleashService: UnleashNextMedContextService,
 ) {
-    private final val ikkeTilgangFeilmelding = "Du har ikke tilgang til å opprette og endre fritekst i sammensatte kontrollsaker. Dette krever spesialtilgang."
+    private final val ikkeTilgangFeilmelding =
+        "Du har ikke tilgang til å opprette og endre sammensatte kontrollsaker. Dette krever spesialtilgang."
 
     @PostMapping(
         produces = [MediaType.APPLICATION_JSON_VALUE],
@@ -41,7 +42,7 @@ class SammensattKontrollsakController(
         @RequestBody restOpprettSammensattKontrollsak: RestOpprettSammensattKontrollsak,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
-            return forbidden(ikkeTilgangFeilmelding)
+            throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 
         tilgangService.verifiserHarTilgangTilHandling(
@@ -63,7 +64,7 @@ class SammensattKontrollsakController(
         @RequestBody restSammensattKontrollsak: RestSammensattKontrollsak,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
-            return forbidden(ikkeTilgangFeilmelding)
+            throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 
         tilgangService.verifiserHarTilgangTilHandling(
@@ -85,7 +86,7 @@ class SammensattKontrollsakController(
         @RequestBody restSammensattKontrollsak: RestSammensattKontrollsak,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
-            return forbidden(ikkeTilgangFeilmelding)
+            throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 
         tilgangService.verifiserHarTilgangTilHandling(
