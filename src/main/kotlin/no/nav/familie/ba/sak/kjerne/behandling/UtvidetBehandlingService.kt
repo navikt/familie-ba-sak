@@ -36,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaService
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsService
+import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
@@ -64,6 +65,7 @@ class UtvidetBehandlingService(
     private val feilutbetaltValutaService: FeilutbetaltValutaService,
     private val brevmottakerService: BrevmottakerService,
     private val refusjonEøsService: RefusjonEøsService,
+    private val sammensattKontrollsakService: SammensattKontrollsakService,
     private val vurderingsstrategiForValutakurserRepository: VurderingsstrategiForValutakurserRepository,
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
@@ -102,6 +104,8 @@ class UtvidetBehandlingService(
         val refusjonEøs = refusjonEøsService.hentRefusjonEøsPerioder(behandlingId)
 
         val brevmottakere = brevmottakerService.hentRestBrevmottakere(behandlingId)
+
+        val sammensattKontrollsakFritekst = sammensattKontrollsakService.hentSammensattKontrollsak(behandlingId)
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
@@ -152,6 +156,7 @@ class UtvidetBehandlingService(
             feilutbetaltValuta = feilutbetaltValuta,
             brevmottakere = brevmottakere,
             refusjonEøs = refusjonEøs,
+            sammensattKontrollsak = sammensattKontrollsakFritekst,
             vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)?.vurderingsstrategiForValutakurser,
         )
     }
