@@ -59,7 +59,7 @@ class BeslutteVedtak(
                 melding = "Årsak ${BehandlingÅrsak.KORREKSJON_VEDTAKSBREV.visningsnavn} og toggle ${FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV} false",
                 frontendFeilmelding = "Du har ikke tilgang til å beslutte for denne behandlingen. Ta kontakt med teamet dersom dette ikke stemmer.",
             )
-        } else if (behandling.erTekniskBehandling() &&
+        } else if (behandling.erTekniskEndring() &&
             !unleashService.isEnabled(
                 FeatureToggleConfig.TEKNISK_ENDRING,
                 behandling.id,

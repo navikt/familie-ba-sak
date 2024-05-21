@@ -201,7 +201,6 @@ internal class StønadsstatistikkServiceTest(
     fun `Skal gi feil hvis det kommer en ny BehandlingÅrsak som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
         val behandlingsÅrsakIBASak =
             enumValues<BehandlingÅrsak>()
-                .filter { it != BehandlingÅrsak.TEKNISK_OPPHØR } // IKke i bruk lenger
                 .map { it.name }
         val behandlingsÅrsakFraEksternKontrakt =
             ikkeAvvikleteEnumverdier<BehandlingÅrsakV2>()
@@ -284,7 +283,7 @@ internal class StønadsstatistikkServiceTest(
     fun `Skal gi feil hvis det kommer en ny BehandlingType som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
         val behandlingsTypeIBasak =
             enumValues<BehandlingType>().map { it.name }
-                .filter { it != BehandlingType.TEKNISK_OPPHØR.name } // TEKNISK_OPPHØR er ikke i bruk
+
         val behandlingsTypeFraStønadskontrakt = ikkeAvvikleteEnumverdier<BehandlingTypeV2>()
 
         assertThat(behandlingsTypeIBasak)

@@ -17,7 +17,6 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -98,34 +97,7 @@ data class Behandling(
             "steg=$steg)"
     }
 
-    // Skal kun brukes på gamle behandlinger
-    fun erTekniskOpphør(): Boolean {
-        return if (type == BehandlingType.TEKNISK_OPPHØR ||
-            opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR
-        ) {
-            if (type == BehandlingType.TEKNISK_OPPHØR &&
-                opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR
-            ) {
-                true
-            } else {
-                throw Feil(
-                    "Behandling er teknisk opphør, men årsak $opprettetÅrsak " +
-                        "og type $type samsvarer ikke.",
-                )
-            }
-        } else {
-            false
-        }
-    }
-
     fun validerBehandlingstype(sisteBehandlingSomErVedtatt: Behandling? = null) {
-        if (type == BehandlingType.TEKNISK_OPPHØR) {
-            throw FunksjonellFeil(
-                melding = "Kan ikke lage teknisk opphør behandling.",
-                frontendFeilmelding = "Kan ikke lage teknisk opphør behandling, bruk heller teknisk endring.",
-            )
-        }
-
         if (type == BehandlingType.TEKNISK_ENDRING ||
             opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
         ) {
@@ -260,8 +232,6 @@ data class Behandling(
 
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
-    fun erTekniskBehandling() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR || erTekniskEndring()
-
     fun erKorrigereVedtak() = opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV
 
     fun kanLeggeTilOgFjerneUtvidetVilkår() =
@@ -351,7 +321,6 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     DØDSFALL_BRUKER("Dødsfall bruker"),
     NYE_OPPLYSNINGER("Nye opplysninger"),
     KLAGE("Klage"),
-    TEKNISK_OPPHØR("Teknisk opphør"), // Ikke lenger i bruk. Bruk heller teknisk endring
     TEKNISK_ENDRING("Teknisk endring"), // Brukes i tilfeller ved systemfeil og vi ønsker å iverksette mot OS på nytt
     KORREKSJON_VEDTAKSBREV("Korrigere vedtak med egen brevmal"),
     OMREGNING_6ÅR("Omregning 6 år"),
@@ -388,7 +357,6 @@ enum class BehandlingType(val visningsnavn: String) {
     REVURDERING("Revurdering"),
     MIGRERING_FRA_INFOTRYGD("Migrering fra infotrygd"),
     MIGRERING_FRA_INFOTRYGD_OPPHØRT("Opphør migrering fra infotrygd"),
-    TEKNISK_OPPHØR("Teknisk opphør"), // Ikke lenger i bruk. Bruk heller teknisk endring
     TEKNISK_ENDRING("Teknisk endring"),
 }
 

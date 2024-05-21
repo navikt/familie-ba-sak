@@ -207,7 +207,6 @@ class BrevmalService(
 
             BehandlingType.MIGRERING_FRA_INFOTRYGD,
             BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
-            BehandlingType.TEKNISK_OPPHØR,
             BehandlingType.TEKNISK_ENDRING,
             -> throw FunksjonellFeil(
                 melding = feilmelidingBehandlingType,
