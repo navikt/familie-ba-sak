@@ -64,7 +64,7 @@ class RestFagsakTest(
     @Test
     fun `Skal sjekke at gjeldende utbetalingsperioder kommer med i restfagsak`() {
         val søkerFnr = randomFnr()
-        val barnFnr = leggTilPersonInfo(randomBarnFnr())
+        val barnFnr = leggTilPersonInfo(randomBarnFnr(10))
 
         val førstegangsbehandling =
             kjørStegprosessForFGB(
