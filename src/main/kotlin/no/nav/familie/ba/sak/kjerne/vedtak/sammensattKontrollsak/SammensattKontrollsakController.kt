@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak
 
+import no.nav.familie.ba.sak.common.RessursUtils.forbidden
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOpprettSammensattKontrollsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSammensattKontrollsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
@@ -22,7 +25,14 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/sammensatt-kontrollsak")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class SammensattKontrollsakController(val tilgangService: TilgangService, val sammensattKontrollsakService: SammensattKontrollsakService, val utvidetBehandlingService: UtvidetBehandlingService) {
+class SammensattKontrollsakController(
+    val tilgangService: TilgangService,
+    val sammensattKontrollsakService: SammensattKontrollsakService,
+    val utvidetBehandlingService: UtvidetBehandlingService,
+    val unleashService: UnleashNextMedContextService,
+) {
+    private final val ikkeTilgangFeilmelding = "Du har ikke tilgang til å opprette og endre fritekst i sammensatte kontrollsaker. Dette krever spesialtilgang."
+
     @PostMapping(
         produces = [MediaType.APPLICATION_JSON_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
@@ -30,6 +40,10 @@ class SammensattKontrollsakController(val tilgangService: TilgangService, val sa
     fun opprettSammensattKontrollsak(
         @RequestBody restOpprettSammensattKontrollsak: RestOpprettSammensattKontrollsak,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
+            return forbidden(ikkeTilgangFeilmelding)
+        }
+
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Opprett SammensattKontrollsak",
@@ -48,6 +62,10 @@ class SammensattKontrollsakController(val tilgangService: TilgangService, val sa
     fun oppdaterSammensattKontrollsak(
         @RequestBody restSammensattKontrollsak: RestSammensattKontrollsak,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
+            return forbidden(ikkeTilgangFeilmelding)
+        }
+
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdater SammensattKontrollsak",
@@ -66,6 +84,10 @@ class SammensattKontrollsakController(val tilgangService: TilgangService, val sa
     fun slettSammensattKontrollsak(
         @RequestBody restSammensattKontrollsak: RestSammensattKontrollsak,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
+            return forbidden(ikkeTilgangFeilmelding)
+        }
+
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Slett SammensattKontrollsak",

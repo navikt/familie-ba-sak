@@ -14,6 +14,7 @@ class FeatureToggleConfig {
         const val HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD = "familie-ba-sak.hent-identer-til-psys-fra-infotrygd"
         const val KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ENKELT_SAK = "familie-ba-sak.kan-kjore-autmatisk-valutajustering-behandling-for-enkelt-sak"
         const val KAN_OVERSTYRE_AUTOMATISKE_VALUTAKURSER = "familie-ba-sak.kan-overstyre-automatiske-valutakurser"
+        const val KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER = "familie-ba-sak.kan-opprette-og-endre-sammensatte-kontrollsaker"
 
         // satsendring
         // Oppretter satsendring-tasker for de som ikke har fått ny task
