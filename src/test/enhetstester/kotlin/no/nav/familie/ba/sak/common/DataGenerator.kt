@@ -118,8 +118,9 @@ import kotlin.random.Random
 val fødselsnummerGenerator = FoedselsnummerGenerator()
 
 fun randomFnr(foedselsdato: LocalDate? = null): String {
-    val foedselsdato = foedselsdato ?: (20..70).random().årSiden.minusDays((1..364).random().toLong())
-    return fødselsnummerGenerator.foedselsnummer(foedselsdato).asString
+    return fødselsnummerGenerator.foedselsnummer(
+        foedselsdato ?: (20..70).random().årSiden.minusDays((1..364).random().toLong()),
+    ).asString
 }
 
 fun randomBarnFnr(alder: Int? = null): String =

@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.logger
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -74,8 +73,6 @@ class RestFagsakTest(
 
         val restfagsak = fagsakService.hentRestFagsak(fagsakId = førstegangsbehandling.fagsak.id)
 
-        logger.info("gjeldendeUtbetalingsperioder ${restfagsak.data?.gjeldendeUtbetalingsperioder}")
-        logger.info("gjeldendeUtbetalingsperioder ${restfagsak.data}")
         assertThat(restfagsak.data?.gjeldendeUtbetalingsperioder).isNotEmpty
     }
 }
