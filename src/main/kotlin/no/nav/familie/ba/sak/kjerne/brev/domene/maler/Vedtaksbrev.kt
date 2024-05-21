@@ -9,8 +9,9 @@ interface Vedtaksbrev : Brev {
 }
 
 interface VedtaksbrevData : BrevData {
-    val perioder: List<BrevPeriode>
+    val perioder: List<BrevPeriode>?
     val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?
+    val sammensattKontrollsakFritekst: String?
 }
 
 enum class BrevPeriodeType(val apiNavn: String) {
@@ -33,4 +34,5 @@ data class VedtakFellesfelter(
     val organisasjonsnummer: String? = null,
     val gjelder: String? = null,
     val korrigertVedtakData: KorrigertVedtakData? = null,
+    val sammensattKontrollsakFritekst: String? = null,
 )

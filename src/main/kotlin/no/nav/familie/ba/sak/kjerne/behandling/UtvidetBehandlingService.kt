@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaService
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsService
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsakService
+import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.tilRestSammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
@@ -105,7 +106,7 @@ class UtvidetBehandlingService(
 
         val brevmottakere = brevmottakerService.hentRestBrevmottakere(behandlingId)
 
-        val sammensattKontrollsakFritekst = sammensattKontrollsakService.hentSammensattKontrollsak(behandlingId)
+        val sammensattKontrollsakFritekst = sammensattKontrollsakService.finnSammensattKontrollsak(behandlingId)?.tilRestSammensattKontrollsak()
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,

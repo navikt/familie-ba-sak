@@ -11,8 +11,8 @@ class SammensattKontrollsakService(
     private val sammensattKontrollsakRepository: SammensattKontrollsakRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
-    fun hentSammensattKontrollsak(behandlingId: Long): RestSammensattKontrollsak? {
-        return sammensattKontrollsakRepository.finnSammensattKontrollsakForBehandling(behandlingId = behandlingId)?.tilRestSammensattKontrollsak()
+    fun finnSammensattKontrollsak(behandlingId: Long): SammensattKontrollsak? {
+        return sammensattKontrollsakRepository.finnSammensattKontrollsakForBehandling(behandlingId = behandlingId)
     }
 
     fun opprettSammensattKontrollsak(

@@ -49,6 +49,7 @@ data class OpphørMedEndring(
                         ),
                     perioder = vedtakFellesfelter.perioder,
                     utbetalingerPerMndEøs = vedtakFellesfelter.utbetalingerPerMndEøs,
+                    sammensattKontrollsakFritekst = vedtakFellesfelter.sammensattKontrollsakFritekst,
                 ),
         )
 }
@@ -56,13 +57,14 @@ data class OpphørMedEndring(
 data class OpphørMedEndringData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokument,
-    override val perioder: List<BrevPeriode>,
+    override val perioder: List<BrevPeriode>?,
     override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
+    override val sammensattKontrollsakFritekst: String?,
 ) : VedtaksbrevData {
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
         val feilutbetaling: Boolean,
-        val hjemmeltekst: Hjemmeltekst,
+        val hjemmeltekst: Hjemmeltekst?,
         val etterbetaling: Etterbetaling?,
         val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
         val korrigertVedtak: KorrigertVedtakData?,

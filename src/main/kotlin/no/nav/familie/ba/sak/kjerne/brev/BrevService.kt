@@ -62,6 +62,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -91,6 +92,7 @@ class BrevService(
     private val kompetanseRepository: KompetanseRepository,
     private val valutakursRepository: ValutakursRepository,
     private val unleashService: UnleashNextMedContextService,
+    private val sammensattKontrollsakService: SammensattKontrollsakService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -381,6 +383,8 @@ class BrevService(
 
         val utbetalingerPerMndEøs = hentUtbetalingerPerMndEøs(vedtak)
 
+        val sammensattKontrollsakFritekst = sammensattKontrollsakService.finnSammensattKontrollsak(behandlingId = vedtak.behandling.id)?.fritekst
+
         val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
         val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId)
 
@@ -409,6 +413,7 @@ class BrevService(
             gjelder = if (organisasjonsnummer != null) grunnlagOgSignaturData.grunnlag.søker.navn else null,
             korrigertVedtakData = korrigertVedtak?.let { KorrigertVedtakData(datoKorrigertVedtak = it.vedtaksdato.tilDagMånedÅr()) },
             utbetalingerPerMndEøs = utbetalingerPerMndEøs,
+            sammensattKontrollsakFritekst = sammensattKontrollsakFritekst,
         )
     }
 

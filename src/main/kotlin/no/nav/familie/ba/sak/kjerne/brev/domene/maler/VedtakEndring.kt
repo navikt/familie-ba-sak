@@ -60,6 +60,7 @@ data class VedtakEndring(
                         ),
                     perioder = vedtakFellesfelter.perioder,
                     utbetalingerPerMndEøs = vedtakFellesfelter.utbetalingerPerMndEøs,
+                    sammensattKontrollsakFritekst = vedtakFellesfelter.sammensattKontrollsakFritekst,
                 ),
         )
 }
@@ -67,14 +68,15 @@ data class VedtakEndring(
 data class EndringVedtakData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokument,
-    override val perioder: List<BrevPeriode>,
+    override val perioder: List<BrevPeriode>?,
     override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
+    override val sammensattKontrollsakFritekst: String?,
 ) : VedtaksbrevData {
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
         val etterbetaling: Etterbetaling?,
         val feilutbetaling: Boolean,
-        val hjemmeltekst: Hjemmeltekst,
+        val hjemmeltekst: Hjemmeltekst?,
         val klage: Boolean,
         val klageInstitusjon: Boolean,
         val etterbetalingInstitusjon: EtterbetalingInstitusjon?,

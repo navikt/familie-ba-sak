@@ -36,6 +36,7 @@ data class Autovedtak6og18årData(
     override val flettefelter: FlettefelterForDokumentImpl,
     override val perioder: List<BrevPeriode>,
     override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
+    override val sammensattKontrollsakFritekst: String? = null,
 ) : VedtaksbrevData {
     data class Delmaler(
         val hjemmeltekst: Hjemmeltekst,
