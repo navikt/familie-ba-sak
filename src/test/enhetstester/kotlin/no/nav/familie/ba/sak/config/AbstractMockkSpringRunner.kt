@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.CacheManager
 import org.springframework.context.ConfigurableApplicationContext
+import java.util.UUID
 
 abstract class AbstractMockkSpringRunner {
     /**
@@ -142,7 +143,7 @@ abstract class AbstractMockkSpringRunner {
             TaskRepositoryTestConfig.clearMockTaskService(mockOpprettTaskService)
         }
 
-        MDC.put("callId", this::class.java.simpleName)
+        MDC.put("callId", "${this::class.java.simpleName}-${UUID.randomUUID()}")
     }
 
     private fun clearCaches() {
