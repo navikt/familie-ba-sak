@@ -142,7 +142,7 @@ abstract class AbstractMockkSpringRunner {
             TaskRepositoryTestConfig.clearMockTaskService(mockOpprettTaskService)
         }
 
-        MDC.put("callId", "callId")
+        MDC.put("callId", this::class.java.simpleName)
     }
 
     private fun clearCaches() {
