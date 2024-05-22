@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
+import no.nav.familie.ba.sak.common.randomAktør
+import no.nav.familie.ba.sak.common.randomBarnFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -22,8 +24,11 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         TilkjentYtelse(behandling = behandling, endretDato = LocalDate.now(), opprettetDato = LocalDate.now())
     val beløp = BigDecimal(100)
 
-    val barn1 = tilfeldigPerson(personType = PersonType.BARN)
-    val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+    val barnAktør1 = randomAktør(randomBarnFnr(10))
+    val barnAktør2 = randomAktør(randomBarnFnr(14))
+
+    val barn1 = tilfeldigPerson(personType = PersonType.BARN, aktør = barnAktør1)
+    val barn2 = tilfeldigPerson(personType = PersonType.BARN, aktør = barnAktør2)
     val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
     @BeforeEach
@@ -103,7 +108,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         assertEquals(8, andelerTilkjentYtelserEtterEUAList.size)
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList[0],
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør1 }[0],
             barn1.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 1),
@@ -111,7 +116,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList[1],
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør1 }[1],
             barn1.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 4),
@@ -119,7 +124,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList[2],
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør1 }[2],
             barn1.aktør.aktivFødselsnummer(),
             beløp,
             YearMonth.of(2018, 10),
@@ -127,7 +132,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList[3],
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør2 }[0],
             barn2.aktør.aktivFødselsnummer(),
             beløp,
             YearMonth.of(2018, 2),
@@ -135,7 +140,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList[4],
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør2 }[1],
             barn2.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 4),
@@ -143,7 +148,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList[5],
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør2 }[2],
             barn2.aktør.aktivFødselsnummer(),
             beløp,
             YearMonth.of(2018, 6),
@@ -151,7 +156,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList[6],
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør2 }[3],
             barn2.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 7),
@@ -159,7 +164,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList[7],
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør2 }[4],
             barn2.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 11),
