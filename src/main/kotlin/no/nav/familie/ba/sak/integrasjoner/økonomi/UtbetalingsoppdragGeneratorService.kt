@@ -92,10 +92,13 @@ class UtbetalingsoppdragGeneratorService(
             ?.let { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandlingId = it.id) }
 
     private fun hentSisteAndelTilkjentYtelse(fagsak: Fagsak): Map<IdentOgType, AndelTilkjentYtelse> {
-        val utbetalingsoppdrag = andelTilkjentYtelseRepository.hentUtbetalingsoppdrag(fagsakId = fagsak.id)
-        logger.info("FOO $utbetalingsoppdrag")
-        return andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(fagsakId = fagsak.id)
-            .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
+        try {
+            return andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(fagsakId = fagsak.id)
+                .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
+        } catch (e: Exception) {
+            logger.info("FOO", e)
+            throw e
+        }
     }
 
     private fun beregnOmMigreringsDatoErEndret(
