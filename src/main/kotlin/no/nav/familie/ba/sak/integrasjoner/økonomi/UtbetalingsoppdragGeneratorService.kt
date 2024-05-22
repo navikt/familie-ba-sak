@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.førerTilOpphør
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.logger
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
@@ -90,9 +91,12 @@ class UtbetalingsoppdragGeneratorService(
         behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)
             ?.let { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandlingId = it.id) }
 
-    private fun hentSisteAndelTilkjentYtelse(fagsak: Fagsak) =
-        andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(fagsakId = fagsak.id)
+    private fun hentSisteAndelTilkjentYtelse(fagsak: Fagsak): Map<IdentOgType, AndelTilkjentYtelse> {
+        val utbetalingsoppdrag = andelTilkjentYtelseRepository.hentUtbetalingsoppdrag(fagsakId = fagsak.id)
+        logger.info("FOO $utbetalingsoppdrag")
+        return andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(fagsakId = fagsak.id)
             .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
+    }
 
     private fun beregnOmMigreringsDatoErEndret(
         behandling: Behandling,

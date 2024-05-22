@@ -107,4 +107,20 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
         nativeQuery = true,
     )
     fun hentSisteAndelPerIdentOgType(fagsakId: Long): List<AndelTilkjentYtelse>
+
+    @Query(
+        """        
+            SELECT
+             ty.utbetalingsoppdrag
+             FROM andel_tilkjent_ytelse aty
+              JOIN tilkjent_ytelse ty ON ty.id = aty.tilkjent_ytelse_id
+              JOIN Behandling b ON b.id = aty.fk_behandling_id
+             WHERE b.fk_fagsak_id = :fagsakId
+               AND ty.utbetalingsoppdrag IS NOT NULL
+               AND aty.periode_offset IS NOT NULL
+               AND b.status = 'AVSLUTTET'
+    """,
+        nativeQuery = true,
+    )
+    fun hentUtbetalingsoppdrag(fagsakId: Long): List<String>
 }
