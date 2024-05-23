@@ -1,31 +1,33 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 
-data class Førstegangsvedtak(
+data class VedtakEndringSammensattKontrollsak(
     override val mal: Brevmal,
-    override val data: FørstegangsvedtakData,
+    override val data: EndringVedtakSammensattKontrollsakData,
 ) : Vedtaksbrev {
     constructor(
-        mal: Brevmal = Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
-        vedtakFellesfelter: VedtakFellesfelter,
+        mal: Brevmal = Brevmal.VEDTAK_ENDRING,
+        vedtakFellesfelter: VedtakFellesfelterSammensattKontrollsak,
         etterbetaling: Etterbetaling? = null,
+        erFeilutbetalingPåBehandling: Boolean,
+        erKlage: Boolean,
         etterbetalingInstitusjon: EtterbetalingInstitusjon? = null,
-        informasjonOmAarligKontroll: Boolean = false,
+        informasjonOmAarligKontroll: Boolean,
+        feilutbetaltValuta: FeilutbetaltValuta? = null,
         refusjonEosAvklart: RefusjonEøsAvklart? = null,
         refusjonEosUavklart: RefusjonEøsUavklart? = null,
-        utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering? = null,
         duMåMeldeFraOmEndringer: Boolean = true,
         duMåMeldeFraOmEndringerEøsSelvstendigRett: Boolean = false,
         informasjonOmUtbetaling: Boolean = false,
+        utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering? = null,
     ) :
         this(
             mal = mal,
             data =
-                FørstegangsvedtakData(
+                EndringVedtakSammensattKontrollsakData(
                     delmalData =
-                        FørstegangsvedtakData.Delmaler(
+                        EndringVedtakSammensattKontrollsakData.Delmaler(
                             signaturVedtak =
                                 SignaturVedtak(
                                     enhet = vedtakFellesfelter.enhet,
@@ -33,10 +35,13 @@ data class Førstegangsvedtak(
                                     beslutter = vedtakFellesfelter.beslutter,
                                 ),
                             etterbetaling = etterbetaling,
-                            hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                            klage = erKlage,
+                            klageInstitusjon = erKlage,
+                            feilutbetaling = erFeilutbetalingPåBehandling,
                             etterbetalingInstitusjon = etterbetalingInstitusjon,
                             korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
                             informasjonOmAarligKontroll = informasjonOmAarligKontroll,
+                            forMyeUtbetaltBarnetrygd = feilutbetaltValuta,
                             refusjonEosAvklart = refusjonEosAvklart,
                             refusjonEosUavklart = refusjonEosUavklart,
                             duMaaMeldeFraOmEndringerEosSelvstendigRett = duMåMeldeFraOmEndringerEøsSelvstendigRett,
@@ -44,7 +49,6 @@ data class Førstegangsvedtak(
                             informasjonOmUtbetaling = informasjonOmUtbetaling,
                             utbetalingstabellAutomatiskValutajustering = utbetalingstabellAutomatiskValutajustering,
                         ),
-                    perioder = vedtakFellesfelter.perioder,
                     flettefelter =
                         FlettefelterForDokumentImpl(
                             gjelder = flettefelt(vedtakFellesfelter.gjelder),
@@ -53,28 +57,32 @@ data class Førstegangsvedtak(
                             organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
                         ),
                     utbetalingerPerMndEøs = vedtakFellesfelter.utbetalingerPerMndEøs,
+                    sammensattKontrollsakFritekst = vedtakFellesfelter.sammensattKontrollsakFritekst,
                 ),
         )
 }
 
-data class FørstegangsvedtakData(
+data class EndringVedtakSammensattKontrollsakData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokument,
-    override val perioder: List<BrevPeriode>,
-    override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?,
-) : VedtaksbrevStandardData {
+    override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
+    override val sammensattKontrollsakFritekst: String,
+) : VedtaksbrevSammensattKontrollsak {
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
         val etterbetaling: Etterbetaling?,
-        val hjemmeltekst: Hjemmeltekst,
+        val feilutbetaling: Boolean,
+        val klage: Boolean,
+        val klageInstitusjon: Boolean,
         val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
         val korrigertVedtak: KorrigertVedtakData?,
         val informasjonOmAarligKontroll: Boolean,
+        val forMyeUtbetaltBarnetrygd: FeilutbetaltValuta?,
         val refusjonEosAvklart: RefusjonEøsAvklart?,
         val refusjonEosUavklart: RefusjonEøsUavklart?,
-        val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
         val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
         val duMaaMeldeFraOmEndringer: Boolean,
         val informasjonOmUtbetaling: Boolean,
+        val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
     )
 }

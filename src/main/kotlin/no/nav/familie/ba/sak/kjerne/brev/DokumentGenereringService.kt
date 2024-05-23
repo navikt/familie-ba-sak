@@ -12,11 +12,11 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrev
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsakService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.lang.Exception
 
 @Service
 class DokumentGenereringService(
@@ -25,6 +25,7 @@ class DokumentGenereringService(
     private val brevKlient: BrevKlient,
     private val integrasjonClient: IntegrasjonClient,
     private val saksbehandlerContext: SaksbehandlerContext,
+    private val sammensattKontrollsakService: SammensattKontrollsakService,
     @Lazy private val testVerktøyService: TestVerktøyService,
 ) {
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
@@ -33,11 +34,14 @@ class DokumentGenereringService(
                 throw FunksjonellFeil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
             }
 
+            val sammensattKontrollsak = sammensattKontrollsakService.finnSammensattKontrollsak(vedtak.behandling.id)
+
             val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
             val vedtaksbrev =
-                when (vedtak.behandling.opprettetÅrsak) {
-                    BehandlingÅrsak.DØDSFALL_BRUKER -> brevService.hentDødsfallbrevData(vedtak)
-                    BehandlingÅrsak.KORREKSJON_VEDTAKSBREV -> brevService.hentKorreksjonbrevData(vedtak)
+                when {
+                    sammensattKontrollsak != null -> brevService.hentSammensattKontrollsakBrevdata(vedtak, sammensattKontrollsak)
+                    vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER -> brevService.hentDødsfallbrevData(vedtak)
+                    vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV -> brevService.hentKorreksjonbrevData(vedtak)
                     else -> brevService.hentVedtaksbrevData(vedtak)
                 }
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)

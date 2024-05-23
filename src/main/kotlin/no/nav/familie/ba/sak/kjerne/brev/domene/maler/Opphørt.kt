@@ -36,7 +36,6 @@ data class Opphørt(
                             gjelder = vedtakFellesfelter.gjelder,
                         ),
                     perioder = vedtakFellesfelter.perioder,
-                    sammensattKontrollsakFritekst = vedtakFellesfelter.sammensattKontrollsakFritekst,
                 ),
         )
 }
@@ -44,14 +43,13 @@ data class Opphørt(
 data class OpphørtData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokumentImpl,
-    override val perioder: List<BrevPeriode>?,
+    override val perioder: List<BrevPeriode>,
     override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
-    override val sammensattKontrollsakFritekst: String?,
-) : VedtaksbrevData {
+) : VedtaksbrevStandardData {
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
         val feilutbetaling: Boolean,
-        val hjemmeltekst: Hjemmeltekst?,
+        val hjemmeltekst: Hjemmeltekst,
         val korrigertVedtak: KorrigertVedtakData?,
     )
 }
