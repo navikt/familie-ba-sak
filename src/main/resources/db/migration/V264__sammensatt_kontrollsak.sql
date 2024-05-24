@@ -11,4 +11,5 @@ CREATE TABLE sammensatt_kontrollsak
 );
 
 CREATE SEQUENCE sammensatt_kontrollsak_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;
-CREATE INDEX sammensatt_kontrollsak_seq_fk_behandling_id_idx ON sammensatt_kontrollsak (fk_behandling_id);
+CREATE UNIQUE INDEX sammensatt_kontrollsak_seq_fk_behandling_id_idx ON sammensatt_kontrollsak (fk_behandling_id);
+
