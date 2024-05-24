@@ -98,14 +98,3 @@ fun RegelverkResultat?.kombinerMed(resultat: RegelverkResultat?) =
     }
 
 fun VilkårRegelverkResultat?.erOppfylt() = this?.resultat == Resultat.OPPFYLT
-
-data class KombinertRegelverkResultat(
-    val barnetsResultat: RegelverkResultat?,
-    val søkersResultat: RegelverkResultat?,
-) {
-    val kombinertResultat get() = barnetsResultat.kombinerMed(søkersResultat)
-
-    override fun toString(): String {
-        return kombinertResultat.toString()
-    }
-}

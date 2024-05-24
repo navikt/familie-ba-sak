@@ -32,7 +32,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -42,7 +41,6 @@ internal class KompetanseServiceTest {
     val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService = mockk()
     val endretUtbetalingAndelTidslinjeService: EndretUtbetalingAndelTidslinjeService = mockk()
     val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
-    val unleashService: UnleashService = mockk()
 
     val kompetanseService =
         KompetanseService(
@@ -54,7 +52,6 @@ internal class KompetanseServiceTest {
         TilpassKompetanserTilRegelverkService(
             vilkårsvurderingTidslinjeService = vilkårsvurderingTidslinjeService,
             endretUtbetalingAndelTidslinjeService = endretUtbetalingAndelTidslinjeService,
-            unleashNext = unleashService,
             kompetanseRepository = mockKompetanseRepository,
             endringsabonnenter = emptyList(),
         )
@@ -62,7 +59,6 @@ internal class KompetanseServiceTest {
     @BeforeEach
     fun init() {
         mockKompetanseRepository.deleteAll()
-        every { unleashService.isEnabled(any()) } returns true
     }
 
     @Test
