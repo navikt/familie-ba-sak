@@ -40,7 +40,6 @@ data class VedtakFellesfelter(
     val organisasjonsnummer: String? = null,
     val gjelder: String? = null,
     val korrigertVedtakData: KorrigertVedtakData? = null,
-    val sammensattKontrollsakFritekst: String? = null,
 )
 
 data class VedtakFellesfelterSammensattKontrollsak(

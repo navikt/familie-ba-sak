@@ -452,8 +452,6 @@ class BrevService(
 
         val utbetalingerPerMndEøs = hentUtbetalingerPerMndEøs(vedtak)
 
-        val sammensattKontrollsakFritekst = sammensattKontrollsakService.finnSammensattKontrollsak(behandlingId = vedtak.behandling.id)?.fritekst
-
         val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
         val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId)
 
@@ -482,7 +480,6 @@ class BrevService(
             gjelder = if (organisasjonsnummer != null) grunnlagOgSignaturData.grunnlag.søker.navn else null,
             korrigertVedtakData = korrigertVedtak?.let { KorrigertVedtakData(datoKorrigertVedtak = it.vedtaksdato.tilDagMånedÅr()) },
             utbetalingerPerMndEøs = utbetalingerPerMndEøs,
-            sammensattKontrollsakFritekst = sammensattKontrollsakFritekst,
         )
     }
 
