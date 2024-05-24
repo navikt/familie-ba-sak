@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
@@ -963,6 +964,23 @@ internal class BrevUtilsTest {
             listOf(
                 lagValutakurs(fom = LocalDate.now().minusMonths(4).toYearMonth(), tom = LocalDate.now().minusMonths(4).toYearMonth(), barnAktører = setOf(barn), kurs = BigDecimal.valueOf(1)),
                 lagValutakurs(fom = LocalDate.now().minusMonths(3).toYearMonth(), tom = LocalDate.now().minusMonths(3).toYearMonth(), barnAktører = setOf(barn), kurs = BigDecimal.valueOf(1.2)),
+            )
+
+        assertThat(skalHenteUtbetalingerEøs(endringstidspunkt = endringstidspunkt, valutakurser = valutakurser)).isFalse
+    }
+
+    @Test
+    fun `skalHenteUtbetalingerEøs - skal returnere false uavhengig av valutakurs dersom endringstidspunktet er satt til tidenes ende`() {
+        val endringstidspunkt = TIDENES_ENDE
+        val barn = randomAktør()
+
+        val valutakurser =
+            listOf(
+                lagValutakurs(fom = LocalDate.now().minusMonths(4).toYearMonth(), tom = LocalDate.now().minusMonths(4).toYearMonth(), barnAktører = setOf(barn), kurs = BigDecimal.valueOf(1)),
+                lagValutakurs(fom = LocalDate.now().minusMonths(3).toYearMonth(), tom = LocalDate.now().minusMonths(3).toYearMonth(), barnAktører = setOf(barn), kurs = BigDecimal.valueOf(1.2)),
+                lagValutakurs(fom = LocalDate.now().minusMonths(2).toYearMonth(), tom = LocalDate.now().minusMonths(2).toYearMonth(), barnAktører = setOf(barn), kurs = BigDecimal.valueOf(1.1)),
+                lagValutakurs(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().minusMonths(1).toYearMonth(), barnAktører = setOf(barn), kurs = BigDecimal.valueOf(1.2)),
+                lagValutakurs(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), barnAktører = setOf(barn), kurs = BigDecimal.valueOf(1.3)),
             )
 
         assertThat(skalHenteUtbetalingerEøs(endringstidspunkt = endringstidspunkt, valutakurser = valutakurser)).isFalse

@@ -117,24 +117,4 @@ class EndretUtbetalingAndelController(
             ),
         )
     }
-
-    @PostMapping(path = ["/{behandlingId}/tilbakestill"])
-    fun tilbakestillBehandlingTilBehandlingsresultat(
-        @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<String>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Opprett endretutbetalingandel",
-        )
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        validerBehandlingKanRedigeres(behandling)
-
-        tilbakestillBehandlingTilBehandlingsresultatService
-            .tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
-
-        return ResponseEntity.ok(
-            Ressurs.success("OK"),
-        )
-    }
 }

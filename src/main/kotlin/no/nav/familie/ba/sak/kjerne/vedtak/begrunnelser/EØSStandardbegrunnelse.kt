@@ -87,6 +87,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetTilleggstekstNullutbetaling"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_TILLEGGSTEKST_UTBETALINGSTABELL {
+        override val sanityApiNavn = "innvilgetTilleggstekstUtbetalingstabell"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     INNVILGET_SEKUNDÆRLAND_UK_STANDARD {
         override val sanityApiNavn = "innvilgetSekundaerlandUkStandard"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
@@ -555,6 +559,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "fortsattInnvilgetTilleggsteksterSekundaerIkkeFaattSvarPaaSed"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
     },
+    FORTSATT_INNVILGET_TILLEGGSTEKST_UTBETALINGSTABELL {
+        override val sanityApiNavn = "fortsattInnvilgetTilleggstekstUtbetalingstabell"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
     FORTSATT_INNVILGET_TILLEGSTEKST_UK_FULL_UTBETALING {
         override val sanityApiNavn = "fortsattInnvilgetTilleggstekstUkFullUtbetaling"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
@@ -609,6 +617,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     },
     REDUKSJON_TILLEGGSTEKST_NULLUTBETALING {
         override val sanityApiNavn = "reduksjonTilleggstekstNullutbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_TILLEGGSTEKST_UTBETALINGSTABELL {
+        override val sanityApiNavn = "reduksjonTilleggstekstUtbetalingstabell"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
     },
     REDUKSJON_UK_MIDLERTIDIG_DIFFERANSEUTBETALING {

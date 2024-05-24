@@ -40,16 +40,6 @@ class InfotrygdService(
         return infotrygdBarnetrygdClient.hentStønader(søkerIdenter, emptyList(), historikk)
     }
 
-    fun hentMaskertRestInfotrygdstønaderVedManglendeTilgang(aktør: Aktør): RestInfotrygdstønader? {
-        return familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
-            ?.let {
-                RestInfotrygdstønader(
-                    adressebeskyttelsegradering = it.adressebeskyttelseGradering,
-                    harTilgang = false,
-                )
-            }
-    }
-
     fun harÅpenSakIInfotrygd(
         søkerIdenter: List<String>,
         barnasIdenter: List<String> = emptyList(),
