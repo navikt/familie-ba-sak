@@ -302,7 +302,7 @@ fun skalHenteUtbetalingerEøs(
     endringstidspunkt: LocalDate,
     valutakurser: List<Valutakurs>,
 ): Boolean {
-    // Hvis endringstidspunktet er satt til tidenes ende så ønsker vi ikke å hente eøs utbetalinger
+    // Hvis endringstidspunktet er satt til tidenes ende så returner vi bare false da det ikke finnes valutakurser etter det tidspunktet.
     if (endringstidspunkt == TIDENES_ENDE) return false
 
     val valutakurserEtterEndringtidspunktet =
