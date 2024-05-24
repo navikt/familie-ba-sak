@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.sisteDagIMåned
@@ -301,9 +302,13 @@ fun skalHenteUtbetalingerEøs(
     endringstidspunkt: LocalDate,
     valutakurser: List<Valutakurs>,
 ): Boolean {
+    // Hvis endringstidspunktet er satt til tidenes ende så ønsker vi ikke å hente eøs utbetalinger
+    if (endringstidspunkt == TIDENES_ENDE) return false
+
     val valutakurserEtterEndringtidspunktet =
         valutakurser.tilSeparateTidslinjerForBarna()
             .mapValues { (_, valutakursTidslinjeForBarn) -> valutakursTidslinjeForBarn.beskjærFraOgMed(endringstidspunkt.tilMånedTidspunkt()) }
+
     return valutakurserEtterEndringtidspunktet.any { it.value.erIkkeTom() }
 }
 
