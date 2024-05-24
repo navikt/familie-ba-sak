@@ -45,8 +45,8 @@ data class OpphørtSammensattKontrollsakData(
     override val sammensattKontrollsakFritekst: String,
 ) : VedtaksbrevSammensattKontrollsak {
     data class Delmaler(
-        val signaturVedtak: SignaturVedtak,
-        val feilutbetaling: Boolean,
-        val korrigertVedtak: KorrigertVedtakData?,
-    )
+        override val signaturVedtak: SignaturVedtak,
+        override val feilutbetaling: Boolean,
+        override val korrigertVedtak: KorrigertVedtakData?,
+    ) : OpphørtDelmaler
 }

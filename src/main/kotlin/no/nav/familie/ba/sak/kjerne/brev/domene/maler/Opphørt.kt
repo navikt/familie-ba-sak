@@ -47,9 +47,15 @@ data class OpphørtData(
     override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
 ) : VedtaksbrevStandardData {
     data class Delmaler(
-        val signaturVedtak: SignaturVedtak,
-        val feilutbetaling: Boolean,
+        override val signaturVedtak: SignaturVedtak,
+        override val feilutbetaling: Boolean,
+        override val korrigertVedtak: KorrigertVedtakData?,
         val hjemmeltekst: Hjemmeltekst,
-        val korrigertVedtak: KorrigertVedtakData?,
-    )
+    ) : OpphørtDelmaler
+}
+
+interface OpphørtDelmaler {
+    val signaturVedtak: SignaturVedtak
+    val feilutbetaling: Boolean
+    val korrigertVedtak: KorrigertVedtakData?
 }

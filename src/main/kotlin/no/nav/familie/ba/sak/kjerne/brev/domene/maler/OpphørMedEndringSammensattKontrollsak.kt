@@ -58,14 +58,14 @@ data class OpphørMedEndringSammensattKontrollsakData(
     override val sammensattKontrollsakFritekst: String,
 ) : VedtaksbrevSammensattKontrollsak {
     data class Delmaler(
-        val signaturVedtak: SignaturVedtak,
-        val feilutbetaling: Boolean,
-        val etterbetaling: Etterbetaling?,
-        val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
-        val korrigertVedtak: KorrigertVedtakData?,
-        val refusjonEosAvklart: RefusjonEøsAvklart?,
-        val refusjonEosUavklart: RefusjonEøsUavklart?,
-        val klage: Boolean,
-        val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
-    )
+        override val signaturVedtak: SignaturVedtak,
+        override val feilutbetaling: Boolean,
+        override val etterbetaling: Etterbetaling?,
+        override val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
+        override val korrigertVedtak: KorrigertVedtakData?,
+        override val refusjonEosAvklart: RefusjonEøsAvklart?,
+        override val refusjonEosUavklart: RefusjonEøsUavklart?,
+        override val klage: Boolean,
+        override val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
+    ) : OpphørMedEndringDelmaler
 }
