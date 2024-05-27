@@ -290,10 +290,13 @@ class OppgaveService(
                 gammelOppgave.fristFerdigstillelse == null ->
                     logger.warn("Oppgave ${dbOppgave.gsakId} har ingen oppgavefrist ved oppdatering av frist")
 
-                oppgaveErAvsluttet -> {}
+                oppgaveErAvsluttet -> {
+                    logger.info("Oppgave ${dbOppgave.gsakId} er allerede avsluttet")
+                }
                 else -> {
                     val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)
                     val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
+                    logger.info("Oppgave ${dbOppgave.gsakId} endrer frist fra ${gammelOppgave.fristFerdigstillelse} til $nyFrist")
                     integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
                 }
             }
