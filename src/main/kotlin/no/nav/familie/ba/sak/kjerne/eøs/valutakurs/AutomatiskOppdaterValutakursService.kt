@@ -81,6 +81,8 @@ class AutomatiskOppdaterValutakursService(
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
         endringstidspunkt: YearMonth,
     ) {
+        if (behandling.erMigrering() || behandling.opprettetÅrsak.erManuellMigreringsårsak()) return
+
         val vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)
         if (vurderingsstrategiForValutakurser?.vurderingsstrategiForValutakurser == VurderingsstrategiForValutakurser.MANUELL) return
 
