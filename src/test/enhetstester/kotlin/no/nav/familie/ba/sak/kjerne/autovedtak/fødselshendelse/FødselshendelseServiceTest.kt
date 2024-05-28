@@ -49,6 +49,7 @@ import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
@@ -69,6 +70,7 @@ class FødselshendelseServiceTest {
     val personopplysningerService = mockk<PersonopplysningerService>()
     val opprettTaskService = mockk<OpprettTaskService>()
     val oppgaveService = mockk<OppgaveService>()
+    val mockUnleashService = mockk<UnleashService>()
 
     val integrasjonClient = mockk<IntegrasjonClient>()
     val statsborgerskapService =
@@ -93,6 +95,7 @@ class FødselshendelseServiceTest {
             statsborgerskapService,
             opprettTaskService,
             oppgaveService,
+            mockUnleashService,
         )
 
     @Test
