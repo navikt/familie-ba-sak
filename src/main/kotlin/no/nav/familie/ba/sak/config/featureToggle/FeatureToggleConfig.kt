@@ -15,6 +15,9 @@ class FeatureToggleConfig {
         const val KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ENKELT_SAK = "familie-ba-sak.kan-kjore-autmatisk-valutajustering-behandling-for-enkelt-sak"
         const val KAN_OVERSTYRE_AUTOMATISKE_VALUTAKURSER = "familie-ba-sak.kan-overstyre-automatiske-valutakurser"
 
+        // NAV-21071 lagt bak toggle og kan evt fjernes på sikt hvis man ikke har trengt å skru den på igjen
+        const val SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM = "familie-ba-sak.skalOpprettFremleggsoppgaveDersomEOSMedlem"
+
         // satsendring
         // Oppretter satsendring-tasker for de som ikke har fått ny task
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
