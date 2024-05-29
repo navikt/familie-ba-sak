@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
@@ -43,6 +45,7 @@ class BeslutteVedtak(
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val saksbehandlerContext: SaksbehandlerContext,
     private val automatiskBeslutningService: AutomatiskBeslutningService,
+    private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -92,6 +95,8 @@ class BeslutteVedtak(
             beslutning = data,
             behandlingErAutomatiskBesluttet = behandlingSkalAutomatiskBesluttes,
         )
+
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandling.id))
 
         return if (data.beslutning.erGodkjent()) {
             val vedtak =
