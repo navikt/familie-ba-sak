@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.5 (Debian 14.5-1.pgdg110+1)
--- Dumped by pg_dump version 14.10 (Homebrew)
+-- Dumped from database version 16.3 (Debian 16.3-1.pgdg120+1)
+-- Dumped by pg_dump version 16.3
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1079,35 +1079,6 @@ CREATE SEQUENCE public.po_bostedsadresse_seq
 
 
 --
--- Name: po_bostedsadresseperiode; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.po_bostedsadresseperiode (
-    id bigint NOT NULL,
-    fk_po_person_id bigint NOT NULL,
-    fom date,
-    tom date,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    versjon bigint DEFAULT 0 NOT NULL
-);
-
-
---
--- Name: po_bostedsadresseperiode_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.po_bostedsadresseperiode_seq
-    START WITH 1000000
-    INCREMENT BY 50
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
 -- Name: po_doedsfall; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1631,7 +1602,8 @@ CREATE TABLE public.valutakurs (
     opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
     endret_av character varying,
-    endret_tid timestamp(3) without time zone
+    endret_tid timestamp(3) without time zone,
+    vurderingsform text
 );
 
 
@@ -1766,22 +1738,6 @@ CREATE SEQUENCE public.vedtaksperiode_seq
 
 
 --
--- Name: verge; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.verge (
-    id bigint NOT NULL,
-    ident character varying,
-    fk_behandling_id bigint NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying(20) DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying(20),
-    endret_tid timestamp(3) without time zone
-);
-
-
---
 -- Name: verge_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -1805,9 +1761,7 @@ CREATE TABLE public.vilkaarsvurdering (
     opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
     endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    samlet_resultat character varying,
-    ytelse_personer text DEFAULT ''::text
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -1866,6 +1820,29 @@ CREATE SEQUENCE public.vilkar_resultat_seq
 
 
 --
+-- Name: vurderingsstrategi_for_valutakurser; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.vurderingsstrategi_for_valutakurser (
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    vurderingsstrategi_for_valutakurser text NOT NULL
+);
+
+
+--
+-- Name: vurderingsstrategi_for_valutakurser_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.vurderingsstrategi_for_valutakurser_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
 -- Name: aktoer_merge_logg id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1884,6 +1861,427 @@ ALTER TABLE ONLY public.task ALTER COLUMN id SET DEFAULT nextval('public.task_se
 --
 
 ALTER TABLE ONLY public.task_logg ALTER COLUMN id SET DEFAULT nextval('public.task_logg_seq'::regclass);
+
+
+--
+-- Data for Name: aktoer; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: aktoer_merge_logg; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: aktoer_til_kompetanse; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: aktoer_til_utenlandsk_periodebeloep; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: aktoer_til_valutakurs; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: andel_tilkjent_ytelse; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: annen_vurdering; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: arbeidsfordeling_pa_behandling; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: batch; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.batch VALUES (1000000, '2021-01-06 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000050, '2021-01-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000100, '2021-02-26 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000150, '2021-03-31 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000200, '2021-04-26 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000250, '2021-05-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000300, '2021-06-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000350, '2021-07-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000400, '2021-08-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000450, '2021-09-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000500, '2021-10-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000550, '2021-11-22 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000600, '2022-01-05 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000650, '2022-01-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000700, '2022-02-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000750, '2022-03-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000800, '2022-04-26 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000850, '2022-05-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000900, '2022-06-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000950, '2022-07-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001000, '2022-08-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001050, '2022-09-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001100, '2022-10-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001150, '2022-11-21 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001200, '2023-01-05 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001250, '2023-01-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001300, '2023-02-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001350, '2023-03-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001400, '2023-04-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001450, '2023-05-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001500, '2023-06-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001550, '2023-07-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001600, '2023-08-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001650, '2023-09-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001700, '2023-10-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001750, '2023-11-22 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001800, '2024-01-04 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001850, '2024-01-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001900, '2024-02-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001950, '2024-03-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002000, '2024-04-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002050, '2024-05-24 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002100, '2024-06-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002150, '2024-07-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002200, '2024-08-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002250, '2024-09-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002300, '2024-10-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
+
+
+--
+-- Data for Name: behandling; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: behandling_migreringsinfo; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: behandling_soknadsinfo; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: behandling_steg_tilstand; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: brevmottaker; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: data_chunk; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: ecbvalutakurscache; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: endret_utbetaling_andel; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: eos_begrunnelse; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: fagsak; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: feilutbetalt_valuta; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: foedselshendelsefiltrering_resultat; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: gr_periode_overgangsstonad; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: gr_personopplysninger; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: gr_soknad; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: institusjon; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: journalpost; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: kompetanse; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: korrigert_etterbetaling; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: korrigert_vedtak; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: logg; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: okonomi_simulering_mottaker; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: okonomi_simulering_postering; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: oppgave; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: person_resultat; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: personident; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: po_arbeidsforhold; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: po_bostedsadresse; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: po_doedsfall; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: po_opphold; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: po_person; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: po_sivilstand; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: po_statsborgerskap; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: refusjon_eos; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: saksstatistikk_mellomlagring; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: satskjoering; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: sett_paa_vent; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: skyggesak; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: task; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.task VALUES (51, '1654', 'PLUKKET', 2, '2024-05-29 15:31:17.509', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-07.01.2022
+', '2024-05-29 15:31:17.508603', NULL);
+INSERT INTO public.task VALUES (1, '1654', 'PLUKKET', 2, '2024-05-29 15:31:17.471', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-06.01.2022
+', '2024-05-29 15:31:17.471229', NULL);
+
+
+--
+-- Data for Name: task_logg; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+INSERT INTO public.task_logg VALUES (51, 1, 'PLUKKET', 'node1', '2024-05-29 15:32:29.295', NULL, 'VL');
+INSERT INTO public.task_logg VALUES (1, 51, 'PLUKKET', 'node1', '2024-05-29 15:32:29.295', NULL, 'VL');
+
+
+--
+-- Data for Name: tilbakekreving; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: tilkjent_ytelse; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: totrinnskontroll; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: utenlandsk_periodebeloep; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: valutakurs; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: vedtak; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: vedtaksbegrunnelse; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: vedtaksbegrunnelse_fritekst; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: vedtaksperiode; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: vilkaarsvurdering; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: vilkar_resultat; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: vurderingsstrategi_for_valutakurser; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
 
 --
 -- Name: aktoer_merge_logg_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
@@ -2124,13 +2522,6 @@ SELECT pg_catalog.setval('public.po_bostedsadresse_seq', 1000000, false);
 
 
 --
--- Name: po_bostedsadresseperiode_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.po_bostedsadresseperiode_seq', 1000000, false);
-
-
---
 -- Name: po_doedsfall_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2211,7 +2602,7 @@ SELECT pg_catalog.setval('public.skyggesak_seq', 1000000, false);
 -- Name: task_logg_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.task_logg_seq', 1, false);
+SELECT pg_catalog.setval('public.task_logg_seq', 151, true);
 
 
 --
@@ -2310,6 +2701,13 @@ SELECT pg_catalog.setval('public.vilkaarsvurdering_seq', 1000000, false);
 --
 
 SELECT pg_catalog.setval('public.vilkar_resultat_seq', 1000000, false);
+
+
+--
+-- Name: vurderingsstrategi_for_valutakurser_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.vurderingsstrategi_for_valutakurser_seq', 1000000, false);
 
 
 --
@@ -2641,14 +3039,6 @@ ALTER TABLE ONLY public.po_bostedsadresse
 
 
 --
--- Name: po_bostedsadresseperiode po_bostedsadresseperiode_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.po_bostedsadresseperiode
-    ADD CONSTRAINT po_bostedsadresseperiode_pkey PRIMARY KEY (id);
-
-
---
 -- Name: po_doedsfall po_doedsfall_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2817,19 +3207,19 @@ ALTER TABLE ONLY public.vedtaksperiode
 
 
 --
--- Name: verge verge_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.verge
-    ADD CONSTRAINT verge_pkey PRIMARY KEY (id);
-
-
---
 -- Name: vilkar_resultat vilkar_resultat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.vilkar_resultat
     ADD CONSTRAINT vilkar_resultat_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: vurderingsstrategi_for_valutakurser vurderingsstrategi_for_valutakurser_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.vurderingsstrategi_for_valutakurser
+    ADD CONSTRAINT vurderingsstrategi_for_valutakurser_pkey PRIMARY KEY (id);
 
 
 --
@@ -3127,13 +3517,6 @@ CREATE INDEX po_bostedsadresse_fk_idx ON public.po_bostedsadresse USING btree (f
 
 
 --
--- Name: po_bostedsadresseperiode_fk_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX po_bostedsadresseperiode_fk_idx ON public.po_bostedsadresseperiode USING btree (fk_po_person_id);
-
-
---
 -- Name: po_doedsfall_fk_po_person_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3391,13 +3774,6 @@ END));
 
 
 --
--- Name: uidx_verge_behandling_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX uidx_verge_behandling_id ON public.verge USING btree (fk_behandling_id);
-
-
---
 -- Name: utenlandsk_periodebeloep_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3465,6 +3841,13 @@ CREATE INDEX vilkar_resultat_fk_personr_idx ON public.vilkar_resultat USING btre
 --
 
 CREATE INDEX vilkar_resultat_sist_endret_i_behandling_id_idx ON public.vilkar_resultat USING btree (sist_endret_i_behandling_id);
+
+
+--
+-- Name: vurderingsstrategi_for_valutakurser_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX vurderingsstrategi_for_valutakurser_fk_behandling_id_idx ON public.vurderingsstrategi_for_valutakurser USING btree (fk_behandling_id);
 
 
 --
@@ -3820,14 +4203,6 @@ ALTER TABLE ONLY public.po_bostedsadresse
 
 
 --
--- Name: po_bostedsadresseperiode po_bostedsadresseperiode_fk_po_person_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.po_bostedsadresseperiode
-    ADD CONSTRAINT po_bostedsadresseperiode_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id);
-
-
---
 -- Name: po_doedsfall po_doedsfall_fk_po_person_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3972,19 +4347,19 @@ ALTER TABLE ONLY public.vedtaksperiode
 
 
 --
--- Name: verge verge_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.verge
-    ADD CONSTRAINT verge_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
-
-
---
 -- Name: vilkar_resultat vilkar_resultat_fk_person_resultat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.vilkar_resultat
     ADD CONSTRAINT vilkar_resultat_fk_person_resultat_id_fkey FOREIGN KEY (fk_person_resultat_id) REFERENCES public.person_resultat(id);
+
+
+--
+-- Name: vurderingsstrategi_for_valutakurser vurderingsstrategi_for_valutakurser_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.vurderingsstrategi_for_valutakurser
+    ADD CONSTRAINT vurderingsstrategi_for_valutakurser_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id) ON DELETE CASCADE;
 
 
 --
