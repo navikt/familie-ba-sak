@@ -33,7 +33,7 @@ jobs:
           docker_context: .
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-          byosbom: target/bom.json
+          byosbom: target/classes/META-INF/sbom/application.cdx.json
 
       - name: Skriv ut docker-taggen
         run: echo 'Docker-tag er ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }} ' >> $GITHUB_STEP_SUMMARY
