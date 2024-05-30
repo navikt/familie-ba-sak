@@ -147,7 +147,6 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>10.13.0</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -393,6 +392,11 @@
             <artifactId>medeia-validator-jackson</artifactId>
             <version>${medeia-validator-jackson.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.jsqlparser</groupId>
+            <artifactId>jsqlparser</artifactId>
+            <version>4.9</version>
         </dependency>
 
         <dependency>
