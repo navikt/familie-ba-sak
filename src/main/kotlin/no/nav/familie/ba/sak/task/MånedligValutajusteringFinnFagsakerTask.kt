@@ -61,7 +61,10 @@ class MånedligValutajusteringFinnFagsakerTask(
         const val TASK_STEP_TYPE = "månedligValutajusteringFinnFagsaker"
         private val logger = LoggerFactory.getLogger(MånedligValutajusteringFinnFagsakerTask::class.java)
 
-        fun lagTask(inneværendeMåned: YearMonth, triggerTid: LocalDateTime) =
+        fun lagTask(
+            inneværendeMåned: YearMonth,
+            triggerTid: LocalDateTime,
+        ) =
             Task(
                 type = MånedligValutajusteringFinnFagsakerTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(MånedligValutajusteringFinnFagsakerTaskDto(inneværendeMåned)),

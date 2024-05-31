@@ -43,9 +43,10 @@ class MånedligValutajusteringScheduler(
             taskRepository.save(
                 MånedligValutajusteringFinnFagsakerTask.lagTask(
                     inneværendeMåned = inneværendeMåned,
-                    triggerTid = VirkedagerProvider.nesteVirkedag(
-                        LocalDate.now().minusDays(1),
-                    ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0)
+                    triggerTid =
+                        VirkedagerProvider.nesteVirkedag(
+                            LocalDate.now().minusDays(1),
+                        ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0),
                 ),
             )
         }
