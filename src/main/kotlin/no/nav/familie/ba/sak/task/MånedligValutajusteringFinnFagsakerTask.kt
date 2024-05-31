@@ -18,6 +18,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Service
@@ -60,11 +61,13 @@ class MånedligValutajusteringFinnFagsakerTask(
         const val TASK_STEP_TYPE = "månedligValutajusteringFinnFagsaker"
         private val logger = LoggerFactory.getLogger(MånedligValutajusteringFinnFagsakerTask::class.java)
 
-        fun lagTask(inneværendeMåned: YearMonth) =
+        fun lagTask(inneværendeMåned: YearMonth, triggerTid: LocalDateTime) =
             Task(
                 type = MånedligValutajusteringFinnFagsakerTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(MånedligValutajusteringFinnFagsakerTaskDto(inneværendeMåned)),
                 mapOf("måned" to inneværendeMåned.toString()).toProperties(),
+            ).medTriggerTid(
+                triggerTid = triggerTid,
             )
 
         fun erSekundærlandIMåned(
