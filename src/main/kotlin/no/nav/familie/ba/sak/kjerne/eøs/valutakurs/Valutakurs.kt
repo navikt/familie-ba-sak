@@ -15,7 +15,10 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
@@ -159,3 +162,16 @@ fun List<UtfyltValutakurs>.tilTidslinje() =
     }.tilTidslinje()
 
 fun Collection<Valutakurs>.filtrerErUtfylt() = this.map { it.tilIValutakurs() }.filterIsInstance<UtfyltValutakurs>()
+
+fun Collection<Valutakurs>.erUtdaterteValutakurserIMåned(
+    måned: YearMonth,
+) = any {
+    val fom = it.fom ?: TIDENES_MORGEN.toYearMonth()
+    val tom = it.tom ?: TIDENES_ENDE.toYearMonth()
+
+    fom < måned && tom >= måned
+}
+
+fun Collection<Valutakurs>.erAlleValutakurserOppdaterteIMåned(
+    måned: YearMonth,
+): Boolean = !this.erUtdaterteValutakurserIMåned(måned)

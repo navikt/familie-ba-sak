@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.erUtdaterteValutakurserIMåned
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -51,20 +51,10 @@ class MånedligValutajusteringFinnFagsakerTask(
         sisteEøsBehanldingerIFagsakerMedEøsBehandlinger.take(10).forEach { behandlingid ->
             val valutakurser = valutakursService.hentValutakurser(BehandlingId(behandlingid))
 
-            if (hentErUtdaterteValutakurser(valutakurser, data.måned)) {
+            if (valutakurser.erUtdaterteValutakurserIMåned(data.måned)) {
                 taskRepository.save(MånedligValutajusteringTask.lagTask(behandlingid, data.måned))
             }
         }
-    }
-
-    private fun hentErUtdaterteValutakurser(
-        valutakurser: Collection<Valutakurs>,
-        måned: YearMonth
-    ) = valutakurser.any {
-        val fom = it.fom ?: TIDENES_MORGEN.toYearMonth()
-        val tom = it.tom ?: TIDENES_ENDE.toYearMonth()
-
-        fom < måned && tom >= måned
     }
 
     companion object {
