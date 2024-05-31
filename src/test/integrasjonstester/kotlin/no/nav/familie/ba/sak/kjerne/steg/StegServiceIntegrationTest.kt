@@ -30,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -63,6 +64,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.LocalDate
 
 class StegServiceIntegrationTest(
@@ -95,6 +97,9 @@ class StegServiceIntegrationTest(
     @Autowired
     private val økonomiKlient: ØkonomiKlient,
 ) : AbstractSpringIntegrationTest() {
+    @MockBean
+    private lateinit var automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService
+
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
