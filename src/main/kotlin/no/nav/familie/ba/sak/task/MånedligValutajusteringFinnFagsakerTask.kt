@@ -1,16 +1,9 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.erAlleValutakurserOppdaterteIMåned
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -73,11 +66,5 @@ class MånedligValutajusteringFinnFagsakerTask(
             ).medTriggerTid(
                 triggerTid = triggerTid,
             )
-
-        fun erSekundærlandIMåned(
-            kompetanser: Collection<Kompetanse>,
-            yearMonth: YearMonth,
-        ) = kompetanser.filter { (it.fom ?: TIDENES_MORGEN.toYearMonth()).isSameOrBefore(yearMonth) && (it.tom ?: TIDENES_ENDE.toYearMonth()).isSameOrAfter(yearMonth) }
-            .any { kompetanse -> kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
     }
 }

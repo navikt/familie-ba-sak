@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.ba.sak.task.MånedligValutajusteringFinnFagsakerTask
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -147,15 +146,7 @@ class AutovedtakMånedligValutajusteringService(
             return
         }
 
-        val kompetanserPåSisteVedtatteBehandling = kompetanseService.hentKompetanser(BehandlingId(sisteVedtatteBehandling.id))
-        val erSekundærland =
-            MånedligValutajusteringFinnFagsakerTask.erSekundærlandIMåned(kompetanserPåSisteVedtatteBehandling, måned)
-
-        if (erSekundærland) {
-            utførMånedligValutajustering(behandlingid = sisteVedtatteBehandling.id, måned)
-        } else {
-            logger.info("Siste behandling er ikke sekundærland for måned=$måned")
-        }
+        utførMånedligValutajustering(behandlingid = sisteVedtatteBehandling.id, måned)
     }
 
     companion object {
