@@ -45,6 +45,5 @@ data class RestUtvidetBehandling(
     val feilutbetaltValuta: List<RestFeilutbetaltValuta>,
     val brevmottakere: List<RestBrevmottaker>,
     val refusjonEøs: List<RestRefusjonEøs>,
-    val sammensattKontrollsak: RestSammensattKontrollsak?,
     val vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser? = VurderingsstrategiForValutakurser.AUTOMATISK,
 )

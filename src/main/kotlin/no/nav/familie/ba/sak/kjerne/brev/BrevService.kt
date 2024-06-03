@@ -408,7 +408,7 @@ class BrevService(
                 )
             }
 
-            else -> throw Feil("Brevmalen: $brevmal er ikke støttet for sammensatte kontrollsaker")
+            else -> throw Feil("Brevmalen $brevmal er ikke støttet for sammensatte kontrollsaker")
         }
     }
 

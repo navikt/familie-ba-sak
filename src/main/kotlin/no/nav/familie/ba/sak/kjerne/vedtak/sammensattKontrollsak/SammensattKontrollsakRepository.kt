@@ -4,9 +4,9 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
 interface SammensattKontrollsakRepository : JpaRepository<SammensattKontrollsak, Long> {
-    @Query(value = "SELECT t FROM SammensattKontrollsak t WHERE t.behandlingId = :behandlingId")
+    @Query(value = "SELECT sk FROM SammensattKontrollsak sk WHERE sk.behandlingId = :behandlingId")
     fun finnSammensattKontrollsakForBehandling(behandlingId: Long): SammensattKontrollsak?
 
-    @Query(value = "SELECT t FROM SammensattKontrollsak t WHERE t.id = :id")
+    @Query(value = "SELECT sk FROM SammensattKontrollsak sk WHERE sk.id = :id")
     fun hentSammensattKontrollsak(id: Long): SammensattKontrollsak
 }
