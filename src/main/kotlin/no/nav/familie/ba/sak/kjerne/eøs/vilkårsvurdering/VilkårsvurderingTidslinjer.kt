@@ -118,10 +118,7 @@ class VilkårsvurderingTidslinjer(
         val regelverkResultatTidslinje =
             egetRegelverkResultatTidslinje
                 .kombinerMed(søkersTidslinje.regelverkResultatTidslinje) { barnetsResultat, søkersResultat ->
-                    KombinertRegelverkResultat(
-                        barnetsResultat = barnetsResultat,
-                        søkersResultat = søkersResultat,
-                    )
+                    barnetsResultat.kombinerMed(søkersResultat)
                 }
                 // Barnets egne tidslinjer kan på dette tidspunktet strekke seg 18 år frem i tid,
                 // og mye lenger enn søkers regelverk-tidslinje, som skal være begrensningen. Derfor besjærer vi mot den

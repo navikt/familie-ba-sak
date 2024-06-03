@@ -91,6 +91,10 @@ private fun finnUtgjørendeVilkår(
             oppfylteVilkårResultaterForrigePeriode = oppfylteVilkårResultaterForrigePeriode,
         )
 
+    val erOrdinæreVilkårInnvilgetForrigePeriodeEllerForrigeBehandling =
+        begrunnelseGrunnlag.forrigePeriode?.erOrdinæreVilkårInnvilget() ?: false ||
+            begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.erOrdinæreVilkårInnvilget() ?: false
+
     return if (begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget()) {
         when (sanityBegrunnelse.periodeResultat) {
             SanityPeriodeResultat.INNVILGET_ELLER_ØKNING -> vilkårTjent + vilkårEndret
@@ -105,7 +109,8 @@ private fun finnUtgjørendeVilkår(
         }
     } else {
         vilkårTapt.takeIf {
-            sanityBegrunnelse.periodeResultat in
+            erOrdinæreVilkårInnvilgetForrigePeriodeEllerForrigeBehandling &&
+                sanityBegrunnelse.periodeResultat in
                 listOf(
                     SanityPeriodeResultat.IKKE_INNVILGET,
                     SanityPeriodeResultat.REDUKSJON,

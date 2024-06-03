@@ -58,11 +58,9 @@ class HenleggBehandling(
             )
         }
 
-        val (oppgaverTekniskVedlikeholdPgaSatsendring, oppgaverSomSkalFerdigstilles) =
-            oppgaveService.hentOppgaverSomIkkeErFerdigstilt(
-                behandling,
-            )
-                .partition {
+        oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling)
+            .filter {
+                !(
                     data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type in
                         listOf(
                             BehandleSak,
@@ -70,16 +68,11 @@ class HenleggBehandling(
                             BehandleUnderkjentVedtak,
                             VurderLivshendelse,
                         )
-                }
-
-        oppgaverSomSkalFerdigstilles.forEach {
-            oppgaveService.ferdigstillOppgaver(behandling.id, it.type)
-        }
-
-        oppgaverTekniskVedlikeholdPgaSatsendring.forEach {
-            logger.info("Teknisk opphør pga satsendring. Fjerner behandlesAvApplikasjon for oppgaveId=${it.gsakId} slik at saksbehandler kan lukke den fra Gosys. fagsakId=${fagsak.id}, behandlingId=${behandling.id}")
-            oppgaveService.fjernBehandlesAvApplikasjon(listOf(it.gsakId.toLong()))
-        }
+                )
+            }
+            .forEach {
+                oppgaveService.ferdigstillOppgaver(behandling.id, it.type)
+            }
 
         loggService.opprettHenleggBehandling(behandling, data.årsak.beskrivelse, data.begrunnelse)
 

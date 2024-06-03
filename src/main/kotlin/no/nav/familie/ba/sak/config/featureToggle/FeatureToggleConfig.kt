@@ -16,6 +16,9 @@ class FeatureToggleConfig {
         const val KAN_OVERSTYRE_AUTOMATISKE_VALUTAKURSER = "familie-ba-sak.kan-overstyre-automatiske-valutakurser"
         const val KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER = "familie-ba-sak.kan-opprette-og-endre-sammensatte-kontrollsaker"
 
+        // NAV-21071 lagt bak toggle og kan evt fjernes på sikt hvis man ikke har trengt å skru den på igjen
+        const val SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM = "familie-ba-sak.skalOpprettFremleggsoppgaveDersomEOSMedlem"
+
         // satsendring
         // Oppretter satsendring-tasker for de som ikke har fått ny task
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"

@@ -115,9 +115,6 @@ class IntegrasjonClientMock {
             every { mockIntegrasjonClient.fordelOppgave(any(), any()) } returns
                 OppgaveResponse(12345678L)
 
-            every { mockIntegrasjonClient.fjernBehandlesAvApplikasjon(any()) } returns
-                OppgaveResponse(12345678L)
-
             every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
                 OppdaterJournalpostResponse("1234567")
 

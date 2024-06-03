@@ -164,20 +164,4 @@ class OppgaveController(
 
         return ResponseEntity.ok(Ressurs.success(behandleSakOppgaveFrister))
     }
-
-    @PostMapping("/fjern-behandles-av-applikasjon")
-    fun fjernBehandlesAvApplikasjonFor(
-        @RequestBody oppgaver: List<Long>,
-    ): ResponseEntity<Ressurs<String>> {
-        val fjernetBehandlesAvApplikasjonForOppgaver =
-            oppgaveService.fjernBehandlesAvApplikasjon(
-                oppgaver,
-            )
-        logger.info("Fjernet behandlesAvApplikasjon for oppgaver=$fjernetBehandlesAvApplikasjonForOppgaver")
-        return ResponseEntity.ok(
-            Ressurs.success(
-                "Fjernet behandlesAvApplikasjon for $fjernetBehandlesAvApplikasjonForOppgaver",
-            ),
-        )
-    }
 }
