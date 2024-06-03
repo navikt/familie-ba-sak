@@ -17,6 +17,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.erAlleValutakurserOppdaterteIMåned
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -37,6 +39,7 @@ class AutovedtakMånedligValutajusteringService(
     private val behandlingService: BehandlingService,
     private val localDateProvider: LocalDateProvider,
     private val kompetanseService: KompetanseService,
+    private val valutakursService: ValutakursService,
 ) {
     private val månedligvalutajusteringIgnorertÅpenBehandling = Metrics.counter("valutajustering.ignorert.aapenbehandling")
 
@@ -55,6 +58,15 @@ class AutovedtakMånedligValutajusteringService(
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingid)
         val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) ?: error("Fant ikke siste vedtatte behandling for ${behandling.fagsak.id}")
+
+        if (behandlingid != sisteVedtatteBehandling.id) {
+            val sisteValutakurser = valutakursService.hentValutakurser(BehandlingId(sisteVedtatteBehandling.id))
+            if (sisteValutakurser.erAlleValutakurserOppdaterteIMåned(måned)) {
+                logger.info("Valutakursene er allerede oppdatert for fagsak ${behandling.fagsak.id}. Hopper ut")
+                return
+            }
+        }
+
         val aktivOgÅpenBehandling =
             behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(
                 fagsakId = sisteVedtatteBehandling.fagsak.id,
