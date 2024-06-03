@@ -45,6 +45,7 @@ class BrevServiceTest {
             kompetanseRepository = mockk(),
             unleashService = unleashService,
             sammensattKontrollsakService = mockk(),
+            endretUtbetalingAndelRepository = mockk(),
         )
 
     @BeforeEach
