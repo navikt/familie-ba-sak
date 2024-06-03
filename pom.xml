@@ -32,7 +32,7 @@
         <cucumber.version>7.18.0</cucumber.version>
         <mockk.version>1.13.11</mockk.version>
         <wiremock.version>3.6.0</wiremock.version>
-        <token-validation-spring.version>4.1.7</token-validation-spring.version>
+        <token-validation-spring.version>4.1.8</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.5.0</springdoc.version>
         <sentry.version>7.9.0</sentry.version>
