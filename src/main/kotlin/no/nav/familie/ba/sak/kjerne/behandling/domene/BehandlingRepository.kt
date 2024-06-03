@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query(value = "SELECT b FROM Behandling b WHERE b.id = :behandlingId")
@@ -70,18 +71,18 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Long>
 
     @Query(
-        value = """SELECT DISTINCT ON (b.fk_fagsak_id) b.id
-                    FROM behandling b
-                           INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                           INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+        value = """SELECT DISTINCT f.id
+                    FROM fagsak f 
+                            INNER JOIN behandling b ON f.id = b.fk_fagsak_id
+                            INNER JOIN valutakurs v ON v.fk_behandling_id = b.id
+                            INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
                     WHERE f.status = 'LØPENDE'
-                      AND ty.utbetalingsoppdrag IS NOT NULL
-                      AND f.arkivert = false
-                      AND b.kategori = 'EØS'
-                    ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC""",
+                      AND f.arkivert = false 
+                      AND ty.stonad_tom >= :måned
+                      AND (v.tom >= :måned OR v.tom == null)""",
         nativeQuery = true,
     )
-    fun finnSisteIverksatteEØSBehandlingFraLøpendeFagsaker(): List<Long>
+    fun finnAlleFagsakerMedLøpendeValutakursIMåned(måned: YearMonth): List<Long>
 
     @Query(
         """select b from Behandling b

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -39,14 +40,15 @@ class MånedligValutajusteringFinnFagsakerTask(
 
         logger.info("Starter månedlig valutajustering for ${data.måned}")
 
-        val sisteEøsBehanldingerIFagsakerMedEøsBehandlinger = behandlingService.hentSisteIverksatteEØSBehandlingFraLøpendeFagsaker().toSet().sorted()
+        val fagsakerMedLøpendeValutakurs = behandlingService.hentAlleFagsakerMedLøpendeValutakursIMåned(data.måned).toSet().sorted()
 
         // Hardkoder denne til å kun ta 10 behanldinger i første omgang slik at vi er helt sikre på at vi ikke kjører på alle behandlinger mens vi tester.
-        sisteEøsBehanldingerIFagsakerMedEøsBehandlinger.take(10).forEach { behandlingid ->
-            val valutakurser = valutakursService.hentValutakurser(BehandlingId(behandlingid))
+        fagsakerMedLøpendeValutakurs.take(10).forEach { fagsakId ->
+            val sisteVedtatteBehandling = behandlingService.hentSisteBehandlingSomErVedtatt(fagsakId) ?: throw Feil("Fant ikke siste vedtatte behandling for $fagsakId")
+            val valutakurser = valutakursService.hentValutakurser(BehandlingId(sisteVedtatteBehandling.id))
 
             if (!valutakurser.erAlleValutakurserOppdaterteIMåned(data.måned)) {
-                taskRepository.save(MånedligValutajusteringTask.lagTask(behandlingid, data.måned))
+                taskRepository.save(MånedligValutajusteringTask.lagTask(fagsakId, data.måned))
             }
         }
     }

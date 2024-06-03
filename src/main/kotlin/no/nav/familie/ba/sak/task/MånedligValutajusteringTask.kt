@@ -26,13 +26,13 @@ class MånedligValutajusteringTask(
         logger.info("Starter Task månedlig valutajustering for $taskdto")
 
         autovedtakMånedligValutajusteringService.utførMånedligValutajustering(
-            behandlingid = taskdto.behandlingid,
+            fagsakId = taskdto.fagsakId,
             måned = taskdto.måned,
         )
     }
 
     data class MånedligValutajusteringTaskDto(
-        val behandlingid: Long,
+        val fagsakId: Long,
         val måned: YearMonth,
     )
 
@@ -41,15 +41,15 @@ class MånedligValutajusteringTask(
         private val logger = LoggerFactory.getLogger(MånedligValutajusteringTask::class.java)
 
         fun lagTask(
-            behandlingId: Long,
+            fagsakId: Long,
             valutajusteringsMåned: YearMonth,
         ): Task =
             Task(
                 type = MånedligValutajusteringTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(MånedligValutajusteringTaskDto(behandlingid = behandlingId, måned = valutajusteringsMåned)),
+                payload = objectMapper.writeValueAsString(MånedligValutajusteringTaskDto(fagsakId = fagsakId, måned = valutajusteringsMåned)),
                 properties =
                     mapOf(
-                        "behandlingId" to behandlingId.toString(),
+                        "fagsakId" to fagsakId.toString(),
                         "måned" to valutajusteringsMåned.toString(),
                     ).toProperties(),
             )
