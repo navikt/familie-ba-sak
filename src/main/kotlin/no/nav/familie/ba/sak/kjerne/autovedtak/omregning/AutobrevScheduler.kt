@@ -17,7 +17,7 @@ class AutobrevScheduler(
     val leaderClientService: LeaderClientService,
 ) {
     /**
-     * Denne funksjonen kjøres kl.7 den første dagen i måneden og setter triggertid på tasken til kl.8 den første virkedagen i måneden.
+     * Denne funksjonen kjøres kl.6 den første dagen i måneden og setter triggertid på tasken til kl.7 den første virkedagen i måneden.
      * For testformål kan funksjonen opprettTask også kalles direkte via et restendepunkt.
      */
     @Transactional

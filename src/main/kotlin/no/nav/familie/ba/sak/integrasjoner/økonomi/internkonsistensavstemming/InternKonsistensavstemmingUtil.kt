@@ -34,7 +34,9 @@ fun erForskjellMellomAndelerOgOppdrag(
                 "Fagsak $fagsakId har sendt utbetalingsperiode(r) til økonomi som ikke har tilsvarende andel tilkjent ytelse." +
                     "\nDet er differanse i perioden(e) ${forskjellMellomAndeleneOgUtbetalingsoppdraget.utbetalingsperioder.tilTidStrenger()}." +
                     "\n\nSiste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
-                    "\n$utbetalingsoppdrag",
+                    "\n$utbetalingsoppdrag" +
+                    "\n\nAndelene i siste behandling som er sendt til økonomi er:" +
+                    "\n${andeler.joinToString("\n")} ",
             )
 
         is IngenForskjell -> Unit
