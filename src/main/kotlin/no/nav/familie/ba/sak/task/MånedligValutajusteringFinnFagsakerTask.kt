@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.erUtdaterteValutakurserIMåned
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.erAlleValutakurserOppdaterteIMåned
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -51,7 +51,7 @@ class MånedligValutajusteringFinnFagsakerTask(
         sisteEøsBehanldingerIFagsakerMedEøsBehandlinger.take(10).forEach { behandlingid ->
             val valutakurser = valutakursService.hentValutakurser(BehandlingId(behandlingid))
 
-            if (valutakurser.erUtdaterteValutakurserIMåned(data.måned)) {
+            if (!valutakurser.erAlleValutakurserOppdaterteIMåned(data.måned)) {
                 taskRepository.save(MånedligValutajusteringTask.lagTask(behandlingid, data.måned))
             }
         }
