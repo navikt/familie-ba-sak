@@ -50,6 +50,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import kotlin.concurrent.thread
@@ -342,7 +343,7 @@ class ForvalterController(
     @PostMapping("/start-valutajustering-scheduler")
     @Operation(summary = "Start valutajustering for alle sekundærlandsaker i gjeldende måned")
     fun lagMånedligValutajusteringTask(): ResponseEntity<Ressurs<String>> {
-        månedligValutajusteringScheduler.lagMånedligValutajusteringTask()
+        månedligValutajusteringScheduler.lagMånedligValutajusteringTask(triggerTid = LocalDateTime.now())
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 
