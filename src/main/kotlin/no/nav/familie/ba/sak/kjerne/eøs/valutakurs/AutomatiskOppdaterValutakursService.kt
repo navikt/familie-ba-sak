@@ -103,13 +103,13 @@ class AutomatiskOppdaterValutakursService(
     }
 
     private fun UtfyltUtenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(
-        endringstidspunkt: YearMonth,
+        månedForTidligsteTillatteAutomatiskeValutakurs: YearMonth,
     ): List<Valutakurs> {
-        val start = maxOf(endringstidspunkt, fom)
+        val start = maxOf(månedForTidligsteTillatteAutomatiskeValutakurs, fom)
         val denneMåneden = localDateProvider.now().toYearMonth()
         val slutt = tom ?: denneMåneden
 
-        if (endringstidspunkt.isAfter(slutt)) return emptyList()
+        if (månedForTidligsteTillatteAutomatiskeValutakurs.isAfter(slutt)) return emptyList()
 
         return start.rangeTo(slutt).map { måned ->
             val sisteVirkedagForrigeMåned = måned.minusMonths(1).tilSisteVirkedag()
