@@ -140,16 +140,13 @@ data class AndelTilkjentYtelse(
     fun erDeltBosted() = this.prosent == BigDecimal(50)
 
     fun vurdertEtter(personResultater: Set<PersonResultat>): Regelverk {
-        val relevanteVilkårsResultaer = finnRelevanteVilkårsresulaterForRegelverk(personResultater)
+        val relevanteVilkårsResultater = finnRelevanteVilkårsresulaterForRegelverk(personResultater)
 
-        return if (relevanteVilkårsResultaer.isEmpty()) {
-            Regelverk.NASJONALE_REGLER
-        } else if (relevanteVilkårsResultaer.all { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }) {
-            Regelverk.EØS_FORORDNINGEN
-        } else if (relevanteVilkårsResultaer.all { it.vurderesEtter == Regelverk.NASJONALE_REGLER }) {
-            Regelverk.NASJONALE_REGLER
-        } else {
-            Regelverk.NASJONALE_REGLER
+        return when {
+            relevanteVilkårsResultater.isEmpty() -> Regelverk.NASJONALE_REGLER
+            relevanteVilkårsResultater.all { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } -> Regelverk.EØS_FORORDNINGEN
+            relevanteVilkårsResultater.all { it.vurderesEtter == Regelverk.NASJONALE_REGLER } -> Regelverk.NASJONALE_REGLER
+            else -> Regelverk.NASJONALE_REGLER
         }
     }
 
@@ -174,7 +171,7 @@ data class AndelTilkjentYtelse(
                     (it.periodeTom == null || this.stønadFom <= it.periodeTom?.toYearMonth())
             }
             .filter { vilkårResultat ->
-                regelverkavhenigeVilkår().any { it == vilkårResultat.vilkårType }
+                regelverkAvhengigeVilkår().any { it == vilkårResultat.vilkårType }
             }
 }
 
@@ -208,13 +205,12 @@ enum class YtelseType(val klassifisering: String) {
         }
 }
 
-private fun regelverkavhenigeVilkår(): List<Vilkår> {
-    return listOf(
+private fun regelverkAvhengigeVilkår() =
+    listOf(
         Vilkår.BOR_MED_SØKER,
         Vilkår.BOSATT_I_RIKET,
         Vilkår.LOVLIG_OPPHOLD,
     )
-}
 
 fun Collection<AndelTilkjentYtelse>.tilTidslinjerPerPersonOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->

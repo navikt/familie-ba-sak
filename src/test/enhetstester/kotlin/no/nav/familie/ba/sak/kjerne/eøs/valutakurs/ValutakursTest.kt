@@ -120,4 +120,53 @@ class ValutakursTest {
             assertThat(valutakursMedObligatoriskeFelter.erObligatoriskeFelterSatt()).isTrue()
         }
     }
+
+    @Nested
+    inner class `Valider at erAlleValutakurserOppdaterteIMåned` {
+        @Test
+        fun `gir true når alle valutakurser er oppdatert for gitt måned`() {
+            val måned = LocalDate.now().toYearMonth()
+
+            val valutakurs1 =
+                lagValutakurs(
+                    fom = måned,
+                    tom = null,
+                    valutakode = "SEK",
+                )
+
+            val valutakurs2 =
+                lagValutakurs(
+                    fom = måned,
+                    tom = null,
+                    valutakode = "EUR",
+                )
+
+            val valutakurser = listOf(valutakurs1, valutakurs2)
+
+            assertThat(valutakurser.erAlleValutakurserOppdaterteIMåned(måned)).isTrue()
+        }
+
+        @Test
+        fun `gir false når en valutakurs ikke er oppdatert for gitt måned`() {
+            val måned = LocalDate.now().toYearMonth()
+
+            val valutakurs1 =
+                lagValutakurs(
+                    fom = måned.minusMonths(1),
+                    tom = null,
+                    valutakode = "SEK",
+                )
+
+            val valutakurs2 =
+                lagValutakurs(
+                    fom = måned,
+                    tom = null,
+                    valutakode = "EUR",
+                )
+
+            val valutakurser = listOf(valutakurs1, valutakurs2)
+
+            assertThat(valutakurser.erAlleValutakurserOppdaterteIMåned(måned)).isFalse()
+        }
+    }
 }
