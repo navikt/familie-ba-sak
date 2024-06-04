@@ -79,7 +79,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                     WHERE f.status = 'LØPENDE'
                       AND f.arkivert = false 
                       AND ty.stonad_tom >= :måned
-                      AND (v.tom >= :måned OR v.tom IS null)""",
+                      AND (v.tom IS null OR v.tom >= :måned)""",
         nativeQuery = true,
     )
     fun finnAlleFagsakerMedLøpendeValutakursIMåned(måned: YearMonth): List<Long>
