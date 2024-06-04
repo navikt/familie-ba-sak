@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.springframework.stereotype.Service
+import java.time.YearMonth
 
 @Service
 class BehandlingHentOgPersisterService(
@@ -102,8 +103,8 @@ class BehandlingHentOgPersisterService(
     fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> =
         behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
 
-    fun hentSisteIverksatteEØSBehandlingFraLøpendeFagsaker(): List<Long> =
-        behandlingRepository.finnSisteIverksatteEØSBehandlingFraLøpendeFagsaker()
+    fun hentAlleFagsakerMedLøpendeValutakursIMåned(måned: YearMonth): List<Long> =
+        behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned)
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)

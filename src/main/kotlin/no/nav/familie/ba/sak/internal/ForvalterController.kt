@@ -330,7 +330,7 @@ class ForvalterController(
         val erPersonMedTilgangTilÅStarteValutajustering = unleashNextMedContextService.isEnabled(FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ENKELT_SAK)
 
         if (erPersonMedTilgangTilÅStarteValutajustering) {
-            autovedtakMånedligValutajusteringService.utførMånedligValutajusteringPåFagsak(fagsakId = fagsakId, måned = YearMonth.now())
+            autovedtakMånedligValutajusteringService.utførMånedligValutajustering(fagsakId = fagsakId, måned = YearMonth.now())
         } else {
             throw Feil("Du har ikke tilgang til å kjøre valutajustering")
         }
