@@ -105,7 +105,7 @@ private fun lagPersonresultaterTekst(behandling: Behandling?) =
 fun hentTekstForFagsak(behandling: Behandling) =
     """
     Gitt følgende fagsaker for begrunnelse
-      | FagsakId | Fagsaktype | Fagsakstatus |
+      | FagsakId | Fagsaktype | Status |
       | 1 | ${behandling.fagsak.type} | ${behandling.fagsak.status} |"""
 
 fun hentTekstForBehandlinger(
