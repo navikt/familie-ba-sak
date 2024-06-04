@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -104,7 +105,7 @@ class BehandlingHentOgPersisterService(
         behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
 
     fun hentAlleFagsakerMedLøpendeValutakursIMåned(måned: YearMonth): List<Long> =
-        behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned)
+        behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned.førsteDagIInneværendeMåned())
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
