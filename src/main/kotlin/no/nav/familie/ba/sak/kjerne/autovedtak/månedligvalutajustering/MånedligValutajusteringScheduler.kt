@@ -32,7 +32,9 @@ class MånedligValutajusteringScheduler(
      */
     @Scheduled(cron = "0 0 $KLOKKETIME_SCHEDULER_TRIGGES 1 * *")
     @Transactional
-    fun lagMånedligValutajusteringTask(triggerTid: LocalDateTime = hentNesteVirkedag()) {
+    fun lagScheduledMånedligValutajusteringTask() = lagMånedligValutajusteringTask(triggerTid = hentNesteVirkedag())
+
+    fun lagMånedligValutajusteringTask(triggerTid: LocalDateTime) {
         val inneværendeMåned = YearMonth.now()
         if (!unleashService.isEnabled(FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ALLE_SAKER)) {
             logger.info("FeatureToggle ${FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ALLE_SAKER} er skrudd av. Avbryter månedlig valutajustering.")
