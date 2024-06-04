@@ -86,27 +86,27 @@ class AutomatiskOppdaterValutakursServiceTest {
 
     @Test
     fun `oppdaterValutakurserEtterEndringstidspunkt skal automatisk hente valutakurser hver måned etter endringstidspunktet`() {
-        UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
+        UtenlandskPeriodebeløpBuilder(jan(2023), behandlingId)
             .medBeløp("777777777", "EUR", "N", barn1, barn2, barn3)
             .lagreTil(utenlandskPeriodebeløpRepository)
 
-        ValutakursBuilder(jan(2020), behandlingId)
+        ValutakursBuilder(jan(2023), behandlingId)
             .medKurs("111111111", "EUR", barn1, barn2, barn3)
             .medVurderingsform(Vurderingsform.MANUELL)
             .lagreTil(valutakursRepository)
 
-        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2020, 5, 15)
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2023, 5, 15)
 
         automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId)
 
         val forventetUberørteValutakurser =
-            ValutakursBuilder(jan(2020), behandlingId)
+            ValutakursBuilder(jan(2023), behandlingId)
                 .medKurs("1111", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.MANUELL)
                 .bygg()
 
         val forventetOppdaterteValutakurser =
-            ValutakursBuilder(jan(2020), behandlingId)
+            ValutakursBuilder(jan(2023), behandlingId)
                 .medKurs("    45678", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.AUTOMATISK)
                 .bygg()
