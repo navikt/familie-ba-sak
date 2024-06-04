@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
 
+val DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING = YearMonth.of(2023, 1)
+
 @Service
 class AutomatiskOppdaterValutakursService(
     private val valutakursService: ValutakursService,
@@ -94,7 +96,7 @@ class AutomatiskOppdaterValutakursService(
             utenlandskePeriodebeløp
                 .filtrerErUtfylt()
                 .flatMap { utenlandskPeriodebeløp ->
-                    utenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(maxOf(månedEtterSisteManuellePostering, endringstidspunkt))
+                    utenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(maxOf(endringstidspunkt, månedEtterSisteManuellePostering, DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING))
                 }
 
         valutakursService.oppdaterValutakurser(BehandlingId(behandling.id), automatiskGenererteValutakurser)
