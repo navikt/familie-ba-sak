@@ -541,7 +541,7 @@ class BegrunnelseTeksterStepDefinition {
             fagsak = fagsak,
             nyBehanldingId = nyBehandling,
             svarFraEcbMock = svarFraEcbMock,
-        ).utførMånedligValutajustering(fagsakId = forrigeBehandling.id, måned = dagensDato.toYearMonth())
+        ).utførMånedligValutajustering(fagsakId = fagsakId, måned = dagensDato.toYearMonth())
     }
 
     @Så("forvent følgende valutakurser for behandling {}")
