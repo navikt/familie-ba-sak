@@ -44,6 +44,7 @@ class BrevServiceTest {
             valutakursRepository = mockk(),
             kompetanseRepository = mockk(),
             unleashService = unleashService,
+            endretUtbetalingAndelRepository = mockk(),
         )
 
     @BeforeEach
