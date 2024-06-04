@@ -61,9 +61,9 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
                 forrigeBehandling?.id,
             ) +
             hentTekstForVilkårresultater(personResultater.sorterPåFødselsdato(persongrunnlag), behandling.id) +
-            hentTekstForTilkjentYtelse(andeler, persongrunnlag, andelerForrigeBehandling, persongrunnlagForrigeBehandling) +
+            hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) +
             hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
-            hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
+            hentTekstForTilkjentYtelse(andeler, persongrunnlag, andelerForrigeBehandling, persongrunnlagForrigeBehandling) + """
     
     Når vedtaksperiodene genereres for behandling ${behandling.id}""" +
             hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) +
