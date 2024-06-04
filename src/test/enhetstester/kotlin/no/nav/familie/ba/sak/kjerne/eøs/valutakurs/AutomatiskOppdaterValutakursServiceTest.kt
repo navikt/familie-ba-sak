@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import org.assertj.core.api.Assertions.assertThat
@@ -155,6 +156,49 @@ class AutomatiskOppdaterValutakursServiceTest {
         val forventetOppdaterteValutakurser =
             ValutakursBuilder(jan(2023), behandlingId)
                 .medKurs("    4567", "EUR", barn1, barn2, barn3)
+                .medVurderingsform(Vurderingsform.AUTOMATISK)
+                .bygg()
+
+        assertThat(valutakursService.hentValutakurser(behandlingId))
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .ignoringFields("valutakursdato")
+            .ignoringFields("endretTidspunkt")
+            .ignoringFields("opprettetTidspunkt")
+            .isEqualTo(forventetUberørteValutakurser + forventetOppdaterteValutakurser)
+    }
+
+    @Test
+    fun `oppdaterValutakurserEtterEndringstidspunkt skal ikke oppdatere valutakurser før praksisendringsdatoen januar 2023`() {
+        every { behandlingHentOgPersisterService.hent(any()) } answers { lagBehandling(id = firstArg()) }
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
+        every { ecbService.hentValutakurs(any(), any()) } answers {
+            val dato = secondArg<LocalDate>()
+            (dato.month.value % 10).toBigDecimal()
+        }
+
+        UtenlandskPeriodebeløpBuilder(sep(2022), behandlingId)
+            .medBeløp("77778888", "EUR", "N", barn1, barn2, barn3)
+            .lagreTil(utenlandskPeriodebeløpRepository)
+
+        ValutakursBuilder(sep(2022), behandlingId)
+            .medKurs("11111111", "EUR", barn1, barn2, barn3)
+            .medVurderingsform(Vurderingsform.MANUELL)
+            .lagreTil(valutakursRepository)
+
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2022, 5, 15)
+
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId)
+
+        val forventetUberørteValutakurser =
+            ValutakursBuilder(sep(2022), behandlingId)
+                .medKurs("1111", "EUR", barn1, barn2, barn3)
+                .medVurderingsform(Vurderingsform.MANUELL)
+                .bygg()
+
+        val forventetOppdaterteValutakurser =
+            ValutakursBuilder(sep(2022), behandlingId)
+                .medKurs("    2123", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.AUTOMATISK)
                 .bygg()
 
