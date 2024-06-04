@@ -63,7 +63,8 @@ OBS: Pass på at du ikke kjører postgres lokalt på samme port (5432)
 ### Autentisering
 
 For å kalle applikasjonen fra fontend må du sette miljøvariablene BA_SAK_CLIENT_ID og CLIENT_SECRET. Dette kan gjøres
-under `Edit Configurations -> Environment Variables`. Miljøvariablene kan hentes fra `azuread-familie-ba-sak-lokal` i
+under `Edit Configurations -> Environment Variables`. Man kan sette miljøvariablene ved å kjøre hentMiljøVariabler.sh. 
+De kan også hentes fra `azuread-familie-ba-sak-lokal` i
 dev-gcp-clusteret ved å gjøre følgende:
 
 1. Logg på `gcloud`, typisk med kommandoen: `gcloud auth login`
