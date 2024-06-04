@@ -14,6 +14,9 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetaling
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilIKompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtfyltUtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilIUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -38,6 +41,8 @@ fun lagGyldigeBegrunnelserTest(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
     kompetanse: Collection<Kompetanse>,
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
+    utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
+    utenlandskePeriodebeløpForrigeBehandling: Collection<UtenlandskPeriodebeløp>?,
 ): String {
     val test =
         """
@@ -62,6 +67,7 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
             ) +
             hentTekstForVilkårresultater(personResultater.sorterPåFødselsdato(persongrunnlag), behandling.id) +
             hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) +
+            hentTekstForUtenlandskPeriodebeløp(utenlandskePeriodebeløp, utenlandskePeriodebeløpForrigeBehandling) +
             hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
             hentTekstForTilkjentYtelse(andeler, persongrunnlag, andelerForrigeBehandling, persongrunnlagForrigeBehandling) + """
     
@@ -309,6 +315,50 @@ private fun hentKompetanseRader(kompetanser: Collection<Kompetanse>?): String =
             }|${
                 kompetanse.barnetsBostedsland
             } |"""
+        } ?: ""
+
+fun hentTekstForUtenlandskPeriodebeløp(
+    utenlandskPeriodebeløp: Collection<UtenlandskPeriodebeløp>,
+    utenlandskPeriodebeløpForrigeBehandling: Collection<UtenlandskPeriodebeløp>?,
+): String {
+    val rader =
+        hentUtenlandskPeriodebeløpRader(utenlandskPeriodebeløpForrigeBehandling) +
+            hentUtenlandskPeriodebeløpRader(utenlandskPeriodebeløp)
+
+    return if (rader.isEmpty()) {
+        ""
+    } else {
+        """
+
+    Og med utenlandsk periodebeløp for begrunnelse
+      | AktørId | Fra måned | Til måned | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |""" +
+            rader
+    }
+}
+
+private fun hentUtenlandskPeriodebeløpRader(utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>?): String =
+    utenlandskePeriodebeløp
+        ?.map { it.tilIUtenlandskPeriodebeløp() }
+        ?.filterIsInstance<UtfyltUtenlandskPeriodebeløp>()
+        ?.joinToString("") { utenlandskPeriodebeløp ->
+            """
+      | ${
+                utenlandskPeriodebeløp.barnAktører.joinToString(", ") { it.aktørId }
+            } |${
+                utenlandskPeriodebeløp.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
+            }|${
+                utenlandskPeriodebeløp.tom?.sisteDagIInneværendeMåned()?.tilddMMyyyy() ?: ""
+            }|${
+                utenlandskPeriodebeløp.behandlingId
+            }|${
+                utenlandskPeriodebeløp.beløp
+            }|${
+                utenlandskPeriodebeløp.valutakode
+            }|${
+                utenlandskPeriodebeløp.intervall
+            }|${
+                utenlandskPeriodebeløp.utbetalingsland
+            }|"""
         } ?: ""
 
 fun hentTekstForGyligeBegrunnelserForVedtaksperiodene(
