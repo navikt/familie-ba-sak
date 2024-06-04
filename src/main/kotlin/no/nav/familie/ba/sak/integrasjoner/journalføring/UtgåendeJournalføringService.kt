@@ -121,8 +121,7 @@ class UtgåendeJournalføringService(
         fagsakId: String,
         behandlingId: Long?,
         tilVerge: Boolean,
-    ) =
-        "${fagsakId}_${behandlingId}${if (tilVerge) "_verge" else ""}_${MDCOperations.getCallId()}"
+    ) = listOfNotNull(fagsakId, behandlingId, if (tilVerge) "verge" else null, MDCOperations.getCallId()).joinToString("_")
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
