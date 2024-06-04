@@ -58,6 +58,6 @@ class MånedligValutajusteringScheduler(
         ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0)
 
     companion object {
-        const val KLOKKETIME_SCHEDULER_TRIGGES = 6
+        const val KLOKKETIME_SCHEDULER_TRIGGES = 2
     }
 }
