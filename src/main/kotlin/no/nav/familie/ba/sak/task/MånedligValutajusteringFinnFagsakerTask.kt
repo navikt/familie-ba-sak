@@ -43,7 +43,7 @@ class MånedligValutajusteringFinnFagsakerTask(
 
         logger.info("Starter månedlig valutajustering for ${data.måned}")
 
-        val fagsakerMedLøpendeValutakurs = behandlingService.hentAlleFagsakerMedLøpendeValutakursIMåned(data.måned).toSet().sorted()
+        val fagsakerMedLøpendeValutakurs = behandlingService.hentAlleFagsakerMedLøpendeValutakursIMåned(data.måned)
 
         // Hardkoder denne til å kun ta 10 behanldinger i første omgang slik at vi er helt sikre på at vi ikke kjører på alle behandlinger mens vi tester.
         fagsakerMedLøpendeValutakurs.take(10).forEach { fagsakId ->
