@@ -17,6 +17,9 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilIKompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtfyltUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilIUtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.UtfyltValutakurs
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilIValutakurs
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -43,6 +46,8 @@ fun lagGyldigeBegrunnelserTest(
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
     utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
     utenlandskePeriodebeløpForrigeBehandling: Collection<UtenlandskPeriodebeløp>?,
+    valutakurser: Collection<Valutakurs>,
+    valutakurserForrigeBehandling: Collection<Valutakurs>?,
 ): String {
     val test =
         """
@@ -68,6 +73,7 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
             hentTekstForVilkårresultater(personResultater.sorterPåFødselsdato(persongrunnlag), behandling.id) +
             hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) +
             hentTekstForUtenlandskPeriodebeløp(utenlandskePeriodebeløp, utenlandskePeriodebeløpForrigeBehandling) +
+            hentTekstForValutakurser(valutakurser, valutakurserForrigeBehandling) +
             hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
             hentTekstForTilkjentYtelse(andeler, persongrunnlag, andelerForrigeBehandling, persongrunnlagForrigeBehandling) + """
     
@@ -358,6 +364,48 @@ private fun hentUtenlandskPeriodebeløpRader(utenlandskePeriodebeløp: Collectio
                 utenlandskPeriodebeløp.intervall
             }|${
                 utenlandskPeriodebeløp.utbetalingsland
+            }|"""
+        } ?: ""
+
+fun hentTekstForValutakurser(
+    valutakurser: Collection<Valutakurs>,
+    valutakurserForrigeBehandling: Collection<Valutakurs>?,
+): String {
+    val rader =
+        hentValutakursRader(valutakurserForrigeBehandling) +
+            hentValutakursRader(valutakurser)
+
+    return if (rader.isEmpty()) {
+        ""
+    } else {
+        """
+
+    Og med utenlandsk periodebeløp for begrunnelse
+      | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs |""" +
+            rader
+    }
+}
+
+private fun hentValutakursRader(valutakurser: Collection<Valutakurs>?): String =
+    valutakurser
+        ?.map { it.tilIValutakurs() }
+        ?.filterIsInstance<UtfyltValutakurs>()
+        ?.joinToString("") { valutakurs ->
+            """
+      | ${
+                valutakurs.barnAktører.joinToString(", ") { it.aktørId }
+            } |${
+                valutakurs.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
+            }|${
+                valutakurs.tom?.sisteDagIInneværendeMåned()?.tilddMMyyyy() ?: ""
+            }|${
+                valutakurs.behandlingId
+            }|${
+                valutakurs.valutakursdato
+            }|${
+                valutakurs.valutakode
+            }|${
+                valutakurs.kurs
             }|"""
         } ?: ""
 
