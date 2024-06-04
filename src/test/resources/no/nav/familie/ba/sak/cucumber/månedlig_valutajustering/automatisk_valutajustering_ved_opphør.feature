@@ -5,8 +5,8 @@ Egenskap: Automatisk valutajustering ved opphør
 
   Bakgrunn:
     Gitt følgende fagsaker for begrunnelse
-      | FagsakId | Fagsaktype | Fagsakstatus |
-      | 1        | NORMAL     | LØPENDE      |
+      | FagsakId | Fagsaktype | Status  |
+      | 1        | NORMAL     | LØPENDE |
 
     Gitt følgende behandling
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
