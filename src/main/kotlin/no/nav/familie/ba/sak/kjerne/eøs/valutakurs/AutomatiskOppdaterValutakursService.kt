@@ -77,7 +77,6 @@ class AutomatiskOppdaterValutakursService(
         endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id).toYearMonth(),
     )
 
-    @Transactional
     private fun oppdaterValutakurserEtterEndringstidspunkt(
         behandling: Behandling,
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
