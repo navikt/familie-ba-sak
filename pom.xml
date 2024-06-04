@@ -40,7 +40,7 @@
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>2.1.2</mock-oauth2-server.version>
+        <mock-oauth2-server.version>2.1.5</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
@@ -48,7 +48,6 @@
         <testcontainers.postgresql.version>1.19.8</testcontainers.postgresql.version>
         <unleash.version>9.2.2</unleash.version>
         <maven.model.version>3.9.7</maven.model.version>
-        <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.11.3</avro.version>
         <confluent.version>7.6.1</confluent.version>
@@ -245,12 +244,6 @@
             <groupId>no.nav.security</groupId>
             <artifactId>token-client-core</artifactId>
             <version>${token-validation-spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.security</groupId>
-            <artifactId>token-validation-test-support</artifactId>
-            <version>${token-validation-test-support.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>no.nav.security</groupId>
