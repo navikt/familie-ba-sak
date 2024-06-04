@@ -169,8 +169,8 @@ class AutomatiskOppdaterValutakursServiceTest {
 
     @Test
     fun `oppdaterValutakurserEtterEndringstidspunkt skal skal kun lage automatiske valutakurser etter siste manuelle postering`() {
-        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2020, 2, 15)
-        val tomDatoSisteManuellePostering = LocalDate.of(2020, 4, 30)
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2023, 2, 15)
+        val tomDatoSisteManuellePostering = LocalDate.of(2023, 4, 30)
         every { simuleringService.oppdaterSimuleringPåBehandlingVedBehov(any()) } returns
             listOf(
                 mockØkonomiSimuleringMottaker(
@@ -178,18 +178,18 @@ class AutomatiskOppdaterValutakursServiceTest {
                         listOf(
                             mockØkonomiSimuleringPostering(
                                 fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT,
-                                fom = LocalDate.of(2019, 3, 1),
+                                fom = LocalDate.of(2023, 4, 1),
                                 tom = tomDatoSisteManuellePostering,
                             ),
                         ),
                 ),
             )
 
-        UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
+        UtenlandskPeriodebeløpBuilder(jan(2023), behandlingId)
             .medBeløp("777777777", "EUR", "N", barn1, barn2, barn3)
             .lagreTil(utenlandskPeriodebeløpRepository)
 
-        ValutakursBuilder(jan(2020), behandlingId)
+        ValutakursBuilder(jan(2023), behandlingId)
             .medKurs("111111111", "EUR", barn1, barn2, barn3)
             .medVurderingsform(Vurderingsform.MANUELL)
             .lagreTil(valutakursRepository)
@@ -197,13 +197,13 @@ class AutomatiskOppdaterValutakursServiceTest {
         automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId)
 
         val forventetUberørteValutakurser =
-            ValutakursBuilder(jan(2020), behandlingId)
+            ValutakursBuilder(jan(2023), behandlingId)
                 .medKurs("1111", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.MANUELL)
                 .bygg()
 
         val forventetOppdaterteValutakurser =
-            ValutakursBuilder(jan(2020), behandlingId)
+            ValutakursBuilder(jan(2023), behandlingId)
                 .medKurs("    45678", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.AUTOMATISK)
                 .bygg()
