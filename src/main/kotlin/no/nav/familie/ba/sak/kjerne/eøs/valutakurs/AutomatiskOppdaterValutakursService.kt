@@ -84,6 +84,8 @@ class AutomatiskOppdaterValutakursService(
     ) {
         if (behandling.erMigrering() || behandling.opprettetÅrsak.erManuellMigreringsårsak()) return
 
+        if (behandling.skalBehandlesAutomatisk) return
+
         val vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)
         if (vurderingsstrategiForValutakurser?.vurderingsstrategiForValutakurser == VurderingsstrategiForValutakurser.MANUELL) return
 

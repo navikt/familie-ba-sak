@@ -8,5 +8,6 @@ fun mockSimuleringService(): SimuleringService {
     val simuleringService = mockk<SimuleringService>()
     every { simuleringService.oppdaterSimuleringPåBehandling(any()) } returns emptyList()
     every { simuleringService.hentSimuleringPåBehandling(any()) } returns emptyList()
+    every { simuleringService.oppdaterSimuleringPåBehandlingVedBehov(any()) } returns emptyList()
     return simuleringService
 }

@@ -1,16 +1,10 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.erAlleValutakurserOppdaterteIMåned
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -46,14 +40,15 @@ class MånedligValutajusteringFinnFagsakerTask(
 
         logger.info("Starter månedlig valutajustering for ${data.måned}")
 
-        val sisteEøsBehanldingerIFagsakerMedEøsBehandlinger = behandlingService.hentSisteIverksatteEØSBehandlingFraLøpendeFagsaker().toSet().sorted()
+        val fagsakerMedLøpendeValutakurs = behandlingService.hentAlleFagsakerMedLøpendeValutakursIMåned(data.måned).toSet().sorted()
 
         // Hardkoder denne til å kun ta 10 behanldinger i første omgang slik at vi er helt sikre på at vi ikke kjører på alle behandlinger mens vi tester.
-        sisteEøsBehanldingerIFagsakerMedEøsBehandlinger.take(10).forEach { behandlingid ->
-            val valutakurser = valutakursService.hentValutakurser(BehandlingId(behandlingid))
+        fagsakerMedLøpendeValutakurs.take(10).forEach { fagsakId ->
+            val sisteVedtatteBehandling = behandlingService.hentSisteBehandlingSomErVedtatt(fagsakId) ?: throw Feil("Fant ikke siste vedtatte behandling for $fagsakId")
+            val valutakurser = valutakursService.hentValutakurser(BehandlingId(sisteVedtatteBehandling.id))
 
             if (!valutakurser.erAlleValutakurserOppdaterteIMåned(data.måned)) {
-                taskRepository.save(MånedligValutajusteringTask.lagTask(behandlingid, data.måned))
+                taskRepository.save(MånedligValutajusteringTask.lagTask(fagsakId, data.måned))
             }
         }
     }
@@ -73,11 +68,5 @@ class MånedligValutajusteringFinnFagsakerTask(
             ).medTriggerTid(
                 triggerTid = triggerTid,
             )
-
-        fun erSekundærlandIMåned(
-            kompetanser: Collection<Kompetanse>,
-            yearMonth: YearMonth,
-        ) = kompetanser.filter { (it.fom ?: TIDENES_MORGEN.toYearMonth()).isSameOrBefore(yearMonth) && (it.tom ?: TIDENES_ENDE.toYearMonth()).isSameOrAfter(yearMonth) }
-            .any { kompetanse -> kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
     }
 }
