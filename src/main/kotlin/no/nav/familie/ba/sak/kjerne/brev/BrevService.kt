@@ -255,7 +255,7 @@ class BrevService(
         utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?,
     ): UtbetalingstabellAutomatiskValutajustering? =
         utbetalingerPerMndEøs?.let {
-            val endringstidspunkt = hentSorterteVedtaksperioderMedBegrunnelser(vedtak).first().fom!!.tilMånedTidspunkt()
+            val endringstidspunkt = hentSorterteVedtaksperioderMedBegrunnelser(vedtak).first { it.fom != null }.fom!!.tilMånedTidspunkt()
             val landkoder = integrasjonClient.hentLandkoderISO2()
             val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id)
             return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt, landkoder, kompetanser)
