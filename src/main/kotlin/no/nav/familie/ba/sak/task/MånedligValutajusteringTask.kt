@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.log.IdUtils
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -51,6 +52,7 @@ class MånedligValutajusteringTask(
                     mapOf(
                         "fagsakId" to fagsakId.toString(),
                         "måned" to valutajusteringsMåned.toString(),
+                        "callId" to IdUtils.generateId(),
                     ).toProperties(),
             )
     }
