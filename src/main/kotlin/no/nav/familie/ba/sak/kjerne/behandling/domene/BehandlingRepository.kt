@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 
 interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query(value = "SELECT b FROM Behandling b WHERE b.id = :behandlingId")
@@ -79,10 +78,10 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                     WHERE f.status = 'LØPENDE'
                       AND f.arkivert = false 
                       AND ty.stonad_tom >= :måned
-                      AND (v.tom >= :måned OR v.tom IS null)""",
+                      AND (v.tom IS null OR v.tom >= :måned)""",
         nativeQuery = true,
     )
-    fun finnAlleFagsakerMedLøpendeValutakursIMåned(måned: YearMonth): List<Long>
+    fun finnAlleFagsakerMedLøpendeValutakursIMåned(måned: LocalDate): List<Long>
 
     @Query(
         """select b from Behandling b

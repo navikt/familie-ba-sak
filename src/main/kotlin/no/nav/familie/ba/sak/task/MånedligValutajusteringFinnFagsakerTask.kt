@@ -9,10 +9,13 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.erAlleValutakurserOppdaterteIMåned
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.log.IdUtils
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -40,7 +43,7 @@ class MånedligValutajusteringFinnFagsakerTask(
 
         logger.info("Starter månedlig valutajustering for ${data.måned}")
 
-        val fagsakerMedLøpendeValutakurs = behandlingService.hentAlleFagsakerMedLøpendeValutakursIMåned(data.måned).toSet().sorted()
+        val fagsakerMedLøpendeValutakurs = behandlingService.hentAlleFagsakerMedLøpendeValutakursIMåned(data.måned)
 
         // Hardkoder denne til å kun ta 10 behanldinger i første omgang slik at vi er helt sikre på at vi ikke kjører på alle behandlinger mens vi tester.
         fagsakerMedLøpendeValutakurs.take(10).forEach { fagsakId ->
@@ -64,7 +67,10 @@ class MånedligValutajusteringFinnFagsakerTask(
             Task(
                 type = MånedligValutajusteringFinnFagsakerTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(MånedligValutajusteringFinnFagsakerTaskDto(inneværendeMåned)),
-                mapOf("måned" to inneværendeMåned.toString()).toProperties(),
+                mapOf(
+                    "måned" to inneværendeMåned.toString(),
+                    "callId" to (MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()),
+                ).toProperties(),
             ).medTriggerTid(
                 triggerTid = triggerTid,
             )
