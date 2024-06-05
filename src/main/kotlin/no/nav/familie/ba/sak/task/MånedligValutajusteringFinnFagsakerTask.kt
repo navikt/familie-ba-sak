@@ -52,6 +52,8 @@ class MånedligValutajusteringFinnFagsakerTask(
 
             if (!valutakurser.erAlleValutakurserOppdaterteIMåned(data.måned)) {
                 taskRepository.save(MånedligValutajusteringTask.lagTask(fagsakId, data.måned))
+            } else {
+                logger.info("Valutakursene er allerede oppdatert for fagsak $fagsakId. Hopper over")
             }
         }
     }
