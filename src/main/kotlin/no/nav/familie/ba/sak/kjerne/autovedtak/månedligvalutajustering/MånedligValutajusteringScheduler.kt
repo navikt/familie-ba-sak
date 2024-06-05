@@ -32,7 +32,11 @@ class MånedligValutajusteringScheduler(
      */
     @Scheduled(cron = "0 0 $KLOKKETIME_SCHEDULER_TRIGGES 1 * *")
     @Transactional
-    fun lagScheduledMånedligValutajusteringTask() = lagMånedligValutajusteringTask(triggerTid = hentNesteVirkedag())
+    fun lagScheduledMånedligValutajusteringTask() {
+        if (leaderClientService.isLeader()) {
+            lagMånedligValutajusteringTask(triggerTid = hentNesteVirkedag())
+        }
+    }
 
     fun lagMånedligValutajusteringTask(triggerTid: LocalDateTime) {
         val inneværendeMåned = YearMonth.now()
@@ -41,15 +45,13 @@ class MånedligValutajusteringScheduler(
             return
         }
 
-        if (leaderClientService.isLeader()) {
-            logger.info("Kjører scheduled månedlig valutajustering for $inneværendeMåned")
-            taskRepository.save(
-                MånedligValutajusteringFinnFagsakerTask.lagTask(
-                    inneværendeMåned = inneværendeMåned,
-                    triggerTid = triggerTid,
-                ),
-            )
-        }
+        logger.info("Kjører scheduled månedlig valutajustering for $inneværendeMåned")
+        taskRepository.save(
+            MånedligValutajusteringFinnFagsakerTask.lagTask(
+                inneværendeMåned = inneværendeMåned,
+                triggerTid = triggerTid,
+            ),
+        )
     }
 
     private fun hentNesteVirkedag(): LocalDateTime =
