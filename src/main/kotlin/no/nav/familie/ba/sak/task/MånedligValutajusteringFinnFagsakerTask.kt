@@ -46,7 +46,7 @@ class MånedligValutajusteringFinnFagsakerTask(
         val fagsakerMedLøpendeValutakurs = behandlingService.hentAlleFagsakerMedLøpendeValutakursIMåned(data.måned)
 
         // Hardkoder denne til å kun ta 10 behanldinger i første omgang slik at vi er helt sikre på at vi ikke kjører på alle behandlinger mens vi tester.
-        fagsakerMedLøpendeValutakurs.take(10).forEach { fagsakId ->
+        fagsakerMedLøpendeValutakurs.take(100).forEach { fagsakId ->
             val sisteVedtatteBehandling = behandlingService.hentSisteBehandlingSomErVedtatt(fagsakId) ?: throw Feil("Fant ikke siste vedtatte behandling for $fagsakId")
             val valutakurser = valutakursService.hentValutakurser(BehandlingId(sisteVedtatteBehandling.id))
 
@@ -65,7 +65,7 @@ class MånedligValutajusteringFinnFagsakerTask(
             triggerTid: LocalDateTime,
         ) =
             Task(
-                type = MånedligValutajusteringFinnFagsakerTask.TASK_STEP_TYPE,
+                type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(MånedligValutajusteringFinnFagsakerTaskDto(inneværendeMåned)),
                 mapOf(
                     "måned" to inneværendeMåned.toString(),

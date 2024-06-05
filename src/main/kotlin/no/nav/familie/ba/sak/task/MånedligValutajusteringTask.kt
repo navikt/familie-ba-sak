@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.log.IdUtils
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -45,12 +46,13 @@ class MånedligValutajusteringTask(
             valutajusteringsMåned: YearMonth,
         ): Task =
             Task(
-                type = MånedligValutajusteringTask.TASK_STEP_TYPE,
+                type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(MånedligValutajusteringTaskDto(fagsakId = fagsakId, måned = valutajusteringsMåned)),
                 properties =
                     mapOf(
                         "fagsakId" to fagsakId.toString(),
                         "måned" to valutajusteringsMåned.toString(),
+                        "callId" to IdUtils.generateId(),
                     ).toProperties(),
             )
     }
