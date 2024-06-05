@@ -8,7 +8,6 @@ import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.time.YearMonth
@@ -27,8 +26,6 @@ class MånedligValutajusteringTask(
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val taskdto = objectMapper.readValue(task.payload, MånedligValutajusteringTaskDto::class.java)
-        logger.info("Starter Task månedlig valutajustering for $taskdto")
-
         autovedtakMånedligValutajusteringService.utførMånedligValutajustering(
             fagsakId = taskdto.fagsakId,
             måned = taskdto.måned,
@@ -42,7 +39,6 @@ class MånedligValutajusteringTask(
 
     companion object {
         const val TASK_STEP_TYPE = "månedligValutajustering"
-        private val logger = LoggerFactory.getLogger(MånedligValutajusteringTask::class.java)
 
         fun lagTask(
             fagsakId: Long,
