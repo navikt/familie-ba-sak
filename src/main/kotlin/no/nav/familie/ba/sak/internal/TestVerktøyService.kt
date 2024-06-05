@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -29,6 +31,8 @@ class TestVerktøyService(
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val vedtakRepository: VedtakRepository,
     private val kompetanseRepository: KompetanseRepository,
+    private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
+    private val valutakursRepository: ValutakursRepository,
 ) {
     @Transactional
     fun oppdaterVilkårUtenFomTilFødselsdato(behandlingId: Long) {
@@ -82,6 +86,14 @@ class TestVerktøyService(
         val kompetanseForrigeBehandling =
             forrigeBehandling?.let { kompetanseRepository.finnFraBehandlingId(it.id) }
 
+        val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId)
+        val utenlandskePeriodebeløpForrigeBehandling =
+            forrigeBehandling?.let { utenlandskPeriodebeløpRepository.finnFraBehandlingId(it.id) }
+
+        val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId)
+        val valutakurserForrigeBehandling =
+            forrigeBehandling?.let { valutakursRepository.finnFraBehandlingId(it.id) }
+
         val vedtaksperioder =
             vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
                 vedtakRepository.findByBehandlingAndAktiv(behandlingId).id,
@@ -101,6 +113,10 @@ class TestVerktøyService(
             endredeUtbetalingerForrigeBehandling = endredeUtbetalingerForrigeBehandling,
             kompetanse = kompetanse,
             kompetanseForrigeBehandling = kompetanseForrigeBehandling,
+            utenlandskePeriodebeløp = utenlandskePeriodebeløp,
+            utenlandskePeriodebeløpForrigeBehandling = utenlandskePeriodebeløpForrigeBehandling,
+            valutakurser = valutakurser,
+            valutakurserForrigeBehandling = valutakurserForrigeBehandling,
         )
     }
 

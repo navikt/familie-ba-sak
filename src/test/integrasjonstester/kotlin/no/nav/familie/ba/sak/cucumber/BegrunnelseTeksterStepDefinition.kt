@@ -541,7 +541,20 @@ class BegrunnelseTeksterStepDefinition {
             fagsak = fagsak,
             nyBehanldingId = nyBehandling,
             svarFraEcbMock = svarFraEcbMock,
-        ).utførMånedligValutajustering(behandlingid = forrigeBehandling.id, måned = dagensDato.toYearMonth())
+        ).utførMånedligValutajustering(fagsakId = fagsakId, måned = dagensDato.toYearMonth())
+    }
+
+    @Så("forvent følgende valutakurser for behandling {}")
+    fun `forvent følgende valutakurser for behandling`(
+        behandlingId: Long,
+        dataTable: DataTable,
+    ) {
+        val forventedeValutakurser = lagValutakurs(dataTable.asMaps(), persongrunnlag)
+
+        assertThat(valutakurs[behandlingId]!!.sortedBy { it.valutakursdato })
+            .usingRecursiveComparison()
+            .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*id")
+            .isEqualTo(forventedeValutakurser[behandlingId]!!.sortedBy { it.valutakursdato })
     }
 }
 

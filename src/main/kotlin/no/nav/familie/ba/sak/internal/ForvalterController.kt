@@ -50,6 +50,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import kotlin.concurrent.thread
@@ -330,7 +331,7 @@ class ForvalterController(
         val erPersonMedTilgangTilÅStarteValutajustering = unleashNextMedContextService.isEnabled(FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ENKELT_SAK)
 
         if (erPersonMedTilgangTilÅStarteValutajustering) {
-            autovedtakMånedligValutajusteringService.utførMånedligValutajusteringPåFagsak(fagsakId = fagsakId, måned = YearMonth.now())
+            autovedtakMånedligValutajusteringService.utførMånedligValutajustering(fagsakId = fagsakId, måned = YearMonth.now())
         } else {
             throw Feil("Du har ikke tilgang til å kjøre valutajustering")
         }
@@ -341,12 +342,8 @@ class ForvalterController(
 
     @PostMapping("/start-valutajustering-scheduler")
     @Operation(summary = "Start valutajustering for alle sekundærlandsaker i gjeldende måned")
-    fun lagMånedligValuttajusteringTask(): ResponseEntity<Ressurs<String>> {
-        if (envService.erDev()) {
-            månedligValutajusteringScheduler.lagMånedligValutajusteringTask()
-        } else {
-            throw Feil("Kan ikke kjøre valutajustering fra forvaltercontroller i prod")
-        }
+    fun lagMånedligValutajusteringTask(): ResponseEntity<Ressurs<String>> {
+        månedligValutajusteringScheduler.lagMånedligValutajusteringTask(triggerTid = LocalDateTime.now())
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
@@ -13,6 +14,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
@@ -43,6 +48,8 @@ class BeslutteVedtak(
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val saksbehandlerContext: SaksbehandlerContext,
     private val automatiskBeslutningService: AutomatiskBeslutningService,
+    private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
+    private val valutakursRepository: ValutakursRepository,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -92,6 +99,12 @@ class BeslutteVedtak(
             beslutning = data,
             behandlingErAutomatiskBesluttet = behandlingSkalAutomatiskBesluttes,
         )
+
+        val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id)
+        val erAutomatiskeValutakurserPåBehandling = valutakurser.any { it.vurderingsform == Vurderingsform.AUTOMATISK }
+        if (unleashService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) && erAutomatiskeValutakurserPåBehandling) {
+            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandling.id))
+        }
 
         return if (data.beslutning.erGodkjent()) {
             val vedtak =

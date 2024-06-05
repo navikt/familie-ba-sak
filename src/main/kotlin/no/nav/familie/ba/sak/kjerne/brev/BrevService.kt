@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
@@ -37,15 +36,20 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.KorreksjonVedtaksbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.KorreksjonVedtaksbrevData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.KorrigertVedtakData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.OpphørMedEndring
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.OpphørMedEndringSammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Opphørt
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.OpphørtSammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.RefusjonEøsAvklart
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.RefusjonEøsUavklart
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingstabellAutomatiskValutajustering
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndring
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndringSammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelterSammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
@@ -62,6 +66,8 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
+import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -91,6 +97,8 @@ class BrevService(
     private val kompetanseRepository: KompetanseRepository,
     private val valutakursRepository: ValutakursRepository,
     private val unleashService: UnleashNextMedContextService,
+    private val sammensattKontrollsakService: SammensattKontrollsakService,
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -122,7 +130,7 @@ class BrevService(
                     duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
                     duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
                     informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
-                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter),
+                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter.utbetalingerPerMndEøs),
                 )
 
             Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON ->
@@ -148,7 +156,7 @@ class BrevService(
                     duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
                     duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
                     informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
-                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter),
+                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter.utbetalingerPerMndEøs),
                 )
 
             Brevmal.VEDTAK_ENDRING_INSTITUSJON ->
@@ -182,7 +190,7 @@ class BrevService(
                     refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
                     refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
                     erKlage = behandling.erKlage(),
-                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter),
+                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter.utbetalingerPerMndEøs),
                 )
 
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON ->
@@ -211,7 +219,7 @@ class BrevService(
                     duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
                     duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
                     informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
-                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter),
+                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelter.utbetalingerPerMndEøs),
                 )
 
             Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON ->
@@ -244,10 +252,10 @@ class BrevService(
 
     private fun hentLandOgStartdatoForUtbetalingstabell(
         vedtak: Vedtak,
-        vedtakFellesfelter: VedtakFellesfelter,
+        utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?,
     ): UtbetalingstabellAutomatiskValutajustering? =
-        vedtakFellesfelter.utbetalingerPerMndEøs?.let {
-            val endringstidspunkt = hentSorterteVedtaksperioderMedBegrunnelser(vedtak).first().fom!!.tilMånedTidspunkt()
+        utbetalingerPerMndEøs?.let {
+            val endringstidspunkt = hentSorterteVedtaksperioderMedBegrunnelser(vedtak).first { it.fom != null }.fom!!.tilMånedTidspunkt()
             val landkoder = integrasjonClient.hentLandkoderISO2()
             val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id)
             return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt, landkoder, kompetanser)
@@ -341,6 +349,70 @@ class BrevService(
             )
         }
 
+    fun hentSammensattKontrollsakBrevdata(
+        vedtak: Vedtak,
+        sammensattKontrollsak: SammensattKontrollsak,
+    ): Vedtaksbrev {
+        val behandling = vedtak.behandling
+
+        val brevmal =
+            brevmalService.hentBrevmal(
+                vedtak.behandling,
+            )
+
+        val skalMeldeFraOmEndringerEøsSelvstendigRett by lazy {
+            vedtaksperiodeService.skalMeldeFraOmEndringerEøsSelvstendigRett(vedtak)
+        }
+
+        val skalInkludereInformasjonOmUtbetaling by lazy {
+            sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling)
+        }
+
+        val vedtakFellesfelterSammensattKontrollsak = lagVedtaksbrevFellesfelterSammensattKontrollsak(vedtak = vedtak, sammensattKontrollsak = sammensattKontrollsak)
+        return when (brevmal) {
+            Brevmal.VEDTAK_OPPHØRT -> {
+                OpphørtSammensattKontrollsak(
+                    vedtakFellesfelterSammensattKontrollsak = vedtakFellesfelterSammensattKontrollsak,
+                    erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
+                )
+            }
+
+            Brevmal.VEDTAK_OPPHØR_MED_ENDRING -> {
+                OpphørMedEndringSammensattKontrollsak(
+                    vedtakFellesfelter = vedtakFellesfelterSammensattKontrollsak,
+                    etterbetaling = hentEtterbetaling(vedtak),
+                    erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
+                    refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
+                    refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
+                    erKlage = behandling.erKlage(),
+                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelterSammensattKontrollsak.utbetalingerPerMndEøs),
+                )
+            }
+
+            Brevmal.VEDTAK_ENDRING -> {
+                VedtakEndringSammensattKontrollsak(
+                    vedtakFellesfelter = vedtakFellesfelterSammensattKontrollsak,
+                    etterbetaling = hentEtterbetaling(vedtak),
+                    erKlage = behandling.erKlage(),
+                    erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
+                    informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
+                    feilutbetaltValuta =
+                        vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)?.let {
+                            FeilutbetaltValuta(perioderMedForMyeUtbetalt = it)
+                        },
+                    refusjonEosAvklart = beskrivPerioderMedAvklartRefusjonEøs(vedtak),
+                    refusjonEosUavklart = beskrivPerioderMedUavklartRefusjonEøs(vedtak),
+                    duMåMeldeFraOmEndringer = !skalMeldeFraOmEndringerEøsSelvstendigRett,
+                    duMåMeldeFraOmEndringerEøsSelvstendigRett = skalMeldeFraOmEndringerEøsSelvstendigRett,
+                    informasjonOmUtbetaling = skalInkludereInformasjonOmUtbetaling,
+                    utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(vedtak, vedtakFellesfelterSammensattKontrollsak.utbetalingerPerMndEøs),
+                )
+            }
+
+            else -> throw Feil("Brevmalen $brevmal er ikke støttet for sammensatte kontrollsaker")
+        }
+    }
+
     private fun hentSorterteVedtaksperioderMedBegrunnelser(vedtak: Vedtak) =
         vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
             .filter { it.erBegrunnet() }
@@ -409,6 +481,33 @@ class BrevService(
             gjelder = if (organisasjonsnummer != null) grunnlagOgSignaturData.grunnlag.søker.navn else null,
             korrigertVedtakData = korrigertVedtak?.let { KorrigertVedtakData(datoKorrigertVedtak = it.vedtaksdato.tilDagMånedÅr()) },
             utbetalingerPerMndEøs = utbetalingerPerMndEøs,
+        )
+    }
+
+    private fun lagVedtaksbrevFellesfelterSammensattKontrollsak(
+        vedtak: Vedtak,
+        sammensattKontrollsak: SammensattKontrollsak,
+    ): VedtakFellesfelterSammensattKontrollsak {
+        val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
+
+        val organisasjonsnummer = vedtak.behandling.fagsak.institusjon?.orgNummer
+        val organisasjonsnavn = organisasjonsnummer?.let { organisasjonService.hentOrganisasjon(it).navn }
+
+        val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(vedtak.behandling.id)
+
+        val utbetalingerPerMndEøs = hentUtbetalingerPerMndEøs(vedtak)
+
+        return VedtakFellesfelterSammensattKontrollsak(
+            enhet = grunnlagOgSignaturData.enhet,
+            saksbehandler = grunnlagOgSignaturData.saksbehandler,
+            beslutter = grunnlagOgSignaturData.beslutter,
+            søkerNavn = organisasjonsnavn ?: grunnlagOgSignaturData.grunnlag.søker.navn,
+            søkerFødselsnummer = grunnlagOgSignaturData.grunnlag.søker.aktør.aktivFødselsnummer(),
+            organisasjonsnummer = organisasjonsnummer,
+            gjelder = if (organisasjonsnummer != null) grunnlagOgSignaturData.grunnlag.søker.navn else null,
+            korrigertVedtakData = korrigertVedtak?.let { KorrigertVedtakData(datoKorrigertVedtak = it.vedtaksdato.tilDagMånedÅr()) },
+            utbetalingerPerMndEøs = utbetalingerPerMndEøs,
+            sammensattKontrollsakFritekst = sammensattKontrollsak.fritekst,
         )
     }
 
@@ -485,19 +584,21 @@ class BrevService(
         val behandlingId = vedtak.behandling.id
         val endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId = behandlingId)
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId = behandlingId)
+        val endretutbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandlingId)
 
         if (!skalHenteUtbetalingerEøs(endringstidspunkt = endringstidspunkt, valutakurser)) {
             return null
         }
 
-        val andelerForVedtaksperioderPerAktørOgType = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId).tilTidslinjerPerPersonOgType()
+        val andelerTilkjentYtelseForBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandlingId).toList()
 
         return hentUtbetalingerPerMndEøs(
             endringstidspunkt = endringstidspunkt,
-            andelerForVedtaksperioderPerAktørOgType = andelerForVedtaksperioderPerAktørOgType,
+            andelTilkjentYtelserForBehandling = andelerTilkjentYtelseForBehandling,
             utenlandskePeriodebeløp = utenlandskePeriodebeløp,
             valutakurser = valutakurser,
+            endretutbetalingAndeler = endretutbetalingAndeler,
         )
     }
 

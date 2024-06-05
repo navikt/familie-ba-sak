@@ -175,13 +175,11 @@ class RestartAvSmåbarnstilleggTest(
     fun `Skal finne en fagsak hvor småbarnstillegg starter opp igjen inneværende måned selv om det er utført satsendring`() {
         val satsendringDato = SatsService.finnSisteSatsFor(SatsType.SMA).gyldigFom.toYearMonth()
 
+        val senesteSatsTidspunkt = LocalDate.of(2022, 12, 1)
+        val barnFødselsdato = senesteSatsTidspunkt.minusYears(1).førsteDagIInneværendeMåned()
+
         mockkObject(SatsTidspunkt)
-        every { SatsTidspunkt.senesteSatsTidspunkt } returns
-            LocalDate.of(
-                2022,
-                12,
-                1,
-            ) // Mocker slik at behandling får gammel sats
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns senesteSatsTidspunkt // Mocker slik at behandling får gammel sats
 
         // Fagsak - har restart dato på samme dato som satsendringen
         val personScenario: RestScenario = lagScenario(barnFødselsdato)

@@ -20,6 +20,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -51,6 +53,8 @@ class BeslutteVedtakTest {
     private val automatiskBeslutningService: AutomatiskBeslutningService = mockk()
     private val saksbehandlerContext = mockk<SaksbehandlerContext>()
     private val loggService = mockk<LoggService>()
+    private val automatiskOppdaterValutakursService = mockk<AutomatiskOppdaterValutakursService>()
+    private val valutakursRepository = mockk<ValutakursRepository>()
 
     val beslutteVedtak =
         BeslutteVedtak(
@@ -65,12 +69,15 @@ class BeslutteVedtakTest {
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             saksbehandlerContext = saksbehandlerContext,
             automatiskBeslutningService = automatiskBeslutningService,
+            automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+            valutakursRepository = valutakursRepository,
         )
 
     private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
     @BeforeEach
     fun setUp() {
+        every { valutakursRepository.finnFraBehandlingId(any()) } returns emptyList()
         every { taskRepository.save(any()) } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
         every {
             toTrinnKontrollService.besluttTotrinnskontroll(
@@ -92,6 +99,8 @@ class BeslutteVedtakTest {
         every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns randomVilkårsvurdering
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
+        every { automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(any()) } just runs
+        every { unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) } returns true
     }
 
     @Test

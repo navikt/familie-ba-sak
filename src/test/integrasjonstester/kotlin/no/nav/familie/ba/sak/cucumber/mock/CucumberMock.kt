@@ -5,6 +5,7 @@ import io.mockk.spyk
 import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategiForValutakurserRepository
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -33,12 +34,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferansebe
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilbakestillBehandlingFraKompetanseEndringService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilbakestillBehandlingFraValutakursEndringService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassUtenlandskePeriodebeløpTilKompetanserService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.EndretUtbetalingAndelTidslinjeService
 import no.nav.familie.ba.sak.kjerne.steg.FerdigstillBehandling
 import no.nav.familie.ba.sak.kjerne.steg.IverksettMotOppdrag
 import no.nav.familie.ba.sak.kjerne.steg.RegistrerPersongrunnlag
@@ -87,7 +90,6 @@ class CucumberMock(
     val loggService = mockLoggService()
     val behandlingHentOgPersisterService = mockBehandlingHentOgPersisterService(forrigeBehandling = forrigeBehandling, dataFraCucumber = dataFraCucumber, idForNyBehandling = nyBehanldingId)
     val periodeOvergangsstønadGrunnlagRepository = mockPeriodeOvergangsstønadGrunnlagRepository(dataFraCucumber)
-    val tilpassKompetanserTilRegelverkService = mockTilpassKompetanserTilRegelverkService()
     val søknadGrunnlagService = mockSøknadGrunnlagService(dataFraCucumber)
     val endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService(dataFraCucumber)
     val vedtakRepository = mockVedtakRepository(dataFraCucumber)
@@ -108,6 +110,8 @@ class CucumberMock(
     val unleashNextMedContextService = mockUnleashNextMedContextService()
     val mockPåVentService = mockk<SettPåVentService>()
     val opprettTaskService = mockk<OpprettTaskService>()
+    val endretUtbetalingAndelTidslinjeService = EndretUtbetalingAndelTidslinjeService(endretUtbetalingAndelHentOgPersisterService)
+    val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
 
     val behandlingstemaService =
         BehandlingstemaService(
@@ -236,8 +240,8 @@ class CucumberMock(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
             simuleringService = simuleringService,
-            mockk(),
-            unleashNextMedContextService,
+            vurderingsstrategiForValutakurserRepository = vurderingsstrategiForValutakurserRepository,
+            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService =
@@ -271,7 +275,11 @@ class CucumberMock(
             kompetanseRepository = kompetanseRepository,
         )
 
-    val kompetanseService = KompetanseService(kompetanseRepository, endringsabonnenter = listOf(tilpassUtenlandskePeriodebeløpTilKompetanserService, tilbakestillBehandlingFraKompetanseEndringService))
+    val endringsabonnenterForKompetanse = listOf(tilpassUtenlandskePeriodebeløpTilKompetanserService, tilbakestillBehandlingFraKompetanseEndringService)
+
+    val tilpassKompetanserTilRegelverkService = TilpassKompetanserTilRegelverkService(vilkårsvurderingTidslinjeService, endretUtbetalingAndelTidslinjeService, kompetanseRepository, endringsabonnenter = endringsabonnenterForKompetanse)
+
+    val kompetanseService = KompetanseService(kompetanseRepository, endringsabonnenter = endringsabonnenterForKompetanse)
 
     val eøsSkjemaerForNyBehandlingService = EøsSkjemaerForNyBehandlingService(kompetanseService = kompetanseService, utenlandskPeriodebeløpService = utenlandskPeriodebeløpService, valutakursService = valutakursService)
 
