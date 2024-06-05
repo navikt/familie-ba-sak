@@ -140,6 +140,12 @@ class BeregningService(
             ?: emptyList()
     }
 
+    fun hentAndelerFraForrigeVedtatteBehandling(behandling: Behandling): List<AndelTilkjentYtelse> {
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+        return forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
+            ?: emptyList()
+    }
+
     @Transactional
     fun oppdaterBehandlingMedBeregning(
         behandling: Behandling,
