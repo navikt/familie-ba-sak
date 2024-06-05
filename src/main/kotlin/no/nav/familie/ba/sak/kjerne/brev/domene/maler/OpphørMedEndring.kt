@@ -58,17 +58,29 @@ data class OpphørMedEndringData(
     override val flettefelter: FlettefelterForDokument,
     override val perioder: List<BrevPeriode>,
     override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
-) : VedtaksbrevData {
+) : VedtaksbrevStandardData {
     data class Delmaler(
-        val signaturVedtak: SignaturVedtak,
-        val feilutbetaling: Boolean,
+        override val signaturVedtak: SignaturVedtak,
+        override val feilutbetaling: Boolean,
+        override val etterbetaling: Etterbetaling?,
+        override val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
+        override val korrigertVedtak: KorrigertVedtakData?,
+        override val refusjonEosAvklart: RefusjonEøsAvklart?,
+        override val refusjonEosUavklart: RefusjonEøsUavklart?,
+        override val klage: Boolean,
+        override val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
         val hjemmeltekst: Hjemmeltekst,
-        val etterbetaling: Etterbetaling?,
-        val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
-        val korrigertVedtak: KorrigertVedtakData?,
-        val refusjonEosAvklart: RefusjonEøsAvklart?,
-        val refusjonEosUavklart: RefusjonEøsUavklart?,
-        val klage: Boolean,
-        val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
-    )
+    ) : OpphørMedEndringDelmaler
+}
+
+interface OpphørMedEndringDelmaler {
+    val signaturVedtak: SignaturVedtak
+    val feilutbetaling: Boolean
+    val etterbetaling: Etterbetaling?
+    val etterbetalingInstitusjon: EtterbetalingInstitusjon?
+    val korrigertVedtak: KorrigertVedtakData?
+    val refusjonEosAvklart: RefusjonEøsAvklart?
+    val refusjonEosUavklart: RefusjonEøsUavklart?
+    val klage: Boolean
+    val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?
 }

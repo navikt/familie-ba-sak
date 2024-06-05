@@ -35,6 +35,7 @@ import org.springframework.web.client.postForEntity
     "mock-rest-template-config",
     "mock-task-repository",
     "mock-task-service",
+    "mock-unleash",
 )
 class RolletilgangTest(
     @Autowired

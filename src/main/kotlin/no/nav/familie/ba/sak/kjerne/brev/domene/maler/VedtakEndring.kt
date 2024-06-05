@@ -69,23 +69,41 @@ data class EndringVedtakData(
     override val flettefelter: FlettefelterForDokument,
     override val perioder: List<BrevPeriode>,
     override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
-) : VedtaksbrevData {
+) : VedtaksbrevStandardData {
     data class Delmaler(
-        val signaturVedtak: SignaturVedtak,
-        val etterbetaling: Etterbetaling?,
-        val feilutbetaling: Boolean,
+        override val signaturVedtak: SignaturVedtak,
+        override val etterbetaling: Etterbetaling?,
+        override val feilutbetaling: Boolean,
+        override val klage: Boolean,
+        override val klageInstitusjon: Boolean,
+        override val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
+        override val korrigertVedtak: KorrigertVedtakData?,
+        override val informasjonOmAarligKontroll: Boolean,
+        override val forMyeUtbetaltBarnetrygd: FeilutbetaltValuta?,
+        override val refusjonEosAvklart: RefusjonEøsAvklart?,
+        override val refusjonEosUavklart: RefusjonEøsUavklart?,
+        override val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
+        override val duMaaMeldeFraOmEndringer: Boolean,
+        override val informasjonOmUtbetaling: Boolean,
+        override val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
         val hjemmeltekst: Hjemmeltekst,
-        val klage: Boolean,
-        val klageInstitusjon: Boolean,
-        val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
-        val korrigertVedtak: KorrigertVedtakData?,
-        val informasjonOmAarligKontroll: Boolean,
-        val forMyeUtbetaltBarnetrygd: FeilutbetaltValuta?,
-        val refusjonEosAvklart: RefusjonEøsAvklart?,
-        val refusjonEosUavklart: RefusjonEøsUavklart?,
-        val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean,
-        val duMaaMeldeFraOmEndringer: Boolean,
-        val informasjonOmUtbetaling: Boolean,
-        val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?,
-    )
+    ) : EndringVedtakDelmaler
+}
+
+interface EndringVedtakDelmaler {
+    val signaturVedtak: SignaturVedtak
+    val etterbetaling: Etterbetaling?
+    val feilutbetaling: Boolean
+    val klage: Boolean
+    val klageInstitusjon: Boolean
+    val etterbetalingInstitusjon: EtterbetalingInstitusjon?
+    val korrigertVedtak: KorrigertVedtakData?
+    val informasjonOmAarligKontroll: Boolean
+    val forMyeUtbetaltBarnetrygd: FeilutbetaltValuta?
+    val refusjonEosAvklart: RefusjonEøsAvklart?
+    val refusjonEosUavklart: RefusjonEøsUavklart?
+    val duMaaMeldeFraOmEndringerEosSelvstendigRett: Boolean
+    val duMaaMeldeFraOmEndringer: Boolean
+    val informasjonOmUtbetaling: Boolean
+    val utbetalingstabellAutomatiskValutajustering: UtbetalingstabellAutomatiskValutajustering?
 }

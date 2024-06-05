@@ -8,9 +8,16 @@ interface Vedtaksbrev : Brev {
     override val data: VedtaksbrevData
 }
 
-interface VedtaksbrevData : BrevData {
-    val perioder: List<BrevPeriode>
+interface VedtaksbrevData : BrevData
+
+interface VedtaksbrevStandardData : VedtaksbrevData {
+    val perioder: List<BrevPeriode>?
     val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?
+}
+
+interface VedtaksbrevSammensattKontrollsak : VedtaksbrevData {
+    val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?
+    val sammensattKontrollsakFritekst: String
 }
 
 enum class BrevPeriodeType(val apiNavn: String) {
@@ -29,6 +36,19 @@ data class VedtakFellesfelter(
     val søkerNavn: String,
     val søkerFødselsnummer: String,
     val perioder: List<BrevPeriode>,
+    val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?,
+    val organisasjonsnummer: String? = null,
+    val gjelder: String? = null,
+    val korrigertVedtakData: KorrigertVedtakData? = null,
+)
+
+data class VedtakFellesfelterSammensattKontrollsak(
+    val enhet: String,
+    val saksbehandler: String,
+    val beslutter: String,
+    val søkerNavn: String,
+    val søkerFødselsnummer: String,
+    val sammensattKontrollsakFritekst: String,
     val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?,
     val organisasjonsnummer: String? = null,
     val gjelder: String? = null,

@@ -51,6 +51,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer :
     "mock-task-repository",
     "mock-task-service",
     "mock-sanity-client",
+    "mock-unleash",
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")
