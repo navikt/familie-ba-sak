@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.erAlleValutakurserOppdaterteIMåned
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
@@ -25,6 +26,7 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.time.YearMonth
 
 @Service
@@ -36,6 +38,7 @@ class AutovedtakMånedligValutajusteringService(
     private val behandlingService: BehandlingService,
     private val localDateProvider: LocalDateProvider,
     private val valutakursService: ValutakursService,
+    private val simuleringService: SimuleringService,
 ) {
     private val månedligvalutajusteringIgnorertÅpenBehandling = Metrics.counter("valutajustering.ignorert.aapenbehandling")
 
@@ -86,6 +89,13 @@ class AutovedtakMånedligValutajusteringService(
                 behandlingÅrsak = BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING,
                 fagsakId = fagsakId,
             )
+
+        val etterutbetaling = simuleringService.hentEtterbetaling(behandlingEtterBehandlingsresultat.id)
+        val feilutbetaling by lazy { simuleringService.hentFeilutbetaling(behandlingEtterBehandlingsresultat.id) }
+
+        if (etterutbetaling > BigDecimal.ZERO || feilutbetaling > BigDecimal.ZERO) {
+            throw Feil("Etterbetaling eller feilutbetaling er større enn 0 ved månedlig valutajustering for fagsak=$fagsakId. Må behandles manuelt.")
+        }
 
         val opprettetVedtak =
             autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
