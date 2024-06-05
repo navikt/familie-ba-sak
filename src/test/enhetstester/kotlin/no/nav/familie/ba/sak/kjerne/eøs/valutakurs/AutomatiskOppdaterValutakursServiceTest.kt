@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringMott
 import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -169,8 +170,8 @@ class AutomatiskOppdaterValutakursServiceTest {
     }
 
     @Test
-    fun `oppdaterValutakurserEtterEndringstidspunkt skal ikke oppdatere valutakurser før praksisendringsdatoen januar 2023`() {
-        every { behandlingHentOgPersisterService.hent(any()) } answers { lagBehandling(id = firstArg()) }
+    fun `oppdaterValutakurserEtterEndringstidspunkt skal ikke oppdatere valutakurser før praksisendringsdatoen januar 2023 for revurdering`() {
+        every { behandlingHentOgPersisterService.hent(any()) } answers { lagBehandling(id = firstArg(), behandlingType = BehandlingType.REVURDERING) }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
         every { ecbService.hentValutakurs(any(), any()) } answers {
             val dato = secondArg<LocalDate>()
@@ -292,5 +293,42 @@ class AutomatiskOppdaterValutakursServiceTest {
             .ignoringFields("endretTidspunkt")
             .ignoringFields("opprettetTidspunkt")
             .isEqualTo(manuelleValutakurserTidslinje.bygg())
+    }
+
+    @Test
+    fun `oppdaterValutakurserEtterEndringstidspunkt skal kunne oppdatere valutakurser før praksisendringsdatoen januar 2023 for førstegangsbehandlinger`() {
+        every { behandlingHentOgPersisterService.hent(any()) } answers { lagBehandling(id = firstArg(), behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING) }
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
+        every { ecbService.hentValutakurs(any(), any()) } answers {
+            val dato = secondArg<LocalDate>()
+            (dato.month.value % 10).toBigDecimal()
+        }
+
+        UtenlandskPeriodebeløpBuilder(sep(2022), behandlingId)
+            .medBeløp("77778888", "EUR", "N", barn1, barn2, barn3)
+            .lagreTil(utenlandskPeriodebeløpRepository)
+
+        ValutakursBuilder(sep(2022), behandlingId)
+            .medKurs("11111111", "EUR", barn1, barn2, barn3)
+            .medVurderingsform(Vurderingsform.MANUELL)
+            .lagreTil(valutakursRepository)
+
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2022, 5, 15)
+
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId)
+
+        val forventetOppdaterteValutakurser =
+            ValutakursBuilder(sep(2022), behandlingId)
+                .medKurs("89012123", "EUR", barn1, barn2, barn3)
+                .medVurderingsform(Vurderingsform.AUTOMATISK)
+                .bygg()
+
+        assertThat(valutakursService.hentValutakurser(behandlingId))
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .ignoringFields("valutakursdato")
+            .ignoringFields("endretTidspunkt")
+            .ignoringFields("opprettetTidspunkt")
+            .isEqualTo(forventetOppdaterteValutakurser)
     }
 }
