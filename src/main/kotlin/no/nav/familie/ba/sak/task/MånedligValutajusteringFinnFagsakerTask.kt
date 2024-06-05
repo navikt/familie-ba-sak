@@ -65,7 +65,7 @@ class MånedligValutajusteringFinnFagsakerTask(
             triggerTid: LocalDateTime,
         ) =
             Task(
-                type = MånedligValutajusteringFinnFagsakerTask.TASK_STEP_TYPE,
+                type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(MånedligValutajusteringFinnFagsakerTaskDto(inneværendeMåned)),
                 mapOf(
                     "måned" to inneværendeMåned.toString(),

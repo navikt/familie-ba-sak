@@ -103,11 +103,11 @@ object BehandlingsresultatValideringUtils {
         andelerDenneBehandlingen: List<AndelTilkjentYtelse>,
         andelerForrigeBehandling: List<AndelTilkjentYtelse>,
     ) {
-        val andelerIFortidenTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType()
-        val andelerIFortidenForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType()
+        val andelerDenneBehandlingTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType()
+        val andelerForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType()
 
         val erEndringISatsTidslinjer =
-            andelerIFortidenTidslinje.outerJoin(andelerIFortidenForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->
+            andelerDenneBehandlingTidslinje.outerJoin(andelerForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->
                 nyAndel?.sats != gammelAndel?.sats
             }
 

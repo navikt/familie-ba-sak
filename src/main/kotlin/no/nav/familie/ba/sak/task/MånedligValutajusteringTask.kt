@@ -45,7 +45,7 @@ class MånedligValutajusteringTask(
             valutajusteringsMåned: YearMonth,
         ): Task =
             Task(
-                type = MånedligValutajusteringTask.TASK_STEP_TYPE,
+                type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(MånedligValutajusteringTaskDto(fagsakId = fagsakId, måned = valutajusteringsMåned)),
                 properties =
                     mapOf(
