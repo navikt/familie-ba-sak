@@ -380,7 +380,7 @@ fun hentTekstForValutakurser(
     } else {
         """
 
-    Og med utenlandsk periodebeløp for begrunnelse
+    Og med valutakurs for begrunnelse
       | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs |""" +
             rader
     }
