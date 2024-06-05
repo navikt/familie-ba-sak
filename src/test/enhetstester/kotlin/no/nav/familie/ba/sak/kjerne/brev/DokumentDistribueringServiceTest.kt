@@ -21,8 +21,6 @@ import org.springframework.web.client.RestClientResponseException
 
 @ExtendWith(MockKExtension::class)
 internal class DokumentDistribueringServiceTest {
-    @MockK(relaxed = true)
-    private lateinit var taskService: TaskService
 
     @MockK
     private lateinit var integrasjonClient: IntegrasjonClient
@@ -97,7 +95,7 @@ internal class DokumentDistribueringServiceTest {
             journalpostId = "testId",
             behandlingId = 1L,
             brevmal = Brevmal.SVARTIDSBREV,
-            personEllerInstitusjonIdent = "test",
+            fagsakId = 1L,
             erManueltSendt = true,
         )
 }

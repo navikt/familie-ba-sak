@@ -29,12 +29,6 @@ internal class BrevmottakerServiceTest {
     private lateinit var brevmottakerRepository: BrevmottakerRepository
 
     @MockK
-    private lateinit var personidentService: PersonidentService
-
-    @MockK
-    private lateinit var personopplysningerService: PersonopplysningerService
-
-    @MockK
     private lateinit var validerBrevmottakerService: ValiderBrevmottakerService
 
     @MockK
@@ -42,9 +36,6 @@ internal class BrevmottakerServiceTest {
 
     @InjectMockKs
     private lateinit var brevmottakerService: BrevmottakerService
-
-    private val søkersident = "123"
-    private val søkersnavn = "Test søker"
 
     @Test
     fun `lagMottakereFraBrevMottakere skal lage mottakere når brevmottaker er FULLMEKTIG og bruker har norsk adresse`() {
@@ -54,12 +45,9 @@ internal class BrevmottakerServiceTest {
         val mottakerInfo =
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
-                søkersident,
-                søkersnavn,
             )
         assertTrue { mottakerInfo.size == 2 }
 
-        assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo == null }
 
         assertEquals("John Doe", mottakerInfo.last().navn)
@@ -82,12 +70,9 @@ internal class BrevmottakerServiceTest {
         val mottakerInfo =
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
-                søkersident,
-                søkersnavn,
             )
         assertTrue { mottakerInfo.size == 2 }
 
-        assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
         assertTrue { mottakerInfo.first().manuellAdresseInfo!!.landkode == "DE" }
 
@@ -111,12 +96,9 @@ internal class BrevmottakerServiceTest {
         val mottakerInfo =
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
-                søkersident,
-                søkersnavn,
             )
         assertTrue { mottakerInfo.size == 2 }
 
-        assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
         assertTrue { mottakerInfo.first().manuellAdresseInfo!!.landkode == "DE" }
 
@@ -139,12 +121,9 @@ internal class BrevmottakerServiceTest {
         val mottakerInfo =
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
-                søkersident,
-                søkersnavn,
             )
         assertTrue { mottakerInfo.size == 1 }
 
-        assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
         assertTrue { mottakerInfo.first().manuellAdresseInfo!!.landkode == "DE" }
     }
@@ -164,12 +143,9 @@ internal class BrevmottakerServiceTest {
         val mottakerInfo =
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
-                søkersident,
-                søkersnavn,
             )
         assertTrue { mottakerInfo.size == 1 }
 
-        assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
         assertTrue { mottakerInfo.first().manuellAdresseInfo!!.landkode == "DE" }
     }
@@ -194,8 +170,6 @@ internal class BrevmottakerServiceTest {
         assertThrows<FunksjonellFeil> {
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
-                søkersident,
-                søkersnavn,
             )
         }.also {
             assertTrue(it.frontendFeilmelding!!.contains("kan ikke kombineres"))

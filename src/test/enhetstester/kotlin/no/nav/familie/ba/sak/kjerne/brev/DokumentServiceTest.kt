@@ -103,9 +103,10 @@ internal class DokumentServiceTest {
                     fagsakId = any(),
                     journalførendeEnhet = any(),
                     brev = any(),
-                    førsteside = any(),
                     dokumenttype = any(),
-                    avsenderMottaker = capture(avsenderMottaker),
+                    førsteside = any(),
+                    eksternReferanseId = any(),
+                    avsenderMottaker = capture(avsenderMottaker)
                 )
             } returns "mockJournalpostId"
             every { journalføringRepository.save(any()) } returns
@@ -276,10 +277,10 @@ internal class DokumentServiceTest {
                 fagsakId = any(),
                 journalførendeEnhet = any(),
                 brev = any(),
-                førsteside = any(),
                 dokumenttype = any(),
+                førsteside = any(),
+                eksternReferanseId = any(),
                 avsenderMottaker = capture(avsenderMottakere),
-                tilManuellMottakerEllerVerge = any(),
             )
         } returns "mockJournalPostId" andThen "mockJournalPostId1"
 
@@ -295,16 +296,16 @@ internal class DokumentServiceTest {
                 fagsakId = any(),
                 journalførendeEnhet = any(),
                 brev = any(),
-                førsteside = any(),
                 dokumenttype = any(),
+                førsteside = any(),
+                eksternReferanseId = any(),
                 avsenderMottaker = any(),
-                tilManuellMottakerEllerVerge = any(),
             )
         }
         verify(exactly = 2) { journalføringRepository.save(any()) }
         verify(exactly = 2) { taskRepository.save(any()) }
 
-        assertEquals(2, avsenderMottakere.size)
+        assertEquals(1, avsenderMottakere.size)
         assertEquals("Fullmektig navn", avsenderMottakere.single { it.idType == null }.navn)
     }
 
@@ -339,10 +340,10 @@ internal class DokumentServiceTest {
                 fagsakId = any(),
                 journalførendeEnhet = any(),
                 brev = any(),
-                førsteside = any(),
                 dokumenttype = any(),
+                førsteside = any(),
+                eksternReferanseId = any(),
                 avsenderMottaker = capture(avsenderMottakere),
-                tilManuellMottakerEllerVerge = any(),
             )
         } returns "mockJournalPostId" andThen "mockJournalPostId1"
 
@@ -358,15 +359,15 @@ internal class DokumentServiceTest {
                 fagsakId = any(),
                 journalførendeEnhet = any(),
                 brev = any(),
-                førsteside = any(),
                 dokumenttype = any(),
+                førsteside = any(),
+                eksternReferanseId = any(),
                 avsenderMottaker = any(),
-                tilManuellMottakerEllerVerge = any(),
             )
         }
         verify(exactly = 2) { taskRepository.save(any()) }
 
-        assertEquals(2, avsenderMottakere.size)
+        assertEquals(1, avsenderMottakere.size)
         assertEquals("Fullmektig navn", avsenderMottakere.single { it.idType == null }.navn)
     }
 
@@ -383,10 +384,10 @@ internal class DokumentServiceTest {
                 fagsakId = any(),
                 journalførendeEnhet = any(),
                 brev = any(),
-                førsteside = any(),
                 dokumenttype = any(),
+                førsteside = any(),
+                eksternReferanseId = any(),
                 avsenderMottaker = any(),
-                tilManuellMottakerEllerVerge = any(),
             )
         } returns "mockJournalPostId"
 
@@ -400,10 +401,10 @@ internal class DokumentServiceTest {
                 fagsakId = any(),
                 journalførendeEnhet = any(),
                 brev = any(),
-                førsteside = any(),
                 dokumenttype = any(),
+                førsteside = any(),
+                eksternReferanseId = any(),
                 avsenderMottaker = any(),
-                tilManuellMottakerEllerVerge = any(),
             )
         }
         verify(exactly = 0) { journalføringRepository.save(any()) }
