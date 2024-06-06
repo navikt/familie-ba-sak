@@ -51,6 +51,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -257,8 +258,8 @@ class BrevService(
         utbetalingerPerMndEøs?.let {
             val endringstidspunkt = hentSorterteVedtaksperioderMedBegrunnelser(vedtak).first().fom!!.tilMånedTidspunkt()
             val landkoder = integrasjonClient.hentLandkoderISO2()
-            val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id)
-            return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt, landkoder, kompetanser)
+            val skundærlandKompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id).filter { it.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
+            return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt, landkoder, skundærlandKompetanser)
         }
 
     fun sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling: Behandling): Boolean {

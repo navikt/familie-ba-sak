@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.util.SkjemaBuilder
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -15,6 +16,10 @@ class KompetanseBuilder(
     fun medKompetanse(
         k: String,
         vararg barn: Person,
+        søkersAktivitetsland: String = "NO",
+        barnetsBostedsland: String = "NO",
+        søkersAktivitet: KompetanseAktivitet = KompetanseAktivitet.ARBEIDER,
+        annenForeldersAktivitet: KompetanseAktivitet = KompetanseAktivitet.ARBEIDER,
         annenForeldersAktivitetsland: String? = null,
         erAnnenForelderOmfattetAvNorskLovgivning: Boolean? = false,
     ) =
@@ -22,12 +27,20 @@ class KompetanseBuilder(
             when (it) {
                 '-' ->
                     Kompetanse.NULL.copy(
+                        søkersAktivitet = søkersAktivitet,
+                        annenForeldersAktivitet = annenForeldersAktivitet,
+                        søkersAktivitetsland = søkersAktivitetsland,
+                        barnetsBostedsland = barnetsBostedsland,
                         annenForeldersAktivitetsland = annenForeldersAktivitetsland,
                         erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
                     )
 
                 'S' ->
                     Kompetanse.NULL.copy(
+                        søkersAktivitet = søkersAktivitet,
+                        annenForeldersAktivitet = annenForeldersAktivitet,
+                        søkersAktivitetsland = søkersAktivitetsland,
+                        barnetsBostedsland = barnetsBostedsland,
                         resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
                         annenForeldersAktivitetsland = annenForeldersAktivitetsland,
                         erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
@@ -35,6 +48,10 @@ class KompetanseBuilder(
 
                 'P' ->
                     Kompetanse.NULL.copy(
+                        søkersAktivitet = søkersAktivitet,
+                        annenForeldersAktivitet = annenForeldersAktivitet,
+                        søkersAktivitetsland = søkersAktivitetsland,
+                        barnetsBostedsland = barnetsBostedsland,
                         resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                         annenForeldersAktivitetsland = annenForeldersAktivitetsland,
                         erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,

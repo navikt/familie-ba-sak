@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -77,10 +78,12 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
 
     return forrigeUtenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
         .outerJoin(barnasKompetanseTidslinjer) { upb, kompetanse ->
+            val utbetalingsland = kompetanse?.utbetalingsland()
             when {
                 kompetanse == null -> null
-                upb == null || upb.utbetalingsland != kompetanse.annenForeldersAktivitetsland ->
-                    UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = kompetanse.annenForeldersAktivitetsland)
+                upb == null || upb.utbetalingsland != utbetalingsland ->
+                    UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = utbetalingsland)
+
                 else -> upb
             }
         }

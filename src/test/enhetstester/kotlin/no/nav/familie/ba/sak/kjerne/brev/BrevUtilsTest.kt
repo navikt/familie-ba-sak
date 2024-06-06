@@ -1095,9 +1095,28 @@ internal class BrevUtilsTest {
                 "DK" to "Danmark",
             )
 
-        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt = endringstidspunkt, landkoder = landkoder, kompetanser = kompetanser)
+        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt = endringstidspunkt, landkoder = landkoder, sekundærlandsKompetanser = kompetanser)
         assertThat(utbetalingstabellAutomatiskValutajustering).isNotNull
         assertThat(utbetalingstabellAutomatiskValutajustering.utbetalingerEosLand?.first()).isEqualTo("Sverige og Danmark")
+    }
+
+    @Test
+    fun `hentLandOgStartdatoForUtbetalingstabell - skal finne korrekt utbetalingsland når hovedregelen gir Norge`() {
+        val endringstidspunkt = LocalDate.now().tilMånedTidspunkt()
+
+        val kompetanser =
+            listOf(
+                lagKompetanse(fom = YearMonth.now(), tom = YearMonth.now().plusMonths(2), søkersAktivitet = KompetanseAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN, søkersAktivitetsland = "SE", annenForeldersAktivitet = KompetanseAktivitet.IKKE_AKTUELT, annenForeldersAktivitetsland = null, barnetsBostedsland = "NO", kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND, erAnnenForelderOmfattetAvNorskLovgivning = false, barnAktører = setOf(randomAktør())),
+            )
+
+        val landkoder =
+            mapOf(
+                "SE" to "Sverige",
+            )
+
+        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt = endringstidspunkt, landkoder = landkoder, sekundærlandsKompetanser = kompetanser)
+        assertThat(utbetalingstabellAutomatiskValutajustering).isNotNull
+        assertThat(utbetalingstabellAutomatiskValutajustering.utbetalingerEosLand?.first()).isEqualTo("Sverige")
     }
 }
 
