@@ -45,5 +45,6 @@ fun mockAutovedtakMånedligValutajusteringService(
         snikeIKøenService = cucumberMock.snikeIKøenService,
         localDateProvider = cucumberMock.mockedDateProvider,
         valutakursService = cucumberMock.valutakursService,
+        simuleringService = cucumberMock.simuleringService,
     )
 }
