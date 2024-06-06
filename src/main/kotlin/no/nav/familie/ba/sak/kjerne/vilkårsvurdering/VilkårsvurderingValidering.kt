@@ -58,7 +58,7 @@ fun validerIkkeBlandetRegelverk(
     if (vilkårsvurderingTidslinjer.harBlandetRegelverk()) {
         val feilmelding = "Det er forskjellig regelverk for en eller flere perioder for søker eller barna."
 
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING) {
+        if (behandling.opprettetÅrsak in listOf(BehandlingÅrsak.SATSENDRING, BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING)) {
             logger.warn("$feilmelding Gjelder $behandling")
         } else {
             throw FunksjonellFeil(melding = feilmelding)
