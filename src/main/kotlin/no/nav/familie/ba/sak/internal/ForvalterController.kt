@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.Autovedt
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatusScheduler
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -372,7 +373,7 @@ class ForvalterController(
 
     @PostMapping("/finn-korrigerte-utenlandske-periodebeløp")
     @Operation(summary = "Kjører korrigerUtbetalingslandForUtenlandskPeriodebeløp slik at utenlandske periodebeløp med utbetalingsland 'NO' eller null blir korrigert")
-    fun kjørKorrigerUtbetalingslandForUtenlandskePeriodebeløp(): ResponseEntity<Ressurs<List<UtenlandskPeriodebeløpEndring>>> {
+    fun kjørKorrigerUtbetalingslandForUtenlandskePeriodebeløp(): ResponseEntity<Ressurs<Pair<List<UtenlandskPeriodebeløpEndring>, List<Kompetanse>>>> {
         val utenlandskePeriodebeløpEndringer = forvalterService.finnUtenlandskePeriodebeløpSomSkalKorrigeres()
         return ResponseEntity.ok(Ressurs.success(utenlandskePeriodebeløpEndringer))
     }
