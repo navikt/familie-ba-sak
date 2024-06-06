@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.internal.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -351,9 +352,9 @@ private fun hentUtenlandskPeriodebeløpRader(utenlandskePeriodebeløp: Collectio
       | ${
                 utenlandskPeriodebeløp.barnAktører.joinToString(", ") { it.aktørId }
             } |${
-                utenlandskPeriodebeløp.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
+                utenlandskPeriodebeløp.fom.tilKortString()
             }|${
-                utenlandskPeriodebeløp.tom?.sisteDagIInneværendeMåned()?.tilddMMyyyy() ?: ""
+                utenlandskPeriodebeløp.tom?.tilKortString() ?: ""
             }|${
                 utenlandskPeriodebeløp.behandlingId
             }|${
@@ -380,7 +381,7 @@ fun hentTekstForValutakurser(
     } else {
         """
 
-    Og med utenlandsk periodebeløp for begrunnelse
+    Og med valutakurs for begrunnelse
       | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs |""" +
             rader
     }

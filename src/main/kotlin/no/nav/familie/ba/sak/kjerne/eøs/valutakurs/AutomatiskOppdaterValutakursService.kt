@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.tilSisteVirkedag
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -93,11 +94,18 @@ class AutomatiskOppdaterValutakursService(
         val datoSisteManuellePostering = simuleringMottakere.finnDatoSisteManuellePostering() ?: TIDENES_MORGEN
         val månedEtterSisteManuellePostering = datoSisteManuellePostering.toYearMonth().plusMonths(1)
 
+        val månedForTidligsteTillatteAutomatiskeValutakurs =
+            if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                maxOf(endringstidspunkt, månedEtterSisteManuellePostering)
+            } else {
+                maxOf(endringstidspunkt, månedEtterSisteManuellePostering, DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING)
+            }
+
         val automatiskGenererteValutakurser =
             utenlandskePeriodebeløp
                 .filtrerErUtfylt()
                 .flatMap { utenlandskPeriodebeløp ->
-                    utenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(maxOf(endringstidspunkt, månedEtterSisteManuellePostering, DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING))
+                    utenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(månedForTidligsteTillatteAutomatiskeValutakurs)
                 }
 
         valutakursService.oppdaterValutakurser(BehandlingId(behandling.id), automatiskGenererteValutakurser)
