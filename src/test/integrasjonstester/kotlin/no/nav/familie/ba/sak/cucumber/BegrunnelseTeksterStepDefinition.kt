@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -533,8 +532,6 @@ class BegrunnelseTeksterStepDefinition {
     ) {
         val fagsak = fagsaker[fagsakId]!!
 
-        val forrigeBehandling = behandlinger.values.filter { it.fagsak.id == fagsak.id && it.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.id } ?: error("Finner ikke forrige behandling")
-
         val svarFraEcbMock = lagSvarFraEcbMock(dataTable)
 
         mockAutovedtakMånedligValutajusteringService(
@@ -559,7 +556,7 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     @Så("forvent at endringstidspunktet er {} for behandling {}")
-    fun `generer vedtaksperioder fors `(
+    fun `forvent at endringstidspunktet er for behandling`(
         forventetEndringstidspunktString: String,
         behandlingId: Long,
     ) {
@@ -567,7 +564,7 @@ class BegrunnelseTeksterStepDefinition {
         val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
         val grunnlagForBegrunnelser = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
 
-        val faktiskEntringstidspunkt =
+        val faktiskEndringstidspunkt =
             utledEndringstidspunkt(
                 behandlingsGrunnlagForVedtaksperioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
                 behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
@@ -575,7 +572,7 @@ class BegrunnelseTeksterStepDefinition {
 
         val forventetEndringstidspunkt = parseNullableDato(forventetEndringstidspunktString) ?: error("Så forvent følgende endringstidspunkt {} forventer en dato")
 
-        assertThat(forventetEndringstidspunkt).isEqualTo(faktiskEntringstidspunkt)
+        assertThat(faktiskEndringstidspunkt).isEqualTo(forventetEndringstidspunkt)
     }
 }
 
