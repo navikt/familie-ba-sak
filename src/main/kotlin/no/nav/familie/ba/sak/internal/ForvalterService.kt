@@ -291,7 +291,7 @@ class ForvalterService(
 
         val utenlandskePeriodebeløpPerBehandling = utenlandskePeriodebeløpMedFeilUtbetalingsland.groupBy { it.behandlingId }
 
-        val kompetanserMedFeil: List<Kompetanse> = emptyList()
+        val kompetanserMedFeil: MutableList<Kompetanse> = mutableListOf()
 
         val korrigerteUtenlandskePeriodebeløp =
             utenlandskePeriodebeløpPerBehandling.entries.flatMap { (behandlingId, utenlandskePeriodebeløp) ->
@@ -308,7 +308,7 @@ class ForvalterService(
                             else -> null
                         }
                     } catch (e: Exception) {
-                        kompetanserMedFeil.plus(kompetanse)
+                        kompetanserMedFeil.add(kompetanse!!)
                         null
                     }
                 }.flatMap { (_, tidslinjer) -> tidslinjer.perioder().mapNotNull { periode -> periode.innhold } }
