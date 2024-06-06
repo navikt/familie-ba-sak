@@ -7,4 +7,7 @@ import org.springframework.data.jpa.repository.Query
 interface KompetanseRepository : PeriodeOgBarnSkjemaRepository<Kompetanse> {
     @Query("SELECT k FROM Kompetanse k WHERE k.behandlingId = :behandlingId")
     override fun finnFraBehandlingId(behandlingId: Long): Collection<Kompetanse>
+
+    @Query("SELECT k FROM Kompetanse k WHERE k.behandlingId in :behandlinger and k.resultat = 'NORGE_ER_SEKUNDÆRLAND'")
+    fun hentSekundærlandsKompetanserForBehandlinger(behandlinger: Set<Long>): Collection<Kompetanse>
 }

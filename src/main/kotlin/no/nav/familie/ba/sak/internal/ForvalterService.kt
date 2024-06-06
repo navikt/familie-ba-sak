@@ -27,10 +27,15 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -67,6 +72,8 @@ class ForvalterService(
     private val infotrygdService: InfotrygdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val kompetanseRepository: KompetanseRepository,
+    private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -275,7 +282,39 @@ class ForvalterService(
             throw Feil("Det finnes flere vilkårresultater som begynner før fødselsdato til person: $this")
         }
     }
+
+    fun finnUtenlandskePeriodebeløpSomSkalKorrigeres(): List<UtenlandskPeriodebeløpEndring> {
+        val utenlandskePeriodebeløpMedFeilUtbetalingsland = utenlandskPeriodebeløpRepository.hentUtenlandskePeriodebeløpMedFeilUtbetalingsland()
+        val behandlinger = utenlandskePeriodebeløpMedFeilUtbetalingsland.map { it.behandlingId }.toSet()
+        val sekundærlandsKompetanser = kompetanseRepository.hentSekundærlandsKompetanserForBehandlinger(behandlinger).groupBy { it.behandlingId }
+
+        val utenlandskePeriodebeløpPerBehandling = utenlandskePeriodebeløpMedFeilUtbetalingsland.groupBy { it.behandlingId }
+
+        val korrigerteUtenlandskePeriodebeløp =
+            utenlandskePeriodebeløpPerBehandling.entries.flatMap { (behandlingId, utenlandskePeriodebeløp) ->
+                utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna().outerJoin(sekundærlandsKompetanser[behandlingId]!!.tilSeparateTidslinjerForBarna()) { upb, kompetanse ->
+                    val utbetalingsland = kompetanse?.utbetalingsland()
+                    when {
+                        kompetanse == null -> null
+                        upb == null -> null
+                        utbetalingsland == null -> throw Feil("Skal ikke kunne skje")
+                        upb.utbetalingsland != utbetalingsland ->
+                            UtenlandskPeriodebeløpEndring(id = upb.id, behandlingId = behandlingId, utbetalingslandOriginalt = upb.utbetalingsland, utbetalingslandKorrigert = utbetalingsland)
+
+                        else -> null
+                    }
+                }.flatMap { (_, tidslinjer) -> tidslinjer.perioder().mapNotNull { periode -> periode.innhold } }
+            }
+        return korrigerteUtenlandskePeriodebeløp
+    }
 }
+
+data class UtenlandskPeriodebeløpEndring(
+    val id: Long,
+    val behandlingId: Long,
+    val utbetalingslandOriginalt: String?,
+    val utbetalingslandKorrigert: String,
+)
 
 interface FagsakMedFlereMigreringer {
     val fagsakId: Long
