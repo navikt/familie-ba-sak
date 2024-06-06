@@ -371,9 +371,18 @@ class ForvalterController(
     }
 
     @PostMapping("/finn-korrigerte-utenlandske-periodebeløp")
-    @Operation(summary = "Kjører korrigerUtbetalingslandForUtenlandskPeriodebeløp slik at utenlandske periodebeløp med utbetalingsland 'NO' eller null blir korrigert")
-    fun kjørKorrigerUtbetalingslandForUtenlandskePeriodebeløp(): ResponseEntity<Ressurs<UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse>> {
+    @Operation(summary = "Kjører finnUtenlandskePeriodebeløpSomSkalKorrigeres for å finne alle utenlandske periodebeløp med utbetalingsland 'NO' eller null")
+    fun kjørfinnUtenlandskePeriodebeløpSomSkalKorrigeres(): ResponseEntity<Ressurs<UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse>> {
         val utenlandskePeriodebeløpEndringer = forvalterService.finnUtenlandskePeriodebeløpSomSkalKorrigeres()
         return ResponseEntity.ok(Ressurs.success(utenlandskePeriodebeløpEndringer))
+    }
+
+    @PostMapping("/korriger-utenlandske-periodebeløp")
+    @Operation(summary = "Kjører korrigerUtenlandskePeriodebeløp slik at utenlandske periodebeløp med utbetalingsland 'NO' eller null blir korrigert")
+    fun kjørkorrigerUtenlandskePeriodebeløpForBehandlinger(
+        @RequestBody behandlinger: List<Long>,
+    ): ResponseEntity<Ressurs<String>> {
+        forvalterService.korrigerUtenlandskePeriodebeløp(behandlinger)
+        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 }

@@ -329,6 +329,29 @@ class ForvalterService(
         return UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse(korrigerteUtenlandskePeriodebeløp, kompetanserMedFeil)
     }
 
+    @Transactional
+    fun korrigerUtenlandskePeriodebeløp(behandlinger: List<Long>) {
+        val utenlandskePeriodebeløpSomSkalKorrigeres =
+            finnUtenlandskePeriodebeløpSomSkalKorrigeres().utenlandskePeriodeBeløpEndringer
+                .filter { behandlinger.contains(it.behandlingId) }
+                .groupBy { it.behandlingId }
+
+        val korrigerteUtenlandskePeriodebeløpPerBehandling =
+            utenlandskePeriodebeløpSomSkalKorrigeres.mapValues { (_, utenlandskePerioderSomSkalKorrigeresForBehandling) ->
+                utenlandskePerioderSomSkalKorrigeresForBehandling.map {
+                    val eksisterendeUtenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.getReferenceById(it.id)
+                    eksisterendeUtenlandskPeriodebeløp.copy(utbetalingsland = it.utbetalingslandKorrigert).also { upb ->
+                        upb.behandlingId = it.behandlingId
+                        upb.id = it.id
+                    }
+                }
+            }
+
+        korrigerteUtenlandskePeriodebeløpPerBehandling.forEach { (_, korrigerteUtenlandskePeriodebeløpForBehandling) ->
+            utenlandskPeriodebeløpRepository.saveAll(korrigerteUtenlandskePeriodebeløpForBehandling)
+        }
+    }
+
     private fun <T : PeriodeOgBarnSkjema<T>> List<T>.tilTidslinjerPerBarn(): Map<Aktør, Tidslinje<T, Måned>> {
         val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
 
