@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.prosessering.internal.TaskService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.extension.ExtendWith
@@ -20,6 +21,9 @@ import org.springframework.web.client.RestClientResponseException
 
 @ExtendWith(MockKExtension::class)
 internal class DokumentDistribueringServiceTest {
+    @MockK(relaxed = true)
+    private lateinit var taskService: TaskService
+
     @MockK
     private lateinit var integrasjonClient: IntegrasjonClient
 

@@ -103,9 +103,8 @@ class JournalførVedtaksbrev(
         data: JournalførVedtaksbrevDTO,
         behandling: Behandling,
     ) {
-        journalposterTilDistribusjon.forEach {
-            when (it.value) {
-                is Institusjon,
+        journalposterTilDistribusjon.forEach { (journalpostId, mottaker) ->
+            when (mottaker) {
                 is FullmektigEllerVerge,
                 -> { // Denne tasken sender kun vedtaksbrev
                     val distribuerTilVergeTask =
@@ -114,8 +113,8 @@ class JournalførVedtaksbrev(
                                 distribuerDokumentDTO =
                                     lagDistribuerDokumentDto(
                                         behandling = behandling,
-                                        journalPostId = it.key,
-                                        mottakerInfo = it.value,
+                                        journalPostId = journalpostId,
+                                        mottakerInfo = mottaker,
                                     ),
                                 properties = data.task.metadata,
                             )
@@ -125,6 +124,7 @@ class JournalførVedtaksbrev(
                 is Bruker,
                 is BrukerMedUtenlandskAdresse,
                 is Dødsbo,
+                is Institusjon,
                 -> {
                     // Denne tasken sender vedtaksbrev og håndterer steg videre
                     val distribuerTilSøkerTask =
@@ -132,8 +132,8 @@ class JournalførVedtaksbrev(
                             distribuerDokumentDTO =
                                 lagDistribuerDokumentDto(
                                     behandling = behandling,
-                                    journalPostId = it.key,
-                                    mottakerInfo = it.value,
+                                    journalPostId = journalpostId,
+                                    mottakerInfo = mottaker,
                                 ),
                             properties = data.task.metadata,
                         )
