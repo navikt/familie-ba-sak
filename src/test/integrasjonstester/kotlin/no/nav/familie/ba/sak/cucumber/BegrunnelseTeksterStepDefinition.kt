@@ -48,6 +48,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.genererVedtaksperioder
@@ -555,6 +556,26 @@ class BegrunnelseTeksterStepDefinition {
             .usingRecursiveComparison()
             .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*id")
             .isEqualTo(forventedeValutakurser[behandlingId]!!.sortedBy { it.valutakursdato })
+    }
+
+    @Så("forvent at endringstidspunktet er {} for behandling {}")
+    fun `generer vedtaksperioder fors `(
+        forventetEndringstidspunktString: String,
+        behandlingId: Long,
+    ) {
+        val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+        val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
+        val grunnlagForBegrunnelser = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
+
+        val faktiskEntringstidspunkt =
+            utledEndringstidspunkt(
+                behandlingsGrunnlagForVedtaksperioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
+                behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
+            )
+
+        val forventetEndringstidspunkt = parseNullableDato(forventetEndringstidspunktString) ?: error("Så forvent følgende endringstidspunkt {} forventer en dato")
+
+        assertThat(forventetEndringstidspunkt).isEqualTo(faktiskEntringstidspunkt)
     }
 }
 
