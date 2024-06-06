@@ -92,7 +92,6 @@ class DokumentService(
             )
         }
 
-        val generertBrev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest)
         val førsteside =
             if (manueltBrevRequest.brevmal.skalGenerereForside()) {
                 Førsteside(
@@ -124,7 +123,7 @@ class DokumentService(
                     fnr = fagsak.aktør.aktivFødselsnummer(),
                     fagsakId = fagsakId.toString(),
                     journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
-                    brev = generertBrev,
+                    brev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest, fagsak),
                     dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
                     førsteside = førsteside,
                     eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsakId, behandling?.id, mottakerInfo),
@@ -170,7 +169,7 @@ class DokumentService(
                 listOf(
                     Institusjon(
                         orgNummer = checkNotNull(fagsak.institusjon).orgNummer,
-                        navn = utledInstitusjonNavn(manueltBrevRequest),
+                        navn = organisasjonService.hentOrganisasjon(manueltBrevRequest.mottakerIdent).navn,
                     ),
                 )
             brevmottakere.isNotEmpty() ->
@@ -178,12 +177,6 @@ class DokumentService(
                     brevmottakere,
                 )
             else -> listOf(Bruker)
-        }
-    }
-
-    private fun utledInstitusjonNavn(manueltBrevRequest: ManueltBrevRequest): String {
-        return manueltBrevRequest.mottakerNavn.ifBlank {
-            organisasjonService.hentOrganisasjon(manueltBrevRequest.mottakerIdent).navn
         }
     }
 

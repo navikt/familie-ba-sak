@@ -107,6 +107,7 @@ class DokumentController(
                     arbeidsfordelingService,
                 ),
             erForhåndsvisning = true,
+            fagsak = behandling.fagsak
         ).let { Ressurs.success(it) }
     }
 
@@ -159,6 +160,7 @@ class DokumentController(
         return dokumentGenereringService.genererManueltBrev(
             manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
             erForhåndsvisning = true,
+            fagsak = fagsakService.hentPåFagsakId(fagsakId),
         ).let { Ressurs.success(it) }
     }
 

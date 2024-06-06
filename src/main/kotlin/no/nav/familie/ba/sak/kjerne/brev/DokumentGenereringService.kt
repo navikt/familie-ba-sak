@@ -4,11 +4,15 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrev
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -27,6 +31,8 @@ class DokumentGenereringService(
     private val saksbehandlerContext: SaksbehandlerContext,
     private val sammensattKontrollsakService: SammensattKontrollsakService,
     @Lazy private val testVerktøyService: TestVerktøyService,
+    private val personopplysningerService: PersonopplysningerService,
+    private val organisasjonService: OrganisasjonService,
 ) {
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
         try {
@@ -62,11 +68,16 @@ class DokumentGenereringService(
 
     fun genererManueltBrev(
         manueltBrevRequest: ManueltBrevRequest,
+        fagsak: Fagsak,
         erForhåndsvisning: Boolean = false,
     ): ByteArray {
+        val navnIBrevHeader = finnSøkerEllerInstitusjonsNavn(fagsak)
         try {
             val brev: Brev =
-                manueltBrevRequest.tilBrev(saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()) { integrasjonClient.hentLandkoderISO2() }
+                manueltBrevRequest.tilBrev(
+                    navnIBrevHeader,
+                    saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
+                ) { integrasjonClient.hentLandkoderISO2() }
             return brevKlient.genererBrev(
                 målform = manueltBrevRequest.mottakerMålform.tilSanityFormat(),
                 brev = brev,
@@ -82,6 +93,17 @@ class DokumentGenereringService(
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                 throwable = exception,
             )
+        }
+    }
+
+    private fun finnSøkerEllerInstitusjonsNavn(fagsak: Fagsak): String {
+        return if (fagsak.type == FagsakType.INSTITUSJON) {
+            val orgnummer = fagsak.institusjon?.orgNummer
+                ?: throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
+            organisasjonService.hentOrganisasjon(orgnummer).navn
+        } else {
+            personopplysningerService.hentPersoninfoEnkel(fagsak.aktør).navn
+                ?: throw Feil("Klarte ikke hente navn på fagsak.aktør fra pdl")
         }
     }
 }
