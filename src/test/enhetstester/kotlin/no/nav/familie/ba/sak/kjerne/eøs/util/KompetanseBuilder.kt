@@ -27,10 +27,6 @@ class KompetanseBuilder(
             when (it) {
                 '-' ->
                     Kompetanse.NULL.copy(
-                        søkersAktivitet = søkersAktivitet,
-                        annenForeldersAktivitet = annenForeldersAktivitet,
-                        søkersAktivitetsland = søkersAktivitetsland,
-                        barnetsBostedsland = barnetsBostedsland,
                         annenForeldersAktivitetsland = annenForeldersAktivitetsland,
                         erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
                     )
