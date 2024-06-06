@@ -4,14 +4,12 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBrevMottaker
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.domene.Bruker
-import no.nav.familie.ba.sak.kjerne.steg.domene.Dødsbo
 import no.nav.familie.ba.sak.kjerne.steg.domene.BrukerMedUtenlandskAdresse
+import no.nav.familie.ba.sak.kjerne.steg.domene.Dødsbo
 import no.nav.familie.ba.sak.kjerne.steg.domene.FullmektigEllerVerge
 import no.nav.familie.ba.sak.kjerne.steg.domene.ManuellAdresseInfo
 import no.nav.familie.ba.sak.kjerne.steg.domene.MottakerInfo
@@ -23,8 +21,6 @@ import org.springframework.transaction.annotation.Transactional
 class BrevmottakerService(
     private val brevmottakerRepository: BrevmottakerRepository,
     private val loggService: LoggService,
-    private val personidentService: PersonidentService,
-    private val personopplysningerService: PersonopplysningerService,
     private val validerBrevmottakerService: ValiderBrevmottakerService,
 ) {
     @Transactional
@@ -100,7 +96,7 @@ class BrevmottakerService(
                     manueltRegistrerteMottakere.filter { it.type != MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE }
                 if (tilleggsmottakerListe.size > 1) {
                     throw FunksjonellFeil(
-                        "Mottakerfeil: ${tilleggsmottakerListe.first().type.visningsnavn} kan ikke kombineres med ${tilleggsmottakerListe.last().type.visningsnavn}"
+                        "Mottakerfeil: ${tilleggsmottakerListe.first().type.visningsnavn} kan ikke kombineres med ${tilleggsmottakerListe.last().type.visningsnavn}",
                     )
                 }
                 val tilleggsmottaker =
@@ -109,13 +105,6 @@ class BrevmottakerService(
                     }
                 listOfNotNull(bruker, tilleggsmottaker)
             }
-        }
-    }
-
-    fun hentMottakerNavn(personIdent: String): String {
-        val aktør = personidentService.hentAktør(personIdent)
-        return personopplysningerService.hentPersoninfoNavnOgAdresse(aktør).let {
-            it.navn!!
         }
     }
 

@@ -170,8 +170,8 @@ class DokumentService(
                 listOf(
                     Institusjon(
                         orgNummer = checkNotNull(fagsak.institusjon).orgNummer,
-                        institusjonNavn = utledInstitusjonNavn(manueltBrevRequest)
-                    )
+                        navn = utledInstitusjonNavn(manueltBrevRequest),
+                    ),
                 )
             brevmottakere.isNotEmpty() ->
                 brevmottakerService.lagMottakereFraBrevMottakere(
@@ -230,13 +230,15 @@ class DokumentService(
     }
 
     companion object {
-
         fun genererEksternReferanseIdForJournalpost(
             fagsakId: Long,
             behandlingId: Long?,
             mottakerInfo: MottakerInfo,
         ) = listOfNotNull(
-            fagsakId, behandlingId, if (mottakerInfo is FullmektigEllerVerge) "verge" else null, MDC.get(MDCConstants.MDC_CALL_ID)
+            fagsakId,
+            behandlingId,
+            if (mottakerInfo is FullmektigEllerVerge) "verge" else null,
+            MDC.get(MDCConstants.MDC_CALL_ID),
         ).joinToString("_")
     }
 }

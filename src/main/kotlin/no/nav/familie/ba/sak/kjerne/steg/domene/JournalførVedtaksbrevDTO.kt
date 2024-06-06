@@ -6,7 +6,6 @@ import no.nav.familie.prosessering.domene.Task
 
 data class JournalførVedtaksbrevDTO(val vedtakId: Long, val task: Task)
 
-
 sealed interface MottakerInfo {
     val navn: String
         get() = ""
@@ -32,7 +31,7 @@ class Dødsbo(
 
 data class Institusjon(
     val orgNummer: String,
-    val institusjonNavn: String,
+    override val navn: String,
 ) : MottakerInfo
 
 fun MottakerInfo.tilAvsenderMottaker(): AvsenderMottaker? {
@@ -43,11 +42,12 @@ fun MottakerInfo.tilAvsenderMottaker(): AvsenderMottaker? {
                 id = null,
                 idType = null,
             )
-        is Institusjon -> AvsenderMottaker(
-            idType = BrukerIdType.ORGNR,
-            id = orgNummer,
-            navn = institusjonNavn, // TODO sjekk om denne settes i frontend
-        )
+        is Institusjon ->
+            AvsenderMottaker(
+                idType = BrukerIdType.ORGNR,
+                id = orgNummer,
+                navn = navn,
+            )
         // Trenger ikke overstyres når mottaker er bruker
         is Bruker, is BrukerMedUtenlandskAdresse -> null
     }

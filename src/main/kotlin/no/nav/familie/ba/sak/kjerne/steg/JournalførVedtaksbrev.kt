@@ -64,10 +64,11 @@ class JournalførVedtaksbrev(
 
         if (fagsak.type == FagsakType.INSTITUSJON) {
             val orgNummer = fagsak.institusjon!!.orgNummer
-            mottakere += Institusjon(
-                orgNummer = orgNummer,
-                institusjonNavn = organisasjonService.hentOrganisasjon(orgNummer).navn
-            )
+            mottakere +=
+                Institusjon(
+                    orgNummer = orgNummer,
+                    navn = organisasjonService.hentOrganisasjon(orgNummer).navn,
+                )
         } else {
             val brevMottakere = brevmottakerService.hentBrevmottakere(behandling.id)
             if (brevMottakere.isNotEmpty()) {
@@ -105,16 +106,17 @@ class JournalførVedtaksbrev(
         journalposterTilDistribusjon.forEach {
             when (it.value) {
                 is Institusjon,
-                is FullmektigEllerVerge -> { // Denne tasken sender kun vedtaksbrev
+                is FullmektigEllerVerge,
+                -> { // Denne tasken sender kun vedtaksbrev
                     val distribuerTilVergeTask =
                         DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask
                             .opprettDistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
                                 distribuerDokumentDTO =
-                                lagDistribuerDokumentDto(
-                                    behandling = behandling,
-                                    journalPostId = it.key,
-                                    mottakerInfo = it.value,
-                                ),
+                                    lagDistribuerDokumentDto(
+                                        behandling = behandling,
+                                        journalPostId = it.key,
+                                        mottakerInfo = it.value,
+                                    ),
                                 properties = data.task.metadata,
                             )
                     taskRepository.save(distribuerTilVergeTask)
@@ -122,16 +124,17 @@ class JournalførVedtaksbrev(
 
                 is Bruker,
                 is BrukerMedUtenlandskAdresse,
-                is Dødsbo -> {
+                is Dødsbo,
+                -> {
                     // Denne tasken sender vedtaksbrev og håndterer steg videre
                     val distribuerTilSøkerTask =
                         DistribuerDokumentTask.opprettDistribuerDokumentTask(
                             distribuerDokumentDTO =
-                            lagDistribuerDokumentDto(
-                                behandling = behandling,
-                                journalPostId = it.key,
-                                mottakerInfo = it.value,
-                            ),
+                                lagDistribuerDokumentDto(
+                                    behandling = behandling,
+                                    journalPostId = it.key,
+                                    mottakerInfo = it.value,
+                                ),
                             properties = data.task.metadata,
                         )
                     taskRepository.save(distribuerTilSøkerTask)

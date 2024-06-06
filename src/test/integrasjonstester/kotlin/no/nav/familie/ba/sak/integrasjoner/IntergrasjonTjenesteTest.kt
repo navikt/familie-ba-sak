@@ -193,7 +193,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                         ),
                     ),
                 behandlingId = vedtak.behandling.id,
-                eksternReferanseId = "1_${vedtak.behandling.id}_journalfør"
+                eksternReferanseId = "1_${vedtak.behandling.id}_journalfør",
             )
 
         assertThat(journalPostId).isEqualTo(MOCK_JOURNALPOST_FOR_VEDTAK_ID)

@@ -59,8 +59,6 @@ internal class DokumentServiceTest {
             BrevmottakerService(
                 brevmottakerRepository = brevmottakerRepository,
                 loggService = mockk(),
-                personidentService = personidentService,
-                personopplysningerService = mockk(),
                 validerBrevmottakerService = mockk(),
             ),
         )
@@ -106,7 +104,7 @@ internal class DokumentServiceTest {
                     dokumenttype = any(),
                     førsteside = any(),
                     eksternReferanseId = any(),
-                    avsenderMottaker = capture(avsenderMottaker)
+                    avsenderMottaker = capture(avsenderMottaker),
                 )
             } returns "mockJournalpostId"
             every { journalføringRepository.save(any()) } returns
@@ -270,7 +268,6 @@ internal class DokumentServiceTest {
                     landkode = "NO",
                 ),
             )
-        every { brevmottakerService.hentMottakerNavn(søkersident) } returns "søker"
         every {
             utgåendeJournalføringService.journalførManueltBrev(
                 fnr = any(),
@@ -333,7 +330,6 @@ internal class DokumentServiceTest {
             )
         val avsenderMottakere = mutableListOf<AvsenderMottaker>()
 
-        every { brevmottakerService.hentMottakerNavn(søkersident) } returns "søker"
         every {
             utgåendeJournalføringService.journalførManueltBrev(
                 fnr = any(),
