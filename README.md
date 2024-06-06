@@ -1,5 +1,7 @@
 # familie-ba-sak
 
+test
+
 Saksbehandling for barnetrygd
 
 ## Kjøring lokalt
