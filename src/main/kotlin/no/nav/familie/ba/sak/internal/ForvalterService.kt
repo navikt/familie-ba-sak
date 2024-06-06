@@ -27,15 +27,22 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjema
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -294,23 +301,22 @@ class ForvalterService(
 
         val korrigerteUtenlandskePeriodebeløp =
             utenlandskePeriodebeløpPerBehandling.entries.flatMap { (behandlingId, utenlandskePeriodebeløp) ->
-                utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna().outerJoin(sekundærlandsKompetanser[behandlingId]!!.tilSeparateTidslinjerForBarna()) { upb, kompetanse ->
+                utenlandskePeriodebeløp.tilTidslinjerPerBarn().outerJoin(sekundærlandsKompetanser[behandlingId]!!.tilTidslinjerPerBarn()) { upb, kompetanse ->
                     try {
                         val utbetalingsland = kompetanse?.utbetalingsland()
                         when {
                             kompetanse == null -> null
                             upb == null -> null
-                            utbetalingsland == null -> throw Feil("Skal ikke kunne skje")
                             upb.utbetalingsland != utbetalingsland ->
-                                UtenlandskPeriodebeløpEndring(id = upb.id, behandlingId = behandlingId, utbetalingslandOriginalt = upb.utbetalingsland, utbetalingslandKorrigert = utbetalingsland)
+                                UtenlandskPeriodebeløpEndring(id = upb.id, behandlingId = behandlingId, utbetalingslandOriginalt = upb.utbetalingsland, utbetalingslandKorrigert = utbetalingsland!!)
 
                             else -> null
                         }
                     } catch (e: Exception) {
                         kompetanserMedFeil.add(
                             KompetanseMedFeil(
-                                behandlingId = kompetanse!!.behandlingId,
-                                kompetanseId = kompetanse.id,
+                                behandlingId = behandlingId,
+                                kompetanseId = kompetanse!!.id,
                                 søkersAktivitetsland = kompetanse.søkersAktivitetsland,
                                 annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland,
                                 barnetsBostedsland = kompetanse.barnetsBostedsland,
@@ -321,6 +327,24 @@ class ForvalterService(
                 }.flatMap { (_, tidslinjer) -> tidslinjer.perioder().mapNotNull { periode -> periode.innhold } }
             }
         return UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse(korrigerteUtenlandskePeriodebeløp, kompetanserMedFeil)
+    }
+
+    private fun <T : PeriodeOgBarnSkjema<T>> List<T>.tilTidslinjerPerBarn(): Map<Aktør, Tidslinje<T, Måned>> {
+        val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
+
+        return alleBarnAktørIder.associateWith { aktør ->
+            tidslinje {
+                this
+                    .filter { it.barnAktører.contains(aktør) }
+                    .map {
+                        Periode(
+                            fraOgMed = it.fom.tilTidspunktEllerUendeligTidlig(it.tom),
+                            tilOgMed = it.tom.tilTidspunktEllerUendeligSent(it.fom),
+                            innhold = it,
+                        )
+                    }
+            }
+        }
     }
 }
 
