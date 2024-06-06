@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -283,29 +284,36 @@ class ForvalterService(
         }
     }
 
-    fun finnUtenlandskePeriodebeløpSomSkalKorrigeres(): List<UtenlandskPeriodebeløpEndring> {
+    fun finnUtenlandskePeriodebeløpSomSkalKorrigeres(): Pair<List<UtenlandskPeriodebeløpEndring>, List<Kompetanse>> {
         val utenlandskePeriodebeløpMedFeilUtbetalingsland = utenlandskPeriodebeløpRepository.hentUtenlandskePeriodebeløpMedFeilUtbetalingsland()
         val behandlinger = utenlandskePeriodebeløpMedFeilUtbetalingsland.map { it.behandlingId }.toSet()
         val sekundærlandsKompetanser = kompetanseRepository.hentSekundærlandsKompetanserForBehandlinger(behandlinger).groupBy { it.behandlingId }
 
         val utenlandskePeriodebeløpPerBehandling = utenlandskePeriodebeløpMedFeilUtbetalingsland.groupBy { it.behandlingId }
 
+        val kompetanserMedFeil: List<Kompetanse> = emptyList()
+
         val korrigerteUtenlandskePeriodebeløp =
             utenlandskePeriodebeløpPerBehandling.entries.flatMap { (behandlingId, utenlandskePeriodebeløp) ->
                 utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna().outerJoin(sekundærlandsKompetanser[behandlingId]!!.tilSeparateTidslinjerForBarna()) { upb, kompetanse ->
-                    val utbetalingsland = kompetanse?.utbetalingsland()
-                    when {
-                        kompetanse == null -> null
-                        upb == null -> null
-                        utbetalingsland == null -> throw Feil("Skal ikke kunne skje")
-                        upb.utbetalingsland != utbetalingsland ->
-                            UtenlandskPeriodebeløpEndring(id = upb.id, behandlingId = behandlingId, utbetalingslandOriginalt = upb.utbetalingsland, utbetalingslandKorrigert = utbetalingsland)
+                    try {
+                        val utbetalingsland = kompetanse?.utbetalingsland()
+                        when {
+                            kompetanse == null -> null
+                            upb == null -> null
+                            utbetalingsland == null -> throw Feil("Skal ikke kunne skje")
+                            upb.utbetalingsland != utbetalingsland ->
+                                UtenlandskPeriodebeløpEndring(id = upb.id, behandlingId = behandlingId, utbetalingslandOriginalt = upb.utbetalingsland, utbetalingslandKorrigert = utbetalingsland)
 
-                        else -> null
+                            else -> null
+                        }
+                    } catch (e: Exception) {
+                        kompetanserMedFeil.plus(kompetanse)
+                        null
                     }
                 }.flatMap { (_, tidslinjer) -> tidslinjer.perioder().mapNotNull { periode -> periode.innhold } }
             }
-        return korrigerteUtenlandskePeriodebeløp
+        return Pair(korrigerteUtenlandskePeriodebeløp, kompetanserMedFeil)
     }
 }
 
