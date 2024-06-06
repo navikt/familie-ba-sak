@@ -29,7 +29,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -284,14 +283,14 @@ class ForvalterService(
         }
     }
 
-    fun finnUtenlandskePeriodebeløpSomSkalKorrigeres(): Pair<List<UtenlandskPeriodebeløpEndring>, List<Kompetanse>> {
+    fun finnUtenlandskePeriodebeløpSomSkalKorrigeres(): UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse {
         val utenlandskePeriodebeløpMedFeilUtbetalingsland = utenlandskPeriodebeløpRepository.hentUtenlandskePeriodebeløpMedFeilUtbetalingsland()
         val behandlinger = utenlandskePeriodebeløpMedFeilUtbetalingsland.map { it.behandlingId }.toSet()
         val sekundærlandsKompetanser = kompetanseRepository.hentSekundærlandsKompetanserForBehandlinger(behandlinger).groupBy { it.behandlingId }
 
         val utenlandskePeriodebeløpPerBehandling = utenlandskePeriodebeløpMedFeilUtbetalingsland.groupBy { it.behandlingId }
 
-        val kompetanserMedFeil: MutableList<Kompetanse> = mutableListOf()
+        val kompetanserMedFeil: MutableList<KompetanseMedFeil> = mutableListOf()
 
         val korrigerteUtenlandskePeriodebeløp =
             utenlandskePeriodebeløpPerBehandling.entries.flatMap { (behandlingId, utenlandskePeriodebeløp) ->
@@ -308,14 +307,35 @@ class ForvalterService(
                             else -> null
                         }
                     } catch (e: Exception) {
-                        kompetanserMedFeil.add(kompetanse!!)
+                        kompetanserMedFeil.add(
+                            KompetanseMedFeil(
+                                behandlingId = kompetanse!!.behandlingId,
+                                kompetanseId = kompetanse.id,
+                                søkersAktivitetsland = kompetanse.søkersAktivitetsland,
+                                annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland,
+                                barnetsBostedsland = kompetanse.barnetsBostedsland,
+                            ),
+                        )
                         null
                     }
                 }.flatMap { (_, tidslinjer) -> tidslinjer.perioder().mapNotNull { periode -> periode.innhold } }
             }
-        return Pair(korrigerteUtenlandskePeriodebeløp, kompetanserMedFeil)
+        return UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse(korrigerteUtenlandskePeriodebeløp, kompetanserMedFeil)
     }
 }
+
+data class UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse(
+    val utenlandskePeriodeBeløpEndringer: List<UtenlandskPeriodebeløpEndring>,
+    val kompetanserMedFeil: List<KompetanseMedFeil>,
+)
+
+data class KompetanseMedFeil(
+    val behandlingId: Long,
+    val kompetanseId: Long,
+    val søkersAktivitetsland: String?,
+    val annenForeldersAktivitetsland: String?,
+    val barnetsBostedsland: String?,
+)
 
 data class UtenlandskPeriodebeløpEndring(
     val id: Long,
