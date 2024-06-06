@@ -147,6 +147,15 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
 
+    INNVILGET_SELVSTENDIG_RETT_TO_PRIMÆRLAND_NORGE_UTBETALER {
+        override val sanityApiNavn = "innvilgetSelvstendigRettToPrimaerlandNorgeUtbetaler"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SELVSTENDIG_RETT_TO_PRIMÆRLAND_ANNET_LAND_UTBETALER {
+        override val sanityApiNavn = "innvilgetSelvstendigRettToPrimaerlandAnnetLandUtbetaler"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+
     INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_FÅR_YTELSE_I_UTLANDET {
         override val sanityApiNavn = "innvilgetSelvstendigRettSekundaerlandFaarYtelseIUtlandet"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET

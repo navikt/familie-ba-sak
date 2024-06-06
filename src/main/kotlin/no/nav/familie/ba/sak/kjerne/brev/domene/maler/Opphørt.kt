@@ -45,11 +45,17 @@ data class OpphørtData(
     override val flettefelter: FlettefelterForDokumentImpl,
     override val perioder: List<BrevPeriode>,
     override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
-) : VedtaksbrevData {
+) : VedtaksbrevStandardData {
     data class Delmaler(
-        val signaturVedtak: SignaturVedtak,
-        val feilutbetaling: Boolean,
+        override val signaturVedtak: SignaturVedtak,
+        override val feilutbetaling: Boolean,
+        override val korrigertVedtak: KorrigertVedtakData?,
         val hjemmeltekst: Hjemmeltekst,
-        val korrigertVedtak: KorrigertVedtakData?,
-    )
+    ) : OpphørtDelmaler
+}
+
+interface OpphørtDelmaler {
+    val signaturVedtak: SignaturVedtak
+    val feilutbetaling: Boolean
+    val korrigertVedtak: KorrigertVedtakData?
 }

@@ -62,7 +62,7 @@ data class ForsattInnvilgetData(
     override val flettefelter: FlettefelterForDokument,
     override val perioder: List<BrevPeriode>,
     override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
-) : VedtaksbrevData {
+) : VedtaksbrevStandardData {
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
         val hjemmeltekst: Hjemmeltekst,

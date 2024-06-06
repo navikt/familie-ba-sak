@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Component
@@ -31,28 +32,34 @@ class MånedligValutajusteringScheduler(
      */
     @Scheduled(cron = "0 0 $KLOKKETIME_SCHEDULER_TRIGGES 1 * *")
     @Transactional
-    fun lagMånedligValutajusteringTask() {
+    fun lagScheduledMånedligValutajusteringTask() {
+        if (leaderClientService.isLeader()) {
+            lagMånedligValutajusteringTask(triggerTid = hentNesteVirkedag())
+        }
+    }
+
+    fun lagMånedligValutajusteringTask(triggerTid: LocalDateTime) {
         val inneværendeMåned = YearMonth.now()
         if (!unleashService.isEnabled(FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ALLE_SAKER)) {
             logger.info("FeatureToggle ${FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ALLE_SAKER} er skrudd av. Avbryter månedlig valutajustering.")
             return
         }
 
-        if (leaderClientService.isLeader()) {
-            logger.info("Kjører scheduled månedlig valutajustering for $inneværendeMåned")
-            taskRepository.save(
-                MånedligValutajusteringFinnFagsakerTask.lagTask(
-                    inneværendeMåned = inneværendeMåned,
-                    triggerTid =
-                        VirkedagerProvider.nesteVirkedag(
-                            LocalDate.now().minusDays(1),
-                        ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0),
-                ),
-            )
-        }
+        logger.info("Kjører scheduled månedlig valutajustering for $inneværendeMåned")
+        taskRepository.save(
+            MånedligValutajusteringFinnFagsakerTask.lagTask(
+                inneværendeMåned = inneværendeMåned,
+                triggerTid = triggerTid,
+            ),
+        )
     }
 
+    private fun hentNesteVirkedag(): LocalDateTime =
+        VirkedagerProvider.nesteVirkedag(
+            LocalDate.now().minusDays(1),
+        ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0)
+
     companion object {
-        const val KLOKKETIME_SCHEDULER_TRIGGES = 6
+        const val KLOKKETIME_SCHEDULER_TRIGGES = 2
     }
 }

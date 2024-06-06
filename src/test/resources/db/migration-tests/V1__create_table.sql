@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.5 (Debian 14.5-1.pgdg110+1)
--- Dumped by pg_dump version 14.10 (Homebrew)
+-- Dumped from database version 16.3 (Debian 16.3-1.pgdg120+1)
+-- Dumped by pg_dump version 16.3
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1079,35 +1079,6 @@ CREATE SEQUENCE public.po_bostedsadresse_seq
 
 
 --
--- Name: po_bostedsadresseperiode; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.po_bostedsadresseperiode (
-    id bigint NOT NULL,
-    fk_po_person_id bigint NOT NULL,
-    fom date,
-    tom date,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    versjon bigint DEFAULT 0 NOT NULL
-);
-
-
---
--- Name: po_bostedsadresseperiode_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.po_bostedsadresseperiode_seq
-    START WITH 1000000
-    INCREMENT BY 50
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
 -- Name: po_doedsfall; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1631,7 +1602,8 @@ CREATE TABLE public.valutakurs (
     opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
     endret_av character varying,
-    endret_tid timestamp(3) without time zone
+    endret_tid timestamp(3) without time zone,
+    vurderingsform text
 );
 
 
@@ -1766,22 +1738,6 @@ CREATE SEQUENCE public.vedtaksperiode_seq
 
 
 --
--- Name: verge; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.verge (
-    id bigint NOT NULL,
-    ident character varying,
-    fk_behandling_id bigint NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying(20) DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying(20),
-    endret_tid timestamp(3) without time zone
-);
-
-
---
 -- Name: verge_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -1805,9 +1761,7 @@ CREATE TABLE public.vilkaarsvurdering (
     opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
     endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    samlet_resultat character varying,
-    ytelse_personer text DEFAULT ''::text
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -1866,6 +1820,29 @@ CREATE SEQUENCE public.vilkar_resultat_seq
 
 
 --
+-- Name: vurderingsstrategi_for_valutakurser; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.vurderingsstrategi_for_valutakurser (
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    vurderingsstrategi_for_valutakurser text NOT NULL
+);
+
+
+--
+-- Name: vurderingsstrategi_for_valutakurser_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.vurderingsstrategi_for_valutakurser_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
 -- Name: aktoer_merge_logg id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1890,532 +1867,420 @@ ALTER TABLE ONLY public.task_logg ALTER COLUMN id SET DEFAULT nextval('public.ta
 -- Data for Name: aktoer; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.aktoer (aktoer_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: aktoer_merge_logg; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.aktoer_merge_logg (id, fk_fagsak_id, historisk_aktoer_id, ny_aktoer_id, merge_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: aktoer_til_kompetanse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.aktoer_til_kompetanse (fk_kompetanse_id, fk_aktoer_id) FROM stdin;
-\.
 
 
 --
 -- Data for Name: aktoer_til_utenlandsk_periodebeloep; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.aktoer_til_utenlandsk_periodebeloep (fk_utenlandsk_periodebeloep_id, fk_aktoer_id) FROM stdin;
-\.
 
 
 --
 -- Data for Name: aktoer_til_valutakurs; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.aktoer_til_valutakurs (fk_valutakurs_id, fk_aktoer_id) FROM stdin;
-\.
 
 
 --
 -- Data for Name: andel_tilkjent_ytelse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.andel_tilkjent_ytelse (id, fk_behandling_id, versjon, opprettet_av, opprettet_tid, stonad_fom, stonad_tom, type, kalkulert_utbetalingsbelop, endret_av, endret_tid, tilkjent_ytelse_id, periode_offset, forrige_periode_offset, kilde_behandling_id, prosent, sats, fk_aktoer_id, nasjonalt_periodebelop, differanseberegnet_periodebelop) FROM stdin;
-\.
 
 
 --
 -- Data for Name: annen_vurdering; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.annen_vurdering (id, fk_person_resultat_id, resultat, type, begrunnelse, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: arbeidsfordeling_pa_behandling; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.arbeidsfordeling_pa_behandling (id, fk_behandling_id, behandlende_enhet_id, behandlende_enhet_navn, manuelt_overstyrt) FROM stdin;
-\.
 
 
 --
 -- Data for Name: batch; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.batch (id, kjoredato, status) FROM stdin;
-1000000	2021-01-06 00:00:00	LEDIG
-1000050	2021-01-29 00:00:00	LEDIG
-1000100	2021-02-26 00:00:00	LEDIG
-1000150	2021-03-31 00:00:00	LEDIG
-1000200	2021-04-26 00:00:00	LEDIG
-1000250	2021-05-28 00:00:00	LEDIG
-1000300	2021-06-29 00:00:00	LEDIG
-1000350	2021-07-30 00:00:00	LEDIG
-1000400	2021-08-30 00:00:00	LEDIG
-1000450	2021-09-27 00:00:00	LEDIG
-1000500	2021-10-29 00:00:00	LEDIG
-1000550	2021-11-22 00:00:00	LEDIG
-1000600	2022-01-05 00:00:00	LEDIG
-1000650	2022-01-28 00:00:00	LEDIG
-1000700	2022-02-25 00:00:00	LEDIG
-1000750	2022-03-25 00:00:00	LEDIG
-1000800	2022-04-26 00:00:00	LEDIG
-1000850	2022-05-27 00:00:00	LEDIG
-1000900	2022-06-29 00:00:00	LEDIG
-1000950	2022-07-29 00:00:00	LEDIG
-1001000	2022-08-30 00:00:00	LEDIG
-1001050	2022-09-29 00:00:00	LEDIG
-1001100	2022-10-28 00:00:00	LEDIG
-1001150	2022-11-21 00:00:00	LEDIG
-1001200	2023-01-05 00:00:00	LEDIG
-1001250	2023-01-30 00:00:00	LEDIG
-1001300	2023-02-27 00:00:00	LEDIG
-1001350	2023-03-28 00:00:00	LEDIG
-1001400	2023-04-25 00:00:00	LEDIG
-1001450	2023-05-30 00:00:00	LEDIG
-1001500	2023-06-29 00:00:00	LEDIG
-1001550	2023-07-28 00:00:00	LEDIG
-1001600	2023-08-30 00:00:00	LEDIG
-1001650	2023-09-29 00:00:00	LEDIG
-1001700	2023-10-30 00:00:00	LEDIG
-1001750	2023-11-22 00:00:00	LEDIG
-\.
+INSERT INTO public.batch VALUES (1000000, '2021-01-06 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000050, '2021-01-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000100, '2021-02-26 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000150, '2021-03-31 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000200, '2021-04-26 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000250, '2021-05-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000300, '2021-06-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000350, '2021-07-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000400, '2021-08-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000450, '2021-09-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000500, '2021-10-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000550, '2021-11-22 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000600, '2022-01-05 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000650, '2022-01-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000700, '2022-02-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000750, '2022-03-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000800, '2022-04-26 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000850, '2022-05-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000900, '2022-06-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1000950, '2022-07-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001000, '2022-08-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001050, '2022-09-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001100, '2022-10-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001150, '2022-11-21 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001200, '2023-01-05 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001250, '2023-01-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001300, '2023-02-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001350, '2023-03-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001400, '2023-04-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001450, '2023-05-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001500, '2023-06-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001550, '2023-07-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001600, '2023-08-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001650, '2023-09-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001700, '2023-10-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001750, '2023-11-22 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001800, '2024-01-04 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001850, '2024-01-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001900, '2024-02-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1001950, '2024-03-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002000, '2024-04-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002050, '2024-05-24 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002100, '2024-06-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002150, '2024-07-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002200, '2024-08-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002250, '2024-09-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002300, '2024-10-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 
 
 --
 -- Data for Name: behandling; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.behandling (id, fk_fagsak_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, behandling_type, aktiv, status, kategori, underkategori, opprettet_aarsak, skal_behandles_automatisk, resultat, overstyrt_endringstidspunkt, aktivert_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: behandling_migreringsinfo; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.behandling_migreringsinfo (id, fk_behandling_id, migreringsdato, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: behandling_soknadsinfo; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.behandling_soknadsinfo (id, fk_behandling_id, mottatt_dato, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, er_digital, journalpost_id, brevkode) FROM stdin;
-\.
 
 
 --
 -- Data for Name: behandling_steg_tilstand; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.behandling_steg_tilstand (id, fk_behandling_id, behandling_steg, behandling_steg_status, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: brevmottaker; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.brevmottaker (id, fk_behandling_id, type, navn, adresselinje_1, adresselinje_2, postnummer, poststed, landkode, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: data_chunk; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.data_chunk (id, fk_batch_id, transaksjons_id, chunk_nr, er_sendt, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: ecbvalutakurscache; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.ecbvalutakurscache (id, valutakursdato, valutakode, kurs, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: endret_utbetaling_andel; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.endret_utbetaling_andel (id, fk_behandling_id, fk_po_person_id, fom, tom, prosent, aarsak, begrunnelse, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, avtaletidspunkt_delt_bosted, soknadstidspunkt) FROM stdin;
-\.
 
 
 --
 -- Data for Name: eos_begrunnelse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.eos_begrunnelse (id, fk_vedtaksperiode_id, begrunnelse) FROM stdin;
-\.
 
 
 --
 -- Data for Name: fagsak; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.fagsak (id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, status, arkivert, fk_aktoer_id, type, fk_institusjon_id) FROM stdin;
-\.
 
 
 --
 -- Data for Name: feilutbetalt_valuta; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.feilutbetalt_valuta (id, fk_behandling_id, fom, tom, feilutbetalt_beloep, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, er_per_maaned) FROM stdin;
-\.
 
 
 --
 -- Data for Name: foedselshendelsefiltrering_resultat; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.foedselshendelsefiltrering_resultat (id, fk_behandling_id, filtreringsregel, resultat, begrunnelse, evalueringsaarsaker, regel_input, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: gr_periode_overgangsstonad; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.gr_periode_overgangsstonad (id, fk_behandling_id, fom, tom, datakilde, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, fk_aktoer_id) FROM stdin;
-\.
 
 
 --
 -- Data for Name: gr_personopplysninger; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.gr_personopplysninger (id, fk_behandling_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, aktiv) FROM stdin;
-\.
 
 
 --
 -- Data for Name: gr_soknad; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.gr_soknad (id, opprettet_av, opprettet_tid, fk_behandling_id, soknad, aktiv) FROM stdin;
-\.
 
 
 --
 -- Data for Name: institusjon; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.institusjon (id, org_nummer, tss_ekstern_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: journalpost; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.journalpost (id, fk_behandling_id, journalpost_id, opprettet_tid, opprettet_av, type) FROM stdin;
-\.
 
 
 --
 -- Data for Name: kompetanse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.kompetanse (id, fk_behandling_id, fom, tom, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, soekers_aktivitet, annen_forelderes_aktivitet, annen_forelderes_aktivitetsland, barnets_bostedsland, resultat, sokers_aktivitetsland, er_annen_forelder_omfattet_av_norsk_lovgivning) FROM stdin;
-\.
 
 
 --
 -- Data for Name: korrigert_etterbetaling; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.korrigert_etterbetaling (id, aarsak, begrunnelse, belop, aktiv, fk_behandling_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: korrigert_vedtak; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.korrigert_vedtak (id, begrunnelse, vedtaksdato, aktiv, fk_behandling_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: logg; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.logg (id, opprettet_av, opprettet_tid, fk_behandling_id, type, tittel, rolle, tekst) FROM stdin;
-\.
 
 
 --
 -- Data for Name: okonomi_simulering_mottaker; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.okonomi_simulering_mottaker (id, mottaker_nummer, mottaker_type, opprettet_av, opprettet_tid, endret_av, endret_tid, versjon, fk_behandling_id) FROM stdin;
-\.
 
 
 --
 -- Data for Name: okonomi_simulering_postering; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.okonomi_simulering_postering (id, fk_okonomi_simulering_mottaker_id, fag_omraade_kode, fom, tom, betaling_type, belop, postering_type, forfallsdato, uten_inntrekk, opprettet_av, opprettet_tid, endret_av, endret_tid, versjon, er_feilkonto) FROM stdin;
-\.
 
 
 --
 -- Data for Name: oppgave; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.oppgave (id, fk_behandling_id, gsak_id, type, ferdigstilt, opprettet_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: person_resultat; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.person_resultat (id, fk_vilkaarsvurdering_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, fk_aktoer_id) FROM stdin;
-\.
 
 
 --
 -- Data for Name: personident; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.personident (fk_aktoer_id, foedselsnummer, aktiv, gjelder_til, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: po_arbeidsforhold; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.po_arbeidsforhold (id, fk_po_person_id, arbeidsgiver_id, arbeidsgiver_type, fom, tom, opprettet_av, opprettet_tid, endret_av, endret_tid, versjon) FROM stdin;
-\.
 
 
 --
 -- Data for Name: po_bostedsadresse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.po_bostedsadresse (id, type, bostedskommune, husnummer, husbokstav, bruksenhetsnummer, adressenavn, kommunenummer, tilleggsnavn, postnummer, opprettet_av, opprettet_tid, endret_av, versjon, endret_tid, matrikkel_id, fom, tom, fk_po_person_id) FROM stdin;
-\.
-
-
---
--- Data for Name: po_bostedsadresseperiode; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.po_bostedsadresseperiode (id, fk_po_person_id, fom, tom, opprettet_av, opprettet_tid, endret_av, endret_tid, versjon) FROM stdin;
-\.
 
 
 --
 -- Data for Name: po_doedsfall; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.po_doedsfall (id, fk_po_person_id, versjon, doedsfall_dato, doedsfall_adresse, doedsfall_postnummer, doedsfall_poststed, opprettet_av, opprettet_tid, endret_av, endret_tid, manuell_registrert) FROM stdin;
-\.
 
 
 --
 -- Data for Name: po_opphold; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.po_opphold (id, fk_po_person_id, type, fom, tom, opprettet_av, opprettet_tid, endret_av, endret_tid, versjon) FROM stdin;
-\.
 
 
 --
 -- Data for Name: po_person; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.po_person (id, fk_gr_personopplysninger_id, type, opprettet_av, opprettet_tid, endret_av, versjon, endret_tid, foedselsdato, fk_aktoer_id, navn, kjoenn, maalform) FROM stdin;
-\.
 
 
 --
 -- Data for Name: po_sivilstand; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.po_sivilstand (id, fk_po_person_id, fom, type, opprettet_av, opprettet_tid, endret_av, endret_tid, versjon) FROM stdin;
-\.
 
 
 --
 -- Data for Name: po_statsborgerskap; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.po_statsborgerskap (id, fk_po_person_id, landkode, fom, tom, opprettet_av, opprettet_tid, endret_av, endret_tid, versjon, medlemskap) FROM stdin;
-\.
 
 
 --
 -- Data for Name: refusjon_eos; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.refusjon_eos (id, fk_behandling_id, fom, tom, refusjonsbeloep, land, refusjon_avklart, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: saksstatistikk_mellomlagring; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.saksstatistikk_mellomlagring (id, offset_verdi, funksjonell_id, type, kontrakt_versjon, json, konvertert_tid, opprettet_tid, sendt_tid, type_id, offset_aiven) FROM stdin;
-\.
 
 
 --
 -- Data for Name: satskjoering; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.satskjoering (id, fk_fagsak_id, start_tid, ferdig_tid, feiltype, sats_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: sett_paa_vent; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.sett_paa_vent (id, fk_behandling_id, versjon, opprettet_av, opprettet_tid, frist, aktiv, aarsak, endret_av, endret_tid, tid_tatt_av_vent, tid_satt_paa_vent) FROM stdin;
-\.
 
 
 --
 -- Data for Name: skyggesak; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.skyggesak (id, fk_fagsak_id, sendt_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: task; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.task (id, payload, status, versjon, opprettet_tid, type, metadata, trigger_tid, avvikstype) FROM stdin;
-\.
+INSERT INTO public.task VALUES (51, '1654', 'PLUKKET', 2, '2024-05-29 15:31:17.509', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-07.01.2022
+', '2024-05-29 15:31:17.508603', NULL);
+INSERT INTO public.task VALUES (1, '1654', 'PLUKKET', 2, '2024-05-29 15:31:17.471', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-06.01.2022
+', '2024-05-29 15:31:17.471229', NULL);
 
 
 --
 -- Data for Name: task_logg; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.task_logg (id, task_id, type, node, opprettet_tid, melding, endret_av) FROM stdin;
-\.
+INSERT INTO public.task_logg VALUES (51, 1, 'PLUKKET', 'node1', '2024-05-29 15:32:29.295', NULL, 'VL');
+INSERT INTO public.task_logg VALUES (1, 51, 'PLUKKET', 'node1', '2024-05-29 15:32:29.295', NULL, 'VL');
 
 
 --
 -- Data for Name: tilbakekreving; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.tilbakekreving (id, valg, varsel, begrunnelse, tilbakekrevingsbehandling_id, opprettet_av, opprettet_tid, endret_av, endret_tid, versjon, fk_behandling_id) FROM stdin;
-\.
 
 
 --
 -- Data for Name: tilkjent_ytelse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.tilkjent_ytelse (id, fk_behandling_id, stonad_fom, stonad_tom, opprettet_dato, opphor_fom, utbetalingsoppdrag, endret_dato) FROM stdin;
-\.
 
 
 --
 -- Data for Name: totrinnskontroll; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.totrinnskontroll (id, fk_behandling_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, aktiv, saksbehandler, beslutter, godkjent, saksbehandler_id, beslutter_id, kontrollerte_sider) FROM stdin;
-\.
 
 
 --
 -- Data for Name: utenlandsk_periodebeloep; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.utenlandsk_periodebeloep (id, fk_behandling_id, fom, tom, intervall, valutakode, beloep, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, utbetalingsland, kalkulert_maanedlig_beloep) FROM stdin;
-\.
 
 
 --
 -- Data for Name: valutakurs; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.valutakurs (id, fk_behandling_id, fom, tom, valutakursdato, valutakode, kurs, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: vedtak; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.vedtak (id, fk_behandling_id, versjon, opprettet_av, opprettet_tid, vedtaksdato, endret_av, endret_tid, aktiv, stonad_brev_pdf) FROM stdin;
-\.
 
 
 --
 -- Data for Name: vedtaksbegrunnelse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.vedtaksbegrunnelse (id, fk_vedtaksperiode_id, vedtak_begrunnelse_spesifikasjon) FROM stdin;
-\.
 
 
 --
 -- Data for Name: vedtaksbegrunnelse_fritekst; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.vedtaksbegrunnelse_fritekst (id, fk_vedtaksperiode_id, fritekst) FROM stdin;
-\.
 
 
 --
 -- Data for Name: vedtaksperiode; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.vedtaksperiode (id, fk_vedtak_id, fom, tom, type, opprettet_av, opprettet_tid, endret_av, endret_tid, versjon) FROM stdin;
-\.
-
-
---
--- Data for Name: verge; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.verge (id, ident, fk_behandling_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
-\.
 
 
 --
 -- Data for Name: vilkaarsvurdering; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.vilkaarsvurdering (id, fk_behandling_id, aktiv, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, samlet_resultat, ytelse_personer) FROM stdin;
-\.
 
 
 --
 -- Data for Name: vilkar_resultat; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.vilkar_resultat (id, vilkar, resultat, regel_input, regel_output, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, fk_person_resultat_id, begrunnelse, periode_fom, periode_tom, sist_endret_i_behandling_id, evaluering_aarsak, er_automatisk_vurdert, er_eksplisitt_avslag_paa_soknad, vedtak_begrunnelse_spesifikasjoner, vurderes_etter, utdypende_vilkarsvurderinger, resultat_begrunnelse) FROM stdin;
-\.
+
+
+--
+-- Data for Name: vurderingsstrategi_for_valutakurser; Type: TABLE DATA; Schema: public; Owner: -
+--
+
 
 
 --
@@ -2657,13 +2522,6 @@ SELECT pg_catalog.setval('public.po_bostedsadresse_seq', 1000000, false);
 
 
 --
--- Name: po_bostedsadresseperiode_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.po_bostedsadresseperiode_seq', 1000000, false);
-
-
---
 -- Name: po_doedsfall_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2744,7 +2602,7 @@ SELECT pg_catalog.setval('public.skyggesak_seq', 1000000, false);
 -- Name: task_logg_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.task_logg_seq', 1, false);
+SELECT pg_catalog.setval('public.task_logg_seq', 151, true);
 
 
 --
@@ -2843,6 +2701,13 @@ SELECT pg_catalog.setval('public.vilkaarsvurdering_seq', 1000000, false);
 --
 
 SELECT pg_catalog.setval('public.vilkar_resultat_seq', 1000000, false);
+
+
+--
+-- Name: vurderingsstrategi_for_valutakurser_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.vurderingsstrategi_for_valutakurser_seq', 1000000, false);
 
 
 --
@@ -3174,14 +3039,6 @@ ALTER TABLE ONLY public.po_bostedsadresse
 
 
 --
--- Name: po_bostedsadresseperiode po_bostedsadresseperiode_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.po_bostedsadresseperiode
-    ADD CONSTRAINT po_bostedsadresseperiode_pkey PRIMARY KEY (id);
-
-
---
 -- Name: po_doedsfall po_doedsfall_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3350,19 +3207,19 @@ ALTER TABLE ONLY public.vedtaksperiode
 
 
 --
--- Name: verge verge_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.verge
-    ADD CONSTRAINT verge_pkey PRIMARY KEY (id);
-
-
---
 -- Name: vilkar_resultat vilkar_resultat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.vilkar_resultat
     ADD CONSTRAINT vilkar_resultat_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: vurderingsstrategi_for_valutakurser vurderingsstrategi_for_valutakurser_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.vurderingsstrategi_for_valutakurser
+    ADD CONSTRAINT vurderingsstrategi_for_valutakurser_pkey PRIMARY KEY (id);
 
 
 --
@@ -3660,13 +3517,6 @@ CREATE INDEX po_bostedsadresse_fk_idx ON public.po_bostedsadresse USING btree (f
 
 
 --
--- Name: po_bostedsadresseperiode_fk_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX po_bostedsadresseperiode_fk_idx ON public.po_bostedsadresseperiode USING btree (fk_po_person_id);
-
-
---
 -- Name: po_doedsfall_fk_po_person_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3924,13 +3774,6 @@ END));
 
 
 --
--- Name: uidx_verge_behandling_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX uidx_verge_behandling_id ON public.verge USING btree (fk_behandling_id);
-
-
---
 -- Name: utenlandsk_periodebeloep_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3998,6 +3841,13 @@ CREATE INDEX vilkar_resultat_fk_personr_idx ON public.vilkar_resultat USING btre
 --
 
 CREATE INDEX vilkar_resultat_sist_endret_i_behandling_id_idx ON public.vilkar_resultat USING btree (sist_endret_i_behandling_id);
+
+
+--
+-- Name: vurderingsstrategi_for_valutakurser_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX vurderingsstrategi_for_valutakurser_fk_behandling_id_idx ON public.vurderingsstrategi_for_valutakurser USING btree (fk_behandling_id);
 
 
 --
@@ -4353,14 +4203,6 @@ ALTER TABLE ONLY public.po_bostedsadresse
 
 
 --
--- Name: po_bostedsadresseperiode po_bostedsadresseperiode_fk_po_person_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.po_bostedsadresseperiode
-    ADD CONSTRAINT po_bostedsadresseperiode_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id);
-
-
---
 -- Name: po_doedsfall po_doedsfall_fk_po_person_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4505,19 +4347,19 @@ ALTER TABLE ONLY public.vedtaksperiode
 
 
 --
--- Name: verge verge_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.verge
-    ADD CONSTRAINT verge_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
-
-
---
 -- Name: vilkar_resultat vilkar_resultat_fk_person_resultat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.vilkar_resultat
     ADD CONSTRAINT vilkar_resultat_fk_person_resultat_id_fkey FOREIGN KEY (fk_person_resultat_id) REFERENCES public.person_resultat(id);
+
+
+--
+-- Name: vurderingsstrategi_for_valutakurser vurderingsstrategi_for_valutakurser_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.vurderingsstrategi_for_valutakurser
+    ADD CONSTRAINT vurderingsstrategi_for_valutakurser_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id) ON DELETE CASCADE;
 
 
 --

@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.tilSisteVirkedag
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -24,6 +25,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
+
+val DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING = YearMonth.of(2023, 1)
 
 @Service
 class AutomatiskOppdaterValutakursService(
@@ -75,13 +78,14 @@ class AutomatiskOppdaterValutakursService(
         endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id).toYearMonth(),
     )
 
-    @Transactional
     private fun oppdaterValutakurserEtterEndringstidspunkt(
         behandling: Behandling,
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
         endringstidspunkt: YearMonth,
     ) {
         if (behandling.erMigrering() || behandling.opprettetÅrsak.erManuellMigreringsårsak()) return
+
+        if (behandling.skalBehandlesAutomatisk) return
 
         val vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)
         if (vurderingsstrategiForValutakurser?.vurderingsstrategiForValutakurser == VurderingsstrategiForValutakurser.MANUELL) return
@@ -90,24 +94,31 @@ class AutomatiskOppdaterValutakursService(
         val datoSisteManuellePostering = simuleringMottakere.finnDatoSisteManuellePostering() ?: TIDENES_MORGEN
         val månedEtterSisteManuellePostering = datoSisteManuellePostering.toYearMonth().plusMonths(1)
 
+        val månedForTidligsteTillatteAutomatiskeValutakurs =
+            if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                maxOf(endringstidspunkt, månedEtterSisteManuellePostering)
+            } else {
+                maxOf(endringstidspunkt, månedEtterSisteManuellePostering, DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING)
+            }
+
         val automatiskGenererteValutakurser =
             utenlandskePeriodebeløp
                 .filtrerErUtfylt()
                 .flatMap { utenlandskPeriodebeløp ->
-                    utenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(maxOf(månedEtterSisteManuellePostering, endringstidspunkt))
+                    utenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(månedForTidligsteTillatteAutomatiskeValutakurs)
                 }
 
         valutakursService.oppdaterValutakurser(BehandlingId(behandling.id), automatiskGenererteValutakurser)
     }
 
     private fun UtfyltUtenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(
-        endringstidspunkt: YearMonth,
+        månedForTidligsteTillatteAutomatiskeValutakurs: YearMonth,
     ): List<Valutakurs> {
-        val start = maxOf(endringstidspunkt, fom)
+        val start = maxOf(månedForTidligsteTillatteAutomatiskeValutakurs, fom)
         val denneMåneden = localDateProvider.now().toYearMonth()
         val slutt = tom ?: denneMåneden
 
-        if (endringstidspunkt.isAfter(slutt)) return emptyList()
+        if (månedForTidligsteTillatteAutomatiskeValutakurs.isAfter(slutt)) return emptyList()
 
         return start.rangeTo(slutt).map { måned ->
             val sisteVirkedagForrigeMåned = måned.minusMonths(1).tilSisteVirkedag()

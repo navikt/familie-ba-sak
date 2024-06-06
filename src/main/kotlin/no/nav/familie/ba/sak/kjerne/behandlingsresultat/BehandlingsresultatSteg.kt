@@ -75,7 +75,7 @@ class BehandlingsresultatSteg(
         }
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
-        val andelerForrigeBehandling by lazy { beregningService.hentAndelerFraForrigeIverksattebehandling(behandling) }
+        val andelerForrigeBehandling by lazy { beregningService.hentAndelerFraForrigeVedtatteBehandling(behandling) }
 
         if (behandling.erSatsendring()) {
             validerSatsendring(tilkjentYtelse)
