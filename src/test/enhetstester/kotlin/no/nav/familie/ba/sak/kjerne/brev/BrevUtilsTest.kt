@@ -1095,7 +1095,7 @@ internal class BrevUtilsTest {
                 "DK" to "Danmark",
             )
 
-        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt = endringstidspunkt, landkoder = landkoder, sekundærlandsKompetanser = kompetanser)
+        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt = endringstidspunkt, landkoder = landkoder, kompetanser = kompetanser)
         assertThat(utbetalingstabellAutomatiskValutajustering).isNotNull
         assertThat(utbetalingstabellAutomatiskValutajustering.utbetalingerEosLand?.first()).isEqualTo("Sverige og Danmark")
     }
@@ -1114,7 +1114,7 @@ internal class BrevUtilsTest {
                 "SE" to "Sverige",
             )
 
-        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt = endringstidspunkt, landkoder = landkoder, sekundærlandsKompetanser = kompetanser)
+        val utbetalingstabellAutomatiskValutajustering = hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt = endringstidspunkt, landkoder = landkoder, kompetanser = kompetanser)
         assertThat(utbetalingstabellAutomatiskValutajustering).isNotNull
         assertThat(utbetalingstabellAutomatiskValutajustering.utbetalingerEosLand?.first()).isEqualTo("Sverige")
     }

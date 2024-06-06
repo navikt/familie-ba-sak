@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingM
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilUtfylteKompetanserEtterEndringstidpunktPerAktør
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
@@ -319,17 +320,19 @@ fun skalHenteUtbetalingerEøs(
 fun hentLandOgStartdatoForUtbetalingstabell(
     endringstidspunkt: MånedTidspunkt,
     landkoder: Map<String, String>,
-    sekundærlandsKompetanser: Collection<Kompetanse>,
+    kompetanser: Collection<Kompetanse>,
 ): UtbetalingstabellAutomatiskValutajustering {
-    val utfylteKompetanserEtterEndringstidspunkt =
-        sekundærlandsKompetanser.tilUtfylteKompetanserEtterEndringstidpunktPerAktør(endringstidspunkt)
+    val utfylteSekundærlandsKompetanserEtterEndringstidspunkt =
+        kompetanser
+            .filter { it.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
+            .tilUtfylteKompetanserEtterEndringstidpunktPerAktør(endringstidspunkt)
 
-    if (utfylteKompetanserEtterEndringstidspunkt.isEmpty()) {
+    if (utfylteSekundærlandsKompetanserEtterEndringstidspunkt.isEmpty()) {
         throw Feil("Finner ingen kompetanser etter endringstidspunkt")
     }
 
     val eøsLandMedUtbetalinger =
-        utfylteKompetanserEtterEndringstidspunkt.values.flatten().map {
+        utfylteSekundærlandsKompetanserEtterEndringstidspunkt.values.flatten().map {
             it.utbetalingsland()
         }
             .toSet()
