@@ -68,7 +68,7 @@ class FeilutbetaltValutaController(
             handling = "oppdater periode med feilutbetalt valuta",
         )
 
-        feilutbetaltValutaService.oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, id = id)
+        feilutbetaltValutaService.oppdatertFeilutbetaltValutaPeriode(restFeilutbetaltValuta = feilutbetaltValuta, id = id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
