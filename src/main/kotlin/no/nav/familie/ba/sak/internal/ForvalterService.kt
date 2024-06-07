@@ -27,10 +27,22 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjema
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -67,6 +79,8 @@ class ForvalterService(
     private val infotrygdService: InfotrygdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val kompetanseRepository: KompetanseRepository,
+    private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -275,7 +289,115 @@ class ForvalterService(
             throw Feil("Det finnes flere vilkårresultater som begynner før fødselsdato til person: $this")
         }
     }
+
+    fun finnUtenlandskePeriodebeløpSomSkalKorrigeres(): UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse {
+        val utenlandskePeriodebeløpMedFeilUtbetalingsland = utenlandskPeriodebeløpRepository.hentUtenlandskePeriodebeløpMedFeilUtbetalingsland()
+        val behandlinger = utenlandskePeriodebeløpMedFeilUtbetalingsland.map { it.behandlingId }.toSet()
+        val sekundærlandsKompetanser = kompetanseRepository.hentSekundærlandsKompetanserForBehandlinger(behandlinger).groupBy { it.behandlingId }
+
+        val utenlandskePeriodebeløpPerBehandling = utenlandskePeriodebeløpMedFeilUtbetalingsland.groupBy { it.behandlingId }
+
+        val kompetanserMedFeil: MutableList<KompetanseMedFeil> = mutableListOf()
+        val behandlingerMedUpbSomKanKorrigeres: MutableSet<Long> = mutableSetOf()
+
+        val utenlandskePeriodeBeløpEndringer =
+            utenlandskePeriodebeløpPerBehandling.entries.flatMap { (behandlingId, utenlandskePeriodebeløp) ->
+                utenlandskePeriodebeløp.tilTidslinjerPerBarn().outerJoin(sekundærlandsKompetanser[behandlingId]!!.tilTidslinjerPerBarn()) { upb, kompetanse ->
+                    try {
+                        val utbetalingsland = kompetanse?.utbetalingsland()
+                        when {
+                            kompetanse == null -> null
+                            upb == null -> null
+                            upb.utbetalingsland != utbetalingsland -> {
+                                behandlingerMedUpbSomKanKorrigeres.add(behandlingId)
+                                UtenlandskPeriodebeløpEndring(id = upb.id, behandlingId = behandlingId, utbetalingslandOriginalt = upb.utbetalingsland, utbetalingslandKorrigert = utbetalingsland!!)
+                            }
+
+                            else -> null
+                        }
+                    } catch (e: Exception) {
+                        kompetanserMedFeil.add(
+                            KompetanseMedFeil(
+                                behandlingId = behandlingId,
+                                kompetanseId = kompetanse!!.id,
+                                søkersAktivitetsland = kompetanse.søkersAktivitetsland,
+                                annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland,
+                                barnetsBostedsland = kompetanse.barnetsBostedsland,
+                            ),
+                        )
+                        null
+                    }
+                }.flatMap { (_, tidslinjer) -> tidslinjer.perioder().mapNotNull { periode -> periode.innhold } }
+            }.toSet()
+        return UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse(
+            utenlandskePeriodeBeløpEndringer = utenlandskePeriodeBeløpEndringer,
+            behandlingerMedUpbSomKanKorrigeres = behandlingerMedUpbSomKanKorrigeres,
+            kompetanserMedFeil = kompetanserMedFeil.toSet(),
+        )
+    }
+
+    @Transactional
+    fun korrigerUtenlandskePeriodebeløp(behandlinger: List<Long>) {
+        val utenlandskePeriodebeløpSomSkalKorrigeres =
+            finnUtenlandskePeriodebeløpSomSkalKorrigeres().utenlandskePeriodeBeløpEndringer
+                .filter { behandlinger.contains(it.behandlingId) }
+                .groupBy { it.behandlingId }
+
+        val korrigerteUtenlandskePeriodebeløpPerBehandling =
+            utenlandskePeriodebeløpSomSkalKorrigeres.mapValues { (_, utenlandskePerioderSomSkalKorrigeresForBehandling) ->
+                utenlandskePerioderSomSkalKorrigeresForBehandling.map {
+                    val eksisterendeUtenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.getReferenceById(it.id)
+                    eksisterendeUtenlandskPeriodebeløp.copy(utbetalingsland = it.utbetalingslandKorrigert).also { upb ->
+                        upb.behandlingId = it.behandlingId
+                        upb.id = it.id
+                    }
+                }
+            }
+
+        korrigerteUtenlandskePeriodebeløpPerBehandling.forEach { (_, korrigerteUtenlandskePeriodebeløpForBehandling) ->
+            utenlandskPeriodebeløpRepository.saveAll(korrigerteUtenlandskePeriodebeløpForBehandling)
+        }
+    }
+
+    private fun <T : PeriodeOgBarnSkjema<T>> List<T>.tilTidslinjerPerBarn(): Map<Aktør, Tidslinje<T, Måned>> {
+        val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
+
+        return alleBarnAktørIder.associateWith { aktør ->
+            tidslinje {
+                this
+                    .filter { it.barnAktører.contains(aktør) }
+                    .map {
+                        Periode(
+                            fraOgMed = it.fom.tilTidspunktEllerUendeligTidlig(it.tom),
+                            tilOgMed = it.tom.tilTidspunktEllerUendeligSent(it.fom),
+                            innhold = it,
+                        )
+                    }
+            }
+        }
+    }
 }
+
+data class UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse(
+    val utenlandskePeriodeBeløpEndringer: Set<UtenlandskPeriodebeløpEndring>,
+    val behandlingerMedUpbSomKanKorrigeres: Set<Long>,
+    val kompetanserMedFeil: Set<KompetanseMedFeil>,
+)
+
+data class KompetanseMedFeil(
+    val behandlingId: Long,
+    val kompetanseId: Long,
+    val søkersAktivitetsland: String?,
+    val annenForeldersAktivitetsland: String?,
+    val barnetsBostedsland: String?,
+)
+
+data class UtenlandskPeriodebeløpEndring(
+    val id: Long,
+    val behandlingId: Long,
+    val utbetalingslandOriginalt: String?,
+    val utbetalingslandKorrigert: String,
+)
 
 interface FagsakMedFlereMigreringer {
     val fagsakId: Long
