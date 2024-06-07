@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.brev.domene.erTilInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.Bruker
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.FullmektigEllerVerge
@@ -25,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerInfo
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.tilAvsenderMottaker
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -165,7 +165,7 @@ class DokumentService(
         brevmottakere: List<ManuellBrevmottaker>,
     ): List<MottakerInfo> {
         return when {
-            manueltBrevRequest.erTilInstitusjon ->
+            fagsak.type == FagsakType.INSTITUSJON ->
                 listOf(
                     Institusjon(
                         orgNummer = checkNotNull(fagsak.institusjon).orgNummer,

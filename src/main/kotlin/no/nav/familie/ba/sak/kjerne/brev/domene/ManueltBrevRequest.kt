@@ -36,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollE�
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.VarselbrevMedÅrsakerOgBarn
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
@@ -114,8 +115,8 @@ fun ManueltBrevRequest.byggMottakerdata(
         arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id).run {
             Enhet(enhetId = behandlendeEnhetId, enhetNavn = behandlendeEnhetNavn)
         }
-    return when {
-        erTilInstitusjon -> {
+    return when (behandling.fagsak.type) {
+        FagsakType.INSTITUSJON -> {
             val fødselsnummerPåPerson = behandling.fagsak.aktør.aktivFødselsnummer()
             val person = hentPerson(fødselsnummerPåPerson)
 
@@ -130,13 +131,16 @@ fun ManueltBrevRequest.byggMottakerdata(
             )
         }
 
-        else ->
+        FagsakType.NORMAL,
+        FagsakType.BARN_ENSLIG_MINDREÅRIG,
+        -> {
             hentPerson(mottakerIdent).let { mottakerPerson ->
                 this.copy(
                     enhet = enhet,
                     mottakerMålform = mottakerPerson.målform,
                 )
             }
+        }
     }
 }
 

@@ -85,13 +85,14 @@ internal class DokumentServiceTest {
     @Test
     fun `sendManueltBrev skal journalføre med brukerIdType ORGNR når fagsakType er INSTITUSJON`() {
         val avsenderMottaker = slot<AvsenderMottaker>()
-        val behandling = lagBehandling(
-            Fagsak(
-                type = FagsakType.INSTITUSJON,
-                aktør = randomAktør(),
-                institusjon = Institusjon(orgNummer = "123456789", tssEksternId = "xxx")
+        val behandling =
+            lagBehandling(
+                Fagsak(
+                    type = FagsakType.INSTITUSJON,
+                    aktør = randomAktør(),
+                    institusjon = Institusjon(orgNummer = "123456789", tssEksternId = "xxx"),
+                ),
             )
-        )
 
         every { fagsakRepository.finnFagsak(any()) } returns behandling.fagsak
         val orgNummer = behandling.fagsak.institusjon!!.orgNummer
@@ -109,15 +110,15 @@ internal class DokumentServiceTest {
             )
         } returns "mockJournalpostId"
         every { journalføringRepository.save(any()) } returns
-                DbJournalpost(
-                    behandling = behandling,
-                    journalpostId = "id",
-                )
+            DbJournalpost(
+                behandling = behandling,
+                journalpostId = "id",
+            )
         every { organisasjonService.hentOrganisasjon(any()) } returns
-                Organisasjon(
-                    organisasjonsnummer = orgNummer,
-                    navn = "Testinstitusjon",
-                )
+            Organisasjon(
+                organisasjonsnummer = orgNummer,
+                navn = "Testinstitusjon",
+            )
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
         runCatching {

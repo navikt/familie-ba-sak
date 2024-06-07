@@ -30,7 +30,6 @@ class HenleggBehandling(
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
-
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
         data: RestHenleggBehandlingInfo,

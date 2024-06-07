@@ -76,7 +76,7 @@ class DokumentGenereringService(
             val brev: Brev =
                 manueltBrevRequest.tilBrev(
                     navnIBrevHeader,
-                    saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
+                    saksbehandlerContext.hentSaksbehandlerSignaturTilBrev(),
                 ) { integrasjonClient.hentLandkoderISO2() }
             return brevKlient.genererBrev(
                 målform = manueltBrevRequest.mottakerMålform.tilSanityFormat(),
@@ -98,8 +98,9 @@ class DokumentGenereringService(
 
     private fun finnSøkerEllerInstitusjonsNavn(fagsak: Fagsak): String {
         return if (fagsak.type == FagsakType.INSTITUSJON) {
-            val orgnummer = fagsak.institusjon?.orgNummer
-                ?: throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
+            val orgnummer =
+                fagsak.institusjon?.orgNummer
+                    ?: throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
             organisasjonService.hentOrganisasjon(orgnummer).navn
         } else {
             personopplysningerService.hentPersoninfoEnkel(fagsak.aktør).navn

@@ -107,7 +107,7 @@ class DokumentController(
                     arbeidsfordelingService,
                 ),
             erForhåndsvisning = true,
-            fagsak = behandling.fagsak
+            fagsak = behandling.fagsak,
         ).let { Ressurs.success(it) }
     }
 
