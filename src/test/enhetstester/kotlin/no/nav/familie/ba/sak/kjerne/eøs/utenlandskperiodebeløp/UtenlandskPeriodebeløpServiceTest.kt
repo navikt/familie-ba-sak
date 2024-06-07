@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -25,6 +26,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
     val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> =
         mockPeriodeBarnSkjemaRepository()
     val kompetanseRepository: KompetanseRepository = mockk()
+    val unleashService: UnleashService = mockk()
 
     val utenlandskPeriodebeløpService =
         UtenlandskPeriodebeløpService(
@@ -37,6 +39,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
             utenlandskPeriodebeløpRepository,
             emptyList(),
             kompetanseRepository,
+            unleashService,
         )
 
     @BeforeEach
@@ -64,6 +67,8 @@ internal class UtenlandskPeriodebeløpServiceTest {
                 .byggKompetanser()
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId.id) } returns kompetanser
+
+        every { unleashService.isEnabled(any(), false) } returns true
 
         tilpassUtenlandskePeriodebeløpTilKompetanserService
             .tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId)

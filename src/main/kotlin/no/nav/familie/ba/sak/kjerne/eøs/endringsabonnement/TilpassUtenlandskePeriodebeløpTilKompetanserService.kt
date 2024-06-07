@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.FinnPeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
@@ -10,12 +11,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -24,6 +27,7 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
     utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp>>,
     private val kompetanseRepository: FinnPeriodeOgBarnSkjemaRepository<Kompetanse>,
+    val unleashService: UnleashService,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse> {
     val skjemaService =
         PeriodeOgBarnSkjemaService(
@@ -52,10 +56,13 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
     ) {
         val forrigeUtenlandskePeriodebeløp = skjemaService.hentMedBehandlingId(behandlingId)
 
+        val skalBrukeNyRegelForUtledningAvUtbetalingsland = unleashService.isEnabled(FeatureToggleConfig.SKAL_BRUKE_NY_REGEL_FOR_UTLEDNING_AV_UTBETALINGSLAND, false)
+
         val oppdaterteUtenlandskPeriodebeløp =
             tilpassUtenlandskePeriodebeløpTilKompetanser(
                 forrigeUtenlandskePeriodebeløp,
                 gjeldendeKompetanser,
+                skalBrukeNyRegelForUtledningAvUtbetalingsland,
             ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(
@@ -69,6 +76,7 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
 internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
     forrigeUtenlandskePeriodebeløp: Iterable<UtenlandskPeriodebeløp>,
     gjeldendeKompetanser: Iterable<Kompetanse>,
+    skalBrukeNyRegelForUtledningAvUtbetalingsland: Boolean,
 ): Collection<UtenlandskPeriodebeløp> {
     val barnasKompetanseTidslinjer =
         gjeldendeKompetanser
@@ -77,10 +85,12 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
 
     return forrigeUtenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
         .outerJoin(barnasKompetanseTidslinjer) { upb, kompetanse ->
+            val utbetalingsland = if (skalBrukeNyRegelForUtledningAvUtbetalingsland) kompetanse?.utbetalingsland() else kompetanse?.annenForeldersAktivitetsland
             when {
                 kompetanse == null -> null
-                upb == null || upb.utbetalingsland != kompetanse.annenForeldersAktivitetsland ->
-                    UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = kompetanse.annenForeldersAktivitetsland)
+                upb == null || upb.utbetalingsland != utbetalingsland ->
+                    UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = utbetalingsland)
+
                 else -> upb
             }
         }
