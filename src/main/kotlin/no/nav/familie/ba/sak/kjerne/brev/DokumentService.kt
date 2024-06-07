@@ -111,7 +111,6 @@ class DokumentService(
 
         val mottakere =
             lagMottakere(
-                manueltBrevRequest = manueltBrevRequest,
                 fagsak = fagsak,
                 brevmottakere = brevmottakere,
             )
@@ -160,18 +159,19 @@ class DokumentService(
     }
 
     private fun lagMottakere(
-        manueltBrevRequest: ManueltBrevRequest,
         fagsak: Fagsak,
         brevmottakere: List<ManuellBrevmottaker>,
     ): List<MottakerInfo> {
         return when {
-            fagsak.type == FagsakType.INSTITUSJON ->
+            fagsak.type == FagsakType.INSTITUSJON -> {
+                val orgNummer = checkNotNull(fagsak.institusjon).orgNummer
                 listOf(
                     Institusjon(
-                        orgNummer = checkNotNull(fagsak.institusjon).orgNummer,
-                        navn = organisasjonService.hentOrganisasjon(manueltBrevRequest.mottakerIdent).navn,
+                        orgNummer = orgNummer,
+                        navn = organisasjonService.hentOrganisasjon(orgNummer).navn,
                     ),
                 )
+            }
             brevmottakere.isNotEmpty() ->
                 brevmottakerService.lagMottakereFraBrevMottakere(
                     brevmottakere,

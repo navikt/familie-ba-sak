@@ -71,11 +71,13 @@ class DokumentGenereringService(
         fagsak: Fagsak,
         erForhåndsvisning: Boolean = false,
     ): ByteArray {
-        val navnIBrevHeader = finnSøkerEllerInstitusjonsNavn(fagsak)
+        val mottakerIdent = fagsak.institusjon?.orgNummer ?: fagsak.aktør.aktivFødselsnummer()
+        val navnTilBrevHeader = finnSøkerEllerInstitusjonsNavn(fagsak)
         try {
             val brev: Brev =
                 manueltBrevRequest.tilBrev(
-                    navnIBrevHeader,
+                    mottakerIdent,
+                    navnTilBrevHeader,
                     saksbehandlerContext.hentSaksbehandlerSignaturTilBrev(),
                 ) { integrasjonClient.hentLandkoderISO2() }
             return brevKlient.genererBrev(

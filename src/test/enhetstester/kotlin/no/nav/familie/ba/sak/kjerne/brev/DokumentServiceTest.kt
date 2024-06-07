@@ -125,7 +125,6 @@ internal class DokumentServiceTest {
             dokumentService.sendManueltBrev(
                 ManueltBrevRequest(
                     brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
-                    mottakerIdent = orgNummer,
                     enhet = Enhet("enhet", "enhetNavn"),
                 ),
                 behandling = behandling,
@@ -169,7 +168,6 @@ internal class DokumentServiceTest {
             dokumentService.sendManueltBrev(
                 ManueltBrevRequest(
                     brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
-                    mottakerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
                     enhet = Enhet("enhet", "enhetNavn"),
                 ),
                 behandling = behandling,
@@ -289,8 +287,7 @@ internal class DokumentServiceTest {
     @Test
     fun `sendManueltBrev skal sende manuelt brev til FULLMEKTIG og bruker som har FULLMEKTIG manuelt brev mottaker`() {
         val behandling = lagBehandling()
-        val søkersident = behandling.fagsak.aktør.aktivFødselsnummer()
-        val manueltBrevRequest = ManueltBrevRequest(mottakerIdent = søkersident, brevmal = Brevmal.SVARTIDSBREV)
+        val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV)
         val avsenderMottakere = mutableListOf<AvsenderMottaker>()
 
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
@@ -347,7 +344,6 @@ internal class DokumentServiceTest {
     fun `sendManueltBrev skal sende manuelt brev til FULLMEKTIG og bruker ved manuell brevmottaker på fagsak`() {
         val aktør = randomAktør()
         val fagsak = Fagsak(aktør = aktør)
-        val søkersident = aktør.aktivFødselsnummer()
         val brevmottakere =
             listOf(
                 ManuellBrevmottaker(
@@ -361,7 +357,6 @@ internal class DokumentServiceTest {
             )
         val manueltBrevRequest =
             ManueltBrevRequest(
-                mottakerIdent = søkersident,
                 brevmal = Brevmal.SVARTIDSBREV,
                 manuelleBrevmottakere = brevmottakere,
             )
@@ -407,9 +402,8 @@ internal class DokumentServiceTest {
     @Test
     fun `sendManueltBrev skal sende informasjonsbrev manuelt på fagsak`() {
         val fagsak = defaultFagsak()
-        val søkersident = fagsak.aktør.aktivFødselsnummer()
         val manueltBrevRequest =
-            ManueltBrevRequest(mottakerIdent = søkersident, brevmal = Brevmal.INFORMASJONSBREV_KAN_SØKE)
+            ManueltBrevRequest(brevmal = Brevmal.INFORMASJONSBREV_KAN_SØKE)
 
         every {
             utgåendeJournalføringService.journalførManueltBrev(
@@ -451,7 +445,6 @@ internal class DokumentServiceTest {
         dokumentService.sendManueltBrev(
             ManueltBrevRequest(
                 brevmal = brevmal,
-                mottakerIdent = "123456789",
                 enhet = Enhet("enhet", "enhetNavn"),
             ),
             behandling = behandling,

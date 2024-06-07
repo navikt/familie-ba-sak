@@ -37,7 +37,6 @@ class HenleggBehandling(
         val fagsak = behandling.fagsak
 
         if (data.årsak == HenleggÅrsak.SØKNAD_TRUKKET) {
-            val mottakerIdent = fagsak.institusjon?.orgNummer ?: fagsak.aktør.aktivFødselsnummer()
             val brevmal = fagsak.institusjon?.let { Brevmal.HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON } ?: Brevmal.HENLEGGE_TRUKKET_SØKNAD
 
             dokumentService.sendManueltBrev(
@@ -45,7 +44,6 @@ class HenleggBehandling(
                 fagsakId = fagsak.id,
                 manueltBrevRequest =
                     ManueltBrevRequest(
-                        mottakerIdent = mottakerIdent,
                         brevmal = brevmal,
                     ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService),
             )
