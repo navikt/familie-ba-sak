@@ -298,8 +298,9 @@ class ForvalterService(
         val utenlandskePeriodebeløpPerBehandling = utenlandskePeriodebeløpMedFeilUtbetalingsland.groupBy { it.behandlingId }
 
         val kompetanserMedFeil: MutableList<KompetanseMedFeil> = mutableListOf()
+        val behandlingerMedUpbSomKanKorrigeres: MutableSet<Long> = mutableSetOf()
 
-        val korrigerteUtenlandskePeriodebeløp =
+        val utenlandskePeriodeBeløpEndringer =
             utenlandskePeriodebeløpPerBehandling.entries.flatMap { (behandlingId, utenlandskePeriodebeløp) ->
                 utenlandskePeriodebeløp.tilTidslinjerPerBarn().outerJoin(sekundærlandsKompetanser[behandlingId]!!.tilTidslinjerPerBarn()) { upb, kompetanse ->
                     try {
@@ -307,8 +308,10 @@ class ForvalterService(
                         when {
                             kompetanse == null -> null
                             upb == null -> null
-                            upb.utbetalingsland != utbetalingsland ->
+                            upb.utbetalingsland != utbetalingsland -> {
+                                behandlingerMedUpbSomKanKorrigeres.add(behandlingId)
                                 UtenlandskPeriodebeløpEndring(id = upb.id, behandlingId = behandlingId, utbetalingslandOriginalt = upb.utbetalingsland, utbetalingslandKorrigert = utbetalingsland!!)
+                            }
 
                             else -> null
                         }
@@ -325,8 +328,12 @@ class ForvalterService(
                         null
                     }
                 }.flatMap { (_, tidslinjer) -> tidslinjer.perioder().mapNotNull { periode -> periode.innhold } }
-            }
-        return UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse(korrigerteUtenlandskePeriodebeløp, kompetanserMedFeil)
+            }.toSet()
+        return UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse(
+            utenlandskePeriodeBeløpEndringer = utenlandskePeriodeBeløpEndringer,
+            behandlingerMedUpbSomKanKorrigeres = behandlingerMedUpbSomKanKorrigeres,
+            kompetanserMedFeil = kompetanserMedFeil.toSet(),
+        )
     }
 
     @Transactional
@@ -372,8 +379,9 @@ class ForvalterService(
 }
 
 data class UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse(
-    val utenlandskePeriodeBeløpEndringer: List<UtenlandskPeriodebeløpEndring>,
-    val kompetanserMedFeil: List<KompetanseMedFeil>,
+    val utenlandskePeriodeBeløpEndringer: Set<UtenlandskPeriodebeløpEndring>,
+    val behandlingerMedUpbSomKanKorrigeres: Set<Long>,
+    val kompetanserMedFeil: Set<KompetanseMedFeil>,
 )
 
 data class KompetanseMedFeil(
