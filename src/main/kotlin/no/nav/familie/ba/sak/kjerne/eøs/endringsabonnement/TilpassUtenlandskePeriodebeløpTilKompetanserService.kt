@@ -56,7 +56,7 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
     ) {
         val forrigeUtenlandskePeriodebeløp = skjemaService.hentMedBehandlingId(behandlingId)
 
-        val skalBrukeNyRegelForUtledningAvUtbetalingsland = unleashService.isEnabled(FeatureToggleConfig.SKAL_BRUKE_NY_REGEL_FOR_UTLEDNING_AV_UTBETALINGSLAND)
+        val skalBrukeNyRegelForUtledningAvUtbetalingsland = unleashService.isEnabled(FeatureToggleConfig.SKAL_BRUKE_NY_REGEL_FOR_UTLEDNING_AV_UTBETALINGSLAND, false)
 
         val oppdaterteUtenlandskPeriodebeløp =
             tilpassUtenlandskePeriodebeløpTilKompetanser(
