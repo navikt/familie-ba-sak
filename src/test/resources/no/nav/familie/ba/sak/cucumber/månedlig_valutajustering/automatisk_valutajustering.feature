@@ -36,14 +36,14 @@ Egenskap: Automatisk valutajustering
 
     Og med kompetanser for begrunnelse
       | AktørId | Fra dato   | Til dato | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
-      | 2       | 01.11.2019 |          | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | DK                    | DK                             | DK                  |
+      | 2       | 01.11.2019 |          | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | DK                             | DK                  |
 
     Og følgende dagens dato 13.03.2024
 
   Scenario: Automatisk valutajustering skal endre på beløp for måned
     Og med utenlandsk periodebeløp for begrunnelse
       | AktørId | Fra måned | Til måned | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
-      | 2       | 11.2019   |           | 1            | 100   | DKK         | MÅNEDLIG  | NO              |
+      | 2       | 11.2019   |           | 1            | 100   | DKK         | MÅNEDLIG  | DK              |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
@@ -65,8 +65,8 @@ Egenskap: Automatisk valutajustering
   Scenario: Automatisk valutajustering skal endre på beløp riktig, selv om det er en utenlandsk periodbeløp som starter samme måned
     Og med utenlandsk periodebeløp for begrunnelse
       | AktørId | Fra måned | Til måned | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
-      | 2       | 11.2019   | 02.2024   | 1            | 100   | DKK         | MÅNEDLIG  | NO              |
-      | 2       | 03.2024   |           | 1            | 200   | DKK         | MÅNEDLIG  | NO              |
+      | 2       | 11.2019   | 02.2024   | 1            | 100   | DKK         | MÅNEDLIG  | DK              |
+      | 2       | 03.2024   |           | 1            | 200   | DKK         | MÅNEDLIG  | DK              |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |

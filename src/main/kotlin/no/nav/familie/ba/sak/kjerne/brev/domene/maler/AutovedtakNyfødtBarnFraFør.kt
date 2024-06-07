@@ -38,7 +38,7 @@ data class AutovedtakNyfødtBarnFraFørData(
     override val flettefelter: FlettefelterForDokumentImpl,
     override val perioder: List<BrevPeriode>,
     override val utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>? = null,
-) : VedtaksbrevData {
+) : VedtaksbrevStandardData {
     data class Delmaler(
         val etterbetaling: Etterbetaling?,
         val hjemmeltekst: Hjemmeltekst,

@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringMott
 import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import org.assertj.core.api.Assertions.assertThat
@@ -85,27 +87,27 @@ class AutomatiskOppdaterValutakursServiceTest {
 
     @Test
     fun `oppdaterValutakurserEtterEndringstidspunkt skal automatisk hente valutakurser hver måned etter endringstidspunktet`() {
-        UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
+        UtenlandskPeriodebeløpBuilder(jan(2023), behandlingId)
             .medBeløp("777777777", "EUR", "N", barn1, barn2, barn3)
             .lagreTil(utenlandskPeriodebeløpRepository)
 
-        ValutakursBuilder(jan(2020), behandlingId)
+        ValutakursBuilder(jan(2023), behandlingId)
             .medKurs("111111111", "EUR", barn1, barn2, barn3)
             .medVurderingsform(Vurderingsform.MANUELL)
             .lagreTil(valutakursRepository)
 
-        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2020, 5, 15)
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2023, 5, 15)
 
         automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId)
 
         val forventetUberørteValutakurser =
-            ValutakursBuilder(jan(2020), behandlingId)
+            ValutakursBuilder(jan(2023), behandlingId)
                 .medKurs("1111", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.MANUELL)
                 .bygg()
 
         val forventetOppdaterteValutakurser =
-            ValutakursBuilder(jan(2020), behandlingId)
+            ValutakursBuilder(jan(2023), behandlingId)
                 .medKurs("    45678", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.AUTOMATISK)
                 .bygg()
@@ -124,36 +126,36 @@ class AutomatiskOppdaterValutakursServiceTest {
         every { behandlingHentOgPersisterService.hent(any()) } answers { lagBehandling(id = firstArg()) }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
 
-        UtenlandskPeriodebeløpBuilder(jan(2020), forrigeBehandlingId)
+        UtenlandskPeriodebeløpBuilder(jan(2023), forrigeBehandlingId)
             .medBeløp("77777777", "EUR", "N", barn1, barn2, barn3)
             .lagreTil(utenlandskPeriodebeløpRepository)
 
-        UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
+        UtenlandskPeriodebeløpBuilder(jan(2023), behandlingId)
             .medBeløp("77778888", "EUR", "N", barn1, barn2, barn3)
             .lagreTil(utenlandskPeriodebeløpRepository)
 
-        ValutakursBuilder(jan(2020), forrigeBehandlingId)
+        ValutakursBuilder(jan(2023), forrigeBehandlingId)
             .medKurs("11111111", "EUR", barn1, barn2, barn3)
             .medVurderingsform(Vurderingsform.MANUELL)
             .lagreTil(valutakursRepository)
 
-        ValutakursBuilder(jan(2020), behandlingId)
+        ValutakursBuilder(jan(2023), behandlingId)
             .medKurs("01234567", "EUR", barn1, barn2, barn3)
             .medVurderingsform(Vurderingsform.AUTOMATISK)
             .lagreTil(valutakursRepository)
 
-        every { vedtaksperiodeService.finnEndringstidspunktForBehandlingUtenValutakursendringer(behandlingId.id) } returns LocalDate.of(2020, 5, 15)
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandlingUtenValutakursendringer(behandlingId.id) } returns LocalDate.of(2023, 5, 15)
 
         automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringstidspunkt(behandlingId)
 
         val forventetUberørteValutakurser =
-            ValutakursBuilder(jan(2020), behandlingId)
+            ValutakursBuilder(jan(2023), behandlingId)
                 .medKurs("1111", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.MANUELL)
                 .bygg()
 
         val forventetOppdaterteValutakurser =
-            ValutakursBuilder(jan(2020), behandlingId)
+            ValutakursBuilder(jan(2023), behandlingId)
                 .medKurs("    4567", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.AUTOMATISK)
                 .bygg()
@@ -168,9 +170,52 @@ class AutomatiskOppdaterValutakursServiceTest {
     }
 
     @Test
+    fun `oppdaterValutakurserEtterEndringstidspunkt skal ikke oppdatere valutakurser før praksisendringsdatoen januar 2023 for revurdering`() {
+        every { behandlingHentOgPersisterService.hent(any()) } answers { lagBehandling(id = firstArg(), behandlingType = BehandlingType.REVURDERING) }
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
+        every { ecbService.hentValutakurs(any(), any()) } answers {
+            val dato = secondArg<LocalDate>()
+            (dato.month.value % 10).toBigDecimal()
+        }
+
+        UtenlandskPeriodebeløpBuilder(sep(2022), behandlingId)
+            .medBeløp("77778888", "EUR", "N", barn1, barn2, barn3)
+            .lagreTil(utenlandskPeriodebeløpRepository)
+
+        ValutakursBuilder(sep(2022), behandlingId)
+            .medKurs("11111111", "EUR", barn1, barn2, barn3)
+            .medVurderingsform(Vurderingsform.MANUELL)
+            .lagreTil(valutakursRepository)
+
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2022, 5, 15)
+
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId)
+
+        val forventetUberørteValutakurser =
+            ValutakursBuilder(sep(2022), behandlingId)
+                .medKurs("1111", "EUR", barn1, barn2, barn3)
+                .medVurderingsform(Vurderingsform.MANUELL)
+                .bygg()
+
+        val forventetOppdaterteValutakurser =
+            ValutakursBuilder(sep(2022), behandlingId)
+                .medKurs("    2123", "EUR", barn1, barn2, barn3)
+                .medVurderingsform(Vurderingsform.AUTOMATISK)
+                .bygg()
+
+        assertThat(valutakursService.hentValutakurser(behandlingId))
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .ignoringFields("valutakursdato")
+            .ignoringFields("endretTidspunkt")
+            .ignoringFields("opprettetTidspunkt")
+            .isEqualTo(forventetUberørteValutakurser + forventetOppdaterteValutakurser)
+    }
+
+    @Test
     fun `oppdaterValutakurserEtterEndringstidspunkt skal skal kun lage automatiske valutakurser etter siste manuelle postering`() {
-        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2020, 2, 15)
-        val tomDatoSisteManuellePostering = LocalDate.of(2020, 4, 30)
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2023, 2, 15)
+        val tomDatoSisteManuellePostering = LocalDate.of(2023, 4, 30)
         every { simuleringService.oppdaterSimuleringPåBehandlingVedBehov(any()) } returns
             listOf(
                 mockØkonomiSimuleringMottaker(
@@ -178,18 +223,18 @@ class AutomatiskOppdaterValutakursServiceTest {
                         listOf(
                             mockØkonomiSimuleringPostering(
                                 fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT,
-                                fom = LocalDate.of(2019, 3, 1),
+                                fom = LocalDate.of(2023, 4, 1),
                                 tom = tomDatoSisteManuellePostering,
                             ),
                         ),
                 ),
             )
 
-        UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
+        UtenlandskPeriodebeløpBuilder(jan(2023), behandlingId)
             .medBeløp("777777777", "EUR", "N", barn1, barn2, barn3)
             .lagreTil(utenlandskPeriodebeløpRepository)
 
-        ValutakursBuilder(jan(2020), behandlingId)
+        ValutakursBuilder(jan(2023), behandlingId)
             .medKurs("111111111", "EUR", barn1, barn2, barn3)
             .medVurderingsform(Vurderingsform.MANUELL)
             .lagreTil(valutakursRepository)
@@ -197,13 +242,13 @@ class AutomatiskOppdaterValutakursServiceTest {
         automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId)
 
         val forventetUberørteValutakurser =
-            ValutakursBuilder(jan(2020), behandlingId)
+            ValutakursBuilder(jan(2023), behandlingId)
                 .medKurs("1111", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.MANUELL)
                 .bygg()
 
         val forventetOppdaterteValutakurser =
-            ValutakursBuilder(jan(2020), behandlingId)
+            ValutakursBuilder(jan(2023), behandlingId)
                 .medKurs("    45678", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.AUTOMATISK)
                 .bygg()
@@ -248,5 +293,42 @@ class AutomatiskOppdaterValutakursServiceTest {
             .ignoringFields("endretTidspunkt")
             .ignoringFields("opprettetTidspunkt")
             .isEqualTo(manuelleValutakurserTidslinje.bygg())
+    }
+
+    @Test
+    fun `oppdaterValutakurserEtterEndringstidspunkt skal kunne oppdatere valutakurser før praksisendringsdatoen januar 2023 for førstegangsbehandlinger`() {
+        every { behandlingHentOgPersisterService.hent(any()) } answers { lagBehandling(id = firstArg(), behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING) }
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
+        every { ecbService.hentValutakurs(any(), any()) } answers {
+            val dato = secondArg<LocalDate>()
+            (dato.month.value % 10).toBigDecimal()
+        }
+
+        UtenlandskPeriodebeløpBuilder(sep(2022), behandlingId)
+            .medBeløp("77778888", "EUR", "N", barn1, barn2, barn3)
+            .lagreTil(utenlandskPeriodebeløpRepository)
+
+        ValutakursBuilder(sep(2022), behandlingId)
+            .medKurs("11111111", "EUR", barn1, barn2, barn3)
+            .medVurderingsform(Vurderingsform.MANUELL)
+            .lagreTil(valutakursRepository)
+
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2022, 5, 15)
+
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId)
+
+        val forventetOppdaterteValutakurser =
+            ValutakursBuilder(sep(2022), behandlingId)
+                .medKurs("89012123", "EUR", barn1, barn2, barn3)
+                .medVurderingsform(Vurderingsform.AUTOMATISK)
+                .bygg()
+
+        assertThat(valutakursService.hentValutakurser(behandlingId))
+            .usingRecursiveComparison()
+            .ignoringFields("id")
+            .ignoringFields("valutakursdato")
+            .ignoringFields("endretTidspunkt")
+            .ignoringFields("opprettetTidspunkt")
+            .isEqualTo(forventetOppdaterteValutakurser)
     }
 }

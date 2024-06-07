@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -87,7 +88,12 @@ object BehandlingsresultatValideringUtils {
             erEndringTilbakeITidTidslinje.perioder().forEach {
                 val erEndring = it.innhold == true
                 if (erEndring) {
-                    throw Feil("Det er endringer i andelene som går tilbake i tid. Gjelder andelene fra ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}.")
+                    secureLogger.info(
+                        "Er endring i kalkulert utbetalt beløp i perioden ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}.\n" +
+                            "Andeler denne behandlingen: $andelerDenneBehandlingen\n" +
+                            "Andeler forrige behandling: $andelerForrigeBehandling",
+                    )
+                    throw Feil("Det er endringer i kalkulert utbetalt beløp som går tilbake i tid. Gjelder andelene fra ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}. Se secure log for mer detaljer.")
                 }
             }
         }
@@ -97,11 +103,11 @@ object BehandlingsresultatValideringUtils {
         andelerDenneBehandlingen: List<AndelTilkjentYtelse>,
         andelerForrigeBehandling: List<AndelTilkjentYtelse>,
     ) {
-        val andelerIFortidenTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType()
-        val andelerIFortidenForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType()
+        val andelerDenneBehandlingTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType()
+        val andelerForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType()
 
         val erEndringISatsTidslinjer =
-            andelerIFortidenTidslinje.outerJoin(andelerIFortidenForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->
+            andelerDenneBehandlingTidslinje.outerJoin(andelerForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->
                 nyAndel?.sats != gammelAndel?.sats
             }
 
@@ -109,7 +115,12 @@ object BehandlingsresultatValideringUtils {
             erEndringISatsTidslinje.perioder().forEach {
                 val erEndring = it.innhold == true
                 if (erEndring) {
-                    throw Feil("Det er endringer i andelene som går tilbake i tid. Gjelder andelene fra ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}.")
+                    secureLogger.info(
+                        "Er endring i sats for andel i perioden ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}.\n" +
+                            "Andeler denne behandlingen: $andelerDenneBehandlingen\n" +
+                            "Andeler forrige behandling: $andelerForrigeBehandling",
+                    )
+                    throw Feil("Det er endringer i andelene relatert til sats som går tilbake i tid. Gjelder andelene fra ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}. Se secure log for mer detaljer.")
                 }
             }
         }
