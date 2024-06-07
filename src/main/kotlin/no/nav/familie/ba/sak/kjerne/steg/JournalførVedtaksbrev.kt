@@ -27,7 +27,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
-import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask
+import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilFullmektigEllerVergeTask
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
@@ -108,8 +108,8 @@ class JournalførVedtaksbrev(
                 is FullmektigEllerVerge,
                 -> { // Denne tasken sender kun vedtaksbrev
                     val distribuerTilVergeTask =
-                        DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask
-                            .opprettDistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
+                        DistribuerVedtaksbrevTilFullmektigEllerVergeTask
+                            .opprettDistribuerVedtaksbrevTilFullmektigEllerVergeTask(
                                 distribuerDokumentDTO =
                                     lagDistribuerDokumentDto(
                                         behandling = behandling,

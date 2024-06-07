@@ -174,7 +174,7 @@ internal class BrevmottakerServiceTest {
     }
 
     @Test
-    fun `lagMottakereFraBrevMottakere skal kaste feil når brevmottakere inneholder to av typen BrukerMedUtenlandskAdresse`() {
+    fun `lagMottakereFraBrevMottakere skal kaste feil dersom brevmottakere inneholder to av typen BrukerMedUtenlandskAdresse`() {
         val brevmottakere =
             listOf(
                 lagBrevMottakerDb(
