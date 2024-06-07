@@ -14,5 +14,6 @@ fun mockUnleashNextMedContextService(): UnleashNextMedContextService {
 fun mockUnleashService(): UnleashService {
     val unleashService = mockk<UnleashService>()
     every { unleashService.isEnabled(any()) } returns true
+    every { unleashService.isEnabled(any(), defaultValue = any()) } returns true
     return unleashService
 }
