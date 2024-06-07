@@ -7,6 +7,6 @@ interface UtenlandskPeriodebeløpRepository : PeriodeOgBarnSkjemaRepository<Uten
     @Query("SELECT upb FROM UtenlandskPeriodebeløp upb WHERE upb.behandlingId = :behandlingId")
     override fun finnFraBehandlingId(behandlingId: Long): Collection<UtenlandskPeriodebeløp>
 
-    @Query("SELECT upb FROM UtenlandskPeriodebeløp  upb WHERE (upb.utbetalingsland = 'NO' or upb.utbetalingsland = null)")
+    @Query("SELECT upb FROM UtenlandskPeriodebeløp  upb WHERE (upb.utbetalingsland = 'NO' or upb.utbetalingsland is null)")
     fun hentUtenlandskePeriodebeløpMedFeilUtbetalingsland(): Collection<UtenlandskPeriodebeløp>
 }
