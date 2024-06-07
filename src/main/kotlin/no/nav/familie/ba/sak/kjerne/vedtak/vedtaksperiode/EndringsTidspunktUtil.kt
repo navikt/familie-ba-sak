@@ -170,7 +170,7 @@ private fun VedtaksperiodeGrunnlagForPerson?.erLik(
 
         is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
             grunnlagForVedtaksperiodeForrigeBehandling is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget &&
-                this.vilkårResultaterForVedtaksperiode.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode.toSet()
+                this.vilkårResultaterForVedtaksperiode.erLikUtenomTom(grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode)
 
         null -> grunnlagForVedtaksperiodeForrigeBehandling == null
     }

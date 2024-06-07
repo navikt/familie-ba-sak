@@ -90,6 +90,8 @@ class AutovedtakMånedligValutajusteringService(
                 fagsakId = fagsakId,
             )
 
+        simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingEtterBehandlingsresultat.id)
+
         val etterutbetaling = simuleringService.hentEtterbetaling(behandlingEtterBehandlingsresultat.id)
         val feilutbetaling by lazy { simuleringService.hentFeilutbetaling(behandlingEtterBehandlingsresultat.id) }
 
