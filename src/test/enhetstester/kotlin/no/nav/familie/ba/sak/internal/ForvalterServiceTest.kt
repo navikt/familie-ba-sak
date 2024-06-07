@@ -23,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -94,6 +96,12 @@ class ForvalterServiceTest {
 
     @MockK
     lateinit var infotrygdService: InfotrygdService
+
+    @MockK
+    lateinit var kompetanseRepository: KompetanseRepository
+
+    @MockK
+    lateinit var utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository
 
     @InjectMockKs
     lateinit var forvalterService: ForvalterService
