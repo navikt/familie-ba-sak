@@ -615,17 +615,17 @@ class VedtaksperiodeService(
                 when (målform) {
                     NN -> {
                         if (avklart) {
-                            "Frå $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
+                            "Frå $fom til $tom blir etterbetaling på $beløp kroner utbetalt til myndighetene i $land."
                         } else {
-                            "Frå $fom til $tom blir ikkje etterbetaling på $beløp kroner per månad utbetalt no sidan det er utbetalt barnetrygd i $land."
+                            "Frå $fom til $tom blir ikkje etterbetaling på $beløp kroner utbetalt no sidan det er utbetalt barnetrygd i $land."
                         }
                     }
 
                     else -> {
                         if (avklart) {
-                            "Fra $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
+                            "Fra $fom til $tom blir etterbetaling på $beløp kroner utbetalt til myndighetene i $land."
                         } else {
-                            "Fra $fom til $tom blir ikke etterbetaling på $beløp kroner per måned utbetalt nå siden det er utbetalt barnetrygd i $land."
+                            "Fra $fom til $tom blir ikke etterbetaling på $beløp kroner utbetalt nå siden det er utbetalt barnetrygd i $land."
                         }
                     }
                 }
