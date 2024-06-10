@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatusScheduler
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
-import no.nav.familie.ba.sak.task.KorrigerUtenlandskePeriodebeløpTask
 import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
@@ -33,7 +32,6 @@ import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -369,25 +367,6 @@ class ForvalterController(
             val hennleggAutovedtakTask = HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask.opprettTask(behandlingId)
             taskRepository.save(hennleggAutovedtakTask)
         }
-        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
-    }
-
-    @GetMapping("/finn-korrigerte-utenlandske-periodebeløp")
-    @Operation(summary = "Kjører finnUtenlandskePeriodebeløpSomSkalKorrigeres for å finne alle utenlandske periodebeløp med utbetalingsland 'NO' eller null")
-    fun kjørfinnUtenlandskePeriodebeløpSomSkalKorrigeres(): ResponseEntity<Ressurs<UtenlandskePeriodebeløpEndringerOgBehandlingerMedFeilIKompetanse>> {
-        val utenlandskePeriodebeløpEndringer = forvalterService.finnUtenlandskePeriodebeløpSomSkalKorrigeres()
-        return ResponseEntity.ok(Ressurs.success(utenlandskePeriodebeløpEndringer))
-    }
-
-    @PostMapping("/korriger-utenlandske-periodebeløp")
-    @Operation(summary = "Kjører korrigerUtenlandskePeriodebeløp slik at utenlandske periodebeløp med utbetalingsland 'NO' eller null blir korrigert")
-    @Transactional
-    fun kjørkorrigerUtenlandskePeriodebeløpForBehandlinger(
-        @RequestBody behandlinger: List<Long>,
-    ): ResponseEntity<Ressurs<String>> {
-        logger.info("Opprettet korrigerUtenlandskPeriodebeløpTask for behandlingene: [${behandlinger.joinToString(", ")}]")
-        val korrigerUtenlandskePeriodebeløpTask = Task(KorrigerUtenlandskePeriodebeløpTask.TASK_STEP_TYPE, objectMapper.writeValueAsString(behandlinger))
-        taskRepository.save(korrigerUtenlandskePeriodebeløpTask)
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 }

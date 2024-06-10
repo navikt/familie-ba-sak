@@ -43,7 +43,7 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
                 .bygg()
 
         val faktiskeUtenlandskePeriodebeløp =
-            tilpassUtenlandskePeriodebeløpTilKompetanser(forrigeUtenlandskePeriodebeløp, gjeldendeKompetanser, true)
+            tilpassUtenlandskePeriodebeløpTilKompetanser(forrigeUtenlandskePeriodebeløp, gjeldendeKompetanser)
 
         assertEqualsUnordered(forventedeUtenlandskePeriodebeløp, faktiskeUtenlandskePeriodebeløp)
     }
@@ -61,7 +61,7 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
                 .byggKompetanser()
 
         val faktiskeUtenlandskePeriodebeløp =
-            tilpassUtenlandskePeriodebeløpTilKompetanser(forrigeUtenlandskePeriodebeløp, gjeldendeKompetanser, true)
+            tilpassUtenlandskePeriodebeløpTilKompetanser(forrigeUtenlandskePeriodebeløp, gjeldendeKompetanser)
 
         val forventedeUtenlandskePeriodebeløp =
             UtenlandskPeriodebeløpBuilder(jan2020)
