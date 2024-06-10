@@ -77,8 +77,6 @@ Se `.deploy/nais/azure-ad-app-lokal.yaml` dersom du ønsker å deploye `azuread-
 
 Til slutt skal miljøvariablene se slik ut:
 
-DevLauncher/DevLauncherPostgres
-
 * BA_SAK_CLIENT_ID=`AZURE_APP_CLIENT_ID` (fra `azuread-familie-ba-sak-lokal`)
 * CLIENT_SECRET=`AZURE_APP_CLIENT_SECRET` (fra `azuread-familie-ba-sak-lokal`)
 

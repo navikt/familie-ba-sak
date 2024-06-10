@@ -294,10 +294,32 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
             }
         }
 
+        erEndretUtbetalingOgDeltBostedOgInnvilgetEllerØkning(this) -> {
+            hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson).keys.map { it.fødselsdato }
+        }
+
         else -> {
             barnPåBegrunnelse.map { it.fødselsdato }
         }
     }
+}
+
+private fun hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
+    begrunnelsesGrunnlagPerPerson.filter { (person, begrunnelseGrunnlag) ->
+        val endretUtbetalingAndelIPeriode = begrunnelseGrunnlag.dennePerioden.endretUtbetalingAndel
+
+        endretUtbetalingAndelIPeriode?.årsak == Årsak.DELT_BOSTED &&
+            endretUtbetalingAndelIPeriode.prosent != BigDecimal.ZERO &&
+            person.type == PersonType.BARN
+    }
+
+private fun erEndretUtbetalingOgDeltBostedOgInnvilgetEllerØkning(
+    sanityBegrunnelse: ISanityBegrunnelse,
+): Boolean {
+    return sanityBegrunnelse.gjelderEndretutbetaling &&
+        sanityBegrunnelse is SanityBegrunnelse &&
+        sanityBegrunnelse.endringsaarsaker.contains(Årsak.DELT_BOSTED) &&
+        sanityBegrunnelse.periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING
 }
 
 private fun ISanityBegrunnelse.erEksplisittAvslagPåSøker(
