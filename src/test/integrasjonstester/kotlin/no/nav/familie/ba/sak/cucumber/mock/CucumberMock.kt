@@ -2,8 +2,10 @@
 
 import io.mockk.mockk
 import io.mockk.spyk
+import kotlinx.coroutines.CoroutineScope
 import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategiForValutakurserRepository
@@ -72,7 +74,8 @@ class CucumberMock(
     nyBehanldingId: Long,
     forrigeBehandling: Behandling?,
     efSakRestClientMock: EfSakRestClient = mockEfSakRestClient(),
-    ecbService: ECBService = mockk<ECBService>(),
+    ecbService: ECBService = mockEcbService(dataFraCucumber),
+    scope: CoroutineScope? = null,
 ) {
     val mockedDateProvider = MockedDateProvider(dataFraCucumber.dagensDato)
     val persongrunnlagService = mockPersongrunnlagService(dataFraCucumber)
@@ -112,7 +115,7 @@ class CucumberMock(
     val arbeidsfordelingService = mockArbeidsfordelingService()
     val behandlingMetrikker = mockBehandlingMetrikker()
     val tilbakekrevingService = mockTilbakekrevingService()
-    val taskRepository = MockTasker().mockTaskRepositoryWrapper(this)
+    val taskRepository = MockTasker().mockTaskRepositoryWrapper(this, scope)
     val unleashNextMedContextService = mockUnleashNextMedContextService()
     val unleashService = mockUnleashService()
     val mockPåVentService = mockk<SettPåVentService>()
@@ -447,6 +450,7 @@ class CucumberMock(
             automatiskBeslutningService = automatiskBeslutningService,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             valutakursRepository = valutakursRepository,
+            simuleringService = simuleringService,
         )
 
     val stegService =

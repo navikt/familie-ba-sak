@@ -104,11 +104,25 @@ class BeslutteVedtak(
 
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id)
         val erAutomatiskeValutakurserPåBehandling = valutakurser.any { it.vurderingsform == Vurderingsform.AUTOMATISK }
-        if (unleashService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) && erAutomatiskeValutakurserPåBehandling) {
-            oppdaterValutakurserOgValiderIkkeFeilutbetaling(behandling, data.beslutning.erGodkjent())
-        }
+        val erEndringIFeilutbetalingOgErValutajustering =
+            if (unleashService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) && erAutomatiskeValutakurserPåBehandling) {
+                val gammelFeilutbetaling = simuleringService.hentFeilutbetaling(behandling.id)
+
+                automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandling.id))
+
+                simuleringService.oppdaterSimuleringPåBehandling(behandling)
+
+                val nyFeilutbetaling = simuleringService.hentFeilutbetaling(behandling.id)
+                nyFeilutbetaling != gammelFeilutbetaling
+            } else {
+                false
+            }
 
         return if (data.beslutning.erGodkjent()) {
+            if (erEndringIFeilutbetalingOgErValutajustering) {
+                throw FunksjonellFeil("Det er en feilutbetaling som saksbehandler ikke har tatt stilling til. Saken må underkjennes og sendes tilbake til saksbehandler for ny vurdering.")
+            }
+
             val vedtak =
                 vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
@@ -161,20 +175,12 @@ class BeslutteVedtak(
                     fristForFerdigstillelse = LocalDate.now(),
                 )
             taskRepository.save(behandleUnderkjentVedtakTask)
-            StegType.SEND_TIL_BESLUTTER
-        }
-    }
 
-    private fun oppdaterValutakurserOgValiderIkkeFeilutbetaling(
-        behandling: Behandling,
-        erGodkjent: Boolean,
-    ) {
-        val gammelFeilutbetaling = simuleringService.hentFeilutbetaling(behandling.id)
-        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandling.id))
-        simuleringService.oppdaterSimuleringPåBehandling(behandling)
-        val nyFeilutbetaling = simuleringService.hentFeilutbetaling(behandling.id)
-        if (nyFeilutbetaling != gammelFeilutbetaling && erGodkjent) {
-            throw FunksjonellFeil("Det er en feilutbetaling som saksbehandler ikke har tatt stilling til. Saken må underkjennes og sendes tilbake til saksbehandler for ny vurdering.")
+            if (erEndringIFeilutbetalingOgErValutajustering) {
+                StegType.BEHANDLINGSRESULTAT
+            } else {
+                StegType.SEND_TIL_BESLUTTER
+            }
         }
     }
 

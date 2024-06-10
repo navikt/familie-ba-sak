@@ -382,7 +382,7 @@ fun hentTekstForValutakurser(
         """
 
     Og med valutakurs for begrunnelse
-      | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs |""" +
+      | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs | Vurderingsform |""" +
             rader
     }
 }
@@ -407,6 +407,8 @@ private fun hentValutakursRader(valutakurser: Collection<Valutakurs>?): String =
                 valutakurs.valutakode
             }|${
                 valutakurs.kurs
+            }|${
+                valutakurs.vurderingsform
             }|"""
         } ?: ""
 
