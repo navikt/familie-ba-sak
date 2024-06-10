@@ -68,8 +68,6 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId.id) } returns kompetanser
 
-        every { unleashService.isEnabled(any(), false) } returns true
-
         tilpassUtenlandskePeriodebeløpTilKompetanserService
             .tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId)
 
