@@ -7,12 +7,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilBrevMottaker
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.steg.domene.Bruker
-import no.nav.familie.ba.sak.kjerne.steg.domene.BrukerMedUtenlandskAdresse
-import no.nav.familie.ba.sak.kjerne.steg.domene.Dødsbo
-import no.nav.familie.ba.sak.kjerne.steg.domene.FullmektigEllerVerge
-import no.nav.familie.ba.sak.kjerne.steg.domene.ManuellAdresseInfo
-import no.nav.familie.ba.sak.kjerne.steg.domene.MottakerInfo
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
