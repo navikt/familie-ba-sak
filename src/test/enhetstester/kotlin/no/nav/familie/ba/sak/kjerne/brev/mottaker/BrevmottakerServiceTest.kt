@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
 import io.mockk.every
-import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
@@ -16,10 +15,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.repository.findByIdOrNull
 
-@ExtendWith(MockKExtension::class)
 internal class BrevmottakerServiceTest {
     private val brevmottakerRepository: BrevmottakerRepository = mockk()
 
