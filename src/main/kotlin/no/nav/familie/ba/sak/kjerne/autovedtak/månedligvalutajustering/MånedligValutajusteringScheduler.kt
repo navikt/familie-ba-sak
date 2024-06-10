@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.task.MånedligValutajusteringFinnFagsakerTask
@@ -22,7 +20,6 @@ class MånedligValutajusteringScheduler(
     val fagsakService: FagsakService,
     val leaderClientService: LeaderClientService,
     val taskRepository: TaskRepositoryWrapper,
-    private val unleashService: UnleashNextMedContextService,
 ) {
     private val logger = LoggerFactory.getLogger(MånedligValutajusteringScheduler::class.java)
 
@@ -40,11 +37,6 @@ class MånedligValutajusteringScheduler(
 
     fun lagMånedligValutajusteringTask(triggerTid: LocalDateTime) {
         val inneværendeMåned = YearMonth.now()
-        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ALLE_SAKER)) {
-            logger.info("FeatureToggle ${FeatureToggleConfig.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ALLE_SAKER} er skrudd av. Avbryter månedlig valutajustering.")
-            return
-        }
-
         logger.info("Kjører scheduled månedlig valutajustering for $inneværendeMåned")
         taskRepository.save(
             MånedligValutajusteringFinnFagsakerTask.lagTask(

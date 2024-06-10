@@ -3,15 +3,12 @@ package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FeilutbetaltValutaService(
-    @Autowired
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
-    @Autowired
     private val loggService: LoggService,
 ) {
     private fun finnFeilutbetaltValutaThrows(id: Long): FeilutbetaltValuta {
@@ -30,7 +27,8 @@ class FeilutbetaltValutaService(
                     fom = feilutbetaltValuta.fom,
                     tom = feilutbetaltValuta.tom,
                     feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp,
-                    erPerMåned = true,
+                    // TODO: Sjekk om hele erPerMåned logikken kan fjernes nå som vi ikke ønsker å se på det per måned basis (NAV-21272)
+                    erPerMåned = false,
                 ),
             )
         loggService.loggFeilutbetaltValutaPeriodeLagtTil(behandlingId = behandlingId, feilutbetaltValuta = lagret)
@@ -62,14 +60,14 @@ class FeilutbetaltValutaService(
 
     @Transactional
     fun oppdatertFeilutbetaltValutaPeriode(
-        feilutbetaltValuta: RestFeilutbetaltValuta,
+        restFeilutbetaltValuta: RestFeilutbetaltValuta,
         id: Long,
     ) {
-        val periode = feilutbetaltValutaRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
+        val feilutbetaltValuta = feilutbetaltValutaRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${restFeilutbetaltValuta.id}") }
 
-        periode.fom = feilutbetaltValuta.fom
-        periode.tom = feilutbetaltValuta.tom
-        periode.feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp
-        periode.erPerMåned = true
+        feilutbetaltValuta.fom = restFeilutbetaltValuta.fom
+        feilutbetaltValuta.tom = restFeilutbetaltValuta.tom
+        feilutbetaltValuta.feilutbetaltBeløp = restFeilutbetaltValuta.feilutbetaltBeløp
+        feilutbetaltValuta.erPerMåned = false
     }
 }
