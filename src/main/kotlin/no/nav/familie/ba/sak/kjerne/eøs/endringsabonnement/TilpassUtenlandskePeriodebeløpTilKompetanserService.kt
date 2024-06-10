@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.FinnPeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
@@ -56,13 +55,10 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
     ) {
         val forrigeUtenlandskePeriodebeløp = skjemaService.hentMedBehandlingId(behandlingId)
 
-        val skalBrukeNyRegelForUtledningAvUtbetalingsland = unleashService.isEnabled(FeatureToggleConfig.SKAL_BRUKE_NY_REGEL_FOR_UTLEDNING_AV_UTBETALINGSLAND, false)
-
         val oppdaterteUtenlandskPeriodebeløp =
             tilpassUtenlandskePeriodebeløpTilKompetanser(
                 forrigeUtenlandskePeriodebeløp,
                 gjeldendeKompetanser,
-                skalBrukeNyRegelForUtledningAvUtbetalingsland,
             ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(
@@ -76,7 +72,6 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
 internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
     forrigeUtenlandskePeriodebeløp: Iterable<UtenlandskPeriodebeløp>,
     gjeldendeKompetanser: Iterable<Kompetanse>,
-    skalBrukeNyRegelForUtledningAvUtbetalingsland: Boolean,
 ): Collection<UtenlandskPeriodebeløp> {
     val barnasKompetanseTidslinjer =
         gjeldendeKompetanser
@@ -85,7 +80,7 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
 
     return forrigeUtenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
         .outerJoin(barnasKompetanseTidslinjer) { upb, kompetanse ->
-            val utbetalingsland = if (skalBrukeNyRegelForUtledningAvUtbetalingsland) kompetanse?.utbetalingsland() else kompetanse?.annenForeldersAktivitetsland
+            val utbetalingsland = kompetanse?.utbetalingsland()
             when {
                 kompetanse == null -> null
                 upb == null || upb.utbetalingsland != utbetalingsland ->
