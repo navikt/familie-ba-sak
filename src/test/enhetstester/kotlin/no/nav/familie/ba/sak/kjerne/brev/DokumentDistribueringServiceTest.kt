@@ -97,7 +97,7 @@ internal class DokumentDistribueringServiceTest {
             journalpostId = "testId",
             behandlingId = 1L,
             brevmal = Brevmal.SVARTIDSBREV,
-            personEllerInstitusjonIdent = "test",
+            fagsakId = 1L,
             erManueltSendt = true,
         )
 }

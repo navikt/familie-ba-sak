@@ -16,13 +16,16 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.brev.domene.erTilInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.Bruker
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.FullmektigEllerVerge
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.Institusjon
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerInfo
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.tilAvsenderMottaker
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.steg.domene.MottakerInfo
-import no.nav.familie.ba.sak.kjerne.steg.domene.toList
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -31,12 +34,12 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.leggTilBlankAnnenVurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
-import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
+import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -89,7 +92,6 @@ class DokumentService(
             )
         }
 
-        val generertBrev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest)
         val førsteside =
             if (manueltBrevRequest.brevmal.skalGenerereForside()) {
                 Førsteside(
@@ -102,7 +104,6 @@ class DokumentService(
             }
 
         val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: error("Finnes ikke fagsak for fagsakId=$fagsakId")
-        val søkersident = fagsak.aktør.aktivFødselsnummer()
 
         val brevmottakereFraBehandling = behandling?.let { brevmottakerService.hentBrevmottakere(it.id) } ?: emptyList()
         val brevmottakere =
@@ -110,7 +111,6 @@ class DokumentService(
 
         val mottakere =
             lagMottakere(
-                manueltBrevRequest = manueltBrevRequest,
                 fagsak = fagsak,
                 brevmottakere = brevmottakere,
             )
@@ -122,14 +122,11 @@ class DokumentService(
                     fnr = fagsak.aktør.aktivFødselsnummer(),
                     fagsakId = fagsakId.toString(),
                     journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
-                    brev = generertBrev,
-                    førsteside = førsteside,
+                    brev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest, fagsak),
                     dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
-                    avsenderMottaker = utledAvsenderMottaker(manueltBrevRequest, mottakerInfo),
-                    // mottakersnavn fyller ut kun når manuell mottaker finnes
-                    tilManuellMottakerEllerVerge =
-                        mottakerInfo.navn != null &&
-                            mottakerInfo.navn != brevmottakerService.hentMottakerNavn(søkersident),
+                    førsteside = førsteside,
+                    eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsakId, behandling?.id, mottakerInfo),
+                    avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),
                 ).also { journalposterTilDistribusjon[it] = mottakerInfo }
 
             behandling?.let {
@@ -162,60 +159,24 @@ class DokumentService(
     }
 
     private fun lagMottakere(
-        manueltBrevRequest: ManueltBrevRequest,
         fagsak: Fagsak,
         brevmottakere: List<ManuellBrevmottaker>,
     ): List<MottakerInfo> {
-        val søkersident = fagsak.aktør.aktivFødselsnummer()
         return when {
-            manueltBrevRequest.erTilInstitusjon ->
-                MottakerInfo(
-                    brukerId = checkNotNull(fagsak.institusjon).orgNummer,
-                    brukerIdType = BrukerIdType.ORGNR,
-                    erInstitusjonVerge = false,
-                ).toList()
+            fagsak.type == FagsakType.INSTITUSJON -> {
+                val orgNummer = checkNotNull(fagsak.institusjon).orgNummer
+                listOf(
+                    Institusjon(
+                        orgNummer = orgNummer,
+                        navn = organisasjonService.hentOrganisasjon(orgNummer).navn,
+                    ),
+                )
+            }
             brevmottakere.isNotEmpty() ->
                 brevmottakerService.lagMottakereFraBrevMottakere(
                     brevmottakere,
-                    søkersident,
                 )
-            else ->
-                MottakerInfo(
-                    brukerIdType = BrukerIdType.FNR,
-                    brukerId = søkersident,
-                    erInstitusjonVerge = false,
-                ).toList()
-        }
-    }
-
-    private fun utledAvsenderMottaker(
-        manueltBrevRequest: ManueltBrevRequest,
-        mottakerInfo: MottakerInfo,
-    ): AvsenderMottaker? {
-        return when {
-            manueltBrevRequest.erTilInstitusjon -> {
-                AvsenderMottaker(
-                    idType = BrukerIdType.ORGNR,
-                    id = manueltBrevRequest.mottakerIdent,
-                    navn = utledInstitusjonNavn(manueltBrevRequest),
-                )
-            }
-            mottakerInfo.brukerIdType != BrukerIdType.ORGNR && mottakerInfo.navn != null -> {
-                AvsenderMottaker(
-                    idType = mottakerInfo.brukerIdType,
-                    id = mottakerInfo.brukerIdType?.let { mottakerInfo.brukerId },
-                    navn = mottakerInfo.navn,
-                )
-            }
-            else -> {
-                null
-            }
-        }
-    }
-
-    private fun utledInstitusjonNavn(manueltBrevRequest: ManueltBrevRequest): String {
-        return manueltBrevRequest.mottakerNavn.ifBlank {
-            organisasjonService.hentOrganisasjon(manueltBrevRequest.mottakerIdent).navn
+            else -> listOf(Bruker)
         }
     }
 
@@ -242,7 +203,7 @@ class DokumentService(
         DistribuerDokumentTask.opprettDistribuerDokumentTask(
             distribuerDokumentDTO =
                 DistribuerDokumentDTO(
-                    personEllerInstitusjonIdent = journalPostTilDistribusjon.value.brukerId,
+                    fagsakId = fagsak.id,
                     behandlingId = behandling?.id,
                     journalpostId = journalPostTilDistribusjon.key,
                     brevmal = manueltBrevRequest.brevmal,
@@ -253,11 +214,24 @@ class DokumentService(
                 Properties().apply
                     {
                         this["fagsakIdent"] = fagsak.aktør.aktivFødselsnummer()
-                        this["mottakerIdent"] = journalPostTilDistribusjon.value.brukerId
+                        this["mottakerType"] = journalPostTilDistribusjon.value::class.simpleName
                         this["journalpostId"] = journalPostTilDistribusjon.key
                         this["behandlingId"] = behandling?.id.toString()
                         this["fagsakId"] = fagsak.id.toString()
                     },
         ).also { taskRepository.save(it) }
+    }
+
+    companion object {
+        fun genererEksternReferanseIdForJournalpost(
+            fagsakId: Long,
+            behandlingId: Long?,
+            mottakerInfo: MottakerInfo,
+        ) = listOfNotNull(
+            fagsakId,
+            behandlingId,
+            if (mottakerInfo is FullmektigEllerVerge) "verge" else null,
+            MDC.get(MDCConstants.MDC_CALL_ID),
+        ).joinToString("_")
     }
 }

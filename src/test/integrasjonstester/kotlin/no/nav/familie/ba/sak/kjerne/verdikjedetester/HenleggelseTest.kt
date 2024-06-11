@@ -87,7 +87,6 @@ class HenleggelseTest(
                 behandlingId = førsteBehandling.behandlingId,
                 manueltBrevRequest =
                     ManueltBrevRequest(
-                        mottakerIdent = scenario.søker.ident!!,
                         brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
                     ),
             )
