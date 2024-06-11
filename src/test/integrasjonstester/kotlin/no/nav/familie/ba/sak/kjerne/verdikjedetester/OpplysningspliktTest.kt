@@ -80,7 +80,6 @@ class OpplysningspliktTest(
             manueltBrevRequest =
                 ManueltBrevRequest(
                     brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
-                    mottakerIdent = scenario.søker.ident,
                     enhet = Enhet(enhetId = "1234", enhetNavn = "Enhet Enhetesen"),
                 ),
             behandling = behandling,

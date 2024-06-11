@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.brev.domene.erTilInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.Bruker
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.FullmektigEllerVerge
@@ -25,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerInfo
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.tilAvsenderMottaker
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -92,7 +92,6 @@ class DokumentService(
             )
         }
 
-        val generertBrev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest)
         val førsteside =
             if (manueltBrevRequest.brevmal.skalGenerereForside()) {
                 Førsteside(
@@ -112,7 +111,6 @@ class DokumentService(
 
         val mottakere =
             lagMottakere(
-                manueltBrevRequest = manueltBrevRequest,
                 fagsak = fagsak,
                 brevmottakere = brevmottakere,
             )
@@ -124,7 +122,7 @@ class DokumentService(
                     fnr = fagsak.aktør.aktivFødselsnummer(),
                     fagsakId = fagsakId.toString(),
                     journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
-                    brev = generertBrev,
+                    brev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest, fagsak),
                     dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
                     førsteside = førsteside,
                     eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsakId, behandling?.id, mottakerInfo),
@@ -161,29 +159,24 @@ class DokumentService(
     }
 
     private fun lagMottakere(
-        manueltBrevRequest: ManueltBrevRequest,
         fagsak: Fagsak,
         brevmottakere: List<ManuellBrevmottaker>,
     ): List<MottakerInfo> {
         return when {
-            manueltBrevRequest.erTilInstitusjon ->
+            fagsak.type == FagsakType.INSTITUSJON -> {
+                val orgNummer = checkNotNull(fagsak.institusjon).orgNummer
                 listOf(
                     Institusjon(
-                        orgNummer = checkNotNull(fagsak.institusjon).orgNummer,
-                        navn = utledInstitusjonNavn(manueltBrevRequest),
+                        orgNummer = orgNummer,
+                        navn = organisasjonService.hentOrganisasjon(orgNummer).navn,
                     ),
                 )
+            }
             brevmottakere.isNotEmpty() ->
                 brevmottakerService.lagMottakereFraBrevMottakere(
                     brevmottakere,
                 )
             else -> listOf(Bruker)
-        }
-    }
-
-    private fun utledInstitusjonNavn(manueltBrevRequest: ManueltBrevRequest): String {
-        return manueltBrevRequest.mottakerNavn.ifBlank {
-            organisasjonService.hentOrganisasjon(manueltBrevRequest.mottakerIdent).navn
         }
     }
 
