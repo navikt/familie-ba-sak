@@ -69,6 +69,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
+import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -200,6 +201,15 @@ fun lagBehandling(
         aktivertTidspunkt = aktivertTid,
     ).also {
         it.endretTidspunkt = endretTidspunkt
+        val tidligereSteg =
+            StegType.entries
+                .filter { it.rekkefølge < førsteSteg.rekkefølge }
+                .filter { it != StegType.HENLEGG_BEHANDLING }
+
+        tidligereSteg.forEach { steg ->
+            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, steg, behandlingStegStatus = BehandlingStegStatus.UTFØRT))
+        }
+
         it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
     }
 
