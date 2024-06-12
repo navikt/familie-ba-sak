@@ -867,7 +867,7 @@ fun kjørStegprosessForFGB(
             DistribuerDokumentDTO(
                 behandlingId = behandlingEtterJournalførtVedtak.id,
                 journalpostId = "1234",
-                personEllerInstitusjonIdent = søkerFnr,
+                fagsakId = behandlingEtterJournalførtVedtak.fagsak.id,
                 brevmal =
                     brevmalService.hentBrevmal(
                         behandlingEtterJournalførtVedtak,
@@ -999,7 +999,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
             DistribuerDokumentDTO(
                 behandlingId = behandling.id,
                 journalpostId = "1234",
-                personEllerInstitusjonIdent = søkerFnr,
+                fagsakId = behandling.fagsak.id,
                 brevmal = brevmalService.hentBrevmal(behandling),
                 erManueltSendt = false,
             ),

@@ -107,6 +107,7 @@ class DokumentController(
                     arbeidsfordelingService,
                 ),
             erForhåndsvisning = true,
+            fagsak = behandling.fagsak,
         ).let { Ressurs.success(it) }
     }
 
@@ -156,9 +157,11 @@ class DokumentController(
             handling = "hente forhåndsvisning brev",
         )
 
+        val fagsak = fagsakService.hentPåFagsakId(fagsakId)
         return dokumentGenereringService.genererManueltBrev(
-            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
+            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(fagsak.aktør.aktivFødselsnummer(), arbeidsfordelingService),
             erForhåndsvisning = true,
+            fagsak = fagsak,
         ).let { Ressurs.success(it) }
     }
 
@@ -173,8 +176,9 @@ class DokumentController(
             handling = "sende brev",
         )
 
+        val fagsakIdent = fagsakService.hentPåFagsakId(fagsakId).aktør.aktivFødselsnummer()
         dokumentService.sendManueltBrev(
-            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
+            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(fagsakIdent, arbeidsfordelingService),
             fagsakId = fagsakId,
         )
         return ResponseEntity.ok(Ressurs.success(fagsakService.lagRestMinimalFagsak(fagsakId = fagsakId)))

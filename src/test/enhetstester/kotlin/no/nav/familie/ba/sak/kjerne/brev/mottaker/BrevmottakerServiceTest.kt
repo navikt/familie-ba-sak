@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
@@ -11,40 +8,28 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.repository.findByIdOrNull
 
-@ExtendWith(MockKExtension::class)
 internal class BrevmottakerServiceTest {
-    @MockK
-    private lateinit var brevmottakerRepository: BrevmottakerRepository
+    private val brevmottakerRepository: BrevmottakerRepository = mockk()
 
-    @MockK
-    private lateinit var personidentService: PersonidentService
+    private val validerBrevmottakerService: ValiderBrevmottakerService = mockk()
 
-    @MockK
-    private lateinit var personopplysningerService: PersonopplysningerService
+    private val loggService: LoggService = mockk()
 
-    @MockK
-    private lateinit var validerBrevmottakerService: ValiderBrevmottakerService
-
-    @MockK
-    private lateinit var loggService: LoggService
-
-    @InjectMockKs
-    private lateinit var brevmottakerService: BrevmottakerService
-
-    private val søkersident = "123"
-    private val søkersnavn = "Test søker"
+    private val brevmottakerService =
+        BrevmottakerService(
+            brevmottakerRepository = brevmottakerRepository,
+            loggService = loggService,
+            validerBrevmottakerService = validerBrevmottakerService,
+        )
 
     @Test
     fun `lagMottakereFraBrevMottakere skal lage mottakere når brevmottaker er FULLMEKTIG og bruker har norsk adresse`() {
@@ -54,12 +39,9 @@ internal class BrevmottakerServiceTest {
         val mottakerInfo =
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
-                søkersident,
-                søkersnavn,
             )
         assertTrue { mottakerInfo.size == 2 }
 
-        assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo == null }
 
         assertEquals("John Doe", mottakerInfo.last().navn)
@@ -82,12 +64,9 @@ internal class BrevmottakerServiceTest {
         val mottakerInfo =
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
-                søkersident,
-                søkersnavn,
             )
         assertTrue { mottakerInfo.size == 2 }
 
-        assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
         assertTrue { mottakerInfo.first().manuellAdresseInfo!!.landkode == "DE" }
 
@@ -111,12 +90,9 @@ internal class BrevmottakerServiceTest {
         val mottakerInfo =
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
-                søkersident,
-                søkersnavn,
             )
         assertTrue { mottakerInfo.size == 2 }
 
-        assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
         assertTrue { mottakerInfo.first().manuellAdresseInfo!!.landkode == "DE" }
 
@@ -139,12 +115,9 @@ internal class BrevmottakerServiceTest {
         val mottakerInfo =
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
-                søkersident,
-                søkersnavn,
             )
         assertTrue { mottakerInfo.size == 1 }
 
-        assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
         assertTrue { mottakerInfo.first().manuellAdresseInfo!!.landkode == "DE" }
     }
@@ -164,12 +137,9 @@ internal class BrevmottakerServiceTest {
         val mottakerInfo =
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
-                søkersident,
-                søkersnavn,
             )
         assertTrue { mottakerInfo.size == 1 }
 
-        assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
         assertTrue { mottakerInfo.first().manuellAdresseInfo!!.landkode == "DE" }
     }
@@ -194,11 +164,39 @@ internal class BrevmottakerServiceTest {
         assertThrows<FunksjonellFeil> {
             brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere.map { ManuellBrevmottaker(it) },
-                søkersident,
-                søkersnavn,
             )
         }.also {
             assertTrue(it.frontendFeilmelding!!.contains("kan ikke kombineres"))
+        }
+    }
+
+    @Test
+    fun `lagMottakereFraBrevMottakere skal kaste feil dersom brevmottakere inneholder to av typen BrukerMedUtenlandskAdresse`() {
+        val brevmottakere =
+            listOf(
+                lagBrevMottakerDb(
+                    mottakerType = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
+                    poststed = "Munchen",
+                    landkode = "DE",
+                ),
+                lagBrevMottakerDb(
+                    mottakerType = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
+                    poststed = "Munchen",
+                    landkode = "DE",
+                ),
+            )
+        every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
+
+        assertThrows<FunksjonellFeil> {
+            brevmottakerService.lagMottakereFraBrevMottakere(
+                brevmottakere.map { ManuellBrevmottaker(it) },
+            )
+        }.also {
+            assertTrue(
+                it.frontendFeilmelding!!.contains(
+                    "Mottakerfeil: Det er registrert mer enn en utenlandsk adresse tilhørende bruker",
+                ),
+            )
         }
     }
 

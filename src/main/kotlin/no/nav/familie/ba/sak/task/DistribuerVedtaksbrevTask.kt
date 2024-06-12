@@ -26,7 +26,7 @@ class DistribuerVedtaksbrevTask(
             DistribuerDokumentDTO(
                 behandlingId = distribuerVedtaksbrevDTO.behandlingId,
                 journalpostId = distribuerVedtaksbrevDTO.journalpostId,
-                personEllerInstitusjonIdent = distribuerVedtaksbrevDTO.personIdent,
+                fagsakId = behandling.fagsak.id,
                 brevmal = brevmalService.hentBrevmal(behandling),
                 erManueltSendt = false,
             )
