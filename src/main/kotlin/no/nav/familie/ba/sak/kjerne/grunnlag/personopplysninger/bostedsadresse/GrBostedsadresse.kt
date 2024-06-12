@@ -112,7 +112,13 @@ abstract class GrBostedsadresse(
                 }
             return mappetAdresse.also {
                 it.person = person
-                it.periode = DatoIntervallEntitet(bostedsadresse.angittFlyttedato, bostedsadresse.gyldigTilOgMed)
+
+                it.periode =
+                    DatoIntervallEntitet(
+                        // Hvorfor bruker vi ikke bostedsadresse.gyldigFraOgMed her? Tror det er det som brukes i Gosys.
+                        fom = bostedsadresse.angittFlyttedato,
+                        tom = bostedsadresse.gyldigTilOgMed,
+                    )
             }
         }
 
