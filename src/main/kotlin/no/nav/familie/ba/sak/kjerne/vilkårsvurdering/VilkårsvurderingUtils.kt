@@ -13,12 +13,21 @@ import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Uendelighet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
@@ -434,6 +443,7 @@ private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForri
 fun genererPersonResultatForPerson(
     vilkårsvurdering: Vilkårsvurdering,
     person: Person,
+    erToggleForAutomatiskBehandlingAvBosattIRiketVikårPå: Boolean,
 ): PersonResultat {
     val personResultat =
         PersonResultat(
@@ -449,7 +459,7 @@ fun genererPersonResultatForPerson(
         )
 
     val vilkårResultater =
-        vilkårForPerson.map { vilkår ->
+        vilkårForPerson.flatMap { vilkår ->
             val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
 
             val tom: LocalDate? =
@@ -459,25 +469,75 @@ fun genererPersonResultatForPerson(
                     else -> null
                 }
 
-            VilkårResultat(
-                personResultat = personResultat,
-                erAutomatiskVurdert =
-                    when (vilkår) {
-                        Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP -> true
-                        else -> false
-                    },
-                resultat = utledResultat(vilkår, person),
-                vilkårType = vilkår,
-                periodeFom = fom,
-                periodeTom = tom,
-                begrunnelse = utledBegrunnelse(vilkår, person),
-                sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
-            )
+            val erNasjonalBehandling = vilkårsvurdering.behandling.kategori == BehandlingKategori.NASJONAL
+
+            if (vilkår == Vilkår.BOSATT_I_RIKET && erNasjonalBehandling && erToggleForAutomatiskBehandlingAvBosattIRiketVikårPå) {
+                person.bostedsadresser.tilAutomatiskeVilkårResultaterForBosattIRiket(personResultat)
+            } else {
+                listOf(
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        erAutomatiskVurdert =
+                            when (vilkår) {
+                                Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP -> true
+                                else -> false
+                            },
+                        resultat = utledResultat(vilkår, person),
+                        vilkårType = vilkår,
+                        periodeFom = fom,
+                        periodeTom = tom,
+                        begrunnelse = utledBegrunnelse(vilkår, person),
+                        sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+                    ),
+                )
+            }
         }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
     personResultat.setSortedVilkårResultater(vilkårResultater)
 
     return personResultat
+}
+
+private fun MutableList<GrBostedsadresse>.tilAutomatiskeVilkårResultaterForBosattIRiket(
+    personResultat: PersonResultat,
+): List<VilkårResultat> {
+    if (this.isEmpty()) {
+        return listOf(
+            VilkårResultat(
+                personResultat = personResultat,
+                erAutomatiskVurdert = true,
+                resultat = Resultat.IKKE_OPPFYLT,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                periodeFom = null,
+                periodeTom = null,
+                begrunnelse = "Vurdert og satt automatisk.",
+                sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+            ),
+        )
+    }
+
+    return this.tilBostederINorgeTidslinje().perioder().map { periode ->
+        val erBosattINorge = periode.innhold?.toList()?.isNotEmpty() ?: false
+        val bostedstekster = periode.innhold?.map { it.tilFrontendString() }?.joinToString("\n") ?: ""
+
+        VilkårResultat(
+            personResultat = personResultat,
+            erAutomatiskVurdert = true,
+            resultat = if (erBosattINorge) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
+            vilkårType = Vilkår.BOSATT_I_RIKET,
+            periodeFom = if (periode.fraOgMed.uendelighet == Uendelighet.INGEN) periode.fraOgMed.tilLocalDate() else null,
+            periodeTom = if (periode.tilOgMed.uendelighet == Uendelighet.INGEN) periode.tilOgMed.tilLocalDate() else null,
+            begrunnelse = "Vurdert og satt automatisk. \n$bostedstekster",
+            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+        )
+    }
+}
+
+private fun List<GrBostedsadresse>.tilBostederINorgeTidslinje(): Tidslinje<Iterable<GrBostedsadresse>, Dag> {
+    // Lager en tidslinje per periode siden de kan overlappe
+    val erBosattINorgeTidslinjer = this.map { listOf(periodeAv(it.periode?.fom, it.periode?.tom, it)).tilTidslinje() }
+
+    return erBosattINorgeTidslinjer.kombiner { norskeBostedsadresserIPeriode -> norskeBostedsadresserIPeriode }
 }
 
 private fun utledResultat(
