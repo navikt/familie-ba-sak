@@ -12,8 +12,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
@@ -35,6 +37,7 @@ import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class BeslutteVedtak(
@@ -51,6 +54,7 @@ class BeslutteVedtak(
     private val automatiskBeslutningService: AutomatiskBeslutningService,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
     private val valutakursRepository: ValutakursRepository,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val simuleringService: SimuleringService,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
     override fun utførStegOgAngiNeste(
@@ -108,9 +112,7 @@ class BeslutteVedtak(
             if (unleashService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) && erAutomatiskeValutakurserPåBehandling) {
                 val gammelFeilutbetaling = simuleringService.hentFeilutbetaling(behandling.id)
 
-                automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandling.id))
-
-                simuleringService.oppdaterSimuleringPåBehandling(behandling)
+                oppdaterValutakurserOgSimulering(behandling = behandling, erGodkjent = data.beslutning.erGodkjent())
 
                 val nyFeilutbetaling = simuleringService.hentFeilutbetaling(behandling.id)
                 nyFeilutbetaling != gammelFeilutbetaling
@@ -184,13 +186,28 @@ class BeslutteVedtak(
         }
     }
 
+    private fun oppdaterValutakurserOgSimulering(
+        behandling: Behandling,
+        erGodkjent: Boolean,
+    ) {
+        val andelerTilkjentYtelseFørValutakursOppdatering = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandling.id))
+
+        val andelerTilkjentYtelseEtterValutakursOppdatering = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        if (erGodkjent) {
+            validerIngenEndringTilbakeITid(andelerTilkjentYtelseEtterValutakursOppdatering, andelerTilkjentYtelseFørValutakursOppdatering, YearMonth.now())
+        }
+
+        simuleringService.oppdaterSimuleringPåBehandling(behandling)
+    }
+
     override fun postValiderSteg(behandling: Behandling) {
         tilkjentYtelseValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling)
     }
 
-    override fun stegType(): StegType {
-        return StegType.BESLUTTE_VEDTAK
-    }
+    override fun stegType(): StegType = StegType.BESLUTTE_VEDTAK
 
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
         val endringerIUtbetaling =

@@ -450,6 +450,7 @@ class CucumberMock(
             automatiskBeslutningService = automatiskBeslutningService,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             valutakursRepository = valutakursRepository,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             simuleringService = simuleringService,
         )
 
