@@ -20,10 +20,13 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.Autovedt
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatusScheduler
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -31,6 +34,7 @@ import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
+import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -71,12 +75,13 @@ class ForvalterController(
     private val taskService: TaskService,
     private val satskjøringRepository: SatskjøringRepository,
     private val autovedtakMånedligValutajusteringService: AutovedtakMånedligValutajusteringService,
-    private val envService: EnvService,
     private val månedligValutajusteringScheduler: MånedligValutajusteringScheduler,
     private val fagsakService: FagsakService,
     private val unleashNextMedContextService: UnleashNextMedContextService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val fagsakStatusScheduler: FagsakStatusScheduler,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val stønadsstatistikkService: StønadsstatistikkService,
+    private val persongrunnlagService: PersongrunnlagService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -368,5 +373,21 @@ class ForvalterController(
             taskRepository.save(hennleggAutovedtakTask)
         }
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+    }
+
+    @GetMapping("/stonadstatistikk-utbetalingsperioder/{behandlingId}")
+    fun hentStønadstatistikkUtbetalingsperioder(
+        @PathVariable behandlingId: Long
+    ): ResponseEntity<List<UtbetalingsperiodeDVHV2>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "hente data til test",
+        )
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
+        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
+        val utbetalingsperioder = stønadsstatistikkService.hentUtbetalingsperioderTilDatavarehus(behandling = behandling, persongrunnlag = persongrunnlag)
+
+        return ResponseEntity.ok(utbetalingsperioder)
     }
 }

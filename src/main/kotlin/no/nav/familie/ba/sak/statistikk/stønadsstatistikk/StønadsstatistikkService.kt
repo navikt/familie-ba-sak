@@ -119,7 +119,7 @@ class StønadsstatistikkService(
         return lagPersonDVHV2(søker)
     }
 
-    private fun hentUtbetalingsperioderTilDatavarehus(
+    fun hentUtbetalingsperioderTilDatavarehus(
         behandling: Behandling,
         persongrunnlag: PersonopplysningGrunnlag,
     ): List<UtbetalingsperiodeDVHV2> {
