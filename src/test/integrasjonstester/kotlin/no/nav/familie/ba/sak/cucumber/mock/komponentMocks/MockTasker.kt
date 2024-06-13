@@ -2,6 +2,8 @@
 
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -35,7 +37,10 @@ class MockTasker() {
         }
     }
 
-    fun mockTaskRepositoryWrapper(cucumberMock: CucumberMock): TaskRepositoryWrapper {
+    fun mockTaskRepositoryWrapper(
+        cucumberMock: CucumberMock,
+        scope: CoroutineScope?,
+    ): TaskRepositoryWrapper {
         val taskRepositoryWrapper = mockk<TaskRepositoryWrapper>()
         every { taskRepositoryWrapper.save(any()) } answers {
             val task = firstArg<Task>()
@@ -49,7 +54,13 @@ class MockTasker() {
 
             val asyncTaskStep = tasktyper[task.type]
             if (asyncTaskStep != null) {
-                kjørTaskOmIkkeAnnenTaskKjører(asyncTaskStep, task)
+                if (scope != null) {
+                    scope.launch {
+                        kjørTaskOmIkkeAnnenTaskKjører(asyncTaskStep, task)
+                    }
+                } else {
+                    kjørTaskOmIkkeAnnenTaskKjører(asyncTaskStep, task)
+                }
             } else {
                 logger.warn("Fant ikke taskstep for tasktype ${task.type} i cucumberMock. Kjører ikke tasken.")
             }

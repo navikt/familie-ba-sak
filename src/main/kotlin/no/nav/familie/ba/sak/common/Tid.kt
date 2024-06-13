@@ -20,6 +20,7 @@ private val FORMAT_DATO_MÅNED_ÅR_KORT = DateTimeFormatter.ofPattern("MM.yy", n
 private val FORMAT_DATO_DAG_MÅNED_ÅR = DateTimeFormatter.ofPattern("d. MMMM yyyy", nbLocale)
 private val FORMAT_DATO_MÅNED_ÅR = DateTimeFormatter.ofPattern("MMMM yyyy", nbLocale)
 private val FORMAT_DATO_MÅNED_ÅR_MEDIUM = DateTimeFormatter.ofPattern("MMM yy", nbLocale)
+private val FORMAT_DATO_KORT_MÅNED_LANGT_ÅR = DateTimeFormatter.ofPattern("MM.yyyy", nbLocale)
 
 fun LocalDate.tilddMMyy() = this.format(FORMAT_DATE_DDMMYY)
 
@@ -38,6 +39,8 @@ fun LocalDate.tilMånedÅr() = this.format(FORMAT_DATO_MÅNED_ÅR)
 fun YearMonth.tilMånedÅr() = this.format(FORMAT_DATO_MÅNED_ÅR)
 
 fun YearMonth.tilMånedÅrMedium() = this.format(FORMAT_DATO_MÅNED_ÅR_MEDIUM)
+
+fun YearMonth.tilKortMånedLangtÅr() = this.format(FORMAT_DATO_KORT_MÅNED_LANGT_ÅR)
 
 fun erBack2BackIMånedsskifte(
     tilOgMed: LocalDate?,
