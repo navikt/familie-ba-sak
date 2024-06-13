@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 interface VedtakRepository : JpaRepository<Vedtak, Long> {
@@ -16,4 +17,7 @@ interface VedtakRepository : JpaRepository<Vedtak, Long> {
 
     @Query("SELECT v.vedtaksdato FROM Vedtak v WHERE v.behandling.id = :behandlingId AND v.aktiv = true")
     fun finnVedtaksdatoForBehandling(behandlingId: Long): LocalDateTime?
+
+    @Query("SELECT v.behandling.id FROM Vedtak v WHERE v.vedtaksdato > :dato AND v.aktiv = true")
+    fun finnBehandlingerMedVedtakEtterDato(dato: LocalDate): List<Long>
 }
