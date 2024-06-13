@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.filtrerErUtfylt
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
@@ -96,8 +97,10 @@ class AutomatiskOppdaterValutakursService(
 
         val månedForTidligsteTillatteAutomatiskeValutakurs =
             if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                logger.info("Førstegangsbehandling: Setter tidligste måned for automatisk valutakurs det seneste av endringstidspunkt($endringstidspunkt) og måned etter siste manuelle postering($månedEtterSisteManuellePostering)")
                 maxOf(endringstidspunkt, månedEtterSisteManuellePostering)
             } else {
+                logger.info("Revurdering: Setter tidligste måned for automatisk valutakurs det seneste av endringstidspunkt($endringstidspunkt), måned etter siste manuelle postering($månedEtterSisteManuellePostering) og praksisendring($DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING)")
                 maxOf(endringstidspunkt, månedEtterSisteManuellePostering, DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING)
             }
 
