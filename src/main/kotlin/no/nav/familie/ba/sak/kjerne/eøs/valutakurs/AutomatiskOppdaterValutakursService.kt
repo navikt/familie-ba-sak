@@ -106,19 +106,28 @@ class AutomatiskOppdaterValutakursService(
                 maxOf(endringstidspunkt, månedEtterSisteManuellePostering, DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING)
             }
 
+        val automatiskGenererteValutakurser =
+            utenlandskePeriodebeløp.tilAutomatiskeValutakurserEtter(månedForTidligsteTillatteAutomatiskeValutakurs)
+
+        valutakursService.oppdaterValutakurser(BehandlingId(behandling.id), automatiskGenererteValutakurser)
+    }
+
+    private fun Collection<UtenlandskPeriodebeløp>.tilAutomatiskeValutakurserEtter(
+        månedForTidligsteTillatteAutomatiskeValutakurs: YearMonth,
+    ): List<Valutakurs> {
         val valutakoder =
-            utenlandskePeriodebeløp.filtrerErUtfylt().map { it.valutakode }.toSet()
+            filtrerErUtfylt().map { it.valutakode }.toSet()
 
         val automatiskGenererteValutakurser =
             valutakoder.map { valutakode ->
-                val upbGruppertPerBarnForValutakode = utenlandskePeriodebeløp.filtrerErUtfylt().filter { it.valutakode == valutakode }.groupBy { it.barnAktører }
+                val upbGruppertPerBarnForValutakode = filtrerErUtfylt().filter { it.valutakode == valutakode }.groupBy { it.barnAktører }
                 val upbPerBarnTidslinjer = upbGruppertPerBarnForValutakode.values.map { upbForBarn -> upbForBarn.sortedBy { it.fom }.map { månedPeriodeAv(it.fom, it.tom, it) }.tilTidslinje() }
 
                 val perioderAvBarnMedValutakode = upbPerBarnTidslinjer.kombiner { upberIPeriode -> upberIPeriode.flatMap { it.barnAktører }.toSet() }.perioder()
 
                 perioderAvBarnMedValutakode.mapNotNull { periode ->
                     periode.innhold?.let {
-                        lagAutomatiskOppdaterteValutakurserEtter(
+                        lagAutomatiskeValutakurserIPeriode(
                             månedForTidligsteTillatteAutomatiskeValutakurs,
                             periode.fraOgMed.tilYearMonth(),
                             periode.tilOgMed.tilYearMonthEllerNull(),
@@ -128,11 +137,10 @@ class AutomatiskOppdaterValutakursService(
                     }
                 }.flatten()
             }.flatten()
-
-        valutakursService.oppdaterValutakurser(BehandlingId(behandling.id), automatiskGenererteValutakurser)
+        return automatiskGenererteValutakurser
     }
 
-    private fun lagAutomatiskOppdaterteValutakurserEtter(
+    private fun lagAutomatiskeValutakurserIPeriode(
         månedForTidligsteTillatteAutomatiskeValutakurs: YearMonth,
         fom: YearMonth,
         tom: YearMonth?,
