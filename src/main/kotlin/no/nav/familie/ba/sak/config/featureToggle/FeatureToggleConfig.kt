@@ -6,6 +6,7 @@ class FeatureToggleConfig {
         const val ENDRET_EØS_REGELVERKFILTER_FOR_BARN = "familie-ba-sak.endret-eos-regelverkfilter-for-barn"
         const val KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ALLE_SAKER = "familie-ba-sak.kan-kjore-autmatisk-valutajustering-behandling-for-alle-saker"
         const val KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER = "familie-ba-sak.kan-opprette-automatiske-valutakurser-paa-manuelle-saker"
+        const val KAN_AUTOMATISK_UTLEDE_BOSATT_I_RIKET_VILKÅRET_PÅ_NASJONALE_SAKER = "kan-automatisk-utlede-bosatt-i-riket-vilkaaret-paa-nasjonale-saker"
 
         // Operasjonelle
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"

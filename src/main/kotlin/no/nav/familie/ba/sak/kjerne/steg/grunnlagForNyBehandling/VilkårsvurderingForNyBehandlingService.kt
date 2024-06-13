@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -30,6 +32,7 @@ class VilkårsvurderingForNyBehandlingService(
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
     private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     fun opprettVilkårsvurderingUtenomHovedflyt(
         behandling: Behandling,
@@ -172,6 +175,7 @@ class VilkårsvurderingForNyBehandlingService(
                     aktivVilkårsvurdering?.personResultater?.mapNotNull {
                         personopplysningGrunnlag.barna.firstOrNull { barn -> barn.aktør == it.aktør }
                     }?.filter { it.type == PersonType.BARN }?.map { it.aktør } ?: emptyList(),
+                erToggleForAutomatiskBehandlingAvBosattIRiketVikårPå = unleashNextMedContextService.isEnabled(FeatureToggleConfig.KAN_AUTOMATISK_UTLEDE_BOSATT_I_RIKET_VILKÅRET_PÅ_NASJONALE_SAKER),
             )
 
         tellMetrikkerForFødselshendelse(

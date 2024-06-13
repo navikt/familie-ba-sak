@@ -54,6 +54,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                 endretUtbetalingAndelService = endretUtbetalingAndelService,
                 vilkårsvurderingMetrics = vilkårsvurderingMetrics,
                 andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+                unleashNextMedContextService = mockk(),
             )
     }
 

@@ -240,6 +240,7 @@ class VilkårsvurderingUtilsTest {
             genererPersonResultatForPerson(
                 vilkårsvurdering = vilkårsvurdering,
                 person = dødtBarn,
+                erToggleForAutomatiskBehandlingAvBosattIRiketVikårPå = false,
             )
 
         Assertions.assertTrue(personResultatForDødtBarn.vilkårResultater.all { it.begrunnelse == "Dødsfall" })
@@ -261,6 +262,7 @@ class VilkårsvurderingUtilsTest {
             genererPersonResultatForPerson(
                 vilkårsvurdering = vilkårsvurdering,
                 person = levendeBarn,
+                erToggleForAutomatiskBehandlingAvBosattIRiketVikårPå = false,
             )
 
         val under18ÅrVilkår =
