@@ -142,7 +142,7 @@ class StønadsstatistikkService(
                 if (andelerIPeriode != null) {
                     mapTilUtbetalingsperiodeV2(
                         fom = periode.fraOgMed.tilYearMonth().førsteDagIInneværendeMåned(),
-                        tom = periode.fraOgMed.tilYearMonth().sisteDagIInneværendeMåned(),
+                        tom = periode.tilOgMed.tilYearMonth().sisteDagIInneværendeMåned(),
                         andelerForSegment = andelerIPeriode,
                         behandling = behandling,
                         søkerOgBarn = søkerOgBarn,
