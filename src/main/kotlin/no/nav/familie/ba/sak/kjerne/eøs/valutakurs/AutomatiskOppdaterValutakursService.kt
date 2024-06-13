@@ -128,11 +128,11 @@ class AutomatiskOppdaterValutakursService(
                 perioderAvBarnMedValutakode.mapNotNull { periode ->
                     periode.innhold?.let {
                         lagAutomatiskeValutakurserIPeriode(
-                            månedForTidligsteTillatteAutomatiskeValutakurs,
-                            periode.fraOgMed.tilYearMonth(),
-                            periode.tilOgMed.tilYearMonthEllerNull(),
-                            it,
-                            valutakode,
+                            månedForTidligsteTillatteAutomatiskeValutakurs = månedForTidligsteTillatteAutomatiskeValutakurs,
+                            fom = periode.fraOgMed.tilYearMonth(),
+                            tom = periode.tilOgMed.tilYearMonthEllerNull(),
+                            barn = it,
+                            valutakode = valutakode,
                         )
                     }
                 }.flatten()
@@ -145,7 +145,7 @@ class AutomatiskOppdaterValutakursService(
         fom: YearMonth,
         tom: YearMonth?,
         barn: Set<Aktør>,
-        kode: String,
+        valutakode: String,
     ): List<Valutakurs> {
         val start = maxOf(månedForTidligsteTillatteAutomatiskeValutakurs, fom)
         val denneMåneden = localDateProvider.now().toYearMonth()
@@ -161,8 +161,8 @@ class AutomatiskOppdaterValutakursService(
                 tom = if (måned == denneMåneden && tom == null) null else måned,
                 barnAktører = barn,
                 valutakursdato = sisteVirkedagForrigeMåned,
-                valutakode = kode,
-                kurs = ecbService.hentValutakurs(kode, sisteVirkedagForrigeMåned),
+                valutakode = valutakode,
+                kurs = ecbService.hentValutakurs(valutakode, sisteVirkedagForrigeMåned),
                 vurderingsform = Vurderingsform.AUTOMATISK,
             )
         }
