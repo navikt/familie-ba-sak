@@ -193,6 +193,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                         ),
                     ),
                 behandlingId = vedtak.behandling.id,
+                eksternReferanseId = "1_${vedtak.behandling.id}_journalfør",
             )
 
         assertThat(journalPostId).isEqualTo(MOCK_JOURNALPOST_FOR_VEDTAK_ID)
@@ -519,7 +520,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             journalpostId = "123456789",
             behandlingId = 1L,
             brevmal = Brevmal.VARSEL_OM_REVURDERING,
-            personEllerInstitusjonIdent = "test",
+            fagsakId = 1L,
             erManueltSendt = true,
         )
 

@@ -516,7 +516,8 @@ class StegService(
             if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK && !erTekniskVedlikeholdHenleggelse) {
                 throw FunksjonellFeil(
                     "Behandlingen er på steg '${behandling.steg.displayName()}', " +
-                        "og er da låst for alle andre type endringer.",
+                        "og er da låst for alle andre type endringer." +
+                        "behandlingSteg er $behandlingSteg",
                 )
             }
 

@@ -41,7 +41,7 @@ class FeilutbetaltValutaServiceTest(
             .also { Assertions.assertThat(it[0].tom).isNotNull() }
 
         feilutbetaltValutaService.oppdatertFeilutbetaltValutaPeriode(
-            feilutbetaltValuta =
+            restFeilutbetaltValuta =
                 RestFeilutbetaltValuta(
                     id = id,
                     fom = LocalDate.of(2020, Month.JANUARY, 1),

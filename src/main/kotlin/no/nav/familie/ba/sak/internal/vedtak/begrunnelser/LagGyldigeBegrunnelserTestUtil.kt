@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.internal.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilKortMånedLangtÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -352,9 +352,9 @@ private fun hentUtenlandskPeriodebeløpRader(utenlandskePeriodebeløp: Collectio
       | ${
                 utenlandskPeriodebeløp.barnAktører.joinToString(", ") { it.aktørId }
             } |${
-                utenlandskPeriodebeløp.fom.tilKortString()
+                utenlandskPeriodebeløp.fom.tilKortMånedLangtÅr()
             }|${
-                utenlandskPeriodebeløp.tom?.tilKortString() ?: ""
+                utenlandskPeriodebeløp.tom?.tilKortMånedLangtÅr() ?: ""
             }|${
                 utenlandskPeriodebeløp.behandlingId
             }|${
@@ -382,7 +382,7 @@ fun hentTekstForValutakurser(
         """
 
     Og med valutakurs for begrunnelse
-      | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs |""" +
+      | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs | Vurderingsform |""" +
             rader
     }
 }
@@ -407,6 +407,8 @@ private fun hentValutakursRader(valutakurser: Collection<Valutakurs>?): String =
                 valutakurs.valutakode
             }|${
                 valutakurs.kurs
+            }|${
+                valutakurs.vurderingsform
             }|"""
         } ?: ""
 

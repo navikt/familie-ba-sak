@@ -15,6 +15,7 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -154,20 +155,46 @@ data class TomKompetanse(
     override val behandlingId: Long,
 ) : IKompetanse
 
+interface IUtfyltKompetanse : IKompetanse {
+    override val id: Long
+    override val behandlingId: Long
+    val barnAktører: Set<Aktør>
+    val søkersAktivitet: KompetanseAktivitet
+    val annenForeldersAktivitet: KompetanseAktivitet
+    val annenForeldersAktivitetsland: String?
+    val søkersAktivitetsland: String
+    val barnetsBostedsland: String
+    val resultat: KompetanseResultat
+    val erAnnenForelderOmfattetAvNorskLovgivning: Boolean
+}
+
 data class UtfyltKompetanse(
-    override val id: Long,
-    override val behandlingId: Long,
     val fom: YearMonth,
     val tom: YearMonth?,
-    val barnAktører: Set<Aktør>,
-    val søkersAktivitet: KompetanseAktivitet,
-    val annenForeldersAktivitet: KompetanseAktivitet,
-    val annenForeldersAktivitetsland: String?,
-    val søkersAktivitetsland: String,
-    val barnetsBostedsland: String,
-    val resultat: KompetanseResultat,
-    val erAnnenForelderOmfattetAvNorskLovgivning: Boolean,
-) : IKompetanse
+    override val id: Long,
+    override val behandlingId: Long,
+    override val barnAktører: Set<Aktør>,
+    override val søkersAktivitet: KompetanseAktivitet,
+    override val annenForeldersAktivitet: KompetanseAktivitet,
+    override val annenForeldersAktivitetsland: String?,
+    override val søkersAktivitetsland: String,
+    override val barnetsBostedsland: String,
+    override val resultat: KompetanseResultat,
+    override val erAnnenForelderOmfattetAvNorskLovgivning: Boolean,
+) : IUtfyltKompetanse
+
+data class UtfyltKompetanseUtenTidsperiode(
+    override val id: Long,
+    override val behandlingId: Long,
+    override val barnAktører: Set<Aktør>,
+    override val søkersAktivitet: KompetanseAktivitet,
+    override val annenForeldersAktivitet: KompetanseAktivitet,
+    override val annenForeldersAktivitetsland: String?,
+    override val søkersAktivitetsland: String,
+    override val barnetsBostedsland: String,
+    override val resultat: KompetanseResultat,
+    override val erAnnenForelderOmfattetAvNorskLovgivning: Boolean,
+) : IUtfyltKompetanse
 
 fun Kompetanse.tilIKompetanse(): IKompetanse {
     return if (this.erObligatoriskeFelterSatt()) {
@@ -176,6 +203,19 @@ fun Kompetanse.tilIKompetanse(): IKompetanse {
             behandlingId = this.behandlingId,
             fom = this.fom!!,
             tom = this.tom,
+            barnAktører = this.barnAktører,
+            søkersAktivitet = this.søkersAktivitet!!,
+            annenForeldersAktivitet = this.annenForeldersAktivitet!!,
+            annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
+            søkersAktivitetsland = this.søkersAktivitetsland!!,
+            barnetsBostedsland = this.barnetsBostedsland!!,
+            resultat = this.resultat!!,
+            erAnnenForelderOmfattetAvNorskLovgivning = this.erAnnenForelderOmfattetAvNorskLovgivning!!,
+        )
+    } else if (this.erObligatoriskeFelterUtenomTidsperioderSatt()) {
+        UtfyltKompetanseUtenTidsperiode(
+            id = this.id,
+            behandlingId = this.behandlingId,
             barnAktører = this.barnAktører,
             søkersAktivitet = this.søkersAktivitet!!,
             annenForeldersAktivitet = this.annenForeldersAktivitet!!,
@@ -211,5 +251,34 @@ fun Collection<Kompetanse>.tilUtfylteKompetanserEtterEndringstidpunktPerAktør(e
 
     return alleBarnAktørIder.associateWith { aktør ->
         utfylteKompetanser.filter { it.barnAktører.contains(aktør) }.tilTidslinje().beskjærFraOgMed(endringstidspunkt).perioder().mapNotNull { it.innhold }
+    }
+}
+
+fun Kompetanse.utbetalingsland(): String? {
+    val kompetanse = this.tilIKompetanse()
+    return when (kompetanse) {
+        is IUtfyltKompetanse -> kompetanse.utbetalingsland()
+        is TomKompetanse -> null
+    }
+}
+
+fun IUtfyltKompetanse.utbetalingsland(): String {
+    if (this.resultat == KompetanseResultat.NORGE_ER_PRIMÆRLAND) return "NO"
+
+    // Hovedregel
+    val utbetalingsland =
+        if (this.erAnnenForelderOmfattetAvNorskLovgivning) {
+            this.søkersAktivitetsland
+        } else {
+            this.annenForeldersAktivitetsland ?: this.barnetsBostedsland
+        }
+
+    return when (utbetalingsland) {
+        "NO" ->
+            // Unntak. Finner landet som er registrert på kompetansen som ikke er Norge.
+            setOf(this.søkersAktivitetsland, this.annenForeldersAktivitetsland, this.barnetsBostedsland).filterNotNull().singleOrNull { it != "NO" }
+                ?: throw FunksjonellFeil(melding = "Dersom Norge er sekundærland, må søkers aktivitetsland, annen forelders aktivitetsland eller barnets bostedsland være satt til noe annet enn Norge.")
+
+        else -> utbetalingsland
     }
 }

@@ -5,6 +5,7 @@ import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
+import kotlinx.coroutines.runBlocking
 import lagSvarFraEcbMock
 import mockAutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.common.Feil
@@ -16,9 +17,9 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
+import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -31,13 +32,17 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.RestSanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -48,6 +53,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.genererVedtaksperioder
@@ -75,6 +81,7 @@ class BegrunnelseTeksterStepDefinition {
     var tilkjenteYtelser = mutableMapOf<Long, TilkjentYtelse>()
     var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
     var overgangsstønader = mutableMapOf<Long, List<InternPeriodeOvergangsstønad>>()
+    var totrinnskontroller = mutableMapOf<Long, Totrinnskontroll>()
     var dagensDato: LocalDate = LocalDate.now()
 
     var gjeldendeBehandlingId: Long? = null
@@ -532,8 +539,6 @@ class BegrunnelseTeksterStepDefinition {
     ) {
         val fagsak = fagsaker[fagsakId]!!
 
-        val forrigeBehandling = behandlinger.values.filter { it.fagsak.id == fagsak.id && it.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.id } ?: error("Finner ikke forrige behandling")
-
         val svarFraEcbMock = lagSvarFraEcbMock(dataTable)
 
         mockAutovedtakMånedligValutajusteringService(
@@ -555,6 +560,78 @@ class BegrunnelseTeksterStepDefinition {
             .usingRecursiveComparison()
             .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*id")
             .isEqualTo(forventedeValutakurser[behandlingId]!!.sortedBy { it.valutakursdato })
+    }
+
+    @Så("forvent at endringstidspunktet er {} for behandling {}")
+    fun `forvent at endringstidspunktet er for behandling`(
+        forventetEndringstidspunktString: String,
+        behandlingId: Long,
+    ) {
+        val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+        val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
+        val grunnlagForBegrunnelser = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
+
+        val faktiskEndringstidspunkt =
+            utledEndringstidspunkt(
+                behandlingsGrunnlagForVedtaksperioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
+                behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
+            )
+
+        val forventetEndringstidspunkt = parseNullableDato(forventetEndringstidspunktString) ?: error("Så forvent følgende endringstidspunkt {} forventer en dato")
+
+        assertThat(faktiskEndringstidspunkt).isEqualTo(forventetEndringstidspunkt)
+    }
+
+    @Når("vi kjører beslutte vedtakssteg for behandling {} med beslutning {}")
+    fun `når vi kjører beslutte vedtakssteg for behandling med beslutning`(
+        behandlingId: Long,
+        beslutning: Beslutning,
+    ) {
+        val behandling = behandlinger[behandlingId]!!
+        val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
+
+        if (totrinnskontroller[behandlingId] == null) {
+            totrinnskontroller[behandlingId] = Totrinnskontroll(behandling = behandling, saksbehandler = "Test", saksbehandlerId = "Test")
+        }
+
+        val dataFraCucumber = this
+        runBlocking {
+            val mock =
+                CucumberMock(
+                    dataFraCucumber = dataFraCucumber,
+                    nyBehanldingId = behandlingId,
+                    forrigeBehandling = forrigeBehandlingId?.let { behandlinger[forrigeBehandlingId] },
+                    scope = this,
+                )
+
+            val restBeslutning =
+                RestBeslutningPåVedtak(
+                    beslutning = beslutning,
+                )
+
+            mock.stegService.håndterBeslutningForVedtak(behandling, restBeslutning)
+        }
+    }
+
+    /**
+     * Mulige felt:
+     * | AktørId | Fra dato | Til dato | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
+     */
+    @Når("vi legger til utenlandsk periodebeløp for behandling {}")
+    fun `når vi legger til upb på behandling`(
+        behandlingId: Long,
+        dataTable: DataTable,
+    ) {
+        val utenlandskPeriodebeløp = lagUtenlandskperiodeBeløp(dataTable.asMaps(), persongrunnlag)[behandlingId]!!
+
+        val mock =
+            CucumberMock(
+                dataFraCucumber = this,
+                nyBehanldingId = behandlingId,
+                forrigeBehandling = null,
+            )
+
+        mock.utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløp.single())
     }
 }
 
