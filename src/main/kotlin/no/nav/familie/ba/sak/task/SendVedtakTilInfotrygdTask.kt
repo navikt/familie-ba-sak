@@ -48,10 +48,14 @@ class SendVedtakTilInfotrygdTask(
                 .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
 
         val førsteUtbetalingsperiode =
-            andelerMedEndringer.map { it.andel }
-                .tilTidslinjerPerPersonOgType().values
-                .kombiner<AndelTilkjentYtelse, Iterable<AndelTilkjentYtelse>?, Måned> { it }.perioder()
-                .filterNot { it.innhold == null }.firstOrNull()
+            andelerMedEndringer
+                .map { it.andel }
+                .tilTidslinjerPerPersonOgType()
+                .values
+                .kombiner<AndelTilkjentYtelse, Iterable<AndelTilkjentYtelse>?, Måned> { it }
+                .perioder()
+                .filterNot { it.innhold == null }
+                .firstOrNull()
 
         return if (førsteUtbetalingsperiode != null) {
             førsteUtbetalingsperiode.fraOgMed.tilYearMonth().førsteDagIInneværendeMåned()

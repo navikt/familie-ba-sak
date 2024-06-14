@@ -46,9 +46,11 @@ object RessursUtils {
             rolleTilgangskontrollFeil,
         )
         logger.warn("En håndtert tilgangsfeil har oppstått - ${rolleTilgangskontrollFeil.melding}")
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
             .body(
-                Ressurs.ikkeTilgang<T>(rolleTilgangskontrollFeil.melding)
+                Ressurs
+                    .ikkeTilgang<T>(rolleTilgangskontrollFeil.melding)
                     .copy(frontendFeilmelding = rolleTilgangskontrollFeil.frontendFeilmelding.ifBlank { "Mangler tilgang" }),
             )
     }

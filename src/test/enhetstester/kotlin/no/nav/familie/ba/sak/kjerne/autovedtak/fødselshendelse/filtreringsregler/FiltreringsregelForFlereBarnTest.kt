@@ -154,10 +154,9 @@ class FiltreringsregelForFlereBarnTest {
         val andelTilkjentytelse =
             listOf(
                 MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
-            )
-                .map {
-                    lagAndelTilkjentYtelse(it.fom, it.tom)
-                }
+            ).map {
+                lagAndelTilkjentYtelse(it.fom, it.tom)
+            }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
 
         every {
@@ -267,10 +266,9 @@ class FiltreringsregelForFlereBarnTest {
         val andelTilkjentytelse =
             listOf(
                 MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
-            )
-                .map {
-                    lagAndelTilkjentYtelse(it.fom, it.tom)
-                }
+            ).map {
+                lagAndelTilkjentYtelse(it.fom, it.tom)
+            }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
 
         val sisteVedtatteBehandling = lagBehandling()
@@ -320,8 +318,8 @@ class FiltreringsregelForFlereBarnTest {
         kjønn: Kjønn = Kjønn.KVINNE,
         sivilstand: SIVILSTAND = SIVILSTAND.UGIFT,
         dødsfallDato: String? = null,
-    ): Person {
-        return Person(
+    ): Person =
+        Person(
             aktør = aktør,
             type = type,
             personopplysningGrunnlag = personopplysningGrunnlag,
@@ -329,24 +327,22 @@ class FiltreringsregelForFlereBarnTest {
             navn = "navn",
             kjønn = kjønn,
             bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf(),
-        )
-            .apply {
-                this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this))
-                if (dødsfallDato != null) {
-                    this.dødsfall =
-                        lagDødsfallFraPdl(
-                            person = this,
-                            dødsfallDatoFraPdl = dødsfallDato,
-                            dødsfallAdresseFraPdl =
-                                PdlKontaktinformasjonForDødsboAdresse(
-                                    adresselinje1 = "Gate 1",
-                                    postnummer = "1234",
-                                    poststedsnavn = "Oslo",
-                                ),
-                        )
-                }
+        ).apply {
+            this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this))
+            if (dødsfallDato != null) {
+                this.dødsfall =
+                    lagDødsfallFraPdl(
+                        person = this,
+                        dødsfallDatoFraPdl = dødsfallDato,
+                        dødsfallAdresseFraPdl =
+                            PdlKontaktinformasjonForDødsboAdresse(
+                                adresselinje1 = "Gate 1",
+                                postnummer = "1234",
+                                poststedsnavn = "Oslo",
+                            ),
+                    )
             }
-    }
+        }
 
     private fun generePersonInfoMedBarn(
         barn: Set<Aktør>? = null,
@@ -355,23 +351,23 @@ class FiltreringsregelForFlereBarnTest {
         adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
         bostedsadresse: Bostedsadresse? = null,
         sivilstand: SIVILSTAND = SIVILSTAND.UGIFT,
-    ): PersonInfo {
-        return PersonInfo(
+    ): PersonInfo =
+        PersonInfo(
             fødselsdato = fødselsDato ?: LocalDate.now().minusYears(20),
             navn = navn,
             adressebeskyttelseGradering = adressebeskyttelsegradering,
             bostedsadresser = bostedsadresse?.let { mutableListOf(it) } ?: mutableListOf(Bostedsadresse()),
             sivilstander = listOf(Sivilstand(type = sivilstand)),
             forelderBarnRelasjon =
-                barn?.map {
-                    ForelderBarnRelasjon(
-                        aktør = it,
-                        relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                        navn = "navn $it",
-                    )
-                }?.toSet() ?: emptySet(),
+                barn
+                    ?.map {
+                        ForelderBarnRelasjon(
+                            aktør = it,
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            navn = "navn $it",
+                        )
+                    }?.toSet() ?: emptySet(),
         )
-    }
 
     private fun genererFaktaMedTidligereBarn(
         manaderFodselEtt: Long,

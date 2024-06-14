@@ -82,8 +82,8 @@ fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
 
 // Dokumenttittel legges på i familie-integrasjoner basert på dokumenttype
 // Denne funksjonen bestemmer om dokumenttittelen skal overstyres eller ikke
-fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
-    return if (behandling.type == BehandlingType.REVURDERING) {
+fun hentOverstyrtDokumenttittel(behandling: Behandling): String? =
+    if (behandling.type == BehandlingType.REVURDERING) {
         behandling.opprettetÅrsak.hentOverstyrtDokumenttittelForOmregningsbehandling() ?: when {
             listOf(
                 INNVILGET,
@@ -100,18 +100,16 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
     } else {
         null
     }
-}
 
 fun hjemlerTilHjemmeltekst(
     hjemler: List<String>,
     lovForHjemmel: String,
-): String {
-    return when (hjemler.size) {
+): String =
+    when (hjemler.size) {
         0 -> throw Feil("Kan ikke lage hjemmeltekst for $lovForHjemmel når ingen begrunnelser har hjemler fra $lovForHjemmel knyttet til seg.")
         1 -> "§ ${hjemler[0]}"
         else -> "§§ ${Utils.slåSammen(hjemler)}"
     }
-}
 
 fun hentHjemmeltekst(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
@@ -142,7 +140,8 @@ fun hentHjemmeltekst(
     val alleHjemlerForBegrunnelser =
         hentAlleTyperHjemler(
             hjemlerSeparasjonsavtaleStorbritannia =
-                sanityEøsBegrunnelser.flatMap { it.hjemlerSeperasjonsavtalenStorbritannina }
+                sanityEøsBegrunnelser
+                    .flatMap { it.hjemlerSeperasjonsavtalenStorbritannina }
                     .distinct(),
             ordinæreHjemler = ordinæreHjemler.distinct(),
             hjemlerFraFolketrygdloven =
@@ -179,15 +178,14 @@ private fun slåSammenHjemlerAvUlikeTyper(hjemler: List<String>) =
         else -> hjemler.slåSammen()
     }
 
-fun Collection<String>.slåSammen(): String {
-    return this.reduceIndexed { index, acc, s ->
+fun Collection<String>.slåSammen(): String =
+    this.reduceIndexed { index, acc, s ->
         when (index) {
             0 -> s
             this.size - 1 -> "$acc og $s"
             else -> "$acc, $s"
         }
     }
-}
 
 private fun hentAlleTyperHjemler(
     hjemlerSeparasjonsavtaleStorbritannia: List<String>,
@@ -299,9 +297,7 @@ fun hentVirkningstidspunktForDødsfallbrev(
     return virkningstidspunkt.tilMånedÅr()
 }
 
-fun hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev: Boolean): List<String> {
-    return if (vedtakKorrigertHjemmelSkalMedIBrev) listOf("35") else emptyList()
-}
+fun hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev: Boolean): List<String> = if (vedtakKorrigertHjemmelSkalMedIBrev) listOf("35") else emptyList()
 
 fun skalHenteUtbetalingerEøs(
     endringstidspunkt: LocalDate,
@@ -311,7 +307,8 @@ fun skalHenteUtbetalingerEøs(
     if (endringstidspunkt == TIDENES_ENDE) return false
 
     val valutakurserEtterEndringtidspunktet =
-        valutakurser.tilSeparateTidslinjerForBarna()
+        valutakurser
+            .tilSeparateTidslinjerForBarna()
             .mapValues { (_, valutakursTidslinjeForBarn) -> valutakursTidslinjeForBarn.beskjærFraOgMed(endringstidspunkt.tilMånedTidspunkt()) }
 
     return valutakurserEtterEndringtidspunktet.any { it.value.erIkkeTom() }
@@ -332,10 +329,11 @@ fun hentLandOgStartdatoForUtbetalingstabell(
     }
 
     val eøsLandMedUtbetalinger =
-        utfylteSekundærlandsKompetanserEtterEndringstidspunkt.values.flatten().map {
-            it.utbetalingsland()
-        }
-            .toSet()
+        utfylteSekundærlandsKompetanserEtterEndringstidspunkt.values
+            .flatten()
+            .map {
+                it.utbetalingsland()
+            }.toSet()
             .map { it.tilLandNavn(landkoder).navn }
     return UtbetalingstabellAutomatiskValutajustering(utbetalingerEosLand = eøsLandMedUtbetalinger.slåSammen(), utbetalingerEosMndAar = endringstidspunkt.tilYearMonth().tilMånedÅr())
 }
@@ -368,29 +366,28 @@ fun hentUtbetalingerPerMndEøs(
         }
         // Kombinerer verdiene til alle tidslinjene slik at vi får en liste av UtbetalingEøs per periode, samt sørger for at vi får en periode per mnd.
         // Grupperer deretter på periodenes fom
-        .kombiner().perioder()
+        .kombiner()
+        .perioder()
         .flatMap { periode -> periode.splitPerTidsenhet(LocalDate.now().tilMånedTidspunkt()) }
         .associate { periode ->
             val utbetalingMndEøs = hentUtbetalingMndEøs(utbetalingerEøs = periode.innhold?.toList() ?: emptyList())
             val fraOgMedDato = periode.fraOgMed.tilYearMonth().tilMånedÅrMedium()
 
             fraOgMedDato to utbetalingMndEøs
-        }
-        .filter { it.value.utbetalinger.isNotEmpty() }
+        }.filter { it.value.utbetalinger.isNotEmpty() }
 }
 
 private fun hentUtbetalingEøs(
     aktørOgYtelseType: Pair<Aktør, YtelseType>,
     andelUpbOgValutakurs: AndelUpbOgValutakurs,
-): UtbetalingEøs {
-    return UtbetalingEøs(
+): UtbetalingEøs =
+    UtbetalingEøs(
         fnr = aktørOgYtelseType.first.aktivFødselsnummer(),
         ytelseType = aktørOgYtelseType.second,
         satsINorge = andelUpbOgValutakurs.andelTilkjentYtelse.sats,
         utbetaltFraAnnetLand = andelUpbOgValutakurs.utenlandskPeriodebeløp?.tilUtbetaltFraAnnetLand(andelUpbOgValutakurs.valutakurs),
         utbetaltFraNorge = andelUpbOgValutakurs.andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
     )
-}
 
 private fun hentUtbetalingMndEøs(utbetalingerEøs: List<UtbetalingEøs>): UtbetalingMndEøs {
     val summertUtbetaltFraAnnetLand = utbetalingerEøs.sumOf { utbetalingEøs -> utbetalingEøs.utbetaltFraAnnetLand?.beløpINok ?: 0 }

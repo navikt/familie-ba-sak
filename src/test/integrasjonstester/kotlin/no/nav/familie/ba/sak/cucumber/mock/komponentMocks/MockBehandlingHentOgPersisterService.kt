@@ -21,11 +21,15 @@ fun mockBehandlingHentOgPersisterService(
     }
     every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(any()) } answers {
         val fagsakId = firstArg<Long>()
-        dataFraCucumber.behandlinger.values.filter { it.fagsak.id == fagsakId && it.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.aktivertTidspunkt }
+        dataFraCucumber.behandlinger.values
+            .filter { it.fagsak.id == fagsakId && it.status == BehandlingStatus.AVSLUTTET }
+            .maxByOrNull { it.aktivertTidspunkt }
     }
     every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers {
         val behandling = firstArg<Behandling>()
-        dataFraCucumber.behandlinger.values.filter { it.fagsak.id == behandling.fagsak.id && it.id != behandling.id && it.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.aktivertTidspunkt }
+        dataFraCucumber.behandlinger.values
+            .filter { it.fagsak.id == behandling.fagsak.id && it.id != behandling.id && it.status == BehandlingStatus.AVSLUTTET }
+            .maxByOrNull { it.aktivertTidspunkt }
     }
     every { behandlingHentOgPersisterService.hent(any()) } answers {
         val behandlingId = firstArg<Long>()

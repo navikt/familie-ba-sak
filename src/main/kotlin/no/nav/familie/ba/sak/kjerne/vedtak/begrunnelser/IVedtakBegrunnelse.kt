@@ -49,8 +49,7 @@ class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>
 }
 
 @Converter
-class IVedtakBegrunnelseListConverter :
-    AttributeConverter<List<IVedtakBegrunnelse>, String> {
+class IVedtakBegrunnelseListConverter : AttributeConverter<List<IVedtakBegrunnelse>, String> {
     override fun convertToDatabaseColumn(vedtakbegrunnelser: List<IVedtakBegrunnelse>) =
         vedtakbegrunnelser.joinToString(";") { it.enumnavnTilString() }
 
@@ -58,7 +57,8 @@ class IVedtakBegrunnelseListConverter :
         if (string.isNullOrBlank()) {
             emptyList()
         } else {
-            string.split(";")
+            string
+                .split(";")
                 .map { IVedtakBegrunnelse.konverterTilEnumVerdi(it) }
         }
 }

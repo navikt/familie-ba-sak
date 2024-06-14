@@ -84,15 +84,16 @@ internal class TidslinjeTest {
 
     @Test
     fun `skal presentere tidslinjefeil på et forstålig format`() {
-        assertThatExceptionOfType(TidslinjeFeilException::class.java).isThrownBy {
-            TestTidslinje(
-                Periode(1.jan(2020), 31.jan(2020), 'A'),
-                Periode(1.feb(2020), 29.feb(2020).somUendeligLengeTil(), 'A'),
-                Periode(1.mar(2020), 30.apr(2020), 'B'),
-            ).perioder()
-        }.withMessage(
-            "[TidslinjeFeil(type=UENDELIG_FREMTID_FØR_SISTE_PERIODE, periode=2020-02-01 - 2020-02-29-->: A, tidslinje=2020-01-01 - 2020-01-31: A | 2020-02-01 - 2020-02-29-->: A | 2020-03-01 - 2020-04-30: B)]",
-        )
+        assertThatExceptionOfType(TidslinjeFeilException::class.java)
+            .isThrownBy {
+                TestTidslinje(
+                    Periode(1.jan(2020), 31.jan(2020), 'A'),
+                    Periode(1.feb(2020), 29.feb(2020).somUendeligLengeTil(), 'A'),
+                    Periode(1.mar(2020), 30.apr(2020), 'B'),
+                ).perioder()
+            }.withMessage(
+                "[TidslinjeFeil(type=UENDELIG_FREMTID_FØR_SISTE_PERIODE, periode=2020-02-01 - 2020-02-29-->: A, tidslinje=2020-01-01 - 2020-01-31: A | 2020-02-01 - 2020-02-29-->: A | 2020-03-01 - 2020-04-30: B)]",
+            )
     }
 
     @Test
@@ -143,6 +144,8 @@ internal class TidslinjeTest {
     }
 }
 
-internal class TestTidslinje(vararg val perioder: Periode<Char, Dag>) : Tidslinje<Char, Dag>() {
+internal class TestTidslinje(
+    vararg val perioder: Periode<Char, Dag>,
+) : Tidslinje<Char, Dag>() {
     override fun lagPerioder() = perioder.toList()
 }

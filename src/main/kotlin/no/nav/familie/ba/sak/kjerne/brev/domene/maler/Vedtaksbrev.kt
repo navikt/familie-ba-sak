@@ -20,7 +20,9 @@ interface VedtaksbrevSammensattKontrollsak : VedtaksbrevData {
     val sammensattKontrollsakFritekst: String
 }
 
-enum class BrevPeriodeType(val apiNavn: String) {
+enum class BrevPeriodeType(
+    val apiNavn: String,
+) {
     UTBETALING("utbetaling"),
     INGEN_UTBETALING("ingenUtbetaling"),
     INGEN_UTBETALING_UTEN_PERIODE("ingenUtbetalingUtenPeriode"),

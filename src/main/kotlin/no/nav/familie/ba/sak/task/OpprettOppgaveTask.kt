@@ -41,8 +41,8 @@ class OpprettOppgaveTask(
             fristForFerdigstillelse: LocalDate,
             tilordnetRessurs: String? = null,
             beskrivelse: String? = null,
-        ): Task {
-            return Task(
+        ): Task =
+            Task(
                 type = TASK_STEP_TYPE,
                 payload =
                     objectMapper.writeValueAsString(
@@ -56,6 +56,5 @@ class OpprettOppgaveTask(
                         ),
                     ),
             )
-        }
     }
 }

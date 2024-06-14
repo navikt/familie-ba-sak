@@ -147,11 +147,13 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         kalkulertUtbetalingsbeløp = 1054,
         nasjonaltPeriodebeløp = 1054,
         stønadFom =
-            LocalDate.now()
+            LocalDate
+                .now()
                 .minusMonths(12)
                 .toYearMonth(),
         stønadTom =
-            LocalDate.now()
+            LocalDate
+                .now()
                 .plusMonths(12)
                 .toYearMonth(),
         type = YtelseType.ORDINÆR_BARNETRYGD,

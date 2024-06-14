@@ -342,8 +342,11 @@ class DokumentServiceIntegrationTest(
             brevKlient.genererBrev(
                 "bokmaal",
                 match {
-                    it.mal == Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON && it.data.flettefelter.gjelder!!.first() == "institusjonsbarnets navn" &&
-                        it.data.flettefelter.organisasjonsnummer!!.first() == orgNummer
+                    it.mal == Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON &&
+                        it.data.flettefelter.gjelder!!
+                            .first() == "institusjonsbarnets navn" &&
+                        it.data.flettefelter.organisasjonsnummer!!
+                            .first() == orgNummer
                 },
             )
         }

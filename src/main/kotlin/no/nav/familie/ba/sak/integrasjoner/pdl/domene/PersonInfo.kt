@@ -43,22 +43,16 @@ data class ForelderBarnRelasjon(
     val fødselsdato: LocalDate? = null,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
 ) {
-    override fun toString(): String {
-        return "ForelderBarnRelasjon(personIdent=XXX, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"
-    }
+    override fun toString(): String = "ForelderBarnRelasjon(personIdent=XXX, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"
 
-    fun toSecureString(): String {
-        return "ForelderBarnRelasjon(personIdent=${aktør.aktivFødselsnummer()}, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"
-    }
+    fun toSecureString(): String = "ForelderBarnRelasjon(personIdent=${aktør.aktivFødselsnummer()}, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"
 }
 
 data class ForelderBarnRelasjonMaskert(
     val relasjonsrolle: FORELDERBARNRELASJONROLLE,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING,
 ) {
-    override fun toString(): String {
-        return "ForelderBarnRelasjonMaskert(relasjonsrolle=$relasjonsrolle)"
-    }
+    override fun toString(): String = "ForelderBarnRelasjonMaskert(relasjonsrolle=$relasjonsrolle)"
 }
 
 data class Personident(
@@ -81,7 +75,9 @@ data class PdlKontaktinformasjonForDødsboAdresse(
     val postnummer: String,
 )
 
-data class VergeData(val harVerge: Boolean)
+data class VergeData(
+    val harVerge: Boolean,
+)
 
 class KjonnDeserializer : StdDeserializer<Kjønn>(Kjønn::class.java) {
     override fun deserialize(

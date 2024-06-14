@@ -23,7 +23,8 @@ class KlageClient(
             UriComponentsBuilder
                 .fromUri(familieKlageUri)
                 .pathSegment("api/ekstern/behandling/opprett")
-                .build().toUri()
+                .build()
+                .toUri()
 
         return kallEksternTjenesteUtenRespons<Unit>(
             tjeneste = "klage",
@@ -40,7 +41,8 @@ class KlageClient(
                 .fromUri(familieKlageUri)
                 .pathSegment("api/ekstern/behandling/${Fagsystem.BA}")
                 .queryParam("eksternFagsakId", eksternIder.joinToString(","))
-                .build().toUri()
+                .build()
+                .toUri()
 
         return kallEksternTjenesteRessurs(
             tjeneste = "klage",

@@ -92,7 +92,13 @@ internal class PersonopplysningerServiceTest(
             )
 
         assertEquals(1, personInfo.forelderBarnRelasjon.size)
-        assertEquals(ID_BARN_1, personInfo.forelderBarnRelasjon.single().aktør.aktivFødselsnummer())
+        assertEquals(
+            ID_BARN_1,
+            personInfo.forelderBarnRelasjon
+                .single()
+                .aktør
+                .aktivFødselsnummer(),
+        )
     }
 
     @Test
@@ -162,21 +168,16 @@ internal class PersonopplysningerServiceTest(
     private fun gyldigRequest(
         queryFilnavn: String,
         requestFilnavn: String,
-    ): String {
-        return readfile(requestFilnavn)
+    ): String =
+        readfile(requestFilnavn)
             .replace(
                 "GRAPHQL-PLACEHOLDER",
                 readfile(queryFilnavn).graphqlCompatible(),
             )
-    }
 
-    private fun readfile(filnavn: String): String {
-        return this::class.java.getResource("/pdl/$filnavn")!!.readText()
-    }
+    private fun readfile(filnavn: String): String = this::class.java.getResource("/pdl/$filnavn")!!.readText()
 
-    private fun String.graphqlCompatible(): String {
-        return StringUtils.normalizeSpace(this.replace("\n", ""))
-    }
+    private fun String.graphqlCompatible(): String = StringUtils.normalizeSpace(this.replace("\n", ""))
 
     private fun lagMockForPdl(
         graphqlQueryFilnavn: String,
@@ -184,10 +185,12 @@ internal class PersonopplysningerServiceTest(
         mockResponse: String,
     ) {
         wireMockServer.stubFor(
-            WireMock.post(WireMock.urlEqualTo("/api/graphql"))
+            WireMock
+                .post(WireMock.urlEqualTo("/api/graphql"))
                 .withRequestBody(WireMock.equalToJson(gyldigRequest(graphqlQueryFilnavn, requestFilnavn)))
                 .willReturn(
-                    WireMock.aResponse()
+                    WireMock
+                        .aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withBody(mockResponse),
                 ),

@@ -93,15 +93,16 @@ class ForvalterController(
     ): ResponseEntity<String> {
         var antallFeil = 0
         oppgaveListe.forEach { oppgaveId ->
-            Result.runCatching {
-                ferdigstillOppgave(oppgaveId)
-            }.fold(
-                onSuccess = { logger.info("Har ferdigstilt oppgave med oppgaveId=$oppgaveId") },
-                onFailure = {
-                    logger.warn("Klarte ikke å ferdigstille oppgaveId=$oppgaveId", it)
-                    antallFeil = antallFeil.inc()
-                },
-            )
+            Result
+                .runCatching {
+                    ferdigstillOppgave(oppgaveId)
+                }.fold(
+                    onSuccess = { logger.info("Har ferdigstilt oppgave med oppgaveId=$oppgaveId") },
+                    onFailure = {
+                        logger.warn("Klarte ikke å ferdigstille oppgaveId=$oppgaveId", it)
+                        antallFeil = antallFeil.inc()
+                    },
+                )
         }
         return ResponseEntity.ok("Ferdigstill oppgaver kjørt. Antall som ikke ble ferdigstilt: $antallFeil")
     }
@@ -213,7 +214,8 @@ class ForvalterController(
             handling = "hente data til test",
         )
 
-        return testVerktøyService.hentBegrunnelsetest(behandlingId)
+        return testVerktøyService
+            .hentBegrunnelsetest(behandlingId)
             .replace("\n", System.lineSeparator())
     }
 
@@ -227,7 +229,8 @@ class ForvalterController(
             handling = "hente data til test",
         )
 
-        return testVerktøyService.hentVedtaksperioderTest(behandlingId)
+        return testVerktøyService
+            .hentVedtaksperioderTest(behandlingId)
             .replace("\n", System.lineSeparator())
     }
 

@@ -49,15 +49,14 @@ data class PeriodeOvergangsstønadGrunnlag(
     @Column(name = "datakilde", nullable = false)
     val datakilde: Datakilde,
 ) : BaseEntitet() {
-    override fun toString(): String {
-        return "PeriodeOvergangsstønadGrunnlag(" +
+    override fun toString(): String =
+        "PeriodeOvergangsstønadGrunnlag(" +
             "id=$id, " +
             "behandlingId=$behandlingId, " +
             "aktør=$aktør, " +
             "fom=$fom, " +
             "tom=$tom, " +
             "datakilde=$datakilde)"
-    }
 
     fun tilInternPeriodeOvergangsstønad() =
         InternPeriodeOvergangsstønad(

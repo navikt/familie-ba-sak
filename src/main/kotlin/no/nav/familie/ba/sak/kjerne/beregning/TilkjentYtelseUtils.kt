@@ -49,12 +49,12 @@ object TilkjentYtelseUtils {
         val (endretUtbetalingAndelerSøker, endretUtbetalingAndelerBarna) = endretUtbetalingAndeler.partition { it.person?.type == PersonType.SØKER }
 
         val andelerTilkjentYtelseBarnaUtenEndringer =
-            OrdinærBarnetrygdUtil.beregnAndelerTilkjentYtelseForBarna(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                personResultater = vilkårsvurdering.personResultater,
-                fagsakType = fagsakType,
-            )
-                .map {
+            OrdinærBarnetrygdUtil
+                .beregnAndelerTilkjentYtelseForBarna(
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    personResultater = vilkårsvurdering.personResultater,
+                    fagsakType = fagsakType,
+                ).map {
                     if (it.person.type != PersonType.BARN) throw Feil("Prøver å generere ordinær andel for person av typen ${it.person.type}")
 
                     AndelTilkjentYtelse(
@@ -97,22 +97,21 @@ object TilkjentYtelseUtils {
                 SmåbarnstilleggBarnetrygdGenerator(
                     behandlingId = vilkårsvurdering.behandling.id,
                     tilkjentYtelse = tilkjentYtelse,
+                ).lagSmåbarnstilleggAndeler(
+                    perioderMedFullOvergangsstønad =
+                        hentPerioderMedFullOvergangsstønad(
+                            personopplysningGrunnlag.søker.aktør,
+                        ),
+                    utvidetAndeler = andelerTilkjentYtelseUtvidetMedAlleEndringer,
+                    barnasAndeler = barnasAndelerInkludertEtterbetaling3ÅrEndringer,
+                    barnasAktørerOgFødselsdatoer =
+                        personopplysningGrunnlag.barna.map {
+                            Pair(
+                                it.aktør,
+                                it.fødselsdato,
+                            )
+                        },
                 )
-                    .lagSmåbarnstilleggAndeler(
-                        perioderMedFullOvergangsstønad =
-                            hentPerioderMedFullOvergangsstønad(
-                                personopplysningGrunnlag.søker.aktør,
-                            ),
-                        utvidetAndeler = andelerTilkjentYtelseUtvidetMedAlleEndringer,
-                        barnasAndeler = barnasAndelerInkludertEtterbetaling3ÅrEndringer,
-                        barnasAktørerOgFødselsdatoer =
-                            personopplysningGrunnlag.barna.map {
-                                Pair(
-                                    it.aktør,
-                                    it.fødselsdato,
-                                )
-                            },
-                    )
             } else {
                 emptyList()
             }
@@ -156,7 +155,8 @@ object TilkjentYtelseUtils {
             andelerForPerson.value.forEach { andelForPerson ->
                 // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
                 val (perioderMedEndring, perioderUtenEndring) =
-                    andelForPerson.stønadsPeriode()
+                    andelForPerson
+                        .stønadsPeriode()
                         .perioderMedOgUtenOverlapp(
                             endringerForPerson.map { endringerForPerson -> endringerForPerson.periode },
                         )
@@ -260,11 +260,16 @@ object TilkjentYtelseUtils {
         førsteAndel: AndelTilkjentYtelseMedEndreteUtbetalinger,
         nesteAndel: AndelTilkjentYtelseMedEndreteUtbetalinger,
     ): Boolean =
-        førsteAndel.stønadTom.sisteDagIInneværendeMåned()
-            .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) && førsteAndel.prosent == BigDecimal(0) && nesteAndel.prosent ==
+        førsteAndel.stønadTom
+            .sisteDagIInneværendeMåned()
+            .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) &&
+            førsteAndel.prosent == BigDecimal(0) &&
+            nesteAndel.prosent ==
             BigDecimal(
                 0,
-            ) && førsteAndel.endreteUtbetalinger.isNotEmpty() && førsteAndel.endreteUtbetalinger.singleOrNull() == nesteAndel.endreteUtbetalinger.singleOrNull()
+            ) &&
+            førsteAndel.endreteUtbetalinger.isNotEmpty() &&
+            førsteAndel.endreteUtbetalinger.singleOrNull() == nesteAndel.endreteUtbetalinger.singleOrNull()
 }
 
 fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair<List<MånedPeriode>, List<MånedPeriode>> {
@@ -289,7 +294,8 @@ fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair
             alleMånederMedOverlappstatus
                 .filter { it.key > periodeStart && it.value != periodeMedOverlapp }
                 .minByOrNull { it.key }
-                ?.key?.minusMonths(1) ?: this.tom
+                ?.key
+                ?.minusMonths(1) ?: this.tom
 
         // Når tom skal utledes for en periode det eksisterer en endret periode for må den minste av følgende to datoer velges:
         // 1. tom for den aktuelle endrete perioden
@@ -312,7 +318,8 @@ fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair
         periodeStart =
             alleMånederMedOverlappstatus
                 .filter { it.key > periodeSlutt }
-                .minByOrNull { it.key }?.key
+                .minByOrNull { it.key }
+                ?.key
     }
     return Pair(perioderMedOverlapp, perioderUtenOverlapp)
 }
@@ -334,7 +341,8 @@ data class RestYtelsePeriodeUtenDatoer(
 
 fun List<AndelTilkjentYtelse>.tilRestYtelsePerioder(): List<RestYtelsePeriode> {
     val restYtelsePeriodeTidslinjePerAktørOgTypeSlåttSammen =
-        this.groupBy { Pair(it.aktør, it.type) }
+        this
+            .groupBy { Pair(it.aktør, it.type) }
             .mapValues { (_, andelerTilkjentYtelse) ->
                 andelerTilkjentYtelse
                     .tilRestYtelsePeriodeUtenDatoerTidslinje()
@@ -357,11 +365,11 @@ fun List<AndelTilkjentYtelse>.tilRestYtelsePerioder(): List<RestYtelsePeriode> {
 }
 
 private fun List<AndelTilkjentYtelse>.tilRestYtelsePeriodeUtenDatoerTidslinje() =
-    this.map {
-        månedPeriodeAv(
-            fraOgMed = it.stønadFom,
-            tilOgMed = it.stønadTom,
-            innhold = RestYtelsePeriodeUtenDatoer(kalkulertUtbetalingsbeløp = it.kalkulertUtbetalingsbeløp, it.type, it.prosent > BigDecimal.ZERO),
-        )
-    }
-        .tilTidslinje()
+    this
+        .map {
+            månedPeriodeAv(
+                fraOgMed = it.stønadFom,
+                tilOgMed = it.stønadTom,
+                innhold = RestYtelsePeriodeUtenDatoer(kalkulertUtbetalingsbeløp = it.kalkulertUtbetalingsbeløp, it.type, it.prosent > BigDecimal.ZERO),
+            )
+        }.tilTidslinje()

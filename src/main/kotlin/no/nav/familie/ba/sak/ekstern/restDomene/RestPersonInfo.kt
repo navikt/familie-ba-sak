@@ -94,7 +94,12 @@ fun PersonInfo.tilRestPersonInfoMedNavnOgAdresse(personIdent: String): RestPerso
                 null -> null
                 else ->
                     RestBostedsadresse(
-                        adresse = bostedsadresse?.vegadresse?.adressenavn?.plus(" ${bostedsadresse.vegadresse?.husnummer ?: ""}")?.trim(),
+                        adresse =
+                            bostedsadresse
+                                ?.vegadresse
+                                ?.adressenavn
+                                ?.plus(" ${bostedsadresse.vegadresse?.husnummer ?: ""}")
+                                ?.trim(),
                         postnummer = postnummer,
                     )
             },

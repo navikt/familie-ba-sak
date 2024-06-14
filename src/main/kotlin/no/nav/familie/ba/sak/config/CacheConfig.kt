@@ -25,7 +25,9 @@ class CacheConfig {
                         .newBuilder()
                         .maximumSize(1000)
                         .expireAfterWrite(60, TimeUnit.MINUTES)
-                        .recordStats().build<Any, Any>().asMap()
+                        .recordStats()
+                        .build<Any, Any>()
+                        .asMap()
                 return ConcurrentMapCache(name, concurrentMap, true)
             }
         }
@@ -39,7 +41,9 @@ class CacheConfig {
                         .newBuilder()
                         .maximumSize(1000)
                         .expireAfterWrite(10, TimeUnit.MINUTES)
-                        .recordStats().build<Any, Any>().asMap()
+                        .recordStats()
+                        .build<Any, Any>()
+                        .asMap()
                 return ConcurrentMapCache(name, concurrentMap, true)
             }
         }
@@ -53,7 +57,9 @@ class CacheConfig {
                         .newBuilder()
                         .maximumSize(1000)
                         .expireAfterWrite(24, TimeUnit.HOURS)
-                        .recordStats().build<Any, Any>().asMap()
+                        .recordStats()
+                        .build<Any, Any>()
+                        .asMap()
                 return ConcurrentMapCache(name, concurrentMap, true)
             }
         }
@@ -68,7 +74,9 @@ class CacheConfig {
                         .initialCapacity(100)
                         .maximumSize(1000)
                         .expireAfterWrite(1, TimeUnit.DAYS)
-                        .recordStats().build<Any, Any>().asMap()
+                        .recordStats()
+                        .build<Any, Any>()
+                        .asMap()
                 return ConcurrentMapCache(name, concurrentMap, true)
             }
         }
@@ -90,7 +98,8 @@ fun <VALUE : Any, RESULT> CacheManager.hentCacheForSaksbehandler(
     val saksbehandler = SikkerhetContext.hentSaksbehandler()
 
     val previousValues: List<Pair<VALUE, RESULT?>> =
-        values.distinct()
+        values
+            .distinct()
             .map { it to cache.get(Pair(saksbehandler, it))?.get() as RESULT? }
 
     val cachedValues = previousValues.mapNotNull { if (it.second == null) null else it }.toMap() as Map<VALUE, RESULT>

@@ -36,8 +36,7 @@ class KafkaAivenErrorHandlerTest {
                 consumer,
                 container,
             )
-        }
-            .hasMessageNotContaining("Feil i test")
+        }.hasMessageNotContaining("Feil i test")
             .hasMessageContaining("Stopped container")
             .hasStackTraceContaining("Sjekk securelogs for mer info")
             .hasCauseExactlyInstanceOf(Exception::class.java)
@@ -53,8 +52,7 @@ class KafkaAivenErrorHandlerTest {
                 consumer,
                 container,
             )
-        }
-            .hasMessageNotContaining("Feil i test")
+        }.hasMessageNotContaining("Feil i test")
             .hasMessageContaining("Stopped container")
             .hasStackTraceContaining("Sjekk securelogs for mer info")
             .hasCauseExactlyInstanceOf(Exception::class.java)
@@ -69,8 +67,7 @@ class KafkaAivenErrorHandlerTest {
                 consumer,
                 container,
             )
-        }
-            .hasMessageNotContaining("Feil i test")
+        }.hasMessageNotContaining("Feil i test")
             .hasMessageContaining("Stopped container")
             .hasStackTraceContaining("Sjekk securelogs for mer info")
             .hasCauseExactlyInstanceOf(Exception::class.java)

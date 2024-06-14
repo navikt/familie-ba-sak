@@ -36,7 +36,9 @@ class DifferanseberegningsUtilsTest {
     @Test
     fun `Skal konvertere årlig utenlandsk periodebeløp til månedlig`() {
         val månedligValutabeløp =
-            1200.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
+            1200
+                .i("EUR")
+                .somUtenlandskPeriodebeløp(ÅRLIG)
                 .tilMånedligValutabeløp()
 
         Assertions.assertEquals(100.i("EUR"), månedligValutabeløp)
@@ -45,7 +47,9 @@ class DifferanseberegningsUtilsTest {
     @Test
     fun `Skal konvertere kvartalsvis utenlandsk periodebeløp til månedlig`() {
         val månedligValutabeløp =
-            300.i("EUR").somUtenlandskPeriodebeløp(KVARTALSVIS)
+            300
+                .i("EUR")
+                .somUtenlandskPeriodebeløp(KVARTALSVIS)
                 .tilMånedligValutabeløp()
 
         Assertions.assertEquals(100.i("EUR"), månedligValutabeløp)
@@ -54,7 +58,9 @@ class DifferanseberegningsUtilsTest {
     @Test
     fun `Månedlig utenlandsk periodebeløp skal ikke endres`() {
         val månedligValutabeløp =
-            100.i("EUR").somUtenlandskPeriodebeløp(MÅNEDLIG)
+            100
+                .i("EUR")
+                .somUtenlandskPeriodebeløp(MÅNEDLIG)
                 .tilMånedligValutabeløp()
 
         Assertions.assertEquals(100.i("EUR"), månedligValutabeløp)
@@ -63,7 +69,9 @@ class DifferanseberegningsUtilsTest {
     @Test
     fun `Skal konvertere ukentlig utenlandsk periodebeløp til månedlig`() {
         val månedligValutabeløp =
-            25.i("EUR").somUtenlandskPeriodebeløp(UKENTLIG)
+            25
+                .i("EUR")
+                .somUtenlandskPeriodebeløp(UKENTLIG)
                 .tilMånedligValutabeløp()
 
         Assertions.assertEquals(108.75.i("EUR"), månedligValutabeløp)
@@ -72,7 +80,9 @@ class DifferanseberegningsUtilsTest {
     @Test
     fun `Skal ha presisjon i kronekonverteringen til norske kroner`() {
         val månedligValutabeløp =
-            0.0123767453453.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
+            0.0123767453453
+                .i("EUR")
+                .somUtenlandskPeriodebeløp(ÅRLIG)
                 .tilMånedligValutabeløp()
 
         Assertions.assertEquals(0.0010313954.i("EUR"), månedligValutabeløp)

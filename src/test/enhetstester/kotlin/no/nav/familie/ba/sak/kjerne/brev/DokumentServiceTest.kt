@@ -205,7 +205,8 @@ internal class DokumentServiceTest {
 
             sendBrev(brevmal, behandling)
 
-            assertThat(personResultat.andreVurderinger).extracting("type")
+            assertThat(personResultat.andreVurderinger)
+                .extracting("type")
                 .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
             verify(exactly = 1) {
                 behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
@@ -244,7 +245,8 @@ internal class DokumentServiceTest {
 
             sendBrev(brevmal, behandling)
 
-            assertThat(personResultat.andreVurderinger).extracting("type")
+            assertThat(personResultat.andreVurderinger)
+                .extracting("type")
                 .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
             verify(exactly = 1) {
                 behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
@@ -276,7 +278,8 @@ internal class DokumentServiceTest {
 
             sendBrev(brevmal, behandling)
 
-            assertThat(personResultat.andreVurderinger).extracting("type")
+            assertThat(personResultat.andreVurderinger)
+                .extracting("type")
                 .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
             verify(exactly = 0) {
                 vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any(), null)

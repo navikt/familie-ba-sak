@@ -64,7 +64,9 @@ class AutovedtakSmåbarnstilleggService(
     private val antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "paavirker_ikke_fagsak")
 
-    enum class TilManuellBehandlingÅrsak(val beskrivelse: String) {
+    enum class TilManuellBehandlingÅrsak(
+        val beskrivelse: String,
+    ) {
         NYE_UTBETALINGSPERIODER_FØRER_TIL_MANUELL_BEHANDLING("Endring i OS gir etterbetaling, feilutbetaling eller endring mer enn 1 måned frem i tid"),
         KLARER_IKKE_BEGRUNNE("Klarer ikke å begrunne"),
     }
@@ -176,18 +178,20 @@ class AutovedtakSmåbarnstilleggService(
             if (sistIverksatteBehandling == null) {
                 emptyList()
             } else {
-                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                    behandlingId = sistIverksatteBehandling.id,
-                ).filter { it.erSmåbarnstillegg() }
+                beregningService
+                    .hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                        behandlingId = sistIverksatteBehandling.id,
+                    ).filter { it.erSmåbarnstillegg() }
             }
 
         val nyeSmåbarnstilleggAndeler =
             if (sistIverksatteBehandling == null) {
                 emptyList()
             } else {
-                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                    behandlingId = behandlingEtterBehandlingsresultat.id,
-                ).filter { it.erSmåbarnstillegg() }
+                beregningService
+                    .hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                        behandlingId = behandlingEtterBehandlingsresultat.id,
+                    ).filter { it.erSmåbarnstillegg() }
             }
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) =
@@ -220,7 +224,8 @@ class AutovedtakSmåbarnstilleggService(
         metric.increment()
 
         val behandlingPåMaskinellVent =
-            behandlingHentOgPersisterService.hentBehandlinger(automatiskBehandling.fagsak.id, BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
+            behandlingHentOgPersisterService
+                .hentBehandlinger(automatiskBehandling.fagsak.id, BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
                 .singleOrNull()
 
         val manuellBehandlingId =
@@ -235,10 +240,11 @@ class AutovedtakSmåbarnstilleggService(
                 )
                 taBehandlingAvMaskinellVent(behandlingPåMaskinellVent.id).id
             } else {
-                autovedtakService.omgjørBehandlingTilManuellOgKjørSteg(
-                    behandling = automatiskBehandling,
-                    steg = StegType.VILKÅRSVURDERING,
-                ).id
+                autovedtakService
+                    .omgjørBehandlingTilManuellOgKjørSteg(
+                        behandling = automatiskBehandling,
+                        steg = StegType.VILKÅRSVURDERING,
+                    ).id
             }
 
         oppgaveService.opprettOppgaveForManuellBehandling(

@@ -100,7 +100,8 @@ class InternKonsistensavstemmingService(
     private fun hentFagsakTilAndelerISisteBehandlingSendtTilØkonomiMap(fagsaker: Set<Long>): Map<Long, List<AndelTilkjentYtelse>> {
         val behandlinger = behandlingHentOgPersisterService.hentSisteBehandlingSomErSendtTilØkonomiPerFagsak(fagsaker)
 
-        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(behandlinger.map { it.id })
+        return andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandlinger(behandlinger.map { it.id })
             .groupBy { it.behandlingId }
             .mapKeys { (behandlingId, _) -> behandlinger.find { it.id == behandlingId }?.fagsak?.id!! }
     }

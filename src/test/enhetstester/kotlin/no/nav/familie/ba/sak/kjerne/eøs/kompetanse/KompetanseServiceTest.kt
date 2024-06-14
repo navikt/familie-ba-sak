@@ -441,21 +441,18 @@ internal class KompetanseServiceTest {
                     barn1,
                     annenForeldersAktivitetsland = null,
                     erAnnenForelderOmfattetAvNorskLovgivning = true,
-                )
-                .medKompetanse(
+                ).medKompetanse(
                     "---------",
                     barn2,
                     barn3,
                     annenForeldersAktivitetsland = null,
                     erAnnenForelderOmfattetAvNorskLovgivning = false,
-                )
-                .medKompetanse(
+                ).medKompetanse(
                     "   SSSS",
                     barn1,
                     annenForeldersAktivitetsland = null,
                     erAnnenForelderOmfattetAvNorskLovgivning = true,
-                )
-                .lagreTil(mockKompetanseRepository)
+                ).lagreTil(mockKompetanseRepository)
 
         kompetanseService.kopierOgErstattKompetanser(behandlingId1, behandlingId2)
 
@@ -533,11 +530,9 @@ fun kompetanse(
 private fun KompetanseService.finnKompetanse(
     behandlingId: BehandlingId,
     kompetanse: Kompetanse,
-): Kompetanse {
-    return this.hentKompetanser(behandlingId)
+): Kompetanse =
+    this
+        .hentKompetanser(behandlingId)
         .first { it == kompetanse }
-}
 
-fun Kompetanse.lagreTil(kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>): Kompetanse {
-    return kompetanseRepository.saveAll(listOf(this)).first()
-}
+fun Kompetanse.lagreTil(kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>): Kompetanse = kompetanseRepository.saveAll(listOf(this)).first()

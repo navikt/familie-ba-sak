@@ -131,8 +131,8 @@ class ArbeidsfordelingService(
         behandling: Behandling,
         sisteBehandlingSomErIverksatt: Behandling?,
         aktivArbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandling?,
-    ): ArbeidsfordelingPåBehandling {
-        return aktivArbeidsfordelingPåBehandling
+    ): ArbeidsfordelingPåBehandling =
+        aktivArbeidsfordelingPåBehandling
             ?: if (sisteBehandlingSomErIverksatt != null) {
                 val forrigeIverksattesBehandlingArbeidsfordelingsenhet =
                     arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(
@@ -149,7 +149,6 @@ class ArbeidsfordelingService(
             } else {
                 throw Feil("Klarte ikke å fastsette arbeidsfordelingsenhet på satsendringsbehandling.")
             }
-    }
 
     private fun postFastsattBehandlendeEnhet(
         behandling: Behandling,
@@ -177,16 +176,16 @@ class ArbeidsfordelingService(
         }
     }
 
-    fun hentArbeidsfordelingPåBehandling(behandlingId: Long): ArbeidsfordelingPåBehandling {
-        return arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandlingId)
+    fun hentArbeidsfordelingPåBehandling(behandlingId: Long): ArbeidsfordelingPåBehandling =
+        arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandlingId)
             ?: error("Finner ikke tilknyttet arbeidsfordeling på behandling med id $behandlingId")
-    }
 
     fun hentArbeidsfordelingsenhet(behandling: Behandling): Arbeidsfordelingsenhet {
         val søker: IdentMedAdressebeskyttelse = identMedAdressebeskyttelse(behandling.fagsak.aktør)
 
         val personinfoliste: List<IdentMedAdressebeskyttelse> =
-            personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandling.id)
+            personopplysningGrunnlagRepository
+                .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
                 .barn()
                 .mapNotNull {
                     try {
@@ -219,9 +218,10 @@ class ArbeidsfordelingService(
         IdentMedAdressebeskyttelse(
             ident = ident,
             adressebeskyttelsegradering =
-                personopplysningerService.hentPersoninfoEnkel(
-                    personidentService.hentAktør(ident),
-                ).adressebeskyttelseGradering,
+                personopplysningerService
+                    .hentPersoninfoEnkel(
+                        personidentService.hentAktør(ident),
+                    ).adressebeskyttelseGradering,
         )
 
     private fun identMedAdressebeskyttelse(aktør: Aktør) =

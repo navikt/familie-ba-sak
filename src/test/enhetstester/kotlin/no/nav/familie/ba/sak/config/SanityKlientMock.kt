@@ -17,9 +17,7 @@ class SanityKlientMock {
     @Bean
     @Profile("mock-sanity-client")
     @Primary
-    fun mockSanityClient(): SanityKlient {
-        return testSanityKlient
-    }
+    fun mockSanityClient(): SanityKlient = testSanityKlient
 }
 
 val testSanityKlient = TestSantityKlient()
@@ -32,13 +30,9 @@ class TestSantityKlient : SanityKlient("ba-brev", restTemplate) {
         super.hentEØSBegrunnelser()
     }
 
-    override fun hentBegrunnelser(): List<SanityBegrunnelse> {
-        return begrunnelser
-    }
+    override fun hentBegrunnelser(): List<SanityBegrunnelse> = begrunnelser
 
-    override fun hentEØSBegrunnelser(): List<SanityEØSBegrunnelse> {
-        return eøsBegrunnelser
-    }
+    override fun hentEØSBegrunnelser(): List<SanityEØSBegrunnelse> = eøsBegrunnelser
 
     fun hentBegrunnelserMap(): Map<Standardbegrunnelse, SanityBegrunnelse> {
         val enumVerdier = Standardbegrunnelse.values().associateBy { it.sanityApiNavn }
@@ -56,7 +50,8 @@ class TestSantityKlient : SanityKlient("ba-brev", restTemplate) {
         begrunnelser: List<SANITY_BEGRUNNELSE>,
         enumVerdier: Map<String, VEDTAK_BEGRUNNELSE>,
     ): Map<VEDTAK_BEGRUNNELSE, SANITY_BEGRUNNELSE> =
-        begrunnelser.mapNotNull { sanityBegrunnelse ->
-            enumVerdier[sanityBegrunnelse.apiNavn]?.let { it to sanityBegrunnelse }
-        }.toMap()
+        begrunnelser
+            .mapNotNull { sanityBegrunnelse ->
+                enumVerdier[sanityBegrunnelse.apiNavn]?.let { it to sanityBegrunnelse }
+            }.toMap()
 }

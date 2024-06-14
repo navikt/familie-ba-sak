@@ -141,13 +141,19 @@ class StegServiceIntegrationTest(
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
         assertEquals(
             Resultat.OPPFYLT,
-            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr1 }.vilkårResultater
-                .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat,
+            vilkårsvurdering.personResultater
+                .first { it.aktør.aktivFødselsnummer() == barnFnr1 }
+                .vilkårResultater
+                .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }
+                .resultat,
         )
         assertEquals(
             Resultat.IKKE_VURDERT,
-            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr2 }.vilkårResultater
-                .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat,
+            vilkårsvurdering.personResultater
+                .first { it.aktør.aktivFødselsnummer() == barnFnr2 }
+                .vilkårResultater
+                .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }
+                .resultat,
         )
     }
 
@@ -335,16 +341,22 @@ class StegServiceIntegrationTest(
             )
         assertEquals(StegType.BEHANDLING_AVSLUTTET, henlagtBehandling.steg)
         assertTrue {
-            oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
-                .filter { it.type == Oppgavetype.BehandleSak }.isNotEmpty()
+            oppgaveRepository
+                .findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
+                .filter { it.type == Oppgavetype.BehandleSak }
+                .isNotEmpty()
         }
         assertTrue {
-            oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
-                .filter { it.type == Oppgavetype.BehandleUnderkjentVedtak }.isNotEmpty()
+            oppgaveRepository
+                .findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
+                .filter { it.type == Oppgavetype.BehandleUnderkjentVedtak }
+                .isNotEmpty()
         }
         assertTrue {
-            oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
-                .filter { it.type == Oppgavetype.Journalføring }.isEmpty()
+            oppgaveRepository
+                .findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
+                .filter { it.type == Oppgavetype.Journalføring }
+                .isEmpty()
         }
     }
 
@@ -790,7 +802,8 @@ class StegServiceIntegrationTest(
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!
         val barnPersonResultat =
             vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr }.apply {
-                vilkårResultater.first { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                vilkårResultater
+                    .first { it.vilkårType == Vilkår.BOR_MED_SØKER }
                     .apply { utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) }
             }
         val søkerPersonResultat = vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == søkerFnr }
@@ -900,7 +913,8 @@ class StegServiceIntegrationTest(
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!
         val barnPersonResultat =
             vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr }.apply {
-                vilkårResultater.first { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                vilkårResultater
+                    .first { it.vilkårType == Vilkår.BOR_MED_SØKER }
                     .apply { utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) }
             }
         val søkerPersonResultat = vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == søkerFnr }
@@ -1024,7 +1038,8 @@ class StegServiceIntegrationTest(
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!
         val barnPersonResultat =
             vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr }.apply {
-                vilkårResultater.first { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                vilkårResultater
+                    .first { it.vilkårType == Vilkår.BOR_MED_SØKER }
                     .apply { utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) }
             }
         val søkerPersonResultat = vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == søkerFnr }
@@ -1212,8 +1227,8 @@ class StegServiceIntegrationTest(
         assertEquals(SikkerhetContext.SYSTEM_FORKORTELSE, totrinnskontroll.beslutterId)
     }
 
-    private fun kjørGjennomStegInkludertVurderTilbakekreving(): Behandling {
-        return kjørStegprosessForFGB(
+    private fun kjørGjennomStegInkludertVurderTilbakekreving(): Behandling =
+        kjørStegprosessForFGB(
             tilSteg = StegType.VURDER_TILBAKEKREVING,
             søkerFnr = søkerFnr,
             barnasIdenter = listOf(barnFnr1),
@@ -1225,7 +1240,6 @@ class StegServiceIntegrationTest(
             vedtaksperiodeService = vedtaksperiodeService,
             brevmalService = brevmalService,
         )
-    }
 
     private fun assertMigreringsdato(
         migreringsdato: LocalDate,

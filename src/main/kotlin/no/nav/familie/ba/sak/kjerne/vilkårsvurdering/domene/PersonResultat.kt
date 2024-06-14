@@ -69,9 +69,7 @@ class PersonResultat(
         andreVurderinger.addAll(nyeAndreVurderinger)
     }
 
-    fun getSortedVilkårResultat(index: Int): VilkårResultat? {
-        return vilkårResultater.toSortedSet(VilkårResultatComparator).elementAtOrNull(index)
-    }
+    fun getSortedVilkårResultat(index: Int): VilkårResultat? = vilkårResultater.toSortedSet(VilkårResultatComparator).elementAtOrNull(index)
 
     fun addVilkårResultat(vilkårResultat: VilkårResultat) {
         vilkårResultater.add(vilkårResultat)
@@ -143,8 +141,7 @@ class PersonResultat(
                     it.tilKopiForNyttPersonResultat(
                         nyttPersonResultat = nyttPersonResultat,
                     )
-                }
-                .toSet()
+                }.toSet()
 
         nyttPersonResultat.setSortedVilkårResultater(nyeVilkårResultater)
 

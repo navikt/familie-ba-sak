@@ -119,23 +119,20 @@ abstract class GrBostedsadresse(
         fun erSammeAdresse(
             adresse: GrBostedsadresse?,
             andreAdresse: GrBostedsadresse?,
-        ): Boolean {
-            return adresse != null &&
+        ): Boolean =
+            adresse != null &&
                 adresse !is GrUkjentBosted &&
                 adresse == andreAdresse
-        }
     }
 }
 
-fun List<GrBostedsadresse>.filtrerGjeldendeNå(): List<GrBostedsadresse> {
-    return this.filter { it.gjeldendeNå() }
-}
+fun List<GrBostedsadresse>.filtrerGjeldendeNå(): List<GrBostedsadresse> = this.filter { it.gjeldendeNå() }
 
 fun vurderOmPersonerBorSammen(
     adresser: List<GrBostedsadresse>,
     andreAdresser: List<GrBostedsadresse>,
-): Boolean {
-    return adresser.isNotEmpty() &&
+): Boolean =
+    adresser.isNotEmpty() &&
         adresser.any {
             andreAdresser.any { søkerAdresse ->
                 val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
@@ -149,4 +146,3 @@ fun vurderOmPersonerBorSammen(
                     GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
             }
         }
-}

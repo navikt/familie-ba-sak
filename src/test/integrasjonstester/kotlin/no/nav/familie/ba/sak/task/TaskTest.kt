@@ -19,11 +19,11 @@ class TaskTest : AbstractSpringIntegrationTest() {
     @Test
     fun `Tasker skal ha unikt navn`() {
         val taskTyper: List<String> =
-            tasker.stream()
+            tasker
+                .stream()
                 .map { task: AsyncTaskStep ->
                     finnAnnotasjon(task)
-                }
-                .map { it?.taskStepType }
+                }.map { it?.taskStepType }
                 .collect(
                     Collectors.toList<String>(),
                 )
@@ -43,12 +43,11 @@ class TaskTest : AbstractSpringIntegrationTest() {
         )
     }
 
-    private fun harIkkePåkrevdAnnotasjon(it: AsyncTaskStep): Boolean {
-        return !AnnotationUtils.isAnnotationDeclaredLocally(
+    private fun harIkkePåkrevdAnnotasjon(it: AsyncTaskStep): Boolean =
+        !AnnotationUtils.isAnnotationDeclaredLocally(
             TaskStepBeskrivelse::class.java,
             it.javaClass,
         )
-    }
 
     private fun finnAnnotasjon(task: AsyncTaskStep): TaskStepBeskrivelse? {
         val aClass = AopProxyUtils.ultimateTargetClass(task)

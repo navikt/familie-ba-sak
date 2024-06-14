@@ -11,9 +11,7 @@ class FeilutbetaltValutaService(
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
     private val loggService: LoggService,
 ) {
-    private fun finnFeilutbetaltValutaThrows(id: Long): FeilutbetaltValuta {
-        return feilutbetaltValutaRepository.finnFeilutbetaltValuta(id) ?: throw Feil("Finner ikke feilutbetalt valuta med id=$id")
-    }
+    private fun finnFeilutbetaltValutaThrows(id: Long): FeilutbetaltValuta = feilutbetaltValutaRepository.finnFeilutbetaltValuta(id) ?: throw Feil("Finner ikke feilutbetalt valuta med id=$id")
 
     @Transactional
     fun leggTilFeilutbetaltValutaPeriode(

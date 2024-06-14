@@ -161,7 +161,8 @@ class FagsakControllerTest(
     fun `Skal oppgi person med fagsak som fagsakdeltaker`() {
         val personAktør = mockPersonidentService.hentAktør(randomFnr())
 
-        fagsakService.hentEllerOpprettFagsak(personAktør.aktivFødselsnummer())
+        fagsakService
+            .hentEllerOpprettFagsak(personAktør.aktivFødselsnummer())
             .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
         fagsakController.oppgiFagsakdeltagere(RestSøkParam(personAktør.aktivFødselsnummer(), emptyList())).apply {
@@ -194,13 +195,13 @@ class FagsakControllerTest(
             Målform.NB,
         )
 
-        fagsakController.oppgiFagsakdeltagere(
-            RestSøkParam(
-                personAktør.aktivFødselsnummer(),
-                barnaFnr + randomFnr(),
-            ),
-        )
-            .apply {
+        fagsakController
+            .oppgiFagsakdeltagere(
+                RestSøkParam(
+                    personAktør.aktivFødselsnummer(),
+                    barnaFnr + randomFnr(),
+                ),
+            ).apply {
                 assertEquals(barnaFnr, body!!.data!!.map { it.ident })
                 assertEquals(listOf(FagsakDeltagerRolle.BARN), body!!.data!!.map { it.rolle })
             }

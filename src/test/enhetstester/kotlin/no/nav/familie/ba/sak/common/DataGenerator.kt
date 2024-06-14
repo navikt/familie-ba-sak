@@ -118,11 +118,11 @@ import kotlin.random.Random
 
 val fødselsnummerGenerator = FoedselsnummerGenerator()
 
-fun randomFnr(foedselsdato: LocalDate? = null): String {
-    return fødselsnummerGenerator.foedselsnummer(
-        foedselsdato ?: (20..70).random().årSiden.minusDays((1..364).random().toLong()),
-    ).asString
-}
+fun randomFnr(foedselsdato: LocalDate? = null): String =
+    fødselsnummerGenerator
+        .foedselsnummer(
+            foedselsdato ?: (20..70).random().årSiden.minusDays((1..364).random().toLong()),
+        ).asString
 
 fun randomBarnFnr(alder: Int? = null): String =
     randomFnr(
@@ -282,8 +282,8 @@ fun lagAndelTilkjentYtelse(
     sats: Int = sats(ytelseType),
     kalkulertUtbetalingsbeløp: Int? = null,
     nasjonaltPeriodebeløp: Int = beløp,
-): AndelTilkjentYtelse {
-    return AndelTilkjentYtelse(
+): AndelTilkjentYtelse =
+    AndelTilkjentYtelse(
         id = id,
         aktør = aktør,
         behandlingId = behandling.id,
@@ -300,7 +300,6 @@ fun lagAndelTilkjentYtelse(
         kildeBehandlingId = kildeBehandlingId,
         differanseberegnetPeriodebeløp = differanseberegnetPeriodebeløp,
     )
-}
 
 fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
     fom: YearMonth,
@@ -348,8 +347,8 @@ fun lagAndelTilkjentYtelseUtvidet(
     periodeIdOffset: Long? = null,
     forrigeperiodeIdOffset: Long? = null,
     tilkjentYtelse: TilkjentYtelse? = null,
-): AndelTilkjentYtelse {
-    return AndelTilkjentYtelse(
+): AndelTilkjentYtelse =
+    AndelTilkjentYtelse(
         aktør = person.aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
@@ -363,19 +362,17 @@ fun lagAndelTilkjentYtelseUtvidet(
         sats = beløp,
         prosent = BigDecimal(100),
     )
-}
 
 fun lagInitiellTilkjentYtelse(
     behandling: Behandling = lagBehandling(),
     utbetalingsoppdrag: String? = null,
-): TilkjentYtelse {
-    return TilkjentYtelse(
+): TilkjentYtelse =
+    TilkjentYtelse(
         behandling = behandling,
         opprettetDato = LocalDate.now(),
         endretDato = LocalDate.now(),
         utbetalingsoppdrag = utbetalingsoppdrag,
     )
-}
 
 fun lagTestPersonopplysningGrunnlag(
     behandlingId: Long,
@@ -515,8 +512,8 @@ fun lagSøknadDTO(
     søkerIdent: String,
     barnasIdenter: List<String>,
     underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-): SøknadDTO {
-    return SøknadDTO(
+): SøknadDTO =
+    SøknadDTO(
         underkategori = underkategori.tilDto(),
         søkerMedOpplysninger =
             SøkerMedOpplysninger(
@@ -530,7 +527,6 @@ fun lagSøknadDTO(
             },
         endringAvOpplysningerBegrunnelse = "",
     )
-}
 
 fun lagPersonResultaterForSøkerOgToBarn(
     vilkårsvurdering: Vilkårsvurdering,
@@ -540,8 +536,8 @@ fun lagPersonResultaterForSøkerOgToBarn(
     stønadFom: LocalDate,
     stønadTom: LocalDate,
     erDeltBosted: Boolean = false,
-): Set<PersonResultat> {
-    return setOf(
+): Set<PersonResultat> =
+    setOf(
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             person = lagPerson(type = PersonType.SØKER, aktør = søkerAktør),
@@ -577,7 +573,6 @@ fun lagPersonResultaterForSøkerOgToBarn(
             erDeltBosted = erDeltBosted,
         ),
     )
-}
 
 fun lagPersonResultat(
     vilkårsvurdering: Vilkårsvurdering,
@@ -600,30 +595,31 @@ fun lagPersonResultat(
 
     if (lagFullstendigVilkårResultat) {
         personResultat.setSortedVilkårResultater(
-            Vilkår.hentVilkårFor(
-                personType = personType,
-                fagsakType = FagsakType.NORMAL,
-                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-            ).map {
-                VilkårResultat(
-                    personResultat = personResultat,
-                    periodeFom = if (it.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else periodeFom,
-                    periodeTom = periodeTom,
-                    vilkårType = it,
-                    resultat = resultat,
-                    begrunnelse = "",
-                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                    utdypendeVilkårsvurderinger =
-                        listOfNotNull(
-                            when {
-                                erDeltBosted && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED
-                                erDeltBostedSkalIkkeDeles && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
-                                else -> null
-                            },
-                        ),
-                    erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
-                )
-            }.toSet(),
+            Vilkår
+                .hentVilkårFor(
+                    personType = personType,
+                    fagsakType = FagsakType.NORMAL,
+                    behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                ).map {
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        periodeFom = if (it.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else periodeFom,
+                        periodeTom = periodeTom,
+                        vilkårType = it,
+                        resultat = resultat,
+                        begrunnelse = "",
+                        sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                        utdypendeVilkårsvurderinger =
+                            listOfNotNull(
+                                when {
+                                    erDeltBosted && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED
+                                    erDeltBostedSkalIkkeDeles && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
+                                    else -> null
+                                },
+                            ),
+                        erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
+                    )
+                }.toSet(),
         )
     } else {
         personResultat.setSortedVilkårResultater(
@@ -882,13 +878,12 @@ fun kjørStegprosessForFGB(
 
 private fun utledFagsaktype(
     institusjon: RestInstitusjon?,
-): FagsakType {
-    return if (institusjon != null) {
+): FagsakType =
+    if (institusjon != null) {
         FagsakType.INSTITUSJON
     } else {
         FagsakType.NORMAL
     }
-}
 
 /**
  * Dette er en funksjon for å få en førstegangsbehandling til en ønsket tilstand ved test.

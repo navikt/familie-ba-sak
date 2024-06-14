@@ -22,8 +22,7 @@ import java.util.Properties
 class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
     val avstemmingService: AvstemmingService,
     val taskService: TaskService,
-) :
-    AsyncTaskStep {
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val taskDto =
             objectMapper.readValue(

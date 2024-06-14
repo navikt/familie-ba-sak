@@ -138,18 +138,20 @@ class PersongrunnlagServiceTest {
 
             every { personopplysningGrunnlagRepository.save(nyttGrunnlag) } returns nyttGrunnlag
 
-            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør = barnet.aktør,
-                barnFraInneværendeBehandling = listOf(barnet.aktør),
-                barnFraForrigeBehandling = listOf(barnet.aktør),
-                behandling = behandling,
-                målform = Målform.NB,
-            ).apply {
-                Assertions.assertThat(this.personer)
-                    .hasSize(1)
-                    .extracting("type")
-                    .containsExactly(PersonType.BARN)
-            }
+            persongrunnlagService
+                .hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = barnet.aktør,
+                    barnFraInneværendeBehandling = listOf(barnet.aktør),
+                    barnFraForrigeBehandling = listOf(barnet.aktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                ).apply {
+                    Assertions
+                        .assertThat(this.personer)
+                        .hasSize(1)
+                        .extracting("type")
+                        .containsExactly(PersonType.BARN)
+                }
         }
     }
 

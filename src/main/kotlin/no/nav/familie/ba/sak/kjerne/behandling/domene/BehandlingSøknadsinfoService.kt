@@ -30,9 +30,7 @@ class BehandlingSøknadsinfoService(
         behandlingSøknadsinfoRepository.save(behandlingSøknadsinfo)
     }
 
-    fun hentSøknadMottattDato(behandlingId: Long): LocalDateTime? {
-        return behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId).minOfOrNull { it.mottattDato }
-    }
+    fun hentSøknadMottattDato(behandlingId: Long): LocalDateTime? = behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId).minOfOrNull { it.mottattDato }
 
     fun hentSøknadsstatistikk(
         fom: LocalDate,

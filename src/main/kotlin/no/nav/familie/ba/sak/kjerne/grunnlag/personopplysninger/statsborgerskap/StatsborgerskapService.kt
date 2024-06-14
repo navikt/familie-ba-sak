@@ -164,10 +164,11 @@ class StatsborgerskapService(
         gjeldendeDato: LocalDate?,
     ): Boolean =
         eøsMedlemskapsperioderForValgtLand.any {
-            gjeldendeDato == null || (
-                it.gyldigFra <= gjeldendeDato &&
-                    it.gyldigTil >= gjeldendeDato
-            )
+            gjeldendeDato == null ||
+                (
+                    it.gyldigFra <= gjeldendeDato &&
+                        it.gyldigTil >= gjeldendeDato
+                )
         }
 
     private fun erInnenforDatoerSomBetegnerUendelighetIKodeverk(dato: LocalDate) =
@@ -181,8 +182,8 @@ class StatsborgerskapService(
         (statsborgerFra == null || dato.isAfter(statsborgerFra)) &&
             (statsborgerTil == null || dato.isBefore(statsborgerTil))
 
-    private fun hentDatointervallerMedSluttdatoFørNesteStarter(intervaller: List<List<LocalDate?>>): List<DatoIntervallEntitet> {
-        return intervaller.mapIndexed { index, endringsdatoPar ->
+    private fun hentDatointervallerMedSluttdatoFørNesteStarter(intervaller: List<List<LocalDate?>>): List<DatoIntervallEntitet> =
+        intervaller.mapIndexed { index, endringsdatoPar ->
             val fra = endringsdatoPar[0]
             val nesteEndringsdato = endringsdatoPar[1]
             if (index != (intervaller.size - 1)) {
@@ -194,7 +195,6 @@ class StatsborgerskapService(
                 DatoIntervallEntitet(fra, nesteEndringsdato)
             }
         }
-    }
 
     companion object {
         const val LANDKODE_UKJENT = "XUK"

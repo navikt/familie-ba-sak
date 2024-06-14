@@ -96,9 +96,11 @@ class IntegrasjonClient(
     @Cacheable("behandlendeEnhet", cacheManager = "shortCache")
     fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {
         val uri =
-            UriComponentsBuilder.fromUri(integrasjonUri)
+            UriComponentsBuilder
+                .fromUri(integrasjonUri)
                 .pathSegment("arbeidsfordeling", "enhet", "BAR")
-                .build().toUri()
+                .build()
+                .toUri()
 
         return kallEksternTjenesteRessurs(
             tjeneste = "arbeidsfordeling",
@@ -115,7 +117,8 @@ class IntegrasjonClient(
             UriComponentsBuilder
                 .fromUri(integrasjonUri)
                 .pathSegment("arbeidsfordeling", "enhet", Tema.KON.name, "med-relasjoner")
-                .build().toUri()
+                .build()
+                .toUri()
 
         return kallEksternTjenesteRessurs<List<Arbeidsfordelingsenhet>>(
             tjeneste = "arbeidsfordeling",
@@ -136,9 +139,11 @@ class IntegrasjonClient(
         ansettelsesperiodeFom: LocalDate,
     ): List<Arbeidsforhold> {
         val uri =
-            UriComponentsBuilder.fromUri(integrasjonUri)
+            UriComponentsBuilder
+                .fromUri(integrasjonUri)
                 .pathSegment("aareg", "arbeidsforhold")
-                .build().toUri()
+                .build()
+                .toUri()
 
         return kallEksternTjenesteRessurs(
             tjeneste = "aareg",
@@ -269,7 +274,11 @@ class IntegrasjonClient(
             if (saksbehandler == null) {
                 baseUri
             } else {
-                UriComponentsBuilder.fromUri(baseUri).queryParam("saksbehandler", saksbehandler).build().toUri()
+                UriComponentsBuilder
+                    .fromUri(baseUri)
+                    .queryParam("saksbehandler", saksbehandler)
+                    .build()
+                    .toUri()
             }
 
         return kallEksternTjenesteRessurs(
@@ -290,7 +299,10 @@ class IntegrasjonClient(
     ): OppgaveResponse {
         val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/enhet/$nyEnhet")
         val uri =
-            UriComponentsBuilder.fromUri(baseUri).queryParam("fjernMappeFraOppgave", true).build()
+            UriComponentsBuilder
+                .fromUri(baseUri)
+                .queryParam("fjernMappeFraOppgave", true)
+                .build()
                 .toUri() // fjerner alltid mappe fra Barnetrygd siden hver enhet sin mappestruktur
 
         return kallEksternTjenesteRessurs(

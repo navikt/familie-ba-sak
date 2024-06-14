@@ -34,12 +34,11 @@ object UtvidetBarnetrygdUtil {
             UtvidetBarnetrygdGenerator(
                 behandlingId = tilkjentYtelse.behandling.id,
                 tilkjentYtelse = tilkjentYtelse,
+            ).lagUtvidetBarnetrygdAndeler(
+                utvidetVilkår = utvidetVilkår,
+                andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer.map { it.andel },
+                perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerTidslinje(),
             )
-                .lagUtvidetBarnetrygdAndeler(
-                    utvidetVilkår = utvidetVilkår,
-                    andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer.map { it.andel },
-                    perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerTidslinje(),
-                )
 
         return TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet,

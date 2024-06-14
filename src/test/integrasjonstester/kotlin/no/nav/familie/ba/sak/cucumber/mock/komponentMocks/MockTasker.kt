@@ -11,7 +11,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.springframework.aop.framework.AopProxyUtils
 import org.springframework.core.annotation.AnnotationUtils
 
-class MockTasker() {
+class MockTasker {
     val tasker = mutableListOf<Pair<AsyncTaskStep, Task>>()
 
     // Sørger for at taskene blir kjørt i riktig rekkefølge og at vi ikke starter på en ny task før den forrige er ferdig.
@@ -45,12 +45,14 @@ class MockTasker() {
         every { taskRepositoryWrapper.save(any()) } answers {
             val task = firstArg<Task>()
             val tasktyper =
-                cucumberMock.taskservices.map { it }.map { asynctaskstep ->
-                    val aClass = AopProxyUtils.ultimateTargetClass(asynctaskstep)
-                    val annotation = AnnotationUtils.findAnnotation(aClass, TaskStepBeskrivelse::class.java)
-                    requireNotNull(annotation) { "annotasjon mangler" }
-                    annotation.taskStepType to asynctaskstep
-                }.toMap()
+                cucumberMock.taskservices
+                    .map { it }
+                    .map { asynctaskstep ->
+                        val aClass = AopProxyUtils.ultimateTargetClass(asynctaskstep)
+                        val annotation = AnnotationUtils.findAnnotation(aClass, TaskStepBeskrivelse::class.java)
+                        requireNotNull(annotation) { "annotasjon mangler" }
+                        annotation.taskStepType to asynctaskstep
+                    }.toMap()
 
             val asyncTaskStep = tasktyper[task.type]
             if (asyncTaskStep != null) {

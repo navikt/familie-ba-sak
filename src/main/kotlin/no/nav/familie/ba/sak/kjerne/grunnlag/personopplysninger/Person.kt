@@ -99,34 +99,32 @@ data class Person(
             opphold = mutableListOf(),
             arbeidsforhold = mutableListOf(),
             sivilstander = mutableListOf(),
-        )
-            .also {
-                it.bostedsadresser.addAll(
-                    bostedsadresser.map { grBostedsadresse ->
-                        grBostedsadresse.tilKopiForNyPerson(
-                            it,
-                        )
-                    },
-                )
-                it.statsborgerskap.addAll(
-                    statsborgerskap.map { grStatsborgerskap ->
-                        grStatsborgerskap.tilKopiForNyPerson(
-                            it,
-                        )
-                    },
-                )
-                it.opphold.addAll(opphold.map { grOpphold -> grOpphold.tilKopiForNyPerson(it) })
-                it.arbeidsforhold.addAll(arbeidsforhold.map { grArbeidsforhold -> grArbeidsforhold.tilKopiForNyPerson(it) })
-                it.sivilstander.addAll(sivilstander.map { grSivilstand -> grSivilstand.tilKopiForNyPerson(it) })
-                it.dødsfall = dødsfall?.tilKopiForNyPerson(it)
-            }
+        ).also {
+            it.bostedsadresser.addAll(
+                bostedsadresser.map { grBostedsadresse ->
+                    grBostedsadresse.tilKopiForNyPerson(
+                        it,
+                    )
+                },
+            )
+            it.statsborgerskap.addAll(
+                statsborgerskap.map { grStatsborgerskap ->
+                    grStatsborgerskap.tilKopiForNyPerson(
+                        it,
+                    )
+                },
+            )
+            it.opphold.addAll(opphold.map { grOpphold -> grOpphold.tilKopiForNyPerson(it) })
+            it.arbeidsforhold.addAll(arbeidsforhold.map { grArbeidsforhold -> grArbeidsforhold.tilKopiForNyPerson(it) })
+            it.sivilstander.addAll(sivilstander.map { grSivilstand -> grSivilstand.tilKopiForNyPerson(it) })
+            it.dødsfall = dødsfall?.tilKopiForNyPerson(it)
+        }
 
-    override fun toString(): String {
-        return """Person(aktørId=$aktør,
+    override fun toString(): String =
+        """Person(aktørId=$aktør,
                         |type=$type
                         |fødselsdato=$fødselsdato)
-            """.trimMargin()
-    }
+        """.trimMargin()
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
@@ -136,9 +134,7 @@ data class Person(
         return Objects.equals(hashCode(), entitet.hashCode())
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(aktør, fødselsdato)
-    }
+    override fun hashCode(): Int = Objects.hash(aktør, fødselsdato)
 
     fun hentAlder(): Int = Period.between(fødselsdato, now()).years
 
